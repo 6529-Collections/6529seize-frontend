@@ -280,17 +280,22 @@ const sleep = (ms: number, signal?: AbortSignal) =>
     );
   });
 
-/** Waits until the operation is final, and throws when the chain refused it. */
+/**
+ * Waits until the operation is final, and throws when the chain refused it.
+ * A read that fails (a network blip, a busy gateway) is tried again: the
+ * change may still land.
+ */
 export async function awaitFinal(
   txId: Hex,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  limit: number = POLL_LIMIT
 ): Promise<ChainTxStatus> {
-  for (let attempt = 0; attempt < POLL_LIMIT; attempt += 1) {
+  for (let attempt = 0; attempt < limit; attempt += 1) {
     let status: ChainTxStatus | null = null;
     try {
       status = await chainGateway.getTx(txId, signal);
     } catch (error) {
-      if (!(error instanceof ChainGatewayError) || error.status === 0) {
+      if (!(error instanceof ChainGatewayError) || signal?.aborted === true) {
         throw error;
       }
     }
@@ -313,13 +318,45 @@ export async function awaitFinal(
   );
 }
 
-/** Submits signed entries and waits until the change is final. */
+/** Polls for a change whose submit got no answer, for about half a minute. */
+const UNANSWERED_POLLS = 10;
+
+/**
+ * Submits signed entries and waits until the change is final. When the
+ * submit itself gets no answer, the change may still have been taken: the
+ * page looks for it before it says anything, and never calls it unsent.
+ */
 export async function submitAndAwait(
   draft: ChainDraft,
   signatures: readonly ChainSignatureEntry[],
   signal?: AbortSignal
 ): Promise<ChainTxStatus> {
-  await chainGateway.submit(draft.unsigned, signatures, signal);
+  try {
+    await chainGateway.submit(draft.unsigned, signatures, signal);
+  } catch (error) {
+    const unanswered =
+      error instanceof ChainGatewayError &&
+      (error.status === 0 || error.status >= 502) &&
+      signal?.aborted !== true;
+    if (!unanswered) {
+      throw error;
+    }
+    try {
+      return await awaitFinal(draft.txId, signal, UNANSWERED_POLLS);
+    } catch (waited) {
+      if (
+        waited instanceof ChainOperationError &&
+        waited.reason === "timeout"
+      ) {
+        throw new ChainOperationError(
+          "timeout",
+          "The 6529 Network may not have the change. Wait a few minutes and check before you try again.",
+          "UNCONFIRMED"
+        );
+      }
+      throw waited;
+    }
+  }
   return awaitFinal(draft.txId, signal);
 }
 

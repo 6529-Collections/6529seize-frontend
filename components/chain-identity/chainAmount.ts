@@ -48,3 +48,13 @@ export function parseFake6529(input: string): bigint | null {
   }
   return BigInt(whole) * UNIT + BigInt((fraction ?? "").padEnd(DECIMALS, "0"));
 }
+
+/** An amount in base units as an exact decimal the amount field takes. */
+export function fake6529Input(amount: bigint): string {
+  const whole = amount / UNIT;
+  const fraction = (amount % UNIT)
+    .toString()
+    .padStart(DECIMALS, "0")
+    .replace(/0+$/, "");
+  return fraction ? `${whole.toString()}.${fraction}` : whole.toString();
+}

@@ -246,3 +246,25 @@ it("won't create an identity with a handle the chain says is taken", async () =>
     screen.getByRole("button", { name: "Create identity" })
   ).toBeDisabled();
 });
+
+it("holds the move's own fee back when moving all of a wallet's $fake6529", async () => {
+  gateway["getIdentityByWallet"]!.mockResolvedValue({
+    principalId: PRINCIPAL,
+    handle: "tester_one",
+    wallets: [WALLET],
+    profile: null,
+  });
+  render(<ChainIdentityPage />);
+  fireEvent.click(await screen.findByRole("button", { name: "All" }));
+  expect(screen.getByLabelText("Amount to move")).toHaveValue("2");
+  fireEvent.click(screen.getByRole("button", { name: "Move to identity" }));
+  expect(
+    await screen.findByText(
+      "This moves 1.999999 $fake6529. The rest of this wallet's balance pays the move's fee."
+    )
+  ).toBeInTheDocument();
+  const amounts = (draftOperation as jest.Mock).mock.calls.map(
+    ([request]) => (request as { body: { amount: string } }).body.amount
+  );
+  expect(amounts).toEqual(["2000000000000000000", "1999999000000000000"]);
+});

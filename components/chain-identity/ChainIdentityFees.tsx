@@ -9,9 +9,12 @@ import { t, type MessageKey } from "@/i18n/messages";
 import "@/i18n/namespaces/chain-identity";
 import { requestDrip, type DripOutcome } from "@/lib/chain-identity/drip";
 import { fundIdentity } from "@/lib/chain-identity/identityOps";
-import { draftOperation } from "@/lib/chain-identity/operation";
+import {
+  ChainOperationError,
+  draftOperation,
+} from "@/lib/chain-identity/operation";
 import { walletSigner } from "@/lib/chain-identity/signers";
-import { parseFake6529 } from "./chainAmount";
+import { fake6529Input, formatFake6529, parseFake6529 } from "./chainAmount";
 import ChainActionStatus from "./ChainActionStatus";
 import { chainErrorMessage } from "./chainErrorMessage";
 import {
@@ -56,6 +59,7 @@ export default function ChainIdentityFees({
     onChanged();
   });
   const parsed = parseFake6529(amount);
+  const [moveNote, setMoveNote] = useState<string | undefined>(undefined);
   const amountOk =
     parsed !== null &&
     parsed > 0n &&
@@ -80,19 +84,44 @@ export default function ChainIdentityFees({
     }
   };
 
+  // The wallet pays the move's fee too, so the fee is held back from it.
   const startMove = () => {
     if (!amountOk || principalId === null || currencyAsset === null) {
       return;
     }
+    setMoveNote(undefined);
+    const draftMove = (value: bigint) => {
+      const operation = fundIdentity(wallet, principalId, currencyAsset, value);
+      return draftOperation(operation.request, operation.primaryType);
+    };
     void move.prepare(async () => {
-      const operation = fundIdentity(
-        wallet,
-        principalId,
-        currencyAsset,
-        parsed
-      );
+      let value = parsed;
+      let draft = await draftMove(value);
+      const fits = (fee: string) =>
+        walletBalance === null || value + BigInt(fee) <= walletBalance;
+      if (!fits(draft.fee.maxFee) && walletBalance !== null) {
+        value = walletBalance - BigInt(draft.fee.maxFee);
+        if (value <= 0n) {
+          throw new ChainOperationError(
+            "stated",
+            t(locale, "chainIdentity.fees.moveNoRoom")
+          );
+        }
+        draft = await draftMove(value);
+        if (!fits(draft.fee.maxFee)) {
+          throw new ChainOperationError(
+            "stated",
+            t(locale, "chainIdentity.fees.moveNoRoom")
+          );
+        }
+        setMoveNote(
+          t(locale, "chainIdentity.fees.moveAdjusted", {
+            amount: formatFake6529(locale, value),
+          })
+        );
+      }
       return {
-        draft: await draftOperation(operation.request, operation.primaryType),
+        draft,
         signer: walletSigner(config, wallet),
         payer: "wallet",
       };
@@ -149,6 +178,16 @@ export default function ChainIdentityFees({
               aria-describedby="chain-identity-move-hint"
               onChange={(event) => setAmount(event.target.value)}
             />
+            {walletBalance !== null && walletBalance > 0n && (
+              <Button
+                variant="secondary"
+                size="md"
+                disabled={move.busy || move.state.kind === "confirm"}
+                onClick={() => setAmount(fake6529Input(walletBalance))}
+              >
+                {t(locale, "chainIdentity.fees.moveAll")}
+              </Button>
+            )}
             <Button
               variant="primary"
               size="md"
@@ -165,6 +204,7 @@ export default function ChainIdentityFees({
           )}
           <ChainActionStatus
             state={move.state}
+            note={moveNote}
             onConfirm={() => void move.confirm()}
             onCancel={move.cancel}
           />

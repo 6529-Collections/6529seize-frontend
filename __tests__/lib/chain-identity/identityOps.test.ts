@@ -26,14 +26,14 @@ const ZERO = `0x${"00".repeat(32)}`;
 
 describe("operation requests", () => {
   it("creates an identity from a wallet, with principal zero", () => {
-    const { request, primaryType } = identityCreate(W, "gm_6529", null);
+    const { request, primaryType } = identityCreate(W, "tester_two", null);
     expect(primaryType).toBe("IdentityCreate");
     expect(request).toEqual({
       opType: "IDENTITY_CREATE",
       principal: null,
       keyType: 1,
       signer: W.toLowerCase(),
-      body: { legacyId: null, handle: "gm_6529", profileDocCid: "0x" },
+      body: { legacyId: null, handle: "tester_two", profileDocCid: "0x" },
     });
   });
 
@@ -43,7 +43,7 @@ describe("operation requests", () => {
   });
 
   it("takes only handles the chain takes", () => {
-    expect(normalizeHandle(" GM_6529 ")).toBe("gm_6529");
+    expect(normalizeHandle(" Tester_Two ")).toBe("tester_two");
     expect(normalizeHandle("ab")).toBeNull();
     expect(normalizeHandle("has-dash")).toBeNull();
     expect(normalizeHandle("a".repeat(16))).toBeNull();
@@ -53,7 +53,13 @@ describe("operation requests", () => {
     const rep = ratingSet(
       P,
       { kind: "wallet", address: W },
-      { matter: "REP", target: T, category: "Art", value: -3n, priorVersion: 12 }
+      {
+        matter: "REP",
+        target: T,
+        category: "Art",
+        value: -3n,
+        priorVersion: 12,
+      }
     );
     expect(rep.request.body).toEqual({
       matter: 1,
@@ -67,7 +73,13 @@ describe("operation requests", () => {
     const nic = ratingSet(
       P,
       { kind: "session", keyId: TX, grantId: T },
-      { matter: "NIC", target: T, category: "ignored", value: 10n, priorVersion: 0 }
+      {
+        matter: "NIC",
+        target: T,
+        category: "ignored",
+        value: 10n,
+        priorVersion: 0,
+      }
     );
     expect(nic.request).toMatchObject({ keyType: 2, keyId: TX, authRef: T });
     expect(nic.request.body).toMatchObject({
@@ -82,7 +94,13 @@ describe("operation requests", () => {
       ratingSet(
         P,
         { kind: "wallet", address: W },
-        { matter: "REP", target: T, category: "Art!", value: 1n, priorVersion: 0 }
+        {
+          matter: "REP",
+          target: T,
+          category: "Art!",
+          value: 1n,
+          priorVersion: 0,
+        }
       )
     ).toThrow(RangeError);
   });
@@ -182,7 +200,7 @@ describe("pinned EIP-712 types", () => {
     const built = [
       identityCreate(W, "", null),
       profileReplace(P, { kind: "wallet", address: W }, 0, "0x01"),
-      handleClaim(P, W, "gm_6529", ""),
+      handleClaim(P, W, "tester_two", ""),
       ratingSet(
         P,
         { kind: "wallet", address: W },
@@ -209,9 +227,9 @@ describe("pinned EIP-712 types", () => {
     for (const { request, primaryType } of built) {
       const types = pinnedTypes(primaryType);
       expect(types).not.toBeNull();
-      expect(
-        types?.[`${primaryType}Body`]?.map((field) => field.name)
-      ).toEqual(Object.keys(request.body));
+      expect(types?.[`${primaryType}Body`]?.map((field) => field.name)).toEqual(
+        Object.keys(request.body)
+      );
     }
   });
 });
