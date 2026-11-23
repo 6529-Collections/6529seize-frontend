@@ -35316,6 +35316,16 @@ components:
           maxItems: 100
           items:
             $ref: "#/components/schemas/ApiE2eeKeyPackageUpload"
+        replace_one_time:
+          type: boolean
+          description: >-
+            When true, the device's own unclaimed one-time KeyPackages of the
+            uploaded KeyPackages' suites are deleted, in the same transaction,
+            before these are stored: a client that updated replaces the pool its
+            older version made. The replacement never touches claimed
+            KeyPackages, last-resort KeyPackages or other devices' KeyPackages;
+            as on every upload, expired KeyPackages are removed and an uploaded
+            last-resort KeyPackage replaces the current one.
     ApiE2eeWelcome:
       type: object
       required:

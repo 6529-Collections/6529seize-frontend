@@ -33,6 +33,7 @@ export interface ChainWriterIo {
   readonly state: { put(local: BackupLocalState): Promise<void> };
   /** Runs a request on the generation; its 404 means it was replaced. */
   readonly withBackup: <T>(request: () => Promise<T>) => Promise<T>;
+  readonly now: () => number;
 }
 
 /** Another device appended first: the expected_seq precondition failed. */
@@ -212,6 +213,13 @@ async function tryAppend(
   for (const message of segment.messages) {
     local.messagePrints[messageKey(message.g, message.id)] =
       fingerprint(message);
+  }
+  if (segment.reads.length > 0) {
+    local.readsSent = {
+      ...local.readsSent,
+      ...Object.fromEntries(segment.reads),
+    };
+    local.readsAt = io.now();
   }
   let forked = false;
   if (link.index === 0) {
