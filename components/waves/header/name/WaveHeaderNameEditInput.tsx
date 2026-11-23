@@ -24,7 +24,6 @@ export default function WaveHeaderNameEditInput({
           name="name"
           required
           autoComplete="off"
-          // Embedded editors let the sheet announce its new heading first.
           autoFocus={autoFocus}
           data-autofocus={autoFocus || undefined}
           value={name}

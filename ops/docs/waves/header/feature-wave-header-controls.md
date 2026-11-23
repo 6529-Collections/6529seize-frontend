@@ -15,7 +15,7 @@ Users can:
 - Use the bell notification menu after following
 - Mute or unmute waves from the speaker-muted control
 - Open wave description from the info button
-- Open and close followers from the `Joined` count
+- Open Members from the `Joined` count on phones; desktop keeps its follower view
 - Pin or unpin the wave
 - Open the wave name link
 - Rename the wave and update the picture (when edit-eligible on non-DM waves)
@@ -74,7 +74,9 @@ with compact submission icons; wider columns restore the submission labels.
 On phones, the conversation has one top bar with Back, the wave avatar and
 available score tucked beneath the avatar, the wave name, `Join` when available, and
 `More wave actions`. The wave name uses up to two lines, with an ellipsis only
-when it exceeds the second line. The site menu and global search are on the Waves list.
+when it exceeds the second line. Tapping the avatar or name opens details. The
+header score has no phone popover; tap Score in details statistics for its
+breakdown and Learn more. The site menu and global search are on the Waves list.
 `More wave actions` opens a sheet with Wave details, message search, the
 available submission or `How to Submit` controls, time-zone options, sharing,
 and the eligible `New curation` and `New subwave` actions. Direct messages keep

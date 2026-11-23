@@ -53,6 +53,7 @@ export default function WaveInformationSheet({
     () =>
       information
         ? {
+            isPhone,
             view: information.request?.view ?? "about",
             contentId,
             container,
@@ -66,7 +67,7 @@ export default function WaveInformationSheet({
               ),
           }
         : null,
-    [information, contentId, container, tab]
+    [information, contentId, container, tab, isPhone]
   );
   const title =
     subviewOpen && information?.request?.viewTitle
@@ -99,6 +100,7 @@ export default function WaveInformationSheet({
     return (
       <MobileNavigationView
         title={title}
+        pageKey={information?.request?.view}
         onBack={subviewOpen && information ? information.back : onClose}
       >
         {content}

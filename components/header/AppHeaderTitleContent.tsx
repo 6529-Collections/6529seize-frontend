@@ -51,6 +51,7 @@ export default function HeaderTitleContent({
         <WaveTrustSignals
           waveRep={activeWave.wave_rep}
           waveScore={activeWave.wave_score}
+          scoreDetailsDisabled
           variant="header-avatar"
           mode="summary"
           learnMoreHref={scoreLearnMoreHref}
@@ -83,7 +84,18 @@ export default function HeaderTitleContent({
         </Link>
       ) : (
         <>
-          {wavePicture}
+          {phoneWave && activeWave ? (
+            <button
+              type="button"
+              aria-label={t(locale, "waves.information.avatarLabel")}
+              onClick={() => information?.open(activeWave.id)}
+              className="tw-shrink-0 tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            >
+              {wavePicture}
+            </button>
+          ) : (
+            wavePicture
+          )}
           <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-items-start">
             <WaveParentNavigation
               parentWave={activeWave?.parent_wave}

@@ -3556,11 +3556,13 @@
         "Voter lists and vote activity are available in Votes, under All votes and Activity. Both follow the chosen decision; they are absent from the information panel.",
         "On mobile, selecting the wave name opens a dismissible information panel containing About, REP and Configuration. About includes the pinned drop.",
         "On phones the information panel fills the screen and slides in from the right. Use the Back chevron, swipe right, press Escape, or use device Back to return to the original decision, tab, curation and scroll position. The underlying view stays mounted. Vertical gestures scroll the information content; short or cancelled horizontal swipes keep it open. There is no Close icon, drag handle or outside backdrop.",
-        "On mobile, Configuration gear controls open editors inside the information panel. Back, a rightward swipe, browser Back or Escape returns to Configuration without submitting changes; Save returns after a successful update. Failed saves keep the editor open for retry. Configuration retains its selected tab and scroll position. On phones, Back from the main information view returns to the thread. Tablet overlays also offer Close.",
         "On tablet-sized layouts, the overlay side panel also keeps these editors inside the panel. Back or Escape returns to the selected information tab.",
         "Each row in Configuration's Curations section shows the assigned group's criteria summary and a member count. Select the count to open the full criteria and current members in Network.",
-        "In Configuration's Curations section, the plus button creates a curation and a row gear manages an existing curation. Who can curate? shows the criteria and eligible member count. Select Edit criteria to adjust the rules and Save changes to return to the form. Create or Save applies the rules to that curation. The forms share the full-screen phone information view or tablet panel. Back or a rightward swipe discards the draft and returns to Configuration. Back from the main phone view returns to the thread; tablet panels also offer Close. A failed save keeps the draft open.",
-        "Selecting a section switches information for the active wave without navigating away from the thread."
+        "Selecting a section switches information for the active wave without navigating away from the thread.",
+        "On phones the header avatar and name open the same details view. The header score is display-only; tap Score in About statistics for its breakdown and Learn more. The Joined count opens a Members page.",
+        "Phone Configuration uses tappable rows with chevrons for editors. Chat status, Links, both Replies options and administrator message deletion save from inline switches. Turning chat off asks for confirmation. Failed toggles retain the saved value.",
+        "Phone details sub-pages slide in from the right with one Back arrow. Unsaved editors ask Discard changes? before leaving. Rename focuses the field and keeps Save.",
+        "On phones New subwave, New curation and Create curation open full-screen modals sliding up with Cancel and one title. Entered drafts are protected from silent swipe or outside dismissal; Cancel and Back ask before discarding. Desktop and tablet retain their existing editors."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves", "/messages"],
@@ -7746,7 +7748,8 @@
       "facts": [
         "Wave picture editing is a wave header feature. Changing the picture or name leaves decision rules and identity submission settings unchanged.",
         "Availability depends on permissions and wave state.",
-        "Validation and upload states are documented in the update wave picture docs."
+        "Validation and upload states are documented in the update wave picture docs.",
+        "On phones the picture edit action opens the system photo/file picker directly, then a full-screen preview with Save. Cancelling the picker leaves About open. Back asks before discarding a selected picture."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],

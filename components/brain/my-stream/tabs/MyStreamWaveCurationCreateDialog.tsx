@@ -1,6 +1,11 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
+import MobileNavigationView from "@/components/mobile-navigation/MobileNavigationView";
+import { MobilePageDraft } from "@/components/mobile-navigation/MobilePageContext";
+import { AnimatePresence } from "framer-motion";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import Button from "@/components/utils/button/Button";
 import useKeyboardFocusScroll from "@/components/waves/create-wave/hooks/useKeyboardFocusScroll";
@@ -220,13 +225,19 @@ function CurationNameField({
 export default function MyStreamWaveCurationCreateDialog({
   wave,
   isOpen,
-  onClose,
+  onClose: closeDialog,
   onSaved,
   showSuccessToast = true,
   curation,
   permissionMode = "standard",
   panelContainer,
 }: MyStreamWaveCurationCreateDialogProps) {
+  const isPhone = useMediaQuery(PHONE_WAVES_LAYOUT_QUERY);
+  const [phoneOpen, setPhoneOpen] = useState(true);
+  const onClose = () => {
+    if (isPhone) setPhoneOpen(false);
+    else closeDialog();
+  };
   const isEmbedded = panelContainer !== undefined;
   const queryClient = useQueryClient();
   const locale = useBrowserLocale();
@@ -467,6 +478,35 @@ export default function MyStreamWaveCurationCreateDialog({
       </div>
     </div>
   );
+
+  if (isPhone)
+    return (
+      <AnimatePresence
+        onExitComplete={() => {
+          setPhoneOpen(true);
+          closeDialog();
+        }}
+      >
+        {isOpen && phoneOpen && (
+          <MobileNavigationView
+            title={
+              isEditingCriteria
+                ? t(locale, "profileCuration.editor.editCriteria")
+                : dialogTitle
+            }
+            onBack={onClose}
+            presentation="form"
+          >
+            <MobilePageDraft
+              dirty={name !== initialName || criteriaDraft !== null}
+              busy={saveMutation.isPending}
+            >
+              {content}
+            </MobilePageDraft>
+          </MobileNavigationView>
+        )}
+      </AnimatePresence>
+    );
 
   if (isEmbedded) {
     return isOpen && panelContainer

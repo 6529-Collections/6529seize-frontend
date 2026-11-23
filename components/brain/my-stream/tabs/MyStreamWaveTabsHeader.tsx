@@ -170,6 +170,7 @@ function MyStreamWaveHeaderIdentity({
       waveScore={wave.wave_score}
       variant={isNarrow || isPhoneWave ? "header-avatar" : "header-inline"}
       mode="summary"
+      scoreDetailsDisabled={isPhoneWave}
       learnMoreHref={waveScoreLearnMoreHref}
       className={
         isNarrow || isPhoneWave
@@ -208,24 +209,52 @@ function MyStreamWaveHeaderIdentity({
           : "tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-x-[13px]"
       }
     >
-      <div
-        className={`tw-relative tw-size-9 tw-flex-shrink-0 ${showDescriptionPreview || wave.parent_wave ? "tw-self-start" : ""} ${
-          isAnnouncement
-            ? "tw-rounded-lg"
-            : "tw-rounded-full tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950"
-        }`}
-      >
-        {isAnnouncement ? (
-          <AnnouncementWaveIcon className="tw-size-5" />
-        ) : (
-          <WavePicture
-            name={wave.name}
-            picture={wave.picture}
-            contributors={wavePictureContributors}
-          />
-        )}
-        {(isNarrow || isPhoneWave) && score}
-      </div>
+      {isPhoneWave ? (
+        <button
+          type="button"
+          aria-label={t(locale, "waves.information.avatarLabel")}
+          onClick={() => information?.open(wave.id)}
+          className="tw-shrink-0 tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+        >
+          <div
+            className={`tw-relative tw-size-9 tw-flex-shrink-0 ${showDescriptionPreview || wave.parent_wave ? "tw-self-start" : ""} ${
+              isAnnouncement
+                ? "tw-rounded-lg"
+                : "tw-rounded-full tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950"
+            }`}
+          >
+            {isAnnouncement ? (
+              <AnnouncementWaveIcon className="tw-size-5" />
+            ) : (
+              <WavePicture
+                name={wave.name}
+                picture={wave.picture}
+                contributors={wavePictureContributors}
+              />
+            )}
+            {score}
+          </div>
+        </button>
+      ) : (
+        <div
+          className={`tw-relative tw-size-9 tw-flex-shrink-0 ${showDescriptionPreview || wave.parent_wave ? "tw-self-start" : ""} ${
+            isAnnouncement
+              ? "tw-rounded-lg"
+              : "tw-rounded-full tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950"
+          }`}
+        >
+          {isAnnouncement ? (
+            <AnnouncementWaveIcon className="tw-size-5" />
+          ) : (
+            <WavePicture
+              name={wave.name}
+              picture={wave.picture}
+              contributors={wavePictureContributors}
+            />
+          )}
+          {isNarrow && score}
+        </div>
+      )}
       {/* Offset the first line's leading to align its text with the avatar. */}
       <div
         className={`tw-flex tw-min-w-0 tw-flex-1 tw-flex-col ${

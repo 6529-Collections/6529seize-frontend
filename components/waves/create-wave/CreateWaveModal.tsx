@@ -1,6 +1,10 @@
 "use client";
 
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import MobileNavigationView from "@/components/mobile-navigation/MobileNavigationView";
+import { AnimatePresence } from "framer-motion";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
 import { useRef } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -66,6 +70,7 @@ export default function CreateWaveModal({
   parentViewGroupId,
 }: CreateWaveModalProps) {
   const locale = useBrowserLocale();
+  const isPhone = useMediaQuery(PHONE_WAVES_LAYOUT_QUERY);
   const createWaveRef = useRef<CreateWaveHandles>(null);
   const requestClose = () => {
     if (createWaveRef.current) {
@@ -96,6 +101,35 @@ export default function CreateWaveModal({
     ? getCreateSubwaveTitle(locale, parentWaveName)
     : t(locale, "waves.create.dialog.waveTitle");
 
+  const form = (
+    <CreateWave
+      key={`${profile.primary_wallet}:${profile.id ?? ""}`}
+      ref={createWaveRef}
+      profile={profile}
+      onBack={onClose}
+      onSuccess={onClose}
+      parentWaveId={parentWaveId}
+      parentWaveName={parentWaveName}
+      parentAdminGroupId={parentAdminGroupId}
+      parentViewGroupId={parentViewGroupId}
+    />
+  );
+  if (isPhone)
+    return (
+      <AnimatePresence>
+        {isOpen && (
+          <MobileNavigationView
+            title={title}
+            onBack={requestClose}
+            presentation="form"
+            guardDrafts={false}
+          >
+            {form}
+          </MobileNavigationView>
+        )}
+      </AnimatePresence>
+    );
+
   // Unsaved drafts request confirmation before this form can leave.
   return (
     <MobileWrapperDialog
@@ -116,19 +150,7 @@ export default function CreateWaveModal({
       titleClassName="tw-m-0 tw-min-w-0 tw-break-words !tw-text-base !tw-font-semibold tw-leading-6 tw-tracking-wide tw-text-white"
       surfaceClassName="tw-border tw-border-solid tw-border-white/10 tw-bg-[#09090B] tw-shadow-[0_0_80px_rgba(0,0,0,0.8)] md:tw-max-h-[56rem] md:!tw-rounded-3xl"
     >
-      <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
-        <CreateWave
-          key={`${profile.primary_wallet}:${profile.id ?? ""}`}
-          ref={createWaveRef}
-          profile={profile}
-          onBack={onClose}
-          onSuccess={onClose}
-          parentWaveId={parentWaveId}
-          parentWaveName={parentWaveName}
-          parentAdminGroupId={parentAdminGroupId}
-          parentViewGroupId={parentViewGroupId}
-        />
-      </div>
+      <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">{form}</div>
     </MobileWrapperDialog>
   );
 }

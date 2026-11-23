@@ -13,7 +13,7 @@ decision routes.
 
 ## Entry Points
 
-Select the wave name to open **About**. Desktop also provides **Show right
+Select the wave name to open **About**. On phones the conversation avatar opens the same view; its score badge is display-only. Select **Score** in About statistics for the breakdown and **Learn more**. Desktop also provides **Show right
 sidebar**. About includes the creator, creation date, share control, and current
 pinned drop with its content and media. Eligible viewers can add or edit REP.
 Pinned storms keep their reactions clearly separated from the part navigation.
@@ -28,9 +28,11 @@ Pin and mute use matching compact dark button surfaces.
 
 1. Open a wave and select its name.
 2. Read About or switch to REP or Configuration.
-3. On mobile, swipe down from the handle or header, select Close, tap outside,
-   press Escape, or use Back to return to the original view. The decision,
-   tab, curation, scroll and unfinished input remain in place.
+3. On phones, use the Back chevron or swipe right to return to the original
+   view. Sub-pages slide in from the right and use the same single Back control
+   to go up one level. Unsaved edits ask **Discard changes?** before leaving.
+   The decision, tab, curation, scroll and unfinished input remain in place.
+   Tablet panels also offer Close and backdrop dismissal.
 
 ## Common Scenarios
 
@@ -46,22 +48,25 @@ Pin and mute use matching compact dark button surfaces.
   dividers remain. Empty Guidelines has no extra line below its heading.
   Boosted-drop display choices have a borderless container and quiet dark
   unselected options; the selected option keeps its blue indication.
-- Shared changes use administrator gear controls. Personal controls retain their
-  own authentication requirements.
-- On mobile, configuration gears open their editor inside the information
-  panel. Links, chat settings, visibility and administrator access share the
-  same Back control. Back (including browser Back or Escape) returns to
-  Configuration without submitting changes; Save returns after a successful update.
-  Failed saves keep the editor open for retry. Configuration keeps its selected
-  tab and scroll position. Phone information stays full-screen and also supports
-  swiping right to go back. Back from the main information view returns to the
-  thread. Tablet overlays also offer Close.
-  Sheet editors omit a duplicate Cancel button; desktop setting popovers keep
-  Cancel. Chat, Links and Replies checkboxes use the shared dark styling.
-- In Curations, the section plus opens Create curation. A row gear offers
-  management actions including Edit Curation. Both forms stay inside the same
-  mobile sheet or tablet panel, with inline criteria editing and Back to
-  Configuration.
+- On phones, editable Configuration rows open with a tap anywhere on the row;
+  a chevron marks page-opening rows. Chat status, Links, the two Replies
+  options, and administrator message deletion use inline switches that save
+  immediately. Turning chat off requires confirmation. Failed saves leave the
+  previous value visible for retry. Permission and authentication checks still apply.
+- Access rules, slow mode and Guidelines keep their editors and Save controls.
+  Back, Escape, device Back and a rightward swipe go up one level. There is one
+  Back arrow and no duplicate in-content Cancel. Unsaved forms ask before
+  discarding. The selected information tab and its scroll position remain intact.
+- Select the Joined count in phone About to push a Members page. Rename opens
+  with the field focused and keeps Save.
+- On phones, New subwave, New curation and Create curation use full-screen
+  modals sliding up with Cancel. There is one title. Swiping or tapping outside
+  does not silently discard entered content; Cancel and Back ask before
+  discarding a draft. Criteria pages use the same single Back header.
+- In Curations, the section plus opens Create curation. A row's management
+  control includes Edit Curation. Desktop and tablet keep their existing
+  information-panel forms and controls. Failed saves keep drafts for retry.
+- Delete all my messages confirms in a sheet with a red destructive action.
 - On tablet-sized layouts, the overlay side panel also keeps these editors
   inside the panel. Back or Escape returns to the selected information tab.
 - Decision access, rules, appearance and pauses belong to **Settings** in the
@@ -69,7 +74,7 @@ Pin and mute use matching compact dark button surfaces.
 - Information tabs support ArrowLeft, ArrowRight, Home and End. Mobile confines
   focus to the open panel and returns focus to its opener when it closes.
 - Scroll the panel content normally. A short or canceled header drag returns
-  the panel to its open position; horizontal gestures do not dismiss it.
+  the panel to its open position. Phone horizontal swipes go back.
 
 ## Edge Cases
 

@@ -229,6 +229,8 @@ export default function WaveCustomRules({
   return (
     <WaveSettingRow
       canEdit={canEdit}
+      dirty={draft !== getWaveCustomRulesMetadataDraft(metadata)}
+      busy={isSaving}
       editIcon={isConfiguration ? "gear" : "pencil"}
       editLabel={t(locale, "waves.create.rules.guidelinesSettingsEditLabel")}
       label={

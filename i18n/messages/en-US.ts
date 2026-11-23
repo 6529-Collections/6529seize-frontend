@@ -3413,6 +3413,16 @@ export const EN_US_ROOT_MESSAGES = {
   // any page; the rest of its copy is @/i18n/namespaces/artwork-documentation.
   "artworkDocumentation.title": "Artwork documentation",
   "artworkDocumentation.myWorks": "My artwork documentation",
+  "waves.information.avatarLabel": "Open wave details",
+  "waves.information.members": "Members",
+  "waves.information.discardMessage": "Your unsaved changes will be lost.",
+  "waves.information.discardTitle": "Discard changes?",
+  "waves.information.turnOffChat": "Turn off chat?",
+  "waves.information.turnOffChatMessage":
+    "Members will no longer be able to send chat messages. You can turn chat back on here.",
+  "waves.information.turnOffChatAction": "Turn off chat",
+  "waves.information.choosePicture": "Choose photo",
+  "waves.information.picturePreview": "Wave picture preview",
   "waves.information.open": "About {name}",
   ...EN_SUBMISSION_DISCOVERY_MESSAGES,
   ...additionalActionMessages,

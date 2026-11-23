@@ -1,5 +1,10 @@
 "use client";
 
+import { createPortal } from "react-dom";
+import { useWaveInformationPanel } from "@/components/brain/mobile/WaveInformationPanelContext";
+import WaveFollowersList from "@/components/waves/followers/WaveFollowersList";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import React, { type JSX } from "react";
 import clsx from "clsx";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -97,8 +102,14 @@ export const WaveContent: React.FC<WaveContentProps> = ({
   aboutTabLabel,
   showTabs = true,
 }) => {
-  const onFollowersClick = () =>
-    setMode(mode === Mode.FOLLOWERS ? Mode.CONTENT : Mode.FOLLOWERS);
+  const members = useWaveInformationPanel(
+    t(DEFAULT_LOCALE, "waves.information.members"),
+    "wave-members"
+  );
+  const onFollowersClick = () => {
+    if (members.isPhone) members.open();
+    else setMode(mode === Mode.FOLLOWERS ? Mode.CONTENT : Mode.FOLLOWERS);
+  };
 
   const visibleTabLimit = maxVisibleTabs;
 
@@ -131,6 +142,10 @@ export const WaveContent: React.FC<WaveContentProps> = ({
 
   return (
     <div className="tw-flex tw-h-full tw-min-h-0 tw-min-w-0 tw-flex-col tw-overflow-hidden tw-bg-iron-950">
+      {members.isPhone &&
+        members.isOpen &&
+        members.container &&
+        createPortal(<WaveFollowersList wave={wave} />, members.container)}
       {showTabs && (
         <WaveContentTabs
           activeTab={activeSidebarTab}

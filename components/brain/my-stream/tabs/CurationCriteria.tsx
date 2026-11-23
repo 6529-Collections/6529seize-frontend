@@ -1,5 +1,6 @@
 "use client";
 
+import { useMobilePageNavigation } from "@/components/mobile-navigation/MobilePageContext";
 import { useEffect, useRef, useState, type Ref } from "react";
 import dynamic from "next/dynamic";
 import { useAuth } from "@/components/auth/Auth";
@@ -144,6 +145,11 @@ export function CurationCriteriaEditor({
   readonly onCancel: () => void;
 }) {
   const locale = useBrowserLocale();
+  const sharedHeader = useMobilePageNavigation(
+    t(locale, "profileCuration.editor.editCriteria"),
+    onCancel,
+    true
+  );
   const { connectedProfile } = useAuth();
   const { criteria, isLoading, isError, retry } = useGroupCriteria(
     draft || replaceUnavailable ? null : groupId
@@ -219,9 +225,11 @@ export function CurationCriteriaEditor({
               </Button>
             </div>
           )}
-          <Button variant="tertiary" size="sm" onClick={onCancel}>
-            {t(locale, "waves.create.actions.cancel")}
-          </Button>
+          {!sharedHeader && (
+            <Button variant="tertiary" size="sm" onClick={onCancel}>
+              {t(locale, "waves.create.actions.cancel")}
+            </Button>
+          )}
         </div>
       ) : (
         <GroupAssignmentPanel

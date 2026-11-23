@@ -317,6 +317,9 @@ describe("effective App PR CI plan", () => {
     "components/brain/mobile/WaveInformationSheet.tsx",
     "components/brain/my-stream/tabs/PhoneWaveTabs.tsx",
     "components/mobile-navigation/MobileNavigationView.tsx",
+    "components/mobile-navigation/MobilePageContext.tsx",
+    "components/mobile-navigation/useMobileFormHistory.ts",
+    "components/waves/specs/WaveSettingSwitch.tsx",
     "components/brain/left-sidebar/waves/BrainLeftSidebarWavePin.tsx",
     "components\\waves\\leaderboard\\MySubmissionsDialog.tsx",
   ])(
@@ -741,7 +744,9 @@ describe("Composer control browser selection", () => {
     ["components/waves/CreateDrop.tsx", true],
     ["README.md", false],
   ] as const)("selects composer checks for %s: %s", (file, selected) => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "composer-control-plan-"));
+    const root = fs.mkdtempSync(
+      path.join(os.tmpdir(), "composer-control-plan-")
+    );
     const planDir = path.join(root, "test-results/app-pr-ci");
     try {
       fs.mkdirSync(planDir, { recursive: true });

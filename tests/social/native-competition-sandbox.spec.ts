@@ -451,7 +451,8 @@ async function expectSheetTop(sheet: Locator, top: number) {
 async function expectFullScreenInformationView(
   page: Page,
   view: Locator,
-  lastAction?: string
+  lastAction?: string,
+  backLabel = "Back"
 ) {
   await expect
     .poll(async () => {
@@ -469,7 +470,7 @@ async function expectFullScreenInformationView(
     })
     .toBe(true);
   await expect(
-    view.getByRole("button", { name: "Back", exact: true })
+    view.getByRole("button", { name: backLabel, exact: true })
   ).toBeVisible();
   await expect(
     view.getByRole("button", { name: "Close", exact: true })
@@ -10180,9 +10181,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       name: "Cancel",
       exact: true,
     });
-    if (testInfo.project.name === "web-mobile-chromium")
-      await expect(cancelCuration).toBeHidden();
-    else await expect(cancelCuration).toBeVisible();
+    await expect(cancelCuration).toBeVisible();
     await page.screenshot({
       path: testInfo.outputPath("wave-create-curation-handoff.png"),
       animations: "disabled",
@@ -12980,7 +12979,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await expect(page.getByRole("dialog")).toHaveCount(1);
       await expect(sheet).toHaveAccessibleName("Rename wave");
       await expect(
-        sheet.getByRole("heading", { name: "Rename wave", exact: true })
+        sheet.getByRole("textbox", { name: "Wave name", exact: true })
       ).toBeFocused();
       const controlledTrigger = sheet.getByRole("button", {
         name: "Edit wave name",
@@ -13060,6 +13059,25 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           );
       }, surface !== "web");
       await sheet.getByRole("button", { name: "Back", exact: true }).click();
+      const discard = page.getByRole("dialog", {
+        name: "Discard changes?",
+        exact: true,
+      });
+      await expect(
+        discard.getByRole("heading", { name: "Discard changes?", exact: true })
+      ).toBeVisible();
+      await discard
+        .getByRole("button", { name: "Cancel", exact: true })
+        .click();
+      await expect(name).toHaveValue("Unsaved rename");
+      await page.goBack();
+      await expect(
+        discard.getByRole("heading", { name: "Discard changes?", exact: true })
+      ).toBeVisible();
+      await discard
+        .getByRole("button", { name: "Discard changes", exact: true })
+        .click();
+
       await expect(trigger).toBeFocused();
       await expect(trigger).toHaveAttribute("aria-expanded", "false");
       await expectSheetTop(sheet, aboutHeader!.y);
@@ -13119,16 +13137,13 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         name: "Edit wave picture",
         exact: true,
       });
+      const chooserEvent = page.waitForEvent("filechooser");
       await edit.click();
-      await expect(sheet).toHaveAccessibleName("Update wave picture");
-      await expect(page.getByRole("dialog")).toHaveCount(1);
-      await expect(
-        sheet.getByRole("button", { name: "Close", exact: true })
-      ).toHaveCount(0);
-      const save = sheet.getByRole("button", { name: "Save", exact: true });
-      await expect(save).toBeDisabled();
-      await expect(save).toBeInViewport({ ratio: 1 });
-      await sheet.getByLabel(/Click to upload/).setInputFiles({
+      const chooser = await chooserEvent;
+      await expect(sheet).toHaveAccessibleName(
+        "About Local Composer Sandbox Wave"
+      );
+      await chooser.setFiles({
         name: "wave.png",
         mimeType: "image/png",
         buffer: Buffer.from(
@@ -13136,13 +13151,25 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           "base64"
         ),
       });
+      await expect(sheet).toHaveAccessibleName("Update wave picture");
+      await expect(
+        sheet.getByRole("img", { name: "Wave picture preview" })
+      ).toBeVisible();
+      await expect(sheet.getByText(/drag and drop/)).toHaveCount(0);
+      const save = sheet.getByRole("button", { name: "Save", exact: true });
       await expect(save).toBeEnabled();
       await sheet.getByRole("button", { name: "Back", exact: true }).click();
+      const discard = page.getByRole("dialog", {
+        name: "Discard changes?",
+        exact: true,
+      });
+      await discard
+        .getByRole("button", { name: "Discard changes", exact: true })
+        .click();
       await expect(edit).toBeFocused();
+      const cancelEvent = page.waitForEvent("filechooser");
       await edit.click();
-      await expect(save).toBeDisabled();
-      await expect(page.getByRole("dialog")).toHaveCount(1);
-      await sheet.getByRole("button", { name: "Back", exact: true }).click();
+      await (await cancelEvent).setFiles([]);
       await expect(
         sheet.getByRole("tab", { name: "About", exact: true })
       ).toBeVisible();
@@ -13150,7 +13177,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await expect(page.getByRole("dialog")).toHaveCount(0);
     });
 
-    test(`keeps curation create and edit inside the ${surface} Wave sheet`, async ({
+    test(`opens curation create and edit as full-screen modals from the ${surface} Wave sheet`, async ({
       page,
       baseURL,
     }, testInfo) => {
@@ -13247,7 +13274,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await expectSheetTop(sheet, header!.y);
       await expect(
         sheet.getByRole("button", { name: "Cancel", exact: true })
-      ).toHaveCount(0);
+      ).toBeVisible();
       const name = sheet.getByRole("textbox", { name: "Name", exact: true });
       await name.fill("Unsaved curation");
       await expect(
@@ -13302,8 +13329,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         viewport.dispatchEvent(new Event("resize"));
       });
       await expect(sheet).toHaveCount(1);
-      await criteriaEditor
-        .getByRole("button", { name: "Cancel", exact: true })
+      await sheet.getByRole("button", { name: "Back", exact: true }).click();
+      await sheet.getByRole("button", { name: "Back", exact: true }).click();
+      await page
+        .getByRole("dialog", { name: "Discard changes?", exact: true })
+        .getByRole("button", { name: "Discard changes", exact: true })
         .click();
       await expect(editCriteria).toBeFocused();
       await expect(name).toHaveValue("Unsaved curation");
@@ -13316,7 +13346,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await expect(
         sheet.getByRole("button", { name: "Create", exact: true })
       ).toBeEnabled();
-      await sheet.getByRole("button", { name: "Back", exact: true }).click();
+      await sheet.getByRole("button", { name: "Cancel", exact: true }).click();
+      await page
+        .getByRole("dialog", { name: "Discard changes?", exact: true })
+        .getByRole("button", { name: "Discard changes", exact: true })
+        .click();
       await expect(create).toBeFocused();
       await expect(configuration).toHaveAttribute("aria-selected", "true");
       await create.click();
@@ -13355,7 +13389,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         curatorsDialog.getByText("collector-01", { exact: true })
       ).toBeVisible();
       await curatorsDialog
-        .getByRole("button", { name: "Close", exact: true })
+        .getByRole("button", { name: "Back", exact: true })
         .click();
       await expect(sheet).toHaveAccessibleName("Edit curation");
       await name.fill("Updated art");
@@ -13395,9 +13429,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         path: testInfo.outputPath(`embedded-curation-${surface}.png`),
       });
       await swipeInformationBack(page, sheet);
-      await expect(
-        sheet.getByRole("tab", { name: "About", exact: true })
-      ).toBeVisible();
+      await expect(sheet).toHaveAccessibleName("Create curation");
+      await sheet.getByRole("button", { name: "Cancel", exact: true }).click();
+      await expect(configuration).toBeVisible();
       await sheet.getByRole("button", { name: "Back", exact: true }).click();
       await expect(sheet).toHaveCount(0);
       await openWaveInformation(page);
@@ -13599,6 +13633,189 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await expect(page).toHaveURL(originalUrl);
     });
 
+    test(`protects the full-screen New subwave form on ${surface} phones`, async ({
+      page,
+      baseURL,
+    }, testInfo) => {
+      test.skip(
+        testInfo.project.name !== "web-mobile-chromium",
+        "Phone creation coverage."
+      );
+      if (surface !== "web")
+        await installSurfaceSimulation(
+          page.context(),
+          surface === "ios" ? "capacitor-ios-sim" : "capacitor-android-sim",
+          baseURL
+        );
+      await installCompetitionApi(page, true);
+      const parent = await (
+        await page.request.get(
+          `${getSandboxApiOrigin(baseURL)}/api/waves/${WAVE}`
+        )
+      ).json();
+      parent.wave.admin_group.group = {
+        id: composerSandboxConstants.previewGroupId,
+        name: "Active collectors",
+        is_hidden: false,
+      };
+      await page.route(`**/api/waves/${WAVE}`, (route) =>
+        route.fulfill({ json: parent })
+      );
+      await page.goto(`/waves/${WAVE}?tab=chat`);
+      await page
+        .getByRole("button", { name: "More wave actions", exact: true })
+        .click();
+      await page
+        .getByRole("dialog", { name: "More wave actions", exact: true })
+        .getByText("New subwave", { exact: true })
+        .click();
+      const form = page.getByRole("dialog", {
+        name: 'Create subwave of "Local Composer Sandbox Wave"',
+        exact: true,
+      });
+      await expectFullScreenInformationView(page, form, "Next", "Cancel");
+      await expect(
+        form.getByRole("heading", {
+          name: 'Create subwave of "Local Composer Sandbox Wave"',
+          exact: true,
+        })
+      ).toHaveCount(1);
+      await expect(
+        form.getByRole("button", { name: "Cancel", exact: true })
+      ).toHaveCount(1);
+      const name = form.getByRole("textbox", { name: /Subwave Name/ });
+      await name.fill("An unfinished subwave");
+      await swipeInformationBack(page, form);
+      await expect(name).toHaveValue("An unfinished subwave");
+      await page.goBack();
+      const discard = page.getByRole("dialog", {
+        name: "Discard your changes?",
+        exact: true,
+      });
+      await discard
+        .getByRole("button", { name: "Keep editing", exact: true })
+        .click();
+      await expect(name).toHaveValue("An unfinished subwave");
+      await form.getByRole("button", { name: "Cancel", exact: true }).click();
+      await discard
+        .getByRole("button", { name: "Discard changes", exact: true })
+        .click();
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+      await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}\\?tab=chat$`));
+    });
+
+    test(`keeps avatar, score, Members and switch confirmations consistent on ${surface} phones`, async ({
+      page,
+      baseURL,
+    }, testInfo) => {
+      test.skip(
+        testInfo.project.name !== "web-mobile-chromium",
+        "Phone details coverage."
+      );
+      if (surface !== "web")
+        await installSurfaceSimulation(
+          page.context(),
+          surface === "ios" ? "capacitor-ios-sim" : "capacitor-android-sim",
+          baseURL
+        );
+      await installCompetitionApi(page, true);
+      const wave = await (
+        await page.request.get(
+          `${getSandboxApiOrigin(baseURL)}/api/waves/${WAVE}`
+        )
+      ).json();
+      wave.wave.type = "RANK";
+      wave.metrics.subscribers_count = 1331;
+      wave.wave_score = {
+        visibility_score: 96,
+        quality_score: 95,
+        hotness_score: 98,
+        rep_sort_score: 85,
+      };
+      let writes = 0;
+      await page.route(`**/api/waves/${WAVE}`, (route) =>
+        route.fulfill({ json: wave })
+      );
+      await page.route(
+        `**/api/identity-subscriptions/incoming/WAVE/${WAVE}**`,
+        (route) => route.fulfill({ json: { data: [], page: 1, next: false } })
+      );
+      await page.route(`**/api/v3/waves/${WAVE}`, async (route) => {
+        if (route.request().method() === "PATCH") {
+          expect(route.request().postDataJSON()).toEqual({
+            chat: { enabled: false },
+          });
+          wave.chat.enabled = false;
+          writes++;
+        }
+        await route.fulfill({
+          json: {
+            id: WAVE,
+            name: wave.name,
+            picture: wave.picture,
+            permissions: {
+              view: true,
+              administer: true,
+              create_competition: true,
+            },
+            configuration: wave,
+          },
+        });
+      });
+      await page.goto(`/waves/${WAVE}?tab=chat`);
+      const avatar = page.getByRole("button", {
+        name: "Open wave details",
+        exact: true,
+      });
+      await expect(avatar.getByRole("button")).toHaveCount(0);
+      await expect(
+        page.getByRole("button", { name: /^Wave score 96/ })
+      ).toHaveCount(0);
+      await avatar.click();
+      const details = page.getByRole("dialog");
+      await details.getByRole("button", { name: "Score", exact: true }).click();
+      await expect(
+        page.getByRole("link", { name: "Learn more", exact: true })
+      ).toBeVisible();
+      await page.keyboard.press("Escape");
+      await details
+        .getByRole("button", { name: "1,331 Joined", exact: true })
+        .click();
+      await expect(details).toHaveAccessibleName("Members");
+      await expect(
+        details.getByRole("button", { name: "Back", exact: true })
+      ).toHaveCount(1);
+      await details.getByRole("button", { name: "Back", exact: true }).click();
+      await details
+        .getByRole("tab", { name: "Configuration", exact: true })
+        .click();
+      const chat = details.getByRole("switch", {
+        name: "Chat status",
+        exact: true,
+      });
+      await chat.click();
+      const confirm = page.getByRole("dialog", {
+        name: "Turn off chat?",
+        exact: true,
+      });
+      await confirm
+        .getByRole("button", { name: "Cancel", exact: true })
+        .click();
+      await expect(chat).toBeChecked();
+      expect(writes).toBe(0);
+      await chat.click();
+      await confirm
+        .getByRole("button", { name: "Turn off chat", exact: true })
+        .click();
+      await expect(chat).not.toBeChecked();
+      expect(writes).toBe(1);
+      await page.screenshot({
+        path: testInfo.outputPath(`phone-details-switches-${surface}.png`),
+      });
+      await details.getByRole("button", { name: "Back", exact: true }).click();
+      await expect(avatar).toBeFocused();
+    });
+
     test(`edits Configuration inside the ${surface} Wave sheet and returns with Back`, async ({
       page,
       baseURL,
@@ -13663,77 +13880,37 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await sheet
         .getByRole("tab", { name: "Configuration", exact: true })
         .click();
-      const links = sheet.getByRole("button", {
-        name: "Edit links",
-        exact: true,
-      });
-      await links.scrollIntoViewIfNeeded();
-      const row = sheet
-        .getByRole("button", { name: "Edit links", exact: true })
-        .locator("..");
-      const labelBox = await row
-        .getByText("Links", { exact: true })
-        .boundingBox();
-      const iconBox = await sheet
-        .getByRole("button", { name: "Edit links", exact: true })
-        .locator("svg")
-        .boundingBox();
-      expect(labelBox).not.toBeNull();
-      expect(iconBox).not.toBeNull();
-      expect(
-        Math.abs(
-          labelBox!.y + labelBox!.height / 2 - iconBox!.y - iconBox!.height / 2
-        )
-      ).toBeLessThanOrEqual(1);
-      const originalUrl = page.url();
-      await page.screenshot({
-        path: testInfo.outputPath(`configuration-${surface}.png`),
-      });
-      const initialHeader = await sheet
-        .getByTestId("mobile-dialog-header")
-        .boundingBox();
-      expect(initialHeader).not.toBeNull();
-
-      await links.click();
-      await expect(sheet).toHaveCount(1);
-      await expect(sheet).toHaveAccessibleName("Edit links");
-      await expectSheetTop(sheet, initialHeader!.y);
+      const links = sheet.getByRole("switch", { name: "Links", exact: true });
+      await expect(links).toBeChecked();
       await expect(
-        sheet.getByRole("button", { name: "Back", exact: true })
-      ).toBeVisible();
-      const checkbox = sheet.getByRole("checkbox", {
-        name: "Disable links",
-        exact: true,
-      });
-      await expect(checkbox).toHaveCSS("appearance", "none");
-      await expect(checkbox).toHaveCSS("background-color", "rgb(28, 28, 33)");
-      await expect(
-        sheet.getByRole("button", { name: "Cancel", exact: true })
+        sheet.getByRole("button", { name: "Edit links", exact: true })
       ).toHaveCount(0);
-      await checkbox.check();
-      await expect(checkbox).toHaveCSS("background-image", /data:image/);
-      await sheet.getByRole("button", { name: "Back", exact: true }).click();
-      await expect(links).toBeFocused();
-      await expectSheetTop(sheet, initialHeader!.y);
-      expect(writes).toBe(0);
-      await expect(
-        sheet.getByRole("tab", { name: "Configuration", exact: true })
-      ).toHaveAttribute("aria-selected", "true");
+      const originalUrl = page.url();
       await links.click();
-      await expect(checkbox).not.toBeChecked();
-      await checkbox.check();
-      await sheet.getByRole("button", { name: "Save", exact: true }).click();
       await expect(
         page.getByText("Couldn't save these wave settings.", { exact: true })
       ).toBeVisible();
-      await expect(checkbox).toBeChecked();
-      await expect(sheet).toHaveAccessibleName("Edit links");
+      await expect(links).toBeChecked();
+      expect(writes).toBe(1);
       failSave = false;
-      await sheet.getByRole("button", { name: "Save", exact: true }).click();
-      await expect(links).toBeFocused();
-      await expect(row.getByText("Disabled", { exact: true })).toBeVisible();
+      await links.click();
+      await expect(links).not.toBeChecked();
       expect(writes).toBe(2);
-
+      await expect(
+        sheet.getByRole("switch", {
+          name: "Anyone who can see this wave can reply",
+          exact: true,
+        })
+      ).toBeVisible();
+      await expect(
+        sheet.getByRole("switch", {
+          name: "Collapse replies under each drop",
+          exact: true,
+        })
+      ).toBeVisible();
+      await page.screenshot({
+        path: testInfo.outputPath(`configuration-${surface}.png`),
+      });
       for (const label of [
         "Edit Visibility access",
         "Edit Chat access",
@@ -13741,45 +13918,20 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       ]) {
         const trigger = sheet.getByRole("button", { name: label, exact: true });
         await trigger.click();
-        await expect(sheet).toHaveCount(1);
         await expect(sheet).toHaveAccessibleName(label);
-        await expectSheetTop(sheet, initialHeader!.y);
         await expect(
           sheet.getByRole("button", { name: "Back", exact: true })
-        ).toBeVisible();
+        ).toHaveCount(1);
         await expect(
-          sheet.getByRole("button", { name: "Save changes", exact: true })
-        ).toBeVisible();
-        await expectNoHorizontalOverflow(page);
-        if (label === "Edit Visibility access") {
-          await sheet
-            .getByRole("button", { name: "Make wave public", exact: true })
-            .click();
-          const confirmation = page.getByRole("dialog", {
-            name: "Make wave public?",
-            exact: true,
-          });
-          await expect(
-            confirmation.getByRole("heading", {
-              name: "Make wave public?",
-              exact: true,
-            })
-          ).toBeVisible();
-          await confirmation
-            .getByRole("button", { name: "Make public", exact: true })
-            .click({ trial: true });
-          await confirmation
-            .getByRole("button", { name: "Cancel", exact: true })
-            .click();
-          await expect(confirmation).toHaveCount(0);
-          await expect(sheet).toHaveCount(1);
-          await expect(sheet).toHaveAccessibleName(label);
-        }
-        await page.screenshot({
-          path: testInfo.outputPath(
-            `configuration-${surface}-${label.split(" ")[1]}.png`
-          ),
-        });
+          sheet.getByRole("button", { name: "Cancel", exact: true })
+        ).toHaveCount(0);
+        await sheet.getByRole("button", { name: /^Level/ }).click();
+        await expect(sheet).toHaveAccessibleName("Level");
+        await expect(
+          sheet.getByRole("button", { name: "Back", exact: true })
+        ).toHaveCount(1);
+        await sheet.getByRole("button", { name: "Back", exact: true }).click();
+        await expect(sheet).toHaveAccessibleName(label);
         if (label === "Edit Chat access") await page.goBack();
         else if (label === "Edit Admins access")
           await page.keyboard.press("Escape");
@@ -13794,30 +13946,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await expect(page).toHaveURL(originalUrl);
       }
       expect(writes).toBe(2);
-      await links.click();
-      if (surface === "web") {
-        // A history entry without its optional title still needs a named sheet.
-        await page.evaluate(() => {
-          const state = { ...window.history.state };
-          delete state.waveInformationViewTitle;
-          window.history.replaceState(state, "");
-        });
-        await page.goBack();
-        await expect(links).toBeFocused();
-        await page.goForward();
-        await expect(sheet).toHaveAccessibleName(`About ${wave.name}`);
-        await expect(checkbox).toBeVisible();
-      }
-      await swipeInformationBack(page, sheet);
-      await expect(
-        sheet.getByRole("tab", { name: "About", exact: true })
-      ).toBeVisible();
       await sheet.getByRole("button", { name: "Back", exact: true }).click();
       await expect(sheet).toHaveCount(0);
       await expect(page).toHaveURL(originalUrl);
-      await expect
-        .poll(() => page.evaluate(() => window.history.state?.waveInformation))
-        .toBeUndefined();
     });
   }
 

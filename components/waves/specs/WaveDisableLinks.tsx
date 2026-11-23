@@ -1,7 +1,9 @@
 "use client";
 
+import { WaveInformationPanelContext } from "@/components/brain/mobile/WaveInformationPanelContext";
+import WaveSettingSwitch from "./WaveSettingSwitch";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { useCallback, useState } from "react";
+import { useCallback, useContext, useState } from "react";
 import WaveDisableLinksEditorForm from "./WaveDisableLinksEditorForm";
 import WaveSettingRow from "./WaveSettingRow";
 import { useWaveSettingUpdater } from "./useWaveSettingUpdater";
@@ -16,6 +18,8 @@ export default function WaveDisableLinks({
   wave,
   display = "settings",
 }: WaveDisableLinksProps) {
+  const phoneDetails =
+    useContext(WaveInformationPanelContext)?.isPhone === true;
   const { canEdit, mutating, saveChatUpdate } = useWaveSettingUpdater(wave);
   const linksDisabled = wave.chat.links_disabled === true;
   let valueLabel = linksDisabled ? "On" : "Off";
@@ -52,6 +56,23 @@ export default function WaveDisableLinks({
       onSave={() => handleSave(closeEditor)}
     />
   );
+
+  if (phoneDetails && display === "configuration")
+    return (
+      <WaveSettingSwitch
+        label={waveRightPanelText(
+          "waves.sidebar.rightPanel.configuration.chat.links.label"
+        )}
+        checked={!linksDisabled}
+        disabled={mutating || !canEdit}
+        onChange={(allowed) =>
+          saveChatUpdate(
+            () => {},
+            (chat) => ({ ...chat, links_disabled: !allowed })
+          )
+        }
+      />
+    );
 
   return (
     <WaveSettingRow

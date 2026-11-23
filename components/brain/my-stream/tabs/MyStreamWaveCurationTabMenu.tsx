@@ -1,9 +1,13 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { useWaveInformationPanel } from "@/components/brain/mobile/WaveInformationPanelContext";
+import { useContext, useRef, useState } from "react";
+import {
+  WaveInformationPanelContext,
+  useWaveInformationPanel,
+} from "@/components/brain/mobile/WaveInformationPanelContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
+  ChevronRightIcon,
   Cog6ToothIcon,
   EllipsisVerticalIcon,
 } from "@heroicons/react/24/outline";
@@ -207,7 +211,9 @@ export default function MyStreamWaveCurationTabMenu({
   const { updateProfileWave, isPending: isProfileWavePending } =
     useProfileWaveMutation(connectedProfile);
   const editPanel = useWaveInformationPanel(
-    t(locale, "profileCuration.editor.editTitle")
+    t(locale, "profileCuration.editor.editTitle"),
+    undefined,
+    "modal"
   );
   const editTriggerRef = useRef<HTMLButtonElement>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -345,13 +351,25 @@ export default function MyStreamWaveCurationTabMenu({
     deleteMutation.isPending ||
     isSettingProfileCuration ||
     isProfileActionPending;
+  const phoneDetails =
+    useContext(WaveInformationPanelContext)?.isPhone === true;
   const isConfiguration = triggerVariant === "configuration";
-  const triggerClassName = getTriggerClassName({
+  const baseTriggerClassName = getTriggerClassName({
     isConfiguration,
     hasTriggerLabel: Boolean(triggerLabel),
   });
-  const triggerContent = isConfiguration ? (
+  const triggerClassName =
+    phoneDetails && isConfiguration
+      ? baseTriggerClassName +
+        " after:tw-absolute after:tw-inset-0 after:tw-content-['']"
+      : baseTriggerClassName;
+  const configurationIcon = phoneDetails ? (
+    <ChevronRightIcon aria-hidden="true" className="tw-size-4" />
+  ) : (
     <Cog6ToothIcon aria-hidden="true" className="tw-size-5" />
+  );
+  const triggerContent = isConfiguration ? (
+    configurationIcon
   ) : (
     <>
       <EllipsisVerticalIcon className="-tw-ml-1 tw-block tw-size-4 tw-flex-shrink-0" />
