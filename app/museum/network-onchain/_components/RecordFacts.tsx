@@ -13,9 +13,9 @@ import {
   identifiersOf,
   onchainMuseumRecordHref,
 } from "@/lib/museum/onchain/fields";
-import {
-  type OnchainLink,
-  type OnchainMuseumView,
+import type {
+  OnchainLink,
+  OnchainMuseumView,
 } from "@/lib/museum/onchain/presentation";
 import {
   collectionOf,
@@ -374,75 +374,91 @@ function aboutFact(
   );
 }
 
-function statementFacts(
+function rightsFacts(
   view: OnchainMuseumView,
   record: OnchainMuseumRecord
 ): Fact[] {
   const body = bodyOf(record);
+  const licence = asRecord(body["licence"]);
+  const uri = licence?.["uri"];
+  return [
+    {
+      label: t(locale, "museum.onchain.record.rightsStatus"),
+      value: registryValueLabel("rightsStatus", String(body["status"])),
+    },
+    ...(typeof licence?.["name"] === "string"
+      ? [
+          {
+            label: t(locale, "museum.onchain.record.licence"),
+            value:
+              typeof uri === "string" && uri.startsWith("https://") ? (
+                <a href={uri} rel="noreferrer" className={TEXT_LINK}>
+                  {licence["name"]}
+                </a>
+              ) : (
+                licence["name"]
+              ),
+          },
+        ]
+      : []),
+    ...textFact("museum.onchain.record.terms", bodyText(record, "terms")),
+    ...aboutFact(view, record),
+  ];
+}
+
+function decisionFacts(
+  view: OnchainMuseumView,
+  record: OnchainMuseumRecord
+): Fact[] {
+  const body = bodyOf(record);
+  return [
+    {
+      label: t(locale, "museum.onchain.record.outcome"),
+      value: registryValueLabel("outcome", String(body["outcome"])),
+    },
+    ...textFact("museum.onchain.record.statement", bodyText(record, "text")),
+    ...refsFact(
+      view,
+      "museum.onchain.record.decidedBy",
+      agentRefs(body["decided_by"])
+    ),
+    ...aboutFact(view, record),
+  ];
+}
+
+function observationFacts(
+  view: OnchainMuseumView,
+  record: OnchainMuseumRecord
+): Fact[] {
+  const body = bodyOf(record);
+  const method = asRecord(body["method"])?.["name"];
+  const from = body["observed_from"];
+  const to = body["observed_to"];
+  let observed: string | null = null;
+  if (typeof from === "string" && typeof to === "string") {
+    const time = (value: string) => formatUtcDateTime(Date.parse(value) / 1000);
+    observed = from === to ? time(from) : `${time(from)} – ${time(to)}`;
+  }
+  return [
+    ...textFact(
+      "museum.onchain.record.method",
+      typeof method === "string" ? registryValueLabel("method", method) : null
+    ),
+    ...refsFact(view, "museum.onchain.record.observationTarget", [
+      body["target"],
+    ]),
+    ...textFact("museum.onchain.record.observed", observed),
+  ];
+}
+
+function statementFacts(
+  view: OnchainMuseumView,
+  record: OnchainMuseumRecord
+): Fact[] {
   const family = familyOf(record);
-  if (family === "PRV_RIGHTS") {
-    const licence = asRecord(body["licence"]);
-    const uri = licence?.["uri"];
-    return [
-      {
-        label: t(locale, "museum.onchain.record.rightsStatus"),
-        value: registryValueLabel("rightsStatus", String(body["status"])),
-      },
-      ...(typeof licence?.["name"] === "string"
-        ? [
-            {
-              label: t(locale, "museum.onchain.record.licence"),
-              value:
-                typeof uri === "string" && uri.startsWith("https://") ? (
-                  <a href={uri} rel="noreferrer" className={TEXT_LINK}>
-                    {licence["name"]}
-                  </a>
-                ) : (
-                  licence["name"]
-                ),
-            },
-          ]
-        : []),
-      ...textFact("museum.onchain.record.terms", bodyText(record, "terms")),
-      ...aboutFact(view, record),
-    ];
-  }
-  if (family === "PRV_DECISION") {
-    return [
-      {
-        label: t(locale, "museum.onchain.record.outcome"),
-        value: registryValueLabel("outcome", String(body["outcome"])),
-      },
-      ...textFact("museum.onchain.record.statement", bodyText(record, "text")),
-      ...refsFact(
-        view,
-        "museum.onchain.record.decidedBy",
-        agentRefs(body["decided_by"])
-      ),
-      ...aboutFact(view, record),
-    ];
-  }
-  if (family === "PRV_OBSERVATION") {
-    const method = asRecord(body["method"])?.["name"];
-    const from = body["observed_from"];
-    const to = body["observed_to"];
-    let observed: string | null = null;
-    if (typeof from === "string" && typeof to === "string") {
-      const time = (value: string) =>
-        formatUtcDateTime(Date.parse(value) / 1000);
-      observed = from === to ? time(from) : `${time(from)} – ${time(to)}`;
-    }
-    return [
-      ...textFact(
-        "museum.onchain.record.method",
-        typeof method === "string" ? registryValueLabel("method", method) : null
-      ),
-      ...refsFact(view, "museum.onchain.record.observationTarget", [
-        body["target"],
-      ]),
-      ...textFact("museum.onchain.record.observed", observed),
-    ];
-  }
+  if (family === "PRV_RIGHTS") return rightsFacts(view, record);
+  if (family === "PRV_DECISION") return decisionFacts(view, record);
+  if (family === "PRV_OBSERVATION") return observationFacts(view, record);
   return aboutFact(view, record);
 }
 

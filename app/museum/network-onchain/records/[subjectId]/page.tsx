@@ -21,9 +21,9 @@ import {
   onchainMuseumRecordHref,
   parseSubjectIdParam,
 } from "@/lib/museum/onchain/fields";
-import {
-  type OnchainEdge,
-  type OnchainMuseumView,
+import type {
+  OnchainEdge,
+  OnchainMuseumView,
 } from "@/lib/museum/onchain/presentation";
 import { textsNaming } from "@/lib/museum/onchain/texts";
 import { getOnchainMuseum } from "@/lib/museum/onchain/runtime.server";

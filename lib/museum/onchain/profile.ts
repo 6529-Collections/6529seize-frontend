@@ -156,7 +156,7 @@ export function checkProfileVersion(
 export function referencedSubjectId(
   ref: unknown,
   ns: string,
-  registryCaip10: string
+  registryId: string
 ): Hex | null {
   if (!isPlainObject(ref)) return null;
   const recordType = nonEmpty(ref["record_type"]);
@@ -167,7 +167,7 @@ export function referencedSubjectId(
   const registry = nonEmpty(ref["registry"]);
   const subject = nonEmpty(ref["subject"]);
   if (
-    registry?.toLowerCase() === registryCaip10.toLowerCase() &&
+    registry?.toLowerCase() === registryId.toLowerCase() &&
     subject !== null &&
     /^0x[0-9a-fA-F]{64}$/u.test(subject)
   ) {

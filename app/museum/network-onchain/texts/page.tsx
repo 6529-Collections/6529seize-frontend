@@ -8,7 +8,7 @@ import {
   documentPath,
   ONCHAIN_MUSEUM_BASE_PATH,
 } from "@/lib/museum/onchain/fields";
-import { type OnchainMuseumView } from "@/lib/museum/onchain/presentation";
+import type { OnchainMuseumView } from "@/lib/museum/onchain/presentation";
 import { getOnchainMuseum } from "@/lib/museum/onchain/runtime.server";
 import {
   FilterableGroups,

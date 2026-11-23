@@ -9,7 +9,7 @@ import type {
   OnchainRecordState,
 } from "@/lib/museum/onchain/museum";
 import { onchainMuseumRecordHref } from "@/lib/museum/onchain/fields";
-import { type OnchainMuseumView } from "@/lib/museum/onchain/presentation";
+import type { OnchainMuseumView } from "@/lib/museum/onchain/presentation";
 import { workImage } from "@/lib/museum/onchain/works";
 import type { FilterableGroupsCopy, FilterableItem } from "./FilterableGroups";
 import { registryValueLabel } from "./labels";

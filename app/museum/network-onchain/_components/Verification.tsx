@@ -3,7 +3,7 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { ONCHAIN_MUSEUM_SOURCE } from "@/lib/museum/onchain/constants";
 import { onchainMuseumRecordHref } from "@/lib/museum/onchain/fields";
-import { type OnchainMuseumView } from "@/lib/museum/onchain/presentation";
+import type { OnchainMuseumView } from "@/lib/museum/onchain/presentation";
 import {
   CopyValue,
   FactList,

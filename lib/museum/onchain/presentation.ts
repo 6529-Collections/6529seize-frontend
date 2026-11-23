@@ -149,6 +149,46 @@ export interface Graph {
   readonly about: ReadonlyMap<string, OnchainMuseumRecord[]>;
 }
 
+type Resolve = (ref: unknown) => OnchainMuseumRecord | null;
+
+/** A verified relation as an edge at each verified end. */
+function relationEdges(
+  record: OnchainMuseumRecord,
+  verified: Resolve
+): [string, OnchainEdge][] {
+  const { source, target } = bodyOf(record);
+  const from = verified(source);
+  const to = verified(target);
+  const base = { relation: record, kind: record.profile?.kind ?? "" };
+  const edges: [string, OnchainEdge][] = [];
+  if (from !== null) {
+    edges.push([
+      from.subjectId,
+      { ...base, direction: "out", other: to, otherRef: target },
+    ]);
+  }
+  if (to !== null) {
+    edges.push([
+      to.subjectId,
+      { ...base, direction: "in", other: from, otherRef: source },
+    ]);
+  }
+  return edges;
+}
+
+/** The distinct verified records a statement's `about` and target name. */
+function namedRecords(
+  record: OnchainMuseumRecord,
+  verified: Resolve
+): OnchainMuseumRecord[] {
+  const named = new Map<string, OnchainMuseumRecord>();
+  for (const ref of aboutRefs(record)) {
+    const item = verified(ref);
+    if (item !== null) named.set(item.subjectId, item);
+  }
+  return [...named.values()];
+}
+
 function buildGraph(snapshot: OnchainMuseumSnapshot): Graph {
   const { registry, declaration } = snapshot;
   const registryId = registryCaip10(registry.checks.chainId, registry.registry);
@@ -161,44 +201,23 @@ function buildGraph(snapshot: OnchainMuseumSnapshot): Graph {
     snapshot.records.find((record) => record.profile !== null)?.profile?.ns ??
     "";
   const refSubject = (ref: unknown) => referencedSubjectId(ref, ns, registryId);
-  const verified = (ref: unknown) => {
+  const verified: Resolve = (ref) => {
     const id = refSubject(ref);
     const record = id === null ? undefined : bySubject.get(id);
-    return record?.profile === null || record === undefined ? null : record;
+    return record?.profile ? record : null;
   };
   const edges = new Map<string, OnchainEdge[]>();
   const about = new Map<string, OnchainMuseumRecord[]>();
   for (const record of snapshot.records) {
     if (record.profile === null) continue;
     if (familyOf(record) === "PRV_RELATION") {
-      const { source, target } = record.profile.body;
-      const from = verified(source);
-      const to = verified(target);
-      const base = { relation: record, kind: record.profile.kind };
-      if (from !== null) {
-        push(edges, from.subjectId, {
-          ...base,
-          direction: "out",
-          other: to,
-          otherRef: target,
-        });
+      for (const [subjectId, edge] of relationEdges(record, verified)) {
+        push(edges, subjectId, edge);
       }
-      if (to !== null) {
-        push(edges, to.subjectId, {
-          ...base,
-          direction: "in",
-          other: from,
-          otherRef: source,
-        });
+    } else {
+      for (const named of namedRecords(record, verified)) {
+        push(about, named.subjectId, record);
       }
-      continue;
-    }
-    const seen = new Set<string>();
-    for (const ref of aboutRefs(record)) {
-      const named = verified(ref);
-      if (named === null || seen.has(named.subjectId)) continue;
-      seen.add(named.subjectId);
-      push(about, named.subjectId, record);
     }
   }
   return { refSubject, bySubject, edges, about };
@@ -248,42 +267,39 @@ function isLot(record: OnchainMuseumRecord, graph: Graph): boolean {
   );
 }
 
+/** Agents a work names in `body.created_by` or by a `created_by` relation. */
+function workCreators(record: OnchainMuseumRecord, graph: Graph): string[] {
+  const createdBy = bodyOf(record)["created_by"];
+  const embedded = (Array.isArray(createdBy) ? createdBy : [])
+    .map((item) => graph.refSubject(asRecord(item)?.["agent"]))
+    .filter((id): id is Hex => id !== null);
+  const related = (graph.edges.get(record.subjectId) ?? [])
+    .filter((edge) => edge.kind === "created_by" && edge.direction === "out")
+    .flatMap((edge) => (edge.other === null ? [] : [edge.other.subjectId]));
+  return [...embedded, ...related];
+}
+
 function entityRoles(
   records: readonly OnchainMuseumRecord[],
   graph: Graph
 ): EntityRoles {
-  const creators = new Set<string>();
-  const held = new Set<string>();
-  const lots = new Set(
-    records.filter((record) => isLot(record, graph)).map((r) => r.subjectId)
+  const works = records.filter(
+    (record) =>
+      record.profile?.kind === "work" && familyOf(record) === "PRV_ENTITY"
   );
-  for (const record of records) {
-    if (record.profile?.kind !== "work" || familyOf(record) !== "PRV_ENTITY") {
-      continue;
-    }
-    const createdBy = bodyOf(record)["created_by"];
-    for (const item of Array.isArray(createdBy) ? createdBy : []) {
-      const id = graph.refSubject(asRecord(item)?.["agent"]);
-      if (id !== null) creators.add(id);
-    }
-    for (const edge of graph.edges.get(record.subjectId) ?? []) {
-      if (
-        edge.kind === "created_by" &&
-        edge.direction === "out" &&
-        edge.other
-      ) {
-        creators.add(edge.other.subjectId);
-      }
-    }
-  }
-  for (const list of graph.edges.values()) {
-    for (const edge of list) {
-      if (edge.kind === "held_by" && edge.direction === "in" && edge.other) {
-        held.add(edge.other.subjectId);
-      }
-    }
-  }
-  return { creators, held, lots };
+  const held = [...graph.edges.values()]
+    .flat()
+    .filter((edge) => edge.kind === "held_by" && edge.direction === "in")
+    .flatMap((edge) => (edge.other === null ? [] : [edge.other.subjectId]));
+  return {
+    creators: new Set(works.flatMap((work) => workCreators(work, graph))),
+    held: new Set(held),
+    lots: new Set(
+      records
+        .filter((record) => isLot(record, graph))
+        .map((record) => record.subjectId)
+    ),
+  };
 }
 
 interface Labels {
@@ -364,18 +380,15 @@ function buildLabels(
     }
     const subject = aboutRefs(record)
       .map(recordLabel)
-      .find((item) => item !== null);
+      .find((item): item is string => item !== null);
     const observedTo = bodyOf(record)["observed_to"];
-    if (
-      (subject === undefined || subject === null) &&
-      typeof observedTo === "string"
-    ) {
+    if (subject === undefined && typeof observedTo === "string") {
       labels.set(record.subjectId, labeler.dated(kindOf(record), observedTo));
       continue;
     }
     labels.set(
       record.subjectId,
-      subject === undefined || subject === null
+      subject === undefined
         ? `${kindOf(record)} ${record.profile?.localId ?? ""}`.trim()
         : `${kindOf(record)}: ${subject}`
     );
@@ -477,7 +490,7 @@ export function buildOnchainMuseumView(
   const recordForRef = (ref: unknown) => {
     const id = graph.refSubject(ref);
     const record = id === null ? undefined : graph.bySubject.get(id);
-    return record === undefined || record.profile === null ? null : record;
+    return record?.profile ? record : null;
   };
   const resolveRef = (ref: unknown): OnchainLink => {
     const record = recordForRef(ref);
