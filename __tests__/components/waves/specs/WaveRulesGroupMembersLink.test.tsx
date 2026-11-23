@@ -68,9 +68,7 @@ describe("WaveRulesGroupMembersLink", () => {
     renderWithQueryClient(
       <WaveRulesGroupMembersLink
         groupId="group-1"
-        groupName="Generated group name"
         href="/network?page=1&group=group-1"
-        linkLabel="Inspect Generated group name group criteria and members"
       />
     );
 
@@ -80,11 +78,11 @@ describe("WaveRulesGroupMembersLink", () => {
     );
     expect(criteria).toHaveAttribute("aria-live", "polite");
     const link = screen.getByRole("link", {
-      name: "Inspect Generated group name group criteria and members: 365 users",
+      name: "365 users",
     });
     expect(link).toHaveTextContent("365 users");
     expect(link).toHaveAttribute("href", "/network?page=1&group=group-1");
-    expect(link).toHaveAttribute("title", "Generated group name");
+    expect(link).toHaveAttribute("title", "365 users");
     expect(fetchSavedGroupMembersPage).toHaveBeenCalledWith(
       expect.objectContaining({
         groupId: "group-1",
@@ -108,7 +106,6 @@ describe("WaveRulesGroupMembersLink", () => {
     const { rerender } = renderWithQueryClient(
       <WaveRulesGroupMembersLink
         groupId="group-1"
-        groupName="First group"
         href="/network?page=1&group=group-1"
       />
     );
@@ -117,7 +114,6 @@ describe("WaveRulesGroupMembersLink", () => {
     rerender(
       <WaveRulesGroupMembersLink
         groupId="group-2"
-        groupName="Second group"
         href="/network?page=1&group=group-2"
       />
     );

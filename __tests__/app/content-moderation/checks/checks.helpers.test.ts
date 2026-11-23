@@ -44,3 +44,9 @@ it("ignores malformed dates, unknown enum values and unsafe subject identifiers"
 it("does not turn missing date boundaries into timestamps", () => {
   expect(readCheckFilters(new URLSearchParams())).toEqual({});
 });
+
+it("ignores old Group name filter links", () => {
+  expect(
+    readCheckFilters(new URLSearchParams({ subject_type: "GROUP_NAME" }))
+  ).toEqual({});
+});

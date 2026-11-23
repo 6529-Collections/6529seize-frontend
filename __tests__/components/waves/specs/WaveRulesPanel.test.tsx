@@ -2,7 +2,8 @@ import WaveRulesPanel from "@/components/waves/specs/WaveRulesPanel";
 import type { WaveRules } from "@/helpers/waves/wave-rules.helpers";
 import type Link from "next/link";
 import type { ComponentProps } from "react";
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
+import { renderWithQueryClient } from "@/__tests__/utils/reactQuery";
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -11,6 +12,16 @@ jest.mock("next/link", () => ({
       {children}
     </a>
   ),
+}));
+
+jest.mock("@/services/api/group-members-api", () => ({
+  fetchSavedGroupMembersPage: jest.fn().mockResolvedValue({
+    count: 12,
+    data: [],
+  }),
+}));
+jest.mock("@/services/api/common-api", () => ({
+  commonApiFetch: jest.fn().mockResolvedValue(null),
 }));
 
 const rules: WaveRules = {
@@ -24,7 +35,7 @@ const rules: WaveRules = {
           label: "Chat access",
           value: "Artists",
           valueHref: "/network?page=1&group=artists",
-          valueLinkLabel: "Inspect Artists group criteria and members",
+          valueGroupId: "artists",
         },
         {
           id: "admin",
@@ -42,11 +53,13 @@ const rules: WaveRules = {
 };
 
 describe("WaveRulesPanel", () => {
-  it("renders visible groups as accessible links and private groups as text", () => {
-    render(<WaveRulesPanel rules={rules} showCustomRules={false} />);
+  it("renders visible groups as accessible links and private groups as text", async () => {
+    renderWithQueryClient(
+      <WaveRulesPanel rules={rules} showCustomRules={false} />
+    );
 
-    const link = screen.getByRole("link", {
-      name: "Inspect Artists group criteria and members",
+    const link = await screen.findByRole("link", {
+      name: "12 users",
     });
     expect(link).toHaveAttribute("href", "/network?page=1&group=artists");
     expect(link).toHaveClass("tw-min-h-11");
@@ -57,7 +70,7 @@ describe("WaveRulesPanel", () => {
   });
 
   it("supports an interactive value for a create-wave rule row", () => {
-    render(
+    renderWithQueryClient(
       <WaveRulesPanel
         rules={rules}
         showCustomRules={false}
@@ -75,7 +88,7 @@ describe("WaveRulesPanel", () => {
   });
 
   it("shows display guidelines without a display-only label", () => {
-    render(
+    renderWithQueryClient(
       <WaveRulesPanel
         rules={{
           ...rules,
@@ -97,7 +110,7 @@ describe("WaveRulesPanel", () => {
   });
 
   it("keeps the requires-acceptance label for binding rules", () => {
-    render(
+    renderWithQueryClient(
       <WaveRulesPanel
         rules={{
           ...rules,

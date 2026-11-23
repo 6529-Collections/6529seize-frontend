@@ -139,9 +139,7 @@ export default function WaveRulesPanel({
       return (
         <WaveRulesGroupMembersLink
           groupId={row.valueGroupId}
-          groupName={row.value}
           href={row.valueHref}
-          linkLabel={row.valueLinkLabel}
         />
       );
     }
@@ -149,7 +147,6 @@ export default function WaveRulesPanel({
     return (
       <Link
         href={row.valueHref}
-        aria-label={row.valueLinkLabel}
         title={row.value}
         className="tw-inline-flex tw-min-h-11 tw-max-w-full tw-cursor-pointer tw-items-center tw-justify-end tw-break-words tw-rounded-md tw-text-right tw-text-iron-50 tw-underline tw-underline-offset-2 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-300 desktop-hover:hover:tw-decoration-2 sm:tw-min-h-9"
       >

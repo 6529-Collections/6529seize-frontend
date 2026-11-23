@@ -33,7 +33,6 @@ export interface WaveRuleRow {
   readonly value: string;
   readonly valueHref?: string | undefined;
   readonly valueGroupId?: string | undefined;
-  readonly valueLinkLabel?: string | undefined;
   readonly description?: string | undefined;
 }
 
@@ -239,24 +238,15 @@ export const getScopeRuleValue = ({
 }: {
   readonly scope: ApiWaveScope | null | undefined;
   readonly fallback: string;
-}): Pick<
-  WaveRuleRow,
-  "value" | "valueHref" | "valueGroupId" | "valueLinkLabel"
-> => {
+}): Pick<WaveRuleRow, "value" | "valueHref" | "valueGroupId"> => {
   const value = getScopeLabel({ scope, fallback });
   const valueHref = getScopeLink(scope);
   const groupId = scope?.group?.id?.trim();
-  const groupName = scope?.group?.name?.trim();
 
   return {
     value,
     valueHref,
     valueGroupId: valueHref ? groupId : undefined,
-    valueLinkLabel: valueHref
-      ? t(DEFAULT_LOCALE, "waves.chatSettings.access.inspectGroup", {
-          groupName: groupName ?? value,
-        })
-      : undefined,
   };
 };
 
@@ -279,17 +269,12 @@ const getChatAccessRow = ({
   value,
   valueHref,
   valueGroupId,
-  valueLinkLabel,
-}: Pick<
-  WaveRuleRow,
-  "value" | "valueHref" | "valueGroupId" | "valueLinkLabel"
->): WaveRuleRow => ({
+}: Pick<WaveRuleRow, "value" | "valueHref" | "valueGroupId">): WaveRuleRow => ({
   id: "chat-access",
   label: t(DEFAULT_LOCALE, "waves.chatSettings.access.label"),
   value,
   valueHref,
   valueGroupId,
-  valueLinkLabel,
 });
 
 export const getCreateGroupLabel = ({
