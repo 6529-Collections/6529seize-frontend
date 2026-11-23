@@ -30,7 +30,8 @@ test.describe("on-chain Museum preview", () => {
     await expect(
       page.getByRole("heading", {
         level: 1,
-        name: "The Museum, read from the chain",
+        // On fixtures the heading says the page is a test preview.
+        name: /^(?:The Museum, read from the chain|The Museum's records, from a test preview)$/u,
       })
     ).toBeVisible();
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
@@ -67,7 +68,9 @@ test.describe("on-chain Museum preview", () => {
     }
 
     const works = page
-      .getByRole("list", { name: /^Works in the collection/u })
+      // Works in the collection are grouped by the accession that brought
+      // them in.
+      .getByRole("list", { name: /accession 6529NM\.2026\.003/u })
       .first();
     // Work cards load their images as they near the viewport, and show them
     // only after the browser checks their SHA-256.
