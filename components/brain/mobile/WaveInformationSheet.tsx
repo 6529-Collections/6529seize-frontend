@@ -99,6 +99,7 @@ export default function WaveInformationSheet({
   if (isPhone && wave.chat.scope.group?.is_direct_message !== true) {
     return (
       <MobileNavigationView
+        springMotion
         title={title}
         pageKey={information?.request?.view}
         onBack={subviewOpen && information ? information.back : onClose}

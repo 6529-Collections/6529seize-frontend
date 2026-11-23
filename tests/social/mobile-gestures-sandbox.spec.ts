@@ -320,6 +320,20 @@ for (const platform of ["ios", "android"] as const) {
       await visibleBack.press("Enter");
       await expect(page).toHaveURL(/\/waves$/);
       await openWave(page);
+      const title = page.getByRole("button", {
+        name: "About Local Composer Sandbox Wave",
+        exact: true,
+      });
+      const join = page.getByRole("button", {
+        name: "Join Local Composer Sandbox Wave",
+        exact: true,
+      });
+      const titleStart = await title.evaluate(
+        (element) => element.getBoundingClientRect().x
+      );
+      const joinStart = await join.evaluate(
+        (element) => element.getBoundingClientRect().x
+      );
       const row = page
         .getByTestId("wave-swipe-surface")
         .locator("[data-wave-drop-id][data-reply-enabled=true]")
@@ -329,18 +343,31 @@ for (const platform of ["ios", "android"] as const) {
         .poll(() =>
           page
             .getByTestId("wave-swipe-surface")
-            .evaluate(
-              (element) =>
-                new DOMMatrixReadOnly(getComputedStyle(element).transform).m41
-            )
+            .evaluate((element) => element.getBoundingClientRect().x)
         )
         .toBeGreaterThan(80);
+      const contentOffset = await page
+        .getByTestId("wave-swipe-surface")
+        .evaluate((element) => element.getBoundingClientRect().x);
+      for (const [control, start] of [
+        [title, titleStart],
+        [join, joinStart],
+      ] as const) {
+        expect(
+          await control.evaluate((element) => element.getBoundingClientRect().x)
+        ).toBeCloseTo(start + contentOffset, 0);
+      }
       await page.screenshot({
         path: testInfo.outputPath("wave-back-tracking.png"),
       });
       await dragging.reverse();
       await dragging.release();
       await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}`));
+      await expect
+        .poll(() =>
+          title.evaluate((element) => element.getBoundingClientRect().x)
+        )
+        .toBeCloseTo(titleStart, 0);
       await page.evaluate(() => {
         const start = document.startViewTransition.bind(document);
         document.startViewTransition = (...args) => {
@@ -562,16 +589,18 @@ for (const platform of ["ios", "android"] as const) {
       const cancelled = await touchDrag(page, post, 115);
       await expect
         .poll(() =>
-          surface.evaluate(
-            (element) =>
-              new DOMMatrixReadOnly(getComputedStyle(element).transform).m41
-          )
+          surface.evaluate((element) => element.getBoundingClientRect().x)
         )
         .toBeGreaterThan(80);
       await cancelled.reverse();
       await cancelled.release();
       await expect(page).toHaveURL(/\/waves\?view=profile-feed$/);
       await expect(surface).toHaveCSS("transform", "none");
+      await expect
+        .poll(() =>
+          surface.evaluate((element) => element.getBoundingClientRect().x)
+        )
+        .toBeCloseTo(0, 0);
 
       for (const [index, method] of (
         ["swipe", "button", "wave-link"] as const

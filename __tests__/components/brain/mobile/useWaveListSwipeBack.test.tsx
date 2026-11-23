@@ -14,12 +14,14 @@ function SwipeHarness({
   onIntentStart,
   onSwipeBack,
   targetScreen,
+  withHeader = false,
 }: {
   readonly enabled?: boolean;
   readonly scope?: string;
   readonly onIntentStart: () => void;
   readonly onSwipeBack: () => void;
   readonly targetScreen?: waveNavigation.WaveScreen | undefined;
+  readonly withHeader?: boolean;
 }) {
   const { ref, onTouchStart } = useWaveListSwipeBack({
     enabled,
@@ -28,11 +30,19 @@ function SwipeHarness({
     onSwipeBack,
     targetScreen,
   });
-  return (
+  const content = (
     <div ref={ref} onTouchStart={onTouchStart} data-testid="surface">
       <span data-testid="content">Wave</span>
       <input aria-label="Vote" type="range" />
     </div>
+  );
+  return withHeader ? (
+    <div data-wave-swipe-page data-testid="page">
+      <header>Wave name and Join</header>
+      {content}
+    </div>
+  ) : (
+    content
   );
 }
 
@@ -103,6 +113,46 @@ it("tracks an interior drag, then commits on release", () => {
   fireEvent.touchEnd(content, { touches: [], changedTouches: [touch(280)] });
   expect(onSwipeBack).toHaveBeenCalledTimes(1);
   expect(surface.style.transform).toBe("");
+});
+
+it("moves the header's page and clears it when navigation is disabled after release", async () => {
+  const onSwipeBack = jest.fn();
+  const onIntentStart = jest.fn();
+  const view = (enabled: boolean) => (
+    <SwipeHarness
+      withHeader
+      targetScreen="list"
+      {...{ enabled, onSwipeBack, onIntentStart }}
+    />
+  );
+  const { rerender } = render(view(true));
+  const page = screen.getByTestId("page");
+  const surface = screen.getByTestId("surface");
+  const content = screen.getByTestId("content");
+  let finish = () => {};
+  const finished = new Promise<void>((resolve) => {
+    finish = resolve;
+  });
+  const cancel = jest.fn();
+  const animate = jest.fn(() => ({ finished, cancel }));
+  Object.defineProperty(page, "animate", { value: animate });
+  fireEvent.touchStart(content, { touches: [touch(160)] });
+  fireEvent.touchMove(content, { touches: [touch(300)] });
+  act(() => jest.advanceTimersByTime(20));
+  expect(page.style.transform).toBe("translate3d(140px, 0, 0)");
+  expect(surface.style.transform).toBe("");
+  fireEvent.touchEnd(content, { touches: [], changedTouches: [touch(300)] });
+  expect(animate).toHaveBeenCalledTimes(1);
+  expect(onSwipeBack).not.toHaveBeenCalled();
+  rerender(view(false));
+  expect(cancel).toHaveBeenCalledTimes(1);
+  expect(page.style.transform).toBe("");
+  expect(page.style.willChange).toBe("");
+  await act(async () => {
+    finish();
+    await finished;
+  });
+  expect(onSwipeBack).not.toHaveBeenCalled();
 });
 
 it("returns to rest after reversal or native cancellation", () => {

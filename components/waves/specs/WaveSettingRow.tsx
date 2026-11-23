@@ -3,7 +3,7 @@
 import PencilIcon, {
   PencilIconSize,
 } from "@/components/utils/icons/PencilIcon";
-import { ChevronRightIcon, Cog6ToothIcon } from "@heroicons/react/24/outline";
+import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 import { isTouchFirstEnvironment } from "@/helpers/touch-first.helpers";
 import { FocusTrap } from "focus-trap-react";
 import type { ReactNode } from "react";
@@ -301,15 +301,11 @@ export default function WaveSettingRow({
   const rowGridClasses = canEdit
     ? "tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)_2.75rem] sm:tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)_1.75rem]"
     : "tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)]";
-  let editIconContent =
+  const editIconContent =
     editIcon === "gear" ? (
       <Cog6ToothIcon aria-hidden="true" className="tw-size-5" />
     ) : (
       <PencilIcon size={PencilIconSize.SMALL} />
-    );
-  if (panel.isPhone)
-    editIconContent = (
-      <ChevronRightIcon aria-hidden="true" className="tw-size-5" />
     );
   const editButton = canEdit ? (
     <IconButton
@@ -348,10 +344,9 @@ export default function WaveSettingRow({
           <span className="tw-min-w-0 tw-break-words tw-text-right tw-font-medium tw-text-iron-50">
             {valueLabel}
           </span>
-          <ChevronRightIcon
-            aria-hidden="true"
-            className="tw-size-4 tw-shrink-0 tw-text-iron-500"
-          />
+          <span className="tw-flex tw-shrink-0 tw-text-iron-500">
+            {editIconContent}
+          </span>
         </button>
         {editorSurface}
       </>

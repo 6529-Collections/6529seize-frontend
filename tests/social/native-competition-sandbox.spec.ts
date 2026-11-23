@@ -452,7 +452,7 @@ async function expectFullScreenInformationView(
   page: Page,
   view: Locator,
   lastAction?: string,
-  backLabel = "Back"
+  navigationLabel = "Back"
 ) {
   await expect
     .poll(async () => {
@@ -470,10 +470,13 @@ async function expectFullScreenInformationView(
     })
     .toBe(true);
   await expect(
-    view.getByRole("button", { name: backLabel, exact: true })
+    view.getByRole("button", { name: navigationLabel, exact: true })
   ).toBeVisible();
   await expect(
-    view.getByRole("button", { name: "Close", exact: true })
+    view.getByRole("button", {
+      name: navigationLabel === "Close" ? "Back" : "Close",
+      exact: true,
+    })
   ).toHaveCount(0);
   if (lastAction) {
     await expect(
@@ -5669,6 +5672,175 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     });
   }
   for (const surface of ["web", "ios", "android"] as const) {
+    test(`catches and settles the wave-details spring without bounce on ${surface}`, async ({
+      page,
+      baseURL,
+    }, testInfo) => {
+      test.skip(
+        testInfo.project.name !== "web-mobile-chromium",
+        "Phone spring trial."
+      );
+      const runtimeErrors: string[] = [];
+      page.on("pageerror", (error) => runtimeErrors.push(error.message));
+      page.on("console", (message) => {
+        if (/hydration|hydrating|server rendered HTML/i.test(message.text()))
+          runtimeErrors.push(message.text());
+      });
+      await installCompetitionApi(page);
+      if (surface !== "web")
+        await installSurfaceSimulation(
+          page.context(),
+          surface === "ios" ? "capacitor-ios-sim" : "capacitor-android-sim",
+          baseURL
+        );
+      await page.goto(`/waves/${WAVE}?tab=chat`);
+      const opener = page.getByRole("button", {
+        name: "About Local Composer Sandbox Wave",
+        exact: true,
+      });
+      await opener.waitFor();
+      const capture = await page.evaluateHandle(() => {
+        let active = true;
+        const frames: Array<{ x: number; opacity: number; reduced: boolean }> =
+          [];
+        const tick = () => {
+          const view = document.querySelector<HTMLElement>(
+            "[data-wave-details-spring]"
+          );
+          if (view)
+            frames.push({
+              x: view.getBoundingClientRect().x,
+              opacity: Number(getComputedStyle(view).opacity),
+              reduced: matchMedia("(prefers-reduced-motion: reduce)").matches,
+            });
+          if (active) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+        return {
+          frames,
+          stop: () => {
+            active = false;
+          },
+        };
+      });
+      const session = await page.context().newCDPSession(page);
+      await opener.click();
+      await page.waitForFunction(() => {
+        const view = document.querySelector("[data-wave-details-spring]");
+        const x = view?.getBoundingClientRect().x;
+        return x !== undefined && x > 20 && x < innerWidth - 140;
+      });
+      const view = page.locator("[data-wave-details-spring]");
+      const before = await view.boundingBox();
+      const header = await page
+        .getByTestId("mobile-dialog-header")
+        .boundingBox();
+      expect(before).not.toBeNull();
+      expect(header).not.toBeNull();
+      const x = before!.x + 85,
+        y = header!.y + header!.height / 2;
+      await session.send("Input.dispatchTouchEvent", {
+        type: "touchStart",
+        touchPoints: [{ x, y }],
+      });
+      const held = await view.evaluate(
+        (element) => element.getBoundingClientRect().x
+      );
+      await page.waitForTimeout(120);
+      expect(
+        await view.evaluate((element) => element.getBoundingClientRect().x)
+      ).toBeCloseTo(held, 0);
+      await session.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: [{ x: x + 25, y }],
+      });
+      await expect
+        .poll(() =>
+          view.evaluate((element) => element.getBoundingClientRect().x)
+        )
+        .toBeCloseTo(held + 25, 0);
+      // Holding the short drag makes its release slow: it must return, not close.
+      await page.waitForTimeout(150);
+      await session.send("Input.dispatchTouchEvent", {
+        type: "touchEnd",
+        touchPoints: [],
+      });
+      await expect
+        .poll(() =>
+          view.evaluate((element) => element.getBoundingClientRect().x)
+        )
+        .toBeCloseTo(0, 0);
+      const details = page.getByRole("dialog");
+      await details.getByRole("button", { name: "Back", exact: true }).click();
+      await expect(details).toHaveCount(0);
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await opener.click();
+      await expect(view).toHaveCSS("opacity", "1");
+      await details.getByRole("button", { name: "Back", exact: true }).click();
+      await expect(details).toHaveCount(0);
+      const frames = await capture.evaluate((value) => {
+        value.stop();
+        return value.frames;
+      });
+      const normal = frames.filter((frame) => !frame.reduced);
+      const reduced = frames.filter((frame) => frame.reduced);
+      expect(normal.some((frame) => frame.x > 10 && frame.x < 300)).toBe(true);
+      expect(
+        normal.every(
+          (frame) =>
+            frame.x >= -0.1 && frame.x <= page.viewportSize()!.width + 0.1
+        )
+      ).toBe(true);
+      expect(reduced.length).toBeGreaterThan(1);
+      expect(reduced.every((frame) => Math.abs(frame.x) < 0.1)).toBe(true);
+      expect(
+        reduced.some((frame) => frame.opacity > 0 && frame.opacity < 1)
+      ).toBe(true);
+      await capture.dispose();
+
+      // Changing the OS preference while a finger holds the page must stop
+      // movement immediately, and restoring it must not replay the entry.
+      await page.emulateMedia({ reducedMotion: "no-preference" });
+      await opener.click();
+      await expect
+        .poll(() =>
+          view.evaluate((element) => element.getBoundingClientRect().x)
+        )
+        .toBeCloseTo(0, 0);
+      await session.send("Input.dispatchTouchEvent", {
+        type: "touchStart",
+        touchPoints: [{ x: 85, y }],
+      });
+      await session.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: [{ x: 145, y }],
+      });
+      await expect
+        .poll(() =>
+          view.evaluate((element) => element.getBoundingClientRect().x)
+        )
+        .toBeCloseTo(60, 0);
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await expect
+        .poll(() =>
+          view.evaluate((element) => element.getBoundingClientRect().x)
+        )
+        .toBeCloseTo(0, 0);
+      await session.send("Input.dispatchTouchEvent", {
+        type: "touchEnd",
+        touchPoints: [],
+      });
+      await page.emulateMedia({ reducedMotion: "no-preference" });
+      await page.waitForTimeout(120);
+      expect(
+        await view.evaluate((element) => element.getBoundingClientRect().x)
+      ).toBeCloseTo(0, 0);
+      await details.getByRole("button", { name: "Back", exact: true }).click();
+      await expect(details).toHaveCount(0);
+      expect(runtimeErrors).toEqual([]);
+      await session.detach();
+    });
+
     test(`closes mobile ${surface} information back onto the selected Votes view`, async ({
       page,
     }, testInfo) => {
@@ -13110,6 +13282,13 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await expect(
         sheet.getByRole("tab", { name: "About", exact: true })
       ).toBeVisible();
+      await expect
+        .poll(() =>
+          sheet
+            .locator("[data-wave-details-spring]")
+            .evaluate((element) => element.getBoundingClientRect().x)
+        )
+        .toBeCloseTo(0, 0);
       await sheet.getByRole("button", { name: "Back", exact: true }).click();
       await expect(page.getByRole("dialog")).toHaveCount(0);
       await expectNoHorizontalOverflow(page);
@@ -13272,9 +13451,16 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await expect(sheet).toHaveCount(1);
       await expect(sheet).toHaveAccessibleName("Create curation");
       await expectSheetTop(sheet, header!.y);
+      const closeButton = sheet
+        .getByTestId("mobile-dialog-header")
+        .getByRole("button", { name: "Close", exact: true });
+      await expect(closeButton).toBeVisible();
+      const closeBounds = await closeButton.boundingBox();
+      expect(closeBounds).not.toBeNull();
+      expect(closeBounds!.x).toBeGreaterThan(page.viewportSize()!.width / 2);
       await expect(
         sheet.getByRole("button", { name: "Cancel", exact: true })
-      ).toBeVisible();
+      ).toHaveCount(0);
       const name = sheet.getByRole("textbox", { name: "Name", exact: true });
       await name.fill("Unsaved curation");
       await expect(
@@ -13285,6 +13471,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         exact: true,
       });
       await editCriteria.click();
+      await expect(
+        sheet.getByRole("button", { name: "Back", exact: true })
+      ).toHaveCount(1);
+      await expect(closeButton).toHaveCount(0);
       const criteriaEditor = sheet.getByRole("group", {
         name: "Edit criteria",
         exact: true,
@@ -13346,7 +13536,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await expect(
         sheet.getByRole("button", { name: "Create", exact: true })
       ).toBeEnabled();
-      await sheet.getByRole("button", { name: "Cancel", exact: true }).click();
+      await sheet.getByRole("button", { name: "Close", exact: true }).click();
       await page
         .getByRole("dialog", { name: "Discard changes?", exact: true })
         .getByRole("button", { name: "Discard changes", exact: true })
@@ -13430,7 +13620,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       });
       await swipeInformationBack(page, sheet);
       await expect(sheet).toHaveAccessibleName("Create curation");
-      await sheet.getByRole("button", { name: "Cancel", exact: true }).click();
+      await sheet.getByRole("button", { name: "Close", exact: true }).click();
       await expect(configuration).toBeVisible();
       await sheet.getByRole("button", { name: "Back", exact: true }).click();
       await expect(sheet).toHaveCount(0);
@@ -13673,7 +13863,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         name: 'Create subwave of "Local Composer Sandbox Wave"',
         exact: true,
       });
-      await expectFullScreenInformationView(page, form, "Next", "Cancel");
+      await expectFullScreenInformationView(page, form, "Next", "Close");
       await expect(
         form.getByRole("heading", {
           name: 'Create subwave of "Local Composer Sandbox Wave"',
@@ -13681,7 +13871,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         })
       ).toHaveCount(1);
       await expect(
-        form.getByRole("button", { name: "Cancel", exact: true })
+        form.getByRole("button", { name: "Close", exact: true })
       ).toHaveCount(1);
       const name = form.getByRole("textbox", { name: /Subwave Name/ });
       await name.fill("An unfinished subwave");
@@ -13696,7 +13886,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         .getByRole("button", { name: "Keep editing", exact: true })
         .click();
       await expect(name).toHaveValue("An unfinished subwave");
-      await form.getByRole("button", { name: "Cancel", exact: true }).click();
+      await form.getByRole("button", { name: "Close", exact: true }).click();
       await discard
         .getByRole("button", { name: "Discard changes", exact: true })
         .click();

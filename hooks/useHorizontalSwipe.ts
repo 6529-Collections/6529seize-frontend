@@ -17,9 +17,16 @@ interface HorizontalSwipeOptions {
   readonly threshold: number;
   readonly intentRatio?: number;
   readonly flick?: boolean;
+  /** Catch a running animation at touch-down, before axis intent is known. */
+  readonly captureOnPress?: boolean;
+  readonly allowReverse?: boolean;
   readonly onStart?: () => void;
   readonly onMove: (distance: number, ready: boolean) => void;
-  readonly onEnd: (committed: boolean, distance: number) => void;
+  readonly onEnd: (
+    committed: boolean,
+    distance: number,
+    velocity: number
+  ) => void;
 }
 
 interface Candidate {
@@ -109,6 +116,10 @@ function finish(commit: boolean) {
   globalThis.removeEventListener("blur", cancel);
   if (!current) return;
   if (current.frame !== null) globalThis.cancelAnimationFrame(current.frame);
+  for (const candidate of current.candidates) {
+    if (candidate !== current.owner && candidate.options.current.captureOnPress)
+      candidate.options.current.onEnd(false, 0, 0);
+  }
   const options = current.owner?.options.current;
   if (!options) return;
   clickExpiry = globalThis.setTimeout(() => releaseClickSuppression?.(), 400);
@@ -123,7 +134,7 @@ function finish(commit: boolean) {
       (options.flick === true &&
         current.distance >= FLICK_DISTANCE &&
         velocity >= FLICK_VELOCITY));
-  options.onEnd(committed, current.distance);
+  options.onEnd(committed, current.distance, velocity * 1000);
 }
 
 function cancel() {
@@ -160,38 +171,44 @@ function trackVelocity(current: Gesture, distance: number) {
   }
 }
 
+function claimGesture(current: Gesture, deltaX: number, deltaY: number) {
+  const absoluteDeltaX = Math.abs(deltaX);
+  if (globalThis.getSelection()?.isCollapsed === false) {
+    cancel();
+    return;
+  }
+  if (deltaY >= VERTICAL_SLOP && deltaY >= absoluteDeltaX) {
+    cancel();
+    return;
+  }
+  if (absoluteDeltaX < AXIS_SLOP) return;
+  const candidate = current.candidates.find(
+    ({ options }) =>
+      options.current.enabled &&
+      (deltaX * options.current.direction > 0 ||
+        options.current.allowReverse === true)
+  );
+  if (!candidate) {
+    if (absoluteDeltaX >= deltaY * AXIS_RATIO) cancel();
+    return;
+  }
+  const intentRatio = candidate.options.current.intentRatio ?? AXIS_RATIO;
+  if (absoluteDeltaX < deltaY * intentRatio) return;
+  current.owner = candidate;
+  suppressClick(current.owner.element);
+  if (!current.owner.options.current.captureOnPress)
+    current.owner.options.current.onStart?.();
+}
+
 function track(current: Gesture, touch: Touch) {
   const deltaX = touch.clientX - current.x;
-  const absoluteDeltaX = Math.abs(deltaX);
   const deltaY = Math.abs(touch.clientY - current.y);
-  if (!current.owner) {
-    if (globalThis.getSelection()?.isCollapsed === false) {
-      cancel();
-      return;
-    }
-    if (deltaY >= VERTICAL_SLOP && deltaY >= absoluteDeltaX) {
-      cancel();
-      return;
-    }
-    if (absoluteDeltaX < AXIS_SLOP) return;
-    const candidate = current.candidates.find(
-      ({ options }) =>
-        options.current.enabled && deltaX * options.current.direction > 0
-    );
-    if (!candidate) {
-      if (absoluteDeltaX >= deltaY * AXIS_RATIO) cancel();
-      return;
-    }
-    const intentRatio = candidate.options.current.intentRatio ?? AXIS_RATIO;
-    if (absoluteDeltaX < deltaY * intentRatio) return;
-    current.owner = candidate;
-    suppressClick(current.owner.element);
-    current.owner.options.current.onStart?.();
-  }
-  const distance = Math.max(
-    0,
-    deltaX * current.owner.options.current.direction
-  );
+  if (!current.owner) claimGesture(current, deltaX, deltaY);
+  if (!current.owner) return;
+  const delta = deltaX * current.owner.options.current.direction;
+  const distance = current.owner.options.current.allowReverse
+    ? delta
+    : Math.max(0, delta);
   trackVelocity(current, distance);
 }
 
@@ -242,7 +259,11 @@ function removeCandidate(candidate: Candidate | null) {
     return;
   }
   const index = gesture.candidates.indexOf(candidate);
-  if (index >= 0) gesture.candidates.splice(index, 1);
+  if (index >= 0) {
+    gesture.candidates.splice(index, 1);
+    if (candidate.options.current.captureOnPress)
+      candidate.options.current.onEnd(false, 0, 0);
+  }
   if (gesture.candidates.length === 0) cancel();
 }
 
@@ -280,7 +301,7 @@ export function useHorizontalSwipe(
         distance: 0,
         velocityDistance: 0,
         velocityPeak: 0,
-        velocityPeakAt: 0,
+        velocityPeakAt: performance.now(),
         velocity: 0,
         movedAt: performance.now(),
         frame: null,
@@ -296,5 +317,6 @@ export function useHorizontalSwipe(
     const next = { element: event.currentTarget, options: latest };
     candidate.current = next;
     gesture.candidates.push(next);
+    if (latest.current.captureOnPress) latest.current.onStart?.();
   }, []);
 }

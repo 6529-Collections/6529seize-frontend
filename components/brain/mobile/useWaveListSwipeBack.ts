@@ -26,6 +26,7 @@ export function useWaveListSwipeBack<T extends HTMLElement = HTMLDivElement>({
   targetScreen,
 }: UseWaveListSwipeBackArgs) {
   const ref = useRef<T>(null);
+  const surface = useRef<HTMLElement | null>(null);
   const width = useRef(0);
   const animation = useRef<Animation | null>(null);
   const settling = useRef(false);
@@ -46,20 +47,28 @@ export function useWaveListSwipeBack<T extends HTMLElement = HTMLDivElement>({
       onStart: () => {
         animation.current?.cancel();
         animation.current = null;
-        const measuredWidth = ref.current?.getBoundingClientRect().width ?? 0;
+        // Live returns to Waves move the header with the conversation. Keep
+        // Feed's existing snapshot handoff on its original content surface.
+        surface.current =
+          targetScreen === "list"
+            ? (ref.current?.closest<HTMLElement>("[data-wave-swipe-page]") ??
+              ref.current)
+            : ref.current;
+        const measuredWidth =
+          surface.current?.getBoundingClientRect().width ?? 0;
         width.current =
           measuredWidth > 0 ? measuredWidth : globalThis.innerWidth;
-        ref.current?.style.setProperty("will-change", "transform");
+        surface.current?.style.setProperty("will-change", "transform");
         onIntentStart?.();
       },
       onMove: (distance) => {
-        ref.current?.style.setProperty(
+        surface.current?.style.setProperty(
           "transform",
           `translate3d(${Math.min(distance, width.current)}px, 0, 0)`
         );
       },
       onEnd: (committed, distance) => {
-        const element = ref.current;
+        const element = surface.current;
         if (!element) return;
         const reducedMotion = globalThis.matchMedia(
           "(prefers-reduced-motion: reduce)"
@@ -143,7 +152,7 @@ export function useWaveListSwipeBack<T extends HTMLElement = HTMLDivElement>({
   );
 
   useLayoutEffect(() => {
-    const element = ref.current;
+    const fallbackElement = ref.current;
     return () => {
       generation.current += 1;
       // The recognizer cancels its active touch first; clear any resulting settle.
@@ -151,10 +160,12 @@ export function useWaveListSwipeBack<T extends HTMLElement = HTMLDivElement>({
       animation.current = null;
       previousAnimation?.cancel();
       settling.current = false;
+      const element = surface.current ?? fallbackElement;
+      surface.current = null;
       element?.style.removeProperty("transform");
       element?.style.removeProperty("will-change");
     };
-  }, [enabled, scope]);
+  }, [enabled, scope, targetScreen]);
 
   const onTouchStart = useCallback(
     (event: TouchEvent<HTMLElement>) => {

@@ -2,7 +2,7 @@
 
 import { useContext } from "react";
 import { WaveInformationPanelContext } from "@/components/brain/mobile/WaveInformationPanelContext";
-import { ChevronRightIcon, Cog6ToothIcon } from "@heroicons/react/24/outline";
+import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import IconButton from "@/components/utils/button/IconButton";
 
@@ -22,11 +22,7 @@ export default function WaveGroupEditButton({
   readonly controls?: string | undefined;
 }) {
   const phone = useContext(WaveInformationPanelContext)?.isPhone === true;
-  let icon = phone ? (
-    <ChevronRightIcon aria-hidden="true" className="tw-size-4" />
-  ) : (
-    <Cog6ToothIcon aria-hidden="true" className="tw-size-5" />
-  );
+  let icon = <Cog6ToothIcon aria-hidden="true" className="tw-size-5" />;
   if (loading) icon = <CircleLoader />;
   return (
     <IconButton

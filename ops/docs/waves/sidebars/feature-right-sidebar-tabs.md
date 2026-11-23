@@ -48,8 +48,8 @@ Pin and mute use matching compact dark button surfaces.
   dividers remain. Empty Guidelines has no extra line below its heading.
   Boosted-drop display choices have a borderless container and quiet dark
   unselected options; the selected option keeps its blue indication.
-- On phones, editable Configuration rows open with a tap anywhere on the row;
-  a chevron marks page-opening rows. Chat status, Links, the two Replies
+- On phones, editable Configuration rows keep their settings gear and open
+  with a tap on the gear or anywhere on the row. Chat status, Links, the two Replies
   options, and administrator message deletion use inline switches that save
   immediately. Turning chat off requires confirmation. Failed saves leave the
   previous value visible for retry. Permission and authentication checks still apply.
@@ -60,8 +60,8 @@ Pin and mute use matching compact dark button surfaces.
 - Select the Joined count in phone About to push a Members page. Rename opens
   with the field focused and keeps Save.
 - On phones, New subwave, New curation and Create curation use full-screen
-  modals sliding up with Cancel. There is one title. Swiping or tapping outside
-  does not silently discard entered content; Cancel and Back ask before
+  modals sliding up with one title and an X Close control at the top right.
+  Swiping or tapping outside does not silently discard entered content; Close and Back ask before
   discarding a draft. Criteria pages use the same single Back header.
 - In Curations, the section plus opens Create curation. A row's management
   control includes Edit Curation. Desktop and tablet keep their existing

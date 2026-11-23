@@ -9,7 +9,6 @@ import {
   m,
   useIsPresent,
   useMotionValue,
-  useReducedMotion,
 } from "framer-motion";
 import {
   useCallback,
@@ -26,8 +25,9 @@ import {
   BRAIN_RIGHT_SIDEBAR_EXIT_TRANSITION,
   BRAIN_RIGHT_SIDEBAR_REDUCED_TRANSITION,
 } from "@/components/brain/right-sidebar/BrainRightSidebarTypes";
+import SpringNavigationSurface from "./SpringNavigationSurface";
 import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
-import Button from "@/components/utils/button/Button";
+import MobileWrapperDialogCloseButton from "@/components/mobile-wrapper-dialog/MobileWrapperDialogCloseButton";
 import {
   MobilePageContext,
   type MobilePageNavigation,
@@ -40,8 +40,25 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useDialogKeyboard, {
   DIALOG_KEYBOARD_VIEWPORT_STYLE,
 } from "@/hooks/useDialogKeyboard";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useHorizontalSwipe } from "@/hooks/useHorizontalSwipe";
 import { t } from "@/i18n/messages";
+
+function getPanelMotion(
+  presentation: "page" | "form",
+  reducedMotion: boolean,
+  exitTransition:
+    | typeof BRAIN_RIGHT_SIDEBAR_EXIT_TRANSITION
+    | typeof BRAIN_RIGHT_SIDEBAR_REDUCED_TRANSITION
+) {
+  const entrance = presentation === "form" ? { y: "100%" } : { x: "100%" };
+  const destination = reducedMotion ? 0 : "100%";
+  const exit =
+    presentation === "form"
+      ? { y: destination, transition: exitTransition }
+      : { x: destination, transition: exitTransition };
+  return { entrance, exit };
+}
 
 /** Keep mounted through AnimatePresence so Back and swipe share the same exit. */
 export default function MobileNavigationView({
@@ -51,8 +68,10 @@ export default function MobileNavigationView({
   presentation = "page",
   pageKey,
   guardDrafts = true,
+  springMotion = false,
 }: {
   readonly guardDrafts?: boolean;
+  readonly springMotion?: boolean;
   readonly title: string;
   readonly onBack: () => void;
   readonly children: ReactNode;
@@ -114,17 +133,18 @@ export default function MobileNavigationView({
   );
   const title = navigation?.title ?? baseTitle;
   const requestBack = () => {
-    if (navigation) {
-      if (!navigation.protectDrafts || !guard(navigation.back))
-        navigation.back();
-    } else if (!guard(onBack)) onBack();
+    const leave = navigation?.back ?? onBack;
+    const protectDrafts = navigation?.protectDrafts ?? true;
+    if (protectDrafts && guard(leave)) return false;
+    leave();
+    return true;
   };
   useMobileFormHistory(
     presentation === "form" || parentPage !== null,
     requestBack
   );
   const isPresent = useIsPresent();
-  const reducedMotion = useReducedMotion() ?? false;
+  const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const x = useMotionValue(0);
@@ -159,7 +179,7 @@ export default function MobileNavigationView({
     : BRAIN_RIGHT_SIDEBAR_EXIT_TRANSITION;
   const onTouchStart = useHorizontalSwipe(
     {
-      enabled: isPresent && presentation === "page",
+      enabled: isPresent && presentation === "page" && !springMotion,
       direction: 1,
       threshold: 100,
       intentRatio: 1.2,
@@ -184,6 +204,10 @@ export default function MobileNavigationView({
     (pageKey && pageKey !== "about" ? 1 : 0) + navigationStack.size;
   const previousPage = useRef({ key: activePageKey, depth: pageDepth });
   useLayoutEffect(() => {
+    if (reducedMotion) {
+      x.stop();
+      x.set(0);
+    }
     if (previousPage.current.key === activePageKey) return;
     const backwards = pageDepth < previousPage.current.depth;
     previousPage.current = { key: activePageKey, depth: pageDepth };
@@ -195,7 +219,56 @@ export default function MobileNavigationView({
     return () => animation.stop();
   }, [activePageKey, pageDepth, reducedMotion, transition, x]);
 
-  const entrance = presentation === "form" ? { y: "100%" } : { x: "100%" };
+  const { entrance, exit: panelExit } = getPanelMotion(
+    presentation,
+    reducedMotion,
+    exitTransition
+  );
+  const isFormRoot = presentation === "form" && !navigation;
+
+  const content = (
+    <m.div
+      data-mobile-navigation-view
+      data-state={isPresent ? "open" : "closing"}
+      className="tw-flex tw-h-full tw-min-h-0 tw-flex-col tw-overflow-hidden tw-bg-iron-950 tw-pb-[env(safe-area-inset-bottom,0px)] tw-text-iron-50"
+      style={{ x, touchAction: "pan-y pinch-zoom" }}
+      onTouchStart={onTouchStart}
+    >
+      <header
+        data-testid="mobile-dialog-header"
+        className="tw-shrink-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-pt-[env(safe-area-inset-top,0px)]"
+      >
+        <div className="tw-flex tw-min-h-14 tw-items-center tw-gap-2 tw-px-2 tw-py-1">
+          {!isFormRoot && (
+            <IconButton
+              size={44}
+              aria-label={t(locale, "common.back")}
+              onClick={requestBack}
+            >
+              <ChevronLeftIcon className="tw-size-5" aria-hidden="true" />
+            </IconButton>
+          )}
+          <DialogTitle
+            key={title}
+            ref={focusTitle}
+            tabIndex={-1}
+            className={`tw-m-0 tw-min-w-0 tw-flex-1 tw-break-words tw-text-base tw-font-semibold focus:tw-outline-none ${isFormRoot ? "tw-pl-2" : "tw-pr-3"}`}
+          >
+            {title}
+          </DialogTitle>
+          {isFormRoot && (
+            <MobileWrapperDialogCloseButton
+              label={t(locale, "common.close")}
+              onClick={requestBack}
+            />
+          )}
+        </div>
+      </header>
+      <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-y-auto">
+        {children}
+      </div>
+    </m.div>
+  );
 
   return (
     <MobilePageContext.Provider value={pageContext}>
@@ -230,66 +303,21 @@ export default function MobileNavigationView({
             <DialogPanel
               as={m.div}
               className="tw-h-full tw-min-h-0"
-              initial={reducedMotion ? false : entrance}
+              initial={springMotion || reducedMotion ? false : entrance}
               animate={{ x: 0, y: 0, transition }}
-              exit={
-                presentation === "form"
-                  ? {
-                      y: reducedMotion ? 0 : "100%",
-                      transition: exitTransition,
-                    }
-                  : {
-                      x: reducedMotion ? 0 : "100%",
-                      transition: exitTransition,
-                    }
-              }
+              exit={springMotion ? {} : panelExit}
             >
-              <m.div
-                data-mobile-navigation-view
-                data-state={isPresent ? "open" : "closing"}
-                className="tw-flex tw-h-full tw-min-h-0 tw-flex-col tw-overflow-hidden tw-bg-iron-950 tw-pb-[env(safe-area-inset-bottom,0px)] tw-text-iron-50"
-                style={{ x, touchAction: "pan-y pinch-zoom" }}
-                onTouchStart={onTouchStart}
-              >
-                <header
-                  data-testid="mobile-dialog-header"
-                  className="tw-shrink-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-pt-[env(safe-area-inset-top,0px)]"
+              {springMotion ? (
+                <SpringNavigationSurface
+                  onBack={requestBack}
+                  scope={activePageKey ?? title}
+                  reducedMotion={reducedMotion}
                 >
-                  <div className="tw-flex tw-min-h-14 tw-items-center tw-gap-2 tw-px-2 tw-py-1">
-                    {presentation === "form" && !navigation ? (
-                      <Button
-                        variant="tertiary"
-                        size="md"
-                        onClick={requestBack}
-                      >
-                        {t(locale, "waves.create.actions.cancel")}
-                      </Button>
-                    ) : (
-                      <IconButton
-                        size={44}
-                        aria-label={t(locale, "common.back")}
-                        onClick={requestBack}
-                      >
-                        <ChevronLeftIcon
-                          className="tw-size-5"
-                          aria-hidden="true"
-                        />
-                      </IconButton>
-                    )}
-                    <DialogTitle
-                      key={title}
-                      ref={focusTitle}
-                      tabIndex={-1}
-                      className="tw-m-0 tw-min-w-0 tw-flex-1 tw-break-words tw-pr-3 tw-text-base tw-font-semibold focus:tw-outline-none"
-                    >
-                      {title}
-                    </DialogTitle>
-                  </div>
-                </header>
-                <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-y-auto">
-                  {children}
-                </div>
-              </m.div>
+                  {content}
+                </SpringNavigationSurface>
+              ) : (
+                content
+              )}
             </DialogPanel>
           </div>
         </Dialog>

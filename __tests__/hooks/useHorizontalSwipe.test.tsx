@@ -101,12 +101,12 @@ it("gives a left drag to the message and a right drag to its containing wave, ex
   start(target);
   move(target, 70);
   end(target, 70);
-  expect(onReply).toHaveBeenCalledWith(true, 110);
+  expect(onReply).toHaveBeenCalledWith(true, 110, expect.any(Number));
   expect(onBack).not.toHaveBeenCalled();
   start(target);
   move(target, 300);
   end(target, 300);
-  expect(onBack).toHaveBeenCalledWith(true, 120);
+  expect(onBack).toHaveBeenCalledWith(true, 120, expect.any(Number));
   expect(onReply).toHaveBeenCalledTimes(1);
 });
 
@@ -126,7 +126,7 @@ it("accepts a post body that opens its chat but leaves embedded links and contro
   start(body);
   move(body, 300);
   end(body, 300);
-  expect(onBack).toHaveBeenCalledWith(true, 120);
+  expect(onBack).toHaveBeenCalledWith(true, 120, expect.any(Number));
   expect(onReply).not.toHaveBeenCalled();
 });
 
@@ -165,7 +165,7 @@ it("cancels a reply after reversing below the threshold", () => {
   });
   move(target, 140);
   end(target, 140);
-  expect(onReply).toHaveBeenCalledWith(false, 40);
+  expect(onReply).toHaveBeenCalledWith(false, 40, expect.any(Number));
 });
 
 it("commits a short quick back flick, but not the same distance held still", () => {
@@ -176,7 +176,7 @@ it("commits a short quick back flick, but not the same distance held still", () 
   });
   move(target, 215);
   end(target, 215);
-  expect(onBack).toHaveBeenLastCalledWith(true, 35);
+  expect(onBack).toHaveBeenLastCalledWith(true, 35, expect.any(Number));
   start(target);
   act(() => {
     jest.advanceTimersByTime(40);
@@ -186,7 +186,7 @@ it("commits a short quick back flick, but not the same distance held still", () 
     jest.advanceTimersByTime(200);
   });
   end(target, 215);
-  expect(onBack).toHaveBeenLastCalledWith(false, 35);
+  expect(onBack).toHaveBeenLastCalledWith(false, 35, expect.any(Number));
 });
 
 it("claims the first clear Android movement before scrolling takes ownership", () => {
@@ -195,7 +195,7 @@ it("claims the first clear Android movement before scrolling takes ownership", (
   expect(move(target, 188.8125, 97.8125)).toBe(false);
   move(target, 300);
   end(target, 300);
-  expect(onBack).toHaveBeenCalledWith(true, 120);
+  expect(onBack).toHaveBeenCalledWith(true, 120, expect.any(Number));
 });
 
 it("keeps a quick flick when Android interpolates a tiny final move", () => {
@@ -213,7 +213,11 @@ it("keeps a quick flick when Android interpolates a tiny final move", () => {
   }
   act(() => jest.advanceTimersByTime(2));
   end(target, 129.75);
-  expect(onBack).toHaveBeenCalledWith(true, expect.closeTo(76.40625));
+  expect(onBack).toHaveBeenCalledWith(
+    true,
+    expect.closeTo(76.40625),
+    expect.any(Number)
+  );
 });
 
 it("cancels a back gesture when released while reversing even beyond the distance threshold", () => {
@@ -225,7 +229,7 @@ it("cancels a back gesture when released while reversing even beyond the distanc
   });
   move(target, 290);
   end(target, 290);
-  expect(onBack).toHaveBeenCalledWith(false, 110);
+  expect(onBack).toHaveBeenCalledWith(false, 110, expect.any(Number));
 });
 
 it("keeps a committed back drag when the release rounds backward by a subpixel", () => {
@@ -235,7 +239,11 @@ it("keeps a committed back drag when the release rounds backward by a subpixel",
   move(target, 300);
   act(() => jest.advanceTimersByTime(1));
   end(target, 299.6);
-  expect(onBack).toHaveBeenCalledWith(true, expect.closeTo(119.6));
+  expect(onBack).toHaveBeenCalledWith(
+    true,
+    expect.closeTo(119.6),
+    expect.any(Number)
+  );
 });
 
 it("keeps a reply when its release rounds backward by a subpixel", () => {
@@ -245,7 +253,11 @@ it("keeps a reply when its release rounds backward by a subpixel", () => {
   move(target, 60);
   act(() => jest.advanceTimersByTime(1));
   end(target, 60.4);
-  expect(onReply).toHaveBeenCalledWith(true, expect.closeTo(119.6));
+  expect(onReply).toHaveBeenCalledWith(
+    true,
+    expect.closeTo(119.6),
+    expect.any(Number)
+  );
 });
 
 it.each(["touchCancel", "blur", "second finger"])(
@@ -263,7 +275,7 @@ it.each(["touchCancel", "blur", "second finger"])(
       fireEvent.touchStart(target, { touches: [touch(60), touch(80, 110, 2)] });
     end(target, 60);
     expect(onReply).toHaveBeenCalledTimes(1);
-    expect(onReply).toHaveBeenCalledWith(false, 120);
+    expect(onReply).toHaveBeenCalledWith(false, 120, expect.any(Number));
   }
 );
 
@@ -308,7 +320,7 @@ it("cancels when permission changes or the owning row unmounts", () => {
     <Harness replyEnabled={false} {...{ onReply, onMove, onBack, onRender }} />
   );
   end(target, 50);
-  expect(onReply).toHaveBeenCalledWith(false, 130);
+  expect(onReply).toHaveBeenCalledWith(false, 130, expect.any(Number));
   onReply.mockClear();
   rerender(<Harness {...{ onReply, onMove, onBack, onRender }} />);
   start(target);
@@ -316,7 +328,7 @@ it("cancels when permission changes or the owning row unmounts", () => {
   unmount();
   end(target, 50);
   expect(onReply).toHaveBeenCalledTimes(1);
-  expect(onReply).toHaveBeenCalledWith(false, 130);
+  expect(onReply).toHaveBeenCalledWith(false, 130, expect.any(Number));
 });
 
 it("suppresses a release click after a slow drag, but allows the next deliberate control tap", () => {
@@ -374,7 +386,7 @@ it("recognizes a rightward thumb arc without changing reply intent", () => {
   move(target, 216, 118);
   move(target, 300, 132);
   end(target, 300);
-  expect(onBack).toHaveBeenCalledWith(true, 120);
+  expect(onBack).toHaveBeenCalledWith(true, 120, expect.any(Number));
   expect(onReply).not.toHaveBeenCalled();
 
   start(target);
@@ -391,7 +403,7 @@ it("lets a small diagonal start become a horizontal Back swipe", () => {
   move(target, 205, 111);
   move(target, 300, 111);
   end(target, 300);
-  expect(onBack).toHaveBeenCalledWith(true, 120);
+  expect(onBack).toHaveBeenCalledWith(true, 120, expect.any(Number));
 });
 
 it("keeps an ambiguous unsupported direction pending before Back intent", () => {
@@ -400,7 +412,7 @@ it("keeps an ambiguous unsupported direction pending before Back intent", () => 
   move(target, 171, 111);
   move(target, 300, 111);
   end(target, 300);
-  expect(onBack).toHaveBeenCalledWith(true, 120);
+  expect(onBack).toHaveBeenCalledWith(true, 120, expect.any(Number));
 });
 
 it("accumulates fractional reverse moves without losing reversal intent", () => {
@@ -413,7 +425,7 @@ it("accumulates fractional reverse moves without losing reversal intent", () => 
     move(target, 284 - index * 0.875);
   }
   end(target, 280.5);
-  expect(onBack).toHaveBeenCalledWith(false, 100.5);
+  expect(onBack).toHaveBeenCalledWith(false, 100.5, expect.any(Number));
 });
 
 it("measures a retreat from a fractional peak instead of stale forward speed", () => {
@@ -426,7 +438,7 @@ it("measures a retreat from a fractional peak instead of stale forward speed", (
   act(() => jest.advanceTimersByTime(4));
   move(target, 280.625);
   end(target, 280.625);
-  expect(onBack).toHaveBeenCalledWith(false, 100.625);
+  expect(onBack).toHaveBeenCalledWith(false, 100.625, expect.any(Number));
 });
 
 it("does not acquire an ambiguous diagonal that never becomes horizontal", () => {
@@ -449,7 +461,7 @@ it("releases undecided diagonal reply movement without blocking the next gesture
   start(target);
   move(target, 300);
   end(target, 300);
-  expect(onBack).toHaveBeenCalledWith(true, 120);
+  expect(onBack).toHaveBeenCalledWith(true, 120, expect.any(Number));
 });
 
 it.each([false, true])(
@@ -464,12 +476,71 @@ it.each([false, true])(
     });
     fireEvent.touchCancel(target);
     end(target, 310);
-    if (owned) expect(onBack).toHaveBeenCalledWith(false, 30);
+    if (owned)
+      expect(onBack).toHaveBeenCalledWith(false, 30, expect.any(Number));
     else expect(onBack).not.toHaveBeenCalled();
     // A subsequent gesture must still work.
     start(target);
     move(target, 300);
     end(target, 300);
-    expect(onBack).toHaveBeenLastCalledWith(true, 120);
+    expect(onBack).toHaveBeenLastCalledWith(true, 120, expect.any(Number));
   }
 );
+
+function CaughtSpring({
+  onPress,
+  onRelease,
+}: {
+  readonly onPress: jest.Mock;
+  readonly onRelease: jest.Mock;
+}) {
+  const swipe = useHorizontalSwipe(
+    {
+      enabled: true,
+      direction: 1,
+      threshold: 100,
+      flick: true,
+      captureOnPress: true,
+      allowReverse: true,
+      onStart: onPress,
+      onMove: () => undefined,
+      onEnd: onRelease,
+    },
+    "spring"
+  );
+  return (
+    <div data-testid="spring" onTouchStart={swipe}>
+      Moving page
+    </div>
+  );
+}
+
+it("catches an animation on touch-down and resumes it after an unclaimed tap", () => {
+  const onPress = jest.fn(),
+    onRelease = jest.fn();
+  render(<CaughtSpring onPress={onPress} onRelease={onRelease} />);
+  const target = screen.getByTestId("spring");
+  start(target);
+  expect(onPress).toHaveBeenCalledTimes(1);
+  expect(onRelease).not.toHaveBeenCalled();
+  end(target, 180);
+  expect(onRelease).toHaveBeenCalledWith(false, 0, 0);
+});
+
+it("hands off recent finger velocity in pixels per second and lets a caught page reverse", () => {
+  const onPress = jest.fn(),
+    onRelease = jest.fn();
+  render(<CaughtSpring onPress={onPress} onRelease={onRelease} />);
+  const target = screen.getByTestId("spring");
+  start(target);
+  act(() => jest.advanceTimersByTime(40));
+  move(target, 215);
+  end(target, 215);
+  expect(onRelease).toHaveBeenLastCalledWith(true, 35, 875);
+  start(target);
+  act(() => jest.advanceTimersByTime(40));
+  move(target, 160);
+  end(target, 160);
+  expect(onRelease).toHaveBeenLastCalledWith(false, -20, -500);
+  expect(onPress).toHaveBeenCalledTimes(2);
+});

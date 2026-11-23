@@ -28,6 +28,10 @@ from Profile Waves Feed to Waves. The mobile
 bottom-navigation record covers temporary section-tab hiding while composing in
 short landscape iPhone chat viewports.
 
+Live swipe-back to the Waves list moves the channel header and content together
+while the bottom navigation stays fixed. Cancelling restores the whole page;
+the existing return destination and feed reading-position behavior are preserved.
+
 The signing, encrypted-messages and connection-sharing records cover the shared
 permission consent flow, separate or combined grants, shared server device names,
 renewal versus revocation, Desktop secure sharing's Coming soon gate, and exact
@@ -199,6 +203,11 @@ loading announcements, section-specific loading, and destination-bound decision
 controls. It also explains the four primary tabs on phones and the More sheet for
 remaining sections, with the active section label and count. It does not
 promise instant data or a loading screen on every switch.
+
+The `waves.about-sections` record describes phone Configuration rows with their
+settings gear icons and row-wide tap targets. Phone curation and subwave forms
+have one title and a top-right X Close control; nested pages keep one Back arrow.
+Close and Back protect entered drafts, and saving keeps its existing controls.
 
 The `messages.encrypted-chats` record covers profile links in DM headers and
 introductions, sender names and avatars, desktop profile cards, level and public
