@@ -50,12 +50,12 @@ Pin and mute use matching compact dark button surfaces.
   own authentication requirements.
 - On mobile, configuration gears open their editor inside the information
   panel. Links, chat settings, visibility and administrator access share the
-  same Back and Close controls. Back (including browser Back or Escape) returns
-  to Configuration without submitting changes; Save returns after a successful update.
+  same Back control. Back (including browser Back or Escape) returns to
+  Configuration without submitting changes; Save returns after a successful update.
   Failed saves keep the editor open for retry. Configuration keeps its selected
-  tab and scroll position. Close or a downward header swipe dismisses the whole
-  panel. The sheet keeps its height when opening an editor or returning with Back,
-  so short forms do not pull its top edge down the screen.
+  tab and scroll position. Phone information stays full-screen and also supports
+  swiping right to go back. Back from the main information view returns to the
+  thread. Tablet overlays also offer Close.
   Sheet editors omit a duplicate Cancel button; desktop setting popovers keep
   Cancel. Chat, Links and Replies checkboxes use the shared dark styling.
 - In Curations, the section plus opens Create curation. A row gear offers

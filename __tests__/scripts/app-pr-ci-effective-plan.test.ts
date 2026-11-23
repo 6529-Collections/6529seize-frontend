@@ -315,6 +315,7 @@ describe("effective App PR CI plan", () => {
     "tests/social/wave-notification-settings-sandbox.spec.ts",
     "components/header/AppHeader.tsx",
     "components/brain/mobile/WaveInformationSheet.tsx",
+    "components/mobile-navigation/MobileNavigationView.tsx",
     "components/brain/left-sidebar/waves/BrainLeftSidebarWavePin.tsx",
     "components\\waves\\leaderboard\\MySubmissionsDialog.tsx",
   ])(

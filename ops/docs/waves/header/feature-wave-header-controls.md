@@ -43,12 +43,13 @@ use up to two compact columns, with each label beside its icon and value.
 3. Use header controls near the wave title, avatar, and metadata.
 4. Open the owner options menu (`⋮`) when available.
 
-On phones, select the wave name or its chevron to open `About` halfway up
-the screen. Drag the handle up to expand it. Swipe down from the handle or
-header, use `Close`, tap outside, press Escape, or use the device’s Back
-action to return to the thread.
-The main `About` sheet has a Close control; Back controls inside subviews return
-to their parent view.
+On phones, select the wave name or its chevron to open `About` as a full-screen
+view sliding in from the right. Use the top-left Back chevron, swipe right,
+press Escape, or use the device's Back action to return to the thread with its
+selected section and scroll position preserved. Vertical gestures scroll the
+information content. A short or cancelled horizontal swipe keeps the view open.
+The header shows `About` and the wave name. It has no Close control or drag
+handle. Back inside an editor returns to its parent information view.
 
 ## Conversation Header
 
@@ -157,18 +158,18 @@ Add/Edit REP sits beside `Join` when both controls are shown.
     links open `/waves/{waveId}`.
 11. Renaming the wave leaves decision titles and rules unchanged.
     If edit-eligible on a non-DM wave, select the name or its pencil in About to
-    rename; use the picture pencil to update the image. `Rename wave` fits its
-    name field and Save action inside the same
-    sheet, without the full About view's empty space. `Back`
-    returns to `About` and discards an unsaved name; `Close` dismisses the whole
-    panel. `Save` returns to `About` after the name is saved.
-    Picture editing also uses the same panel, with a compact upload form and one
-    `Close` control. `Back` discards a selected image and returns to About;
-    uploading and saving retain the existing image validation and update flow.
+    rename; use the picture pencil to update the image. `Rename wave` keeps its
+    name field and Save action in the same information view. `Back` returns to
+    `About` and discards an unsaved name. `Save` returns to `About` after the
+    name is saved. Picture editing also uses the same panel. `Back` discards a
+    selected image and returns to About; uploading and saving retain the existing
+    image validation and update flow. Tablet overlays also offer `Close` to
+    dismiss the whole panel.
 12. If author, open `⋮` for profile-wave actions and `Delete`. In the mobile
     sheet or tablet overlay, `Wave options` opens inside the same panel. The
-    mobile sheet fits the available actions and expands back to About's full view. Use
-    `Back` to return to `About`; `Close` dismisses the whole panel.
+    phone view stays full-screen. Use `Back` to return to `About`, then `Back`
+    again to return to the thread. Tablet overlays also offer `Close` to dismiss
+    the whole panel.
 13. For `Delete`, confirm in modal. Success redirects to `/waves`.
 
 ## Common Scenarios
@@ -177,9 +178,9 @@ Add/Edit REP sits beside `Join` when both controls are shown.
 - Open followers, then use `Back` or `Joined` again to return to `About`.
 - Pin active waves for faster return.
 - Rename a wave without leaving the thread (`Save` stays disabled until the name changes).
-- On phones, rename keeps one sheet with one Close control. Its Back control
-  returns to `About`; swiping down from the header dismisses the sheet.
-- Mobile Wave REP and picture editors use Close or a downward header swipe to
+- On phones, rename and picture editing stay in the full-screen information
+  view. Back or a rightward swipe returns to `About`.
+- Standalone mobile Wave REP editors use Close or a downward header swipe to
   dismiss; their desktop dialogs also offer Cancel.
 - On direct-message waves, the name link stays available but rename/picture
   pencils stay hidden.

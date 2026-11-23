@@ -146,8 +146,9 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
         .getByRole("heading", { name: `About ${TITLE}`, exact: true })
         .evaluate(
           (heading) =>
-            heading.closest(".mobile-wrapper-dialog")?.getBoundingClientRect()
-              .height
+            heading
+              .closest("[data-mobile-navigation-view]")
+              ?.getBoundingClientRect().height
         );
       expect(originalHeight).toBeGreaterThan(0);
       const bell = about.getByRole("button", {
@@ -178,8 +179,9 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
           .getByRole("heading", { name: "Notification settings", exact: true })
           .evaluate(
             (heading) =>
-              heading.closest(".mobile-wrapper-dialog")?.getBoundingClientRect()
-                .height
+              heading
+                .closest("[data-mobile-navigation-view]")
+                ?.getBoundingClientRect().height
           )
       ).toBeCloseTo(originalHeight ?? 0, 0);
       await expect(
@@ -203,8 +205,9 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
           .getByRole("heading", { name: `About ${TITLE}`, exact: true })
           .evaluate(
             (heading) =>
-              heading.closest(".mobile-wrapper-dialog")?.getBoundingClientRect()
-                .height
+              heading
+                .closest("[data-mobile-navigation-view]")
+                ?.getBoundingClientRect().height
           )
       ).toBeCloseTo(originalHeight ?? 0, 0);
       await bell.tap();
@@ -219,16 +222,21 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
       await expect(choices).toHaveCount(0);
       await expect(bell).toBeFocused();
       await bell.tap();
-      await choices.getByRole("button", { name: "Close", exact: true }).tap();
+      await expect(
+        choices.getByRole("button", { name: "Close", exact: true })
+      ).toHaveCount(0);
+      await choices.getByRole("button", { name: "Back", exact: true }).tap();
       await expect(choices).toHaveCount(0);
+      await about.getByRole("button", { name: "Back", exact: true }).tap();
       await expect(about).toHaveCount(0);
       await openAbout(page);
       await bell.tap();
       await choices.getByRole("checkbox").first().click({ trial: true });
-      await page.touchscreen.tap(8, 12);
-      await expect(choices).toHaveCount(0);
-      await expect(about).toHaveCount(0);
-      await openAbout(page);
+      // Full-screen information has no backdrop to dismiss by tapping outside.
+      await page.touchscreen.tap(page.viewportSize()!.width - 8, 12);
+      await expect(choices).toBeVisible();
+      await choices.getByRole("button", { name: "Back", exact: true }).tap();
+      await expect(bell).toBeFocused();
       await bell.tap();
       api.delayUpdate();
       await choices.getByRole("checkbox", { name: ALL }).tap();

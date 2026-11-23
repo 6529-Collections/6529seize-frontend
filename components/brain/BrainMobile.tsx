@@ -27,6 +27,7 @@ import React, {
   useSyncExternalStore,
 } from "react";
 import {
+  AnimatePresence,
   LazyMotion,
   domAnimation,
   m,
@@ -509,15 +510,17 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
         aria-hidden={!!effectiveDropId}
         inert={effectiveDropId ? true : undefined}
       >
-        {wave &&
-          information?.request?.overlay &&
-          information.request.waveId === wave.id && (
-            <WaveInformationSheet
-              key={information.request.id}
-              wave={wave}
-              onClose={information.close}
-            />
-          )}
+        <AnimatePresence>
+          {wave &&
+            information?.request?.overlay &&
+            information.request.waveId === wave.id && (
+              <WaveInformationSheet
+                key={information.request.id}
+                wave={wave}
+                onClose={information.close}
+              />
+            )}
+        </AnimatePresence>
         {(hasWave || !isApp) && (
           <BrainMobileTabs
             activeView={activeView}

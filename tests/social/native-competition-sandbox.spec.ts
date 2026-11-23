@@ -448,46 +448,66 @@ async function expectSheetTop(sheet: Locator, top: number) {
     .toBeLessThanOrEqual(1);
 }
 
-async function expectCompactInformationSheet(
+async function expectFullScreenInformationView(
   page: Page,
-  sheet: Locator,
-  lastAction: string
+  view: Locator,
+  lastAction?: string
 ) {
   await expect
     .poll(async () => {
-      const header = await sheet
-        .getByTestId("mobile-dialog-header")
+      const bounds = await view
+        .locator("[data-mobile-navigation-view]")
         .boundingBox();
-      return header?.y ?? 0;
+      const viewport = page.viewportSize()!;
+      return (
+        bounds !== null &&
+        Math.abs(bounds.x) <= 1 &&
+        Math.abs(bounds.y) <= 1 &&
+        Math.abs(bounds.width - viewport.width) <= 1 &&
+        Math.abs(bounds.height - viewport.height) <= 1
+      );
     })
-    .toBeGreaterThan(page.viewportSize()!.height / 2);
-  await expect
-    .poll(() =>
-      sheet
-        .getByRole("button", { name: lastAction, exact: true })
-        .evaluate((element) => {
-          const surface = element.closest(".mobile-wrapper-dialog")!;
-          return (
-            surface.getBoundingClientRect().bottom -
-            element.getBoundingClientRect().bottom
-          );
-        })
-    )
-    .toBeLessThan(80);
-  await expect
-    .poll(() =>
-      sheet
-        .getByRole("button", { name: lastAction, exact: true })
-        .evaluate((element) => {
-          const bounds = element.getBoundingClientRect();
-          const viewport = globalThis.visualViewport!;
-          return (
-            bounds.bottom <= viewport.offsetTop + viewport.height &&
-            bounds.top >= viewport.offsetTop
-          );
-        })
-    )
     .toBe(true);
+  await expect(
+    view.getByRole("button", { name: "Back", exact: true })
+  ).toBeVisible();
+  await expect(
+    view.getByRole("button", { name: "Close", exact: true })
+  ).toHaveCount(0);
+  if (lastAction) {
+    await expect(
+      view.getByRole("button", { name: lastAction, exact: true })
+    ).toBeInViewport({ ratio: 1 });
+  }
+}
+
+async function swipeInformationBack(page: Page, view: Locator, distance = 180) {
+  const header = view.getByTestId("mobile-dialog-header");
+  await header.click({ trial: true });
+  const box = await header.boundingBox();
+  expect(box).not.toBeNull();
+  const x = box!.x + 80;
+  const y = box!.y + box!.height / 2;
+  const touch = await page.context().newCDPSession(page);
+  try {
+    await touch.send("Input.dispatchTouchEvent", {
+      type: "touchStart",
+      touchPoints: [{ x, y, id: 1 }],
+    });
+    for (const fraction of [0.2, 0.5, 0.8, 1]) {
+      await touch.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: [{ x: x + distance * fraction, y, id: 1 }],
+      });
+      await page.waitForTimeout(30);
+    }
+    await touch.send("Input.dispatchTouchEvent", {
+      type: "touchEnd",
+      touchPoints: [],
+    });
+  } finally {
+    await touch.detach();
+  }
 }
 
 async function swipeVertically(page: Page, target: Locator, distance: number) {
@@ -5647,8 +5667,8 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       });
     });
   }
-  for (const app of [false, true]) {
-    test(`closes mobile ${app ? "app" : "web"} information back onto the selected Votes view`, async ({
+  for (const surface of ["web", "ios", "android"] as const) {
+    test(`closes mobile ${surface} information back onto the selected Votes view`, async ({
       page,
     }, testInfo) => {
       // Desktop uses the sidebar; this scenario covers the mobile information modal.
@@ -5673,10 +5693,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await page.route(`**/api/waves/${WAVE}`, (route) =>
         route.fulfill({ json: readOnlyWave })
       );
-      if (app)
+      if (surface !== "web")
         await installSurfaceSimulation(
           page.context(),
-          "capacitor-ios-sim",
+          surface === "ios" ? "capacitor-ios-sim" : "capacitor-android-sim",
           testInfo.project.use.baseURL
         );
       const destination = `${ROOT}/beta?tab=votes&voteTab=activity`;
@@ -5701,33 +5721,15 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       );
       await expect(
         dialog.getByRole("button", { name: "Back", exact: true })
-      ).toHaveCount(0);
+      ).toBeVisible();
       await expect(
         dialog.getByRole("tab", { name: "About", exact: true })
       ).toBeVisible();
       await expect(page).toHaveURL(destination);
-      const grip = dialog.getByRole("button", { name: "Expand sheet" });
-      const sheetHeight = () =>
-        dialog
-          .getByTestId("mobile-dialog-header")
-          .evaluate(
-            (header) =>
-              header.closest(".mobile-wrapper-dialog")!.getBoundingClientRect()
-                .height
-          );
-      const viewportHeight = page.viewportSize()!.height;
-      await expect.poll(sheetHeight).toBeLessThan(viewportHeight * 0.53);
-      await expect.poll(sheetHeight).toBeGreaterThan(viewportHeight * 0.44);
-      await swipeVertically(page, grip, -110);
-      const collapse = dialog.getByRole("button", { name: "Collapse sheet" });
-      await expect(collapse).toBeVisible();
-      await expect.poll(sheetHeight).toBeGreaterThan(viewportHeight * 0.9);
+      await expectFullScreenInformationView(page, dialog);
       await page.screenshot({
-        path: testInfo.outputPath("expanded-wave-information.png"),
+        path: testInfo.outputPath("full-screen-wave-information.png"),
       });
-      await collapse.click();
-      await expect(grip).toBeVisible();
-      await expect.poll(sheetHeight).toBeLessThan(viewportHeight * 0.53);
       await dialog
         .getByRole("tab", { name: "Configuration", exact: true })
         .click();
@@ -5746,7 +5748,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         .poll(() => content.evaluate((element) => element.scrollTop))
         .toBeGreaterThan(0);
       await expect(
-        dialog.getByRole("button", { name: "Close", exact: true })
+        dialog.getByRole("button", { name: "Back", exact: true })
       ).toBeVisible();
       await page.screenshot({
         path: testInfo.outputPath("wave-information-mobile.png"),
@@ -5758,7 +5760,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expect(activity).toHaveAttribute("aria-selected", "true");
       await expect(opener).toBeFocused();
       await opener.click();
-      await dialog.getByRole("button", { name: "Close", exact: true }).click();
+      await dialog.getByRole("button", { name: "Back", exact: true }).click();
       await expect(dialog).toHaveCount(0);
       await expect(page).toHaveURL(destination);
       await opener.click();
@@ -5766,15 +5768,43 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expect(dialog).toHaveCount(0);
       await expect(opener).toBeFocused();
       await expect(activity).toHaveAttribute("aria-selected", "true");
+      if (surface === "android") {
+        await opener.click();
+        await expect(dialog).toBeVisible();
+        await page.waitForFunction(
+          () =>
+            "__playwrightAppListeners" in globalThis &&
+            Array.isArray(globalThis.__playwrightAppListeners) &&
+            globalThis.__playwrightAppListeners.includes("backButton")
+        );
+        await page.evaluate(() =>
+          globalThis.dispatchEvent(
+            new CustomEvent("playwright:backButton", {
+              detail: { canGoBack: true },
+              cancelable: true,
+            })
+          )
+        );
+        await expect(dialog).toHaveCount(0);
+        await expect(page).toHaveURL(destination);
+      }
       await opener.click();
       const header = dialog.getByTestId("mobile-dialog-header");
-      await swipeVertically(page, header, 10);
-      await expect(header).toBeVisible();
       await swipeVertically(page, header, 90);
+      await expect(dialog).toBeVisible();
+      await swipeInformationBack(page, dialog, 20);
+      await expectFullScreenInformationView(page, dialog);
+      await swipeInformationBack(page, dialog);
       await expect(dialog).toHaveCount(0);
       await expect(page).toHaveURL(destination);
       await expect(opener).toBeFocused();
       await expect(activity).toHaveAttribute("aria-selected", "true");
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await opener.click();
+      await expectFullScreenInformationView(page, dialog);
+      await dialog.getByRole("button", { name: "Back", exact: true }).click();
+      await expect(dialog).toHaveCount(0);
+      await page.emulateMedia({ reducedMotion: "no-preference" });
       await opener.click();
       await dialog
         .getByRole("link", {
@@ -12855,10 +12885,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           return region !== null && !region.hidden;
         })
       ).toBe(true);
-      await expectCompactInformationSheet(page, sheet, "Save");
+      await expectFullScreenInformationView(page, sheet, "Save");
       await expect(
         sheet.getByRole("button", { name: "Close", exact: true })
-      ).toHaveCount(1);
+      ).toHaveCount(0);
       const name = sheet.getByRole("textbox", {
         name: "Wave name",
         exact: true,
@@ -12924,7 +12954,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await expectSheetTop(sheet, aboutHeader!.y);
       await trigger.click();
       await expect(name).toHaveValue("Local Composer Sandbox Wave");
-      await sheet.getByRole("button", { name: "Close", exact: true }).click();
+      await sheet.getByRole("button", { name: "Back", exact: true }).click();
+      await expect(
+        sheet.getByRole("tab", { name: "About", exact: true })
+      ).toBeVisible();
+      await sheet.getByRole("button", { name: "Back", exact: true }).click();
       await expect(page.getByRole("dialog")).toHaveCount(0);
       await openWaveInformation(page);
       await expect(trigger).toBeVisible();
@@ -12943,11 +12977,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await sheet.getByRole("button", { name: "Back", exact: true }).click();
       await expect(trigger).toBeFocused();
       await titleTrigger.click();
-      await swipeVertically(
-        page,
-        sheet.getByTestId("mobile-dialog-header"),
-        320
-      );
+      await swipeInformationBack(page, sheet);
+      await expect(
+        sheet.getByRole("tab", { name: "About", exact: true })
+      ).toBeVisible();
+      await sheet.getByRole("button", { name: "Back", exact: true }).click();
       await expect(page.getByRole("dialog")).toHaveCount(0);
       await expectNoHorizontalOverflow(page);
     });
@@ -12979,7 +13013,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await expect(page.getByRole("dialog")).toHaveCount(1);
       await expect(
         sheet.getByRole("button", { name: "Close", exact: true })
-      ).toHaveCount(1);
+      ).toHaveCount(0);
       const save = sheet.getByRole("button", { name: "Save", exact: true });
       await expect(save).toBeDisabled();
       await expect(save).toBeInViewport({ ratio: 1 });
@@ -12997,7 +13031,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await edit.click();
       await expect(save).toBeDisabled();
       await expect(page.getByRole("dialog")).toHaveCount(1);
-      await sheet.getByRole("button", { name: "Close", exact: true }).click();
+      await sheet.getByRole("button", { name: "Back", exact: true }).click();
+      await expect(
+        sheet.getByRole("tab", { name: "About", exact: true })
+      ).toBeVisible();
+      await sheet.getByRole("button", { name: "Back", exact: true }).click();
       await expect(page.getByRole("dialog")).toHaveCount(0);
     });
 
@@ -13245,11 +13283,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await page.screenshot({
         path: testInfo.outputPath(`embedded-curation-${surface}.png`),
       });
-      await swipeVertically(
-        page,
-        sheet.getByTestId("mobile-dialog-header"),
-        180
-      );
+      await swipeInformationBack(page, sheet);
+      await expect(
+        sheet.getByRole("tab", { name: "About", exact: true })
+      ).toBeVisible();
+      await sheet.getByRole("button", { name: "Back", exact: true }).click();
       await expect(sheet).toHaveCount(0);
       await openWaveInformation(page);
       await expect(configuration).toBeVisible();
@@ -13305,7 +13343,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           exact: true,
         });
         await expect(page.getByRole("dialog")).toHaveCount(1);
-        await expectCompactInformationSheet(page, sheet, "Delete");
+        await expectFullScreenInformationView(page, sheet, "Delete");
         const optionsHeader = await sheet
           .getByTestId("mobile-dialog-header")
           .boundingBox();
@@ -13353,7 +13391,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await page.screenshot({
         path: testInfo.outputPath(`owner-options-${surface}.png`),
       });
-      await page.getByRole("button", { name: "Close", exact: true }).click();
+      await page.getByRole("button", { name: "Back", exact: true }).click();
+      await expect(
+        page.getByRole("tab", { name: "About", exact: true })
+      ).toBeVisible();
+      await page.getByRole("button", { name: "Back", exact: true }).click();
       await expect(page.getByRole("dialog")).toHaveCount(0);
       await expect(page).toHaveURL(originalUrl);
       await openWaveInformation(page);
@@ -13441,7 +13483,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await page.screenshot({
         path: testInfo.outputPath(`network-return-${surface}.png`),
       });
-      await sheet.getByRole("button", { name: "Close", exact: true }).click();
+      await sheet.getByRole("button", { name: "Back", exact: true }).click();
       await expect(sheet).toHaveCount(0);
       await expect(page).toHaveURL(originalUrl);
     });
@@ -13655,11 +13697,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await expect(sheet).toHaveAccessibleName(`About ${wave.name}`);
         await expect(checkbox).toBeVisible();
       }
-      await swipeVertically(
-        page,
-        sheet.getByTestId("mobile-dialog-header"),
-        90
-      );
+      await swipeInformationBack(page, sheet);
+      await expect(
+        sheet.getByRole("tab", { name: "About", exact: true })
+      ).toBeVisible();
+      await sheet.getByRole("button", { name: "Back", exact: true }).click();
       await expect(sheet).toHaveCount(0);
       await expect(page).toHaveURL(originalUrl);
       await expect

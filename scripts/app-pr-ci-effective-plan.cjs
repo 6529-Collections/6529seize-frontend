@@ -236,6 +236,7 @@ function applyEffectiveAppPrCiPlan(plan) {
         "components/brain/my-stream/MyStreamWavePending.tsx",
         "components/header/AppHeader.tsx",
         "components/brain/mobile/WaveInformationSheet.tsx",
+        "components/mobile-navigation/MobileNavigationView.tsx",
         "components/waves/specs/WaveNotificationSettings.tsx",
         "components/waves/specs/wave-notification-settings/WaveNotificationPreferenceButtons.tsx",
         "components/brain/mobile/WaveInformationPanelContext.ts",
