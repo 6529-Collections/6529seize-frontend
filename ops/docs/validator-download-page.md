@@ -6,8 +6,8 @@ Parent: [Documentation](README.md)
 
 `/validator` is where testers download the 6529 validator. When the
 password gate is on, it protects every page under it, except the signed
-release feed, which validators fetch to find updates, and the authorize
-page.
+release feed, which validators fetch to find updates, the authorize page,
+and the cloud startup script, which a new server downloads.
 
 | Route | What it serves | Access |
 | --- | --- | --- |
@@ -21,6 +21,7 @@ page.
 | `/validator/releases.json` | The signed release feed, byte for byte | Public |
 | `/validator/releases.json.sig` | The feed's signature, byte for byte | Public |
 | `/validator/authorize` | A phone signs a validator's authorization from its link (see [Authorize from a phone](#authorize-from-a-phone)) | Public |
+| `/validator/cloud-init-v1.sh` | The cloud startup script, `public/validator/cloud-init-v1.sh`, as plain text (see [The cloud startup script](#the-cloud-startup-script)) | Public |
 
 The pages send `noindex, nofollow`, and the sitemap leaves them out.
 `robots.txt` does not name them.
@@ -30,7 +31,9 @@ The pages send `noindex, nofollow`, and the sitemap leaves them out.
 `proxy.ts` calls `lib/validator-page/proxyGate.ts` for every path under
 `/validator`. A request without a valid cookie gets the password form in
 place of the page it asked for. Each page and the download route check the
-cookie again.
+cookie again. While the gate is on, the cloud startup script can't download
+a release, so it installs nothing on a new server
+([The cloud startup script](#the-cloud-startup-script)).
 
 - The form posts to `/validator/unlock`. Each address gets 10 tries in 15
   minutes, right or wrong. Each server process also accepts at most 100
@@ -73,7 +76,9 @@ Beanstalk environment is updated, instead of opening the pages.
 
 The deploy then sets `VALIDATOR_PAGE_PUBLIC=true` on Elastic Beanstalk. To
 open the pages without a deploy, set that property on the environment
-directly; Elastic Beanstalk restarts the app with it. Remove the
+directly; Elastic Beanstalk restarts the app with it. The cloud startup
+script needs the pages open: turning the password gate back on stops
+`cloud-init-v1.sh` on every new server. Remove the
 `/validator` entries from the sitemap exclusions once the pages should be
 found by search engines.
 
@@ -192,6 +197,9 @@ No site deploy is needed.
    Until both are in place the pair does not verify, and the site keeps
    the last good feed.
 
+A release must keep everything in [What v1 depends on](#what-v1-depends-on),
+or new cloud servers that use the startup script install nothing.
+
 The pages show the new release within a minute. The download buttons pick
 each file by its name: `.dmg`, `-Setup-<version>-x64.exe`, `_amd64.deb`,
 `_arm64.deb` and `-x86_64.AppImage`. The big button is the visitor's
@@ -224,6 +232,101 @@ with a control character.
 | `severity`, `reason` (per release) | When the offered release is `urgent`, or has a severity the site doesn't know, the download page shows its reason above the download. Absent or `normal`: no notice. |
 | `min_supported`, `deadline`, `deadline_reason` | Shown in that notice: "If you run a release before `min_supported`, update by `deadline`", then `deadline_reason`. A `deadline` counts only in the form `YYYY-MM-DDTHH:MM:SSZ` and with a valid `min_supported`, as in the validator. |
 | `unsafe_versions: [{version, reason}]` | The releases page marks each listed release Unsafe, with its reason, and never as Latest. If the newest release is listed, no release is offered: the download page says why, and its files answer 404. |
+
+## The cloud startup script
+
+`public/validator/cloud-init-v1.sh` sets up a validator on a new cloud
+server, on its first start, as root:
+
+1. It stops at once on a system without `dpkg`, `apt-get` or `python3`:
+   it is for Ubuntu and Debian.
+2. It adds a 2 GB swap file if the server has none and the disk has 4 GB
+   free, which leaves at least 2 GB after the swap file. If it can't, it
+   goes on without one. On EC2's default 8 GiB disk, Ubuntu 24.04 had
+   4.7 GiB free at first boot and 2.3 GiB after setup (measured
+   2026-11-23).
+3. It reads `/validator/releases.json` and takes the newest release, the
+   one the pages offer. It stops if that release is listed as unsafe or
+   has no `.deb` of the package's own name for the machine.
+4. It downloads the `.deb` from `/validator/download/` into
+   `/var/cache/6529-validator-setup/` and checks its SHA-256 against the
+   release list before it installs it. `apt-get update` gets up to 6
+   tries, 20 seconds apart, because another apt can hold its lists in a
+   server's first minutes.
+5. It sets the validator up in data-center mode, with its page at
+   `127.0.0.1:6530`, and restarts it.
+
+Every download is HTTPS only and tries again 5 times: 10 seconds apart, or
+60 seconds when 6529.io answers 503 with `Retry-After: 60`, as the feed and
+the download route do. The output goes to `/var/log/cloud-init-output.log`.
+Each step that fails ends with a line that starts "6529 validator:".
+
+A marker file, `/root/.6529-validator-setup-done`, stops the script from
+running twice: with the marker there, it prints "6529 validator: already
+set up." and stops. To run it again, delete the marker and run
+`sudo bash /root/6529-setup.sh`, the copy the user data saved. Deleting the
+marker alone does nothing: cloud-init runs the user data only on a
+server's first start.
+
+Holders don't paste the script itself. They paste the user data from
+`lib/validator-page/cloudInit.ts`, which downloads the script, checks its
+SHA-256 and only then runs it. The hash and the script come from the same
+site. So the check catches a file that was changed or damaged on the way,
+but it doesn't protect against 6529.io itself being taken over.
+
+**Turning the password gate back on stops `cloud-init-v1.sh` on every new
+server.** The script itself and `releases.json` stay public, but the gate
+answers `/validator/download/` with its password page. The script sees a
+web page where the `.deb` should be and ends with "6529.io asks for a
+password before it hands out ... Nothing was installed."
+
+A published script never changes, because servers keep checking against
+the hash holders copied. To change it, add `cloud-init-v2.sh` with its own
+hash, path and user data, and keep v1.
+`__tests__/lib/validator-page/cloudInit.test.ts` pins v1's SHA-256.
+`scripts/file-contract-tests.cjs` runs that test whenever a script in
+`public/validator/` changes.
+
+### What v1 depends on
+
+v1 can't change, so these must keep working for as long as servers use it.
+A release that changes one of them breaks v1 on every new server.
+
+- The feed at `/validator/releases.json`: `releases[0]` is the newest
+  release, with `version` and `files[]` of `name` and `sha256` (64
+  lowercase hex), and `unsafe_versions[]` of `version`.
+- The download path `/validator/download/<version>/<file>`, which hands out
+  the newest release's files.
+- The package's file name, `6529-validator_<its version>_<arch>.deb`, with
+  `amd64` or `arm64`: `6529-validator_[0-9][0-9A-Za-z.~+-]*_<arch>\.deb`.
+- The package creates the account `validator6529` and the data directory
+  `/var/lib/6529-validator`.
+- This command line, run as root:
+  `runuser -u validator6529 -- validator init --data-dir /var/lib/6529-validator --mode datacenter --ui-bind 127.0.0.1:6530 --force`.
+  `--force` keeps the keys, signer state, password and added peers.
+- The service `6529-validator`, restarted with
+  `systemctl restart 6529-validator`.
+- The program at `/usr/bin/validator`, on root's `PATH`: `runuser` keeps
+  root's `PATH`.
+- The `.deb`'s dependencies, which `apt-get install` takes from the stock
+  Ubuntu 22.04 and 24.04 archives.
+- Redirects that stay HTTPS: the script follows none to `http://`.
+- The password gate's page, served as `text/html`. Only the error line
+  depends on it: with another type, the script stops at the hash check
+  instead, with its "doesn't match its SHA-256" line.
+
+### Known limits of v1
+
+- **Within a few minutes of a new release.** The feed is served
+  `public, max-age=300`, so a server can read a copy up to five minutes
+  old, while the download route hands out only the newest release's files.
+  A server set up in those minutes asks for the release before, gets 404
+  and installs nothing. `sudo bash /root/6529-setup.sh` a few minutes later
+  sets it up.
+- **IPv6-only servers.** The download route redirects to the releases
+  bucket's address, `<bucket>.s3.<region>.amazonaws.com`, which Amazon S3
+  serves over IPv4 only. A server with no IPv4 address can't download the
+  release.
 
 ## Text
 

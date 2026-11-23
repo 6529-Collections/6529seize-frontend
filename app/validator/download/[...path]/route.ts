@@ -13,6 +13,9 @@ function plain(status: number, body: string): Response {
       "Cache-Control": "no-store",
       "Content-Type": "text/plain; charset=utf-8",
       "X-Robots-Tag": "noindex, nofollow",
+      // As the feed's 503: the cloud startup script's curl waits this long
+      // before it tries again.
+      ...(status === 503 ? { "Retry-After": "60" } : {}),
     },
   });
 }
