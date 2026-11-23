@@ -10,7 +10,7 @@ const PRESENTATION_MANIFEST =
 const HEX_64 = /^[0-9a-f]{64}$/u;
 const decoder = new TextDecoder("utf-8", { fatal: true });
 
-export interface OnchainIndexedFile {
+interface OnchainIndexedFile {
   readonly path: string;
   readonly cid: string;
   /** Lower-case hex, without a prefix. */

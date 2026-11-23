@@ -13,7 +13,7 @@ import { VerifiedImage, type VerifiedImageCopy } from "./VerifiedImage";
 
 const locale = DEFAULT_LOCALE;
 
-export function verifiedImageCopy(): VerifiedImageCopy {
+function verifiedImageCopy(): VerifiedImageCopy {
   return {
     checking: t(locale, "museum.onchain.image.checking"),
     failed: t(locale, "museum.onchain.image.failed"),
