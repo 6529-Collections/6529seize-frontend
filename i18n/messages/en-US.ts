@@ -1477,15 +1477,18 @@ const FOLLOWERS_MESSAGES = objectMessages("followers", {
   "list.empty": "No followers yet.",
   "profile.linkAriaLabel": "View {handle}'s profile",
   "profile.avatarAlt": "{handle}'s profile image",
-  "profile.follow.followBack": "Follow back",
-  "profile.follow.mutualStatus": "You follow each other",
-  "profile.follow.unfollow": "Unfollow",
-  "profile.follow.unblock": "Unblock",
-  "profile.follow.unblockProfile": "Unblock {handle}",
-  "profile.follow.error.follow": "Couldn't follow this profile.",
-  "profile.follow.error.unfollow": "Couldn't unfollow this profile.",
-  "profile.follow.error.authenticate": "Couldn't verify your sign-in.",
-  "profile.follow.error.retry": "Please try again.",
+} as const);
+
+const PROFILE_FOLLOW_MESSAGES = objectMessages("profile.follow", {
+  followBack: "Follow back",
+  mutualStatus: "You follow each other",
+  unfollow: "Unfollow",
+  unblock: "Unblock",
+  unblockProfile: "Unblock {handle}",
+  "error.follow": "Couldn't follow this profile.",
+  "error.unfollow": "Couldn't unfollow this profile.",
+  "error.authenticate": "Couldn't verify your sign-in.",
+  "error.retry": "Please try again.",
 } as const);
 
 const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
@@ -5620,6 +5623,7 @@ export const EN_US_ROOT_MESSAGES = {
   ...USER_PROFILE_HEADER_MESSAGES,
   ...USER_CIC_TYPE_MESSAGES,
   ...FOLLOWERS_MESSAGES,
+  ...PROFILE_FOLLOW_MESSAGES,
   ...WAVES_SIDEBAR_MESSAGES,
   ...wavesRightPanelMessages,
   ...QUICK_DM_MESSAGES,
