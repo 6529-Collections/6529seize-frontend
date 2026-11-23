@@ -1,0 +1,737 @@
+{
+  "signer": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+  "vectors": [
+    {
+      "name": "governance.registerCanonicalization alone on the test registry",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0xe2fb0b2000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000b524643383738355f4a4353000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002401551220abababababababababababababababababababababababababababababababab00000000000000000000000000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": true,
+        "risk": "normal",
+        "calls": [
+          "governance.registerCanonicalization"
+        ]
+      }
+    },
+    {
+      "name": "governance.registerCanonicalization alone on the Museum registry",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0xee91c45A1893fbb45ce8EeA170eF05d8d85bb850\",\"value\":\"0\",\"data\":\"0xe2fb0b2000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000b524643383738355f4a4353000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002401551220abababababababababababababababababababababababababababababababab00000000000000000000000000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": true,
+        "risk": "normal",
+        "calls": [
+          "governance.registerCanonicalization"
+        ]
+      }
+    },
+    {
+      "name": "governance.registerRecordType alone on the test registry",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x4725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": true,
+        "risk": "normal",
+        "calls": [
+          "governance.registerRecordType"
+        ]
+      }
+    },
+    {
+      "name": "governance.registerRecordType alone on the Museum registry",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0xee91c45A1893fbb45ce8EeA170eF05d8d85bb850\",\"value\":\"0\",\"data\":\"0x4725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": true,
+        "risk": "normal",
+        "calls": [
+          "governance.registerRecordType"
+        ]
+      }
+    },
+    {
+      "name": "governance.registerSchema alone on the test registry",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0xdad4784800000000000000000000000000000000000000000000000000000000000000c00000000000000000000000000000000000000000000000000000000000000002111111111111111111111111111111111111111111111111111111111111111122222222222222222222222222222222222222222222222222222222222222220000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000016000000000000000000000000000000000000000000000000000000000000000125055424c49435f444f43554d454e545f56310000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002401551220abababababababababababababababababababababababababababababababab000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": true,
+        "risk": "normal",
+        "calls": [
+          "governance.registerSchema"
+        ]
+      }
+    },
+    {
+      "name": "governance.registerSchema alone on the Museum registry",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0xee91c45A1893fbb45ce8EeA170eF05d8d85bb850\",\"value\":\"0\",\"data\":\"0xdad4784800000000000000000000000000000000000000000000000000000000000000c00000000000000000000000000000000000000000000000000000000000000002111111111111111111111111111111111111111111111111111111111111111122222222222222222222222222222222222222222222222222222222222222220000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000016000000000000000000000000000000000000000000000000000000000000000125055424c49435f444f43554d454e545f56310000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002401551220abababababababababababababababababababababababababababababababab000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": true,
+        "risk": "normal",
+        "calls": [
+          "governance.registerSchema"
+        ]
+      }
+    },
+    {
+      "name": "governance.setPublisher alone on the test registry",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x618bb07900000000000000000000000055555555555555555555555555555555555555550000000000000000000000000000000000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": true,
+        "risk": "normal",
+        "calls": [
+          "governance.setPublisher"
+        ]
+      }
+    },
+    {
+      "name": "governance.setPublisher alone on the Museum registry",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0xee91c45A1893fbb45ce8EeA170eF05d8d85bb850\",\"value\":\"0\",\"data\":\"0x618bb07900000000000000000000000055555555555555555555555555555555555555550000000000000000000000000000000000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": true,
+        "risk": "normal",
+        "calls": [
+          "governance.setPublisher"
+        ]
+      }
+    },
+    {
+      "name": "governance.deleteVersion alone on the test registry",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x9c43494fa1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a10000000000000000000000000000000000000000000000000000000000000002d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": true,
+        "risk": "critical",
+        "calls": [
+          "governance.deleteVersion"
+        ]
+      }
+    },
+    {
+      "name": "governance.deleteVersion alone on the Museum registry",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0xee91c45A1893fbb45ce8EeA170eF05d8d85bb850\",\"value\":\"0\",\"data\":\"0x9c43494fa1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a10000000000000000000000000000000000000000000000000000000000000002d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": true,
+        "risk": "critical",
+        "calls": [
+          "governance.deleteVersion"
+        ]
+      }
+    },
+    {
+      "name": "governance.deleteVersions alone on the test registry",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x0e9e6c6ea1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000003d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": true,
+        "risk": "critical",
+        "calls": [
+          "governance.deleteVersions"
+        ]
+      }
+    },
+    {
+      "name": "governance.deleteVersions alone on the Museum registry",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0xee91c45A1893fbb45ce8EeA170eF05d8d85bb850\",\"value\":\"0\",\"data\":\"0x0e9e6c6ea1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000003d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": true,
+        "risk": "critical",
+        "calls": [
+          "governance.deleteVersions"
+        ]
+      }
+    },
+    {
+      "name": "governance.deleteSubject alone on the test registry",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0xcb1efbf1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": true,
+        "risk": "critical",
+        "calls": [
+          "governance.deleteSubject"
+        ]
+      }
+    },
+    {
+      "name": "governance.deleteSubject alone on the Museum registry",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0xee91c45A1893fbb45ce8EeA170eF05d8d85bb850\",\"value\":\"0\",\"data\":\"0xcb1efbf1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1d1\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": true,
+        "risk": "critical",
+        "calls": [
+          "governance.deleteSubject"
+        ]
+      }
+    },
+    {
+      "name": "governance.freeze alone on the test registry",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x62a5af3b\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": true,
+        "risk": "critical",
+        "calls": [
+          "governance.freeze"
+        ]
+      }
+    },
+    {
+      "name": "governance.freeze alone on the Museum registry",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0xee91c45A1893fbb45ce8EeA170eF05d8d85bb850\",\"value\":\"0\",\"data\":\"0x62a5af3b\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": true,
+        "risk": "critical",
+        "calls": [
+          "governance.freeze"
+        ]
+      }
+    },
+    {
+      "name": "governance.declareSuccessor alone on the test registry",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x731fa2080000000000000000000000004444444444444444444444444444444444444444\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": true,
+        "risk": "critical",
+        "calls": [
+          "governance.declareSuccessor"
+        ]
+      }
+    },
+    {
+      "name": "governance.declareSuccessor alone on the Museum registry",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0xee91c45A1893fbb45ce8EeA170eF05d8d85bb850\",\"value\":\"0\",\"data\":\"0x731fa2080000000000000000000000004444444444444444444444444444444444444444\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": true,
+        "risk": "critical",
+        "calls": [
+          "governance.declareSuccessor"
+        ]
+      }
+    },
+    {
+      "name": "governance.transferOwnership alone on the test registry",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0xf2fde38b0000000000000000000000004444444444444444444444444444444444444444\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": true,
+        "risk": "critical",
+        "calls": [
+          "governance.transferOwnership"
+        ]
+      }
+    },
+    {
+      "name": "governance.transferOwnership alone on the Museum registry",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0xee91c45A1893fbb45ce8EeA170eF05d8d85bb850\",\"value\":\"0\",\"data\":\"0xf2fde38b0000000000000000000000004444444444444444444444444444444444444444\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": true,
+        "risk": "critical",
+        "calls": [
+          "governance.transferOwnership"
+        ]
+      }
+    },
+    {
+      "name": "governance.acceptOwnership alone on the test registry",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x79ba5097\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": true,
+        "risk": "critical",
+        "calls": [
+          "governance.acceptOwnership"
+        ]
+      }
+    },
+    {
+      "name": "governance.acceptOwnership alone on the Museum registry",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0xee91c45A1893fbb45ce8EeA170eF05d8d85bb850\",\"value\":\"0\",\"data\":\"0x79ba5097\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": true,
+        "risk": "critical",
+        "calls": [
+          "governance.acceptOwnership"
+        ]
+      }
+    },
+    {
+      "name": "a lower-case registry address is the same registry",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565d29018134517309668946ffc912\",\"value\":\"0\",\"data\":\"0x4725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": true,
+        "risk": "normal",
+        "calls": [
+          "governance.registerRecordType"
+        ]
+      }
+    },
+    {
+      "name": "granting a publisher key is high impact",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x618bb07900000000000000000000000055555555555555555555555555555555555555550000000000000000000000000000000000000000000000000000000000000001\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": true,
+        "risk": "high",
+        "calls": [
+          "governance.setPublisher"
+        ]
+      }
+    },
+    {
+      "name": "a batch of registrations on both registries",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x9641d764fc13c8B624c04430C7356C1C7C8102e2\",\"value\":\"0\",\"data\":\"0x8d80ff0a000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000003cb000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e4e2fb0b2000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000b524643383738355f4a4353000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002401551220abababababababababababababababababababababababababababababababab00000000000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e54000000000000000000000000000000000000ee91c45a1893fbb45ce8eea170ef05d8d85bb85000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000184dad4784800000000000000000000000000000000000000000000000000000000000000c00000000000000000000000000000000000000000000000000000000000000002111111111111111111111111111111111111111111111111111111111111111122222222222222222222222222222222222222222222222222222222222222220000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000016000000000000000000000000000000000000000000000000000000000000000125055424c49435f444f43554d454e545f56310000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002401551220abababababababababababababababababababababababababababababababab000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\",\"operation\":1,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": true,
+        "risk": "normal",
+        "calls": [
+          "governance.registerCanonicalization",
+          "governance.registerRecordType",
+          "governance.registerSchema"
+        ]
+      }
+    },
+    {
+      "name": "a batch granting a publisher key is high impact",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x9641d764fc13c8B624c04430C7356C1C7C8102e2\",\"value\":\"0\",\"data\":\"0x8d80ff0a00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000132000e289576c7565d29018134517309668946ffc91200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044618bb07900000000000000000000000055555555555555555555555555555555555555550000000000000000000000000000000000000000000000000000000000000001000e289576c7565d29018134517309668946ffc91200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044618bb079000000000000000000000000555555555555555555555555555555555555555500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\",\"operation\":1,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": true,
+        "risk": "high",
+        "calls": [
+          "governance.setPublisher",
+          "governance.setPublisher"
+        ]
+      }
+    },
+    {
+      "name": "a batch of 16 calls",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x9641d764fc13c8B624c04430C7356C1C7C8102e2\",\"value\":\"0\",\"data\":\"0x8d80ff0a00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000b90000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000006545950455f300000000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000006545950455f310000000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000006545950455f320000000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000006545950455f330000000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000006545950455f340000000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000006545950455f350000000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000006545950455f360000000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000006545950455f370000000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000006545950455f380000000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000006545950455f390000000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000007545950455f313000000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000007545950455f313100000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000007545950455f313200000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000007545950455f313300000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000007545950455f313400000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000007545950455f31350000000000000000000000000000000000000000000000000000000000000000000000000000000000\",\"operation\":1,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": true,
+        "risk": "normal",
+        "calls": [
+          "governance.registerRecordType",
+          "governance.registerRecordType",
+          "governance.registerRecordType",
+          "governance.registerRecordType",
+          "governance.registerRecordType",
+          "governance.registerRecordType",
+          "governance.registerRecordType",
+          "governance.registerRecordType",
+          "governance.registerRecordType",
+          "governance.registerRecordType",
+          "governance.registerRecordType",
+          "governance.registerRecordType",
+          "governance.registerRecordType",
+          "governance.registerRecordType",
+          "governance.registerRecordType",
+          "governance.registerRecordType"
+        ]
+      }
+    },
+    {
+      "name": "a queued nonce up to 2^53-1",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x4725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"9007199254740991\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": true,
+        "risk": "normal",
+        "calls": [
+          "governance.registerRecordType"
+        ]
+      }
+    },
+    {
+      "name": "refuses another Safe",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x4444444444444444444444444444444444444444\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x4725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "unknown-typed-data"
+      }
+    },
+    {
+      "name": "refuses the Safe written in lower case (domain is exact)",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87bd1be4fbdef9251c318b4870542217aa2adb68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x4725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "unknown-typed-data"
+      }
+    },
+    {
+      "name": "refuses an unpinned chain",
+      "chainId": 1,
+      "payload": "{\"domain\":{\"chainId\":1,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x4725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "unknown-typed-data"
+      }
+    },
+    {
+      "name": "refuses a domain with a name",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"name\":\"Safe\",\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x4725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "unknown-typed-data"
+      }
+    },
+    {
+      "name": "refuses another SafeTx struct",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x4725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint64\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "unknown-typed-data"
+      }
+    },
+    {
+      "name": "refuses a call to an unpinned registry",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x4444444444444444444444444444444444444444\",\"value\":\"0\",\"data\":\"0x4725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses operation 0 to MultiSendCallOnly",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x9641d764fc13c8B624c04430C7356C1C7C8102e2\",\"value\":\"0\",\"data\":\"0x8d80ff0a000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000001f2000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e4e2fb0b2000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000b524643383738355f4a4353000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002401551220abababababababababababababababababababababababababababababababab000000000000000000000000000000000000000000000000000000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses a delegatecall to the registry",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x4725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000\",\"operation\":1,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses a delegatecall to another contract",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x4444444444444444444444444444444444444444\",\"value\":\"0\",\"data\":\"0x8d80ff0a000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000001f2000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e4e2fb0b2000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000b524643383738355f4a4353000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002401551220abababababababababababababababababababababababababababababababab000000000000000000000000000000000000000000000000000000000000000000000000000000000000\",\"operation\":1,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses an inner call to another address",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x9641d764fc13c8B624c04430C7356C1C7C8102e2\",\"value\":\"0\",\"data\":\"0x8d80ff0a000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000001f2000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000004444444444444444444444444444444444444444000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e4e2fb0b2000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000b524643383738355f4a4353000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002401551220abababababababababababababababababababababababababababababababab000000000000000000000000000000000000000000000000000000000000000000000000000000000000\",\"operation\":1,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses an inner call with value",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x9641d764fc13c8B624c04430C7356C1C7C8102e2\",\"value\":\"0\",\"data\":\"0x8d80ff0a000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000001f2000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000e4e2fb0b2000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000b524643383738355f4a4353000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002401551220abababababababababababababababababababababababababababababababab000000000000000000000000000000000000000000000000000000000000000000000000000000000000\",\"operation\":1,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses a nested delegatecall",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x9641d764fc13c8B624c04430C7356C1C7C8102e2\",\"value\":\"0\",\"data\":\"0x8d80ff0a00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000352000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000019641d764fc13c8b624c04430c7356c1c7c8102e2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002448d80ff0a000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000001f2000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e4e2fb0b2000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000b524643383738355f4a4353000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002401551220abababababababababababababababababababababababababababababababab0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\",\"operation\":1,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses an inner delegatecall to the registry",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x9641d764fc13c8B624c04430C7356C1C7C8102e2\",\"value\":\"0\",\"data\":\"0x8d80ff0a000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000001f2000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000010e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e4e2fb0b2000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000b524643383738355f4a4353000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002401551220abababababababababababababababababababababababababababababababab000000000000000000000000000000000000000000000000000000000000000000000000000000000000\",\"operation\":1,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses a high-impact call inside a batch",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x9641d764fc13c8B624c04430C7356C1C7C8102e2\",\"value\":\"0\",\"data\":\"0x8d80ff0a00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000112000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000000e289576c7565d29018134517309668946ffc9120000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000462a5af3b0000000000000000000000000000\",\"operation\":1,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses an ownership transfer inside a batch",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x9641d764fc13c8B624c04430C7356C1C7C8102e2\",\"value\":\"0\",\"data\":\"0x8d80ff0a00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000132000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000000e289576c7565d29018134517309668946ffc91200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000024f2fde38b00000000000000000000000044444444444444444444444444444444444444440000000000000000000000000000\",\"operation\":1,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses trailing bytes in the packed data",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x9641d764fc13c8B624c04430C7356C1C7C8102e2\",\"value\":\"0\",\"data\":\"0x8d80ff0a000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000001f3000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e4e2fb0b2000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000b524643383738355f4a4353000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002401551220abababababababababababababababababababababababababababababababab000000000000000000000000000000000000000000000000000000000000000000000000000000000000\",\"operation\":1,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses a packed call longer than the data",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x9641d764fc13c8B624c04430C7356C1C7C8102e2\",\"value\":\"0\",\"data\":\"0x8d80ff0a0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000010f000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000000e289576c7565d29018134517309668946ffc91200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000\",\"operation\":1,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses non-canonical multiSend call data",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x9641d764fc13c8B624c04430C7356C1C7C8102e2\",\"value\":\"0\",\"data\":\"0x8d80ff0a000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000001f2000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e4e2fb0b2000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000b524643383738355f4a4353000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002401551220abababababababababababababababababababababababababababababababab0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\",\"operation\":1,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses a batch of one call",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x9641d764fc13c8B624c04430C7356C1C7C8102e2\",\"value\":\"0\",\"data\":\"0x8d80ff0a000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000b9000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e54000000000000000000000000000000000000000000000000\",\"operation\":1,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses a batch of 17 calls",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x9641d764fc13c8B624c04430C7356C1C7C8102e2\",\"value\":\"0\",\"data\":\"0x8d80ff0a00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000c49000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000006545950455f300000000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000006545950455f310000000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000006545950455f320000000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000006545950455f330000000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000006545950455f340000000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000006545950455f350000000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000006545950455f360000000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000006545950455f370000000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000006545950455f380000000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000006545950455f390000000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000007545950455f313000000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000007545950455f313100000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000007545950455f313200000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000007545950455f313300000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000007545950455f313400000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000007545950455f313500000000000000000000000000000000000000000000000000000e289576c7565d29018134517309668946ffc912000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000644725e13000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000007545950455f3136000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\",\"operation\":1,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses an unknown operation",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x4725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000\",\"operation\":2,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses value",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"1\",\"data\":\"0x4725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses safeTxGas",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x4725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"1\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses baseGas",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x4725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"1\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses gasPrice",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x4725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"1\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses a gas token",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x4725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x4444444444444444444444444444444444444444\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses a refund receiver",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x4725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x4444444444444444444444444444444444444444\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses a nonce above 2^53-1",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x4725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"9007199254740992\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses a nonce with a leading zero",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x4725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"07\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses a nonce written as a number",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x4725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":7},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses value written as a number",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":0,\"data\":\"0x4725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses operation written as a string",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x4725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e540000000000000000000000000000000000\",\"operation\":\"0\",\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses a publish call (publishing is not governance)",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0xe672920c00000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000004\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses trailing bytes in a governance call",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x4725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000f5055424c49435f444f43554d454e54000000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses empty call data",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses a schema with its document on chain",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0xdad4784800000000000000000000000000000000000000000000000000000000000000c0000000000000000000000000000000000000000000000000000000000000000211111111111111111111111111111111111111111111111111111111111111112222222222222222222222222222222222222222222222222222222222222222000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001600000000000000000000000000000000000000000000000000000000000000006444f435f56310000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002401551220abababababababababababababababababababababababababababababababab0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010100000000000000000000000000000000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses a schema with an unknown hash algorithm",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0xdad4784800000000000000000000000000000000000000000000000000000000000000c0000000000000000000000000000000000000000000000000000000000000000311111111111111111111111111111111111111111111111111111111111111112222222222222222222222222222222222222222222222222222222222222222000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001600000000000000000000000000000000000000000000000000000000000000006444f435f56310000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002401551220abababababababababababababababababababababababababababababababab000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses a literal that is not printable ASCII",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x4725e1300000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000654595045c3a90000000000000000000000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses a zero publisher",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x618bb07900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses a zero successor",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x731fa2080000000000000000000000000000000000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses a zero new owner",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0xf2fde38b0000000000000000000000000000000000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    },
+    {
+      "name": "refuses dirty padding in a governance call",
+      "chainId": 11155111,
+      "payload": "{\"domain\":{\"chainId\":11155111,\"verifyingContract\":\"0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68\"},\"message\":{\"to\":\"0x0e289576c7565D29018134517309668946Ffc912\",\"value\":\"0\",\"data\":\"0x618bb079ff000000000000000000000055555555555555555555555555555555555555550000000000000000000000000000000000000000000000000000000000000000\",\"operation\":0,\"safeTxGas\":\"0\",\"baseGas\":\"0\",\"gasPrice\":\"0\",\"gasToken\":\"0x0000000000000000000000000000000000000000\",\"refundReceiver\":\"0x0000000000000000000000000000000000000000\",\"nonce\":\"7\"},\"primaryType\":\"SafeTx\",\"types\":{\"EIP712Domain\":[{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"verifyingContract\",\"type\":\"address\"}],\"SafeTx\":[{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"},{\"name\":\"data\",\"type\":\"bytes\"},{\"name\":\"operation\",\"type\":\"uint8\"},{\"name\":\"safeTxGas\",\"type\":\"uint256\"},{\"name\":\"baseGas\",\"type\":\"uint256\"},{\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"name\":\"gasToken\",\"type\":\"address\"},{\"name\":\"refundReceiver\",\"type\":\"address\"},{\"name\":\"nonce\",\"type\":\"uint256\"}]}}",
+      "expect": {
+        "ok": false,
+        "problem": "safe-tx-rule"
+      }
+    }
+  ]
+}

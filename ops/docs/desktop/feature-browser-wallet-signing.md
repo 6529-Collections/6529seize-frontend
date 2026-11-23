@@ -84,6 +84,28 @@ offered; start again from 6529 Desktop. After you send, the page shows the
 transaction with a link to Etherscan and returns to 6529 Desktop, which checks
 the transaction on chain before it reports success.
 
+## Safe Transactions for 6529 Provenance
+
+A signer of the 6529 Provenance test Safe (Sepolia) can approve governance
+actions on the two registries that Safe owns: registering canonicalizations,
+record types and schemas (by hash and CID), granting or revoking publisher
+keys, deleting record versions or subjects, freezing a registry, declaring a
+successor, and transferring or accepting ownership. Several registrations can
+go in one batch of 2 to 16 actions; deleting, freezing, declaring a successor
+and ownership changes are only signed on their own.
+
+The browser page shows the Safe with its threshold, the network, the Safe
+transaction number (nonce, marked as queued when later than the Safe's next
+one), and every action in order with its registry and decoded values. It checks
+on chain that the Safe owns each registry (for accepting ownership: that the
+Safe is the pending owner), that your wallet is one of the Safe's signers and
+that the transaction number is not used; if any check fails or cannot run,
+nothing is offered to sign (use **Check again**). High-impact actions show a
+warning and an **I checked this action and want to approve it** box. Signing
+costs no gas: the action happens when enough signers approve and someone
+executes it. A 6529 Desktop build that does not sign Safe transactions shows
+"Update 6529 Desktop, or continue in your browser".
+
 ## User Journey
 
 1. In 6529 Desktop, start an action that needs a signature (for example, vote

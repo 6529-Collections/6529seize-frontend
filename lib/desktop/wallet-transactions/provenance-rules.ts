@@ -43,8 +43,11 @@ const NOT_ZERO: ArgRule = { notZero: true };
 const CID: ArgRule = { lenMax: MAX_CID_BYTES };
 const LABEL: ArgRule = { readableText: true, lenMax: MAX_LABEL_BYTES };
 
-/** `HashRef(uint16 algorithm, bytes32 digest, bytes32 canonicalizationId)`. */
-const hashRef = (name: string): RuleArg => ({
+/**
+ * `HashRef(uint16 algorithm, bytes32 digest, bytes32 canonicalizationId)`
+ * as a tuple argument (also used by the Safe governance rules).
+ */
+export const hashRef = (name: string): RuleArg => ({
   name,
   type: "(uint16,bytes32,bytes32)",
   rule: ANY,
