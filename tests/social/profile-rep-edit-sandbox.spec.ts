@@ -626,9 +626,18 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expect(
       grant.getByRole("button", { name: "mus", exact: true })
     ).toHaveCount(0);
-    await chooseCategory(
-      grant.getByRole("button", { name: "Music", exact: true })
-    );
+    const musicSuggestion = grant.getByRole("button", {
+      name: "Music",
+      exact: true,
+    });
+    if (isMobile) {
+      await musicSuggestion.tap();
+    } else {
+      await musicSuggestion.hover();
+      await page.mouse.down();
+      await expect(search).toBeFocused();
+      await page.mouse.up();
+    }
     await expect(search).toBeEditable();
     await expect(amount).toHaveValue("35");
     await expectFocusedAmountWithoutSelection(amount);
