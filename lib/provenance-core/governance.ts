@@ -1,4 +1,4 @@
-// Copied from 6529-Collections/6529-provenance-app src/governance.ts at commit 8496bfbb6347c265ec74c7e361612d97ccdaf731.
+// Copied from 6529-Collections/6529-provenance-app src/governance.ts at commit 512b6629470e06981905f3a94cff3f381d181478.
 // Do not edit here: change the package and run ops/scripts/sync-provenance-core.mjs.
 // Replaced by @6529-collections/provenance-core from npm once that is published.
 import {
@@ -32,11 +32,13 @@ import {
  * Governance: the calls the owner Safe signs. Publishing (openRelease, publish, sealRelease) is
  * not governance; a publisher key sends it as ordinary transactions (see publish.ts).
  *
- * The rules match the SafeTx schema 6529 Desktop's wallet forwarding enforces: the deletes,
- * freeze, declareSuccessor, transferOwnership and acceptOwnership are single-call SafeTxs
- * (operation 0 to the registry); other calls go 2 to 16 at a time through MultiSendCallOnly
- * (operation 1); value, safeTxGas, baseGas and gasPrice are 0; gasToken and refundReceiver are the
- * zero address; the nonce fits in 2^53 - 1; the typed data is at most 16 Ki characters of JSON.
+ * The rules match the SafeTx schema 6529 Desktop's wallet forwarding enforces:
+ * - the deletes, freeze, declareSuccessor, transferOwnership and acceptOwnership are single-call
+ *   SafeTxs, operation 0 to the registry;
+ * - other calls go 2 to 16 at a time through MultiSendCallOnly, operation 1;
+ * - value, safeTxGas, baseGas and gasPrice are 0, and gasToken and refundReceiver are the zero
+ *   address;
+ * - the nonce fits in 2^53 - 1, and the typed data is at most 16 Ki characters of JSON.
  */
 
 export type GovernanceRisk = "high" | "normal";

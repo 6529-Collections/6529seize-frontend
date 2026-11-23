@@ -1,6 +1,7 @@
 import { sha256, type Hex } from "viem";
 import { cidFromText, cidToText, sha256FromRawCid } from "./cid";
 import type { CidFetcher } from "./ipfs";
+import { canonicalizeJsonBytes } from "./jcs";
 import type { RegistryRelease } from "./registry";
 
 /** The file index a release names by `rootCid`. */
@@ -24,10 +25,6 @@ export interface OnchainFileIndexState {
   readonly cidText: string | null;
   readonly servedBy: string | null;
   readonly fileCount: number;
-  /** Index entries whose SHA-256 and size equal the verified catalog's. */
-  readonly catalogMatches: number;
-  /** Index paths the catalog lists differently or not at all. */
-  readonly catalogMismatches: readonly string[];
   /** Raw-CID entries whose CID names a different SHA-256 than the entry. */
   readonly cidMismatches: readonly string[];
 }
@@ -72,8 +69,6 @@ const EMPTY_INDEX: OnchainFileIndexState = {
   cidText: null,
   servedBy: null,
   fileCount: 0,
-  catalogMatches: 0,
-  catalogMismatches: [],
   cidMismatches: [],
 };
 
@@ -103,28 +98,6 @@ function bareSha256(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const hex = value.replace(/^sha256:/u, "").toLowerCase();
   return HEX_64.test(hex) ? hex : null;
-}
-
-/** Path → SHA-256 and size for every file the verified catalog lists. */
-function catalogFiles(
-  catalog: unknown
-): Map<string, { sha256: string; bytes: number | null }> {
-  const files = new Map<string, { sha256: string; bytes: number | null }>();
-  if (!isRecord(catalog)) return files;
-  for (const key of ["assembly_documents", "media_assets"]) {
-    const list = catalog[key];
-    if (!Array.isArray(list)) continue;
-    for (const entry of list) {
-      if (!isRecord(entry) || typeof entry["path"] !== "string") continue;
-      const digest = bareSha256(entry["sha256"]);
-      if (digest === null) continue;
-      files.set(entry["path"], {
-        sha256: digest,
-        bytes: positiveInteger(entry["file_size"]),
-      });
-    }
-  }
-  return files;
 }
 
 function parseIndexFiles(root: unknown): OnchainIndexedFile[] | null {
@@ -159,55 +132,52 @@ function indexRelease(
 
 interface VerifiedIndex {
   readonly state: OnchainFileIndexState;
-  /** Entries that the catalog lists with the same SHA-256 and size. */
+  /** Entries whose raw CID, when the CID is raw, names their SHA-256. */
   readonly files: ReadonlyMap<string, OnchainIndexedFile>;
 }
 
-/**
- * Keeps index entries whose raw CID (when the CID is raw) names their
- * SHA-256 and that the catalog lists with the same SHA-256 and size.
- */
-function crossCheck(
-  entries: readonly OnchainIndexedFile[],
-  listed: ReadonlyMap<string, { sha256: string; bytes: number | null }>
-): {
+/** Keeps index entries whose raw CID, when the CID is raw, names their SHA-256. */
+function checkEntries(entries: readonly OnchainIndexedFile[]): {
   files: Map<string, OnchainIndexedFile>;
-  catalogMismatches: string[];
   cidMismatches: string[];
 } {
   const files = new Map<string, OnchainIndexedFile>();
-  const catalogMismatches: string[] = [];
   const cidMismatches: string[] = [];
   for (const entry of entries) {
     const cid = cidFromText(entry.cid);
     const rawDigest = cid === null ? null : sha256FromRawCid(cid);
-    const catalogEntry = listed.get(entry.path);
     if (
       rawDigest !== null &&
       rawDigest.slice(2).toLowerCase() !== entry.sha256
     ) {
       cidMismatches.push(entry.path);
-    } else if (
-      catalogEntry?.sha256 !== entry.sha256 ||
-      (catalogEntry.bytes !== null && catalogEntry.bytes !== entry.bytes)
-    ) {
-      catalogMismatches.push(entry.path);
     } else {
       files.set(entry.path, entry);
     }
   }
-  return { files, catalogMismatches, cidMismatches };
+  return { files, cidMismatches };
+}
+
+function isCanonical(bytes: Uint8Array, root: unknown): boolean {
+  try {
+    const canonical = canonicalizeJsonBytes(root);
+    return (
+      canonical.length === bytes.length &&
+      canonical.every((byte, index) => byte === bytes[index])
+    );
+  } catch {
+    return false;
+  }
 }
 
 /**
- * Fetches the file index by its raw CID, accepts it only if its SHA-256 is
- * the digest the CID names, and keeps only entries that the chain-verified
- * catalog lists with the same SHA-256 and size.
+ * Fetches the file index by the raw CID the release names on-chain and
+ * accepts it only if its SHA-256 is the digest the CID names and its bytes
+ * are the RFC 8785 form of the index. Entries whose raw CID names another
+ * SHA-256 are dropped.
  */
 async function loadFileIndex(
   releases: readonly RegistryRelease[],
-  catalog: unknown,
-  catalogId: string | null,
   fetchCid: CidFetcher
 ): Promise<VerifiedIndex> {
   const release = indexRelease(releases);
@@ -236,7 +206,7 @@ async function loadFileIndex(
     entries === null ||
     !isRecord(root) ||
     root["kind"] !== FILE_INDEX_KIND ||
-    (catalogId !== null && root["catalog"] !== catalogId)
+    !isCanonical(fetched.bytes, root)
   ) {
     return {
       state: {
@@ -248,18 +218,13 @@ async function loadFileIndex(
       files: new Map(),
     };
   }
-  const { files, catalogMismatches, cidMismatches } = crossCheck(
-    entries,
-    catalogFiles(catalog)
-  );
+  const { files, cidMismatches } = checkEntries(entries);
   return {
     state: {
       ...base,
       state: "verified",
       servedBy: fetched.host,
       fileCount: entries.length,
-      catalogMatches: files.size,
-      catalogMismatches,
       cidMismatches,
     },
     files,
@@ -280,8 +245,8 @@ function derivativesOf(
     const file = path === null ? undefined : files.get(path);
     const width = positiveInteger(derivative["width"]);
     const height = positiveInteger(derivative["height"]);
-    // The manifest's own hash must name the same bytes the catalog and the
-    // index do; otherwise the derivative is left out.
+    // The manifest's own hash must name the same bytes the index does;
+    // otherwise the derivative is left out.
     if (
       file === undefined ||
       width === null ||
@@ -372,11 +337,9 @@ async function loadManifest(
  */
 export async function loadOnchainMedia(
   releases: readonly RegistryRelease[],
-  catalog: unknown,
-  catalogId: string | null,
   fetchCid: CidFetcher
 ): Promise<OnchainMediaState> {
-  const index = await loadFileIndex(releases, catalog, catalogId, fetchCid);
+  const index = await loadFileIndex(releases, fetchCid);
   const manifests: OnchainManifestState[] = [];
   const images: Record<string, OnchainWorkImage> = {};
   for (const file of index.files.values()) {

@@ -8,11 +8,9 @@ import type {
   OnchainMuseumRecord,
   OnchainRecordState,
 } from "@/lib/museum/onchain/museum";
-import {
-  onchainMuseumRecordHref,
-  workImage,
-  type OnchainMuseumView,
-} from "@/lib/museum/onchain/presentation";
+import { onchainMuseumRecordHref } from "@/lib/museum/onchain/fields";
+import type { OnchainMuseumView } from "@/lib/museum/onchain/presentation";
+import { workImage } from "@/lib/museum/onchain/works";
 import type { FilterableGroupsCopy, FilterableItem } from "./FilterableGroups";
 import { registryValueLabel } from "./labels";
 
@@ -27,6 +25,7 @@ export const LIST_LINK = `tw-break-words tw-text-primary-300 tw-no-underline hov
 
 const STATE_KEYS: Readonly<Record<OnchainRecordState, MessageKey>> = {
   verified: "museum.onchain.state.verified",
+  nonconforming: "museum.onchain.state.nonconforming",
   mismatch: "museum.onchain.state.mismatch",
   unavailable: "museum.onchain.state.unavailable",
   unsupported: "museum.onchain.state.unsupported",
@@ -35,6 +34,7 @@ const STATE_KEYS: Readonly<Record<OnchainRecordState, MessageKey>> = {
 
 const STATE_TONES: Readonly<Record<OnchainRecordState, string>> = {
   verified: "tw-border-emerald-400/40 tw-bg-emerald-400/10 tw-text-emerald-200",
+  nonconforming: "tw-border-red-400/50 tw-bg-red-400/10 tw-text-red-200",
   mismatch: "tw-border-red-400/50 tw-bg-red-400/10 tw-text-red-200",
   unavailable: "tw-border-yellow-400/40 tw-bg-yellow-400/10 tw-text-yellow-100",
   unsupported: "tw-border-yellow-400/40 tw-bg-yellow-400/10 tw-text-yellow-100",
@@ -49,15 +49,10 @@ export function stateLabel(state: OnchainRecordState): string {
   return t(locale, STATE_KEYS[state]);
 }
 
-export function statusLabel(value: string): string {
-  return registryValueLabel("status", value);
-}
-
 /** The literal, with its plain name when the messages know it. */
 export function canonicalizationLabel(literal: string | null): string {
   if (literal === null) return t(locale, "museum.onchain.unknown");
-  const name = registryValueLabel("canonical", literal);
-  return name.includes(literal) ? literal : `${name} · ${literal}`;
+  return registryValueLabel("canonical", literal);
 }
 
 export function formatUtcDateTime(seconds: number): string {
@@ -122,7 +117,10 @@ export function filterableItem(
   };
 }
 
-export function OnchainFrame({ children }: Readonly<{ children: ReactNode }>) {
+export function OnchainFrame({
+  children,
+  fixture,
+}: Readonly<{ children: ReactNode; fixture: boolean }>) {
   return (
     <div className="tailwind-scope tw-min-h-screen tw-min-w-0 tw-overflow-x-clip tw-bg-black tw-text-iron-100">
       <div
@@ -130,7 +128,10 @@ export function OnchainFrame({ children }: Readonly<{ children: ReactNode }>) {
         className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-yellow-400/30 tw-bg-yellow-400/10 tw-px-4 tw-py-2 tw-text-[0.8125rem] tw-leading-5 tw-text-yellow-100 sm:tw-px-6 lg:tw-px-8"
       >
         <p className="tw-m-0 tw-mx-auto tw-w-full tw-max-w-[1324px]">
-          {t(locale, "museum.onchain.notice")}
+          {t(
+            locale,
+            fixture ? "museum.onchain.noticeFixture" : "museum.onchain.notice"
+          )}
         </p>
       </div>
       <div className="tw-mx-auto tw-w-full tw-min-w-0 tw-max-w-[1324px] tw-px-4 tw-py-6 sm:tw-px-6 sm:tw-py-10 lg:tw-px-8 lg:tw-py-14">
@@ -196,18 +197,23 @@ export function StateBadge({ state }: Readonly<{ state: OnchainRecordState }>) {
 
 export function JumpNav({
   links,
-}: Readonly<{ links: readonly { href: string; label: string }[] }>) {
+  id,
+}: Readonly<{
+  links: readonly { href: string; label: string }[];
+  id?: string;
+}>) {
   return (
     <nav
+      id={id}
       aria-label={t(locale, "museum.onchain.jump.label")}
-      className="tw-mb-10"
+      className="tw-mb-10 tw-scroll-mt-24"
     >
-      <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-2 tw-p-0">
+      <ul className="tw-m-0 tw-flex tw-list-none tw-gap-2 tw-overflow-x-auto tw-p-0 tw-pb-1 sm:tw-flex-wrap sm:tw-overflow-visible sm:tw-pb-0">
         {links.map((link) => (
-          <li key={link.href}>
+          <li key={link.href} className="tw-shrink-0">
             <a
               href={link.href}
-              className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-px-4 tw-text-sm tw-text-iron-100 tw-no-underline hover:tw-border-primary-400 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 sm:tw-min-h-9"
+              className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-whitespace-nowrap tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-px-4 tw-text-sm tw-text-iron-100 tw-no-underline hover:tw-border-primary-400 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 sm:tw-min-h-9"
             >
               {link.label}
             </a>
@@ -255,7 +261,7 @@ export function CopyValue({
 }: Readonly<{ value: string; field: string; href?: string | undefined }>) {
   return (
     <span className="tw-flex tw-items-start tw-gap-2">
-      <span className="tw-min-w-0 tw-flex-1">
+      <span className="tw-min-w-0">
         {href === undefined ? (
           <Mono>{value}</Mono>
         ) : (
