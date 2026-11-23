@@ -36,7 +36,35 @@ export type ProfileCmsPackageRecord = {
   readonly publishedAt?: string | undefined;
   /** The signed publication record's CID, once the package was signed for publishing. */
   readonly publicationCid?: string | undefined;
+  /**
+   * In a publish answer with profile sites on the 6529 chain: the content
+   * core and the signed publication record, which the browser uploads to
+   * the gateway's document store before the PROFILE_REPLACE that names them.
+   */
+  readonly chainDocuments?: ProfileCmsChainDocuments | undefined;
 };
+
+type ProfileCmsChainFile = {
+  readonly cid: string;
+  readonly bytes: Uint8Array;
+};
+
+type ProfileCmsChainDocuments = {
+  readonly contentCore: ProfileCmsChainFile;
+  readonly publication: ProfileCmsChainFile;
+};
+
+function decodeChainFile(file: {
+  readonly cid: string;
+  readonly bytes_base64: string;
+}): ProfileCmsChainFile {
+  return {
+    cid: file.cid,
+    bytes: Uint8Array.from(atob(file.bytes_base64), (char) =>
+      char.charCodeAt(0)
+    ),
+  };
+}
 
 export type LoadedProfileCmsPackageRecord = ProfileCmsPackageRecord & {
   readonly cmsPackage: CmsPackageV1;
@@ -65,6 +93,14 @@ export function normalizeProfileCmsPackageRecord(
       : { publishedAt: new Date(record.published_at).toISOString() }),
     ...(record.publication_cid
       ? { publicationCid: record.publication_cid }
+      : {}),
+    ...(record.chain_documents
+      ? {
+          chainDocuments: {
+            contentCore: decodeChainFile(record.chain_documents.content_core),
+            publication: decodeChainFile(record.chain_documents.publication),
+          },
+        }
       : {}),
   };
 }

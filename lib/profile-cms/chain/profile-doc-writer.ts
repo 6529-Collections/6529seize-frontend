@@ -11,7 +11,11 @@ export type ProfileDocSigner = "session-key" | "wallet";
 type ProfileDocWriteErrorCode =
   | "session_key_unusable"
   | "signature_rejected"
-  | "submit_failed";
+  | "submit_failed"
+  /** The document store refused a file over its size cap (413). */
+  | "upload_too_large"
+  /** Any other refused upload: a rate limit, a CID mismatch, a store error. */
+  | "upload_refused";
 
 export class ProfileDocWriteError extends Error {
   constructor(
@@ -37,6 +41,17 @@ export interface ProfileDocWriter {
     edit: (current: ReadonlyMap<string, string> | null) => Map<string, string>,
     signer: ProfileDocSigner
   ): Promise<{ readonly txId: string }>;
+  /**
+   * Uploads files to the gateway's document store through its public name,
+   * one at a time, each with its CID (base32 or 0x hex, passed to the
+   * store's `?cid=` unchanged, so the store refuses a mismatch). Stops at
+   * the first refusal; a file already stored answers 200, so a retry
+   * resumes. Throws ProfileDocWriteError upload_too_large or
+   * upload_refused, with words for the person.
+   */
+  uploadDocuments(
+    documents: readonly { readonly cid: string; readonly bytes: Uint8Array }[]
+  ): Promise<void>;
 }
 
 let registeredWriter: ProfileDocWriter | null = null;

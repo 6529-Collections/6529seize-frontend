@@ -11,6 +11,7 @@
  * Do not edit the class manually.
  */
 
+import { ApiProfileCmsChainDocuments } from '../models/ApiProfileCmsChainDocuments';
 import { ApiProfileCmsPackageStatus } from '../models/ApiProfileCmsPackageStatus';
 import { ApiProfileCmsStorageReceipt } from '../models/ApiProfileCmsStorageReceipt';
 import { HttpFile } from '../http/http';
@@ -34,6 +35,7 @@ export class ApiProfileCmsPackage {
     * CID (CIDv1, raw codec, sha2-256) of the package\'s signed publication record, once the package was signed for publishing. With profile sites on the 6529 chain, a draft that has it waits for the person\'s PROFILE_REPLACE to name it in their ProfileDoc.
     */
     'publication_cid'?: string;
+    'chain_documents'?: ApiProfileCmsChainDocuments;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -128,6 +130,12 @@ export class ApiProfileCmsPackage {
             "name": "publication_cid",
             "baseName": "publication_cid",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "chain_documents",
+            "baseName": "chain_documents",
+            "type": "ApiProfileCmsChainDocuments",
             "format": ""
         }    ];
 

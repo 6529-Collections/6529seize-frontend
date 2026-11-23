@@ -88,4 +88,41 @@ describe("profile site chain helpers in the builder API", () => {
       "publicationCid"
     );
   });
+
+  it("decodes a chain publish answer's files", () => {
+    const base = {
+      id: "draft-1",
+      profile_id: "profile-1",
+      profile_handle: "testhandle",
+      package_id: "profile-native-home",
+      version: 1,
+      status: "draft",
+      package_hash: "sha256:a",
+      payload_hash: "sha256:b",
+      updated_at: 1,
+      created_at: 1,
+      package: {},
+    } as never;
+    const record = normalizeProfileCmsPackageRecord({
+      ...(base as object),
+      publication_cid: "bafkreipublication",
+      chain_documents: {
+        content_core: { cid: "bafkreicore", bytes_base64: btoa("core") },
+        publication: {
+          cid: "bafkreipublication",
+          bytes_base64: btoa("record"),
+        },
+      },
+    } as never);
+    expect(record.chainDocuments?.contentCore.cid).toBe("bafkreicore");
+    expect(
+      new TextDecoder().decode(record.chainDocuments?.contentCore.bytes)
+    ).toBe("core");
+    expect(
+      new TextDecoder().decode(record.chainDocuments?.publication.bytes)
+    ).toBe("record");
+    expect(normalizeProfileCmsPackageRecord(base)).not.toHaveProperty(
+      "chainDocuments"
+    );
+  });
 });

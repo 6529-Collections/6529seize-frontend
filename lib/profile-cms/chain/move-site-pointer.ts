@@ -4,6 +4,7 @@ import {
   type ProfileDocSigner,
   type ProfileDocWriter,
 } from "./profile-doc-writer";
+import { cmsCidFromBytes } from "./cms-cid";
 import {
   withProfileSitePointer,
   type ProfileSitePointer,
@@ -29,6 +30,9 @@ export type ProfileSiteMoveResult =
     };
 
 const SIGNER_ORDER: readonly ProfileDocSigner[] = ["session-key", "wallet"];
+
+const CHAIN_UNAVAILABLE_MESSAGE =
+  "This browser can't sign profile changes on the 6529 Network yet.";
 
 /**
  * Moves the profile site pointer with one PROFILE_REPLACE: the next
@@ -101,6 +105,58 @@ export async function waitForProfileSitePrimary(params: {
   }
 }
 
+type ProfileSiteUploadResult =
+  | { readonly ok: true }
+  | {
+      readonly ok: false;
+      readonly code: "chain_unavailable" | "upload_failed";
+      readonly message: string;
+    };
+
+/**
+ * Uploads the files a PROFILE_REPLACE will name to the gateway's document
+ * store, through the profile tools' writer, after checking each one hashes
+ * to its CID. A refusal keeps the writer's words for the person.
+ */
+export async function uploadProfileSiteFiles(params: {
+  readonly files: readonly {
+    readonly cid: string;
+    readonly bytes: Uint8Array;
+  }[];
+  readonly writer?: ProfileDocWriter | null | undefined;
+}): Promise<ProfileSiteUploadResult> {
+  const writer =
+    params.writer === undefined ? getProfileDocWriter() : params.writer;
+  if (!writer) {
+    return {
+      ok: false,
+      code: "chain_unavailable",
+      message: CHAIN_UNAVAILABLE_MESSAGE,
+    };
+  }
+  if (params.files.some((file) => cmsCidFromBytes(file.bytes) !== file.cid)) {
+    return {
+      ok: false,
+      code: "upload_failed",
+      message:
+        "A file from 6529.io doesn't match its CID. Try publishing again.",
+    };
+  }
+  try {
+    await writer.uploadDocuments(params.files);
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      code: "upload_failed",
+      message:
+        error instanceof Error && error.message
+          ? error.message
+          : "6529's document store couldn't take the files right now. Try again later.",
+    };
+  }
+}
+
 /** The signers this browser has, session key first. */
 async function usableSigners(
   writer: ProfileDocWriter
@@ -140,6 +196,6 @@ function unavailable(): ProfileSiteMoveResult {
   return {
     ok: false,
     code: "chain_unavailable",
-    message: "This browser can't sign profile changes on the 6529 Network yet.",
+    message: CHAIN_UNAVAILABLE_MESSAGE,
   };
 }

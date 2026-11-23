@@ -5340,6 +5340,8 @@ export const EN_US_ROOT_MESSAGES = {
     "Publishing failed. Please try again.",
   "profileCms.builder.publish.error.chainUnavailable":
     "This browser can't sign profile changes on the 6529 Network yet.",
+  "profileCms.builder.publish.error.chainUploadFailed":
+    "Your site's files couldn't be sent to the 6529 Network.",
   "profileCms.builder.publish.error.chainFailed":
     "Your profile change on the 6529 Network did not go through. Please try again.",
   "profileCms.builder.history.title": "Version history",

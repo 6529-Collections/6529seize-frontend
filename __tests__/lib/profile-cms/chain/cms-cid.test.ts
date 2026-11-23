@@ -1,4 +1,7 @@
-import { cmsCidFromHash } from "@/lib/profile-cms/chain/cms-cid";
+import {
+  cmsCidFromBytes,
+  cmsCidFromHash,
+} from "@/lib/profile-cms/chain/cms-cid";
 
 // The same vectors as the ProfileDoc `cms` field text and the backend.
 const VECTORS = [
@@ -15,6 +18,15 @@ const VECTORS = [
     "bafkreiedy57oyhdigsburvrwepydy4i4guk6q3th5b7w42szehbt672tgm",
   ],
 ] as const;
+
+describe("the CID of bytes", () => {
+  it.each([
+    ["", "bafkreihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku"],
+    ["{}", "bafkreicecnx2gvntm6fbcrvnc336qze6st5u7qq7457igegamd3bzkx7ri"],
+  ])("of %j is %s", (text, cid) => {
+    expect(cmsCidFromBytes(new TextEncoder().encode(text))).toBe(cid);
+  });
+});
 
 describe("profile site CIDs", () => {
   it.each(VECTORS)("names %s as %s", (hash, cid) => {

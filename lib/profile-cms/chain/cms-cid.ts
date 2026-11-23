@@ -1,3 +1,5 @@
+import { sha256 } from "js-sha256";
+
 /**
  * Content identifiers for the profile site files a ProfileDoc's `cms.*`
  * keys name: CIDv1, codec raw (0x55), multihash sha2-256, lower-case base32 with
@@ -7,6 +9,11 @@
 const CID_PREFIX = [0x01, 0x55, 0x12, 0x20] as const;
 const BASE32_ALPHABET = "abcdefghijklmnopqrstuvwxyz234567";
 const CMS_HASH_PATTERN = /^sha256:([a-f0-9]{64})$/;
+
+/** The CID of `bytes`: CIDv1, raw codec, sha2-256. */
+export function cmsCidFromBytes(bytes: Uint8Array): string {
+  return cmsCidFromHash(`sha256:${sha256(bytes)}`);
+}
 
 export function cmsCidFromHash(hash: string): string {
   const match = CMS_HASH_PATTERN.exec(hash);
