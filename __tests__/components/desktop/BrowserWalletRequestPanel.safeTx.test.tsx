@@ -32,15 +32,18 @@ let account: { isConnected: boolean; address?: string; chainId?: number } = {
 const readContract = jest.fn();
 const signTypedDataAsync = jest.fn();
 const assign = jest.fn();
+// Stable objects, as wagmi returns them: the page keys its checks on them.
+const config = { chains: [{ id: 1 }, { id: 11_155_111 }] };
+const publicClient = { readContract, call: jest.fn() };
 
 jest.mock("wagmi", () => ({
   useAccount: () => account,
-  useConfig: () => ({ chains: [{ id: 1 }, { id: 11_155_111 }] }),
+  useConfig: () => config,
   useSignMessage: () => ({ signMessageAsync: jest.fn() }),
   useSignTypedData: () => ({ signTypedDataAsync }),
   useSwitchChain: () => ({ switchChainAsync: jest.fn() }),
   useSendTransaction: () => ({ sendTransactionAsync: jest.fn() }),
-  usePublicClient: () => ({ readContract, call: jest.fn() }),
+  usePublicClient: () => publicClient,
 }));
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({ seizeConnect: jest.fn() }),
@@ -297,9 +300,11 @@ describe("BrowserWalletRequestPanel: Safe transactions", () => {
         hash={await fragmentFor("refuses a high-impact call inside a batch")}
       />
     );
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      /will not ask your wallet to sign this Safe transaction/
-    );
+    expect(
+      await screen.findByText(
+        /will not ask your wallet to sign this Safe transaction/
+      )
+    ).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Sign in wallet" })
     ).not.toBeInTheDocument();

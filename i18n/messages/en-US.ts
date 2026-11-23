@@ -4372,6 +4372,8 @@ export const EN_US_ROOT_MESSAGES = {
     "Checking the Safe and the registry on chain…",
   "browserConnector.safeTx.check.ok":
     "Checked: the Safe owns the registry, your wallet is one of its signers, and the transaction number is not used.",
+  "browserConnector.safeTx.check.okPendingOwner":
+    "Checked: the Safe is the registry's pending owner, your wallet is one of its signers, and the transaction number is not used.",
   "browserConnector.safeTx.check.unavailable":
     "The Safe and the registry could not be checked right now, so nothing is offered to sign. Check again.",
   "browserConnector.safeTx.check.notOwner":
@@ -4661,7 +4663,8 @@ export const EN_US_ROOT_MESSAGES = {
   "subscriptions.history.emptyTopups": "No Top Ups found",
   "subscriptions.history.loading": "Loading {title}",
   "subscriptions.coverage.summary.nextFundedDrops": "Next {count} drops funded",
-  "subscriptions.coverage.summary.fundedDropsAbout": "About {count} drops funded",
+  "subscriptions.coverage.summary.fundedDropsAbout":
+    "About {count} drops funded",
   "subscriptions.coverage.summary.fundedDropsAtLeast":
     "At least {count} drops funded",
   "subscriptions.coverage.summary.currentSettingsNote":

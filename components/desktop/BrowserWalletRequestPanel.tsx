@@ -616,6 +616,7 @@ export default function BrowserWalletRequestPanel({
       <BrowserWalletSafeTxView
         locale={locale}
         signer={request.address}
+        requestKey={JSON.stringify(request)}
         description={verified.description.safeTx}
       >
         {(canSign, describedBy) => (
