@@ -9912,6 +9912,26 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     });
     const firstCard = activePanel.getByRole("listitem").first();
     await expect(firstCard).toBeVisible();
+    await expect(collection).toHaveCSS(
+      "background-color",
+      app
+        ? await firstCard
+            .getByRole("link")
+            .evaluate((element) => getComputedStyle(element).backgroundColor)
+        : "rgba(0, 0, 0, 0)"
+    );
+    if (app) {
+      // The full-wave app view fills the viewport without bottom navigation.
+      await expect
+        .poll(() =>
+          collection.evaluate((element) => {
+            return Math.abs(
+              element.getBoundingClientRect().bottom - innerHeight
+            );
+          })
+        )
+        .toBeLessThanOrEqual(2);
+    }
     const panelBounds = await activePanel.boundingBox();
     const cardBounds = await firstCard.boundingBox();
     expect(panelBounds).not.toBeNull();
