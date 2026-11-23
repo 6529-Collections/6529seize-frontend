@@ -13,7 +13,7 @@ page.
 | --- | --- | --- |
 | `/validator` | The downloads of the newest release, with SHA-256 | Password |
 | `/validator/guide` | The tester guide | Password |
-| `/validator/hardware` | What computer the validator needs, with rc.5's systems and measured use | Password |
+| `/validator/hardware` | A permanent redirect to the guide's Path B, at What to buy (`/validator/guide/home-box#what-to-buy`). The guide holds the hardware facts | Password |
 | `/validator/known-issues` | Known issues and workarounds | Password |
 | `/validator/releases` | Every release, newest first, with its files' SHA-256; only the newest has download buttons, and an unsafe release none | Password |
 | `/validator/download/<version>/<file>` | For the newest release only, a 302 to a presigned S3 URL that works for 5 minutes | Password |
@@ -236,9 +236,7 @@ KNOWN-ISSUES.md. The note for testers on the last release ("Upgrading
 from rc.9", `VALIDATOR_UPGRADE` in `guideMarkdown.ts`) shows under the
 download button and at the top of the guide, with the section on Sunday's
 switch (`VALIDATOR_SWITCH`) above it on both. Each shows only
-while the release the pages offer is the one it names (`forVersion`). The hardware page's text and
-numbers are in `hardwareText.ts` there, each checked against the release it
-names.
+while the release the pages offer is the one it names (`forVersion`).
 
 A release fact that is not known when the text is written, such as the
 day of a release's join tests, is written `{{RC10_JOIN_DATE}}` and the like.

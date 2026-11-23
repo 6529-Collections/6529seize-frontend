@@ -1,9 +1,4 @@
 /** @jest-environment node */
-import {
-  DATA_CENTER,
-  PARTS,
-  SOURCES,
-} from "@/lib/validator-page/content/hardwareText";
 import { VALIDATOR_KNOWN_ISSUES_MARKDOWN } from "@/lib/validator-page/content/knownIssuesMarkdown";
 import {
   VALIDATOR_FEEDBACK_TEMPLATE,
@@ -29,11 +24,6 @@ const STILL_TO_FILL = [JOIN_DATE, JOIN_TOR, JOIN_TOR_OFF].filter((fact) =>
   fact.startsWith("{{")
 );
 
-const HARDWARE = [
-  ...PARTS.map((part) => `${part.answer} ${part.why}`),
-  ...DATA_CENTER.map((tier) => tier.note),
-  ...SOURCES,
-].join("\n");
 const knownIssue = (number: number) =>
   VALIDATOR_KNOWN_ISSUES_MARKDOWN.split("\n").find((line) =>
     line.startsWith(`${number}. `)
@@ -43,10 +33,7 @@ describe("validator page text", () => {
   // A release fact still to fill reads {{RC10_...}}, as the tester package's
   // drafts read <UPPER_CASE>. Only the ones STILL_TO_FILL names may be left;
   // fill them with fill-rc10.sh before merging.
-  it.each([
-    ["known issues", VALIDATOR_KNOWN_ISSUES_MARKDOWN],
-    ["hardware page", HARDWARE],
-  ])(
+  it.each([["known issues", VALIDATOR_KNOWN_ISSUES_MARKDOWN]])(
     "the %s hold no release fact still to fill but rc.10's join tests",
     (_name, text) => {
       const rest = STILL_TO_FILL.reduce(
@@ -191,23 +178,6 @@ describe("validator page text", () => {
     expect(VALIDATOR_KNOWN_ISSUES_MARKDOWN).not.toMatch(
       /2026-11-20 14:00|2026-11-04 21:42|2026-11-21 20:00|2026-11-06 03:34|2026-11-22 0[13]:30|2026-11-06 (09:13|11:09)/
     );
-  });
-
-  it("carries rc.10's join tests on the hardware page", () => {
-    expect(PARTS.find((part) => part.key === "first-start")?.why).toContain(
-      `In 6529's tests of rc.10 on ${JOIN_DATE} this took about ${JOIN_TOR} minutes through Tor, and ${JOIN_TOR_OFF} with Tor off.`
-    );
-    expect(SOURCES.join("\n")).toContain(
-      `The first start: 6529's join tests of the test release (${RELEASE}, commit ${COMMIT}) on ${JOIN_DATE} 2026`
-    );
-  });
-
-  it("says a data center with Tor off needs no peer added (rc.8's install guide)", () => {
-    const rack = DATA_CENTER.find((tier) => tier.key === "rack")?.note ?? "";
-    expect(rack).toContain(
-      "With Tor off, it reaches 6529's Bootstraps by their IP addresses, so you add no peer."
-    );
-    expect(HARDWARE).not.toContain("a peer's address from 6529");
   });
 
   it("links the feedback wave by the app's own route, with the owner's template", () => {
