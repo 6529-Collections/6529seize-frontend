@@ -6822,7 +6822,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     const save = row.getByRole("button", { name: "Save vote", exact: true });
     const helper = row.getByText(/^Enter a whole number/);
     const checkbox = row.getByRole("checkbox");
-    const checkmark = checkbox.locator("..").locator('[aria-hidden="true"]');
+    const checkmark = row
+      .getByRole("checkbox")
+      .locator("..")
+      .locator('[aria-hidden="true"]');
     await expect(input).toHaveValue("25");
     await expect(panel.getByText(/^Available in wave\s*75$/)).toBeVisible();
     await expect(
@@ -6962,7 +6965,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         });
         const capture = async (state: "rest" | "selected") => {
           const contentBounds = (await panel.boundingBox())!;
-          const surfaceBounds = (await panel.locator("..").boundingBox())!;
+          const surfaceBounds = (await page
+            .getByRole("tabpanel", { name: "My Votes", exact: true })
+            .locator("..")
+            .boundingBox())!;
           await page.screenshot({
             path: testInfo.outputPath(`my-votes-mobile-${state}.png`),
             clip: {
@@ -7035,7 +7041,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           );
         }
         const textBounds = await row
-          .locator("h3 button, a")
+          .getByRole("heading")
+          .getByRole("button")
+          .or(row.getByRole("link", { name: "playwright", exact: true }))
           .evaluateAll((elements) =>
             elements.slice(0, 2).map((element) => {
               const range = document.createRange();
@@ -7068,10 +7076,13 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         expect(
           firstOptionBounds.y - headerBounds.y - headerBounds.height
         ).toBeGreaterThanOrEqual(12);
-        await sortSheet.locator(".mobile-wrapper-dialog").screenshot({
-          path: testInfo.outputPath("my-votes-sort-spacing.png"),
-          animations: "disabled",
-        });
+        await page
+          .getByRole("dialog", { name: "Sort by", exact: true })
+          .locator(".mobile-wrapper-dialog")
+          .screenshot({
+            path: testInfo.outputPath("my-votes-sort-spacing.png"),
+            animations: "disabled",
+          });
         await page.keyboard.press("Escape");
         await expect(sortSheet).toHaveCount(0);
         await page.screenshot({
