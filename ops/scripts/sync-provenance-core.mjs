@@ -12,7 +12,7 @@
 // NodeNext ESM; this repository resolves TypeScript paths without it), and each file gets a header
 // naming the source commit. Nothing else changes.
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -30,7 +30,8 @@ if (!repo || !commit) {
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const target = join(root, "lib", "provenance-core");
-const git = (...a) => execFileSync("git", ["-C", repo, ...a], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
+// NOSONAR S4036: an operator-run local CLI; git comes from the operator's own PATH, as in a shell.
+const git = (...a) => execFileSync("git", ["-C", repo, ...a], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 }); // NOSONAR S4036
 const full = git("rev-parse", `${commit}^{commit}`).trim();
 const files = git("ls-tree", "-r", "--name-only", full, "src", "vectors")
   .split("\n")
@@ -38,7 +39,12 @@ const files = git("ls-tree", "-r", "--name-only", full, "src", "vectors")
 
 // README.md belongs to this repository, not the package; keep it across copies.
 const readmePath = join(target, "README.md");
-const readme = existsSync(readmePath) ? readFileSync(readmePath) : undefined;
+let readme;
+try {
+  readme = readFileSync(readmePath);
+} catch (error) {
+  if (error.code !== "ENOENT") throw error;
+}
 rmSync(target, { recursive: true, force: true });
 const header = (path) =>
   [

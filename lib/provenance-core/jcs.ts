@@ -1,4 +1,4 @@
-// Copied from 6529-Collections/6529-provenance-app src/jcs.ts at commit 171ab352f90bb56f3e2248d4fd5b8e69b2a39092.
+// Copied from 6529-Collections/6529-provenance-app src/jcs.ts at commit 8496bfbb6347c265ec74c7e361612d97ccdaf731.
 // Do not edit here: change the package and run ops/scripts/sync-provenance-core.mjs.
 // Replaced by @6529-collections/provenance-core from npm once that is published.
 /**
@@ -206,8 +206,9 @@ export function canonicalizeValue(value: JsonValue): string {
   }
   if (typeof value === "string") return JSON.stringify(value);
   if (Array.isArray(value)) return `[${value.map(canonicalizeValue).join(",")}]`;
-  // Array.prototype.sort without a comparator orders by UTF-16 code units, as section 3.2.3 requires.
-  const keys = Object.keys(value).sort();
+  // RFC 8785 section 3.2.3 orders keys by UTF-16 code units, which is what < compares; localeCompare
+  // would not.
+  const keys = Object.keys(value).sort(compareCodeUnits);
   return `{${keys.map((k) => `${JSON.stringify(k)}:${canonicalizeValue(value[k] as JsonValue)}`).join(",")}}`;
 }
 
@@ -255,4 +256,10 @@ export function resolvePointer(value: JsonValue, pointer: string): JsonValue {
     }
   }
   return cur;
+}
+
+/** Orders strings by UTF-16 code units, the order RFC 8785 requires for object keys. */
+export function compareCodeUnits(a: string, b: string): number {
+  if (a < b) return -1;
+  return a > b ? 1 : 0;
 }

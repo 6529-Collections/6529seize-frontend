@@ -1,4 +1,4 @@
-// Copied from 6529-Collections/6529-provenance-app src/safe.ts at commit 171ab352f90bb56f3e2248d4fd5b8e69b2a39092.
+// Copied from 6529-Collections/6529-provenance-app src/safe.ts at commit 8496bfbb6347c265ec74c7e361612d97ccdaf731.
 // Do not edit here: change the package and run ops/scripts/sync-provenance-core.mjs.
 // Replaced by @6529-collections/provenance-core from npm once that is published.
 import {
@@ -16,6 +16,7 @@ import {
   type Hex,
 } from "viem";
 import type { Call } from "./actions";
+import { compareCodeUnits } from "./jcs";
 
 /** Safe v1.4.1 MultiSendCallOnly, deployed at the same address on every chain Safe supports. */
 export const MULTISEND_CALL_ONLY_141: Address = "0x9641d764fc13c8B624c04430C7356C1C7C8102e2";
@@ -187,7 +188,7 @@ export interface BuilderBatch {
 function serializeForChecksum(json: unknown): string {
   if (Array.isArray(json)) return `[${json.map(serializeForChecksum).join(",")}]`;
   if (typeof json === "object" && json !== null) {
-    const keys = Object.keys(json).sort();
+    const keys = Object.keys(json).sort(compareCodeUnits);
     let acc = `{${JSON.stringify(keys)}`;
     for (const k of keys) acc += `${serializeForChecksum((json as Record<string, unknown>)[k])},`;
     return `${acc}}`;
