@@ -78,7 +78,7 @@ export const GUIDE_PAGES_PART_1: readonly ValidatorGuidePageSource[] = [
       "",
       "We tested a fresh install of release 0.1.0-rc.25 on Ubuntu 24.04 with 4 GB of memory, on 22 November 2026. It used up to 1.4 GB while it caught up with the network, and about 0.4 GB once it followed the chain. With release 0.1.0-rc.24, a 4 GB cloud server that caught up from an older history reached 3.6 GB once. The system stopped it for lack of memory, and it restarted by itself. The data folder stayed under 300 MB. Catching up downloaded about 2.2 GB with the newest history. An Arm server with release 0.1.0-rc.25 that took an older history downloaded about 11 GB and used up to 1.9 GB of memory.",
       "",
-      "Once it followed the chain, a cloud server without Tor downloaded 39 MB an hour and sent 6 MB, about 33 GB a month. That was a 70-minute reading on 22 November 2026, before its key signed. At home through Tor, 6529 estimates about 40-60 GB a month, mostly Ethereum reads. We haven't measured a home validator over a whole day. In the first hours after a release, a home validator can use more. Our home test server had just caught up and was also serving other validators that caught up from it. Over 27 minutes it took in 130 MB an hour and sent 84 MB. Signing and the daily votes add to these figures, by an amount we haven't measured.",
+      "Once it followed the chain, a cloud server without Tor downloaded 39 MB an hour and sent 6 MB, about 33 GB a month. That was a 70-minute reading on 22 November 2026, before its key signed. At home through Tor, the validator uses far more. We ran release 0.1.0-rc.25 for 12 hours on 22 and 23 November 2026, on an Arm server with Ubuntu 24.04 set up as at home. It was still a **Watcher** with no key. It took in about 186 MB an hour and sent about 105 MB: about 210 GB a month. That is well above our earlier estimate of 40-60 GB a month. A **Signer** also sends its votes and blocks, which adds an amount we haven't measured.",
       "",
       "At home, the validator connects out. Other validators reach it only through Tor, at an onion address. Nothing reaches it at your home's IP address. Its page answers only on this computer unless you turn on Settings › Access ([Look at it from another computer](/validator/guide/your-computer#7-look-at-it-from-another-computer-optional)).",
       "",
@@ -134,7 +134,7 @@ export const GUIDE_PAGES_PART_1: readonly ValidatorGuidePageSource[] = [
     description:
       "Install the 6529 validator on your Mac, Windows PC or Linux PC, make its key and authorize it.",
     lines: [
-      "You need 4 GB of memory or more, and one of these: Windows 10 or 11 (64-bit), macOS 11 or newer (12 or newer where Tor is blocked), Ubuntu 22.04 or newer, Debian 12 or newer, or Linux Mint 21 or newer. At home it uses about 40-60 GB of data a month, mostly to read Ethereum, and more for a few hours after each release while other validators catch up from yours. That figure is 6529's estimate ([what we measured](/validator/guide/keys-and-privacy#what-it-does-on-your-computer)). On a capped plan, see [On a capped data plan](/validator/guide/keep-running#on-a-capped-data-plan).",
+      "You need 4 GB of memory or more, and one of these: Windows 10 or 11 (64-bit), macOS 11 or newer (12 or newer where Tor is blocked), Ubuntu 22.04 or newer, Debian 12 or newer, or Linux Mint 21 or newer. At home, our 12-hour test used data at a rate of about 210 GB a month ([what we measured](/validator/guide/keys-and-privacy#what-it-does-on-your-computer)), well above our earlier estimate. On a capped plan, see [On a capped data plan](/validator/guide/keep-running#on-a-capped-data-plan).",
       "",
       "## 1. Download",
       "",
@@ -628,7 +628,7 @@ export const GUIDE_PAGES_PART_1: readonly ValidatorGuidePageSource[] = [
       TABLE_RULE_3_COLUMNS,
       "| Memory | 4 GB | 16-32 GB |",
       "| Disk | Under 1 GB | A 4 TB NVMe SSD |",
-      "| Data | About 33 GB a month for a server, about 40-60 GB at home (estimate) | Far more: use an unmetered connection |",
+      "| Data | About 33 GB a month for a server, about 210 GB at home through Tor | Far more: use an unmetered connection |",
       "| Machine | Any computer | A home server built for it |",
       "",
       "The node figures are from ethereum.org's [Run a node](https://ethereum.org/en/developers/docs/nodes-and-clients/run-a-node/) page (October 2026), which also lists ready-made node boxes and setup tools.",
