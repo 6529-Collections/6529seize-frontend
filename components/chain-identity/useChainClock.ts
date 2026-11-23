@@ -31,7 +31,17 @@ const subscribe = (listener: () => void) => {
   };
 };
 
-const snapshot = () => now;
+/**
+ * The stored time; when nothing has kept it moving (no view subscribed), it
+ * is brought up to date first, so a view coming back never paints with a
+ * time from before it left.
+ */
+const snapshot = () => {
+  if (timer === null && Date.now() - now > TICK_MS) {
+    now = Date.now();
+  }
+  return now;
+};
 
 /** The current time in ms, updated while the page is open. */
 export function useChainClock(): number {

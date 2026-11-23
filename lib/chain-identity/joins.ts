@@ -135,6 +135,10 @@ export function heldJoinDraft(
   return draft;
 }
 
+/** Whether an id from an answer is `id`, read defensively. */
+const sameId = (value: unknown, id: string): boolean =>
+  typeof value === "string" && value.toLowerCase() === id.toLowerCase();
+
 /** Whether a wallet can join an identity now, by the chain's rules. */
 export type JoinReadiness =
   | { readonly kind: "free" }
@@ -166,7 +170,7 @@ export function joinReadiness(
     typeof rejoinWaitMs === "number" &&
     left.leftMs + rejoinWaitMs > nowMs &&
     // Creating (joining null) always waits; rejoining the same one doesn't.
-    left.from.toLowerCase() !== joining?.toLowerCase()
+    (joining === null || !sameId(left.from, joining))
   ) {
     return {
       kind: "waiting",
