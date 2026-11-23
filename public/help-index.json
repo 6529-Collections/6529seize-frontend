@@ -3106,14 +3106,13 @@
       "id": "help-bot.credits",
       "kind": "business_rule",
       "title": "Help6529 Credits",
-      "link_label": "Help6529 Credits",
+      "link_label": "Waves",
       "aliases": [
         "help6529 credits",
         "help bot credits",
         "helpbot credits",
         "how do i get help6529 credits",
         "how do i get help bot credits",
-        "why can't i ask help6529",
         "low battery reaction",
         "no help6529 credits"
       ],
@@ -3123,23 +3122,18 @@
         "bot",
         "credits",
         "credit",
-        "rep",
+        "free",
         "battery",
         "low",
-        "question",
-        "activity"
+        "question"
       ],
       "facts": [
-        "Help6529 Credits are REP in the `Help6529 Credits` category.",
-        "Each Help6529 question costs 1 Help6529 Credit REP.",
-        "Automatic grants use the configured Help6529 credit grant amount for signup, profile setup, and daily activity when the user sends any message that day.",
-        "Automatic daily activity grants do not have a balance cap.",
-        "Help6529 Credits is a reserved REP category managed by help6529; normal users cannot grant REP in this category.",
-        "The bot checks the user's Help6529 Credits category balance before answering."
+        "Asking help6529 is free.",
+        "It no longer uses Help6529 Credits."
       ],
-      "canonical_path": "/rep/categories/Help6529%20Credits",
+      "canonical_path": "/waves",
       "related_paths": ["/waves"],
-      "tags": ["help-bot", "credits", "rep"],
+      "tags": ["help-bot", "credits"],
       "source_refs": [
         "ops/docs/specs/2026-06-19-6529-help-bot-knowledge-index.md"
       ]
