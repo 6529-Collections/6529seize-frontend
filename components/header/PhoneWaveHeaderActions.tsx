@@ -28,6 +28,8 @@ import type {
 } from "@/contexts/HeaderContext";
 import { useWaveInformation } from "@/contexts/WaveInformationContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 import HeaderSearchButton from "./header-search/HeaderSearchButton";
 
@@ -110,6 +112,7 @@ export default function PhoneWaveHeaderActions({
   readonly createNavigation: HeaderWaveCreateNavigation | null;
 }) {
   const information = useWaveInformation();
+  const locale = useBrowserLocale();
   const timeZone = useDisplayTimeZoneMenuItem();
   const [isSubmissionHelpOpen, setIsSubmissionHelpOpen] = useState(false);
   const { items: createItems, dialogs } = useWaveCreateMenuActions({
@@ -148,14 +151,14 @@ export default function PhoneWaveHeaderActions({
     <>
       <HeaderSearchButton
         wave={wave}
-        renderTrigger={({ label, open }) => (
+        renderTrigger={({ open }) => (
           <CompactWaveActions
             phone
             items={[
               waveDetails,
               {
                 id: "search-messages",
-                label,
+                label: t(locale, "waves.drops.searchModal.title"),
                 icon: (
                   <MagnifyingGlassIcon
                     className="tw-size-4"

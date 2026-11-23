@@ -370,7 +370,7 @@ test.describe("Display time zone @auth @local-only", () => {
     await expect(seededPostTime(page)).toHaveText("Apr 21, 2024");
     await openPhoneActions();
     const search = actions.getByRole("button", {
-      name: "Search messages in this wave",
+      name: "Search messages",
       exact: true,
     });
     await search.click();

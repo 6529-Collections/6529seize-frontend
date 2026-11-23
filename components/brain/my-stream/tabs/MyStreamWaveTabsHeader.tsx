@@ -316,6 +316,7 @@ export default function MyStreamWaveTabsHeader({
   renderTrailingActions,
   renderOverflowMenuItems,
 }: MyStreamWaveTabsHeaderProps) {
+  const locale = useBrowserLocale();
   const { toggleRightSidebar, isRightSidebarOpen } = useSidebarState();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -463,7 +464,7 @@ export default function MyStreamWaveTabsHeader({
         },
         {
           id: "search-messages",
-          label: searchMessagesLabel,
+          label: t(locale, "waves.drops.searchModal.title"),
           icon: (
             <MagnifyingGlassIcon className="tw-size-4" aria-hidden="true" />
           ),

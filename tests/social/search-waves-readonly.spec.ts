@@ -609,7 +609,7 @@ async function getWaveSearchAction(page: Page, timeout = 5000) {
   await expect(
     sheet.getByRole("heading", { name: "More wave actions", exact: true })
   ).toBeVisible();
-  return sheet.getByRole("button", { name: /^Search messages in .+$/ });
+  return sheet.getByRole("button", { name: "Search messages", exact: true });
 }
 
 async function openSearchOnFirstWaveWithSearch(page: Page) {

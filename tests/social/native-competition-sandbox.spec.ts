@@ -2741,7 +2741,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         waitUntil: "domcontentloaded",
       });
       const phone = page.viewportSize()!.width < 768;
-      const searchName = "Search messages in this wave";
+      const searchName = phone
+        ? "Search messages"
+        : "Search messages in this wave";
       const actionScope = phone ? await openPhoneWaveActions(page) : page;
       await actionScope
         .getByRole("button", { name: searchName, exact: true })
