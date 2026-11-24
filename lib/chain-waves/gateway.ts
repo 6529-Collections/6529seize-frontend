@@ -57,6 +57,8 @@ export interface ChainPoll {
   readonly closeTime: number;
   readonly snapshotDay: number;
   readonly status: "open" | "closed";
+  /** The least TDH a ballot's cluster needs, a decimal string. */
+  readonly minTdh?: string;
 }
 
 interface ChainPollBallot {
@@ -69,6 +71,8 @@ export interface ChainTdhLeaf {
   readonly wallet: Hex;
   readonly cid: Hex;
   readonly identityTdh: string;
+  /** The wallet's own TDH, which a cluster above 16 wallets is read by. */
+  readonly walletTdh?: string;
   readonly walletCount: number;
 }
 

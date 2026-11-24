@@ -261,6 +261,13 @@ describe("writeChainVote", () => {
       });
     });
 
+    it("sends nothing for a vote equal to the current one", async () => {
+      await writeChainVote(config, WALLET, { dropId: DROP_UUID, amount: 10n });
+      gateway.getVoterVotes.mockResolvedValue(null);
+      await writeChainVote(config, WALLET, { dropId: DROP_UUID, amount: 0n });
+      expect(run).not.toHaveBeenCalled();
+    });
+
     it("leaves a window's edge within a minute to the chain", async () => {
       decisionWith({ config: { votingEnd: String(Date.now() - 30_000) } });
       await writeChainVote(config, WALLET, { dropId: DROP_UUID, amount: 5n });
@@ -345,6 +352,27 @@ describe("writeChainPollBallot", () => {
     );
   });
 
+  it("leaves the least TDH to the chain off the snapshot day", async () => {
+    gateway.getPoll.mockResolvedValue({
+      pollId: DROP_POLL,
+      snapshotDay: 30,
+      status: "open",
+      closeTime: Date.now() + 3_600_000,
+      optionCount: 4,
+      maxChoices: 2,
+      minTdh: "10",
+    } as never);
+    gateway.getTdhDayWallet.mockResolvedValue(undefined);
+    gateway.getTdhWallet.mockResolvedValue({
+      leaf: { wallet: WALLET, cid: CID, identityTdh: "9", walletCount: 1 },
+    } as never);
+    await writeChainPollBallot(config, WALLET, {
+      pollId: DROP_UUID,
+      optionNumbers: [2],
+    });
+    expect(run).toHaveBeenCalled();
+  });
+
   it("reads today's list when the node no longer keeps the snapshot day", async () => {
     gateway.getTdhDayWallet.mockResolvedValue(undefined);
     gateway.getTdhWallet.mockResolvedValue({
@@ -393,6 +421,12 @@ describe("writeChainPollBallot", () => {
       {},
       [1],
       "That's already your answer in this poll.",
+    ],
+    [
+      "a cluster below the poll's least TDH on its snapshot day",
+      { minTdh: "10" },
+      [2],
+      "You can't answer this poll.",
     ],
   ])("refuses %s before signing", async (_why, fields, options, sentence) => {
     gateway.getTdhDayWallet.mockResolvedValue({

@@ -163,6 +163,11 @@ export async function writeChainVote(
   const prior = votes?.votes.find(
     (vote) => lower(vote.entryId) === lower(entry.entryId)
   );
+  // A vote equal to the current one changes nothing: the chain writes
+  // nothing for it but still charges the fee, so nothing is sent.
+  if ((asBigInt(prior?.value) ?? 0n) === input.amount) {
+    return;
+  }
   assertVoteTakeable(
     decision,
     entry,
@@ -218,7 +223,12 @@ async function ballotWallet(
   identity: ChainIdentity,
   snapshotDay: number,
   signal?: AbortSignal
-): Promise<{ readonly wallet: Hex; readonly cid: Hex }> {
+): Promise<{
+  readonly wallet: Hex;
+  readonly cid: Hex;
+  /** The TDH the chain reads for the ballot; null off the snapshot day. */
+  readonly tdh: bigint | null;
+}> {
   const candidates = [
     wallet,
     ...identity.wallets.filter((item) => lower(item) !== lower(wallet)),
@@ -236,10 +246,14 @@ async function ballotWallet(
         ? (await wavesGateway.getTdhWallet(candidate, signal))?.leaf
         : onDay;
     if (leaf) {
+      const alone = leaf.walletCount > CLUSTER_MAX;
       return {
         wallet: candidate,
-        cid:
-          leaf.walletCount > CLUSTER_MAX ? loneClusterCid(candidate) : leaf.cid,
+        cid: alone ? loneClusterCid(candidate) : leaf.cid,
+        tdh:
+          onDay === undefined
+            ? null
+            : asBigInt(alone ? leaf.walletTdh : leaf.identityTdh),
       };
     }
   }
@@ -295,6 +309,12 @@ export async function writeChainPollBallot(
   const selection = pollSelection(input.optionNumbers);
   assertBallotTakeable(poll, selection, Date.now());
   const through = await ballotWallet(wallet, voter, poll.snapshotDay, signal);
+  // Below the poll's least TDH on its snapshot day, the chain refuses the
+  // ballot (POLL_NOT_ELIGIBLE) in a block.
+  const minTdh = asBigInt(poll.minTdh) ?? 0n;
+  if (through.tdh !== null && through.tdh < minTdh) {
+    refuse("You can't answer this poll.");
+  }
   const prior = await wavesGateway.findPollBallot(
     poll.pollId,
     through.cid,
