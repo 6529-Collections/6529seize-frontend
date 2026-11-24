@@ -98,6 +98,14 @@ export function useWavesWritesPaused(): boolean {
 }
 
 /**
+ * Whether creating a wave is closed for the move: from the freeze, wherever
+ * it starts, inside a staying wave too, since a new wave would move.
+ */
+export function useWaveCreationPaused(): boolean {
+  return isWavesWritePausedPhase(useWavesMovePhase());
+}
+
+/**
  * "Paused for the move to the 6529 Network." while those writes are closed,
  * in the viewer's locale; null otherwise.
  */

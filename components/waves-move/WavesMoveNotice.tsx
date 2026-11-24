@@ -88,8 +88,11 @@ const getWavesMoveNoticeText = (
  */
 export default function WavesMoveNotice({
   className = "",
+  siteWide = false,
 }: {
   readonly className?: string | undefined;
+  /** For creating a wave, which moves wherever it starts: ignores the scope. */
+  readonly siteWide?: boolean | undefined;
 }) {
   const locale = useBrowserLocale();
   const phase = useWavesMovePhase();
@@ -99,7 +102,7 @@ export default function WavesMoveNotice({
   // never changes the first markup.
   const [dismissed, setDismissed] = useState<string | null>(readDismissed);
   const text =
-    schedule === null || scope === "stays"
+    schedule === null || (scope === "stays" && !siteWide)
       ? null
       : getWavesMoveNoticeText(locale, phase, schedule);
 

@@ -68,6 +68,7 @@ import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
 import MobileWaveSubwavesBar from "./mobile/MobileWaveSubwavesBar";
 import BrainMobileViewContent from "./mobile/BrainMobileViewContent";
+import { WavesMoveScope } from "@/components/waves-move/WavesMoveScope";
 import { BrainView } from "./mobile/brainMobileViews";
 import { BrainMobileSubmissionRulesContext } from "./mobile/BrainMobileSubmissionRulesContext";
 import { useBrainMobileActiveView } from "./mobile/useBrainMobileActiveView";
@@ -567,27 +568,29 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
             }
             className="tw-relative tw-min-w-0 tw-flex-1"
           >
-            <BrainMobileViewContent
-              activeView={activeView}
-              activeWaveId={waveId}
-              activeAboutTab={activeAboutTab}
-              onAboutTabChange={onAboutTabChange}
-              isCurationWave={isCurationWave}
-              isMemesWave={isMemesWave}
-              isRankWave={isRankWave}
-              isApproveWave={isApproveWave}
-              hasPolls={hasPolls}
-              onDropClick={onDropClick}
-              onOpenQuickVote={quickVote.openQuickVote}
-              onPrefetchQuickVote={quickVote.prefetchQuickVote}
-              wave={wave}
-            >
-              <BrainMobileSubmissionRulesContext.Provider
-                value={viewSubmissionRules}
+            <WavesMoveScope wave={wave} waveId={wave?.id}>
+              <BrainMobileViewContent
+                activeView={activeView}
+                activeWaveId={waveId}
+                activeAboutTab={activeAboutTab}
+                onAboutTabChange={onAboutTabChange}
+                isCurationWave={isCurationWave}
+                isMemesWave={isMemesWave}
+                isRankWave={isRankWave}
+                isApproveWave={isApproveWave}
+                hasPolls={hasPolls}
+                onDropClick={onDropClick}
+                onOpenQuickVote={quickVote.openQuickVote}
+                onPrefetchQuickVote={quickVote.prefetchQuickVote}
+                wave={wave}
               >
-                {children}
-              </BrainMobileSubmissionRulesContext.Provider>
-            </BrainMobileViewContent>
+                <BrainMobileSubmissionRulesContext.Provider
+                  value={viewSubmissionRules}
+                >
+                  {children}
+                </BrainMobileSubmissionRulesContext.Provider>
+              </BrainMobileViewContent>
+            </WavesMoveScope>
           </m.div>
         </LazyMotion>
       </div>

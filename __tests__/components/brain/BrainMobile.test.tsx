@@ -10,6 +10,7 @@ import { BrainView } from "@/components/brain/mobile/brainMobileViews";
 import { useBrainMobileSubmissionRules } from "@/components/brain/mobile/BrainMobileSubmissionRulesContext";
 import { SidebarTab } from "@/components/brain/right-sidebar/BrainRightSidebarTypes";
 import { useWaveData } from "@/hooks/useWaveData";
+import { useWavesMoveScope } from "@/components/waves-move/WavesMoveScope";
 import {
   getHistoryWaveTab,
   WAVE_TAB_STORAGE_KEY,
@@ -621,6 +622,47 @@ describe("BrainMobile", () => {
       expect(mockDialogMountCount).toBe(0);
     }
   );
+
+  it("gives the mobile wave views the active wave's part in the move", async () => {
+    const ScopeProbe = () => (
+      <span data-testid="move-scope">{useWavesMoveScope()}</span>
+    );
+    mockSearchParams.set("wave", "1");
+    waveData = { ...createWave(false), stays_on_site: true };
+    const { unmount } = render(
+      <BrainMobile>
+        <ScopeProbe />
+      </BrainMobile>
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("move-scope")).toHaveTextContent("stays")
+    );
+    unmount();
+
+    waveData = { ...createWave(false), stays_on_site: false };
+    render(
+      <BrainMobile>
+        <ScopeProbe />
+      </BrainMobile>
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("move-scope")).toHaveTextContent("moves")
+    );
+  });
+
+  it("leaves the move's site-wide scope where no wave is open", async () => {
+    const ScopeProbe = () => (
+      <span data-testid="move-scope">{useWavesMoveScope()}</span>
+    );
+    render(
+      <BrainMobile>
+        <ScopeProbe />
+      </BrainMobile>
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("move-scope")).toHaveTextContent("none")
+    );
+  });
 
   it("keeps quick vote out of the default wave chat view in app", async () => {
     mockSearchParams.set("wave", "1");

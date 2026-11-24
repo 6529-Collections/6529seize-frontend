@@ -1,15 +1,17 @@
 import { render, renderHook, screen } from "@testing-library/react";
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 import WavesMoveNotice from "@/components/waves-move/WavesMoveNotice";
 import {
   useWavesMoveScope,
   WavesMoveScope,
 } from "@/components/waves-move/WavesMoveScope";
-import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
+import {
+  useWaveCreationPaused,
+  useWavesWritesPaused,
+} from "@/hooks/useWavesMovePhase";
 import {
   forgetWaveMoves,
   isKnownMovingWave,
-  WAVE_STAYS_FIELD,
   waveMoveSignal,
   waveOfKnownDrop,
 } from "@/lib/waves-move/scope";
@@ -32,8 +34,9 @@ jest.mock("@/config/env", () => {
   };
 });
 
-const moving = { id: "w1", [WAVE_STAYS_FIELD]: false };
-const staying = { id: "w2", [WAVE_STAYS_FIELD]: true };
+const STAYS = "stays_on_site";
+const moving = { id: "w1", [STAYS]: false };
+const staying = { id: "w2", [STAYS]: true };
 const unsaid = { id: "w3" };
 
 const inScope =
@@ -46,7 +49,7 @@ const inScope =
         </WavesMoveScope>
       ),
       children
-    ) as JSX.Element;
+    ) as ReactElement;
 
 describe("which waves move", () => {
   beforeEach(() => {
@@ -65,7 +68,7 @@ describe("which waves move", () => {
     expect(waveMoveSignal(staying)).toBe(false);
     expect(waveMoveSignal(unsaid)).toBeNull();
     expect(waveMoveSignal(null)).toBeNull();
-    expect(waveMoveSignal({ [WAVE_STAYS_FIELD]: "yes" })).toBeNull();
+    expect(waveMoveSignal({ [STAYS]: "yes" })).toBeNull();
   });
 
   it("pauses a moving wave's writes and shows its notice", () => {
@@ -115,6 +118,26 @@ describe("which waves move", () => {
     expect(renderHook(() => useWavesWritesPaused()).result.current).toBe(true);
     render(<WavesMoveNotice />);
     expect(screen.getByTestId("waves-move-notice")).toBeInTheDocument();
+  });
+
+  it("keeps wave creation paused, and its notice, inside a staying wave", () => {
+    expect(
+      renderHook(() => useWaveCreationPaused(), { wrapper: inScope(staying) })
+        .result.current
+    ).toBe(true);
+    render(<WavesMoveNotice siteWide />, { wrapper: inScope(staying) });
+    expect(screen.getByTestId("waves-move-notice")).toBeInTheDocument();
+  });
+
+  it("changes nothing where no wave is given", () => {
+    const { result } = renderHook(() => useWavesMoveScope(), {
+      wrapper: ({ children }: { children: ReactNode }) => (
+        <WavesMoveScope wave={undefined} waveId={undefined}>
+          {children}
+        </WavesMoveScope>
+      ),
+    });
+    expect(result.current).toBe("none");
   });
 
   it("tells the request guard what the page read", () => {

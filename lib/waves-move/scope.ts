@@ -5,6 +5,9 @@
  * treated as staying, so nothing pauses or announces a move it may not make.
  */
 
+/** The field 6529.io's API marks a staying wave with. */
+const WAVE_STAYS_FIELD = "stays_on_site";
+
 /**
  * The API's word on a wave or a drop's wave: true when it moves, false when
  * it stays, null when the object doesn't say (an API from before the
@@ -18,9 +21,6 @@ export function waveMoveSignal(wave: unknown): boolean | null {
   const stays = (wave as Record<string, unknown>)[WAVE_STAYS_FIELD];
   return typeof stays === "boolean" ? !stays : null;
 }
-
-/** The field 6529.io's API marks a staying wave with. */
-export const WAVE_STAYS_FIELD = "stays_on_site";
 
 // What the pages have read, for the request guard, which sees only paths
 // and bodies: wave id to whether it moves, and drop id to its wave.

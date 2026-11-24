@@ -183,6 +183,9 @@ const isMovingWaveWrite = (
   body: unknown
 ): boolean => {
   const [root, second, third] = segments;
+  if (root === undefined) {
+    return false;
+  }
   const bodyWave = (): string | null => {
     const waveId = parseBody(body)?.["wave_id"];
     return typeof waveId === "string" ? waveId : null;

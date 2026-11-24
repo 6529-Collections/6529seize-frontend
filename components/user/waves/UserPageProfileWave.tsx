@@ -13,7 +13,7 @@ import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 import { isOwnProfileRoute } from "@/helpers/ProfileHelpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
+import { useWaveCreationPaused } from "@/hooks/useWavesMovePhase";
 import { useProfileWave } from "@/hooks/useProfileWave";
 import { useProfileWaveMutation } from "@/hooks/useProfileWaveMutation";
 import { useWaveById } from "@/hooks/useWaveById";
@@ -251,7 +251,7 @@ export default function UserPageProfileWave({
   const { connectedProfile, activeProfileProxy, setToast } = useAuth();
   // Setting up a profile curation creates a wave, which moves to the 6529
   // Network with the other waves.
-  const wavesWritesPaused = useWavesWritesPaused();
+  const wavesWritesPaused = useWaveCreationPaused();
   const { profile } = useIdentity({
     handleOrWallet,
     initialProfile,

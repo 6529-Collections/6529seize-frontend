@@ -1,0 +1,58 @@
+import type { ApiWave } from "@/generated/models/ApiWave";
+import { toApiWaveMin } from "@/helpers/waves/wave.helpers";
+
+const wave = (extra: Record<string, unknown>) =>
+  ({
+    id: "w1",
+    name: "Wave",
+    picture: null,
+    description_drop: { id: "d0" },
+    last_drop_time: 0,
+    author: { handle: "author" },
+    voting: {
+      authenticated_user_eligible: true,
+      scope: { group: null },
+      period: null,
+      credit_type: "TDH",
+      forbid_negative_votes: false,
+      credit_nfts: [],
+      credit_scope: "WAVE",
+    },
+    participation: {
+      authenticated_user_eligible: true,
+      scope: { group: null },
+      submission_strategy: null,
+    },
+    chat: {
+      authenticated_user_eligible: true,
+      scope: { group: null },
+      links_disabled: false,
+    },
+    visibility: { scope: { group: null } },
+    wave: {
+      authenticated_user_eligible_for_admin: false,
+      admin_group: { group: null },
+      admin_drop_deletion_enabled: false,
+    },
+    pinned: false,
+    identity_wave: false,
+    ...extra,
+  }) as unknown as ApiWave;
+
+describe("toApiWaveMin and the move to the 6529 Network", () => {
+  it.each([true, false])(
+    "keeps the API's stays_on_site (%s) on a drop's rebuilt wave",
+    (staysOnSite) => {
+      expect(
+        toApiWaveMin(wave({ stays_on_site: staysOnSite })) as unknown as Record<
+          string,
+          unknown
+        >
+      ).toMatchObject({ stays_on_site: staysOnSite });
+    }
+  );
+
+  it("adds nothing when the API doesn't send it", () => {
+    expect(toApiWaveMin(wave({}))).not.toHaveProperty("stays_on_site");
+  });
+});

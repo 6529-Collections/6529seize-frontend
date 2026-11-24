@@ -108,5 +108,14 @@ export const toApiWaveMin = (wave: ApiWave): ApiWaveMin => {
     voting_credit_scope: wave.voting.credit_scope,
   };
 
+  // Whether the wave stays on 6529.io: a drop rebuilt from the full wave
+  // keeps the API's word on it (the generated models don't carry it yet).
+  const staysOnSite = (wave as unknown as Record<string, unknown>)[
+    "stays_on_site"
+  ];
+  if (typeof staysOnSite === "boolean") {
+    (waveMin as unknown as Record<string, unknown>)["stays_on_site"] =
+      staysOnSite;
+  }
   return waveMin;
 };

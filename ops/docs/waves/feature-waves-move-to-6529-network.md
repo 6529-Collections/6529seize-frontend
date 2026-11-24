@@ -16,8 +16,10 @@ the site shows no notice and pauses nothing.
 
 ### Waves That Stay
 
-6529.io's API marks each wave, a drop's wave and each decision with
-`stays_on_site`. Inside a wave marked `true`, the notice doesn't show and
+Members-only waves, waves behind a hidden or private group, their
+decisions, and direct messages stay on 6529.io. 6529.io's API marks each
+wave, a drop's wave and each decision with `stays_on_site`. Inside a wave
+marked `true`, the notice doesn't show and
 nothing on this page pauses; its votes, entries, polls, wave REP and settings
 keep going to 6529.io's API, which keeps taking them. A wave whose object
 doesn't carry the field is treated the same way, so nothing pauses or

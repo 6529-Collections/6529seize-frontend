@@ -13,7 +13,7 @@ import {
 import isEqual from "lodash/isEqual";
 import { usePathname } from "next/navigation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
+import { useWaveCreationPaused } from "@/hooks/useWavesMovePhase";
 import WavesMoveNotice from "@/components/waves-move/WavesMoveNotice";
 import { t } from "@/i18n/messages";
 import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
@@ -78,7 +78,7 @@ export default function CreateWave({
   const locale = useBrowserLocale();
   // New waves move to the 6529 Network; while paused the form does not go
   // past its first step.
-  const wavesWritesPaused = useWavesWritesPaused();
+  const wavesWritesPaused = useWaveCreationPaused();
   const isSubwave = !!parentWaveId;
   const waveConfig = useSubwaveWaveConfig({
     parentAdminGroupId,
@@ -378,7 +378,7 @@ export default function CreateWave({
         nativeBoundedStyle={nativeBoundedStyle}
         scrollResetKey={step}
       >
-        <WavesMoveNotice className="tw-mb-4" />
+        <WavesMoveNotice className="tw-mb-4" siteWide />
         <CreateWaveLayout
           quickChat={quickChat}
           config={config}
