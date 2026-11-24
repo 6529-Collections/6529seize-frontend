@@ -57,4 +57,22 @@ describe("what the page shows until 6529.io's index reads the block", () => {
       jest.useRealTimers();
     }
   });
+
+  it("leaves a refresh that fails to the next refetch", async () => {
+    jest.useFakeTimers();
+    try {
+      const throws = jest.fn(() => {
+        throw new Error("offline");
+      });
+      const rejects = jest.fn().mockRejectedValue(new Error("offline"));
+      scheduleIndexRefresh(throws, 10);
+      scheduleIndexRefresh(rejects, 10);
+      expect(() => jest.advanceTimersByTime(10)).not.toThrow();
+      await Promise.resolve();
+      expect(throws).toHaveBeenCalledTimes(1);
+      expect(rejects).toHaveBeenCalledTimes(1);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
 });

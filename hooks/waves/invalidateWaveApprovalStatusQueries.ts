@@ -74,7 +74,7 @@ export function applyWaveDropVoteUpdate(
   );
 
   if (options.fromChain === true) {
-    scheduleIndexRefresh(async () => {
+    scheduleIndexRefresh(() => {
       refreshAfterVote(queryClient, updatedDrop, waveId, options);
     });
     return;

@@ -19,25 +19,25 @@ import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { chainWriteFailure } from "@/components/chain-waves/chainWavesErrorMessage";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useWaveRepAllocation } from "@/hooks/useWaveRepAllocation";
-import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
+import {
+  useChainWavesActive,
+  useWavesWritesPaused,
+} from "@/hooks/useWavesMovePhase";
 import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWriters";
-import { useChainWavesActive } from "@/hooks/useWavesMovePhase";
 import { isRepCategoryName } from "@/lib/chain/codec/rules";
 import { scheduleIndexRefresh } from "@/lib/chain-waves/optimistic";
 import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useId,
-  useRef,
-  useState,
-} from "react";
+import { useContext, useEffect, useId, useRef, useState } from "react";
 
 const WAVE_REP_CATEGORY_PATTERN = /^[\p{L}\p{N}?!,.'() ]{1,100}$/u;
 const CATEGORY_SETTLE_DELAY_MS = 350;
+
+const categoryErrorFor = (category: string): string =>
+  WAVE_REP_CATEGORY_PATTERN.test(category)
+    ? "On the 6529 Network a category uses only letters A-Z, numbers, single spaces and & ' . - _, and starts with a letter or number."
+    : "Use 1-100 letters, numbers, spaces, apostrophes, or basic punctuation.";
 const WAVE_REP_MODAL_LOCALE = DEFAULT_LOCALE;
 
 function getInitialCategory(wave: ApiWave): string {
@@ -73,24 +73,20 @@ export default function WaveRepRatingModal({
       waveId: wave.id,
       category: settledCategory || null,
     });
-  // On the 6529 Network a category name is ASCII letters, digits, spaces
-  // and & ' . - _, starting with a letter or digit.
-  const chainActive = useChainWavesActive();
-  const categoryAllowed = useCallback(
-    (name: string) =>
-      WAVE_REP_CATEGORY_PATTERN.test(name) &&
-      (!chainActive || isRepCategoryName(name)),
-    [chainActive]
-  );
   useKeyboardFocusScroll(contentRef);
 
   useEffect(() => {
-    if (categoryAllowed(debouncedCategory)) {
+    if (WAVE_REP_CATEGORY_PATTERN.test(debouncedCategory)) {
       setSettledCategory(debouncedCategory);
     }
-  }, [debouncedCategory, categoryAllowed]);
+  }, [debouncedCategory]);
 
-  const categoryValid = categoryAllowed(trimmedCategory);
+  // On the 6529 Network a category name is ASCII letters, digits, spaces
+  // and & ' . - _, starting with a letter or digit.
+  const chainActive = useChainWavesActive();
+  const categoryValid =
+    WAVE_REP_CATEGORY_PATTERN.test(trimmedCategory) &&
+    (!chainActive || isRepCategoryName(trimmedCategory));
   const categorySettled = trimmedCategory === settledCategory;
   const allocationReady = categoryValid && categorySettled && !isLoading;
 
@@ -157,41 +153,26 @@ export default function WaveRepRatingModal({
         message: "Wave REP updated.",
         type: "success",
       });
-      const refresh = async () => {
-        queryClient.invalidateQueries({
-          queryKey: [QueryKey.WAVE_REP_RATING],
-        });
-        queryClient.invalidateQueries({
-          queryKey: [QueryKey.WAVE_REP_CREDIT],
-        });
-        queryClient.invalidateQueries({
-          queryKey: [QueryKey.WAVE_REP_OVERVIEW],
-        });
-        queryClient.invalidateQueries({
-          queryKey: [QueryKey.WAVE_REP_CATEGORIES],
-        });
-        queryClient.invalidateQueries({
-          queryKey: [QueryKey.WAVE_REP_CATEGORY_CONTRIBUTORS],
-        });
-        queryClient.invalidateQueries({
-          queryKey: [QueryKey.WAVE_REP_LOGS],
-        });
-        queryClient.invalidateQueries({
-          queryKey: [QueryKey.WAVE],
-        });
-        queryClient.invalidateQueries({
-          queryKey: [QueryKey.WAVES_V2],
-        });
-        queryClient.invalidateQueries({
-          queryKey: [QueryKey.WAVE_SUBWAVES],
-        });
-      };
+      const refresh = () =>
+        Promise.all(
+          [
+            QueryKey.WAVE_REP_RATING,
+            QueryKey.WAVE_REP_CREDIT,
+            QueryKey.WAVE_REP_OVERVIEW,
+            QueryKey.WAVE_REP_CATEGORIES,
+            QueryKey.WAVE_REP_CATEGORY_CONTRIBUTORS,
+            QueryKey.WAVE_REP_LOGS,
+            QueryKey.WAVE,
+            QueryKey.WAVES_V2,
+            QueryKey.WAVE_SUBWAVES,
+          ].map((key) => queryClient.invalidateQueries({ queryKey: [key] }))
+        );
       // On the 6529 Network, 6529.io's index shows the change once it has
       // read the block; a refetch now would show the old allocation.
       if (chainWriters) {
         scheduleIndexRefresh(refresh);
       } else {
-        void refresh();
+        refresh().catch(() => undefined);
       }
     },
     onError: (error) => {
@@ -351,11 +332,7 @@ export default function WaveRepRatingModal({
                 categoryValid ? "tw-sr-only" : ""
               }`}
             >
-              {categoryValid
-                ? ""
-                : WAVE_REP_CATEGORY_PATTERN.test(trimmedCategory)
-                  ? "On the 6529 Network a category uses only letters A-Z, numbers, single spaces and & ' . - _, and starts with a letter or number."
-                  : "Use 1-100 letters, numbers, spaces, apostrophes, or basic punctuation."}
+              {categoryValid ? "" : categoryErrorFor(trimmedCategory)}
             </p>
           </div>
 

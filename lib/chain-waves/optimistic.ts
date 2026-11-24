@@ -45,10 +45,14 @@ export const INDEX_REFRESH_DELAY_MS = 15_000;
  * once would bring back the vote as it was and undo what the page shows.
  */
 export function scheduleIndexRefresh(
-  refresh: () => Promise<unknown>,
+  refresh: () => unknown,
   delayMs: number = INDEX_REFRESH_DELAY_MS
 ): void {
   setTimeout(() => {
-    refresh().catch(() => undefined);
+    // A refresh that fails, at once or later, is left to the next natural
+    // refetch.
+    new Promise((resolve) => {
+      resolve(refresh());
+    }).catch(() => undefined);
   }, delayMs);
 }

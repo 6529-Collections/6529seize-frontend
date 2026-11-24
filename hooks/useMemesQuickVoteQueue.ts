@@ -211,7 +211,7 @@ const useMemesQuickVoteQueueSubmission = ({
       }
 
       if (fromChain) {
-        scheduleIndexRefresh(async () => {
+        scheduleIndexRefresh(() => {
           invalidateQuickVoteUndiscoveredDrop();
           runBestEffortSync(session.syncUndiscoveredWindow);
         });
