@@ -222,16 +222,22 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
       <div
         className={`tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-3 ${mobile ? "tw-bg-iron-950 tw-pt-3" : ""}`}
       >
-        <div className="tw-flex tw-flex-col tw-gap-1 tw-px-4">
+        <div
+          className={`tw-flex tw-px-4 ${mobile ? "tw-flex-col tw-gap-1" : "tw-flex-row-reverse tw-items-center tw-gap-4"}`}
+        >
           {typeof availableVotes === "number" && (
-            <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-400">
+            <p
+              className={`tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-400 ${mobile ? "" : "tw-shrink-0 tw-whitespace-nowrap"}`}
+            >
               {t(locale, "waves.myVotes.availableInWave")}{" "}
               <span className="tw-font-semibold !tw-tabular-nums tw-text-iron-100">
                 {formatInteger(locale, availableVotes)}
               </span>
             </p>
           )}
-          <div className="tw-flex tw-w-full tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-2">
+          <div
+            className={`tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 ${mobile ? "tw-w-full" : "tw-flex-1"}`}
+          >
             <div
               className={`tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2 ${mobile ? "" : "tw-flex-wrap"}`}
             >
@@ -239,24 +245,22 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
               {showResetControls && (!mobile || isSelecting) && selectAllButton}
               {!mobile && showResetControls && showResetActions && resetActions}
             </div>
-            {showResetControls &&
-              onToggleSelection &&
-              (mobile || selectedCount > 0) && (
-                <button
-                  type="button"
-                  onClick={onToggleSelection}
-                  disabled={isResetting}
-                  aria-pressed={mobile ? isSelecting : undefined}
-                  className={`${buttonHeightClassName} tw-ml-auto tw-inline-flex tw-min-w-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3.5 tw-py-0 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 enabled:tw-cursor-pointer disabled:tw-opacity-50 enabled:desktop-hover:hover:tw-bg-iron-900/50 enabled:desktop-hover:hover:tw-text-iron-100 motion-reduce:tw-transition-none`}
-                >
-                  {t(
-                    locale,
-                    mobile && !isSelecting
-                      ? "waves.myVotes.select"
-                      : "waves.myVotes.doneSelecting"
-                  )}
-                </button>
-              )}
+            {mobile && showResetControls && onToggleSelection && (
+              <button
+                type="button"
+                onClick={onToggleSelection}
+                disabled={isResetting}
+                aria-pressed={isSelecting}
+                className={`${buttonHeightClassName} tw-ml-auto tw-inline-flex tw-min-w-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3.5 tw-py-0 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 enabled:tw-cursor-pointer disabled:tw-opacity-50 enabled:desktop-hover:hover:tw-bg-iron-900/50 enabled:desktop-hover:hover:tw-text-iron-100 motion-reduce:tw-transition-none`}
+              >
+                {t(
+                  locale,
+                  !isSelecting
+                    ? "waves.myVotes.select"
+                    : "waves.myVotes.doneSelecting"
+                )}
+              </button>
+            )}
             {mobile && showResetControls && isSelecting && showResetActions && (
               <div className="tw-basis-full">{resetActions}</div>
             )}

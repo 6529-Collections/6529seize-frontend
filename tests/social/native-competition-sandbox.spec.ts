@@ -6896,11 +6896,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       expect(Math.max(...heights) - Math.min(...heights)).toBeLessThanOrEqual(
         1
       );
-      const rationale = page
-        .getByRole("paragraph")
-        .filter({
-          hasText: "Post a public reply in the wave about your saved vote.",
-        });
+      const rationale = page.getByRole("paragraph").filter({
+        hasText: "Post a public reply in the wave about your saved vote.",
+      });
       const firstHeight = await rationale.evaluate(
         (element) => element.parentElement!.getBoundingClientRect().height
       );
@@ -6965,23 +6963,36 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     expect(checkboxLeft).toBe(
       (await panel.getByRole("button", { name: /^Sort by:/ }).boundingBox())!.x
     );
-    expect(checkboxLeft).toBe(
-      (await panel.getByText(/^Available in wave\s*75$/).boundingBox())!.x
+    const balanceBounds = (await panel
+      .getByText(/^Available in wave\s*75$/)
+      .boundingBox())!;
+    const sortBounds = (await panel
+      .getByRole("button", { name: /^Sort by:/ })
+      .boundingBox())!;
+    const toolbarRowBounds = (await row.boundingBox())!;
+    expect(balanceBounds.x + balanceBounds.width).toBe(
+      toolbarRowBounds.x + toolbarRowBounds.width - 16
     );
+    expect(
+      Math.abs(
+        balanceBounds.y +
+          balanceBounds.height / 2 -
+          sortBounds.y -
+          sortBounds.height / 2
+      )
+    ).toBeLessThanOrEqual(1);
     const restingRowTop = (await row.boundingBox())!.y;
     await panel
       .getByRole("button", { name: "Select all", exact: true })
       .click();
     await expect(checkbox).toBeChecked();
-    const selectionDone = panel.getByRole("button", {
-      name: "Done",
-      exact: true,
-    });
-    await expect(selectionDone).toHaveCSS("height", "32px");
-    await expect(selectionDone).toHaveCSS("padding-left", "14px");
-    await expect(selectionDone).toHaveCSS("padding-right", "14px");
+    await expect(
+      panel.getByRole("button", { name: "Done", exact: true })
+    ).toHaveCount(0);
     expect((await row.boundingBox())!.y).toBe(restingRowTop);
-    await panel.getByRole("button", { name: "Done", exact: true }).click();
+    await panel
+      .getByRole("button", { name: "Deselect all", exact: true })
+      .click();
     await expect(checkbox).not.toBeChecked();
     expect((await row.boundingBox())!.y).toBe(restingRowTop);
     await expect(
@@ -6993,10 +7004,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await row.click({ position: { x: 8, y: 8 } });
     await expect(
       panel.getByRole("button", { name: "Done", exact: true })
-    ).toBeVisible();
-    const done = panel.getByRole("button", { name: "Done", exact: true });
-    await done.hover();
-    await expect(done).toHaveCSS("background-color", "rgba(28, 28, 33, 0.5)");
+    ).toHaveCount(0);
     await expect(
       panel.getByRole("button", { name: "Deselect all", exact: true })
     ).toBeVisible();
@@ -7011,7 +7019,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       .getByRole("button", { name: "Cancel", exact: true })
       .click();
     expect(sandbox.requests).toHaveLength(0);
-    await panel.getByRole("button", { name: "Done", exact: true }).click();
+    await panel
+      .getByRole("button", { name: "Deselect all", exact: true })
+      .click();
     await expect(checkbox).not.toBeChecked();
     await input.focus();
     await page.mouse.move(0, 0);
@@ -7020,7 +7030,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await expect(checkmark).toHaveCSS("opacity", "1");
     await checkbox.press("Space");
     await expect(checkbox).toBeChecked();
-    await panel.getByRole("button", { name: "Done", exact: true }).click();
+    await panel
+      .getByRole("button", { name: "Deselect all", exact: true })
+      .click();
     await input.focus();
     await expect(helper).toBeVisible();
     await input.press("Enter");

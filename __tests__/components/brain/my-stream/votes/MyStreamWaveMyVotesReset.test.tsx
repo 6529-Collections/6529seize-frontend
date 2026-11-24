@@ -151,15 +151,14 @@ test("hides available votes when missing", () => {
   expect(screen.queryByText(/Available/)).not.toBeInTheDocument();
 });
 
-test("offers desktop bulk actions without entering mobile selection mode", () => {
-  const clearSelection = jest.fn();
+test("offers desktop bulk actions without mobile Select or Done controls", () => {
   render(
     <AuthContext.Provider value={auth}>
       <MyStreamWaveMyVotesReset
         waveId="wave-1"
         haveDrops
         isSelecting={false}
-        onToggleSelection={clearSelection}
+        onToggleSelection={jest.fn()}
         selected={new Set(["a"])}
         allItemsSelected={false}
         onToggleSelectAll={jest.fn()}
@@ -173,8 +172,9 @@ test("offers desktop bulk actions without entering mobile selection mode", () =>
   ).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Select all" })).toBeEnabled();
   expect(screen.getByRole("button", { name: "Reset 1 vote" })).toBeEnabled();
-  fireEvent.click(screen.getByRole("button", { name: "Done" }));
-  expect(clearSelection).toHaveBeenCalledTimes(1);
+  expect(
+    screen.queryByRole("button", { name: "Done" })
+  ).not.toBeInTheDocument();
 });
 
 test("resets votes for selected drops", async () => {

@@ -6,12 +6,12 @@
 Past winners are excluded; their historical vote records remain preserved.
 Use the compact sorting control beside **Select all**. It opens a dropdown on
 desktop and the shared bottom sheet below 1024px and in the app.
-The control shows the current order, with **Available in wave** on the same
-toolbar when a wave-wide balance is available. The controls wrap on narrow screens.
+The control shows the current order, with **Available in wave** and its balance
+at the far right of the desktop toolbar when available. The controls wrap on narrow screens.
 On mobile, the balance sits above the controls. **Select** / **Done** stays on
 the right; while selecting, **Select all** sits beside the sorting control.
-Desktop shows **Select all** directly beside sorting, without a separate
-**Select** step. **Done** appears after selecting rows and clears the selection.
+Desktop shows **Select all** directly beside sorting. **Select** and **Done**
+appear only on mobile; desktop uses the checkboxes and **Select all** / **Deselect all**.
 **Reset votes** and the selected count appear only after you select a row;
 clearing the selection hides them again. Choose an order:
 
@@ -85,7 +85,8 @@ while each profile loads. The placeholders stay still when reduced motion is ena
    scrolling cancels the hold.
    Desktop checkboxes and `Select all` are available immediately. Click the row
    background, check a checkbox, or choose `Select all` to select rows.
-   `Done` clears selected rows and leaves mobile selection mode.
+   On mobile, `Done` clears selected rows and leaves selection mode.
+   On desktop, clear rows with their checkboxes or `Deselect all`.
    In selection mode, click a row
    outside its controls to select or deselect it. Artwork and title buttons open
    the drop, including with `Enter` or `Space`. Vote controls and profile links
@@ -110,8 +111,9 @@ On mobile web below 1024px and in the app, cards keep the thumbnail beside the t
   does not retain the hover highlight.
 - Rows use a subtle charcoal background. Hovering an unselected row lightens
   it further. Hovering or focusing the title highlights it in blue.
-- `Available in wave` appears above the bordered sorting control and
-  trailing `Select` / `Done` action, on the same surface as the list.
+- On desktop, `Available in wave` and its balance sit at the far right of the
+  toolbar, opposite sorting and bulk actions. On mobile, the balance appears
+  above the sorting control and trailing `Select` / `Done` action.
 - Mobile cards use a 64px media frame with a small media badge. Artwork fits
   inside the frame while preserving its original proportions.
   Opening the artwork retains its full presentation. Rank shares the row with
