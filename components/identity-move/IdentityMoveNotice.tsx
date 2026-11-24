@@ -19,6 +19,8 @@ import {
   formatIdentityMoveTime,
 } from "./identityMoveFormat";
 
+const HOUR_MS = 60 * 60 * 1000;
+
 const getNoticeText = (
   locale: SupportedLocale,
   phase: IdentityMovePhase,
@@ -30,6 +32,7 @@ const getNoticeText = (
       return t(locale, "identityMove.notice", {
         freezeDay: formatIdentityMoveDay(locale, freezeAtMs),
         freezeTime: formatIdentityMoveTime(locale, freezeAtMs),
+        freezeHours: String(Math.round((switchOnMs - freezeAtMs) / HOUR_MS)),
         switchOnWeekday: formatUtcDate(locale, switchOnMs, {
           weekday: "long",
         }),

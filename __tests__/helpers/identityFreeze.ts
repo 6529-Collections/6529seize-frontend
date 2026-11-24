@@ -21,3 +21,13 @@ export function setIdentityFreezeAt(value: string | undefined): void {
   (globalThis as { __identityFreezeAt?: string | undefined }).__identityFreezeAt =
     value;
 }
+
+/**
+ * Sets NEXT_PUBLIC_IDENTITY_SWITCH_ON_AT for a test, read the same way as
+ * `__identityFreezeAt` above, from `__identitySwitchOnAt`.
+ */
+export function setIdentitySwitchOnAt(value: string | undefined): void {
+  (
+    globalThis as { __identitySwitchOnAt?: string | undefined }
+  ).__identitySwitchOnAt = value;
+}

@@ -12,7 +12,8 @@ The page exists only in builds with `NEXT_PUBLIC_FEATURE_CHAIN_IDENTITY` set
 to `true` and `NEXT_PUBLIC_CHAIN_GATEWAY_URL` set to the gateway's https
 origin. It takes changes, and profile pages use the chain for REP and NIC and
 link here, once the switch-on has passed (`NEXT_PUBLIC_IDENTITY_FREEZE_AT`
-plus 24 hours). Before that the page says when changes open.
+plus 24 hours, or `NEXT_PUBLIC_IDENTITY_SWITCH_ON_AT` when later). Before
+that the page says when changes open.
 
 ## Location in the Site
 
