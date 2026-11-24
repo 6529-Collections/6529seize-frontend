@@ -335,10 +335,10 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   const selectionWidth = showSelectionCheckbox ? 44 : 0;
   const desktopGridColumns = isVotingClosed
     ? ""
-    : "@[40rem]/my-vote:tw-grid-cols-[auto_108px_minmax(0,1fr)_22.5rem]";
+    : "@[40rem]/my-vote:tw-grid-cols-[auto_108px_minmax(0,1fr)_23rem]";
   const mobileGridColumns = isVotingClosed
     ? ""
-    : "@[40rem]/my-vote:tw-grid-cols-[auto_80px_minmax(0,1fr)_22.5rem]";
+    : "@[40rem]/my-vote:tw-grid-cols-[auto_80px_minmax(0,1fr)_23rem]";
   const titleId = `my-vote-title-${drop.id}`;
   const longPress = useMyVoteLongPress(
     mobile && !isSelecting && !isSelectionDisabled,

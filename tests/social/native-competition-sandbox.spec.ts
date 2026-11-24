@@ -8747,7 +8747,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           (element) => element.clientWidth - 32
         );
         if (contentWidth >= 640) {
-          expect((await controls.boundingBox())!.width).toBe(360);
+          expect((await controls.boundingBox())!.width).toBe(368);
         } else {
           expect((await controls.boundingBox())!.width).toBe(contentWidth);
         }
