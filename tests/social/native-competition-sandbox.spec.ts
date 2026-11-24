@@ -6899,10 +6899,38 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         containsUnit: field.textContent?.includes("TDH"),
       };
     });
-    expect(compactField.width).toBe(192);
     expect(compactField.containsUnit).toBe(true);
-    expect(compactField.containsSave).toBe(false);
-    expect((await save.boundingBox())!.x).toBeGreaterThan(compactField.right);
+    expect(compactField.containsSave).toBe(true);
+    const saveBounds = (await save.boundingBox())!;
+    expect(saveBounds.x + saveBounds.width).toBeLessThan(compactField.right);
+    const explainBounds = (await row
+      .getByRole("button", { name: "Explain vote", exact: true })
+      .boundingBox())!;
+    const actionCenterGap = await save.evaluate((button) => {
+      const explain = button
+        .closest("form")
+        ?.querySelector('button[type="button"]');
+      if (!explain) throw new Error("Explain vote action missing");
+      const saveBounds = button.getBoundingClientRect();
+      const explainBounds = explain.getBoundingClientRect();
+      return (
+        saveBounds.y +
+        saveBounds.height / 2 -
+        explainBounds.y -
+        explainBounds.height / 2
+      );
+    });
+    expect(Math.abs(actionCenterGap)).toBeLessThanOrEqual(1);
+    const rowBounds = (await row.boundingBox())!;
+    expect(
+      Math.abs(
+        explainBounds.x +
+          explainBounds.width -
+          rowBounds.x -
+          rowBounds.width +
+          16
+      )
+    ).toBeLessThanOrEqual(1);
     const saveSurface = row
       .getByRole("button", { name: "Save vote", exact: true })
       .locator("span");
@@ -6932,6 +6960,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await save.hover({ position: { x: 2, y: 2 } });
     await expect(save).toHaveCSS("background-color", "rgb(57, 95, 228)");
     await expect(save).toHaveCSS("cursor", "pointer");
+    await row.screenshot({
+      path: testInfo.outputPath("my-votes-medium-editing.png"),
+      animations: "disabled",
+    });
     await page.setViewportSize({ width: 1920, height: 1080 });
     await page.mouse.move(0, 0);
     await row.screenshot({
@@ -7424,16 +7456,32 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         );
         const field = (await input.boundingBox())!;
         const action = (await explain.boundingBox())!;
-        if (width >= 1024) {
+        const contentWidth = await row.evaluate(
+          (element) => element.clientWidth - 32
+        );
+        if (contentWidth >= 640) {
           expect((await controls.boundingBox())!.width).toBeLessThanOrEqual(
             384
           );
+        } else {
+          expect((await controls.boundingBox())!.width).toBe(contentWidth);
         }
+        const fieldBounds = await input.evaluate((element) => {
+          const field = element.parentElement!;
+          const bounds = field.getBoundingClientRect();
+          return {
+            right: bounds.right,
+            containsSave: !!field.querySelector('button[type="submit"]'),
+          };
+        });
+        expect(fieldBounds.containsSave).toBe(true);
+        expect(Math.abs(action.x - fieldBounds.right - 8)).toBeLessThanOrEqual(
+          1
+        );
+        const rowBounds = (await row.boundingBox())!;
         expect(
-          await input.evaluate(
-            (element) => element.parentElement!.getBoundingClientRect().width
-          )
-        ).toBeLessThanOrEqual(192);
+          Math.abs(action.x + action.width - rowBounds.x - rowBounds.width + 16)
+        ).toBeLessThanOrEqual(1);
         expect(field.height).toBeGreaterThanOrEqual(44);
         expect(action.height).toBeGreaterThanOrEqual(44);
         expect(Math.abs(field.y - action.y)).toBeLessThanOrEqual(1);
@@ -7467,17 +7515,16 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           expect(box.right).toBeGreaterThanOrEqual(-1);
           expect(box.clipped, JSON.stringify({ width, ...box })).toBe(false);
         }
-        const contentWidth = await row.evaluate(
-          (element) => element.clientWidth - 32
-        );
-        if (width >= 1024 && contentWidth >= 864) {
+        if (contentWidth >= 640) {
           const picture = (await thumbnail.boundingBox())!;
           const heading = (await row.getByRole("heading").boundingBox())!;
           // The title, stats and edit controls occupy the same desktop row.
-          expect(heading.y).toBeGreaterThanOrEqual(picture.y);
-          expect(heading.y + heading.height).toBeLessThanOrEqual(
-            picture.y + picture.height
-          );
+          if (width >= 1024) {
+            expect(heading.y).toBeGreaterThanOrEqual(picture.y);
+            expect(heading.y + heading.height).toBeLessThanOrEqual(
+              picture.y + picture.height
+            );
+          }
           expect(field.y).toBeLessThan(picture.y + picture.height);
           expect(field.x).toBeGreaterThan(heading.x + heading.width);
         }

@@ -328,7 +328,10 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   const mobileSelectionWidth = isSelecting ? 44 : 0;
   const desktopGridColumns = isVotingClosed
     ? ""
-    : "@[46rem]/my-vote:tw-grid-cols-[44px_96px_minmax(0,1fr)_24rem]";
+    : "@[40rem]/my-vote:tw-grid-cols-[44px_96px_minmax(0,1fr)_24rem]";
+  const mobileGridColumns = isVotingClosed
+    ? ""
+    : "@[40rem]/my-vote:tw-grid-cols-[auto_64px_minmax(0,1fr)_24rem] @[40rem]/my-vote:tw-gap-x-3";
   const titleId = `my-vote-title-${drop.id}`;
   const longPress = useMyVoteLongPress(
     mobile && !isSelecting && !isSelectionDisabled,
@@ -411,7 +414,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
       <div
         className={
           mobile
-            ? "tw-grid tw-grid-cols-[auto_72px_minmax(0,1fr)] tw-gap-y-2"
+            ? `tw-grid tw-grid-cols-[auto_72px_minmax(0,1fr)] tw-gap-y-2 ${mobileGridColumns}`
             : `tw-grid tw-grid-cols-[44px_96px_minmax(0,1fr)] tw-gap-x-3 tw-gap-y-2 ${desktopGridColumns}`
         }
       >

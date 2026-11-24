@@ -319,7 +319,6 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   return (
     <MyVotesInput
       mobile={mobile}
-      className={mobile ? "tw-col-span-3 tw-row-start-3" : undefined}
       alwaysShowHelper={!mobile}
       id={voteInputId}
       label={t(locale, "waves.myVotes.yourVotesInCredit", {

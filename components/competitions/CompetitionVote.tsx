@@ -55,6 +55,7 @@ import { updateCompetitionVoteInCache } from "@/components/react-query-wrapper/u
 import {
   MyVotesInput,
   MY_VOTES_INPUT_LAYOUT,
+  MY_VOTES_MOBILE_INPUT_LAYOUT,
 } from "@/components/brain/my-stream/votes/MyVotesInput";
 import { triggerVoteSuccessHaptic } from "@/helpers/vote-haptics";
 
@@ -318,11 +319,11 @@ export function CompetitionVoteForm({
         ref={budgetVisibilityRef}
         role="status"
         aria-label={t(locale, "competitions.loading")}
-        className={`tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-gap-2 ${mobile ? "tw-col-span-3 tw-row-start-3" : MY_VOTES_INPUT_LAYOUT}`}
+        className={`tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-2 ${mobile ? MY_VOTES_MOBILE_INPUT_LAYOUT : MY_VOTES_INPUT_LAYOUT}`}
         aria-busy="true"
         aria-live="off"
       >
-        <div className="tw-h-11 tw-animate-pulse tw-rounded-lg tw-bg-iron-900 motion-reduce:tw-animate-none" />
+        <div className="tw-h-[54px] tw-animate-pulse tw-rounded-lg tw-bg-iron-900 motion-reduce:tw-animate-none" />
         {onExplainVote && (
           <div className="tw-h-11 tw-w-20 tw-animate-pulse tw-rounded-lg tw-bg-iron-900 motion-reduce:tw-animate-none" />
         )}
@@ -369,9 +370,7 @@ export function CompetitionVoteForm({
       <div
         ref={budgetVisibilityRef}
         className={
-          mobile
-            ? "tw-col-span-3 tw-row-start-3 tw-min-w-0"
-            : MY_VOTES_INPUT_LAYOUT
+          mobile ? MY_VOTES_MOBILE_INPUT_LAYOUT : MY_VOTES_INPUT_LAYOUT
         }
       >
         <MyVotesInput
