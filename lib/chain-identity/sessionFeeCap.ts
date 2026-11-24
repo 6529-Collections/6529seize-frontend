@@ -37,9 +37,10 @@ const SIZE_CEILING = 2_048n;
  * handler's state, the client margin of 150,000 RU, and an AccountPolicy's
  * 48,264 RU): 573,564 RU for a wave's REP, 267,364 RU for PROFILE_REPLACE,
  * 737,264 RU for POLL_BALLOT_SET. VOTE_SET walks the voter's stored votes,
- * 20,500 RU each and up to 248 of them, so its largest, 5,887,764 RU, takes
- * the 6,000,000 RU any transaction may carry. The wallet signs any
- * operation not listed.
+ * 20,500 RU each and up to 256 of them (248 under a later rule version
+ * that adds its own reads), so its largest, 5,887,764 RU, takes the
+ * 6,000,000 RU any transaction may carry. The wallet signs any operation
+ * not listed.
  */
 const WORK_CEILING: ReadonlyMap<string, bigint> = new Map([
   ["PollBallotSet", 800_000n],
