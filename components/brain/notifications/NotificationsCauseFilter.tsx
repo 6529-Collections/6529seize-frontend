@@ -7,6 +7,7 @@ import {
 } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { AuthContext } from "@/components/auth/Auth";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import PreferencesGearLink from "@/components/preferences/PreferencesGearLink";
 import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -292,15 +293,21 @@ export default function NotificationsCauseFilter({
 
   return (
     <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-pb-2 tw-pt-2 lg:tw-pt-4">
-      <h1
-        className={
-          isApp
-            ? "tw-sr-only"
-            : "tw-m-0 tw-min-w-0 tw-truncate tw-text-xl tw-font-semibold tw-text-iron-100"
-        }
-      >
-        {t(locale, "profilePreferences.notifications.heading")}
-      </h1>
+      <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-1">
+        <h1
+          className={
+            isApp
+              ? "tw-sr-only"
+              : "tw-m-0 tw-truncate tw-text-xl tw-font-semibold tw-text-iron-100"
+          }
+        >
+          {t(locale, "profilePreferences.notifications.heading")}
+        </h1>
+        <PreferencesGearLink
+          label={t(locale, "profilePreferences.notifications.linkLabel")}
+          className={isApp ? "tw-ml-4" : undefined}
+        />
+      </div>
 
       <div className="tw-relative tw-ml-auto tw-w-36 tw-flex-shrink-0 sm:tw-w-56">
         <button
