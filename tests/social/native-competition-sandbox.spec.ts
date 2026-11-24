@@ -7828,16 +7828,48 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
             const valueBounds = value.getBoundingClientRect();
             const votersBounds = voters.getBoundingClientRect();
             const rankBounds = rank.getBoundingClientRect();
+            const voterLabel = voters.lastElementChild!;
+            const voterNumber = voterLabel.firstElementChild!;
+            const numberStyle = (element: Element) => {
+              const style = getComputedStyle(element);
+              return {
+                color: style.color,
+                fontSize: style.fontSize,
+                fontWeight: style.fontWeight,
+                numerals: style.fontVariantNumeric,
+                tracking: style.letterSpacing,
+              };
+            };
             return {
               labelToValue: valueBounds.left - labelBounds.right,
               totalToVoters: votersBounds.left - valueBounds.right,
               votersToRank: rankBounds.left - votersBounds.right,
+              totalNumber: numberStyle(value),
+              voterNumber: numberStyle(voterNumber),
+              labelColorsMatch:
+                getComputedStyle(label).color ===
+                getComputedStyle(voterLabel).color,
             };
           });
         expect(statsGaps).toEqual({
           labelToValue: 6,
           totalToVoters: 12,
           votersToRank: 12,
+          totalNumber: {
+            color: "rgb(239, 239, 241)",
+            fontSize: "13px",
+            fontWeight: "600",
+            numerals: "tabular-nums",
+            tracking: "-0.13px",
+          },
+          voterNumber: {
+            color: "rgb(239, 239, 241)",
+            fontSize: "13px",
+            fontWeight: "600",
+            numerals: "tabular-nums",
+            tracking: "-0.13px",
+          },
+          labelColorsMatch: true,
         });
         const thumbnailSize = width < 1024 ? 64 : 96;
         expect((await thumbnail.boundingBox())!.width).toBe(thumbnailSize);

@@ -273,8 +273,11 @@ function MyVoteVoters({
           ))}
         </div>
       )}
-      <span className="tw-whitespace-nowrap tw-text-[13px] tw-font-normal tw-leading-5 tw-text-iron-300">
-        <span className="tw-font-semibold">
+      <span className="tw-whitespace-nowrap tw-text-[13px] tw-font-normal tw-leading-5 tw-text-iron-400">
+        <span
+          data-wave-typography="preserve"
+          className="tw-font-semibold tw-tabular-nums tw-tracking-identity tw-text-iron-100"
+        >
           {formatInteger(locale, drop.raters_count)}
         </span>{" "}
         {t(
