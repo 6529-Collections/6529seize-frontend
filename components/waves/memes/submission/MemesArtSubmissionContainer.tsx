@@ -334,6 +334,12 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
       ) {
         documentationRef.current?.onDropSubmitted(drop.id);
       }
+      if (drop && isChainSubmittedArtwork(drop) && hasDocumentation) {
+        setToast({
+          message: t(locale, "memes.submission.documentation.notLinked"),
+          type: "info",
+        });
+      }
       if (drop && isResubmission) {
         await handleResubmissionSubmitted(drop);
       }
@@ -410,6 +416,7 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
     form,
     handlePhaseChange,
     handleResubmissionSubmitted,
+    hasDocumentation,
     isResubmission,
     identity.address,
     identity.canSubmit,

@@ -22,17 +22,21 @@ jest.mock("@/lib/proposal-card/thumbnail", () => ({
 }));
 
 const mockDocumentationDropSubmitted = jest.fn();
+let mockDocumentationProps: { readonly onStarted: () => void } | undefined;
 jest.mock(
   "@/components/waves/memes/submission/MemesSubmissionDocumentation",
   () => {
     const React = jest.requireActual<typeof import("react")>("react");
-    return React.forwardRef((_props, ref) => {
-      React.useImperativeHandle(ref, () => ({
-        onDropSubmitted: mockDocumentationDropSubmitted,
-        prepareClose: async () => true,
-      }));
-      return null;
-    });
+    return React.forwardRef(
+      (props: { readonly onStarted: () => void }, ref) => {
+        mockDocumentationProps = props;
+        React.useImperativeHandle(ref, () => ({
+          onDropSubmitted: mockDocumentationDropSubmitted,
+          prepareClose: async () => true,
+        }));
+        return null;
+      }
+    );
   }
 );
 
@@ -812,7 +816,7 @@ describe("MemesArtSubmissionContainer", () => {
     }
   });
   describe("documentation", () => {
-    const submitWith = async (artwork: unknown) => {
+    const submitWith = async (artwork: unknown, withNotes = false) => {
       mockAuth.mockReturnValue({
         connectedProfile: { id: "profile-a", handle: "artist" },
         activeProfileProxy: null,
@@ -832,10 +836,22 @@ describe("MemesArtSubmissionContainer", () => {
         isSubmitting: false,
       } as any);
       render(<MemesArtSubmissionContainer onClose={onClose} wave={wave} />);
+      if (withNotes) {
+        // The artist starts writing notes before submitting.
+        act(() => mockDocumentationProps?.onStarted());
+      }
       await act(async () => {
         await additionalInfoProps.onSubmit();
       });
     };
+    const chainEntry = {
+      chainEntry: { entryId: "0xentry" },
+      title: "Card",
+      metadata: [],
+      pending: false,
+    };
+    const NOT_LINKED =
+      "Your notes aren't linked to this entry. Find them under My artwork documentation.";
 
     afterEach(() => {
       jest.mocked(isChainSubmittedArtwork).mockReset();
@@ -845,21 +861,30 @@ describe("MemesArtSubmissionContainer", () => {
       jest
         .mocked(isChainSubmittedArtwork)
         .mockImplementation((artwork) => "chainEntry" in artwork);
-      await submitWith({ id: "drop-1", title: "Card", metadata: [] });
+      await submitWith({ id: "drop-1", title: "Card", metadata: [] }, true);
       expect(mockDocumentationDropSubmitted).toHaveBeenCalledWith("drop-1");
+      expect(mockAuth().setToast).not.toHaveBeenCalled();
     });
 
     it("asks no link for an entry on the 6529 Network, which 6529.io doesn't hold yet", async () => {
       jest
         .mocked(isChainSubmittedArtwork)
         .mockImplementation((artwork) => "chainEntry" in artwork);
-      await submitWith({
-        chainEntry: { entryId: "0xentry" },
-        title: "Card",
-        metadata: [],
-        pending: false,
-      });
+      await submitWith(chainEntry);
       expect(mockDocumentationDropSubmitted).not.toHaveBeenCalled();
+      expect(mockAuth().setToast).not.toHaveBeenCalled();
+    });
+
+    it("tells the artist their notes aren't linked to an entry on the 6529 Network", async () => {
+      jest
+        .mocked(isChainSubmittedArtwork)
+        .mockImplementation((artwork) => "chainEntry" in artwork);
+      await submitWith(chainEntry, true);
+      expect(mockDocumentationDropSubmitted).not.toHaveBeenCalled();
+      expect(mockAuth().setToast).toHaveBeenCalledWith({
+        message: NOT_LINKED,
+        type: "info",
+      });
     });
   });
 });

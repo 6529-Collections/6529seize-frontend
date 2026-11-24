@@ -674,6 +674,8 @@ const MEMES_SUBMISSION_MESSAGES = objectMessages("memes.submission", {
     "Read-only preview of how your submission may appear in different views.",
   "additionalInfo.description":
     "Complete the following details for distribution and storytelling purposes.",
+  "documentation.notLinked":
+    "Your notes aren't linked to this entry. Find them under My artwork documentation.",
 } as const);
 
 const MEMES_WAVE_FOOTER_MESSAGES = objectMessages("memes.waveFooter", {
