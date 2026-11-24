@@ -15,15 +15,49 @@ import { chainIdOf, isChainId, LegacyObjectKind, resolveWave } from "./ids";
 
 const HEAD = { at: "head" } as const;
 const lower = (value: string): string => value.toLowerCase();
-const WAVE_DECISIONS_LIMIT = 100;
+/** The gateway's largest page. */
+const WAVE_DECISIONS_PAGE = 500;
+/**
+ * A wave holds at most maxDecisionsPerWave (64 at rule version 7, 1,024 at
+ * most) decisions that aren't archived; archived ones stay listed. Ten
+ * pages leave room for years of archived ones.
+ */
+const WAVE_DECISIONS_PAGES = 10;
 
 export const entryGateway = {
-  /** A wave's decisions, every status. */
-  getWaveDecisions: (waveId: Hex, signal?: AbortSignal) =>
-    chainGatewayGet<readonly ChainDecision[]>(
-      `/v1/waves/${lower(waveId)}/decisions`,
-      { signal, query: { ...HEAD, limit: WAVE_DECISIONS_LIMIT } }
-    ),
+  /**
+   * A wave's decisions, every status, ascending by id. The route pages with
+   * `after` set to the last decisionId read. chainGatewayGet gives a page's
+   * rows without the envelope's `next`, so a full page is followed from its
+   * last id, and a page that doesn't move on ends the list.
+   */
+  getWaveDecisions: async (
+    waveId: Hex,
+    signal?: AbortSignal
+  ): Promise<readonly ChainDecision[]> => {
+    const decisions: ChainDecision[] = [];
+    let after: string | undefined;
+    for (let page = 0; page < WAVE_DECISIONS_PAGES; page += 1) {
+      const rows = await chainGatewayGet<readonly ChainDecision[]>(
+        `/v1/waves/${lower(waveId)}/decisions`,
+        { signal, query: { ...HEAD, limit: WAVE_DECISIONS_PAGE, after } }
+      );
+      decisions.push(...rows);
+      const last = rows.at(-1)?.decisionId;
+      if (
+        rows.length < WAVE_DECISIONS_PAGE ||
+        last === undefined ||
+        lower(last) === after
+      ) {
+        return decisions;
+      }
+      after = lower(last);
+    }
+    throw new ChainOperationError(
+      "rejected",
+      "This wave has more decisions than this page reads. Submit from the decision's own page."
+    );
+  },
 };
 
 const NOT_ON_CHAIN = "This decision isn't on the 6529 Network.";
