@@ -118,7 +118,7 @@ function MyVotesSaveButton({
           transition={
             reduceMotion ? MY_VOTES_FADE_TRANSITION : MY_VOTES_EFFECT_TRANSITION
           }
-          className={`tw-inline-flex tw-min-h-11 tw-min-w-11 tw-shrink-0 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-px-2 tw-text-xs tw-font-semibold focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 enabled:tw-cursor-pointer disabled:tw-cursor-not-allowed disabled:tw-opacity-50 ${mobile ? "tw-bg-transparent tw-text-primary-300" : "tw-bg-primary-500 tw-text-white tw-transition-colors tw-duration-200 enabled:active:tw-bg-primary-600 enabled:desktop-hover:hover:tw-bg-primary-600 motion-reduce:tw-transition-none"}`}
+          className={`tw-inline-flex tw-min-h-11 tw-min-w-11 tw-shrink-0 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-px-2 tw-text-xs tw-font-semibold focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 enabled:tw-cursor-pointer disabled:tw-cursor-not-allowed disabled:tw-opacity-50 ${mobile ? "tw-col-span-full tw-row-start-2 tw-justify-self-start tw-bg-transparent tw-text-primary-300 @[22rem]/my-vote:tw-col-span-1 @[22rem]/my-vote:tw-col-start-3 @[22rem]/my-vote:tw-row-start-1" : "tw-col-start-3 tw-row-start-1 tw-bg-primary-500 tw-text-white tw-transition-colors tw-duration-200 enabled:active:tw-bg-primary-600 enabled:desktop-hover:hover:tw-bg-primary-600 motion-reduce:tw-transition-none"}`}
         >
           <span className="tw-bg-inherit">{label}</span>
         </motion.button>
@@ -188,7 +188,7 @@ export function MyVotesInput({
     <>
       <form
         data-vote-controls
-        className={`tw-grid tw-w-full tw-min-w-0 tw-cursor-default tw-items-start tw-justify-start tw-gap-x-2 tw-gap-y-1 ${mobile ? "tw-grid-cols-[minmax(0,12rem)_auto]" : "tw-grid-cols-[minmax(0,12rem)_auto_auto]"} ${className}`}
+        className={`tw-grid tw-w-full tw-min-w-0 tw-cursor-default tw-items-start tw-justify-start tw-gap-x-2 tw-gap-y-1 ${mobile ? "tw-grid-cols-[minmax(0,8rem)_auto_auto] @[22rem]/my-vote:tw-grid-cols-[minmax(0,8rem)_auto_auto_auto]" : "tw-grid-cols-[minmax(0,8rem)_auto_auto_auto]"} ${className}`}
         onSubmit={(event) => {
           event.preventDefault();
           if (changed && valid && !disabled && !busy) onSubmit();
@@ -199,7 +199,7 @@ export function MyVotesInput({
         </label>
         <div
           data-my-vote-field
-          className={`tw-flex tw-w-full tw-min-w-0 tw-max-w-48 tw-items-center tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-pr-1 focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 ${mobile && !onExplain ? "tw-col-span-2" : ""} ${!valid || error ? "tw-ring-2 tw-ring-inset tw-ring-rose-400" : ""}`}
+          className={`tw-col-start-1 tw-row-start-1 tw-flex tw-w-full tw-min-w-0 tw-max-w-32 tw-items-center tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-pr-1 focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 ${!valid || error ? "tw-ring-2 tw-ring-inset tw-ring-rose-400" : ""}`}
         >
           <input
             ref={inputRef}
@@ -226,21 +226,28 @@ export function MyVotesInput({
             }}
             className="tw-h-11 tw-w-0 tw-min-w-0 tw-flex-1 tw-rounded-lg tw-border-0 tw-bg-transparent tw-py-0 tw-pl-3 tw-pr-1 tw-text-base tw-font-semibold !tw-tabular-nums tw-text-iron-50 tw-outline-none focus:tw-ring-0 disabled:tw-opacity-50"
           />
-          <span className="tw-max-w-[40%] tw-shrink-0 tw-truncate tw-px-1 tw-text-xs tw-text-iron-400">
-            {unit}
-          </span>
-          {mobile && saveAction}
         </div>
-        {!mobile && saveAction}
+        <span className="tw-col-start-2 tw-row-start-1 tw-flex tw-min-h-11 tw-items-center tw-whitespace-nowrap tw-text-xs tw-text-iron-400">
+          {unit}
+        </span>
+        {saveAction}
         {onExplain && (
-          <MyVotesExplainButton
-            mobile={mobile}
-            disabled={!canExplain || busy || disabled}
-            onExplain={onExplain}
-            tooltipId={explainTooltipId}
-            label={explainLabel}
-            description={explainDescription}
-          />
+          <div
+            className={
+              mobile
+                ? "tw-col-start-3 tw-row-start-1 @[22rem]/my-vote:tw-col-start-4"
+                : "tw-col-start-4 tw-row-start-1"
+            }
+          >
+            <MyVotesExplainButton
+              mobile={mobile}
+              disabled={!canExplain || busy || disabled}
+              onExplain={onExplain}
+              tooltipId={explainTooltipId}
+              label={explainLabel}
+              description={explainDescription}
+            />
+          </div>
         )}
         {showHelper && (
           <p

@@ -6890,7 +6890,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         containsSave: !!field.querySelector('button[type="submit"]'),
       };
     });
-    expect(compactField.width).toBeLessThanOrEqual(192);
+    expect(compactField.width).toBeLessThanOrEqual(128);
     expect(compactField.containsSave).toBe(false);
     expect((await save.boundingBox())!.x).toBeGreaterThan(compactField.right);
     const saveSurface = row
@@ -7383,7 +7383,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           await input.evaluate(
             (element) => element.parentElement!.getBoundingClientRect().width
           )
-        ).toBeLessThanOrEqual(192);
+        ).toBeLessThanOrEqual(128);
         expect(field.height).toBeGreaterThanOrEqual(44);
         expect(action.height).toBeGreaterThanOrEqual(44);
         expect(Math.abs(field.y - action.y)).toBeLessThanOrEqual(1);
