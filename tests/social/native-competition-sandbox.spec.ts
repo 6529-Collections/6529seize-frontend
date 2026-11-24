@@ -7281,8 +7281,33 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       path: testInfo.outputPath("my-votes-desktop-editing.png"),
       animations: "disabled",
     });
-    await input.press("Enter");
+    let releaseSave!: () => void;
+    const pendingSave = new Promise<void>((resolve) => {
+      releaseSave = resolve;
+    });
+    let saveAttempts = 0;
+    await page.route(
+      "**/competitions/alpha/entries/entry-alpha/votes/me",
+      async (route) => {
+        saveAttempts += 1;
+        await pendingSave;
+        await route.fallback();
+      }
+    );
+    try {
+      await input.press("Enter");
+      await expect.poll(() => saveAttempts).toBe(1);
+      await expect(input).toBeEnabled();
+      await expect(input).toHaveJSProperty("readOnly", true);
+      await expect(input).toBeFocused();
+      await input.press("Enter");
+      expect(saveAttempts).toBe(1);
+    } finally {
+      releaseSave();
+    }
     await expect(save).toHaveCount(0);
+    await expect(input).toHaveJSProperty("readOnly", false);
+    await expect(input).toBeFocused();
     expect(sandbox.requests).toHaveLength(1);
     expect(sandbox.requests[0]?.body).toMatchObject({ value: 40 });
     await input.fill("9999");
@@ -7381,9 +7406,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       .getByRole("tabpanel", { name: "My Votes", exact: true })
       .getByRole("article")
       .first();
-    await expect(row.getByRole("checkbox")).toHaveCount(0);
     const artwork = row.getByRole("button", { name: /^Open / });
     await expect(artwork).toBeVisible();
+    await expect(row.getByRole("checkbox")).toHaveCount(0);
     const geometry = await artwork.evaluate((element) => {
       const box = element.getBoundingClientRect();
       return {
@@ -7494,6 +7519,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     for (const surface of ["mobile web", "iOS app", "Android app"] as const) {
       test(`edits and selects compact votes in ${surface}`, async ({
         page,
+        browserName,
       }, testInfo) => {
         await page.setViewportSize({ width: 390, height: 844 });
         if (surface !== "mobile web") {
@@ -7551,6 +7577,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           name: "Select",
           exact: true,
         });
+        await expect(select).not.toHaveAttribute("aria-pressed");
         await expect(balance).toBeVisible();
         await expect(select).toHaveCSS("color", "rgb(206, 207, 212)");
         await expect(select).toHaveCSS("height", "44px");
@@ -7806,6 +7833,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await expect(input).toHaveValue("-40");
         await capture("selected");
         const done = panel.getByRole("button", { name: "Done", exact: true });
+        await expect(done).not.toHaveAttribute("aria-pressed");
         if (testInfo.project.use.hasTouch) await done.tap();
         else await done.click();
         if (testInfo.project.use.hasTouch) {
@@ -7817,21 +7845,40 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await expect(row.getByRole("checkbox")).toHaveCount(0);
         await expect(reset).toHaveCount(0);
         const bounds = (await row.getByRole("heading").boundingBox())!;
-        const touch = await page.context().newCDPSession(page);
-        try {
-          await touch.send("Input.dispatchTouchEvent", {
-            type: "touchStart",
-            touchPoints: [{ x: bounds.x + 8, y: bounds.y + 8 }],
+        if (browserName === "chromium") {
+          const touch = await page.context().newCDPSession(page);
+          try {
+            await touch.send("Input.dispatchTouchEvent", {
+              type: "touchStart",
+              touchPoints: [{ x: bounds.x + 8, y: bounds.y + 8 }],
+            });
+            await expect(row.getByRole("checkbox")).toBeChecked();
+          } finally {
+            await touch.send("Input.dispatchTouchEvent", {
+              type: "touchEnd",
+              touchPoints: [],
+            });
+            await touch.detach();
+          }
+        } else {
+          const holdTarget = row.getByRole("heading").getByRole("button");
+          await holdTarget.dispatchEvent("pointerdown", {
+            pointerType: "touch",
+            isPrimary: true,
+            clientX: bounds.x + 8,
+            clientY: bounds.y + 8,
           });
-          await expect(row.getByRole("checkbox")).toBeChecked();
-        } finally {
-          await touch.send("Input.dispatchTouchEvent", {
-            type: "touchEnd",
-            touchPoints: [],
-          });
-          await touch.detach();
+          try {
+            await expect(row.getByRole("checkbox")).toBeChecked();
+          } finally {
+            await holdTarget.dispatchEvent("pointerup", {
+              pointerType: "touch",
+              isPrimary: true,
+            });
+          }
         }
         await expect(row.getByRole("checkbox")).toBeChecked();
+        await expect(page.getByRole("dialog")).toHaveCount(0);
         await expectNoHorizontalOverflow(page);
       });
     }
@@ -8045,10 +8092,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
             }
           );
         });
-        for (const box of width >= 1024 ? boxes : []) {
+        for (const box of boxes) {
           expect(box.left).toBeGreaterThanOrEqual(-1);
           expect(box.right).toBeGreaterThanOrEqual(-1);
-          expect(box.clipped, JSON.stringify({ width, ...box })).toBe(false);
+          if (box.tag !== "INPUT" || width >= 1024)
+            expect(box.clipped, JSON.stringify({ width, ...box })).toBe(false);
         }
         if (contentWidth >= 640) {
           const picture = (await thumbnail.boundingBox())!;

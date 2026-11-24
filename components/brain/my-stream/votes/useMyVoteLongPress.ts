@@ -1,4 +1,10 @@
-import { useEffect, useRef, type PointerEvent, type MouseEvent } from "react";
+import {
+  useCallback,
+  useLayoutEffect,
+  useRef,
+  type PointerEvent,
+  type MouseEvent,
+} from "react";
 import useLongPressClickSuppression from "@/hooks/useLongPressClickSuppression";
 import { DEFAULT_LONG_PRESS_DURATION_MS } from "@/hooks/useLongPressInteraction";
 
@@ -15,11 +21,11 @@ export function useMyVoteLongPress(enabled: boolean, onSelect: () => void) {
   const origin = useRef({ x: 0, y: 0 });
   const held = useRef(false);
   const suppression = useLongPressClickSuppression();
-  const cancel = () => {
+  const cancel = useCallback(() => {
     if (timer.current) globalThis.clearTimeout(timer.current);
     timer.current = null;
-  };
-  useEffect(() => cancel, [enabled]);
+  }, []);
+  useLayoutEffect(() => cancel, [enabled, cancel]);
 
   return {
     onPointerDown: (event: PointerEvent<HTMLElement>) => {
@@ -52,12 +58,22 @@ export function useMyVoteLongPress(enabled: boolean, onSelect: () => void) {
     },
     onPointerUp: () => {
       cancel();
+      held.current = false;
       suppression.releaseSuppressionAfterTouchEnd();
     },
-    onPointerCancel: cancel,
-    onClickCapture: suppression.handleClickCapture,
+    onPointerCancel: () => {
+      cancel();
+      held.current = false;
+      suppression.clearSuppression();
+    },
+    onClickCapture: (event: MouseEvent<HTMLElement>) => {
+      if (event.detail !== 0) suppression.handleClickCapture(event);
+    },
     onContextMenu: (event: MouseEvent<HTMLElement>) => {
-      if ((enabled || held.current) && canStartSelection(event.target))
+      if (
+        (timer.current !== null || held.current) &&
+        canStartSelection(event.target)
+      )
         event.preventDefault();
     },
   };

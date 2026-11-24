@@ -1,4 +1,11 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  act,
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+} from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import MyStreamWaveMyVoteInput from "@/components/brain/my-stream/votes/MyStreamWaveMyVoteInput";
 import { AuthContext } from "@/components/auth/Auth";
@@ -420,6 +427,34 @@ describe("MyStreamWaveMyVoteInput", () => {
       expect(mutateAsync).toHaveBeenCalledWith({ rate: 5, previousRate: 4 })
     );
     expect(auth.requestAuth).toHaveBeenCalledTimes(1);
+  });
+
+  it("retains Enter focus and blocks edits and repeat submission while authentication is pending", async () => {
+    let finishAuth!: (result: { success: boolean }) => void;
+    auth.requestAuth.mockReturnValueOnce(
+      new Promise<{ success: boolean }>((resolve) => {
+        finishAuth = resolve;
+      })
+    );
+    const user = userEvent.setup();
+    render(<MyStreamWaveMyVoteInput drop={drop} />, { wrapper });
+    const input = screen.getByRole("textbox");
+    await user.clear(input);
+    await user.type(input, "5{Enter}");
+    expect(auth.requestAuth).toHaveBeenCalledTimes(1);
+    expect(input).toBeEnabled();
+    expect(input).toHaveAttribute("readonly");
+    expect(input).toHaveFocus();
+    await user.type(input, "9{Enter}");
+    expect(input).toHaveValue("5");
+    expect(auth.requestAuth).toHaveBeenCalledTimes(1);
+    expect(mutateAsync).not.toHaveBeenCalled();
+    await act(async () => finishAuth({ success: true }));
+    await waitFor(() =>
+      expect(mutateAsync).toHaveBeenCalledWith({ rate: 5, previousRate: 0 })
+    );
+    expect(input).toHaveFocus();
+    expect(input).not.toHaveAttribute("readonly");
   });
 
   it("does not submit when voting is closed", () => {

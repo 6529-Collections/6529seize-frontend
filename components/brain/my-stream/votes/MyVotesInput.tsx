@@ -227,7 +227,8 @@ export function MyVotesInput({
             value={
               focused || !hasNumber ? value : formatInteger(locale, numeric)
             }
-            disabled={disabled || busy}
+            disabled={disabled}
+            readOnly={busy}
             aria-invalid={!valid || !!error}
             aria-describedby={describedBy || undefined}
             onFocus={() => setFocused(true)}
