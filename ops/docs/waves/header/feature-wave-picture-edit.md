@@ -32,9 +32,12 @@ Changing a wave picture leaves every decision’s rules and submission settings 
 
 ## User Journey
 
-1. Select the avatar pencil to open `Update wave picture`.
-2. Add an image by click or drag-and-drop.
-3. Confirm the round preview updates.
+1. Select the avatar pencil. On phones this opens the system photo/file picker
+   directly. Cancelling the picker leaves About open.
+2. On desktop, add an image by click or drag-and-drop. Touch controls use photo
+   selection wording.
+3. On phones, review the selected image in a full-screen preview. Desktop keeps
+   its round preview.
 4. Select `Save`.
 5. Complete auth.
 6. The app uploads the file, updates `waves/{waveId}`, refreshes wave data, and
@@ -47,7 +50,8 @@ Changing a wave picture leaves every decision’s rules and submission settings 
 - Only the first selected or dropped file is used.
 - `Save` stays disabled until a valid file is selected.
 - While saving, `Save` stays disabled and shows `Uploading`.
-- `Cancel`, outside click, or `Escape` closes without saving.
+- On phones, Back asks **Discard changes?** before leaving an unsaved preview.
+- Desktop Cancel, outside click, or Escape closes without saving.
 - There is no in-modal remove action in this flow.
 
 ## Errors and Recovery

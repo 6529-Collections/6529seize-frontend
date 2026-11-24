@@ -1,5 +1,7 @@
 "use client";
 
+import { WaveInformationPanelContext } from "@/components/brain/mobile/WaveInformationPanelContext";
+import WaveSettingSwitch from "./WaveSettingSwitch";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import {
   getWaveChatRepliesSettings,
@@ -7,7 +9,7 @@ import {
   type WaveChatRepliesSettings,
 } from "@/helpers/waves/wave-chat-replies.helpers";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
-import { useCallback, useState } from "react";
+import { useCallback, useContext, useState } from "react";
 import WaveChatRepliesEditorForm from "./WaveChatRepliesEditorForm";
 import WaveSettingRow from "./WaveSettingRow";
 import { useWaveSettingUpdater } from "./useWaveSettingUpdater";
@@ -17,6 +19,8 @@ interface WaveChatRepliesProps {
 }
 
 export default function WaveChatReplies({ wave }: WaveChatRepliesProps) {
+  const phoneDetails =
+    useContext(WaveInformationPanelContext)?.isPhone === true;
   const { canEdit, mutating, saveChatUpdate } = useWaveSettingUpdater(wave);
   const { open, collapsed } = getWaveChatRepliesSettings(wave.chat);
   const [draft, setDraft] = useState<WaveChatRepliesSettings>({
@@ -34,6 +38,38 @@ export default function WaveChatReplies({ wave }: WaveChatRepliesProps) {
       replies: { open: draft.open, collapsed: draft.collapsed },
     }));
   };
+
+  if (phoneDetails)
+    return (
+      <>
+        <WaveSettingSwitch
+          label={waveRightPanelText(
+            "waves.sidebar.rightPanel.configuration.chat.replies.openLabel"
+          )}
+          checked={open}
+          disabled={mutating || !canEdit}
+          onChange={(next) =>
+            saveChatUpdate(
+              () => {},
+              (chat) => ({ ...chat, replies: { open: next, collapsed } })
+            )
+          }
+        />
+        <WaveSettingSwitch
+          label={waveRightPanelText(
+            "waves.sidebar.rightPanel.configuration.chat.replies.collapsedLabel"
+          )}
+          checked={collapsed}
+          disabled={mutating || !canEdit}
+          onChange={(next) =>
+            saveChatUpdate(
+              () => {},
+              (chat) => ({ ...chat, replies: { open, collapsed: next } })
+            )
+          }
+        />
+      </>
+    );
 
   return (
     <WaveSettingRow

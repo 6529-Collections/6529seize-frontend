@@ -25,6 +25,7 @@ import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { ApiWaveScore } from "@/generated/models/ApiWaveScore";
 import { getWaveFeatureDescriptor } from "@/services/analytics/waveFeatureUsage";
 
 let mockDeviceInfo = { isApp: false, hasTouchScreen: false };
@@ -703,6 +704,51 @@ it("keeps the overlaid score inside the wave link and opens details on hover", a
     "data-is-drop-wave",
     "true"
   );
+});
+
+it("keeps touch recommendations navigable without opening a score card from focus or emulated hover", () => {
+  jest.useFakeTimers();
+  try {
+    const onClick = jest.fn();
+    render(
+      <HighlyRatedWavesToggle
+        isTouchPreview
+        paddingClassName=""
+        previewItems={[
+          {
+            wave: createMockMinimalWave({
+              id: "touch-recommendation",
+              name: "Touch recommendation",
+              waveScore: Object.assign(new ApiWaveScore(), {
+                visibility_score: 93,
+                quality_score: 91,
+                hotness_score: 97,
+                rep_sort_score: 73,
+              }),
+            }),
+            href: "/waves/touch-recommendation",
+            isActive: false,
+            onClick,
+          },
+        ]}
+      />
+    );
+    const link = screen.getByRole("link", {
+      name: "Open Touch recommendation, score 93",
+    });
+    fireEvent.touchStart(link);
+    fireEvent.focus(link);
+    fireEvent.mouseEnter(link);
+    fireEvent.click(screen.getByText("93", { selector: "text" }));
+    act(() => jest.advanceTimersByTime(1000));
+    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(link).toHaveAttribute("href", "/waves/touch-recommendation");
+    expect(
+      screen.queryByRole("dialog", { name: "Wave score details" })
+    ).not.toBeInTheDocument();
+  } finally {
+    jest.useRealTimers();
+  }
 });
 
 it("uses no-message copy in the combined highly rated score card", async () => {

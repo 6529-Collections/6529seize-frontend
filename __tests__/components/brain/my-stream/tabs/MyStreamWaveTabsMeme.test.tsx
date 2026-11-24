@@ -255,6 +255,7 @@ describe("MyStreamWaveTabsMeme", () => {
       </SidebarProvider>
     );
 
+    fireEvent.click(screen.getByRole("button", { name: "More wave actions" }));
     expect(screen.getByRole("button", { name: "submit" })).toBeInTheDocument();
   });
 
@@ -345,15 +346,6 @@ describe("MyStreamWaveTabsMeme", () => {
     const moreActionsButton = screen.getByRole("button", {
       name: "More wave actions",
     });
-    const submitButton = screen.getByRole("button", { name: "submit" });
-    const searchButton = screen.getByRole("button", {
-      name: "Search messages in this wave",
-    });
-    expect(submitButton.nextElementSibling).toBe(searchButton);
-    expect(searchButton.nextElementSibling).toBe(moreActionsButton);
-    expect(moreActionsButton.nextElementSibling).toBe(
-      screen.getByRole("button", { name: "Wave details" })
-    );
     fireEvent.click(screen.getByRole("button", { name: "About Wave" }));
     expect(mockOpenInformation).toHaveBeenCalledWith("w1");
     fireEvent.click(moreActionsButton);
@@ -362,23 +354,27 @@ describe("MyStreamWaveTabsMeme", () => {
     });
     expect(moreActionsDialog).toBeInTheDocument();
     expect(
-      within(moreActionsDialog).queryByRole("button", {
-        name: "Search messages in this wave",
+      within(moreActionsDialog).getByRole("button", {
+        name: "Search messages",
+        exact: true,
       })
-    ).toBeNull();
+    ).toBeInTheDocument();
+    expect(
+      within(moreActionsDialog).getByRole("button", { name: "submit" })
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Share wave" })
     ).toBeInTheDocument();
     expect(
-      within(moreActionsDialog).queryByRole("button", { name: "Wave details" })
-    ).toBeNull();
+      within(moreActionsDialog).getByRole("button", {
+        name: "Wave details",
+      })
+    ).toBeInTheDocument();
     fireEvent.click(
       within(moreActionsDialog).getByRole("button", { name: "Close panel" })
     );
     await waitFor(() => expect(moreActionsDialog).not.toBeInTheDocument());
-    fireEvent.click(screen.getByRole("button", { name: "Wave details" }));
-    expect(
-      screen.getByRole("button", { name: "Hide details" })
-    ).toHaveAttribute("aria-expanded", "true");
+    fireEvent.click(screen.getByRole("button", { name: "About Wave" }));
+    expect(mockOpenInformation).toHaveBeenCalledWith("w1");
   });
 });

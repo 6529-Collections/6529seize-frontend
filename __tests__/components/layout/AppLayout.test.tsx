@@ -216,12 +216,18 @@ describe("AppLayout", () => {
       `[${PULL_TO_REFRESH_TRANSFORM_ROOT_ATTRIBUTE}="true"]`
     );
     const bottomNav = screen.getByTestId("bottom-nav");
+    const swipePage = container.querySelector("[data-wave-swipe-page]");
 
     expect(scrollTarget).toBeInTheDocument();
     expect(transformRoot).toBeInTheDocument();
     expect(scrollTarget).toContainElement(transformRoot as HTMLElement);
     expect(scrollTarget).not.toContainElement(bottomNav);
     expect(transformRoot).not.toContainElement(bottomNav);
+    expect(transformRoot).toContainElement(swipePage as HTMLElement);
+    expect(swipePage).not.toBe(transformRoot);
+    expect(swipePage).toContainElement(screen.getByTestId("header"));
+    expect(swipePage).toContainElement(screen.getByText("child"));
+    expect(swipePage).not.toContainElement(bottomNav);
     expect(mockPullToRefresh).toHaveBeenCalledWith(
       expect.objectContaining({
         contentRef: expect.objectContaining({ current: transformRoot }),

@@ -4,6 +4,7 @@ import type { ApiWaveScope } from "@/generated/models/ApiWaveScope";
 import WaveGroupTitle from "./WaveGroupTitle";
 import WaveGroupEditButtons from "./edit/WaveGroupEditButtons";
 import { useContext } from "react";
+import { WaveInformationPanelContext } from "@/components/brain/mobile/WaveInformationPanelContext";
 import { AuthContext } from "@/components/auth/Auth";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
@@ -21,6 +22,7 @@ export default function WaveGroup({
   readonly type: WaveGroupType;
   readonly wave: ApiWave;
 }) {
+  const phone = useContext(WaveInformationPanelContext)?.isPhone === true;
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const showEdit =
     type !== WaveGroupType.DROP &&
@@ -37,7 +39,9 @@ export default function WaveGroup({
   );
 
   return (
-    <div className="tw-group tw-relative tw-grid tw-min-h-9 tw-w-full tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)] tw-items-center tw-gap-x-2 tw-px-2 tw-py-1.5 tw-text-sm">
+    <div
+      className={`tw-group tw-relative tw-grid ${phone ? "tw-min-h-12" : "tw-min-h-9"} tw-w-full tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)] tw-items-center tw-gap-x-2 tw-px-2 tw-py-1.5 tw-text-sm [&_a]:tw-relative [&_a]:tw-z-10`}
+    >
       <div className="tw-flex tw-min-w-0 tw-gap-x-4 tw-py-0.5 tw-leading-5">
         <WaveGroupTitle type={type} />
       </div>

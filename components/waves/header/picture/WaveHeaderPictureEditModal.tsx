@@ -13,6 +13,8 @@ import { t } from "@/i18n/messages";
 import { updateWaveHub } from "@/services/api/wave-hub-api";
 import { multiPartUpload } from "../../create-wave/services/multiPartUpload";
 import CreateWaveImageInput from "../../create-wave/overview/CreateWaveImageInput";
+import WavePicturePreview from "./WavePicturePreview";
+import { useMobilePageDraft } from "@/components/mobile-navigation/MobilePageContext";
 import Button from "@/components/utils/button/Button";
 
 function getPictureUpdateErrorMessage(error: unknown): string {
@@ -38,19 +40,23 @@ export default function WaveHeaderPictureEditModal({
   wave,
   onClose,
   embedded = false,
+  initialFile = null,
 }: {
   readonly isOpen: boolean;
   readonly wave: ApiWave;
   readonly onClose: () => void;
   readonly embedded?: boolean;
+  readonly initialFile?: File | null;
 }) {
   const { setToast, requestAuth } = useContext(AuthContext);
   const { onWaveCreated } = useContext(ReactQueryWrapperContext);
   const locale = useBrowserLocale();
 
-  const [file, setFile] = useState<File | null>(null);
+  const [selectedFile, setFile] = useState<File | null>(null);
+  const file = selectedFile ?? initialFile;
   const [mutating, setMutating] = useState(false);
 
+  useMobilePageDraft(isOpen && file !== null, isOpen && mutating);
   const submission = useRef<AbortController | null>(null);
   useLayoutEffect(() => {
     if (!isOpen) submission.current?.abort();
@@ -124,17 +130,22 @@ export default function WaveHeaderPictureEditModal({
 
   const form = (
     <form onSubmit={onSubmit} className="tw-px-4 sm:tw-px-6">
-      <p className="tw-m-0 tw-text-sm tw-leading-5 tw-text-iron-400">
-        {t(locale, "waves.header.pictureEditDescription")}
-      </p>
-
-      <div className="tw-mt-5">
-        <CreateWaveImageInput
-          imageToShow={file}
-          setFile={setFile}
-          allowRemove={false}
-        />
-      </div>
+      {initialFile && file ? (
+        <WavePicturePreview file={file} />
+      ) : (
+        <>
+          <p className="tw-m-0 tw-text-sm tw-leading-5 tw-text-iron-400">
+            {t(locale, "waves.header.pictureEditDescription")}
+          </p>
+          <div className="tw-mt-5">
+            <CreateWaveImageInput
+              imageToShow={file}
+              setFile={setFile}
+              allowRemove={false}
+            />
+          </div>
+        </>
+      )}
 
       <div className="tw-flex tw-flex-col tw-gap-2 tw-pt-5 md:tw-flex-row-reverse md:tw-justify-start">
         <Button
@@ -148,15 +159,17 @@ export default function WaveHeaderPictureEditModal({
         >
           {t(locale, "waves.header.pictureEditSave")}
         </Button>
-        <Button
-          onClick={onClose}
-          variant="secondary"
-          size="lg"
-          fullWidth
-          className="tw-hidden md:tw-inline-flex md:tw-w-auto"
-        >
-          {t(locale, "waves.header.pictureEditCancel")}
-        </Button>
+        {!embedded && (
+          <Button
+            onClick={onClose}
+            variant="secondary"
+            size="lg"
+            fullWidth
+            className="tw-hidden md:tw-inline-flex md:tw-w-auto"
+          >
+            {t(locale, "waves.header.pictureEditCancel")}
+          </Button>
+        )}
       </div>
     </form>
   );

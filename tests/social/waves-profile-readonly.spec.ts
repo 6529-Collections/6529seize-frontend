@@ -1774,7 +1774,11 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     expect(settings.memes_wave_id).toMatch(/^[0-9a-f-]{36}$/i);
     await gotoReady(page, `/waves/${settings.memes_wave_id}`);
     await page
-      .getByRole("navigation", { name: "Wave sections" })
+      .getByRole("button")
+      .locator(":scope[data-wave-phone-more]")
+      .click();
+    await page
+      .getByRole("dialog", { name: "Wave sections", exact: true })
       .getByRole("button", { name: "Settings", exact: true })
       .click();
     const rules = page

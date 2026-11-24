@@ -23,6 +23,10 @@ Entry behavior differs by wave type:
 ## Entry Surfaces
 
 - Open a wave and select `Leaderboard`.
+- On phones, open `More wave actions` and choose `How to Submit` when submission
+  is unavailable. A bottom sheet with an X close control shows the existing
+  access details or Main Stage nomination guidance. Submission help is not
+  repeated at the top of Leaderboard.
 - Standard waves:
   - Header `Drop` is shown only when logged in and eligible.
   - Empty list shows `Drop` in the `No drops to show` card.
