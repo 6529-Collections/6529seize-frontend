@@ -884,6 +884,7 @@ describe("MemesArtSubmissionContainer", () => {
       expect(mockAuth().setToast).toHaveBeenCalledWith({
         message: NOT_LINKED,
         type: "info",
+        autoClose: 10_000,
       });
     });
   });

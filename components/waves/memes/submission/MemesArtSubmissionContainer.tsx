@@ -335,9 +335,11 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
         documentationRef.current?.onDropSubmitted(drop.id);
       }
       if (drop && isChainSubmittedArtwork(drop) && hasDocumentation) {
+        // Longer than an info toast's 3 seconds: it says where the notes are.
         setToast({
           message: t(locale, "memes.submission.documentation.notLinked"),
           type: "info",
+          autoClose: 10_000,
         });
       }
       if (drop && isResubmission) {
