@@ -105,9 +105,14 @@ export function useWavesWritesPaused(kind?: WavesChainWrite): boolean {
   return scope !== "stays" && isWavesWriteClosed(phase, kind);
 }
 
-/** Whether waves writes go to the 6529 Network now. */
+/**
+ * Whether waves writes go to the 6529 Network now. Inside a wave that stays
+ * on 6529.io they keep going to 6529.io's API, which keeps taking them.
+ */
 export function useChainWavesActive(): boolean {
-  return useWavesMovePhase() === "moved" && isChainWavesEnabled();
+  const phase = useWavesMovePhase();
+  const scope = useWavesMoveScope();
+  return scope !== "stays" && phase === "moved" && isChainWavesEnabled();
 }
 
 /**
