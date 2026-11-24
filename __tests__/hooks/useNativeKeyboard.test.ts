@@ -377,6 +377,29 @@ describe("useNativeKeyboard", () => {
       }
     );
 
+    it("finishes an Android hide when the viewport still reports the keyboard", async () => {
+      const { result } = await renderNativeKeyboardHook();
+      jest.useFakeTimers();
+      try {
+        act(() => {
+          input.focus();
+          listeners["keyboardWillShow"]?.({ keyboardHeight: 320 });
+          listeners["keyboardDidShow"]?.({ keyboardHeight: 320 });
+          listeners["keyboardWillHide"]?.();
+        });
+        flushViewportResize(800, 480);
+        expect(result.current.isVisible).toBe(false);
+        expect(result.current.phase).toBe("hiding");
+
+        act(() => {
+          jest.advanceTimersByTime(500);
+        });
+        expect(result.current.phase).toBe("hidden");
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
     it("avoids duplicate Android visibility mutations while preserving geometry and lifecycle updates", async () => {
       const mutations: MutationRecord[] = [];
       const observer = new MutationObserver((records) => {

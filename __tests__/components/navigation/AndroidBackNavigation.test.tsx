@@ -139,6 +139,21 @@ it("navigates once a hiding keyboard has not finished in time", () => {
   expect(mockGoBack).toHaveBeenCalledTimes(1);
 });
 
+it("navigates past the hiding window even if the hiding keyboard reports visible", () => {
+  // A viewport update during hiding can report a visible keyboard.
+  mockKeyboard = { isVisible: true, phase: "hiding" };
+  mockHistory.canGoBack = true;
+  render(<AndroidBackNavigation />);
+  back();
+  expect(mockGoBack).not.toHaveBeenCalled();
+  act(() => {
+    jest.advanceTimersByTime(600);
+  });
+  back();
+  expect(mockHideKeyboard).toHaveBeenCalledTimes(1);
+  expect(mockGoBack).toHaveBeenCalledTimes(1);
+});
+
 it("closes a top layer before a single drop or wave", () => {
   globalThis.history.replaceState(null, "", "/waves/wave-a?drop=drop-a");
   mockDismissLayer.mockReturnValue(true);

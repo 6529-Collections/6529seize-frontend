@@ -43,11 +43,17 @@ function dismissKeyboard(
   keyboard: ReturnType<typeof useNativeKeyboard>,
   hidingSince: number | null
 ): boolean {
-  const isHiding =
-    keyboard.phase === "hiding" &&
-    hidingSince !== null &&
-    Date.now() - hidingSince < KEYBOARD_HIDING_BACK_WINDOW_MS;
-  if (!keyboard.isVisible && !isHiding) return false;
+  if (keyboard.phase === "hiding") {
+    // A stale hiding phase must not consume Back, even if it reports visible.
+    if (
+      hidingSince === null ||
+      Date.now() - hidingSince >= KEYBOARD_HIDING_BACK_WINDOW_MS
+    ) {
+      return false;
+    }
+  } else if (!keyboard.isVisible) {
+    return false;
+  }
   // Android normally dismisses the IME before dispatching Back. Also cover
   // shells that deliver the callback while their keyboard is hiding.
   if (document.activeElement instanceof HTMLElement) {

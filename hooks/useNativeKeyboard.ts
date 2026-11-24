@@ -415,6 +415,13 @@ function syncKeyboardVisibilityFromViewport(): void {
       return;
     }
 
+    // During a native hide the viewport can still report the old keyboard
+    // height. Keep the published closed layout and the pending fallback: only
+    // a native show reopens it, so the hide always finishes.
+    if (nativeKeyboardLifecycleActive && currentState.phase === "hiding") {
+      return;
+    }
+
     clearHiddenFallbackTimeout();
     setKeyboardState({
       isVisible: true,
