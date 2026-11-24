@@ -82,6 +82,13 @@ export default function PhoneWaveTabs({
   const primary = showAll ? [...everyday, ...reference] : everyday.slice(0, 4);
   const secondary = showAll ? [] : [...everyday.slice(4), ...reference];
   const activeSecondary = secondary.find((tab) => tab.key === activeKey);
+  const overflowTabId = activeSecondary?.panelId
+    ? `${dialogId}-tab`
+    : undefined;
+  const overflowControls =
+    [activeSecondary?.panelId, isOpen ? dialogId : undefined]
+      .filter(Boolean)
+      .join(" ") || undefined;
   if (isOpen && secondary.length === 0) setIsOpen(false);
   const rowLayout = JSON.stringify(
     primary.map((tab) => [
@@ -92,7 +99,7 @@ export default function PhoneWaveTabs({
       Boolean(tab.leadingIcon),
     ])
   );
-  const hasTabPanels = primary.some((tab) => tab.panelId);
+  const hasTabPanels = tabs.some((tab) => tab.panelId);
   useEffect(() => {
     const row = rowRef.current;
     if (!row) return;
@@ -105,10 +112,11 @@ export default function PhoneWaveTabs({
     revealActiveTab();
     const observer = new ResizeObserver(revealActiveTab);
     observer.observe(row);
-    const activeTab = row.querySelector<HTMLElement>(
-      '[aria-selected="true"], [aria-current="true"]'
-    );
-    if (activeTab) observer.observe(activeTab);
+    row
+      .querySelectorAll<HTMLElement>(
+        "[data-wave-tab-value], [data-wave-phone-more]"
+      )
+      .forEach((tab) => observer.observe(tab));
     return () => observer.disconnect();
   }, [activeKey, activeSecondary?.label, rowLayout]);
 
@@ -127,6 +135,7 @@ export default function PhoneWaveTabs({
             className="tw-flex tw-flex-none tw-items-stretch tw-gap-1"
             role={hasTabPanels ? "tablist" : undefined}
             aria-label={hasTabPanels ? sections : undefined}
+            aria-owns={overflowTabId}
           >
             {primary.map((tab) => {
               const selected = tab.key === activeKey;
@@ -175,13 +184,16 @@ export default function PhoneWaveTabs({
           </div>
           {secondary.length > 0 && (
             <button
+              id={overflowTabId}
               ref={settingsRef}
               type="button"
+              role={overflowTabId ? "tab" : undefined}
+              aria-selected={overflowTabId ? true : undefined}
               aria-haspopup="dialog"
               aria-describedby={`${dialogId}-description`}
-              aria-expanded={isOpen}
+              aria-expanded={overflowTabId ? undefined : isOpen}
               aria-current={activeSecondary ? "true" : undefined}
-              aria-controls={isOpen ? dialogId : undefined}
+              aria-controls={overflowControls}
               data-wave-phone-more=""
               className={`${TAB_LAYOUT} ${getUnderlineTabClasses({ active: Boolean(activeSecondary), externalIndicator: true })}`}
               onClick={() => setIsOpen(true)}

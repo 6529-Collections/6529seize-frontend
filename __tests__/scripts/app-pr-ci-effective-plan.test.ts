@@ -322,6 +322,7 @@ describe("effective App PR CI plan", () => {
     "components/brain/mobile/WaveInformationSheet.tsx",
     "components/brain/my-stream/tabs/PhoneWaveTabs.tsx",
     "components/mobile-navigation/MobileNavigationView.tsx",
+    "components/mobile-navigation/SpringNavigationSurface.tsx",
     "components/mobile-navigation/MobilePageContext.tsx",
     "components/mobile-navigation/useMobileFormHistory.ts",
     "components/waves/specs/WaveSettingSwitch.tsx",

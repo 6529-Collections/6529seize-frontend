@@ -1,7 +1,5 @@
 import React, { useState } from "react";
-import WaveSubmissionHelpDialog, {
-  type WaveSubmissionHelpAction,
-} from "@/components/waves/header/WaveSubmissionHelpDialog";
+import WaveSubmissionHelpDialog from "@/components/waves/header/WaveSubmissionHelpDialog";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import {
@@ -55,8 +53,9 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
 }) => {
   const { activeContentTab, setActiveContentTab } = useContentTab();
   const locale = useBrowserLocale();
-  const [submissionHelp, setSubmissionHelp] =
-    useState<WaveSubmissionHelpAction | null>(null);
+  const [isSubmissionHelpOpen, setIsSubmissionHelpOpen] = useState(false);
+  const submissionHelp = isSubmissionHelpOpen ? chatSubmitDropAction : null;
+  if (isSubmissionHelpOpen && !submissionHelp) setIsSubmissionHelpOpen(false);
   const { items: createItems, dialogs: createDialogs } =
     useWaveCreateMenuActions({
       wave,
@@ -108,7 +107,7 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
         <button
           type="button"
           className={menuClass}
-          onClick={() => selectPhoneAction(() => setSubmissionHelp(action))}
+          onClick={() => selectPhoneAction(() => setIsSubmissionHelpOpen(true))}
         >
           <LockClosedIcon
             className="tw-size-4 tw-shrink-0"
@@ -227,7 +226,7 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
       {submissionHelp && (
         <WaveSubmissionHelpDialog
           action={submissionHelp}
-          onClose={() => setSubmissionHelp(null)}
+          onClose={() => setIsSubmissionHelpOpen(false)}
         />
       )}
     </div>

@@ -676,6 +676,12 @@ async function openNewCompetition(page: Page) {
     .getByRole("link", { name: /^(?:New decision|Decision)$/, exact: true })
     .click();
 }
+async function openSubmissionAction(page: Page) {
+  const action = page.getByRole("button", { name: /^Submit (Work|Meme)/ });
+  if ((page.viewportSize()?.width ?? 1280) < 768)
+    await openPhoneWaveActions(page);
+  await action.click();
+}
 async function selectCompetitionFilter(page: Page, name: string) {
   const more = page.getByRole("button", { name: "More tabs", exact: true });
   const tab = page.getByRole("tab", { name, exact: true });
@@ -700,7 +706,7 @@ const waveTabStrip = (page: Page) =>
 const phoneWaveTabs = (page: Page) =>
   page.getByRole("main").locator("[data-wave-phone-tabs]");
 const phoneWaveMore = (page: Page) =>
-  page.getByRole("button").locator(":scope[data-wave-phone-more]");
+  page.getByRole("main").locator("[data-wave-phone-more]");
 const phoneWaveSections = (page: Page) =>
   page.getByRole("dialog", { name: "Wave sections", exact: true });
 const waveSectionButton = (page: Page, name: string | RegExp, app: boolean) =>
@@ -729,6 +735,7 @@ async function selectWaveSection(
     await phoneWaveSections(page)
       .getByRole("button", { name, exact: true })
       .click();
+    await expect(phoneWaveSections(page)).toBeHidden();
   }
 }
 
@@ -742,9 +749,10 @@ const selectedWaveSection = (page: Page, name: string | RegExp, app = false) =>
         )
     )
     .or(
-      phoneWaveMore(page)
+      page
+        .getByRole("main")
+        .locator('[data-wave-phone-more][aria-current="true"]')
         .filter({ hasText: name })
-        .and(page.getByRole("button").locator(':scope[aria-current="true"]'))
     );
 async function expectWaveSectionOffered(
   page: Page,
@@ -2515,7 +2523,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await page.addStyleTag({
       content: "nextjs-portal { display: none !important; }",
     });
-    await page.getByRole("button", { name: /^Submit (Work|Meme)/ }).click();
+    await openSubmissionAction(page);
     const dialog = page.getByRole("dialog", {
       name: "Submit Work to The Memes",
     });
@@ -2591,7 +2599,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await page.addStyleTag({
       content: "nextjs-portal { display: none !important; }",
     });
-    await page.getByRole("button", { name: /^Submit (Work|Meme)/ }).click();
+    await openSubmissionAction(page);
     const modal = page.getByRole("dialog", {
       name: "Submit Work to The Memes",
       exact: true,
@@ -5439,7 +5447,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         await expect(focusSurface).toHaveCSS("outline-width", "2px");
         await expect(focusSurface).toHaveCSS(
           "outline-color",
-          "rgb(132, 173, 255)"
+          name === "More wave actions"
+            ? "rgb(82, 139, 255)"
+            : "rgb(132, 173, 255)"
         );
       }
       await panel
@@ -6332,6 +6342,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       const held = await view.evaluate(
         (element) => element.getBoundingClientRect().x
       );
+      expect(held).toBeGreaterThan(1);
       await page.waitForTimeout(120);
       expect(
         await view.evaluate((element) => element.getBoundingClientRect().x)
@@ -6768,17 +6779,16 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     ).toHaveCount(0);
     const topNavigation = await backLink.evaluate((element) => {
       const box = element.getBoundingClientRect();
+      const hit = document.elementFromPoint(box.x + box.width / 2, box.y + 4);
       return {
         x: box.x,
         y: box.y,
         height: box.height,
-        unobscured:
-          document
-            .elementFromPoint(box.x + box.width / 2, box.y + 4)
-            ?.closest("button") === element,
+        unobscured: hit?.closest("button") === element,
+        hit: hit?.outerHTML.slice(0, 600),
       };
     });
-    expect(topNavigation.unobscured).toBe(true);
+    expect(topNavigation.unobscured, JSON.stringify(topNavigation)).toBe(true);
     await page.screenshot({
       path: testInfo.outputPath("native-competition-initial.png"),
       fullPage: true,
@@ -15655,13 +15665,21 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       });
       await expect(memberLink).toBeVisible();
       await expect(memberLink).toHaveAttribute("title", /^[\d,]+ users?$/);
-      const scrollTop = await memberLink.evaluate((element) => {
+      await memberLink.evaluate((element) => {
         let parent = element.parentElement;
         while (parent && getComputedStyle(parent).overflowY !== "auto")
           parent = parent.parentElement;
         if (!parent)
           throw new Error("Wave information scroll container missing");
         parent.scrollTop = 60;
+      });
+      await memberLink.scrollIntoViewIfNeeded();
+      const scrollTop = await memberLink.evaluate((element) => {
+        let parent = element.parentElement;
+        while (parent && getComputedStyle(parent).overflowY !== "auto")
+          parent = parent.parentElement;
+        if (!parent)
+          throw new Error("Wave information scroll container missing");
         return parent.scrollTop;
       });
       expect(scrollTop).toBeGreaterThan(0);
@@ -16486,14 +16504,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           await expect(page).toHaveURL(/\/waves$/);
         } else if (testInfo.project.name === "web-mobile-chromium") {
           await page
-            .getByRole("button", { name: "Open menu", exact: true })
-            .click();
-          await page
-            .getByRole("navigation", {
-              name: "Desktop navigation",
-              exact: true,
-            })
-            .getByRole("link", { name: "Waves", exact: true })
+            .getByRole("button", { name: "Go back", exact: true })
             .click();
           await expect(page).toHaveURL(/\/waves$/);
         }
@@ -16877,6 +16888,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await expect(settings).toHaveAttribute("aria-current", "true");
       const initialVotes = await votes.boundingBox();
       const initialMore = await settings.boundingBox();
+      const initialScroll = await row.evaluate((element) => element.scrollLeft);
       if (!initialVotes || !initialMore) throw new Error("Missing phone tabs");
 
       await page.touchscreen.tap(
@@ -16889,7 +16901,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await expect(settings).toHaveAttribute("aria-current", "true");
       expect((await votes.boundingBox())?.x).toBeCloseTo(initialVotes.x, 0);
       expect((await settings.boundingBox())?.x).toBeCloseTo(initialMore.x, 0);
-      expect(await row.evaluate((element) => element.scrollLeft)).toBe(0);
+      expect(await row.evaluate((element) => element.scrollLeft)).toBe(
+        initialScroll
+      );
       await expectNoHorizontalOverflow(page);
       await navigation.screenshot({
         path: testInfo.outputPath("stable-app-tab-row.png"),

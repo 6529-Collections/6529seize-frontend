@@ -26,6 +26,7 @@ import type { WaveSubmissionHelpAction } from "@/components/waves/header/WaveSub
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
 import { formatInteger } from "@/i18n/format";
+import { getMemesSubmissionHelp } from "./memesSubmissionHelp";
 
 interface MyStreamWaveTabsMemeSubmitProps {
   readonly wave: ApiWave;
@@ -134,17 +135,12 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
   const isClosed = submissionStatus === SubmissionStatus.ENDED;
   const isComingSoon = submissionStatus === SubmissionStatus.NOT_STARTED;
 
-  // Get timestamps for display
-  const openingTime = waveInfo.participation.startTime;
-  const closingTime = waveInfo.participation.endTime;
-
   const restrictedClass = phoneMenu
     ? `${COMPACT_WAVE_ACTION_CLASSES} !tw-justify-start tw-text-iron-300`
     : WAVE_HEADER_RESTRICTION_BUTTON_CLASS;
 
   const renderRestriction = (
-    label: string,
-    reason: string,
+    action: WaveSubmissionHelpAction,
     testId?: string
   ) => {
     if (phoneMenu && onShowSubmissionHelp) {
@@ -152,9 +148,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
         <button
           type="button"
           className={restrictedClass}
-          onClick={() =>
-            onShowSubmissionHelp({ label, restrictionMessage: reason })
-          }
+          onClick={() => onShowSubmissionHelp(action)}
         >
           <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
           <span>{t(locale, HOW_TO_SUBMIT_LABEL_KEY)}</span>
@@ -163,118 +157,61 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
     }
     return (
       <WaveHeaderRestrictionButton
-        label={label}
-        reason={reason}
+        label={action.label}
+        reason={action.restrictionMessage ?? action.label}
         className={restrictedClass}
         data-testid={testId}
         data-full-width="false"
       >
         <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
-        {phoneMenu && <span>{label}</span>}
+        {phoneMenu && <span>{action.label}</span>}
       </WaveHeaderRestrictionButton>
     );
   };
 
-  // Closed state - submissions have ended
-  if (isClosed) {
-    const tooltipText = closingTime
-      ? t(locale, "waves.dropEligibility.closedAt", {
-          date: formatSubmissionWindowTime(closingTime, zone),
-        })
-      : t(locale, "waves.dropEligibility.closedReason");
-
-    return renderRestriction(
-      t(locale, "waves.dropEligibility.closed"),
-      tooltipText,
-      "closed"
-    );
-  }
-
-  // Coming soon state - submissions haven't started
-  if (isComingSoon) {
-    const tooltipText = openingTime
-      ? t(locale, "waves.dropEligibility.opensAt", {
-          date: formatSubmissionWindowTime(openingTime, zone),
-        })
-      : t(locale, "waves.dropEligibility.opensSoonReason");
-
-    return renderRestriction(
-      t(locale, "waves.dropEligibility.openSoon"),
-      tooltipText,
-      "info"
-    );
-  }
-
-  // Not eligible state - user doesn't have permission to submit
-  if (waveInfo.participation.isEligible === false) {
-    if (phoneMenu && onShowSubmissionHelp) {
+  const restriction = getMemesSubmissionHelp(
+    waveInfo.participation,
+    zone,
+    locale
+  );
+  if (restriction) {
+    if (
+      restriction.restrictionKind === "memes-nomination" &&
+      !(phoneMenu && onShowSubmissionHelp)
+    ) {
       return (
-        <button
-          type="button"
-          className={restrictedClass}
-          onClick={() =>
-            onShowSubmissionHelp({
-              label: t(locale, HOW_TO_SUBMIT_LABEL_KEY),
-              restrictionKind: "memes-nomination",
-              restrictionMessage: null,
-            })
-          }
-        >
-          <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
-          <span>{t(locale, HOW_TO_SUBMIT_LABEL_KEY)}</span>
-        </button>
+        <MainStageNominationPopover>
+          <button
+            type="button"
+            aria-haspopup="dialog"
+            className={`${NOT_ELIGIBLE_BUTTON_CLASS} ${
+              iconOnly
+                ? `${COMPACT_ACTION_TOUCH_TARGET_CLASS} tw-size-8 tw-min-w-8`
+                : `tw-w-auto sm:tw-px-2.5 ${HEADER_ACTION_BUTTON_CLASS}`
+            }`}
+          >
+            <LockClosedIcon
+              className={COMPACT_ACTION_ICON_CLASS}
+              strokeWidth={COMPACT_ACTION_ICON_STROKE_WIDTH}
+            />
+            <span
+              className={
+                iconOnly
+                  ? "tw-sr-only"
+                  : `${HEADER_ACTION_BUTTON_TEXT_CLASS} tw-border-x-0 tw-border-b tw-border-t-0 tw-border-dashed tw-border-iron-600/70 tw-pb-px tw-transition-colors group-hover:tw-border-iron-400/80`
+              }
+            >
+              {t(locale, HOW_TO_SUBMIT_LABEL_KEY)}
+            </span>
+          </button>
+        </MainStageNominationPopover>
       );
     }
-    return (
-      <MainStageNominationPopover>
-        <button
-          type="button"
-          aria-haspopup="dialog"
-          className={`${NOT_ELIGIBLE_BUTTON_CLASS} ${
-            iconOnly
-              ? `${COMPACT_ACTION_TOUCH_TARGET_CLASS} tw-size-8 tw-min-w-8`
-              : `tw-w-auto sm:tw-px-2.5 ${HEADER_ACTION_BUTTON_CLASS}`
-          }`}
-        >
-          <LockClosedIcon
-            className={COMPACT_ACTION_ICON_CLASS}
-            strokeWidth={COMPACT_ACTION_ICON_STROKE_WIDTH}
-          />
-          <span
-            className={
-              iconOnly
-                ? "tw-sr-only"
-                : `${HEADER_ACTION_BUTTON_TEXT_CLASS} tw-border-x-0 tw-border-b tw-border-t-0 tw-border-dashed tw-border-iron-600/70 tw-pb-px tw-transition-colors group-hover:tw-border-iron-400/80`
-            }
-          >
-            {t(locale, HOW_TO_SUBMIT_LABEL_KEY)}
-          </span>
-        </button>
-      </MainStageNominationPopover>
-    );
-  }
-
-  // Maximum submissions reached state
-  if (waveInfo.participation.hasReachedLimit) {
-    const maxSubmissions = waveInfo.participation.maxSubmissions ?? "?";
-    const tooltipText = t(
-      locale,
-      maxSubmissions === 1
-        ? "waves.dropEligibility.limitOneReason"
-        : "waves.dropEligibility.limitManyReason",
-      {
-        count:
-          typeof maxSubmissions === "number"
-            ? formatInteger(locale, maxSubmissions)
-            : maxSubmissions,
-      }
-    );
-
-    return renderRestriction(
-      t(locale, "waves.dropEligibility.limitReached"),
-      tooltipText,
-      "info"
-    );
+    let testId: string | undefined;
+    if (isClosed) testId = "closed";
+    else if (isComingSoon || waveInfo.participation.hasReachedLimit)
+      testId = "info";
+    return renderRestriction(restriction, testId);
   }
 
   // Check if user has limited remaining submissions
@@ -335,13 +272,6 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
   const activeLabelFull = t(locale, activeLabelKeys.activeLabelFull);
   const activeLabelCompact = t(locale, activeLabelKeys.activeLabelCompact);
   const showSplitActiveLabels = activeLabelCompact !== activeLabelFull;
-
-  if (!canSubmit) {
-    return renderRestriction(
-      t(locale, "waves.dropEligibility.unavailable"),
-      tooltipText
-    );
-  }
 
   let activeIcon = (
     <PlusIcon className="tw-size-4 tw-flex-shrink-0" strokeWidth={2} />
