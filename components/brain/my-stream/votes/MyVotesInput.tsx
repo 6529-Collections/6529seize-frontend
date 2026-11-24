@@ -146,7 +146,7 @@ export function MyVotesInput({
         </label>
         <div
           data-my-vote-field
-          className={`tw-flex tw-min-w-0 tw-items-center tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-pr-1 focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 ${onExplain ? "" : "tw-col-span-2"} ${!valid || error ? "tw-ring-2 tw-ring-inset tw-ring-rose-400" : ""}`}
+          className={`tw-flex tw-min-w-0 tw-items-center tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-pr-1 focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 ${onExplain ? "" : "tw-col-span-2"} ${!valid || error ? "tw-ring-2 tw-ring-inset tw-ring-rose-400" : ""}`}
         >
           <input
             ref={inputRef}
