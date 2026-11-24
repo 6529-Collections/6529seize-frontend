@@ -6892,9 +6892,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         width: bounds.width,
         right: bounds.right,
         containsSave: !!field.querySelector('button[type="submit"]'),
+        containsUnit: field.textContent?.includes("TDH"),
       };
     });
-    expect(compactField.width).toBeLessThanOrEqual(128);
+    expect(compactField.width).toBe(192);
+    expect(compactField.containsUnit).toBe(true);
     expect(compactField.containsSave).toBe(false);
     expect((await save.boundingBox())!.x).toBeGreaterThan(compactField.right);
     const saveSurface = row
@@ -7133,16 +7135,22 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         expect(textBounds[1]!.bottom).toBeLessThanOrEqual(
           thumbnail.y + thumbnail.height
         );
-        const authorAvatarBottom = await author.evaluate((element) => {
+        const authorArtworkGap = await author.evaluate((element) => {
           const avatar = element.closest(
             "[data-my-vote-author]"
           )?.firstElementChild;
-          if (!avatar) throw new Error("Vote author avatar is missing");
-          return avatar.getBoundingClientRect().bottom;
+          const artwork = element
+            .closest("article")
+            ?.querySelector("[data-my-vote-open]");
+          if (!avatar || !artwork)
+            throw new Error("Vote author or artwork is missing");
+          // Read both edges in the same frame while the native header settles.
+          return (
+            avatar.getBoundingClientRect().bottom -
+            artwork.getBoundingClientRect().bottom
+          );
         });
-        expect(
-          Math.abs(authorAvatarBottom - thumbnail.y - thumbnail.height)
-        ).toBeLessThanOrEqual(1);
+        expect(Math.abs(authorArtworkGap)).toBeLessThanOrEqual(1);
         const compactRank = (await row
           .getByText("1st", { exact: true })
           .boundingBox())!;
@@ -7421,7 +7429,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           await input.evaluate(
             (element) => element.parentElement!.getBoundingClientRect().width
           )
-        ).toBeLessThanOrEqual(128);
+        ).toBeLessThanOrEqual(192);
         expect(field.height).toBeGreaterThanOrEqual(44);
         expect(action.height).toBeGreaterThanOrEqual(44);
         expect(Math.abs(field.y - action.y)).toBeLessThanOrEqual(1);
