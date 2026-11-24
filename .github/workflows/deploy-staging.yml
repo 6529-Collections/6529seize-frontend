@@ -65,6 +65,9 @@ jobs:
       NEXT_PUBLIC_FEATURE_WS_PING: "true"
       # Identities move to the 6529 Network (lib/identity-move/schedule.ts).
       NEXT_PUBLIC_IDENTITY_FREEZE_AT: "2026-11-25T00:00:00Z"
+      # The switch-on is the freeze plus 24 hours. For a later one, set it here
+      # as a UTC instant, in both workflows:
+      # NEXT_PUBLIC_IDENTITY_SWITCH_ON_AT: "YYYY-MM-DDTHH:MM:SSZ"
       NEXTGEN_CHAIN_ID: ${{ vars.STAGING_NEXTGEN_CHAIN_ID || '1' }}
       ASSETS_FROM_S3: "false"
 

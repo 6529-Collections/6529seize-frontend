@@ -9,6 +9,8 @@ on the 6529 Network, through this site.
 
 The build setting `NEXT_PUBLIC_IDENTITY_FREEZE_AT` names the freeze as a UTC
 instant (for example `2026-11-25T00:00:00Z`). Without it nothing below applies.
+The switch-on is the freeze plus 24 hours, unless the build setting
+`NEXT_PUBLIC_IDENTITY_SWITCH_ON_AT` names a later UTC instant.
 
 ## Location in the Site
 
@@ -71,6 +73,18 @@ deploying again before the old instant passes; removing it calls the move
 off. The 6529.io API reads its own `IDENTITY_FREEZE_AT`, and both must name
 the same instant. The browser's checks are a convenience; the API's freeze
 decides what it accepts.
+
+A longer freeze keeps the freeze and sets `NEXT_PUBLIC_IDENTITY_SWITCH_ON_AT`
+in both build workflows to the later switch-on, as a UTC instant, then builds
+and deploys again before the old switch-on passes. The notice, its dates and
+everything on 6529.io that waits for the switch-on follow it. The switch-on
+never comes sooner than the freeze plus 24 hours: an earlier, malformed or
+missing value means the freeze plus 24 hours. The help record
+`profiles.network-move` and the table above give the dates in words, so they
+change in the same commit; a test checks the help record against the
+production workflow. The 6529.io API's own `IDENTITY_SWITCH_ON_AT` must name
+the same instant. A page opened before the new build keeps the old switch-on
+until it is reloaded.
 
 ## Localization
 

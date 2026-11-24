@@ -151,6 +151,77 @@ describe("production exact-artifact deployment contract", () => {
     );
   });
 
+  it("switches identities on at the freeze plus 24 hours or a later UTC instant", () => {
+    const switchOn: unknown = build.env.NEXT_PUBLIC_IDENTITY_SWITCH_ON_AT;
+    if (switchOn === undefined) {
+      return;
+    }
+    expect(switchOn).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/);
+    // A real instant as written: the app refuses one Date.parse would roll
+    // forward (31 November, 24:00).
+    expect(
+      new Date(Date.parse(String(switchOn))).toISOString().replace(".000Z", "Z")
+    ).toBe(switchOn);
+    expect(Date.parse(String(switchOn))).toBeGreaterThan(
+      Date.parse(build.env.NEXT_PUBLIC_IDENTITY_FREEZE_AT) + 24 * 60 * 60 * 1000
+    );
+  });
+
+  it("gives staging the same freeze and switch-on as production", () => {
+    const staging = YAML.parse(read("deploy-staging.yml"));
+    const stagingEnv = Object.values(
+      staging.jobs as Record<string, { env?: Record<string, unknown> }>
+    )
+      .map((job) => job.env ?? {})
+      .find((env) => "NEXT_PUBLIC_IDENTITY_FREEZE_AT" in env);
+    expect(stagingEnv?.["NEXT_PUBLIC_IDENTITY_FREEZE_AT"]).toBe(
+      build.env.NEXT_PUBLIC_IDENTITY_FREEZE_AT
+    );
+    expect(stagingEnv?.["NEXT_PUBLIC_IDENTITY_SWITCH_ON_AT"]).toBe(
+      build.env.NEXT_PUBLIC_IDENTITY_SWITCH_ON_AT
+    );
+  });
+
+  it("gives the help record the freeze and switch-on dates the build uses", () => {
+    const DAY = 24 * 60 * 60 * 1000;
+    const freeze = Date.parse(build.env.NEXT_PUBLIC_IDENTITY_FREEZE_AT);
+    const setting: unknown = build.env.NEXT_PUBLIC_IDENTITY_SWITCH_ON_AT;
+    const configured =
+      typeof setting === "string" ? Date.parse(setting) : Number.NaN;
+    const switchOn =
+      Number.isFinite(configured) && configured > freeze + DAY
+        ? configured
+        : freeze + DAY;
+    const inWords = (ms: number) => {
+      const at = new Date(ms);
+      const weekday = at.toLocaleDateString("en-US", {
+        weekday: "long",
+        timeZone: "UTC",
+      });
+      const month = at.toLocaleDateString("en-US", {
+        month: "long",
+        timeZone: "UTC",
+      });
+      const time = at.toISOString().slice(11, 16);
+      return `${weekday} ${at.getUTCDate()} ${month} ${at.getUTCFullYear()} ${time} UTC`;
+    };
+    const help = JSON.parse(
+      fs.readFileSync(
+        path.join(process.cwd(), "ops", "help", "help-index.json"),
+        "utf8"
+      )
+    ) as { records: { id: string; facts: string[] }[] };
+    const record = help.records.find(
+      (item) => item.id === "profiles.network-move"
+    );
+    const facts = record?.facts.join("\n") ?? "";
+    expect(facts).toContain(`From the freeze (${inWords(freeze)})`);
+    expect(facts).toContain(`From the switch-on (${inWords(switchOn)})`);
+    expect(facts).toContain(
+      `you can't change them for about ${Math.round((switchOn - freeze) / (60 * 60 * 1000))} hours`
+    );
+  });
+
   it("leaves gap-only chat sync off in production builds", () => {
     // Production flips need the owner (WAVES-PLAN 0.7/0.8, C11).
     expect(build.env).not.toHaveProperty("NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC");

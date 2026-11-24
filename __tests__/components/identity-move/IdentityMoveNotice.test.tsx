@@ -1,6 +1,9 @@
 import IdentityMoveNotice from "@/components/identity-move/IdentityMoveNotice";
 import { act, render, screen } from "@testing-library/react";
-import { setIdentityFreezeAt } from "@/__tests__/helpers/identityFreeze";
+import {
+  setIdentityFreezeAt,
+  setIdentitySwitchOnAt,
+} from "@/__tests__/helpers/identityFreeze";
 
 jest.mock("@/config/env", () => {
   const actual = jest.requireActual("@/config/env");
@@ -12,6 +15,9 @@ jest.mock("@/config/env", () => {
         NEXT_PUBLIC_IDENTITY_FREEZE_AT: (
           globalThis as { __identityFreezeAt?: string }
         ).__identityFreezeAt,
+        NEXT_PUBLIC_IDENTITY_SWITCH_ON_AT: (
+          globalThis as { __identitySwitchOnAt?: string }
+        ).__identitySwitchOnAt,
       };
     },
   };
@@ -36,6 +42,7 @@ beforeEach(() => {
 afterEach(() => {
   jest.useRealTimers();
   setIdentityFreezeAt(undefined);
+  setIdentitySwitchOnAt(undefined);
 });
 
 it("renders nothing without a freeze", () => {
@@ -79,4 +86,38 @@ it("follows the clock across the freeze and the switch-on", () => {
     jest.advanceTimersByTime(DAY);
   });
   expect(screen.getByTestId("identity-move-notice")).toHaveTextContent(MOVED);
+});
+
+describe("with a later switch-on", () => {
+  const WED = Date.UTC(2026, 10, 25, 0, 0, 0);
+  const FRI = Date.UTC(2026, 10, 27, 0, 0, 0);
+
+  beforeEach(() => {
+    setIdentityFreezeAt("2026-11-25T00:00:00Z");
+    setIdentitySwitchOnAt("2026-11-27T00:00:00Z");
+  });
+
+  it("says how long the freeze lasts and when it ends, before the freeze", () => {
+    jest.setSystemTime(WED - DAY);
+    render(<IdentityMoveNotice />);
+    expect(screen.getByTestId("identity-move-notice")).toHaveTextContent(
+      "Profiles, handles, ratings, consolidations and delegations move to the 6529 Network. From Wednesday 25 November 00:00 UTC you can't change them for about 48 hours. From Friday you change them on the 6529 Network, through this site."
+    );
+  });
+
+  it("stays frozen through Thursday and names Friday", () => {
+    jest.setSystemTime(WED + DAY + 12 * 60 * 60 * 1000);
+    render(<IdentityMoveNotice />);
+    expect(screen.getByTestId("identity-move-notice")).toHaveTextContent(
+      "Profiles, handles, ratings, consolidations and delegations are moving to the 6529 Network. You can't change them until Friday 27 November 00:00 UTC. From then you change them on the 6529 Network, through this site."
+    );
+  });
+
+  it("has moved from Friday", () => {
+    jest.setSystemTime(FRI);
+    render(<IdentityMoveNotice />);
+    expect(screen.getByTestId("identity-move-notice")).toHaveTextContent(
+      "Profiles, handles, ratings, consolidations and delegations moved to the 6529 Network on Friday 27 November. You can't change them on this site yet."
+    );
+  });
 });

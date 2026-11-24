@@ -134,9 +134,13 @@ export const publicEnvSchema = z.object({
   // exactly "true"; staging builds set it, production builds leave it unset.
   NEXT_PUBLIC_FEATURE_WS_PING: z.string().optional(),
   // The freeze before identities move to the 6529 Network, as a UTC instant
-  // such as "2026-11-24T00:00:00Z" (lib/identity-move/schedule.ts). Unset,
+  // such as "2026-01-01T00:00:00Z" (lib/identity-move/schedule.ts). Unset,
   // nothing changes.
   NEXT_PUBLIC_IDENTITY_FREEZE_AT: z.string().optional(),
+  // A later switch-on for that move, as a UTC instant. Unset, malformed, or
+  // less than 24 hours after the freeze, the switch-on is the freeze plus
+  // 24 hours (lib/identity-move/schedule.ts).
+  NEXT_PUBLIC_IDENTITY_SWITCH_ON_AT: z.string().optional(),
   // End-to-end encrypted chats and poll creation. On only when exactly "true".
   NEXT_PUBLIC_E2EE_DM_ENABLED: z.string().optional(),
   NEXT_PUBLIC_E2EE_POLLS_ENABLED: z.string().optional(),
