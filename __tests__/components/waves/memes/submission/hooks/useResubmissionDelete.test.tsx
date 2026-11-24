@@ -92,6 +92,28 @@ describe("useResubmissionDelete on the 6529 Network", () => {
     expect(addOptimisticDrop).not.toHaveBeenCalled();
   });
 
+  it("offers no withdrawal while the new version isn't final", async () => {
+    const { result, setToast, onClose } = setup();
+    await act(async () => {
+      await result.current.handleResubmissionSuccess({
+        chainEntry: { entryId: "0xentry" } as never,
+        title: "New version",
+        metadata: [],
+        pending: true,
+      });
+    });
+    expect(result.current.replacementPending).toBe(true);
+    expect(result.current.withdrawsOriginal).toBe(true);
+
+    act(() => result.current.handleDeleteOriginalClick());
+
+    expect(result.current.isDeletingOriginal).toBe(false);
+    expect(mockWithdrawEntry).not.toHaveBeenCalled();
+    expect(deleteDrop).not.toHaveBeenCalled();
+    expect(setToast).not.toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
   it("withdraws the original there, with no 6529.io sign-in or delete", async () => {
     const { result, requestAuth, setToast, onClose, onSourceDropDeleted } =
       setup();
@@ -116,6 +138,18 @@ describe("useResubmissionDelete on the 6529 Network", () => {
     expect(onClose).toHaveBeenCalled();
   });
 
+  it("says it couldn't withdraw the original when the failure has no message", async () => {
+    mockWithdrawEntry.mockRejectedValue({});
+    const { result } = setup();
+    act(() => result.current.handleDeleteOriginalClick());
+
+    await waitFor(() =>
+      expect(result.current.deleteOriginalError).toBe(
+        "Unable to withdraw the original submission."
+      )
+    );
+  });
+
   it("keeps the original and says why when the withdrawal fails", async () => {
     mockWithdrawEntry.mockRejectedValue(
       new Error(
@@ -132,5 +166,28 @@ describe("useResubmissionDelete on the 6529 Network", () => {
     );
     expect(onClose).not.toHaveBeenCalled();
     expect(result.current.isDeletingOriginal).toBe(false);
+  });
+});
+
+describe("useResubmissionDelete on 6529.io", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockChainEntriesActive = false;
+  });
+
+  it("deletes the original there after the sign-in", async () => {
+    const { result, requestAuth, onSourceDropDeleted } = setup();
+    expect(result.current.withdrawsOriginal).toBe(false);
+    expect(result.current.replacementPending).toBe(false);
+
+    act(() => result.current.handleDeleteOriginalClick());
+
+    await waitFor(() => expect(onSourceDropDeleted).toHaveBeenCalled());
+    expect(requestAuth).toHaveBeenCalled();
+    expect(deleteDrop).toHaveBeenCalledWith({
+      dropId: "original-drop",
+      waveId: "wave-1",
+    });
+    expect(mockWithdrawEntry).not.toHaveBeenCalled();
   });
 });

@@ -6,7 +6,10 @@ import type AgreementStep from "@/components/waves/memes/submission/steps/Agreem
 import MemesArtSubmissionContainer from "@/components/waves/memes/submission/MemesArtSubmissionContainer";
 import { SubmissionStep } from "@/components/waves/memes/submission/types/Steps";
 import { useArtworkSubmissionForm } from "@/components/waves/memes/submission/hooks/useArtworkSubmissionForm";
-import { useArtworkSubmissionMutation } from "@/components/waves/memes/submission/hooks/useArtworkSubmissionMutation";
+import {
+  isChainSubmittedArtwork,
+  useArtworkSubmissionMutation,
+} from "@/components/waves/memes/submission/hooks/useArtworkSubmissionMutation";
 import { useMemesSubmissionIdentity } from "@/components/waves/memes/submission/hooks/useMemesSubmissionIdentity";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useAuth } from "@/components/auth/Auth";
@@ -722,5 +725,80 @@ describe("MemesArtSubmissionContainer", () => {
     });
     expect(onClose).toHaveBeenCalled();
     expect(onSourceDropDeleted).toHaveBeenCalledTimes(1);
+  });
+  it("offers nothing for the original while a new version on the 6529 Network isn't final", async () => {
+    const user = userEvent.setup();
+    const onSourceDropDeleted = jest.fn();
+    jest
+      .mocked(isChainSubmittedArtwork)
+      .mockImplementation((artwork) => "chainEntry" in artwork);
+    const submitArtwork = jest.fn(async () => ({
+      chainEntry: { entryId: "0xentry" },
+      title: "Replacement",
+      metadata: [],
+      pending: true,
+    }));
+    formState.currentStep = SubmissionStep.ADDITIONAL_INFO;
+    formState.existingMedia = {
+      url: "https://example.com/art.png",
+      mimeType: "image/png",
+    };
+    formState.artworkUploaded = true;
+    formState.artworkUrl = formState.existingMedia.url;
+    mockMutation.mockReturnValue({
+      submitArtwork,
+      uploadProgress: 0,
+      submissionPhase: "idle",
+      submissionError: undefined,
+      isSubmitting: false,
+    } as any);
+    try {
+      render(
+        <MemesArtSubmissionContainer
+          onClose={onClose}
+          wave={wave}
+          sourceDrop={
+            {
+              id: "source-1",
+              title: "Original",
+              wave: { id: "w1" },
+              metadata: [],
+              parts: [
+                {
+                  content: "",
+                  media: [
+                    {
+                      url: "https://example.com/art.png",
+                      mime_type: "image/png",
+                    },
+                  ],
+                },
+              ],
+            } as any
+          }
+          onSourceDropDeleted={onSourceDropDeleted}
+        />
+      );
+
+      await user.click(
+        screen.getByRole("button", {
+          name: /i understand, start resubmission/i,
+        })
+      );
+      await user.click(screen.getByTestId("additional-submit"));
+      await screen.findByTestId("delete-original");
+
+      expect(deleteConfirmationProps.action).toBe("pending");
+      expect(deleteConfirmationProps.replacementDrop).toEqual({
+        title: "Replacement",
+        metadata: [],
+      });
+
+      await user.click(screen.getByTestId("delete-original"));
+      expect(mockCommonApiDelete).not.toHaveBeenCalled();
+      expect(onSourceDropDeleted).not.toHaveBeenCalled();
+    } finally {
+      jest.mocked(isChainSubmittedArtwork).mockReset();
+    }
   });
 });

@@ -64,6 +64,10 @@ export function useResubmissionDelete({
     ApiDrop,
     "title" | "metadata"
   > | null>(null);
+  // A new version sent to the 6529 Network that wasn't final when the wait
+  // ended. It may still land or not, so the original stays: the author can
+  // withdraw it from its menu once the new version shows.
+  const [replacementPending, setReplacementPending] = useState(false);
   const [isDeletingOriginal, setIsDeletingOriginal] = useState(false);
   const [deleteOriginalError, setDeleteOriginalError] = useState<string | null>(
     null
@@ -74,6 +78,7 @@ export function useResubmissionDelete({
       if (isChainSubmittedArtwork(drop)) {
         // No 6529.io drop to cache until its index lists the entry.
         setReplacementDrop({ title: drop.title, metadata: drop.metadata });
+        setReplacementPending(drop.pending);
         setDeleteOriginalError(null);
         return;
       }
@@ -94,7 +99,7 @@ export function useResubmissionDelete({
   );
 
   const handleDeleteOriginal = useCallback(async () => {
-    if (!sourceDrop || isDeletingOriginal) {
+    if (!sourceDrop || isDeletingOriginal || replacementPending) {
       return;
     }
 
@@ -140,7 +145,9 @@ export function useResubmissionDelete({
         return;
       }
 
-      let message = "Unable to delete the original submission.";
+      let message = chainEntries
+        ? "Unable to withdraw the original submission."
+        : "Unable to delete the original submission.";
       if (error instanceof Error) {
         message = error.message;
       } else if (typeof error === "string") {
@@ -156,6 +163,7 @@ export function useResubmissionDelete({
   }, [
     sourceDrop,
     isDeletingOriginal,
+    replacementPending,
     chainEntries,
     queryClient,
     requestAuth,
@@ -176,6 +184,9 @@ export function useResubmissionDelete({
 
   return {
     replacementDrop,
+    replacementPending,
+    // On the 6529 Network the original is withdrawn, not deleted.
+    withdrawsOriginal: chainEntries !== null,
     isDeletingOriginal,
     deleteOriginalError,
     handleResubmissionSuccess,

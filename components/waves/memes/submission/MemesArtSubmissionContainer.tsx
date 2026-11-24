@@ -14,7 +14,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MemesArtSubmissionShell } from "./MemesArtSubmissionShell";
 import { MemesArtSubmissionStepContent } from "./MemesArtSubmissionStepContent";
 import { ResubmitAcknowledgement } from "./ResubmitAcknowledgement";
-import { ResubmitDeleteConfirmation } from "./ResubmitDeleteConfirmation";
+import {
+  ResubmitDeleteConfirmation,
+  type ResubmitOriginalAction,
+} from "./ResubmitDeleteConfirmation";
 import MemesSubmissionDocumentation, {
   type MemesSubmissionDocumentationHandle,
 } from "./MemesSubmissionDocumentation";
@@ -126,6 +129,8 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
   } = useArtworkSubmissionMutation(presentationCompetition(wave));
   const {
     replacementDrop,
+    replacementPending,
+    withdrawsOriginal,
     isDeletingOriginal,
     deleteOriginalError,
     handleResubmissionSuccess,
@@ -439,10 +444,17 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
       />
     );
   } else if (sourceDrop && replacementDrop) {
+    let originalAction: ResubmitOriginalAction = "delete";
+    if (replacementPending) {
+      originalAction = "pending";
+    } else if (withdrawsOriginal) {
+      originalAction = "withdraw";
+    }
     submissionContent = (
       <ResubmitDeleteConfirmation
         originalDrop={sourceDrop}
         replacementDrop={replacementDrop}
+        action={originalAction}
         isDeleting={isDeletingOriginal}
         error={deleteOriginalError}
         onDeleteOriginal={handleDeleteOriginalClick}
