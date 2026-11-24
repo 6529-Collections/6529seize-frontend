@@ -8,6 +8,7 @@ import {
   waitForRouteReady,
 } from "../testHelpers";
 import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
+import { expectUrlState } from "../support/urlState";
 
 const NAVIGATION_TIMEOUT_MS = 15000;
 const GLOBAL_SEARCH_QUERY = "wave score";
@@ -1126,6 +1127,29 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     await expect(join).toHaveAttribute("href", "/join-6529");
     await join.click();
     await expect(page).toHaveURL(/\/join-6529$/);
+  });
+
+  test("finds the new Desktop app from the Apps page and site search", async ({
+    page,
+  }) => {
+    await gotoReady(page, "/about/6529-apps");
+    await expect(
+      page.getByRole("link", { name: "6529 Desktop", exact: true })
+    ).toHaveAttribute("href", "/desktop");
+    await expect(
+      page.getByRole("heading", { name: "6529 Desktop Classic", exact: true })
+    ).toBeVisible();
+
+    const { searchInput } = await openHeaderSearch(page);
+    await searchInput.fill("6529 Desktop");
+    await page.getByRole("tab", { name: /^Pages/ }).click();
+    const desktop = page.getByRole("option", { name: /^6529 Desktop\b/ });
+    await expect(desktop).toHaveAttribute("href", "/desktop");
+    await desktop.click();
+    await expectUrlState(page, (url) => url.pathname === "/desktop");
+    await expect(
+      page.getByRole("heading", { level: 1, name: "6529 Desktop", exact: true })
+    ).toBeVisible();
   });
 
   test("global header search preserves keyboard flow and page navigation", async ({
