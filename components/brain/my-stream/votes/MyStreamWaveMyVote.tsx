@@ -155,9 +155,10 @@ function MyVoteAuthor({
 }) {
   return (
     <div
+      data-my-vote-author
       className={
         mobile
-          ? "tw-flex tw-min-w-0 tw-items-start tw-gap-2"
+          ? "tw-mt-1 tw-flex tw-min-w-0 tw-items-start tw-gap-2"
           : "tw-mt-4 tw-flex tw-min-w-0 tw-items-center tw-gap-2"
       }
     >

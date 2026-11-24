@@ -7092,6 +7092,16 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         expect(textBounds[1]!.bottom).toBeLessThanOrEqual(
           thumbnail.y + thumbnail.height
         );
+        const authorAvatarBottom = await author.evaluate((element) => {
+          const avatar = element.closest(
+            "[data-my-vote-author]"
+          )?.firstElementChild;
+          if (!avatar) throw new Error("Vote author avatar is missing");
+          return avatar.getBoundingClientRect().bottom;
+        });
+        expect(
+          Math.abs(authorAvatarBottom - thumbnail.y - thumbnail.height)
+        ).toBeLessThanOrEqual(1);
         await capture("rest");
         await panel.getByRole("button", { name: /^Sort by:/ }).click();
         const sortSheet = page.getByRole("dialog", {
@@ -7103,13 +7113,18 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           exact: true,
         });
         await expect(firstOption).toBeVisible();
-        const headerBounds = (await sortSheet
-          .getByTestId("mobile-dialog-header")
-          .boundingBox())!;
-        const firstOptionBounds = (await firstOption.boundingBox())!;
-        expect(
-          firstOptionBounds.y - headerBounds.y - headerBounds.height
-        ).toBeGreaterThanOrEqual(12);
+        // Measure in one frame while the sheet may still be sliding into view.
+        const headerGap = await firstOption.evaluate((element) => {
+          const header = element
+            .closest('[role="dialog"]')
+            ?.querySelector('[data-testid="mobile-dialog-header"]');
+          if (!header) throw new Error("Sort sheet header is missing");
+          return (
+            element.getBoundingClientRect().top -
+            header.getBoundingClientRect().bottom
+          );
+        });
+        expect(headerGap).toBeGreaterThanOrEqual(12);
         await page
           .getByRole("dialog", { name: "Sort by", exact: true })
           .locator(".mobile-wrapper-dialog")
