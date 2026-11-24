@@ -3687,6 +3687,7 @@ export const EN_US_ROOT_MESSAGES = {
     "You blocked @{handle}. Unblock them to start a new direct message.",
   "profilePreferences.dm.createRetry": PLEASE_TRY_AGAIN,
   "profilePreferences.notifications.heading": "Notifications",
+  "profilePreferences.notifications.linkLabel": "Notification preferences",
   "profilePreferences.notifications.description":
     "Choose between All and Essential notifications.",
   "profilePreferences.notifications.ALL.label": "All",
