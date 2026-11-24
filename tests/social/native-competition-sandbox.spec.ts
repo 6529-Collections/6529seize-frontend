@@ -7206,7 +7206,27 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         ).toBeEnabled();
         await expect(
           row.getByRole("button", { name: "Save vote", exact: true })
-        ).toHaveCSS("background-color", "rgb(63, 105, 252)");
+        ).toHaveCSS(
+          "background-color",
+          testInfo.project.use.hasTouch
+            ? "rgba(0, 0, 0, 0)"
+            : "rgb(63, 105, 252)"
+        );
+        if (testInfo.project.use.hasTouch) {
+          await expect(
+            row.getByRole("button", { name: "Save vote", exact: true })
+          ).toHaveCSS("color", "rgb(132, 173, 255)");
+          await expect(
+            row.getByRole("button", { name: "Explain vote", exact: true })
+          ).toHaveCSS("border-width", "0px");
+          await expect(
+            row.getByRole("button", { name: "Explain vote", exact: true })
+          ).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+          await row.screenshot({
+            path: testInfo.outputPath("my-votes-mobile-text-actions.png"),
+            animations: "disabled",
+          });
+        }
         await input.fill("25");
         await expect(
           row.getByRole("button", { name: "Save vote", exact: true })
@@ -7378,7 +7398,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         const thumbnailSize = width < 1024 ? 56 : 96;
         expect((await thumbnail.boundingBox())!.width).toBe(thumbnailSize);
         expect((await thumbnail.boundingBox())!.height).toBe(thumbnailSize);
-        await expect(explain).toHaveCSS("border-width", "1px");
+        await expect(explain).toHaveCSS(
+          "border-width",
+          width < 1024 && testInfo.project.use.hasTouch ? "0px" : "1px"
+        );
         await expect(explain).toHaveCSS("height", "44px");
         await expect(
           row.getByRole("button", { name: "Save vote", exact: true })

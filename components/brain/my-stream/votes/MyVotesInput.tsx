@@ -68,7 +68,7 @@ function MyVotesExplainButton({
       {...props}
       variant="tertiary"
       size={null}
-      className={`tw-h-11 tw-min-h-11 tw-min-w-11 tw-whitespace-nowrap !tw-text-xs !tw-font-medium ${mobile ? "!tw-px-1" : "!tw-px-3"}`}
+      className={`tw-h-11 tw-min-h-11 tw-min-w-11 tw-whitespace-nowrap !tw-text-xs !tw-font-medium ${mobile ? "!tw-px-1 touch-only:!tw-border-0 touch-only:!tw-bg-transparent touch-only:!tw-text-iron-300 touch-only:!tw-shadow-none" : "!tw-px-3"}`}
     >
       {label}
     </Button>
@@ -109,7 +109,7 @@ function MyVotesSaveButton({
           transition={
             reduceMotion ? MY_VOTES_FADE_TRANSITION : MY_VOTES_EFFECT_TRANSITION
           }
-          className={`tw-inline-flex tw-min-h-11 tw-min-w-11 tw-shrink-0 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-2 tw-text-xs tw-font-semibold tw-text-white tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 enabled:tw-cursor-pointer enabled:active:tw-bg-primary-600 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 enabled:desktop-hover:hover:tw-bg-primary-600 motion-reduce:tw-transition-none ${mobile ? "tw-col-span-full tw-row-start-2 tw-justify-self-start @[22rem]/my-vote:tw-col-span-1 @[22rem]/my-vote:tw-col-start-3 @[22rem]/my-vote:tw-row-start-1" : "tw-col-start-3 tw-row-start-1"}`}
+          className={`tw-inline-flex tw-min-h-11 tw-min-w-11 tw-shrink-0 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-2 tw-text-xs tw-font-semibold tw-text-white tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 enabled:tw-cursor-pointer enabled:active:tw-bg-primary-600 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 enabled:desktop-hover:hover:tw-bg-primary-600 motion-reduce:tw-transition-none ${mobile ? "tw-col-span-full tw-row-start-2 tw-justify-self-start @[22rem]/my-vote:tw-col-span-1 @[22rem]/my-vote:tw-col-start-3 @[22rem]/my-vote:tw-row-start-1 touch-only:!tw-bg-transparent touch-only:!tw-text-primary-300" : "tw-col-start-3 tw-row-start-1"}`}
         >
           <span className="tw-bg-inherit">{label}</span>
         </motion.button>
