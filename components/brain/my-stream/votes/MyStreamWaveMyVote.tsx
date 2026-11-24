@@ -325,13 +325,15 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   const isSelected = isSelecting && !isVotingClosed && isChecked;
   const isSelectionDisabled = isVotingClosed || isResetting || !onToggleCheck;
   const selectionInputId = `my-vote-reset-selection-${drop.id}`;
-  const mobileSelectionWidth = isSelecting ? 44 : 0;
+  const showSelectionCheckbox =
+    !isVotingClosed && !!onToggleCheck && (!mobile || isSelecting);
+  const selectionWidth = showSelectionCheckbox ? 44 : 0;
   const desktopGridColumns = isVotingClosed
     ? ""
-    : "@[40rem]/my-vote:tw-grid-cols-[44px_96px_minmax(0,1fr)_22.5rem]";
+    : "@[40rem]/my-vote:tw-grid-cols-[auto_108px_minmax(0,1fr)_22.5rem]";
   const mobileGridColumns = isVotingClosed
     ? ""
-    : "@[40rem]/my-vote:tw-grid-cols-[auto_64px_minmax(0,1fr)_22.5rem] @[40rem]/my-vote:tw-gap-x-4";
+    : "@[40rem]/my-vote:tw-grid-cols-[auto_80px_minmax(0,1fr)_22.5rem]";
   const titleId = `my-vote-title-${drop.id}`;
   const longPress = useMyVoteLongPress(
     mobile && !isSelecting && !isSelectionDisabled,
@@ -415,22 +417,22 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
         className={
           mobile
             ? `tw-grid tw-grid-cols-[auto_80px_minmax(0,1fr)] tw-gap-y-2 ${mobileGridColumns}`
-            : `tw-grid tw-grid-cols-[44px_96px_minmax(0,1fr)] tw-gap-x-3 tw-gap-y-2 ${desktopGridColumns}`
+            : `tw-grid tw-grid-cols-[auto_108px_minmax(0,1fr)] tw-gap-y-2 ${desktopGridColumns}`
         }
       >
         <motion.div
-          animate={{ width: mobile ? mobileSelectionWidth : 44 }}
+          animate={{ width: selectionWidth }}
           transition={
             reduceMotion ? { duration: 0 } : MY_VOTES_SPATIAL_TRANSITION
           }
           className={
             mobile
               ? "tw-col-start-1 tw-row-start-1 tw-overflow-hidden"
-              : "tw-col-start-1 tw-row-start-1 tw-flex tw-h-24 tw-items-center tw-justify-center"
+              : "tw-col-start-1 tw-row-start-1 tw-flex tw-h-24 tw-items-center tw-justify-start"
           }
         >
           <AnimatePresence initial={false}>
-            {!isVotingClosed && onToggleCheck && (!mobile || isSelecting) ? (
+            {showSelectionCheckbox && (
               <motion.div
                 key="checkbox"
                 initial={mobile ? { opacity: 0 } : false}
@@ -482,8 +484,6 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
                   </span>
                 </label>
               </motion.div>
-            ) : (
-              !mobile && <span aria-hidden="true" className="tw-size-11" />
             )}
           </AnimatePresence>
         </motion.div>
@@ -524,7 +524,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
 
         {/* Reuse the card's top padding for the title's 44px touch target. */}
         <div
-          className={`tw-col-start-3 tw-row-start-1 tw-flex tw-min-w-0 tw-flex-col ${mobile ? "-tw-mt-4" : ""}`}
+          className={`tw-col-start-3 tw-row-start-1 tw-flex tw-min-w-0 tw-flex-col ${mobile ? "-tw-mt-4 @[40rem]/my-vote:tw-pr-4" : "@[40rem]/my-vote:tw-pr-3"}`}
         >
           <div className="tw-flex tw-min-w-0 tw-items-start tw-gap-2">
             <MediaTypeBadge

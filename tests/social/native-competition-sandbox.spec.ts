@@ -101,6 +101,23 @@ async function expectCompactVoteMediaLayout(row: Locator) {
   expect(alignment.artworkOverlays).toBe(0);
 }
 
+async function toolbarButtonSpacing(button: Locator) {
+  return button.evaluate((element) => {
+    const outer = getComputedStyle(element);
+    const inner = getComputedStyle(element.firstElementChild!);
+    return {
+      height: outer.height,
+      padding: outer.padding,
+      contentHeight: inner.height,
+      contentPadding: inner.padding,
+      contentBorder: inner.borderWidth,
+      fontSize: inner.fontSize,
+      lineHeight: inner.lineHeight,
+      fontWeight: inner.fontWeight,
+    };
+  });
+}
+
 async function expectNumericVoteAppearance(input: Locator) {
   await expect(input).toHaveCSS("background-color", "rgb(28, 28, 33)");
   await expect(input).toHaveCSS("color", "rgb(239, 239, 241)");
@@ -7003,6 +7020,17 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     expect(checkboxLeft).toBe(
       (await panel.getByRole("button", { name: /^Sort by:/ }).boundingBox())!.x
     );
+    const checkboxTarget = (await checkbox.boundingBox())!;
+    const checkboxMark = (await checkmark.boundingBox())!;
+    const artworkBounds = (await row
+      .getByRole("button", { name: /^Open / })
+      .boundingBox())!;
+    expect(artworkBounds.x - checkboxMark.x - checkboxMark.width).toBe(24);
+    expect(checkboxTarget.width).toBe(44);
+    expect(checkboxTarget.height).toBe(44);
+    expect(checkboxTarget.x + checkboxTarget.width).toBeLessThanOrEqual(
+      artworkBounds.x
+    );
     const balanceBounds = (await panel
       .getByText(/^Available in wave\s*75$/)
       .boundingBox())!;
@@ -7248,6 +7276,44 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await expectNoHorizontalOverflow(page);
   });
 
+  test("left-aligns read-only My Votes artwork without a checkbox", async ({
+    page,
+  }, testInfo) => {
+    const mobile = !!testInfo.project.use.hasTouch;
+    await page.setViewportSize({ width: mobile ? 390 : 1920, height: 1000 });
+    const sandbox = await installCompetitionApi(page);
+    sandbox.setVote("alpha", 25);
+    sandbox.setCompetition("alpha", {
+      permissions: {
+        ...competition("alpha", "Alpha").permissions,
+        vote: false,
+      },
+    });
+    await page.goto(ROOT + "/alpha?tab=votes");
+    const row = page
+      .getByRole("tabpanel", { name: "My Votes", exact: true })
+      .getByRole("article")
+      .first();
+    await expect(row.getByRole("checkbox")).toHaveCount(0);
+    const artwork = row.getByRole("button", { name: /^Open / });
+    await expect(artwork).toBeVisible();
+    const geometry = await artwork.evaluate((element) => {
+      const box = element.getBoundingClientRect();
+      return {
+        left:
+          box.left - element.closest("article")!.getBoundingClientRect().left,
+        width: box.width,
+        height: box.height,
+      };
+    });
+    expect(geometry).toEqual({
+      left: 16,
+      width: mobile ? 64 : 96,
+      height: mobile ? 64 : 96,
+    });
+    await expectNoHorizontalOverflow(page);
+  });
+
   for (const artwork of [
     { orientation: "landscape", width: 160, height: 90, mime: "image/svg+xml" },
     { orientation: "portrait", width: 90, height: 160, mime: "image/svg+xml" },
@@ -7401,8 +7467,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await expect(balance).toBeVisible();
         await expect(select).toHaveCSS("color", "rgb(206, 207, 212)");
         await expect(select).toHaveCSS("height", "44px");
-        await expect(select).toHaveCSS("padding-left", "14px");
-        await expect(select).toHaveCSS("padding-right", "14px");
+        const selectSpacing = await toolbarButtonSpacing(select);
         expect((await balance.boundingBox())!.y).toBeLessThan(
           (await select.boundingBox())!.y
         );
@@ -7598,6 +7663,13 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           name: "Select all",
           exact: true,
         });
+        const referenceSpacing = await toolbarButtonSpacing(selectAll);
+        expect(selectSpacing).toEqual(referenceSpacing);
+        expect(
+          await toolbarButtonSpacing(
+            panel.getByRole("button", { name: "Done", exact: true })
+          )
+        ).toEqual(referenceSpacing);
         const sort = panel.getByRole("button", { name: /^Sort by:/ });
         for (const width of [320, 390]) {
           await page.setViewportSize({ width, height: 844 });
@@ -7770,6 +7842,17 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         const thumbnailSize = width < 1024 ? 64 : 96;
         expect((await thumbnail.boundingBox())!.width).toBe(thumbnailSize);
         expect((await thumbnail.boundingBox())!.height).toBe(thumbnailSize);
+        if (width < 1024) {
+          await expect
+            .poll(() =>
+              thumbnail.evaluate(
+                (element) =>
+                  element.getBoundingClientRect().left -
+                  element.closest("article")!.getBoundingClientRect().left
+              )
+            )
+            .toBe(16);
+        }
         await expect(explain).toHaveCSS(
           "border-width",
           width < 1024 && testInfo.project.use.hasTouch ? "0px" : "1px"

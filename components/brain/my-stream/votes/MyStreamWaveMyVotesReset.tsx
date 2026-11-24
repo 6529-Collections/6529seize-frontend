@@ -251,14 +251,18 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
                 onClick={onToggleSelection}
                 disabled={isResetting}
                 aria-pressed={isSelecting}
-                className={`${buttonHeightClassName} tw-ml-auto tw-inline-flex tw-min-w-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3.5 tw-py-0 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 enabled:tw-cursor-pointer disabled:tw-opacity-50 enabled:desktop-hover:hover:tw-bg-iron-900/50 enabled:desktop-hover:hover:tw-text-iron-100 motion-reduce:tw-transition-none`}
+                className={`${buttonClassName} tw-ml-auto tw-text-iron-300 enabled:tw-cursor-pointer`}
               >
-                {t(
-                  locale,
-                  !isSelecting
-                    ? "waves.myVotes.select"
-                    : "waves.myVotes.doneSelecting"
-                )}
+                <span
+                  className={`${COMPACT_ACTION_CONTENT_CLASS} !tw-border-transparent !tw-bg-transparent !tw-font-medium !tw-text-iron-300 desktop-hover:group-hover:!tw-bg-iron-900/50 desktop-hover:group-hover:!tw-text-iron-100`}
+                >
+                  {t(
+                    locale,
+                    !isSelecting
+                      ? "waves.myVotes.select"
+                      : "waves.myVotes.doneSelecting"
+                  )}
+                </span>
               </button>
             )}
             {mobile && showResetControls && isSelecting && showResetActions && (
