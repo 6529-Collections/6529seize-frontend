@@ -22,12 +22,14 @@ export default function UserPageHeaderBanner({
   defaultBanner2,
   canEdit,
   profileLabel,
+  reserveTopSafeArea = false,
 }: {
   readonly profile: ApiIdentity;
   readonly defaultBanner1: string;
   readonly defaultBanner2: string;
   readonly canEdit: boolean;
   readonly profileLabel: string;
+  readonly reserveTopSafeArea?: boolean;
 }) {
   const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
   const bannerImageUrl = getBannerImageUrl(profile.banner1);
@@ -36,9 +38,15 @@ export default function UserPageHeaderBanner({
     : null;
   const banner1Color = getBannerColorValue(profile.banner1) ?? defaultBanner1;
   const banner2Color = getBannerColorValue(profile.banner2) ?? defaultBanner2;
+  const heightClassName = reserveTopSafeArea
+    ? "tw-h-[calc(7rem+env(safe-area-inset-top,0px))] sm:tw-h-[calc(10rem+env(safe-area-inset-top,0px))] md:tw-h-[calc(13rem+env(safe-area-inset-top,0px))]"
+    : "tw-h-28 sm:tw-h-40 md:tw-h-52";
 
   return (
-    <div className="tw-group tw-relative tw-z-10 tw-h-28 tw-w-full tw-overflow-hidden after:tw-pointer-events-none after:tw-absolute after:tw-inset-x-0 after:tw-bottom-0 after:tw-z-20 after:tw-h-px after:tw-bg-white/[0.08] after:tw-content-[''] sm:tw-h-40 md:tw-h-52">
+    <div
+      data-profile-banner
+      className={`tw-group tw-relative tw-z-10 tw-w-full tw-overflow-hidden after:tw-pointer-events-none after:tw-absolute after:tw-inset-x-0 after:tw-bottom-0 after:tw-z-20 after:tw-h-px after:tw-bg-white/[0.08] after:tw-content-[''] ${heightClassName}`}
+    >
       {scaledBannerUrl ? (
         <FallbackImage
           primarySrc={scaledBannerUrl}

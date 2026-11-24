@@ -263,6 +263,7 @@ function ProfileHeaderContent({
             className={`tw-contents ${isApp ? "" : "lg:tw-col-start-1 lg:tw-row-start-1 lg:tw-flex lg:tw-w-full lg:tw-min-w-0 lg:tw-flex-1 lg:tw-flex-row lg:tw-items-start lg:tw-gap-4"}`}
           >
             <div
+              data-profile-avatar
               className={`tw-relative -tw-mt-10 tw-flex-shrink-0 ${isApp ? "" : "lg:-tw-mt-14"}`}
             >
               <UserPageHeaderPfpWrapper
@@ -717,6 +718,7 @@ export default function UserPageHeaderClient({
             defaultBanner2={banner2Color}
             canEdit={false}
             profileLabel={profileLabel}
+            reserveTopSafeArea={isApp}
           />
           {!isApp && mobileOwnerControls ? (
             <div className="tw-absolute tw-right-4 tw-top-3 tw-z-20 sm:tw-right-6 sm:tw-top-4 md:tw-right-8 lg:tw-hidden">

@@ -6,7 +6,10 @@ import {
 } from "@/entities/IProfile";
 import { expectPersonalCollectedActionsAbsent } from "./profileReadonlyHelpers";
 import { expectUrlState } from "../support/urlState";
-import { isCapacitorSimulationProject } from "../support/surfaceSimulation";
+import {
+  installSurfaceSimulation,
+  isCapacitorSimulationProject,
+} from "../support/surfaceSimulation";
 import {
   expect,
   expectAxeClean,
@@ -287,6 +290,72 @@ test.describe("Profile editing @auth @medium @local-only", () => {
         route.fulfill({ json: { count: 0, data: [], next: null, page: 1 } })
     );
   });
+
+  for (const profile of ["playwright", "following-artist-0"]) {
+    test(`native profile controls clear the avatar with iPhone safe areas for ${profile}`, async ({
+      page,
+      baseURL,
+      browserName,
+    }, testInfo) => {
+      test.skip(
+        browserName !== "chromium",
+        "Safe-area environment overrides require Chromium CDP."
+      );
+      await page.setViewportSize({ width: 430, height: 932 });
+      await installSurfaceSimulation(
+        page.context(),
+        "capacitor-ios-sim",
+        baseURL
+      );
+      await seedSession(page);
+      await installHostedWalletReads(page);
+      const cdp = await page.context().newCDPSession(page);
+      await cdp.send("Emulation.setSafeAreaInsetsOverride", {
+        insets: { top: 59 },
+      });
+      await page.goto(`/${profile}`);
+      const back = page.getByRole("button", { name: "Back", exact: true });
+      await expect(back).toBeVisible();
+      const banner = page.getByRole("main").locator("[data-profile-banner]");
+      const avatar = page.getByRole("main").locator("[data-profile-avatar]");
+      for (const top of [59, 62, 0]) {
+        await cdp.send("Emulation.setSafeAreaInsetsOverride", {
+          insets: { top },
+        });
+        await expect
+          .poll(async () => {
+            const [buttonBox, avatarBox] = await Promise.all([
+              back.boundingBox(),
+              avatar.boundingBox(),
+            ]);
+            return buttonBox && avatarBox
+              ? avatarBox.y - buttonBox.y - buttonBox.height - 4
+              : 0;
+          })
+          .toBeGreaterThanOrEqual(8);
+        const [buttonBox, bannerBox, avatarBox] = await Promise.all([
+          back.boundingBox(),
+          banner.boundingBox(),
+          avatar.boundingBox(),
+        ]);
+        if (!buttonBox || !bannerBox || !avatarBox)
+          throw new Error("Missing native profile header geometry");
+        expect(buttonBox.y).toBeGreaterThanOrEqual(top);
+        expect(buttonBox.y + buttonBox.height + 4).toBeLessThanOrEqual(
+          avatarBox.y - 8
+        );
+        expect(buttonBox.y + buttonBox.height).toBeLessThan(
+          bannerBox.y + bannerBox.height
+        );
+        if (top === 59)
+          await page.screenshot({
+            path: testInfo.outputPath("native-profile-safe-area.png"),
+          });
+        await expectNoHorizontalOverflow(page);
+      }
+      await cdp.detach();
+    });
+  }
 
   for (const profile of ["playwright", "following-artist-0"]) {
     test(`Brain wave rows scroll independently on ${profile === "playwright" ? "the owner's" : "a visitor's"} profile`, async ({

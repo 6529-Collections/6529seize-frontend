@@ -127,6 +127,8 @@ also offers a direct shortcut to add or edit an optional About statement.
 - Mobile profile banners retain their existing full-strength artwork and
   top-right owner controls. Desktop banners fade into the content surface at
   the bottom; only the profile picture crosses that boundary.
+- In the app, the banner includes room for the phone's top safe area. Back and
+  the right-side header controls remain over the banner, above the profile picture.
 - The subscription status can link directly to the relevant settings,
   upcoming-drops, or top-up section. The complete status row is the link, with
   its label, current state, and contextual action kept inline when space allows.
