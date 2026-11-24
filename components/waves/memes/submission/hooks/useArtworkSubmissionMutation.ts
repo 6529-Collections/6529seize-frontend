@@ -16,7 +16,7 @@ import { t } from "@/i18n/messages";
 import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
 import { getAuthStateFingerprint } from "@/services/auth/auth-token-fingerprint";
 import { getAuthJwt, getWalletAddress } from "@/services/auth/auth.utils";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
 import type { OperationalData } from "../types/OperationalData";
 import type { TraitsData } from "../types/TraitsData";
@@ -29,6 +29,33 @@ import {
   PROPOSAL_FRAME_METADATA_KEY,
   type ProposalFrameMetadata,
 } from "@/lib/proposal-card/metadata";
+import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
+import {
+  invalidateChainEntryQueries,
+  useChainEntrySubmit,
+} from "@/components/chain-waves/useChainEntryWriters";
+import {
+  ChainEntryPendingError,
+  type ChainEntryReceipt,
+} from "@/lib/chain-waves/entryWriters";
+
+/**
+ * An artwork the 6529 Network took as an entry. 6529.io lists it once its
+ * index reads it from the chain, so there is no 6529.io drop yet.
+ */
+export interface ChainSubmittedArtwork {
+  readonly chainEntry: ChainEntryReceipt;
+  readonly title: string | null;
+  readonly metadata: ApiDropMetadata[];
+  /** Sent, but not final when the wait ended: it may still land. */
+  readonly pending: boolean;
+}
+
+export type SubmittedArtwork = ApiDrop | ChainSubmittedArtwork;
+
+export const isChainSubmittedArtwork = (
+  artwork: SubmittedArtwork
+): artwork is ChainSubmittedArtwork => "chainEntry" in artwork;
 
 /**
  * Interface for the artwork submission data
@@ -67,7 +94,7 @@ interface PhaseChangeCallbacks {
 }
 
 interface SubmissionOptions extends PhaseChangeCallbacks {
-  readonly onSuccess?: ((data: ApiDrop) => void) | undefined;
+  readonly onSuccess?: ((data: SubmittedArtwork) => void) | undefined;
   readonly onError?: ((error: Error) => void) | undefined;
   readonly expectedAuthStateFingerprint: string;
   readonly identityChangedMessage: string;
@@ -75,6 +102,9 @@ interface SubmissionOptions extends PhaseChangeCallbacks {
 
 const ACTIVE_WALLET_CHANGED_ERROR =
   "The active wallet changed during submission";
+
+const ARTWORK_PENDING =
+  "Your artwork was sent to the 6529 Network but isn't final yet. It may still land, so check in a few minutes before you send it again.";
 
 const isSubmissionSignerCurrent = (signerAddress: string): boolean =>
   getWalletAddress()?.toLowerCase() === signerAddress.toLowerCase();
@@ -176,8 +206,10 @@ function useArtworkSubmissionPost(
 ) {
   const { setToast, requestAuth } = useAuth();
   const submitCompetitionEntry = useCompetitionEntrySubmit(competition);
+  const submitChainEntry = useChainEntrySubmit(competition);
+  const queryClient = useQueryClient();
   return useMutation<
-    ApiDrop, // Response type
+    SubmittedArtwork, // Response type
     Error, // Error type
     {
       data: ApiCreateDropRequest;
@@ -196,6 +228,47 @@ function useArtworkSubmissionPost(
       // Update phase to processing
       updatePhase("processing", callbacks);
 
+      if (submitChainEntry) {
+        // On the 6529 Network the consent and the entry carry the artist's
+        // own wallet signatures; no 6529.io sign-in is needed to send them.
+        if (!competition) {
+          throw new Error("Competition entry scope is required");
+        }
+        if (getWalletAddress()?.toLowerCase() !== signerAddress.toLowerCase()) {
+          throw new Error(ACTIVE_WALLET_CHANGED_ERROR);
+        }
+        let chainEntry: ChainEntryReceipt;
+        let pending = false;
+        try {
+          chainEntry = await submitChainEntry({
+            request: data,
+            terms: null,
+            onStage: (stage) =>
+              updatePhase(
+                stage === "wallet" ? "signing" : "processing",
+                callbacks
+              ),
+          });
+        } catch (error) {
+          // Sent but not final yet: it may still land, so it counts as
+          // sent and the form offers no retry.
+          if (!(error instanceof ChainEntryPendingError) || !error.receipt) {
+            throw error;
+          }
+          chainEntry = error.receipt;
+          pending = true;
+        }
+        await invalidateChainEntryQueries(queryClient, data.wave_id).catch(
+          () => undefined
+        );
+        return {
+          chainEntry,
+          title: data.title ?? null,
+          metadata: data.metadata,
+          pending,
+        };
+      }
+
       // Ensure user is authenticated
       const { success } = await requestAuth({
         expectedAuthStateFingerprint,
@@ -211,12 +284,18 @@ function useArtworkSubmissionPost(
 
       return submitCompetitionEntry(data);
     },
-    onSuccess: (_, variables) => {
+    onSuccess: (artwork, variables) => {
       updatePhase("success", variables.callbacks);
 
       // Show success toast
+      if (isChainSubmittedArtwork(artwork) && artwork.pending) {
+        setToast({ message: ARTWORK_PENDING, type: "warning" });
+        return;
+      }
       setToast({
-        message: "Artwork submitted.",
+        message: isChainSubmittedArtwork(artwork)
+          ? "Artwork sent to the 6529 Network. It shows here once 6529.io lists it."
+          : "Artwork submitted.",
         type: "success",
       });
     },

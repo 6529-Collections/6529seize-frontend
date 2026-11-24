@@ -95,8 +95,10 @@ network filters) are not affected.
 ## After the Switch-On
 
 In builds with `NEXT_PUBLIC_FEATURE_CHAIN_WAVES` set to `true` and a chain
-gateway (`NEXT_PUBLIC_CHAIN_GATEWAY_URL`), votes, poll ballots and wave REP
-open again at the switch-on and go to the 6529 Network:
+gateway (`NEXT_PUBLIC_CHAIN_GATEWAY_URL`), votes, poll ballots, wave REP and
+entries open again at the switch-on and go to the 6529 Network.
+
+Votes, poll ballots and wave REP:
 
 - Every vote control (the vote dialog, My Votes and its reset, quick vote,
   decision vote forms) sends `VOTE_SET`; a poll ballot sends
@@ -113,12 +115,22 @@ open again at the switch-on and go to the 6529 Network:
 - A wallet with no identity on the 6529 Network, or an entry, wave or poll the
   network doesn't hold, gets a message saying so; nothing is sent.
 
-The notice then gives the switch-on day as the day the move happened, and
-goes on: Your votes, poll ballots and wave REP go there from this site.
-Entries and wave settings can't be changed here yet. Chat keeps working.
+Entries, signed by the connected wallet (never by the browser key) and shown
+once their block is final:
 
-Entries, wave and decision settings, groups and new polls stay paused until
-their own changes reach this site.
+- A submission (the composer's drop mode, the Memes submission form, a
+  decision's entry form) keeps its consent signature step, then stores the
+  entry's manifest in the 6529 Network's document store and sends
+  `SUBMISSION_CREATE`. A resubmission sends the new entry first, then
+  withdraws the old one.
+- An author's delete of their own entry withdraws it (`SUBMISSION_WITHDRAW`).
+
+The notice then gives the switch-on day as the day the move happened, and
+goes on: Your votes, poll ballots, wave REP and entries go there from this
+site. Wave settings can't be changed here yet. Chat keeps working.
+
+Wave and decision settings, deleting someone else's entry, new waves and
+decisions, and new polls stay paused until their own changes reach this site.
 
 ## Changing the Dates
 

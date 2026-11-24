@@ -99,4 +99,65 @@ describe("useDropInteractionRules during the move to the 6529 Network", () => {
     expect(entryRules.result.current.canDelete).toBe(false);
     expect(chatRules.result.current.canDelete).toBe(true);
   });
+
+  describe("once entries move to the 6529 Network", () => {
+    // Entries open there; deleting another's entry (moderation) does not.
+    beforeEach(() => {
+      paused.mockImplementation((kind?: string) => kind === undefined);
+    });
+
+    afterEach(() => {
+      paused.mockImplementation(() => false);
+    });
+
+    const admin = wrapper({
+      connectedProfile: { id: "p2", handle: "admin" },
+      activeProfileProxy: null,
+    });
+    const adminWave = {
+      ...entry.wave,
+      authenticated_user_admin: true,
+      admin_drop_deletion_enabled: true,
+    };
+
+    it("lets the author withdraw their own entry", () => {
+      const { result } = renderHook(() => useDropInteractionRules(entry), {
+        wrapper: me,
+      });
+      expect(paused).toHaveBeenCalledWith("entries");
+      expect(result.current.canDelete).toBe(true);
+    });
+
+    it("keeps an admin's delete of someone else's entry closed", () => {
+      const { result } = renderHook(
+        () => useDropInteractionRules({ ...entry, wave: adminWave }),
+        { wrapper: admin }
+      );
+      expect(result.current.canDelete).toBe(false);
+    });
+
+    it("keeps a winner where it is", () => {
+      const { result } = renderHook(
+        () =>
+          useDropInteractionRules({
+            ...entry,
+            drop_type: ApiDropType.Winner,
+          }),
+        { wrapper: me }
+      );
+      expect(result.current.canDelete).toBe(false);
+    });
+
+    it("keeps an admin's delete of chat drops", () => {
+      const { result } = renderHook(
+        () =>
+          useDropInteractionRules({
+            ...chat,
+            wave: adminWave,
+          }),
+        { wrapper: admin }
+      );
+      expect(result.current.canDelete).toBe(true);
+    });
+  });
 });

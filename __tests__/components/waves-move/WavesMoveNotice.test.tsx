@@ -186,7 +186,7 @@ describe("WavesMoveNotice with the chain flows on", () => {
     jest.useRealTimers();
   });
 
-  it("says votes, ballots and wave REP go to the 6529 Network after the switch-on", () => {
+  it("says votes, ballots, wave REP and entries go to the 6529 Network after the switch-on", () => {
     (globalThis as { __chainWaves?: object }).__chainWaves = {
       NEXT_PUBLIC_FEATURE_CHAIN_WAVES: "true",
       NEXT_PUBLIC_CHAIN_GATEWAY_URL: "https://gateway.example.test",
@@ -196,7 +196,7 @@ describe("WavesMoveNotice with the chain flows on", () => {
     jest.useFakeTimers({ now: WAVES_SWITCH_ON_MS + HOUR });
     render(<WavesMoveNotice />);
     expect(screen.getByTestId("waves-move-notice")).toHaveTextContent(
-      "Votes, entries and wave settings moved to the 6529 Network on Thursday 26 November. Your votes, poll ballots and wave REP go there from this site. Entries and wave settings can't be changed here yet. Chat keeps working."
+      "Votes, entries and wave settings moved to the 6529 Network on Thursday 26 November. Your votes, poll ballots, wave REP and entries go there from this site. Wave settings can't be changed here yet. Chat keeps working."
     );
   });
 });

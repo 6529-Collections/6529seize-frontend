@@ -72,6 +72,8 @@ export function NativeCompetitionContent({
   const locale = useBrowserLocale();
   // Decision settings and entries move to the 6529 Network.
   const wavesWritesPaused = useWavesWritesPaused();
+  // Entries open there at the switch-on.
+  const entriesPaused = useWavesWritesPaused("entries");
   const pathname = usePathname();
   const router = useRouter();
   const navigateTab = useWaveTabNavigation();
@@ -235,7 +237,7 @@ export function NativeCompetitionContent({
             tab={tab}
             onCreateDrop={
               competition.permissions.submit &&
-              !wavesWritesPaused &&
+              !entriesPaused &&
               competition.lifecycle === ApiCompetitionLifecycle.Published
                 ? () => setEntering((current) => !current)
                 : undefined

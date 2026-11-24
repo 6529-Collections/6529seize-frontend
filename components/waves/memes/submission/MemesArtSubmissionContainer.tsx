@@ -3,7 +3,6 @@
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import useKeyboardFocusScroll from "@/components/waves/create-wave/hooks/useKeyboardFocusScroll";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -23,7 +22,11 @@ import { SubmissionStep } from "./types/Steps";
 import { useArtworkSubmissionForm } from "./hooks/useArtworkSubmissionForm";
 import { applyMainStagePreviewDefaults } from "./utils/mainStageTraits";
 import { presentationCompetition } from "@/helpers/competition-presentation.helpers";
-import { useArtworkSubmissionMutation } from "./hooks/useArtworkSubmissionMutation";
+import {
+  isChainSubmittedArtwork,
+  useArtworkSubmissionMutation,
+  type SubmittedArtwork,
+} from "./hooks/useArtworkSubmissionMutation";
 import { useMemesSubmissionIdentity } from "./hooks/useMemesSubmissionIdentity";
 import { useResubmissionDelete } from "./hooks/useResubmissionDelete";
 import type { SubmissionPhase } from "./ui/SubmissionProgress";
@@ -263,7 +266,7 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
   }, [handleBackToArtwork, resetPreviewState]);
 
   const handleResubmissionSubmitted = useCallback(
-    async (drop: ApiDrop) => {
+    async (drop: SubmittedArtwork) => {
       await handleResubmissionSuccess(drop);
       resetPreviewState();
     },
@@ -311,7 +314,7 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
       return null;
     }
     const media = form.getMediaSelection();
-    const onSubmitted = async (drop: ApiDrop | null) => {
+    const onSubmitted = async (drop: SubmittedArtwork | null) => {
       if (
         drop &&
         getAuthStateFingerprint({
@@ -319,7 +322,10 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
           jwt: getAuthJwt(),
         }) === expectedAuthStateFingerprint
       ) {
-        documentationRef.current?.onDropSubmitted(drop.id);
+        // An entry on the 6529 Network is named by its chain id.
+        documentationRef.current?.onDropSubmitted(
+          isChainSubmittedArtwork(drop) ? drop.chainEntry.entryId : drop.id
+        );
       }
       if (drop && isResubmission) {
         await handleResubmissionSubmitted(drop);

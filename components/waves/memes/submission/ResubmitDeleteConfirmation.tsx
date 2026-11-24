@@ -6,14 +6,17 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 
 interface ResubmitDeleteConfirmationProps {
   readonly originalDrop: ApiDrop;
-  readonly replacementDrop: ApiDrop;
+  readonly replacementDrop: Pick<ApiDrop, "title" | "metadata">;
   readonly isDeleting: boolean;
   readonly error: string | null;
   readonly onDeleteOriginal: () => void;
   readonly onKeepBoth: () => void;
 }
 
-const getDropTitle = (drop: ApiDrop, fallback: string): string => {
+const getDropTitle = (
+  drop: Pick<ApiDrop, "title" | "metadata">,
+  fallback: string
+): string => {
   const metadataTitle = drop.metadata.find(
     (metadata) => metadata.data_key === "title"
   )?.data_value;

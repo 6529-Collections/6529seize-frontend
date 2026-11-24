@@ -134,7 +134,8 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
   // Stable fallback timestamp for unset boundaries and pause calculations.
   const now = useMemo(() => Time.currentMillis(), []);
   const { isMemesWave, isCurationWave, isQuorumWave } = useSeizeSettings();
-  const isPausedForMove = useWavesWritesPaused();
+  // Entries open again on the 6529 Network at the switch-on.
+  const isPausedForMove = useWavesWritesPaused("entries");
 
   // Calculate pause information
   const currentPause = useMemo(() => {

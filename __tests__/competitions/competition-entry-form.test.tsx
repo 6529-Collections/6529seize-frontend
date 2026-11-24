@@ -73,6 +73,13 @@ jest.mock("@/contexts/CompetitionContext", () => ({
     },
   }),
 }));
+const mockChainEntrySubmit = jest.fn();
+let mockChainEntriesActive = false;
+jest.mock("@/components/chain-waves/useChainEntryWriters", () => ({
+  useChainEntrySubmit: () =>
+    mockChainEntriesActive ? mockChainEntrySubmit : null,
+  invalidateChainEntryQueries: jest.fn().mockResolvedValue(undefined),
+}));
 jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
   useCompetitionViewer: () => "author:self",
 }));
@@ -271,4 +278,84 @@ it("keeps submission terms separate from the checkbox accessible name", () => {
   expect(screen.getByText(mockTerms).closest("label")).toBeNull();
   fireEvent.click(checkbox);
   expect(checkbox).toBeChecked();
+});
+
+describe("on the 6529 Network", () => {
+  beforeEach(() => {
+    mockChainEntriesActive = true;
+    mockChainEntrySubmit.mockReset().mockResolvedValue({ entryId: "0xentry" });
+    jest.mocked(createCompetitionEntry).mockClear();
+  });
+
+  afterEach(() => {
+    mockChainEntriesActive = false;
+  });
+
+  it("sends the entry there, not to 6529.io's competition route", async () => {
+    const onClose = jest.fn();
+    render(<CompetitionEntryForm onClose={onClose} />);
+    fireEvent.click(screen.getByRole("button", { name: "Submit an entry" }));
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+    expect(mockChainEntrySubmit).toHaveBeenCalledWith({
+      request: expect.objectContaining({
+        wave_id: "wave",
+        drop_type: "PARTICIPATORY",
+        mentioned_groups: ["ADMINS"],
+        signature: null,
+      }),
+      terms: null,
+      onStage: expect.any(Function),
+    });
+    expect(createCompetitionEntry).not.toHaveBeenCalled();
+  });
+
+  it("says an entry that isn't final yet was sent and offers no second send", async () => {
+    const { ChainEntryPendingError } = jest.requireActual(
+      "@/lib/chain-waves/entryWriters"
+    );
+    mockChainEntrySubmit.mockRejectedValue(
+      new ChainEntryPendingError(
+        "Your entry was sent to the 6529 Network but isn't final yet.",
+        null
+      )
+    );
+    render(<CompetitionEntryForm onClose={jest.fn()} />);
+    const button = screen.getByRole("button", { name: "Submit an entry" });
+    fireEvent.click(button);
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Your entry was sent to the 6529 Network but isn't final yet."
+    );
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    await waitFor(() => expect(button).toBeDisabled());
+  });
+
+  it("shows no failure when the wallet prompt is declined", async () => {
+    mockChainEntrySubmit.mockRejectedValue(
+      Object.assign(new Error("User rejected"), { code: 4001 })
+    );
+    render(<CompetitionEntryForm onClose={jest.fn()} />);
+    const button = screen.getByRole("button", { name: "Submit an entry" });
+    fireEvent.click(button);
+    await waitFor(() => expect(mockChainEntrySubmit).toHaveBeenCalled());
+    await waitFor(() => expect(button).toBeEnabled());
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("says what the 6529 Network refused", async () => {
+    const { ChainOperationError } = jest.requireActual(
+      "@/lib/chain-identity/operation"
+    );
+    mockChainEntrySubmit.mockRejectedValue(
+      new ChainOperationError(
+        "rejected",
+        "This decision isn't taking entries right now."
+      )
+    );
+    render(<CompetitionEntryForm onClose={jest.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: "Submit an entry" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "This decision isn't taking entries right now."
+    );
+    expect(createCompetitionEntry).not.toHaveBeenCalled();
+  });
 });

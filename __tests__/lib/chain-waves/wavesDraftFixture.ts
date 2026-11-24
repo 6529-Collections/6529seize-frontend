@@ -58,7 +58,7 @@ const POLL_BALLOT_SET: OperationSchema = {
   ]),
 };
 
-interface Signing {
+export interface Signing {
   readonly keyType?: 1 | 2;
   readonly keyId?: Hex;
   readonly authRef?: Hex;
@@ -103,7 +103,7 @@ const headerFor = ({ keyType = 1, keyId, authRef = ZERO32 }: Signing) => {
   };
 };
 
-function draftOf(
+export function draftOf(
   op: OperationSchema,
   signing: Signing,
   codecBody: Record<string, unknown>,

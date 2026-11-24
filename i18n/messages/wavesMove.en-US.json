@@ -4,7 +4,7 @@
   "wavesMove.notice": "Votes, entries and wave settings move to the 6529 Network. From {freezeWeekday} {freezeTime} UTC you can't change them until {switchOnWeekday} {switchOnTime} UTC. Chat keeps working.",
   "wavesMove.frozen": "Votes, entries and wave settings are moving to the 6529 Network. You can't change them until {switchOnWeekday} {switchOnTime} UTC. Chat keeps working.",
   "wavesMove.moved": "Votes, entries and wave settings moved to the 6529 Network on {switchOnDay}. You can't change them on this site yet. Chat keeps working.",
-  "wavesMove.movedChain": "Votes, entries and wave settings moved to the 6529 Network on {switchOnDay}. Your votes, poll ballots and wave REP go there from this site. Entries and wave settings can't be changed here yet. Chat keeps working.",
+  "wavesMove.movedChain": "Votes, entries and wave settings moved to the 6529 Network on {switchOnDay}. Your votes, poll ballots, wave REP and entries go there from this site. Wave settings can't be changed here yet. Chat keeps working.",
   "wavesMove.day": "{weekday} {day} {month}",
   "wavesMove.paused": "Paused for the move to the 6529 Network.",
   "wavesMove.submissionsPaused": "Submissions Paused",

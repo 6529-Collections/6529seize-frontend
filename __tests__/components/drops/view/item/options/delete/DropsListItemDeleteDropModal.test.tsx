@@ -11,6 +11,18 @@ jest.mock("@tanstack/react-query");
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStreamActions: () => ({ processDropRemoved: jest.fn() }),
 }));
+const mockWithdrawEntry = jest.fn();
+const mockInvalidateChainEntryQueries = jest.fn(() => Promise.resolve());
+let mockChainEntriesActive = false;
+jest.mock("@/components/chain-waves/useChainEntryWriters", () => ({
+  useChainEntryWriters: () =>
+    mockChainEntriesActive ? { withdrawEntry: mockWithdrawEntry } : null,
+  invalidateChainEntryQueries: (...args: unknown[]) =>
+    mockInvalidateChainEntryQueries(...(args as [])),
+}));
+jest.mock("@/services/api/signed-drop-writes", () => ({
+  deleteDrop: jest.fn().mockResolvedValue(undefined),
+}));
 
 // Mock fetch
 global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
@@ -152,5 +164,66 @@ describe("DropsListItemDeleteDropModal", () => {
       )
     );
     expect(screen.getByRole("button", { name: "Delete" })).toBeEnabled();
+  });
+
+  describe("on the 6529 Network", () => {
+    const { deleteDrop } = jest.requireMock(
+      "@/services/api/signed-drop-writes"
+    );
+
+    beforeEach(() => {
+      mockChainEntriesActive = true;
+      mockWithdrawEntry.mockResolvedValue(undefined);
+    });
+
+    afterEach(() => {
+      mockChainEntriesActive = false;
+    });
+
+    it("withdraws the author's entry there, with no 6529.io sign-in or delete", async () => {
+      const onDropDeleted = jest.fn();
+      const user = userEvent.setup();
+      renderModal({ onDropDeleted });
+
+      expect(
+        screen.getByRole("dialog", { name: "Withdraw Entry" })
+      ).toHaveAccessibleDescription(
+        "Withdraw this entry from the decision? You can't undo this."
+      );
+      await user.click(screen.getByRole("button", { name: "Withdraw" }));
+
+      await waitFor(() => expect(onDropDeleted).toHaveBeenCalled());
+      expect(mockWithdrawEntry).toHaveBeenCalledWith({ dropId: "d1" });
+      expect(deleteDrop).not.toHaveBeenCalled();
+      expect(auth.requestAuth).not.toHaveBeenCalled();
+      expect(auth.setToast).toHaveBeenCalledWith({
+        message: "Entry withdrawn.",
+        type: "warning",
+      });
+      expect(mockInvalidateChainEntryQueries).toHaveBeenCalledWith(
+        undefined,
+        "w"
+      );
+    });
+
+    it("keeps deleting chat drops on 6529.io", async () => {
+      const user = userEvent.setup();
+      render(
+        <AuthContext.Provider value={auth}>
+          <ReactQueryWrapperContext.Provider value={rq}>
+            <DropsListItemDeleteDropModal
+              drop={{ ...drop, drop_type: ApiDropType.Chat }}
+              closeModal={jest.fn()}
+            />
+          </ReactQueryWrapperContext.Provider>
+        </AuthContext.Provider>
+      );
+
+      await user.click(screen.getByRole("button", { name: "Delete" }));
+
+      await waitFor(() => expect(deleteDrop).toHaveBeenCalled());
+      expect(auth.requestAuth).toHaveBeenCalled();
+      expect(mockWithdrawEntry).not.toHaveBeenCalled();
+    });
   });
 });

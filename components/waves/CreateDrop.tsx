@@ -60,6 +60,27 @@ import { reportDropSubmissionFailure } from "@/utils/monitoring/dropSubmissionMo
 import { removeTemporaryThreadReply } from "./drops/reply-threads/pending-replies";
 import { acceptCreatedDrop } from "./create-drop-content/accept-created-drop";
 import { useDeviceSigningPrewarm } from "@/hooks/device-signing/useDeviceSigningPrewarm";
+import {
+  invalidateChainEntryQueries,
+  useChainEntrySubmit,
+  type ChainEntrySubmit,
+} from "@/components/chain-waves/useChainEntryWriters";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
+import {
+  ChainEntryPendingError,
+  type ChainEntryStage,
+} from "@/lib/chain-waves/entryWriters";
+
+const CHAIN_ENTRY_SENT =
+  "Entry sent to the 6529 Network. It shows here once 6529.io lists it.";
+const CHAIN_ENTRY_FAILED = "Couldn't send this entry to the 6529 Network.";
+const CHAIN_ENTRY_IN_FLIGHT =
+  "Your entry is still on its way. Wait for it before you send another.";
+const CHAIN_ENTRY_STAGE: Record<ChainEntryStage, string> = {
+  wallet: "Waiting for your wallet.",
+  sending: "Sending to the 6529 Network.",
+};
 
 export default function CreateDrop({
   activeDrop,
@@ -128,6 +149,7 @@ export default function CreateDrop({
     useWavesMoveDropGuard(processDropRemoved);
   const nativeCompetition = presentationCompetition(wave);
   const submitCompetitionEntry = useCompetitionEntrySubmit(nativeCompetition);
+  const submitChainEntry = useChainEntrySubmit(nativeCompetition);
   const resolvedSubmissionExperience = resolveWaveSubmissionExperience({
     isMemesWave,
     isCurationWave,
@@ -604,33 +626,100 @@ export default function CreateDrop({
     waitAndInvalidateDrops,
   ]);
 
+  // An entry on the 6529 Network: its own signatures, no 6529.io drop to
+  // accept. The optimistic drop goes once the write settles; 6529.io lists
+  // the entry once its index reads it from the chain.
+  // One entry at a time: the wallet prompt can stay open for a while, and a
+  // second entry sent beside it would be a second entry on the chain.
+  const chainEntryInFlightRef = useRef(false);
+  const [chainEntryStage, setChainEntryStage] =
+    useState<ChainEntryStage | null>(null);
+  const sendChainEntry = useCallback(
+    async (submit: ChainEntrySubmit, body: DropMutationBody) => {
+      try {
+        await submit({
+          request: body.drop,
+          terms: wave.participation.terms ?? null,
+          onStage: setChainEntryStage,
+        });
+        setToast({ message: CHAIN_ENTRY_SENT, type: "success" });
+        body.onSuccess?.();
+        onAllDropsAdded?.();
+      } catch (error) {
+        if (error instanceof ChainEntryPendingError) {
+          // Sent, not yet final: it may still land, so no retry is offered.
+          setToast({ message: error.message, type: "warning" });
+          body.onSuccess?.();
+          onAllDropsAdded?.();
+          return;
+        }
+        const isHandled = body.onError?.(error) === true;
+        if (!isHandled && !isUserRejectedSigningError(error)) {
+          setToast({
+            type: "error",
+            title: CHAIN_ENTRY_FAILED,
+            details: getToastErrorDetails(error),
+          });
+        }
+      } finally {
+        chainEntryInFlightRef.current = false;
+        setChainEntryStage(null);
+        // As for a failed send: the optimistic row may be added after the
+        // write settles, so it goes on the next task.
+        const { dropId } = body;
+        if (dropId) {
+          setTimeout(() => processDropRemoved(body.drop.wave_id, dropId), 0);
+        }
+        await invalidateChainEntryQueries(queryClient, body.drop.wave_id).catch(
+          () => undefined
+        );
+      }
+    },
+    [
+      onAllDropsAdded,
+      processDropRemoved,
+      queryClient,
+      setToast,
+      wave.participation.terms,
+    ]
+  );
+
   const enqueueDrop = useCallback(
     (dropRequest: DropMutationBody): boolean => {
       if (refusePausedDrop(dropRequest)) return false;
+      const isEntry = dropRequest.drop.drop_type !== ApiDropType.Chat;
 
-      const slowModeChatReservation = reserveSlowModeChatQueueSlot(
-        dropRequest.drop
-      );
-      if (slowModeChatReservation === false) {
-        return false;
+      if (submitChainEntry && isEntry) {
+        if (chainEntryInFlightRef.current) {
+          setToast({ message: CHAIN_ENTRY_IN_FLIGHT, type: "error" });
+          return false;
+        }
+        chainEntryInFlightRef.current = true;
+        setChainEntryStage("wallet");
+        void sendChainEntry(submitChainEntry, dropRequest);
+      } else {
+        const slowModeChatReservation = reserveSlowModeChatQueueSlot(
+          dropRequest.drop
+        );
+        if (slowModeChatReservation === false) {
+          return false;
+        }
+
+        const queuedDropRequest: QueuedDropMutationBody = {
+          ...dropRequest,
+          ...(slowModeChatReservation === null
+            ? {}
+            : { slowModeChatReservation }),
+          nativeEntrySubmit:
+            nativeCompetition && isEntry ? submitCompetitionEntry : undefined,
+        };
+
+        // Add to queue
+        queueRef.current.push(queuedDropRequest);
+
+        // Process immediately - avoids state update timing issues
+        inFlightProcessNextDropRef.current = processNextDrop();
       }
-
-      const queuedDropRequest: QueuedDropMutationBody = {
-        ...dropRequest,
-        ...(slowModeChatReservation === null
-          ? {}
-          : { slowModeChatReservation }),
-        nativeEntrySubmit:
-          nativeCompetition && dropRequest.drop.drop_type !== ApiDropType.Chat
-            ? submitCompetitionEntry
-            : undefined,
-      };
-
-      // Add to queue
-      queueRef.current.push(queuedDropRequest);
-
-      // Process immediately - avoids state update timing issues
-      inFlightProcessNextDropRef.current = processNextDrop();
 
       // Clear unread divider when user sends a message
       if (unreadDividerContext) {
@@ -661,6 +750,9 @@ export default function CreateDrop({
       processNextDrop,
       refusePausedDrop,
       reserveSlowModeChatQueueSlot,
+      sendChainEntry,
+      setToast,
+      submitChainEntry,
       submitCompetitionEntry,
       unreadDividerContext,
     ]
@@ -791,6 +883,14 @@ export default function CreateDrop({
   return (
     <>
       {dropComposerContent}
+      {chainEntryStage !== null && (
+        <p
+          role="status"
+          className="tw-mb-0 tw-mt-1 tw-px-1 tw-text-xs tw-leading-5 tw-text-iron-400"
+        >
+          {CHAIN_ENTRY_STAGE[chainEntryStage]}
+        </p>
+      )}
       <CreateDropSubmissionDialogs
         allMention={allMention}
         guidelinesAgreement={guidelinesAgreement}

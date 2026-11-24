@@ -20,7 +20,10 @@ export function useWavesMoveDropGuard(
   const locale = useBrowserLocale();
   const { setToast } = useAuth();
   const queryClient = useQueryClient();
-  const entriesPausedForMove = useWavesWritesPaused();
+  // Entries open on the 6529 Network at the switch-on; new polls stay
+  // closed until they open there too.
+  const entriesPausedForMove = useWavesWritesPaused("entries");
+  const pollsPausedForMove = useWavesWritesPaused();
 
   const showPaused = useCallback(() => {
     setToast({ message: t(locale, "wavesMove.paused"), type: "error" });
@@ -42,9 +45,10 @@ export function useWavesMoveDropGuard(
   const refusePausedDrop = useCallback(
     (dropRequest: DropMutationBody): boolean => {
       const { drop } = dropRequest;
+      const isEntry = drop.drop_type !== ApiDropType.Chat;
       if (
-        !entriesPausedForMove ||
-        (drop.drop_type === ApiDropType.Chat && !drop.poll)
+        !(entriesPausedForMove && isEntry) &&
+        !(pollsPausedForMove && !!drop.poll)
       ) {
         return false;
       }
@@ -61,7 +65,13 @@ export function useWavesMoveDropGuard(
       showPaused();
       return true;
     },
-    [entriesPausedForMove, processDropRemoved, queryClient, showPaused]
+    [
+      entriesPausedForMove,
+      pollsPausedForMove,
+      processDropRemoved,
+      queryClient,
+      showPaused,
+    ]
   );
 
   return { entriesPausedForMove, refuseDropMode, refusePausedDrop };
