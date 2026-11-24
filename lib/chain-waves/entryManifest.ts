@@ -66,7 +66,7 @@ import { DocClass, docBytes, docCid, docCommitment } from "./docs";
  *   below rebuilds what each scheme's signature covers from the manifest.
  */
 
-export const ENTRY_MANIFEST_VERSION = 1;
+const ENTRY_MANIFEST_VERSION = 1;
 
 export type EntryConsentScheme = "6529-competition-v1" | "6529-drop";
 
@@ -137,7 +137,7 @@ export function entryFieldsOf(request: ApiCreateDropRequest): EntryFields {
 }
 
 /** The entry fields of a manifest: everything but its envelope. */
-export function entryFieldsOfManifest(manifest: EntryManifest): EntryFields {
+function entryFieldsOfManifest(manifest: EntryManifest): EntryFields {
   const fields: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(manifest)) {
     if (!ENVELOPE_KEYS.has(key)) {
@@ -241,7 +241,7 @@ const nonceBytes = (nonceWord: Hex): Hex => {
 };
 
 /** The nonce word a manifest's commitment takes. */
-export const manifestNonceWord = (manifest: EntryManifest): Hex =>
+const manifestNonceWord = (manifest: EntryManifest): Hex =>
   `${manifest.nonce.toLowerCase()}${"00".repeat(16)}` as Hex;
 
 /** A version 1 manifest for a create-drop request's entry. */

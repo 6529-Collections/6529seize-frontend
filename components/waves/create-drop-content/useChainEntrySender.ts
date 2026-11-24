@@ -48,7 +48,7 @@ type ProcessDropRemoved = (waveId: string, dropId: string) => void;
  * failed send, and tells the sender. The row may be added right after the
  * refusal, so it goes on the next task.
  */
-export function takeBackRefusedDrop(
+function takeBackRefusedDrop(
   dropRequest: DropMutationBody,
   error: unknown,
   stream: {
@@ -202,7 +202,7 @@ function sendEntry(
   });
 }
 
-export interface ChainEntrySender {
+interface ChainEntrySender {
   /** Where the entry on its way stands, or null with none. */
   readonly stage: ChainEntryStage | null;
   /**
