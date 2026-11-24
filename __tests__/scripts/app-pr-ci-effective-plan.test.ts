@@ -119,6 +119,7 @@ describe("effective App PR CI plan", () => {
     "tests/social/profile-about-sandbox.spec.ts",
     "components/user/user-page-header/about/UserPageHeaderAbout.tsx",
     "components/user/user-page-header/UserPageHeaderClient.tsx",
+    "components/user/brain/UserPageBrainSidebarMobileStrip.tsx",
     "components/user/user-page-header/UserPageHeaderEditProfile.tsx",
     "components/user/user-page-header/UserPageHeaderEditProfileDesktop.tsx",
     "components/user/user-page-header/UserPageHeaderProfileEditor.tsx",

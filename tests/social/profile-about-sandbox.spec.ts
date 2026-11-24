@@ -286,6 +286,113 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     );
   });
 
+  for (const profile of ["playwright", "sandbox-recipient"]) {
+    test(`Brain wave rows scroll independently on ${profile === "playwright" ? "the owner's" : "a visitor's"} profile`, async ({
+      page,
+    }, testInfo) => {
+      await seedSession(page);
+      await installHostedWalletReads(page);
+      await page.route("**/drops?**", (route) => route.fulfill({ json: [] }));
+      const createdNames = [
+        "Created wave with a long name",
+        "Second created wave",
+      ];
+      const recentNames = Array.from(
+        { length: 5 },
+        (_, index) => `Recent wave ${index + 1} with a long name`
+      );
+      await page.route("**/v2/waves/profile-activity/**", (route) => {
+        const isCreated =
+          new URL(route.request().url()).searchParams.get("activity_type") ===
+          "CREATED";
+        return route.fulfill({
+          json: {
+            data: (isCreated ? createdNames : recentNames).map(
+              (name, index) => ({
+                wave_id: `00000000-0000-4000-8000-00000000000${index + 1}`,
+                wave_name: name,
+                wave_picture: null,
+                is_private: false,
+                total_drops_count: 12,
+                latest_post_timestamp: 1713744000000,
+              })
+            ),
+            next_cursor: null,
+          },
+        });
+      });
+      await page.goto(`/${profile}/brain`);
+      const mobileStrip = page.getByTestId("brain-sidebar-mobile-strip");
+      const desktop = page.getByTestId("brain-sidebar-desktop");
+      if (testInfo.project.name === "web-desktop-chromium") {
+        await expect(desktop).toBeVisible();
+        await expect(mobileStrip).toBeHidden();
+        await expect(desktop.getByRole("link")).toHaveText([
+          ...createdNames.map((name) => new RegExp(name)),
+          ...recentNames.map((name) => new RegExp(name)),
+        ]);
+        await page.screenshot({
+          path: testInfo.outputPath(`brain-wave-rows-${profile}.png`),
+          fullPage: true,
+          scale: "css",
+        });
+        return;
+      }
+
+      const created = page.getByTestId("brain-created-waves-mobile");
+      const recent = page.getByTestId("brain-recent-waves-mobile");
+      await expect(created.getByRole("link")).toHaveText([createdNames[0]!]);
+      await expect(recent.getByRole("link")).toHaveText(recentNames);
+      await expect(desktop).toBeHidden();
+      const widths = isCapacitorSimulationProject(testInfo.project.name)
+        ? [390]
+        : [320, 390, 768];
+      for (const width of widths) {
+        await page.setViewportSize({ width, height: 1000 });
+        const shell = await page
+          .getByRole("main")
+          .filter({ has: mobileStrip })
+          .last()
+          .boundingBox();
+        const createdBox = await created.boundingBox();
+        const recentBox = await recent.boundingBox();
+        expect(recentBox!.y).toBeGreaterThan(
+          createdBox!.y + createdBox!.height
+        );
+        for (const row of [created, recent]) {
+          const rowBox = await row.boundingBox();
+          const firstChip = await row.getByRole("link").first().boundingBox();
+          expect(Math.abs(rowBox!.x - shell!.x)).toBeLessThanOrEqual(1);
+          expect(
+            Math.abs(rowBox!.x + rowBox!.width - shell!.x - shell!.width)
+          ).toBeLessThanOrEqual(1);
+          expect(firstChip!.x - rowBox!.x).toBe(16);
+        }
+        const heading = mobileStrip.getByText("Recently Active In", {
+          exact: true,
+        });
+        const headingX = (await heading.boundingBox())!.x;
+        await recent.getByRole("link").first().focus();
+        await recent.getByRole("link").last().focus();
+        expect(
+          await recent.evaluate((node) => node.scrollLeft)
+        ).toBeGreaterThan(0);
+        expect(await created.evaluate((node) => node.scrollLeft)).toBe(0);
+        expect((await heading.boundingBox())!.x).toBe(headingX);
+        await expect(recent.getByRole("link").last()).toBeInViewport();
+        await recent.evaluate((node) => {
+          node.scrollLeft = 0;
+        });
+        await expectNoHorizontalOverflow(page);
+      }
+      await page.screenshot({
+        path: testInfo.outputPath(`brain-wave-rows-${profile}.png`),
+        fullPage: true,
+        scale: "css",
+      });
+    });
+  }
+
   test("Guided welcome arrives once, respects motion preferences and preserves focus", async ({
     page,
     baseURL,

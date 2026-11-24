@@ -14,7 +14,8 @@ The same wave can appear in both lists. Direct-message waves are excluded.
 
 - Route: `/{user}/brain`
 - Desktop: right column beside the Brain feed
-- Small screens: horizontal strip above the Brain feed
+- Mobile web and app: separate `Created` and `Recently Active In` rows above the
+  Brain feed, each with its label above its own horizontal scroll area
 
 ## Entry Points
 
@@ -37,8 +38,10 @@ The same wave can appear in both lists. Direct-message waves are excluded.
    lists without moving the Brain feed. The sidebar remains one scroll area.
    Keyboard users can focus the region and use navigation keys to scroll it;
    focused controls remain visible after content updates.
-6. Small screens show the first created-wave pill and recent-activity pills in
-   a horizontally scrollable strip.
+6. Mobile web and app show the first created-wave pill and recent-activity pills
+   in separate labeled rows. Each row scrolls independently to the screen edge,
+   with its content starting 16px in. This layout also applies to your own
+   profile.
 7. If more created results are loaded or another created page is available,
    select `More` to open the created-waves modal. The modal uses the same
    ordering and supports `Load more` until every created result is reachable.
