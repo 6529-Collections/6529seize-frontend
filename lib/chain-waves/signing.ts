@@ -4,7 +4,9 @@ import { chainGateway, type ChainIdentity } from "@/lib/chain-identity/gateway";
 import type { ChainActor } from "@/lib/chain-identity/identityOps";
 import {
   ChainOperationError,
+  draftOperation,
   runOperation,
+  submitAndAwait,
   type ChainSigner,
   type ChainWait,
 } from "@/lib/chain-identity/operation";
@@ -12,6 +14,7 @@ import {
   sessionKeyCanSign,
   usableSessionKey,
 } from "@/lib/chain-identity/session";
+import { withinSessionFeeCap } from "@/lib/chain-identity/sessionFeeCap";
 import { sessionSigner, walletSigner } from "@/lib/chain-identity/signers";
 import type { ChainOperationRequest } from "./ops";
 
@@ -19,6 +22,11 @@ import type { ChainOperationRequest } from "./ops";
 export interface ChainSigning {
   readonly actor: ChainActor;
   readonly signer: ChainSigner;
+  /**
+   * When this browser's session key signs: the wallet, which signs instead
+   * when the fee is above the key's cap (`sessionFeeCap`).
+   */
+  readonly walletInstead?: ChainSigning | undefined;
 }
 
 /** The identity a wallet is bound to, or a message saying it has none. */
@@ -58,6 +66,7 @@ export async function sessionOrWalletSigning(
     return {
       actor: { kind: "session", keyId: key.keyId, grantId: key.grantId },
       signer: sessionSigner(key),
+      walletInstead: walletSigning(config, wallet),
     };
   }
   return walletSigning(config, wallet);
@@ -67,21 +76,51 @@ export async function sessionOrWalletSigning(
  * Drafts, checks, signs and sends one write, and waits as `until` says:
  * "included" for votes, ballots and ratings, which a later write replaces;
  * "final" for everything a later write builds on. Returns the draft, whose
- * txId names the objects the write creates.
+ * txId names the objects the write creates. The session key signs only a
+ * fee within its cap; above it the wallet signs a draft of its own, and
+ * `onWalletFee` hears that draft's fee just before the wallet is asked.
  */
 export async function runChainWrite(
   build: (actor: ChainActor) => ChainOperationRequest,
   signing: ChainSigning,
   until: ChainWait,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  onWalletFee?: (maxFee: bigint) => void
 ) {
+  const wallet = signing.walletInstead;
+  if (wallet === undefined) {
+    const operation = build(signing.actor);
+    const { draft } = await runOperation(
+      operation.request,
+      operation.primaryType,
+      signing.signer,
+      signal,
+      until
+    );
+    return draft;
+  }
   const operation = build(signing.actor);
-  const { draft } = await runOperation(
+  const keyDraft = await draftOperation(
     operation.request,
     operation.primaryType,
-    signing.signer,
-    signal,
-    until
+    signal
   );
-  return draft;
+  if (withinSessionFeeCap(keyDraft)) {
+    const sig = await signing.signer.sign(keyDraft);
+    await submitAndAwait(
+      keyDraft,
+      [{ role: 0, keyType: signing.signer.keyType, sig }],
+      signal,
+      until
+    );
+    return keyDraft;
+  }
+  const saysFee: ChainSigner = {
+    keyType: wallet.signer.keyType,
+    sign: (draft) => {
+      onWalletFee?.(BigInt(draft.fee.maxFee));
+      return wallet.signer.sign(draft);
+    },
+  };
+  return runChainWrite(build, { ...wallet, signer: saysFee }, until, signal);
 }

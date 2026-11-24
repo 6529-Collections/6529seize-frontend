@@ -1,7 +1,11 @@
 import { encodeAbiParameters, keccak256, stringToBytes } from "viem";
 import type { Config } from "wagmi";
 import { chainGateway } from "@/lib/chain-identity/gateway";
-import { runOperation } from "@/lib/chain-identity/operation";
+import {
+  draftOperation,
+  runOperation,
+  submitAndAwait,
+} from "@/lib/chain-identity/operation";
 import { usableSessionKey } from "@/lib/chain-identity/session";
 import { wavesGateway } from "@/lib/chain-waves/gateway";
 import { legacyObjectId } from "@/lib/chain-waves/ids";
@@ -34,9 +38,27 @@ jest.mock("@/lib/chain-waves/gateway", () => ({
     getWaveRatingsByRater: jest.fn(),
   },
 }));
+/** A draft as far as the write runner reads it, with its signed fee. */
+function mockDraft(primaryType: string, maxFee = "100") {
+  return {
+    txId: `0x${"77".repeat(32)}`,
+    typedData: {
+      primaryType,
+      message: { header: { maxFee, maxWork: "300000" } },
+    },
+    unsigned: "0x4001",
+    fee: { maxFee, maxWork: "300000", sizeBytes: 300 },
+  };
+}
+
 jest.mock("@/lib/chain-identity/operation", () => ({
   ...jest.requireActual("@/lib/chain-identity/operation"),
   runOperation: jest.fn(),
+  // The session key's path drafts first, to check the fee against its cap.
+  draftOperation: jest.fn(async (_request: unknown, primaryType: string) =>
+    mockDraft(primaryType)
+  ),
+  submitAndAwait: jest.fn(async () => ({ status: "in_block" })),
 }));
 jest.mock("@/lib/chain-identity/session", () => ({
   ...jest.requireActual("@/lib/chain-identity/session"),
@@ -145,12 +167,59 @@ describe("writeChainVote", () => {
       ops: [0x0102, 0x0606, 0x0608, 0x0701],
     });
     await writeChainVote(config, WALLET, { dropId: DROP_UUID, amount: 3n });
-    expect(lastRequest()).toMatchObject({
+    expect(draftOperation).toHaveBeenCalledTimes(1);
+    expect((draftOperation as jest.Mock).mock.calls[0][0]).toMatchObject({
       keyType: 2,
       keyId: KEY.keyId,
       authRef: KEY.grantId,
     });
-    expect(lastSigner()).toMatchObject({ keyType: 2 });
+    expect(run).not.toHaveBeenCalled();
+    expect(submitAndAwait).toHaveBeenCalledWith(
+      expect.objectContaining({ txId: `0x${"77".repeat(32)}` }),
+      [{ role: 0, keyType: 2, sig: undefined }],
+      undefined,
+      "included"
+    );
+  });
+
+  it("lets the wallet sign, saying the fee first, when it is above the key's cap", async () => {
+    sessionKey.mockResolvedValue({
+      ...KEY,
+      ops: [0x0102, 0x0606, 0x0608, 0x0701],
+    });
+    // 10 $fake6529: far above 20 times a vote's fee at the floor.
+    (draftOperation as jest.Mock).mockImplementationOnce(
+      async (_request: unknown, primaryType: string) =>
+        mockDraft(primaryType, (10n ** 19n).toString())
+    );
+    const walletSign = jest.fn(async () => "0x5167");
+    const { walletSigner } = jest.requireMock("@/lib/chain-identity/signers");
+    walletSigner.mockReturnValueOnce({ keyType: 1, sign: walletSign });
+    run.mockImplementationOnce(
+      async (
+        _request: unknown,
+        primaryType: string,
+        signer: { sign: (draft: unknown) => Promise<string> }
+      ) => {
+        const draft = mockDraft(primaryType);
+        await signer.sign(draft);
+        return { draft, status: { status: "in_block" } };
+      }
+    );
+    const onWalletFee = jest.fn();
+    await writeChainVote(config, WALLET, {
+      dropId: DROP_UUID,
+      amount: 3n,
+      onWalletFee,
+    });
+    // The key's draft is never signed; the wallet signs a draft of its own.
+    expect(submitAndAwait).not.toHaveBeenCalled();
+    expect(lastRequest()).toMatchObject({ keyType: 1, signer: WALLET });
+    expect(lastSigner()).toMatchObject({ keyType: 1 });
+    expect(onWalletFee).toHaveBeenCalledWith(100n);
+    expect(onWalletFee.mock.invocationCallOrder[0]).toBeLessThan(
+      walletSign.mock.invocationCallOrder[0]!
+    );
   });
 
   it("asks the wallet when the session key predates votes", async () => {

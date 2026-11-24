@@ -163,6 +163,7 @@
   "chainIdentity.action.feeHint": "Get $fake6529 for fees.",
   "chainIdentity.rating.feeHint": "Get $fake6529 for fees on your identity page.",
   "chainIdentity.rating.walletFee": "This rating's fee, at most {amount} $fake6529, is more than this browser's key signs on its own. Check your wallet.",
+  "chainIdentity.action.walletFee": "This change's fee, at most {amount} $fake6529, is more than this browser's key signs on its own. Check your wallet.",
   "chainIdentity.error.ADDRESS_BOUND": "That wallet already belongs to an identity.",
   "chainIdentity.error.BAD_SIGNATURE": "The signature doesn't match. Try again.",
   "chainIdentity.error.BAD_WALLET_SIGNATURE": "Your wallet returned a signature the 6529 Network can't use. Try again, or use another wallet app.",

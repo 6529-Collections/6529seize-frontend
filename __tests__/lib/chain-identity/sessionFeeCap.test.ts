@@ -6,7 +6,12 @@ import {
 } from "@/lib/chain-identity/sessionFeeCap";
 import { signWithSessionKey } from "@/lib/chain-identity/sessionKey";
 import { OpType } from "@/lib/chain/codec/ops";
-import { sessionKeyGrant } from "@/lib/chain-identity/identityOps";
+import {
+  OP_POLL_BALLOT_SET,
+  OP_VOTE_SET,
+  sessionKeyGrant,
+} from "@/lib/chain-identity/identityOps";
+import { sessionOpsFor } from "@/lib/chain-identity/session";
 import { sessionSigner } from "@/lib/chain-identity/signers";
 import { ratingDraft } from "./chainDraftFixture";
 
@@ -94,6 +99,12 @@ describe("the session key's fee cap", () => {
     // A profile change counts its work up to 300,000 RU.
     const profile = withFee(inflated, { primaryType: "ProfileReplace" });
     expect(sessionFeeCap(profile)).toBe(161_536_000_000_000_000n);
+    // A ballot up to 800,000 RU; a vote, which walks the voter's stored
+    // votes, up to the 6,000,000 RU any transaction may carry.
+    const ballot = withFee(inflated, { primaryType: "PollBallotSet" });
+    expect(sessionFeeCap(ballot)).toBe(321_536_000_000_000_000n);
+    const vote = withFee(inflated, { primaryType: "VoteSet" });
+    expect(sessionFeeCap(vote)).toBe(1_985_536_000_000_000_000n);
   });
 
   it("leaves an operation it doesn't list to the wallet", () => {
@@ -105,17 +116,21 @@ describe("the session key's fee cap", () => {
   });
 
   it("has a ceiling for every operation a browser key's grant lists", () => {
+    // A grant made once the chain runs votes and ballots lists the most.
     const grant = sessionKeyGrant(`0x${"0a".repeat(32)}`, `0x${"0b".repeat(20)}`, {
       keyId: `0x${"0c".repeat(32)}`,
       publicKeyHex: `0x${"0d".repeat(32)}`,
       currencyAsset: `0x${"0e".repeat(32)}`,
       feeBudget: 1n,
       expiresAtMs: 1,
+      ops: sessionOpsFor([OP_VOTE_SET, OP_POLL_BALLOT_SET]),
     });
     const ops = grant.request.body["ops"] as readonly number[];
-    expect(ops.length).toBeGreaterThan(0);
+    expect(ops).toHaveLength(4);
+    // The codec's table predates POLL_BALLOT_SET.
+    const codes = { ...OpType, POLL_BALLOT_SET: OP_POLL_BALLOT_SET };
     for (const op of ops) {
-      const name = Object.entries(OpType).find(([, code]) => code === op)?.[0];
+      const name = Object.entries(codes).find(([, code]) => code === op)?.[0];
       // PROFILE_REPLACE is ProfileReplace in the typed data.
       const typedName = (name ?? "")
         .toLowerCase()

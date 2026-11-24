@@ -46,10 +46,14 @@ const lower = (value: string): string => value.toLowerCase();
 async function run(
   build: (actor: ChainActor) => ChainOperationRequest,
   signing: ChainSigning,
-  signal?: AbortSignal
+  signal: AbortSignal | undefined,
+  onWalletFee: ((maxFee: bigint) => void) | undefined
 ): Promise<void> {
-  await runChainWrite(build, signing, "included", signal);
+  await runChainWrite(build, signing, "included", signal, onWalletFee);
 }
+
+/** Called with the fee before the wallet signs in place of the session key. */
+type OnWalletFee = { readonly onWalletFee?: ((maxFee: bigint) => void) | undefined };
 
 const asBigInt = (value: unknown): bigint | null => {
   if (typeof value === "number" && Number.isSafeInteger(value)) {
@@ -136,7 +140,7 @@ function assertVoteTakeable(
 export async function writeChainVote(
   config: Config,
   wallet: Hex,
-  input: { readonly dropId: string; readonly amount: bigint },
+  input: { readonly dropId: string; readonly amount: bigint } & OnWalletFee,
   signal?: AbortSignal
 ): Promise<void> {
   const voter = await identityOfWallet(wallet, signal);
@@ -192,7 +196,8 @@ export async function writeChainVote(
         budgetScope,
       }),
     signing,
-    signal
+    signal,
+    input.onWalletFee
   );
 }
 
@@ -318,7 +323,7 @@ export async function writeChainPollBallot(
   input: {
     readonly pollId: string;
     readonly optionNumbers: readonly number[];
-  },
+  } & OnWalletFee,
   signal?: AbortSignal
 ): Promise<void> {
   const voter = await identityOfWallet(wallet, signal);
@@ -362,7 +367,8 @@ export async function writeChainPollBallot(
         wallet: through.wallet,
       }),
     signing,
-    signal
+    signal,
+    input.onWalletFee
   );
 }
 
@@ -374,7 +380,7 @@ export async function writeChainWaveRating(
     readonly waveId: string;
     readonly category: string;
     readonly value: bigint;
-  },
+  } & OnWalletFee,
   signal?: AbortSignal
 ): Promise<void> {
   const rater = await identityOfWallet(wallet, signal);
@@ -409,6 +415,7 @@ export async function writeChainWaveRating(
         priorVersion: prior?.updatedHeight ?? 0,
       }),
     signing,
-    signal
+    signal,
+    input.onWalletFee
   );
 }

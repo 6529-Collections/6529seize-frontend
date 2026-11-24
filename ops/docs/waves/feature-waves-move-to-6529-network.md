@@ -108,6 +108,9 @@ open again at the switch-on and go to the 6529 Network:
   `Enable chain actions on this browser`. A key enabled before the switch-on
   can't sign votes; the identity page then offers
   `Add votes to this browser`, one wallet signature for a new 30-day key.
+- The key signs a change on its own only when its fee is at most 20 times
+  what the change costs at the 6529 Network's lowest fees. Above that, a
+  toast says the fee and the wallet signs the change instead.
 - The control waits until a block holds the change, then shows it. Totals on
   the page follow once 6529.io's index reads the block.
 - A wallet with no identity on the 6529 Network, or an entry, wave or poll the
