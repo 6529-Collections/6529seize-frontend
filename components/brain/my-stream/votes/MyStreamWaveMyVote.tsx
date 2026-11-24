@@ -158,7 +158,7 @@ function MyVoteAuthor({
       data-my-vote-author
       className={
         mobile
-          ? "tw-mt-1 tw-flex tw-min-w-0 tw-items-start tw-gap-2"
+          ? "tw-mt-3 tw-flex tw-min-w-0 tw-items-start tw-gap-2"
           : "tw-mt-4 tw-flex tw-min-w-0 tw-items-center tw-gap-2"
       }
     >
@@ -411,7 +411,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
       <div
         className={
           mobile
-            ? "tw-grid tw-grid-cols-[auto_64px_minmax(0,1fr)] tw-gap-y-2"
+            ? "tw-grid tw-grid-cols-[auto_72px_minmax(0,1fr)] tw-gap-y-2"
             : `tw-grid tw-grid-cols-[44px_96px_minmax(0,1fr)] tw-gap-x-3 tw-gap-y-2 ${desktopGridColumns}`
         }
       >
@@ -488,7 +488,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
         <div
           className={
             mobile
-              ? "tw-relative tw-col-start-2 tw-row-start-1 tw-size-14 [&_img]:!tw-object-cover [&_video]:!tw-object-cover"
+              ? "tw-relative tw-col-start-2 tw-row-start-1 tw-size-16 [&_img]:!tw-object-cover [&_video]:!tw-object-cover"
               : "tw-relative tw-col-start-2 tw-row-start-1 tw-size-24"
           }
         >
