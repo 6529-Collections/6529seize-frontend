@@ -138,22 +138,6 @@ export function apiChainId(record: unknown): Hex | null {
     : null;
 }
 
-/**
- * Whether 6529.io's API names the competition a decision made on the 6529
- * Network: it has a `chain_id` and `legacy_origin` false. 6529.io's runtime
- * doesn't run such a decision, so the API gives it `permissions.submit` and
- * `permissions.vote` false; once entries go to the 6529 Network the writer
- * decides from the chain's decision instead (assertCanSubmit). An imported
- * decision (`legacy_origin` true, or no such field) keeps 6529.io's
- * permissions.
- */
-export function isChainMadeDecision(record: unknown): boolean {
-  return (
-    apiChainId(record) !== null &&
-    (record as { readonly legacy_origin?: unknown }).legacy_origin === false
-  );
-}
-
 const ZERO_ID = /^0x0{64}$/i;
 /** Pages of an author's entries the entry limit's count reads, 500 each. */
 const AUTHOR_ENTRY_PAGES = 10;

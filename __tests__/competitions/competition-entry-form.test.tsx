@@ -370,31 +370,11 @@ describe("on the 6529 Network", () => {
       mockCompetitionOrigin = {};
     });
 
-    it("takes entries though 6529.io's API shows it closed, and lets the network decide", async () => {
-      mockSubmitPermission = false;
-      mockCompetitionOrigin = { chain_id: CHAIN_ID, legacy_origin: false };
-      const onClose = jest.fn();
-      render(<CompetitionEntryForm onClose={onClose} />);
-
-      expect(
-        screen.queryByText(
-          "Entries are currently closed or you are not eligible to submit."
-        )
-      ).not.toBeInTheDocument();
-      const button = screen.getByRole("button", { name: "Submit an entry" });
-      await waitFor(() => expect(button).toBeEnabled());
-      fireEvent.click(button);
-      await waitFor(() => expect(onClose).toHaveBeenCalled());
-      expect(mockChainEntrySubmit).toHaveBeenCalled();
-      expect(createCompetitionEntry).not.toHaveBeenCalled();
-    });
-
     it("says what the network refused when the viewer can't enter", async () => {
       const { ChainOperationError } = jest.requireActual(
         "@/lib/chain-identity/operation"
       );
-      mockSubmitPermission = false;
-      mockCompetitionOrigin = { chain_id: CHAIN_ID, legacy_origin: false };
+      mockCompetitionOrigin = { chain_id: CHAIN_ID };
       mockChainEntrySubmit.mockRejectedValue(
         new ChainOperationError(
           "rejected",
@@ -408,34 +388,19 @@ describe("on the 6529 Network", () => {
       );
     });
 
-    it.each([
-      ["an imported decision", { chain_id: CHAIN_ID, legacy_origin: true }],
-      ["a decision with no origin given", { chain_id: CHAIN_ID }],
-      ["a decision with no chain_id", { legacy_origin: false }],
-    ])("keeps 6529.io's closed submissions for %s", async (_kind, origin) => {
+    it("keeps 6529.io's closed submissions, as for an imported decision", () => {
       mockSubmitPermission = false;
-      mockCompetitionOrigin = origin;
+      mockCompetitionOrigin = { chain_id: CHAIN_ID };
       render(<CompetitionEntryForm onClose={jest.fn()} />);
       expect(
         screen.getByText(
           "Entries are currently closed or you are not eligible to submit."
         )
       ).toBeInTheDocument();
-      expect(
-        screen.getByRole("button", { name: "Submit an entry" })
-      ).toBeDisabled();
-      fireEvent.click(screen.getByRole("button", { name: "Submit an entry" }));
+      const button = screen.getByRole("button", { name: "Submit an entry" });
+      expect(button).toBeDisabled();
+      fireEvent.click(button);
       expect(mockChainEntrySubmit).not.toHaveBeenCalled();
-    });
-
-    it("stays closed before entries go to the 6529 Network", () => {
-      mockChainEntriesActive = false;
-      mockSubmitPermission = false;
-      mockCompetitionOrigin = { chain_id: CHAIN_ID, legacy_origin: false };
-      render(<CompetitionEntryForm onClose={jest.fn()} />);
-      expect(
-        screen.getByRole("button", { name: "Submit an entry" })
-      ).toBeDisabled();
     });
   });
 });

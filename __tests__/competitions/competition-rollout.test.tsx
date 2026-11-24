@@ -3,21 +3,10 @@ import CompetitionDetail from "@/components/competitions/CompetitionDetail";
 import type { ApiCreateWaveMetadataRequest } from "@/generated/models/ApiCreateWaveMetadataRequest";
 import { WAVE_DISPLAY_METADATA_KEYS } from "@/helpers/waves/wave-metadata.helpers";
 let mockPrimary: string | null = null;
-let mockChainWavesActive = false;
 let mockSearch = "edit=1";
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
-const mockCompetition: {
-  [key: string]: unknown;
-  lifecycle: string;
-  type: string;
-  presentation: ApiCreateWaveMetadataRequest[];
-  permissions: {
-    submit: boolean;
-    administer: boolean;
-    edit_rules_after_activity: boolean;
-  };
-} = {
+const mockCompetition = {
   id: "native",
   wave_id: "wave",
   title: "Readable native competition",
@@ -35,10 +24,6 @@ const mockCompetition: {
   voting: { ends_at: null },
   presentation: [] as ApiCreateWaveMetadataRequest[],
 };
-jest.mock("@/hooks/useWavesMovePhase", () => ({
-  ...jest.requireActual("@/hooks/useWavesMovePhase"),
-  useChainWavesActive: () => mockChainWavesActive,
-}));
 jest.mock("@/helpers/competition.helpers", () => ({
   ...jest.requireActual("@/helpers/competition.helpers"),
 }));
@@ -87,10 +72,6 @@ jest.mock(
 jest.mock("@/components/competitions/CompetitionEntryForm", () => () => null);
 
 beforeEach(() => {
-  mockChainWavesActive = false;
-  mockCompetition.permissions.submit = true;
-  delete mockCompetition["chain_id"];
-  delete mockCompetition["legacy_origin"];
   mockCompetition.lifecycle = "PUBLISHED";
   mockCompetition.type = "RANK";
   mockCompetition.presentation = [];
@@ -241,30 +222,25 @@ it.each(["", "tab=rules", "edit=1", "edit=1&competition=native&serialNo=42"])(
 describe("a decision made on the 6529 Network", () => {
   beforeEach(() => {
     mockSearch = "";
-    mockCompetition.permissions.submit = false;
-    mockCompetition["chain_id"] = `0x${"3c".repeat(32)}`;
+    (mockCompetition as Record<string, unknown>)["chain_id"] =
+      `0x${"3c".repeat(32)}`;
   });
 
-  it("offers the entry form once entries go there, though 6529.io's API shows it closed", () => {
-    mockChainWavesActive = true;
-    mockCompetition["legacy_origin"] = false;
+  afterEach(() => {
+    delete (mockCompetition as Record<string, unknown>)["chain_id"];
+    mockCompetition.permissions.submit = true;
+  });
+
+  it("offers the entry form when 6529.io's API offers it", () => {
+    mockCompetition.permissions.submit = true;
     render(<CompetitionDetail waveId="wave" competitionId="native" />);
     expect(
       screen.getByRole("button", { name: "Submit an entry" })
     ).toBeVisible();
   });
 
-  it("offers no entry form before entries go there", () => {
-    mockCompetition["legacy_origin"] = false;
-    render(<CompetitionDetail waveId="wave" competitionId="native" />);
-    expect(
-      screen.queryByRole("button", { name: "Submit an entry" })
-    ).toBeNull();
-  });
-
-  it("keeps an imported decision's closed submissions", () => {
-    mockChainWavesActive = true;
-    mockCompetition["legacy_origin"] = true;
+  it("offers none when 6529.io's API shows it closed", () => {
+    mockCompetition.permissions.submit = false;
     render(<CompetitionDetail waveId="wave" competitionId="native" />);
     expect(
       screen.queryByRole("button", { name: "Submit an entry" })

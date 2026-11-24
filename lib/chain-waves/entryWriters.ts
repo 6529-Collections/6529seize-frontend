@@ -199,8 +199,9 @@ export async function writeChainEntry(
       "This decision isn't taking entries right now."
     );
   }
-  // Who may enter is the chain's to say, also for a decision 6529.io's API
-  // shows closed to submissions because it was made on the chain.
+  // The chain refuses an entry outside its rules only in a block, after
+  // taking the fee; checking first keeps that from the author. 6529.io's
+  // permissions, which the form follows, can lag the chain's groups.
   await assertCanSubmit(decision, author.principalId, signal);
   const fields = entryFieldsOf(input.request);
   const prompt: ChainWalletPrompt = async (ask) => {

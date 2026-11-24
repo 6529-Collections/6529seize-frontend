@@ -31,11 +31,7 @@ import {
   isCompetitionAccessError,
 } from "@/helpers/competition.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import {
-  useChainWavesActive,
-  useWavesWritesPaused,
-} from "@/hooks/useWavesMovePhase";
-import { isChainMadeDecision } from "@/lib/chain-waves/entryGateway";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { t } from "@/i18n/messages";
 import { CompetitionState } from "./CompetitionState";
 import CompetitionAdmin from "./CompetitionAdmin";
@@ -76,14 +72,8 @@ export function NativeCompetitionContent({
   const locale = useBrowserLocale();
   // Decision settings and entries move to the 6529 Network.
   const wavesWritesPaused = useWavesWritesPaused();
-  // Entries open there at the switch-on. A decision made there comes from
-  // 6529.io's API closed to submissions, since 6529.io doesn't run it; once
-  // entries go to the network, the entry form lets the chain decide.
+  // Entries open there at the switch-on.
   const entriesPaused = useWavesWritesPaused("entries");
-  const chainWavesActive = useChainWavesActive();
-  const canEnter =
-    competition.permissions.submit ||
-    (chainWavesActive && isChainMadeDecision(competition));
   const pathname = usePathname();
   const router = useRouter();
   const navigateTab = useWaveTabNavigation();
@@ -246,7 +236,7 @@ export function NativeCompetitionContent({
             scrollContainerRef={scrollContainerRef}
             tab={tab}
             onCreateDrop={
-              canEnter &&
+              competition.permissions.submit &&
               !entriesPaused &&
               competition.lifecycle === ApiCompetitionLifecycle.Published
                 ? () => setEntering((current) => !current)

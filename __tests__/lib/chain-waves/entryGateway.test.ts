@@ -1,9 +1,6 @@
 import type { Hex } from "viem";
 import { chainGatewayGet } from "@/lib/chain-identity/gateway";
-import {
-  entryGateway,
-  isChainMadeDecision,
-} from "@/lib/chain-waves/entryGateway";
+import { entryGateway } from "@/lib/chain-waves/entryGateway";
 
 jest.mock("@/lib/chain-identity/gateway", () => ({
   ...jest.requireActual("@/lib/chain-identity/gateway"),
@@ -66,25 +63,5 @@ describe("entryGateway.getWaveDecisions", () => {
       "Submit from the decision's own page."
     );
     expect(gatewayGet).toHaveBeenCalledTimes(10);
-  });
-});
-
-describe("isChainMadeDecision", () => {
-  const CHAIN_ID = `0x${"3c".repeat(32)}`;
-
-  it("is true for a chain_id with legacy_origin false", () => {
-    expect(
-      isChainMadeDecision({ chain_id: CHAIN_ID, legacy_origin: false })
-    ).toBe(true);
-  });
-
-  it.each([
-    ["an imported decision", { chain_id: CHAIN_ID, legacy_origin: true }],
-    ["no legacy_origin", { chain_id: CHAIN_ID }],
-    ["no chain_id", { legacy_origin: false }],
-    ["a chain_id that isn't one", { chain_id: "0x12", legacy_origin: false }],
-    ["no record", null],
-  ])("is false for %s", (_why, record) => {
-    expect(isChainMadeDecision(record)).toBe(false);
   });
 });

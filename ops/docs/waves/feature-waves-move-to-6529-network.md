@@ -128,10 +128,11 @@ once 6529.io's index lists them:
   outside its submit group, or at its limit of entries in the running, gets
   a message saying so and nothing is sent. A declined wallet prompt, or a
   refusal before anything was sent, leaves the entry in the composer.
-- A decision made on the 6529 Network comes from 6529.io's API with
-  `permissions.submit` false, since 6529.io doesn't run it; its entry form
-  still opens, and the chain's decision says who may enter. Imported
-  decisions keep 6529.io's permissions.
+- The entry form opens where 6529.io's API offers it (`permissions.submit`),
+  for a decision made on the 6529 Network as for an imported one. When the
+  two disagree, the chain's check above refuses before any prompt, and an
+  entry 6529.io doesn't offer can't be made from this site until its API
+  catches up.
 - An author's delete of their own entry withdraws it (`SUBMISSION_WITHDRAW`),
   from the drop menu and the mobile menu alike.
 
