@@ -5,6 +5,7 @@ import {
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/chain-identity";
 import { ChainGatewayError } from "@/lib/chain-identity/gateway";
 import { ChainOperationError } from "@/lib/chain-identity/operation";
 
