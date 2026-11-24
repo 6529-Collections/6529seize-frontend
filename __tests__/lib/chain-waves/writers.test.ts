@@ -65,6 +65,16 @@ const DROP_POLL = legacyObjectId(DROP_UUID, 0x060b);
 const DROP_WAVE = legacyObjectId(DROP_UUID, 0x0501);
 
 const gateway = wavesGateway as jest.Mocked<typeof wavesGateway>;
+
+/** A decision taking votes: open window, votes from -100 to 1000. */
+const OPEN_CONFIG = {
+  creditScope: 1,
+  votingStart: "0",
+  votingEnd: "0",
+  minVote: "-100",
+  maxVote: "1000",
+  perEntryCap: "0",
+};
 const identityByWallet = chainGateway.getIdentityByWallet as jest.Mock;
 const run = runOperation as jest.Mock;
 const sessionKey = usableSessionKey as jest.Mock;
@@ -81,12 +91,15 @@ beforeEach(() => {
   sessionKey.mockResolvedValue(null);
   run.mockResolvedValue({});
   gateway.getEntry.mockImplementation(
-    async (id) => ({ entryId: id, decisionId: DECISION }) as never
+    async (id) =>
+      ({ entryId: id, decisionId: DECISION, status: "active" }) as never
   );
   gateway.getDecision.mockResolvedValue({
     decisionId: DECISION,
     configVersion: 2,
-    config: { creditScope: 1 },
+    status: "published",
+    due: false,
+    config: OPEN_CONFIG,
   } as never);
   gateway.getVoterVotes.mockResolvedValue({
     decisionId: DECISION,
@@ -162,6 +175,98 @@ describe("writeChainVote", () => {
     ).rejects.toThrow("This entry isn't on the 6529 Network.");
     expect(run).not.toHaveBeenCalled();
   });
+
+  describe("refuses before signing what the chain would refuse in a block", () => {
+    const decisionWith = (fields: Record<string, unknown>) =>
+      gateway.getDecision.mockResolvedValue({
+        decisionId: DECISION,
+        configVersion: 2,
+        status: "published",
+        due: false,
+        ...fields,
+        config: {
+          ...OPEN_CONFIG,
+          ...((fields["config"] as object | undefined) ?? {}),
+        },
+      } as never);
+
+    it.each([
+      [
+        "a decision not open",
+        { status: "draft" },
+        5n,
+        "This decision isn't open.",
+      ],
+      [
+        "a decision counting its result",
+        { due: true },
+        5n,
+        "This decision is counting its result. Try again in a few minutes.",
+      ],
+      [
+        "voting not started",
+        { config: { votingStart: String(Date.now() + 600_000) } },
+        5n,
+        "Voting is closed in this decision.",
+      ],
+      [
+        "voting ended",
+        { config: { votingEnd: String(Date.now() - 600_000) } },
+        5n,
+        "Voting is closed in this decision.",
+      ],
+      [
+        "a negative vote where none is allowed",
+        { config: { minVote: "0" } },
+        -5n,
+        "Negative votes aren't allowed in this decision.",
+      ],
+      [
+        "a vote above the range",
+        { config: {} },
+        1001n,
+        "This vote is outside the range this decision allows.",
+      ],
+      [
+        "a vote above the per-entry cap",
+        { config: { perEntryCap: "50" } },
+        -60n,
+        "This vote is above the limit for one entry.",
+      ],
+    ])("%s", async (_why, fields, amount, sentence) => {
+      decisionWith(fields);
+      await expect(
+        writeChainVote(config, WALLET, { dropId: DROP_UUID, amount })
+      ).rejects.toThrow(sentence);
+      expect(run).not.toHaveBeenCalled();
+    });
+
+    it("an entry no longer in the running", async () => {
+      gateway.getEntry.mockImplementation(
+        async (id) =>
+          ({ entryId: id, decisionId: DECISION, status: "winner" }) as never
+      );
+      await expect(
+        writeChainVote(config, WALLET, { dropId: DROP_UUID, amount: 5n })
+      ).rejects.toThrow("This entry no longer takes votes.");
+      expect(run).not.toHaveBeenCalled();
+    });
+
+    it("still takes a vote back to 0 from an ended decision", async () => {
+      decisionWith({ status: "ended" });
+      await writeChainVote(config, WALLET, { dropId: DROP_UUID, amount: 0n });
+      expect(lastRequest().body).toMatchObject({
+        amount: "0",
+        priorVoteVersion: "88",
+      });
+    });
+
+    it("leaves a window's edge within a minute to the chain", async () => {
+      decisionWith({ config: { votingEnd: String(Date.now() - 30_000) } });
+      await writeChainVote(config, WALLET, { dropId: DROP_UUID, amount: 5n });
+      expect(run).toHaveBeenCalled();
+    });
+  });
 });
 
 describe("writeChainPollBallot", () => {
@@ -171,6 +276,10 @@ describe("writeChainPollBallot", () => {
     gateway.getPoll.mockResolvedValue({
       pollId: DROP_POLL,
       snapshotDay: 30,
+      status: "open",
+      closeTime: Date.now() + 3_600_000,
+      optionCount: 4,
+      maxChoices: 2,
     } as never);
     gateway.findPollBallot.mockResolvedValue({
       cid: CID,
@@ -219,7 +328,7 @@ describe("writeChainPollBallot", () => {
     );
     await writeChainPollBallot(config, WALLET, {
       pollId: DROP_UUID,
-      optionNumbers: [1],
+      optionNumbers: [3],
     });
     // abi.encode(keccak256("6529.TdhIdentity.v1"), address[] [w]), hashed.
     const lone = keccak256(
@@ -243,7 +352,7 @@ describe("writeChainPollBallot", () => {
     } as never);
     await writeChainPollBallot(config, WALLET, {
       pollId: DROP_UUID,
-      optionNumbers: [1],
+      optionNumbers: [3],
     });
     expect(lastRequest().body.wallet).toBe(WALLET);
   });
@@ -256,6 +365,57 @@ describe("writeChainPollBallot", () => {
         optionNumbers: [1],
       })
     ).rejects.toThrow("holds TDH");
+    expect(run).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["a closed poll", { status: "closed" }, [2], "This poll is closed."],
+    [
+      "a poll past its close time",
+      { closeTime: Date.now() - 120_000 },
+      [2],
+      "This poll is closed.",
+    ],
+    [
+      "more options than the poll allows",
+      {},
+      [1, 2, 3],
+      "That's more options than this poll allows.",
+    ],
+    [
+      "an option the poll doesn't have",
+      {},
+      [5],
+      "That's more options than this poll allows.",
+    ],
+    [
+      "the answer already given",
+      {},
+      [1],
+      "That's already your answer in this poll.",
+    ],
+  ])("refuses %s before signing", async (_why, fields, options, sentence) => {
+    gateway.getTdhDayWallet.mockResolvedValue({
+      wallet: WALLET,
+      cid: CID,
+      identityTdh: "9",
+      walletCount: 1,
+    } as never);
+    gateway.getPoll.mockResolvedValue({
+      pollId: DROP_POLL,
+      snapshotDay: 30,
+      status: "open",
+      closeTime: Date.now() + 3_600_000,
+      optionCount: 4,
+      maxChoices: 2,
+      ...fields,
+    } as never);
+    await expect(
+      writeChainPollBallot(config, WALLET, {
+        pollId: DROP_UUID,
+        optionNumbers: options,
+      })
+    ).rejects.toThrow(sentence);
     expect(run).not.toHaveBeenCalled();
   });
 });

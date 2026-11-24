@@ -8,7 +8,12 @@ import {
   type ChainActor,
 } from "@/lib/chain-identity/identityOps";
 import { ChainOperationError } from "@/lib/chain-identity/operation";
-import { wavesGateway } from "./gateway";
+import {
+  wavesGateway,
+  type ChainDecision,
+  type ChainEntry,
+  type ChainPoll,
+} from "./gateway";
 import { resolveEntry, resolvePoll, resolveWave } from "./ids";
 import {
   pollBallotSet,
@@ -46,6 +51,25 @@ async function run(
   await runChainWrite(build, signing, "included", signal);
 }
 
+const asBigInt = (value: unknown): bigint | null => {
+  if (typeof value === "number" && Number.isSafeInteger(value)) {
+    return BigInt(value);
+  }
+  return typeof value === "string" && /^-?\d+$/.test(value)
+    ? BigInt(value)
+    : null;
+};
+
+const refuse = (sentence: string): never => {
+  throw new ChainOperationError("rejected", sentence);
+};
+
+/**
+ * A clock a little off leaves the edges of a time window to the chain: the
+ * page refuses only a write clearly outside it.
+ */
+const CLOCK_MARGIN_MS = 60_000;
+
 const asNumber = (value: unknown): number | null => {
   const parsed =
     typeof value === "string" || typeof value === "number"
@@ -53,6 +77,57 @@ const asNumber = (value: unknown): number | null => {
       : Number.NaN;
   return Number.isFinite(parsed) ? parsed : null;
 };
+
+/**
+ * Throws, with the sentence the chain would refuse it with, a vote the 6529
+ * Network would refuse for what the decision and the entry already say
+ * (chain-exec `decisions/vote.rs` checks 2, 5, 6, 8 and 12 to 14). Sent, each
+ * would be refused in a block and still pay its fee. A vote taken back to 0
+ * from an entry no longer in the running, or a closed decision, is always
+ * taken.
+ */
+export function assertVoteTakeable(
+  decision: ChainDecision,
+  entry: ChainEntry,
+  amount: bigint,
+  hasPriorVote: boolean,
+  nowMs: number
+): void {
+  const closed = decision.status === "ended" || decision.status === "archived";
+  if (amount === 0n && hasPriorVote && (entry.status !== "active" || closed)) {
+    return;
+  }
+  if (decision.status !== "published") {
+    refuse("This decision isn't open.");
+  }
+  if (decision.due) {
+    refuse("This decision is counting its result. Try again in a few minutes.");
+  }
+  const start = asNumber(decision.config["votingStart"]) ?? 0;
+  const end = asNumber(decision.config["votingEnd"]) ?? 0;
+  if (
+    start > nowMs + CLOCK_MARGIN_MS ||
+    (end !== 0 && nowMs > end + CLOCK_MARGIN_MS)
+  ) {
+    refuse("Voting is closed in this decision.");
+  }
+  if (entry.status !== "active") {
+    refuse("This entry no longer takes votes.");
+  }
+  const min = asBigInt(decision.config["minVote"]);
+  const max = asBigInt(decision.config["maxVote"]);
+  const cap = asBigInt(decision.config["perEntryCap"]);
+  if (amount < 0n && min !== null && min >= 0n) {
+    refuse("Negative votes aren't allowed in this decision.");
+  }
+  if (min !== null && max !== null && (amount < min || amount > max)) {
+    refuse("This vote is outside the range this decision allows.");
+  }
+  const size = amount < 0n ? -amount : amount;
+  if (cap !== null && cap !== 0n && size > cap) {
+    refuse("This vote is above the limit for one entry.");
+  }
+}
 
 /**
  * Sets the connected wallet's identity's vote on the entry a drop is to
@@ -87,6 +162,13 @@ export async function writeChainVote(
   );
   const prior = votes?.votes.find(
     (vote) => lower(vote.entryId) === lower(entry.entryId)
+  );
+  assertVoteTakeable(
+    decision,
+    entry,
+    input.amount,
+    prior !== undefined,
+    Date.now()
   );
   const signing = await sessionOrWalletSigning(
     config,
@@ -168,6 +250,33 @@ async function ballotWallet(
 }
 
 /**
+ * Throws a ballot the 6529 Network would refuse for what the poll already
+ * says (chain-exec `handlers/polls.rs` checks 2 and 7), before anything is
+ * signed.
+ */
+export function assertBallotTakeable(
+  poll: ChainPoll,
+  selection: number,
+  nowMs: number
+): void {
+  if (
+    poll.status === "closed" ||
+    (poll.closeTime > 0 && nowMs >= poll.closeTime + CLOCK_MARGIN_MS)
+  ) {
+    refuse("This poll is closed.");
+  }
+  const options = poll.optionCount;
+  const above = options < 32 && selection >>> options !== 0;
+  let chosen = 0;
+  for (let bits = selection; bits !== 0; bits >>>= 1) {
+    chosen += bits & 1;
+  }
+  if (above || chosen > poll.maxChoices) {
+    refuse("That's more options than this poll allows.");
+  }
+}
+
+/**
  * Sets the identity's ballot in a drop's poll to `optionNumbers` (6529.io's
  * option numbers, from 1). The ballot belongs to the TDH cluster; the last
  * one set stands.
@@ -183,12 +292,18 @@ export async function writeChainPollBallot(
 ): Promise<void> {
   const voter = await identityOfWallet(wallet, signal);
   const poll = await resolvePoll(input.pollId, signal);
+  const selection = pollSelection(input.optionNumbers);
+  assertBallotTakeable(poll, selection, Date.now());
   const through = await ballotWallet(wallet, voter, poll.snapshotDay, signal);
   const prior = await wavesGateway.findPollBallot(
     poll.pollId,
     through.cid,
     signal
   );
+  // The chain refuses a ballot that changes nothing (NO_CHANGE), in a block.
+  if (prior && prior.version !== 0 && prior.selection === selection) {
+    refuse("That's already your answer in this poll.");
+  }
   const signing = await sessionOrWalletSigning(
     config,
     wallet,
@@ -199,7 +314,7 @@ export async function writeChainPollBallot(
     (actor) =>
       pollBallotSet(voter.principalId, actor, {
         pollId: poll.pollId,
-        selection: pollSelection(input.optionNumbers),
+        selection,
         priorVersion: prior?.version ?? 0,
         wallet: through.wallet,
       }),
