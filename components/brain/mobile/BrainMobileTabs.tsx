@@ -572,7 +572,9 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
       className={`tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] ${phoneWaveLayout ? "tw-pl-2 tw-pr-4 sm:tw-pl-4" : "tw-px-2 sm:tw-px-4 md:tw-px-6"}`}
     >
       {isWaveNavigationLoading && (
-        <div className="tw-flex tw-min-h-12 tw-w-full tw-items-center tw-gap-1.5 tw-overflow-hidden tw-px-0.5">
+        <div
+          className={`tw-flex tw-w-full tw-items-center tw-gap-1.5 tw-overflow-hidden tw-px-0.5 ${phoneWaveLayout ? "tw-min-h-11" : "tw-min-h-12"}`}
+        >
           {streamBackButton}
           <output
             aria-label={t(locale, "wave.navigation.loadingSections")}
