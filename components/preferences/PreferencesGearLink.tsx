@@ -24,7 +24,7 @@ export default function PreferencesGearLink({
       title={label}
       onNavigate={() => onNavigate?.()}
       className={clsx(
-        "tw-inline-flex tw-size-8 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100",
+        "tw-inline-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100",
         className
       )}
     >

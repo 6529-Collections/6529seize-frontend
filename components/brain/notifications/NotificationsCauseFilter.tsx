@@ -305,7 +305,7 @@ export default function NotificationsCauseFilter({
         </h1>
         <PreferencesGearLink
           label={t(locale, "profilePreferences.notifications.linkLabel")}
-          className={isApp ? "tw-ml-4 tw-min-h-10 tw-min-w-10" : undefined}
+          className={isApp ? "tw-ml-4" : undefined}
         />
       </div>
 
