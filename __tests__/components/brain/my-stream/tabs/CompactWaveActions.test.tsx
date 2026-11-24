@@ -1,4 +1,5 @@
 import {
+  act,
   fireEvent,
   render,
   screen,
@@ -9,6 +10,31 @@ import CompactWaveActions, {
   CompactWaveActionsProvider,
 } from "@/components/brain/my-stream/tabs/CompactWaveActions";
 import type { CompactMenuItem } from "@/components/compact-menu";
+import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
+
+const originalMatchMedia = window.matchMedia;
+let phoneChanges: EventTarget;
+beforeEach(() => {
+  phoneChanges = new EventTarget();
+  window.matchMedia = jest.fn((query: string) => {
+    const result = originalMatchMedia(query);
+    return query === PHONE_WAVES_LAYOUT_QUERY
+      ? {
+          ...result,
+          addEventListener: phoneChanges.addEventListener.bind(phoneChanges),
+          removeEventListener:
+            phoneChanges.removeEventListener.bind(phoneChanges),
+        }
+      : result;
+  });
+});
+afterEach(() => {
+  window.matchMedia = originalMatchMedia;
+});
+const changePhoneLayout = (matches: boolean) =>
+  act(() => {
+    phoneChanges.dispatchEvent(Object.assign(new Event("change"), { matches }));
+  });
 
 const items: CompactMenuItem[] = [
   {
@@ -120,4 +146,45 @@ it("keeps the phone sheet and current actions when its header is replaced", asyn
   fireEvent.click(originalSearch);
   await waitFor(() => expect(currentSearch).toHaveBeenCalledTimes(1));
   expect(previousSearch).not.toHaveBeenCalled();
+});
+
+it("retires the phone sheet when leaving its layout without reopening it on return", () => {
+  const view = (phone: boolean) => (
+    <CompactWaveActionsProvider>
+      <CompactWaveActions phone={phone} items={items} />
+    </CompactWaveActionsProvider>
+  );
+  const { rerender } = render(view(true));
+  fireEvent.click(screen.getByRole("button", { name: "More wave actions" }));
+  expect(
+    screen.getByRole("dialog", { name: "More wave actions" })
+  ).toBeVisible();
+  changePhoneLayout(false);
+  rerender(view(false));
+  expect(
+    screen.queryByRole("dialog", { name: "More wave actions" })
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "More wave actions" })
+  ).toHaveAttribute("aria-expanded", "false");
+  changePhoneLayout(true);
+  rerender(view(true));
+  expect(
+    screen.queryByRole("dialog", { name: "More wave actions" })
+  ).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "More wave actions" }));
+  expect(screen.getByRole("button", { name: "Search messages" })).toBeVisible();
+});
+
+it("keeps current registration when entering the phone layout", () => {
+  const view = (
+    <CompactWaveActionsProvider>
+      <CompactWaveActions phone items={items} />
+    </CompactWaveActionsProvider>
+  );
+  const { rerender } = render(view);
+  changePhoneLayout(true);
+  rerender(view);
+  fireEvent.click(screen.getByRole("button", { name: "More wave actions" }));
+  expect(screen.getByRole("button", { name: "Search messages" })).toBeVisible();
 });

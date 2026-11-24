@@ -1,6 +1,7 @@
 "use client";
 
 import IconButton from "@/components/utils/button/IconButton";
+import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
 
 import type { CompactMenuItem } from "@/components/compact-menu";
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
@@ -10,6 +11,7 @@ import {
   createContext,
   Fragment,
   useContext,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useState,
@@ -85,6 +87,19 @@ export function CompactWaveActionsProvider({
 }) {
   const state = useActionSheetState();
   const [menu, setMenu] = useState<WaveActionMenu | null>(null);
+  const { setIsOpen, setPendingAction } = state;
+  useEffect(() => {
+    const query = globalThis.matchMedia(PHONE_WAVES_LAYOUT_QUERY);
+    const onChange = (event: MediaQueryListEvent) => {
+      if (!event.matches) {
+        setIsOpen(false);
+        setPendingAction(null);
+        setMenu(null);
+      }
+    };
+    query.addEventListener("change", onChange);
+    return () => query.removeEventListener("change", onChange);
+  }, [setIsOpen, setPendingAction]);
   const value = useMemo(() => ({ ...state, setMenu }), [state]);
   return (
     <WaveActionSheetContext.Provider value={value}>
