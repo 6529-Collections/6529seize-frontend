@@ -63,21 +63,12 @@ function MyVotesExplainButton({
     "data-tooltip-id": tooltipId,
     "data-tooltip-content": description,
   };
-  if (mobile)
-    return (
-      <button
-        {...props}
-        className="tw-min-h-11 tw-min-w-11 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-1 tw-text-xs tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50"
-      >
-        {label}
-      </button>
-    );
   return (
     <Button
       {...props}
       variant="tertiary"
-      size="sm"
-      className="!tw-min-h-11 tw-min-w-11 tw-whitespace-nowrap !tw-px-3 !tw-text-xs !tw-font-medium"
+      size={null}
+      className={`tw-h-11 tw-min-h-11 tw-min-w-11 tw-whitespace-nowrap !tw-text-xs !tw-font-medium ${mobile ? "!tw-px-1" : "!tw-px-3"}`}
     >
       {label}
     </Button>
