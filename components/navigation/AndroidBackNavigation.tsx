@@ -35,6 +35,8 @@ const ROOT_ROUTES = new Set([
 const BACK_REPEAT_INTERVAL_MS = 250;
 // A hiding keyboard normally finishes within the native animation. Past this,
 // treat the phase as stale so a lost hide event cannot swallow every Back.
+// Keep it longer than NATIVE_KEYBOARD_HIDE_FALLBACK_MS (500 ms) in
+// hooks/useNativeKeyboard.ts, which normally ends the phase first.
 const KEYBOARD_HIDING_BACK_WINDOW_MS = 600;
 
 function dismissKeyboard(

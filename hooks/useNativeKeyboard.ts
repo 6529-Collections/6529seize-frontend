@@ -4,6 +4,10 @@ import { Capacitor } from "@capacitor/core";
 import type { PluginListenerHandle } from "@capacitor/core";
 import { Keyboard } from "@capacitor/keyboard";
 import { useSyncExternalStore } from "react";
+import {
+  isEditableElement,
+  isKeyboardTextEntryElement,
+} from "@/hooks/nativeKeyboardFocus";
 
 type NativeKeyboardPhase = "hidden" | "showing" | "visible" | "hiding";
 
@@ -349,42 +353,6 @@ function getViewportKeyboardHeight(): number {
   // pre-keyboard baseline.
   return normalizeKeyboardHeight(
     Math.max(visualViewportShrinkHeight, viewportBottomOverlap)
-  );
-}
-
-function isEditableElement(element: Element | null): boolean {
-  if (!(element instanceof HTMLElement)) {
-    return false;
-  }
-
-  return (
-    element.isContentEditable ||
-    element.matches(
-      'input:not([disabled]):not([readonly]), textarea:not([disabled]):not([readonly]), select:not([disabled]), [contenteditable="true"], [contenteditable="plaintext-only"]'
-    )
-  );
-}
-
-function isKeyboardTextEntryElement(element: Element | null): boolean {
-  if (!isEditableElement(element)) return false;
-  if (element instanceof HTMLInputElement) {
-    return [
-      "text",
-      "search",
-      "email",
-      "url",
-      "tel",
-      "password",
-      "number",
-    ].includes(element.type);
-  }
-  return (
-    element instanceof HTMLTextAreaElement ||
-    (element instanceof HTMLElement &&
-      (element.isContentEditable ||
-        element.matches(
-          '[contenteditable="true"], [contenteditable="plaintext-only"]'
-        )))
   );
 }
 
