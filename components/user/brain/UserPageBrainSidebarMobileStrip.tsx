@@ -67,7 +67,7 @@ function MobileSectionState({
 
   if (state.waves.length === 0) {
     return (
-      <span className="tw-flex tw-h-9 tw-items-center tw-px-1 tw-text-meta/4 tw-font-normal tw-text-iron-500">
+      <span className="tw-flex tw-h-9 tw-items-center tw-px-1 tw-text-meta/4 tw-font-normal tw-italic tw-text-iron-500">
         {getUserPageBrainSidebarMessage(locale, emptyMessageKey)}
       </span>
     );
