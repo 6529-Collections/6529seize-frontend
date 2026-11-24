@@ -152,13 +152,15 @@ export function OfficialWaveSummary({
   const locale = useBrowserLocale();
 
   return (
-    <div className="tw-flex tw-flex-wrap tw-items-start tw-gap-x-3 tw-gap-y-3 lg:tw-grid lg:tw-grid-cols-[minmax(0,1fr)_auto] lg:tw-gap-x-6 lg:tw-gap-y-0">
-      <h2 className="tw-m-0 tw-min-w-0 tw-max-w-full tw-flex-[1_1_max-content] tw-text-lg tw-font-semibold tw-text-iron-100 max-lg:tw-break-words md:tw-text-xl lg:tw-col-start-1 lg:tw-row-start-1">
+    <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-start tw-gap-x-3 tw-gap-y-3 lg:tw-gap-x-6 lg:tw-gap-y-0">
+      <h2
+        className={`tw-col-start-1 tw-row-start-1 tw-m-0 tw-min-w-0 tw-max-w-full tw-text-lg tw-font-semibold tw-text-iron-100 max-lg:tw-break-words md:tw-text-xl ${canManageOwnOfficialWave ? "" : "tw-col-span-2 lg:tw-col-span-1"}`}
+      >
         {profileCurationLabel ??
           t(locale, "profileCuration.header.fallbackTitle")}
       </h2>
       {canManageOwnOfficialWave && (
-        <div className="tw-ml-auto tw-flex tw-flex-none tw-items-center tw-justify-end tw-gap-2 lg:tw-col-start-2 lg:tw-row-span-2 lg:tw-row-start-1 lg:tw-self-center">
+        <div className="tw-col-start-2 tw-row-start-1 tw-flex tw-items-center tw-justify-end tw-gap-2 lg:tw-row-span-2 lg:tw-self-center">
           {manageCurationControl}
           {onAddPost !== undefined && (
             <Button
@@ -174,7 +176,7 @@ export function OfficialWaveSummary({
         </div>
       )}
 
-      <div className="tw-w-full tw-min-w-0 tw-space-y-2 lg:tw-hidden">
+      <div className="tw-col-span-2 tw-row-start-2 tw-min-w-0 tw-space-y-2 lg:tw-hidden">
         <div className="tw-text-xs tw-font-medium tw-text-iron-500">
           {t(locale, "profileCuration.header.sourceLabel")}
         </div>

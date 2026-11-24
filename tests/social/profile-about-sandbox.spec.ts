@@ -493,10 +493,12 @@ test.describe("Profile editing @auth @medium @local-only", () => {
             const sectionsBox = await page
               .getByRole("navigation", { name: "Profile sections" })
               .boundingBox();
-            expect(manageBox!.y).toBeGreaterThanOrEqual(
-              headingBox!.y + headingBox!.height
+            expect(Math.abs(headingBox!.y - manageBox!.y)).toBeLessThanOrEqual(
+              1
             );
-            expect(headingBox!.width).toBeCloseTo(sectionsBox!.width, 0);
+            expect(headingBox!.x + headingBox!.width).toBeLessThanOrEqual(
+              manageBox!.x
+            );
             expect(manageBox!.x + manageBox!.width).toBeLessThan(addBox!.x);
             expect(
               Math.abs(

@@ -71,9 +71,9 @@ leave without submitting. Their desktop dialogs also offer Cancel.
 - **Owner controls:** `Add post` is the primary action. `Manage` includes
   `Organize posts` under `This Curation` when available and groups profile display
   actions separately from actions that change the Curation itself.
-- **Mobile owner controls:** short titles share their row with a square `Manage`
-  icon button and `+ Add post` at the right. When both cannot fit, the title keeps
-  its full width and the controls stay together on a right-aligned row below it.
+- **Mobile owner controls:** the title shares its row with a square `Manage`
+  icon button and `+ Add post` at the top right. Long titles wrap as one block
+  beside the controls, which stay on the title row.
   `Manage` opens a sheet with the same title on mobile web and in the app.
 - **Mobile empty states:** owner and visitor panels use the same compact frame.
   The owner's `Create Curation` action is a single primary button, with
