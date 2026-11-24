@@ -58,7 +58,7 @@ const DROP_UUID = "6f1c2c4e-9a1b-4c3d-8e5f-0a1b2c3d4e5f";
 const OTHER: Hex = `0x${"22".repeat(32)}`;
 
 // An imported object's id: DerivedId(uuid || 16 zero bytes, 0, kind)
-// (INTERFACES 4.5). The gateway's answers are checked against it.
+// (chain-tx `legacy_object_id`). The gateway's answers are checked against it.
 const imported = (uuid: string, kind: number): Hex =>
   derivedId(`0x${uuid.replace(/-/g, "")}${"00".repeat(16)}`, 0n, kind);
 const DECISION = imported(COMPETITION_UUID, 0x0601);

@@ -6,8 +6,8 @@ import { chainOperation, type ChainOperationRequest } from "./ops";
 /**
  * Entries on the 6529 Network: SUBMISSION_CREATE (0x0604) and
  * SUBMISSION_WITHDRAW (0x0605), rule version 7. Both are wallet-only: the
- * chain refuses them from a session key (INTERFACES-decisions 3.2). Field
- * names follow chain-tx `schema.rs`.
+ * chain refuses them from a session key. Field names follow chain-tx
+ * `schema.rs`.
  */
 
 const word = (value: Hex): Hex => value.toLowerCase() as Hex;

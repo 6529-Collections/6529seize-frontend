@@ -5,9 +5,9 @@ import { wavesGateway, type ChainDecision } from "./gateway";
 import { chainIdOf, isChainId, LegacyObjectKind, resolveWave } from "./ids";
 
 /**
- * The reads an entry needs beyond gateway.ts (WAVES-API "Decisions"): a
- * decision by its chain id or its 6529.io competition id, and a wave's
- * decisions. At the head, as every write's reads are. An imported object's
+ * The reads an entry needs beyond gateway.ts (the gateway's decisions
+ * routes): a decision by its chain id or its 6529.io competition id, and a
+ * wave's decisions. At the head, as every write's reads are. An imported object's
  * chain id is derived here (ids.ts), and every answer an entry or a
  * withdrawal builds on must name the id asked for, so a gateway can't point
  * a signature at another object.
