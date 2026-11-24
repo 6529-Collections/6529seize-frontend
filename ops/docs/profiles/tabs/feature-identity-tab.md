@@ -236,10 +236,10 @@ show the profile-creation welcome.
   and full-width 48px rows on phones. Suggestions use the dialog's content scroll
   area. The amount stays below the pills on desktop. On phones it steps aside
   while suggestions are open and returns when you pick a category, retaining
-  any amount draft. Focusing category search expands the phone sheet to the
-  available height above the keyboard. Moving focus to the amount or actions
-  closes suggestions. Category names are case-sensitive, so `artist` and `Artist`
-  can hold separate ratings.
+  any amount draft. The phone sheet fits its content while searching and stays
+  within the space available above the keyboard. Moving focus to the amount or
+  actions closes suggestions. Category names are case-sensitive, so `artist` and
+  `Artist` can hold separate ratings.
 - The first suggestion is active, shown with a soft grey fill. Use the arrow
   keys to move through suggestions and Enter to pick the active category.
   A blue outline appears only when a suggestion itself has keyboard focus.

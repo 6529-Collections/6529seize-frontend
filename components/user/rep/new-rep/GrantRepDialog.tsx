@@ -32,7 +32,6 @@ export default function GrantRepDialog({
       headerClassName="tw-mb-5"
       headerVariant="minimal"
       scrollableContent={false}
-      expandOnInputFocus
       surfaceClassName="tw-bg-iron-950 md:[--mobile-wrapper-dialog-resting-height:80dvh]"
     >
       <UserPageRateWrapper profile={profile} type={RateMatter.REP}>

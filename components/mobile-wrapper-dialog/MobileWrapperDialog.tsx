@@ -58,8 +58,6 @@ type MobileWrapperDialogProps = {
   readonly fixedHeight?: boolean | undefined;
   /** Let an opted-in child own the dialog's single scrolling content area. */
   readonly scrollableContent?: boolean | undefined;
-  /** Expand phone sheets while a data-dialog-expand input is focused. */
-  readonly expandOnInputFocus?: boolean | undefined;
   /** Also fit the software keyboard viewport in mobile browsers. */
   readonly fitVisualViewport?: boolean | undefined;
   /** Action-only sheets enter at their final position while the keyboard closes. */
@@ -263,17 +261,10 @@ function getDragPanelClassNames(canDragToClose: boolean) {
 
 function getContainerClassNames(
   tabletModal: boolean | undefined,
-  desktopAlign: "center" | "top",
-  expandOnInputFocus: boolean
+  desktopAlign: "center" | "top"
 ) {
   return clsx(
     "tw-pointer-events-none tw-fixed tw-inset-x-0 tw-flex tw-max-w-full tw-justify-center tw-pt-10 [--mobile-wrapper-dialog-keyboard-inset:var(--native-keyboard-inset-bottom,0px)]",
-    expandOnInputFocus && [
-      "max-md:has-[[data-dialog-expand]:focus]:tw-pt-[env(safe-area-inset-top,0px)]",
-      "max-md:has-[[data-dialog-expand]:focus]:[--mobile-wrapper-dialog-viewport-reserve:env(safe-area-inset-top,0px)]",
-      "max-md:has-[[data-dialog-expand]:focus]:[--mobile-wrapper-dialog-resting-height:calc(min(100vh,100svh)-env(safe-area-inset-top,0px))]",
-      "max-md:has-[[data-dialog-expand]:focus]:[--mobile-wrapper-dialog-expanded-height:var(--mobile-wrapper-dialog-available-height,max(0px,calc(min(100vh,100svh)-var(--mobile-wrapper-dialog-viewport-reserve)-var(--mobile-wrapper-dialog-keyboard-inset))))]",
-    ],
     tabletModal && [
       "md:tw-inset-0 md:tw-p-6 md:[--mobile-wrapper-dialog-keyboard-inset:0px]",
       desktopAlign === "top"
@@ -328,12 +319,10 @@ function getSurfaceStyle({
   dialogHeight,
   fixedHeight,
   keyboardTransitionEasing = NATIVE_KEYBOARD_LAYOUT_TRANSITION_EASING,
-  expandOnInputFocus,
 }: {
   readonly dialogHeight: string;
   readonly fixedHeight?: boolean | undefined;
   readonly keyboardTransitionEasing?: string | undefined;
-  readonly expandOnInputFocus: boolean;
 }): CSSProperties {
   const dimension = fixedHeight ? "height" : "max-height";
   const size = fixedHeight
@@ -342,10 +331,6 @@ function getSurfaceStyle({
 
   return {
     ...size,
-    ...(!fixedHeight &&
-      expandOnInputFocus && {
-        height: "var(--mobile-wrapper-dialog-expanded-height, auto)",
-      }),
     transition: `${dimension} ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ${keyboardTransitionEasing}`,
   };
 }
@@ -437,7 +422,6 @@ export default function MobileWrapperDialog({
   tall,
   fixedHeight,
   scrollableContent = true,
-  expandOnInputFocus = false,
   fitVisualViewport = true,
   avoidKeyboard = true,
   keyboardTransitionEasing,
@@ -521,11 +505,7 @@ export default function MobileWrapperDialog({
   const hasDragHandle =
     showDragHandle ?? (dismissible && (enableDragToClose ?? true));
   const showTouchDragHandle = hasDragHandle && isTouchDevice;
-  const containerClassNames = getContainerClassNames(
-    tabletModal,
-    desktopAlign,
-    expandOnInputFocus
-  );
+  const containerClassNames = getContainerClassNames(tabletModal, desktopAlign);
   const slideTransition = getSlideTransition(tabletModal);
   const panelStyle = getPanelStyle({
     canDragToClose,
@@ -549,7 +529,6 @@ export default function MobileWrapperDialog({
     dialogHeight,
     fixedHeight,
     keyboardTransitionEasing,
-    expandOnInputFocus,
   });
   const showDesktopHeaderCloseButton =
     dismissible && !!tabletModal && !showHeaderCloseButton;

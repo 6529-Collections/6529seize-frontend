@@ -96,13 +96,11 @@ function getGrantRepSurface(grant: Locator) {
 }
 
 async function expectCategorySearchLayout(grant: Locator, isMobile: boolean) {
-  if (!isMobile) {
-    await expectCompactGrantLayout(grant);
-    return;
-  }
-
-  // A focused category expands phone sheets; the footer stays below the body.
   await expectGrantTransitionFinished(grant);
+  await expectCompactGrantLayout(grant);
+  if (!isMobile) return;
+
+  // Focusing search keeps the phone sheet fitted to its content, below the top reserve.
   await expect
     .poll(() =>
       getGrantRepSurface(grant).evaluate((panel) => {
@@ -112,30 +110,10 @@ async function expectCategorySearchLayout(grant: Locator, isMobile: boolean) {
         const topReserve = Number.parseFloat(
           getComputedStyle(container).paddingTop
         );
-        return {
-          top: Math.round(bounds.top - (viewport?.offsetTop ?? 0) - topReserve),
-          height: Math.round(
-            bounds.height - (viewport?.height ?? innerHeight) + topReserve
-          ),
-        };
+        return Math.round(bounds.top - (viewport?.offsetTop ?? 0) - topReserve);
       })
     )
-    .toEqual({ top: 0, height: 0 });
-  await expect
-    .poll(async () => {
-      const [body, action] = await Promise.all([
-        grant.getByTestId("grant-rep-body").boundingBox(),
-        grant
-          .getByTestId("grant-rep-footer")
-          .getByRole("button")
-          .first()
-          .boundingBox(),
-      ]);
-      return body && action
-        ? Math.round(action.y - body.y - body.height)
-        : Infinity;
-    })
-    .toBe(16);
+    .toBeGreaterThan(0);
   expect(
     await getGrantRepSurface(grant).evaluate((panel) =>
       [...panel.querySelectorAll("*")]

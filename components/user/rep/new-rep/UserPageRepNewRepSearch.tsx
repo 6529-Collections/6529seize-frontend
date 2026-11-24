@@ -570,7 +570,6 @@ function GrantRepForm({
                 aria-expanded={showSearchDropdown}
                 aria-controls={showSearchDropdown ? searchListId : undefined}
                 aria-activedescendant={activeSuggestionId}
-                data-dialog-expand
                 required
                 autoComplete="off"
                 autoCapitalize="none"
