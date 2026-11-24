@@ -483,7 +483,10 @@ describe("writeChainPollBallot", () => {
 
 describe("writeChainWaveRating", () => {
   beforeEach(() => {
-    gateway.getWave.mockResolvedValue({ waveId: DROP_WAVE } as never);
+    gateway.getWave.mockResolvedValue({
+      waveId: DROP_WAVE,
+      controller: `0x${"0c".repeat(32)}`,
+    } as never);
     gateway.getWaveRatingsByRater.mockResolvedValue([
       {
         rater: VOTER,
@@ -522,6 +525,23 @@ describe("writeChainWaveRating", () => {
       value: 2n,
     });
     expect(lastRequest().body.priorVersion).toBe("0");
+  });
+});
+
+describe("writeChainWaveRating on one's own wave", () => {
+  it("refuses before signing, as the chain refuses a wave's controller", async () => {
+    gateway.getWave.mockResolvedValue({
+      waveId: DROP_WAVE,
+      controller: VOTER.toUpperCase(),
+    } as never);
+    await expect(
+      writeChainWaveRating(config, WALLET, {
+        waveId: DROP_UUID,
+        category: "",
+        value: 5n,
+      })
+    ).rejects.toThrow("You can't rate your own wave.");
+    expect(run).not.toHaveBeenCalled();
   });
 });
 

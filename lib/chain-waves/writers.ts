@@ -86,7 +86,7 @@ const asNumber = (value: unknown): number | null => {
  * from an entry no longer in the running, or a closed decision, is always
  * taken.
  */
-export function assertVoteTakeable(
+function assertVoteTakeable(
   decision: ChainDecision,
   entry: ChainEntry,
   amount: bigint,
@@ -285,7 +285,7 @@ async function throughWallet(
  * says (chain-exec `handlers/polls.rs` checks 2 and 7), before anything is
  * signed.
  */
-export function assertBallotTakeable(
+function assertBallotTakeable(
   poll: ChainPoll,
   selection: number,
   nowMs: number
@@ -379,6 +379,11 @@ export async function writeChainWaveRating(
 ): Promise<void> {
   const rater = await identityOfWallet(wallet, signal);
   const wave = await resolveWave(input.waveId, signal);
+  // The chain refuses a wave's controller rating it (SELF_RATING) only in a
+  // block, after taking the fee.
+  if (lower(wave.controller) === lower(rater.principalId)) {
+    refuse("You can't rate your own wave.");
+  }
   const categoryId = waveRatingCategoryId(input.category);
   const rows = await wavesGateway.getWaveRatingsByRater(
     rater.principalId,
