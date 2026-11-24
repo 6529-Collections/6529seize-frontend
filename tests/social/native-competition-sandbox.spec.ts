@@ -3238,6 +3238,21 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await page.keyboard.press("Escape");
       await expect(sheet).toBeHidden();
       await expect(waveHeaderMore(page)).toBeFocused();
+      const phoneViewport = page.viewportSize()!;
+      await openPhoneWaveActions(page);
+      await page.setViewportSize({ width: 1024, height: 800 });
+      await expect(
+        page.getByRole("button", {
+          name: "Search messages in this wave",
+          exact: true,
+        })
+      ).toBeVisible();
+      await expect(sheet).toBeHidden();
+      await page.setViewportSize(phoneViewport);
+      await expect(waveHeaderMore(page)).toHaveAttribute(
+        "aria-expanded",
+        "false"
+      );
       const reopened = await openPhoneWaveActions(page);
       await reopened
         .getByRole("button", { name: "Search messages", exact: true })
@@ -11937,9 +11952,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     const createOptions = app
       ? page.getByRole("dialog", { name: "More wave actions", exact: true })
       : page.getByRole("menu");
-    await expect(
-      createOptions.getByText("New decision", { exact: true })
-    ).toHaveCount(0);
+    for (const role of ["button", "link", "menuitem"] as const) {
+      await expect(
+        createOptions.getByRole(role, { name: /^(?:New )?Decision$/i })
+      ).toHaveCount(0);
+    }
     if (app) {
       await expect(
         createOptions.getByText("New curation", { exact: true })
