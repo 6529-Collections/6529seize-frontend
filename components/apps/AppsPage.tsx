@@ -19,6 +19,7 @@ import {
   ABOUT_SUPPORTING_TEXT_CLASS_NAME,
 } from "@/components/about/AboutLayout";
 import { useSetTitle } from "@/contexts/TitleContext";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { DesktopAppDownloads } from "./DesktopAppDownloads";
@@ -114,6 +115,7 @@ export default function AppsPage() {
 }
 
 function DesktopClassicPanel() {
+  const hasHydrated = useHasHydrated();
   const [{ expanded, platformResetKey }, setDisclosure] = useState({
     expanded: false,
     platformResetKey: 0,
@@ -141,8 +143,9 @@ function DesktopClassicPanel() {
           aria-expanded={expanded}
           aria-labelledby="6529-desktop-heading"
           aria-describedby="6529-desktop-description"
+          disabled={!hasHydrated}
           onClick={toggle}
-          className="tw-flex tw-w-full tw-items-center tw-gap-3 tw-border-0 tw-bg-transparent tw-p-5 tw-text-left hover:tw-bg-iron-900/60 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-3px] focus-visible:tw-outline-primary-400 sm:tw-p-6"
+          className="tw-flex tw-w-full tw-items-center tw-gap-3 tw-border-0 tw-bg-transparent tw-p-5 tw-text-left enabled:hover:tw-bg-iron-900/60 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-3px] focus-visible:tw-outline-primary-400 sm:tw-p-6"
         >
           <AppPanelIcon icon={ComputerDesktopIcon} />
           <span className="tw-grid tw-min-w-0 tw-flex-1">
