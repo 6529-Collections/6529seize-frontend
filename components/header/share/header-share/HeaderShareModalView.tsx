@@ -710,12 +710,9 @@ export function HeaderShareModalView({
     return null;
   }
 
-  let modalMaxWidthClassName = "tw-max-w-sm sm:tw-max-w-2xl";
-  if (isConnectMode) {
-    modalMaxWidthClassName = isElectron
-      ? "tw-max-w-md"
-      : "tw-max-w-md sm:tw-max-w-xl";
-  }
+  const modalMaxWidthClassName = isConnectMode
+    ? "tw-max-w-md"
+    : "tw-max-w-sm sm:tw-max-w-2xl";
 
   return (
     <div

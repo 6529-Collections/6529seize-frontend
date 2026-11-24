@@ -1004,12 +1004,12 @@ describe("HeaderShare", () => {
     });
 
     it.each([
-      ["6529 Mobile", "native", undefined, "production"],
-      ["6529 Desktop", "desktop", undefined, "production"],
-      ["6529 Desktop", "desktop", undefined, "staging"],
-      ["6529 Desktop Classic", "desktop", undefined, "production"],
-      ["6529 Desktop Classic", "desktop", "stagingclassiccore6529", "staging"],
-      ["6529 Desktop Classic", "desktop", "localclassiccore6529", "production"],
+      ["Mobile", "native", undefined, "production"],
+      ["Desktop", "desktop", undefined, "production"],
+      ["Desktop", "desktop", undefined, "staging"],
+      ["Desktop Classic", "desktop", undefined, "production"],
+      ["Desktop Classic", "desktop", "stagingclassiccore6529", "staging"],
+      ["Desktop Classic", "desktop", "localclassiccore6529", "production"],
     ] as const)(
       "offers combined setup for %s (%s) with Classic override %s on %s",
       async (appName, target, configuredScheme, environment) => {
@@ -1019,7 +1019,7 @@ describe("HeaderShare", () => {
           "DESKTOP_CLASSIC_SCHEME",
           configuredScheme
         );
-        const isClassic = appName === "6529 Desktop Classic";
+        const isClassic = appName === "Desktop Classic";
         const expectedScheme = isClassic
           ? (configuredScheme ?? "classiccore6529")
           : "core6529";
@@ -1125,7 +1125,7 @@ describe("HeaderShare", () => {
           ).toBeVisible();
           expect(
             screen.getByRole("dialog", {
-              name: `Connect ${appName}`,
+              name: `Connect 6529 ${appName}`,
             })
           ).toBeVisible();
           if (isClassic) {
@@ -1239,7 +1239,7 @@ describe("HeaderShare", () => {
         await userEvent.click(screen.getByRole("button", { name: "Back" }));
         await userEvent.click(
           screen.getByRole("button", {
-            name: target === "Desktop" ? "6529 Desktop Classic" : "6529 Mobile",
+            name: target === "Desktop" ? "Desktop Classic" : "Mobile",
           })
         );
         await chooseConnectOnly();
@@ -1346,8 +1346,7 @@ describe("HeaderShare", () => {
           );
           await userEvent.click(
             screen.getByRole("button", {
-              name:
-                target === "Desktop" ? "6529 Desktop Classic" : "6529 Mobile",
+              name: target === "Desktop" ? "Desktop Classic" : "Mobile",
             })
           );
           await chooseConnectOnly();
@@ -1515,16 +1514,16 @@ describe("HeaderShare", () => {
         await screen.findByRole("heading", { name: "Connect Device" })
       ).toBeInTheDocument();
       const modal = screen.getByTestId("header-share-modal");
-      expect(modal).toHaveClass("tw-max-w-md", "sm:tw-max-w-xl");
+      expect(modal).toHaveClass("tw-max-w-md");
       expect(modal.querySelector("#header-share-content")).toBeNull();
       expect(
-        screen.getByRole("button", { name: "6529 Mobile" })
+        screen.getByRole("button", { name: "Mobile" })
       ).toHaveAttribute("aria-pressed", "true");
       expect(
-        screen.getByRole("button", { name: "6529 Desktop" })
+        screen.getByRole("button", { name: "Desktop" })
       ).toBeInTheDocument();
       expect(
-        screen.getByRole("button", { name: "6529 Desktop Classic" })
+        screen.getByRole("button", { name: "Desktop Classic" })
       ).toBeInTheDocument();
       expect(
         screen.getByRole("group", { name: "Device type" })
@@ -1583,7 +1582,7 @@ describe("HeaderShare", () => {
         await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
         await userEvent.click(
           screen.getByRole("button", {
-            name: target === "Desktop" ? "6529 Desktop Classic" : "6529 Mobile",
+            name: target === "Desktop" ? "Desktop Classic" : "Mobile",
           })
         );
         await chooseConnectOnly();
@@ -1764,7 +1763,7 @@ describe("HeaderShare", () => {
       consoleError.mockRestore();
     });
 
-    it.each(["6529 Desktop", "6529 Desktop Classic"])(
+    it.each(["Desktop", "Desktop Classic"])(
       "falls back to Mobile if %s becomes unavailable",
       async (appName) => {
         const { rerender } = renderWithProviders(<HeaderShare />);
@@ -1786,13 +1785,13 @@ describe("HeaderShare", () => {
         );
 
         expect(
-          screen.queryByRole("button", { name: "6529 Desktop Classic" })
+          screen.queryByRole("button", { name: "Desktop Classic" })
         ).toBeNull();
         expect(
-          screen.queryByRole("button", { name: "6529 Desktop" })
+          screen.queryByRole("button", { name: "Desktop" })
         ).toBeNull();
         expect(
-          screen.getByRole("button", { name: "6529 Mobile" })
+          screen.getByRole("button", { name: "Mobile" })
         ).toHaveAttribute("aria-pressed", "true");
       }
     );
@@ -2180,7 +2179,7 @@ describe("HeaderShare", () => {
             screen.getByRole("button", { name: "QR Code" })
           );
           await userEvent.click(
-            screen.getByRole("button", { name: "6529 Desktop Classic" })
+            screen.getByRole("button", { name: "Desktop Classic" })
           );
           await chooseConnectOnly();
 
@@ -2229,7 +2228,7 @@ describe("HeaderShare", () => {
           renderWithProviders(<HeaderShare />);
           await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
           await userEvent.click(
-            screen.getByRole("button", { name: "6529 Desktop" })
+            screen.getByRole("button", { name: "Desktop" })
           );
           await chooseConnectOnly();
 
@@ -2308,7 +2307,7 @@ describe("HeaderShare", () => {
 
       await userEvent.click(screen.getByRole("button", { name: "Back" }));
       await userEvent.click(
-        screen.getByRole("button", { name: "6529 Desktop Classic" })
+        screen.getByRole("button", { name: "Desktop Classic" })
       );
       await chooseConnectOnly();
 
@@ -2341,7 +2340,7 @@ describe("HeaderShare", () => {
       await screen.findByTestId("header-share-modal");
       await userEvent.click(screen.getByRole("button", { name: "Back" }));
       await userEvent.click(
-        screen.getByRole("button", { name: "6529 Desktop Classic" })
+        screen.getByRole("button", { name: "Desktop Classic" })
       );
       await chooseConnectOnly();
 
@@ -2385,7 +2384,7 @@ describe("HeaderShare", () => {
         await screen.findByTestId("header-share-modal");
         await userEvent.click(screen.getByRole("button", { name: "Back" }));
         await userEvent.click(
-          screen.getByRole("button", { name: "6529 Desktop Classic" })
+          screen.getByRole("button", { name: "Desktop Classic" })
         );
         await chooseConnectOnly();
 
@@ -2416,7 +2415,7 @@ describe("HeaderShare", () => {
       renderWithProviders(<HeaderShare />);
       await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
       await userEvent.click(
-        screen.getByRole("button", { name: "6529 Desktop Classic" })
+        screen.getByRole("button", { name: "Desktop Classic" })
       );
       await chooseConnectOnly();
 
@@ -2489,7 +2488,7 @@ describe("HeaderShare", () => {
       );
       await userEvent.click(screen.getByRole("button", { name: "Back" }));
       await userEvent.click(
-        screen.getByRole("button", { name: "6529 Desktop Classic" })
+        screen.getByRole("button", { name: "Desktop Classic" })
       );
       await chooseConnectOnly();
       expect(

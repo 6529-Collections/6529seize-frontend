@@ -4,8 +4,8 @@ import { HEADER_SHARE_LOCALE, SubMode } from "./constants";
 
 const CONNECT_TARGETS = [
   { tab: SubMode.MOBILE, label: "headerShare.menu.mobile" },
-  { tab: SubMode.DESKTOP, label: "apps.newDesktop.title" },
-  { tab: SubMode.DESKTOP_CLASSIC, label: "headerShare.menu.desktop" },
+  { tab: SubMode.DESKTOP, label: "headerShare.menu.desktop" },
+  { tab: SubMode.DESKTOP_CLASSIC, label: "headerShare.menu.desktopClassic" },
 ] as const;
 
 export function ModalMenu({
@@ -35,7 +35,7 @@ export function ModalMenu({
         {t(HEADER_SHARE_LOCALE, "headerShare.menu.deviceType")}
       </legend>
       <div
-        className={`tw-grid tw-gap-2 ${isElectron ? "" : "@[32rem]:tw-grid-cols-3"}`}
+        className={`tw-grid tw-gap-2 ${isElectron ? "" : "@[25rem]:tw-grid-cols-3"}`}
       >
         {targets.map(({ tab, label }) => (
           <button

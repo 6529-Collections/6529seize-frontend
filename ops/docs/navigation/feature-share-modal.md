@@ -99,8 +99,7 @@ the `More` menu.
 
 1. Open the desktop-web account menu, then **Connect Device**.
 2. Confirm the avatar, handle and full wallet address. Under **Which app are you
-   connecting?**, select **6529 Mobile**, **6529 Desktop**, or
-   **6529 Desktop Classic**.
+   connecting?**, select **Mobile**, **Desktop**, or **Desktop Classic**.
 3. Choose **Connect only**, or **Connect with Post Signing & DM Encryption**.
    The modal title names the selected app.
    Secure Classic setup shows the v0.4.1 minimum under the secure action, during

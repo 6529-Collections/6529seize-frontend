@@ -142,7 +142,7 @@ did, what happened, and a screenshot.
 ## Connect an account
 
 On 6529.io, open the account menu, select **Connect Device**, and choose
-**6529 Desktop**. Choose **Connect only** or **Connect with Post Signing & DM
+**Desktop**. Choose **Connect only** or **Connect with Post Signing & DM
 Encryption**, then open the link and accept the connection in the app. See
 [Connect Device](navigation/feature-share-modal.md#connect-device) for details
 about the connection flow and staging links.
