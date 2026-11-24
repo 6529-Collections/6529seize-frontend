@@ -99,9 +99,8 @@ Multipart drops ("storms") stay in one card while users switch parts.
 - Quote-card expansion is depth-limited and cycle-guarded; guarded links fall back to plain links.
 - Selecting text in the body blocks card click-through so copy actions do not open drop detail.
 - Link and button interactions in the body stop propagation to avoid accidental parent-card navigation.
-- Expanding or collapsing a body keeps the reader's current place in the
-  reverse-scrolling thread. If the reader is already at the latest drop, the
-  thread remains pinned there.
+- `Show more` keeps the text you were reading in place and reveals the rest
+  below it. This also works at the latest drop.
 - Marketplace preview-card click events are contained within the preview so
   curation marketplace clicks do not trigger parent-card navigation.
 

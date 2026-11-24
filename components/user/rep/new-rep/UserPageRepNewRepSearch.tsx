@@ -6,7 +6,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
+import { commonApiFetch } from "@/services/api/common-api";
 import {
   useCallback,
   useContext,
@@ -35,14 +35,8 @@ import {
   ReactQueryWrapperContext,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { AuthContext } from "@/components/auth/Auth";
-import {
-  chainRatingBlockedText,
-  chainRatingFailureText,
-} from "@/components/chain-identity/chainErrorMessage";
-import { useChainRatingWriter } from "@/components/chain-identity/useChainRatingWriter";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
-import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
 import { RATING_INPUT_SURFACE_CLASS } from "@/components/user/utils/rate/ratingInputStyles";
 import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
@@ -56,6 +50,8 @@ import { getGrantRepCategoriesToDisplay } from "./grantRepCategoryOptions";
 import GrantRepCategorySuggestions from "./GrantRepCategorySuggestions";
 import GrantRepSubmissionGuidance from "./GrantRepSubmissionGuidance";
 import GrantRepStats from "./GrantRepStats";
+import useRepCategoryNavigation from "./useRepCategoryNavigation";
+import { useGrantRepWrite } from "./useGrantRepWrite";
 
 import { isRatingValue } from "../ratingsManagement";
 
@@ -160,9 +156,9 @@ function GrantRepForm({
   }, []);
   const queryClient = useQueryClient();
   const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
-  const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
+  const { setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
-  const chainWrite = useChainRatingWriter();
+  const grantRep = useGrantRepWrite(profile);
 
   const [repSearch, setRepSearch] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -386,19 +382,7 @@ function GrantRepForm({
   };
 
   const addRepMutation = useMutation({
-    mutationFn: async ({
-      amount,
-      category,
-    }: {
-      amount: number;
-      category: string;
-    }) =>
-      chainWrite
-        ? await chainWrite({ matter: "REP", profile, category, amount })
-        : await commonApiPost<{ amount: number; category: string }, void>({
-            endpoint: `profiles/${profile.query ?? ""}/rep/rating`,
-            body: { amount, category },
-          }),
+    mutationFn: grantRep.write,
     onSuccess: async () => {
       setToast({
         message: t(locale, "rep.categories.grant.toast.updated"),
@@ -421,15 +405,10 @@ function GrantRepForm({
       setToast({
         type: "error",
         title: t(locale, "rep.categories.grant.toast.updateFailed"),
-        ...(chainWrite
-          ? { description: chainRatingFailureText(locale, error) }
-          : {
-              description: t(locale, "rep.categories.grant.toast.tryAgain"),
-              details: getToastErrorDetails(
-                error,
-                getErrorMessage(error, t(locale, GENERIC_ERROR_KEY))
-              ),
-            }),
+        ...grantRep.failureToast(
+          error,
+          getErrorMessage(error, t(locale, GENERIC_ERROR_KEY))
+        ),
       });
     },
   });
@@ -440,8 +419,7 @@ function GrantRepForm({
     if (Number.isNaN(amount)) return;
     setMutating(true);
     try {
-      // On the 6529 Network the rating carries its own signature.
-      const { success } = chainWrite ? { success: true } : await requestAuth();
+      const { success } = await grantRep.signIn();
       if (!success) {
         setToast({
           message: t(locale, "rep.categories.grant.toast.loginRequired"),
@@ -495,12 +473,26 @@ function GrantRepForm({
     !selectedCategory &&
     (repSearchState !== RepSearchState.HAVE_RESULTS ||
       categoriesToDisplay.length > 0);
+  const {
+    searchListId,
+    optionIdPrefix,
+    activeSuggestionIndex,
+    activeSuggestionId,
+    handleSearchKeyDown,
+    resetHighlightedCategory,
+  } = useRepCategoryNavigation({
+    categories: categoriesToDisplay,
+    enabled:
+      showSearchDropdown && repSearchState === RepSearchState.HAVE_RESULTS,
+    onSelect: onRepSelect,
+  });
 
   const handleRepSearchChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const newValue = event.target.value;
     setIsOpen(true);
+    resetHighlightedCategory();
     selectionRequest.current++;
     amountFocusSource.current = null;
     setCheckingAvailability(false);
@@ -520,7 +512,7 @@ function GrantRepForm({
       animate={{ height: layoutHeight }}
       data-testid="grant-rep-layout"
       transition={transition}
-      className="tw-flex tw-max-h-[calc(100dvh-12rem)] tw-min-h-0 tw-max-w-full tw-flex-col tw-overflow-hidden"
+      className="tw-flex tw-min-h-0 tw-max-w-full tw-flex-auto tw-flex-col tw-overflow-hidden"
     >
       <motion.div
         layoutScroll
@@ -566,6 +558,11 @@ function GrantRepForm({
                 id="search-rep"
                 name="search-rep"
                 type="text"
+                role="combobox"
+                aria-autocomplete="list"
+                aria-expanded={showSearchDropdown}
+                aria-controls={showSearchDropdown ? searchListId : undefined}
+                aria-activedescendant={activeSuggestionId}
                 required
                 autoComplete="off"
                 autoCapitalize="none"
@@ -574,6 +571,7 @@ function GrantRepForm({
                 value={repSearch}
                 disabled={mutating}
                 onChange={handleRepSearchChange}
+                onKeyDown={handleSearchKeyDown}
                 onFocus={() => {
                   if (!selectedCategory) setIsOpen(true);
                 }}
@@ -619,6 +617,12 @@ function GrantRepForm({
                 )
               )}
             </div>
+            <GrantRepSubmissionGuidance
+              id={submissionGuidanceId}
+              selectedCategory={activeCategory}
+              categoriesToDisplay={categoriesToDisplay}
+              search={typedCategory}
+            />
             {typedCategoryError && (
               <p
                 id={typedCategoryErrorId}
@@ -635,15 +639,27 @@ function GrantRepForm({
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={transition}
-                  className="tw-absolute tw-inset-x-0 tw-top-full tw-z-10 tw-mt-2 tw-shadow-lg tw-shadow-black/30"
+                  className="tw-mt-2"
                 >
-                  <div className="tw-max-h-20 tw-overflow-y-auto tw-rounded-lg tw-bg-iron-900 tw-p-2 tw-ring-1 tw-ring-inset tw-ring-iron-800/60">
+                  <div
+                    id={searchListId}
+                    role="listbox"
+                    aria-label={t(
+                      locale,
+                      "rep.categories.grant.searchPlaceholder"
+                    )}
+                    aria-busy={repSearchState === RepSearchState.LOADING}
+                    className="tw-rounded-lg tw-bg-iron-900 tw-p-2 tw-ring-1 tw-ring-inset tw-ring-iron-800/60"
+                  >
                     <UserPageRepNewRepSearchDropdown
                       categories={categoriesToDisplay}
                       state={repSearchState}
                       minSearchLength={SEARCH_LENGTH.MIN}
                       maxSearchLength={SEARCH_LENGTH.MAX}
                       onRepSelect={onRepSelect}
+                      search={typedCategory}
+                      activeIndex={activeSuggestionIndex}
+                      optionIdPrefix={optionIdPrefix}
                     />
                   </div>
                 </motion.div>
@@ -665,6 +681,7 @@ function GrantRepForm({
             layout={reducedMotion ? false : "position"}
             transition={transition}
             id={amountFormId}
+            data-testid="grant-rep-amount"
             className="tw-mt-6"
             onSubmit={(event) => {
               event.preventDefault();
@@ -712,15 +729,10 @@ function GrantRepForm({
               </output>
             )}
           </motion.form>
-          <GrantRepSubmissionGuidance
-            id={submissionGuidanceId}
-            selectedCategory={activeCategory}
-            categoriesToDisplay={categoriesToDisplay}
-          />
 
           {isError && (
             <div role="alert" className="tw-mt-3 tw-text-xs tw-text-iron-400">
-              {chainRatingBlockedText(locale, chainError) ?? (
+              {grantRep.blockedText(chainError) ?? (
                 <>
                   {t(locale, "rep.categories.edit.loadError")}{" "}
                   <Button variant="ghost" size="sm" onClick={retry}>

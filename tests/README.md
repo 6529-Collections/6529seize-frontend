@@ -562,9 +562,9 @@ Surface matrix:
 - `test:e2e:composer-sandbox` runs a local-only authenticated Waves composer
   sandbox on both baseline web projects. It starts a mock API runtime,
   renders a real wave detail route, verifies attachment queue/remove behavior
-  and deterministic link previews, long-drop expansion at the latest scroll
-  position and expansion/collapse anchoring while reading older posts, including
-  delayed link previews. It preserves lists, clickable links, and paragraphs
+  and deterministic link previews, stable reading position when expanding
+  the latest or an older long drop, and collapse anchoring for older posts.
+  This covers delayed link previews. It preserves lists, clickable links, and paragraphs
   in both disclosure states and checks nested quote keyboard and touch behavior, plus
   exact synthetic chat-drop and poll submits. The poll flow
   covers its responsive layout, options, type, closing
