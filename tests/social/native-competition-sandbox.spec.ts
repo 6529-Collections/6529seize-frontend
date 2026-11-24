@@ -14,6 +14,7 @@ import type {
   WebSocketRoute,
 } from "@playwright/test";
 import type { ApiDropAndWave } from "@/generated/models/ApiDropAndWave";
+import type { ApiDropRater } from "@/generated/models/ApiDropRater";
 import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
 import type { ApiDropV2PageWithoutCount } from "@/generated/models/ApiDropV2PageWithoutCount";
 import type { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
@@ -1147,6 +1148,7 @@ async function installCompetitionApi(
   const configurations = new Map<string, Record<string, unknown>>();
   const anonymousEntries = new Set<string>();
   const votes: Record<string, number> = { alpha: 0, beta: 0 };
+  let topRaters: ApiDropRater[] = [];
   const requests: { path: string; body: Record<string, unknown> }[] = [];
   await page.route("**/v3/waves", async (route) => {
     const request = route.request().postDataJSON() as Record<string, unknown>;
@@ -1194,8 +1196,8 @@ async function installCompetitionApi(
       rating_prediction: votes[id] ?? 0,
       user_vote: votes[id] ?? 0,
       rank: 1,
-      raters_count: votes[id] ? 1 : 0,
-      top_raters: [],
+      raters_count: Math.max(topRaters.length, votes[id] ? 1 : 0),
+      top_raters: topRaters,
       over_threshold_since_ms: null,
     },
   });
@@ -1234,8 +1236,11 @@ async function installCompetitionApi(
                 rating_prediction: votes[owner.id] ?? 0,
                 user_vote: votes[owner.id] ?? 0,
                 rank: 1,
-                raters_count: votes[owner.id] ? 1 : 0,
-                top_raters: [],
+                raters_count: Math.max(
+                  topRaters.length,
+                  votes[owner.id] ? 1 : 0
+                ),
+                top_raters: topRaters,
                 over_threshold_since_ms: null,
               }
             : null,
@@ -1354,8 +1359,8 @@ async function installCompetitionApi(
               rating_prediction: votes[id] ?? 0,
               user_vote: votes[id] ?? 0,
               rank: 1,
-              raters_count: votes[id] ? 1 : 0,
-              top_raters: [],
+              raters_count: Math.max(topRaters.length, votes[id] ? 1 : 0),
+              top_raters: topRaters,
               over_threshold_since_ms: null,
             },
           })),
@@ -1470,6 +1475,12 @@ async function installCompetitionApi(
     },
     setVote: (id: string, value: number) => {
       votes[id] = value;
+    },
+    setTopRaters: (handles: string[]) => {
+      topRaters = handles.map((handle) => ({
+        profile: { ...entryFixture.drops[0].author, id: handle, handle },
+        rating: 10,
+      }));
     },
     setAnonymousEntry: (id: string, hidden: boolean) => {
       if (hidden) anonymousEntries.add(id);
@@ -7477,6 +7488,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         }
         const sandbox = await installCompetitionApi(page);
         sandbox.setVote("alpha", 25);
+        sandbox.setTopRaters(["voter-one", "voter-two", "voter-three"]);
         await page.goto(`${ROOT}/alpha?tab=votes`);
         await dismissNextDevTools(page);
         const panel = page.getByRole("tabpanel", {
@@ -7602,7 +7614,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           .getByText("1st", { exact: true })
           .boundingBox())!;
         const compactVoters = (await row
-          .getByText("1 voter", { exact: true })
+          .getByText("3 voters", { exact: true })
           .boundingBox())!;
         expect(compactRank.x).toBeGreaterThan(
           compactVoters.x + compactVoters.width
@@ -7615,6 +7627,21 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
               compactVoters.height / 2
           )
         ).toBeLessThanOrEqual(1);
+        const avatarBounds = await row
+          .getByRole("link", { name: /^Voter voter-/ })
+          .evaluateAll((links) =>
+            links.map((link) => {
+              const avatar = link.firstElementChild!.getBoundingClientRect();
+              return { left: avatar.left, right: avatar.right };
+            })
+          );
+        expect(avatarBounds).toHaveLength(3);
+        for (let index = 1; index < avatarBounds.length; index += 1) {
+          const gap =
+            avatarBounds[index]!.left - avatarBounds[index - 1]!.right;
+          expect(gap).toBeGreaterThanOrEqual(0);
+          expect(gap).toBeLessThanOrEqual(1);
+        }
         await capture("rest");
         await panel.getByRole("button", { name: /^Sort by:/ }).click();
         const sortSheet = page.getByRole("dialog", {
@@ -7655,6 +7682,46 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         expect(sandbox.requests).toHaveLength(0);
         await input.focus();
         await expect(row.getByText(/^Enter a whole number/)).toBeVisible();
+        if (testInfo.project.use.hasTouch) {
+          if (surface === "mobile web") {
+            await page.setViewportSize({ width: 390, height: 420 });
+          } else {
+            await page.evaluate(() => {
+              const viewport = globalThis.visualViewport!;
+              Object.defineProperty(viewport, "height", {
+                configurable: true,
+                value: 420,
+              });
+              viewport.dispatchEvent(new Event("resize"));
+            });
+          }
+          await expect(input).toBeFocused();
+          await expect
+            .poll(() =>
+              input.evaluate((field) => {
+                const bounds = field.getBoundingClientRect();
+                const viewport = globalThis.visualViewport!;
+                return (
+                  bounds.top >= viewport.offsetTop &&
+                  bounds.bottom <= viewport.offsetTop + viewport.height
+                );
+              })
+            )
+            .toBe(true);
+          await page.screenshot({
+            path: testInfo.outputPath("my-votes-focused-keyboard.png"),
+            animations: "disabled",
+          });
+          if (surface === "mobile web") {
+            await page.setViewportSize({ width: 390, height: 844 });
+          } else {
+            await page.evaluate(() => {
+              const viewport = globalThis.visualViewport!;
+              Reflect.deleteProperty(viewport, "height");
+              viewport.dispatchEvent(new Event("resize"));
+            });
+          }
+        }
         await input.fill("40");
         await expect(
           row.getByRole("button", { name: "Save vote", exact: true })
