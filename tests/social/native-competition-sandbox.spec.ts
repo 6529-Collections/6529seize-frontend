@@ -6804,6 +6804,131 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     });
   });
 
+  test("prepares the first My Votes explanation without a loading layout jump", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page);
+    sandbox.setVote("alpha", 25);
+    let moderationReads = 0;
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await page.route(
+      "**/content-moderation/profiles/*/status",
+      async (route) => {
+        moderationReads += 1;
+        await gate;
+        await route.fulfill({
+          json: { profile_id: PROFILE, status: "ACTIVE" },
+        });
+      }
+    );
+    try {
+      await page.goto(ROOT + "/alpha?tab=votes");
+      const explain = page.getByRole("button", {
+        name: "Explain vote",
+        exact: true,
+      });
+      await expect(explain).toBeEnabled();
+      await expect.poll(() => moderationReads).toBe(1);
+      await expect(
+        page.getByRole("textbox", { name: "Post a reply", exact: true })
+      ).toHaveCount(0);
+      const response = page.waitForResponse(
+        (response) =>
+          response.url().includes("/content-moderation/profiles/") &&
+          response.url().endsWith("/status")
+      );
+      release();
+      await (await response).finished();
+      const firstOpening = page.evaluate(
+        () =>
+          new Promise<{ height: number; loading: boolean; text: string }[]>(
+            (resolve) => {
+              const frames: {
+                height: number;
+                loading: boolean;
+                text: string;
+              }[] = [];
+              const sample = () => {
+                const description = [...document.querySelectorAll("p")].find(
+                  (element) =>
+                    element.textContent ===
+                    "Post a public reply in the wave about your saved vote."
+                );
+                const region = description?.parentElement;
+                frames.push({
+                  height: region?.getBoundingClientRect().height ?? 0,
+                  loading: !!region?.querySelector(
+                    '[data-testid="posting-access-skeleton"]'
+                  ),
+                  text:
+                    region?.querySelector('[contenteditable="true"]')
+                      ?.textContent ?? "",
+                });
+                if (frames.length < 20) requestAnimationFrame(sample);
+                else resolve(frames);
+              };
+              const start = (event: MouseEvent) => {
+                if (
+                  !(event.target instanceof Element) ||
+                  event.target.closest("button")?.textContent?.trim() !==
+                    "Explain vote"
+                )
+                  return;
+                document.removeEventListener("click", start, true);
+                requestAnimationFrame(sample);
+              };
+              document.addEventListener("click", start, true);
+            }
+          )
+      );
+      await explain.click();
+      const frames = (await firstOpening).filter((frame) => frame.height > 0);
+      expect(frames.length).toBeGreaterThan(0);
+      expect(
+        frames.every(
+          (frame) => !frame.loading && frame.text.includes("Vote rationale")
+        )
+      ).toBe(true);
+      const heights = frames.map((frame) => frame.height);
+      expect(Math.max(...heights) - Math.min(...heights)).toBeLessThanOrEqual(
+        1
+      );
+      const rationale = page
+        .getByRole("paragraph")
+        .filter({
+          hasText: "Post a public reply in the wave about your saved vote.",
+        });
+      const firstHeight = await rationale.evaluate(
+        (element) => element.parentElement!.getBoundingClientRect().height
+      );
+      await page
+        .getByRole("button", { name: "Cancel reply", exact: true })
+        .click();
+      await explain.click();
+      await expect(
+        page.getByRole("textbox", { name: "Post a reply", exact: true })
+      ).toBeEditable();
+      const second = await rationale.evaluate(
+        (element) => element.parentElement!.getBoundingClientRect().height
+      );
+      expect(second).toBe(firstHeight);
+      expect(moderationReads).toBe(1);
+      expect(sandbox.requests).toHaveLength(0);
+      await writeFile(
+        testInfo.outputPath("opening-geometry.json"),
+        JSON.stringify({ frames, firstHeight, second })
+      );
+      await page.screenshot({
+        path: testInfo.outputPath("first-explanation-open.png"),
+      });
+    } finally {
+      release();
+    }
+  });
+
   test("matches My Votes editing with persistent desktop checkboxes", async ({
     page,
   }, testInfo) => {

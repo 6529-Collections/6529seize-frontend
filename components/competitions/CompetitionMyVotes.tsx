@@ -22,6 +22,7 @@ import {
 } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
+import { usePublicProfileModerationStatus } from "@/hooks/content-moderation/usePublicProfileModerationStatus";
 import { isAuthSessionForProfile } from "@/components/auth/auth-session-scope";
 import { getWalletAddress } from "@/services/auth/auth.utils";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
@@ -277,6 +278,8 @@ function ScopedCompetitionMyVotes({
   }, []);
   const client = useQueryClient();
   const { requestAuth, connectedProfile, activeProfileProxy } = useAuth();
+  // Warm the existing posting check before the first Explain vote gesture.
+  usePublicProfileModerationStatus(connectedProfile?.id);
   const sign = useCompetitionSignatureFor(competition);
   const pendingResets = useRef(new Map<string, ApiSetCompetitionVoteRequest>());
   const activeScope = useRef(true);

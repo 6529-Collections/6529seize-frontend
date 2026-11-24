@@ -23,6 +23,8 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
+import { useAuth } from "@/components/auth/Auth";
+import { usePublicProfileModerationStatus } from "@/hooks/content-moderation/usePublicProfileModerationStatus";
 
 interface MyStreamWaveMyVotesProps {
   readonly wave: ApiWave;
@@ -41,6 +43,9 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
   onDropClick,
 }) => {
   const locale = useBrowserLocale();
+  const { connectedProfile } = useAuth();
+  // Share the creator's cached posting check instead of starting it on click.
+  usePublicProfileModerationStatus(connectedProfile?.id);
   const { isApp } = useDeviceInfo();
   const mobileViewport = useIsMobileLayoutViewport();
   const mobile = isApp || mobileViewport;

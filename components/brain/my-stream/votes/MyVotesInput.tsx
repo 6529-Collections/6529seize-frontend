@@ -48,33 +48,55 @@ function MyVotesExplainButton({
   mobile,
   disabled,
   onExplain,
-  tooltipId,
   label,
   description,
 }: {
   readonly mobile: boolean;
   readonly disabled: boolean;
   readonly onExplain: () => void;
-  readonly tooltipId: string;
   readonly label: string;
   readonly description: string;
 }) {
+  const tooltipId = useId();
+  const [tooltipDismissed, setTooltipDismissed] = useState(false);
   const props = {
     type: "button" as const,
     disabled,
-    onClick: onExplain,
+    onClick: () => {
+      setTooltipDismissed(true);
+      onExplain();
+    },
+    onMouseEnter: () => setTooltipDismissed(false),
+    onFocus: () => setTooltipDismissed(false),
     "data-tooltip-id": tooltipId,
     "data-tooltip-content": description,
   };
   return (
-    <Button
-      {...props}
-      variant="tertiary"
-      size={null}
-      className={`tw-h-9 tw-min-h-9 tw-min-w-11 tw-whitespace-nowrap !tw-px-3 !tw-text-xs !tw-font-medium touch-only:tw-h-11 touch-only:tw-min-h-11 ${mobile ? "touch-only:!tw-border-0 touch-only:!tw-bg-transparent touch-only:!tw-text-iron-300 touch-only:!tw-shadow-none" : ""}`}
-    >
-      {label}
-    </Button>
+    <>
+      <Button
+        {...props}
+        variant="tertiary"
+        size={null}
+        className={`tw-h-9 tw-min-h-9 tw-min-w-11 tw-whitespace-nowrap !tw-px-3 !tw-text-xs !tw-font-medium touch-only:tw-h-11 touch-only:tw-min-h-11 ${mobile ? "touch-only:!tw-border-0 touch-only:!tw-bg-transparent touch-only:!tw-text-iron-300 touch-only:!tw-shadow-none" : ""}`}
+      >
+        {label}
+      </Button>
+      <BodyPortalTooltip
+        id={tooltipId}
+        hidden={tooltipDismissed}
+        place="top"
+        offset={8}
+        opacity={1}
+        style={TOOLTIP_STYLES}
+        className="tw-max-w-64 tw-whitespace-normal"
+        closeEvents={{ mouseleave: true, blur: true, click: true }}
+        globalCloseEvents={{
+          escape: true,
+          clickOutsideAnchor: true,
+          scroll: true,
+        }}
+      />
+    </>
   );
 }
 
@@ -148,7 +170,6 @@ export function MyVotesInput({
   onExplain,
 }: MyVotesInputProps) {
   const locale = useBrowserLocale();
-  const explainTooltipId = useId();
   const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const saveRef = useRef<HTMLButtonElement>(null);
@@ -234,7 +255,6 @@ export function MyVotesInput({
               mobile={mobile}
               disabled={!canExplain || busy || disabled}
               onExplain={onExplain}
-              tooltipId={explainTooltipId}
               label={explainLabel}
               description={explainDescription}
             />
@@ -258,22 +278,6 @@ export function MyVotesInput({
           </p>
         )}
       </form>
-      {onExplain && (
-        <BodyPortalTooltip
-          id={explainTooltipId}
-          place="top"
-          offset={8}
-          opacity={1}
-          style={TOOLTIP_STYLES}
-          className="tw-max-w-64 tw-whitespace-normal"
-          closeEvents={{ mouseleave: true, blur: true, click: true }}
-          globalCloseEvents={{
-            escape: true,
-            clickOutsideAnchor: true,
-            scroll: true,
-          }}
-        />
-      )}
     </>
   );
 }
