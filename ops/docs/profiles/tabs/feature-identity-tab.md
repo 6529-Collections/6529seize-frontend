@@ -232,11 +232,11 @@ show the profile-creation welcome.
   empty search or selecting `Change category` opens the
   `Type at least 3 characters.` prompt without searching the network.
 - Pause after typing a category name. Grant Rep checks that exact name. Every
-  matching suggestion appears below the search field: wrapping pills on desktop
-  and full-width 48px rows on phones. Suggestions use the dialog's content scroll
-  area. The amount stays below the pills on desktop. On phones it steps aside
-  while suggestions are open and returns when you pick a category, retaining
-  any amount draft. The phone sheet fits its content while searching and stays
+  matching suggestion appears below the search field as wrapping pills on desktop
+  and phones. Suggestions use the dialog's content scroll area. The amount stays
+  below the pills on desktop. On phones it steps aside while suggestions are open
+  and returns when you pick a category, retaining any amount draft. The phone
+  sheet fits its content while searching and stays
   within the space available above the keyboard. Moving focus to the amount or
   actions closes suggestions. Category names are case-sensitive, so `artist` and
   `Artist` can hold separate ratings.

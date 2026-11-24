@@ -97,7 +97,7 @@ export default function UserPageRepNewRepSearchDropdown({
   }
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-2 tw-p-1 md:tw-flex-row md:tw-flex-wrap">
+    <div className="tw-flex tw-flex-wrap tw-gap-2 tw-p-1">
       {categories.map((category, index) => {
         const isMemesSubmissionCategory = category === MEMES_NOMINEE_CATEGORY;
         const categoryAppearance =
@@ -124,7 +124,7 @@ export default function UserPageRepNewRepSearchDropdown({
               event.stopPropagation();
               onRepSelect(category);
             }}
-            className={`tw-flex tw-min-h-12 tw-w-full tw-max-w-full tw-cursor-pointer tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/60 tw-px-2.5 tw-py-0.5 tw-text-left tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-200 tw-transition-colors tw-duration-150 hover:tw-border-iron-600 hover:tw-bg-iron-800/60 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none md:tw-min-h-8 md:tw-w-auto md:tw-gap-y-1 md:tw-py-1 md:tw-text-xs ${categoryAppearance}`}
+            className={`tw-flex tw-min-h-8 tw-w-auto tw-max-w-full tw-cursor-pointer tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/60 tw-px-2.5 tw-py-1 tw-text-left tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-200 tw-transition-colors tw-duration-150 hover:tw-border-iron-600 hover:tw-bg-iron-800/60 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none ${categoryAppearance}`}
           >
             <span className="tw-min-w-0 tw-max-w-full tw-break-words">
               <CategoryName category={category} search={search} />

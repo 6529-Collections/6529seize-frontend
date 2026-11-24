@@ -963,18 +963,16 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
           return { x: box.x, y: box.y, width: box.width, height: box.height };
         })
       );
+      expect(new Set(boxes.map((box) => Math.round(box.y))).size).toBeLessThan(
+        categories.length
+      );
+      for (const box of boxes) {
+        expect(box.height).toBeGreaterThanOrEqual(32);
+      }
       if (isMobile) {
         await expect(grant.getByTestId("grant-rep-amount")).toBeHidden();
-        for (const box of boxes) {
-          expect(box.height).toBe(48);
-          expect(box.x).toBeCloseTo(boxes[0]!.x, 1);
-          expect(box.width).toBeCloseTo(boxes[0]!.width, 1);
-        }
       } else {
         await expect(amount).toBeVisible();
-        expect(
-          new Set(boxes.map((box) => Math.round(box.y))).size
-        ).toBeLessThan(categories.length);
         expect((await amount.boundingBox())!.y).toBeGreaterThanOrEqual(
           Math.max(...boxes.map((box) => box.y + box.height))
         );
