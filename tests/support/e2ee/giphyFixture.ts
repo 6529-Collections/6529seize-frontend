@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import type { Page } from "@playwright/test";
 import { expect } from "@playwright/test";
+import { openComposerActions } from "./e2eeUi";
 
 const GIF_ID = "e2ee-gif-fixture";
 export const GIPHY_FIXTURE_URL = `https://media1.giphy.com/media/${GIF_ID}/giphy.gif`;
@@ -56,6 +57,7 @@ export async function installGiphyFixture(page: Page) {
 }
 
 export async function openGifPicker(page: Page) {
+  await openComposerActions(page);
   await page.getByRole("button", { name: "Add GIF", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "GIF search" });
   // The shared sheet has fixed children inside a zero-size dialog root.

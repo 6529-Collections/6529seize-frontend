@@ -5,12 +5,7 @@ import { useEffect, useId, useRef, useState, type Ref } from "react";
 import Button from "@/components/utils/button/Button";
 import CreateDropPollModeSelector from "@/components/waves/CreateDropPollModeSelector";
 import PollComposerOptions from "@/components/waves/PollComposerOptions";
-import {
-  COMPOSER_ACTION_BUTTON_CLASS_NAME,
-  COMPOSER_ACTION_ICON_CLASS_NAME,
-  COMPOSER_ACTION_IDLE_CLASS_NAME,
-} from "@/components/waves/composerPresentation";
-import DropActionTooltip from "@/components/waves/drops/DropActionTooltip";
+import { COMPOSER_ACTION_ICON_CLASS_NAME } from "@/components/waves/composerPresentation";
 import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -21,31 +16,33 @@ import {
   parsePollDefinition,
   type PollDefinition,
 } from "@/lib/e2ee/payload";
+import { E2eeComposerActionButton } from "./E2eeComposerActions";
 
 export function E2eePollComposerButton({
   buttonRef,
   onClick,
+  compact,
 }: {
   readonly buttonRef: Ref<HTMLButtonElement>;
   readonly onClick: () => void;
+  readonly compact: boolean;
 }) {
   const locale = useBrowserLocale();
   const label = t(locale, "e2ee.poll.create");
   return (
-    <DropActionTooltip content={label}>
-      <button
-        ref={buttonRef}
-        type="button"
-        onClick={onClick}
-        aria-label={label}
-        className={`${COMPOSER_ACTION_BUTTON_CLASS_NAME} ${COMPOSER_ACTION_IDLE_CLASS_NAME}`}
-      >
-        <ChartBarIcon
-          aria-hidden="true"
-          className={COMPOSER_ACTION_ICON_CLASS_NAME}
-        />
-      </button>
-    </DropActionTooltip>
+    <E2eeComposerActionButton
+      ref={buttonRef}
+      onClick={onClick}
+      tooltip={label}
+      compactLabel={
+        compact ? t(locale, "waves.composer.actions.poll") : undefined
+      }
+    >
+      <ChartBarIcon
+        aria-hidden="true"
+        className={COMPOSER_ACTION_ICON_CLASS_NAME}
+      />
+    </E2eeComposerActionButton>
   );
 }
 

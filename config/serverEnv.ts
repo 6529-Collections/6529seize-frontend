@@ -53,6 +53,11 @@ const getOptionalServerValue = (
 export const getStagingApiKey = (): string | undefined =>
   getOptionalServerValue(process.env["STAGING_API_KEY"]);
 
+// Playwright's browser routes cannot intercept the home page's server reads.
+export const isHomeDropClientFixtureEnabled = (): boolean =>
+  process.env.NODE_ENV === "development" &&
+  process.env["PLAYWRIGHT_HOME_DROP_CLIENT_FIXTURES"] === "1";
+
 export const getFarcasterWarpcastApiKey = (): string | undefined =>
   getOptionalServerValue(process.env["FARCASTER_WARPCAST_API_KEY"]);
 

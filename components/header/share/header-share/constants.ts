@@ -9,6 +9,7 @@ export enum SubMode {
   PAGE,
   MOBILE,
   DESKTOP,
+  DESKTOP_CLASSIC,
 }
 
 export enum PageShareTarget {
@@ -27,15 +28,17 @@ export const squareStyle = {
   justifyContent: "center",
 };
 
-export function getConnectTargetCount(isElectron: boolean): number {
-  return isElectron ? 1 : 2;
+export function isDesktopConnectionTarget(
+  target: SubMode
+): target is SubMode.DESKTOP | SubMode.DESKTOP_CLASSIC {
+  return target === SubMode.DESKTOP || target === SubMode.DESKTOP_CLASSIC;
 }
 
 export function getAvailableConnectSubMode(
   activeSubTab: SubMode,
   isElectron: boolean
 ): SubMode {
-  if (isElectron && activeSubTab === SubMode.DESKTOP) {
+  if (isElectron && isDesktopConnectionTarget(activeSubTab)) {
     return SubMode.MOBILE;
   }
 

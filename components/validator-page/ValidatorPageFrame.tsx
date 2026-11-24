@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { ABOUT_PAGE_SURFACE_CLASS_NAME } from "@/components/about/AboutLayout";
+import { VALIDATOR_HARDWARE_HREF } from "@/lib/validator-page/content/pageText";
 
 export type ValidatorSection =
   | "download"
@@ -17,7 +18,7 @@ const SECTIONS: readonly {
 }[] = [
   { key: "download", href: "/validator", label: "Download" },
   { key: "guide", href: "/validator/guide", label: "Guide" },
-  { key: "hardware", href: "/validator/hardware", label: "Hardware" },
+  { key: "hardware", href: VALIDATOR_HARDWARE_HREF, label: "Hardware" },
   {
     key: "known-issues",
     href: "/validator/known-issues",

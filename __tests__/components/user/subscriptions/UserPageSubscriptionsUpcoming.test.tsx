@@ -42,6 +42,8 @@ const nextMintResult: ReturnType<typeof useNextMintDrop> = {
   isSettingsLoaded: true,
   isFetching: false,
   isLoading: false,
+  isError: false,
+  isFetchedAfterMount: true,
 };
 
 // Include malformed API mappings at this fixture boundary to test rejection.

@@ -5,13 +5,12 @@ import { t, type MessageKey } from "@/i18n/messages";
 import type { ModerationCheckFilters } from "@/services/api/moderation-checks-api";
 
 export const CHECK_FILTER_OPTIONS = {
-  subject_type: ["REP_CATEGORY", "PROFILE_BIO", "GROUP_NAME", "DROP"],
+  subject_type: ["REP_CATEGORY", "PROFILE_BIO", "DROP"],
   outcome: ["ALLOW", "REJECT", "ERROR", "PENDING"],
   policy_family: ["PUBLIC_FIELDS", "WAVE_CONTENT"],
   review_status: ["NEEDS_REVIEW", "REVIEWED"],
   trigger: [
     "PUBLIC_FIELD",
-    "KNOWN_SAFE_PERSONAL_NAME",
     "PROFILE_SUSPENDED",
     "MANUAL_OVERRIDE",
     "REPEATED_IDENTICAL_CONTENT",
@@ -32,7 +31,6 @@ const VALUE_KEYS: Record<string, MessageKey> = {
   CLASSIFY: "checks.operation.CLASSIFY",
   PROFILE_STATUS: "checks.profileStatus",
   PUBLIC_FIELD: "checks.trigger.PUBLIC_FIELD",
-  KNOWN_SAFE_PERSONAL_NAME: "checks.trigger.KNOWN_SAFE_PERSONAL_NAME",
   PROFILE_SUSPENDED: "checks.trigger.PROFILE_SUSPENDED",
   MANUAL_OVERRIDE: "checks.trigger.MANUAL_OVERRIDE",
   REPEATED_IDENTICAL_CONTENT: "checks.trigger.REPEATED_IDENTICAL_CONTENT",
@@ -45,7 +43,6 @@ const VALUE_KEYS: Record<string, MessageKey> = {
   NO_SIGNAL: "checks.trigger.NO_SIGNAL",
   REP_CATEGORY: "checks.subject.REP_CATEGORY",
   PROFILE_BIO: "checks.subject.PROFILE_BIO",
-  GROUP_NAME: "checks.subject.GROUP_NAME",
   DROP: "checks.subject.DROP",
   ALLOW: "checks.outcome.ALLOW",
   REJECT: "checks.outcome.REJECT",
