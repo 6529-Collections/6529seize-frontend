@@ -23,7 +23,7 @@ instant (for example `2026-11-25T00:00:00Z`). Without it nothing below applies.
 | --- | --- |
 | Before the freeze | Profiles, handles, ratings, consolidations and delegations move to the 6529 Network. From Wednesday 25 November 00:00 UTC you can't change them for about 24 hours. From Thursday you change them on the 6529 Network, through this site. |
 | The 24 hours from the freeze | They are moving. You can't change them until the switch-on time (Thursday 26 November 00:00 UTC). |
-| After the switch-on | They moved to the 6529 Network. You can't change them on this site yet. |
+| After the switch-on | They are on the 6529 Network. Change yours there, through this site. A link goes to your identity on the 6529 Network (`/network/identity`). Without the 6529 Network flows on (they need `NEXT_PUBLIC_FEATURE_CHAIN_IDENTITY` set to `true` and a valid `NEXT_PUBLIC_CHAIN_GATEWAY_URL`), it says instead that they moved on the switch-on day and you can't change them on this site yet. |
 
 Dates and times are shown in UTC. The notice changes at the freeze and at the
 switch-on while the page stays open.
