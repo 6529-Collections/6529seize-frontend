@@ -61,6 +61,46 @@ async function enterMyVotesSelection(panel: Locator) {
   if (await select.isVisible()) await select.click();
 }
 
+async function expectCompactVoteMediaLayout(row: Locator) {
+  const alignment = await row.getByRole("heading").evaluate((heading) => {
+    const badge = heading.parentElement!.firstElementChild;
+    const article = heading.closest("article")!;
+    const artwork = article.querySelector("[data-my-vote-open]")!;
+    const author = article.querySelector("[data-my-vote-author]")!;
+    if (!badge || badge === heading)
+      throw new Error("Title media badge is missing");
+    const titleRange = document.createRange();
+    titleRange.selectNodeContents(heading.querySelector("button")!);
+    const authorRange = document.createRange();
+    authorRange.selectNodeContents(author.querySelector("a")!);
+    const badgeBounds = badge.getBoundingClientRect();
+    const artworkBounds = artwork.getBoundingClientRect();
+    const titleBounds = titleRange.getBoundingClientRect();
+    return {
+      artworkGap: badgeBounds.left - artworkBounds.right,
+      titleGap: heading.getBoundingClientRect().left - badgeBounds.right,
+      authorLeftGap:
+        author.firstElementChild!.getBoundingClientRect().left -
+        badgeBounds.left,
+      iconCenterGap:
+        badgeBounds.top +
+        badgeBounds.height / 2 -
+        titleBounds.top -
+        titleBounds.height / 2,
+      titleHandleGap:
+        authorRange.getBoundingClientRect().top - titleBounds.bottom,
+      artworkOverlays: artwork.parentElement!.children.length - 1,
+    };
+  });
+  expect(alignment.artworkGap).toBe(16);
+  expect(alignment.titleGap).toBe(8);
+  expect(alignment.authorLeftGap).toBe(0);
+  expect(Math.abs(alignment.iconCenterGap)).toBeLessThanOrEqual(2);
+  expect(alignment.titleHandleGap).toBeGreaterThanOrEqual(12);
+  expect(alignment.titleHandleGap).toBeLessThanOrEqual(24);
+  expect(alignment.artworkOverlays).toBe(0);
+}
+
 async function expectNumericVoteAppearance(input: Locator) {
   await expect(input).toHaveCSS("background-color", "rgb(28, 28, 33)");
   await expect(input).toHaveCSS("color", "rgb(239, 239, 241)");
@@ -7435,6 +7475,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           );
         });
         expect(Math.abs(authorArtworkGap)).toBeLessThanOrEqual(1);
+        await expectCompactVoteMediaLayout(row);
         const compactRank = (await row
           .getByText("1st", { exact: true })
           .boundingBox())!;
@@ -7573,6 +7614,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           );
           expect((await checkbox.boundingBox())!.width).toBe(44);
           expect((await checkbox.boundingBox())!.height).toBe(44);
+          await expectCompactVoteMediaLayout(row);
           const selectAllBounds = (await selectAll.boundingBox())!;
           expect(
             Math.abs(sortBounds.y - selectAllBounds.y)
@@ -7702,6 +7744,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           )
         ).toMatch(/inset.*2px/);
         const thumbnail = row.getByRole("button", { name: /^Open / });
+        if (width < 1024) await expectCompactVoteMediaLayout(row);
         const statsGaps = await row
           .getByText("Total", { exact: true })
           .evaluate((label) => {

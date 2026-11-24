@@ -331,7 +331,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
     : "@[40rem]/my-vote:tw-grid-cols-[44px_96px_minmax(0,1fr)_22.5rem]";
   const mobileGridColumns = isVotingClosed
     ? ""
-    : "@[40rem]/my-vote:tw-grid-cols-[auto_64px_minmax(0,1fr)_22.5rem] @[40rem]/my-vote:tw-gap-x-3";
+    : "@[40rem]/my-vote:tw-grid-cols-[auto_64px_minmax(0,1fr)_22.5rem] @[40rem]/my-vote:tw-gap-x-4";
   const titleId = `my-vote-title-${drop.id}`;
   const longPress = useMyVoteLongPress(
     mobile && !isSelecting && !isSelectionDisabled,
@@ -414,7 +414,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
       <div
         className={
           mobile
-            ? `tw-grid tw-grid-cols-[auto_72px_minmax(0,1fr)] tw-gap-y-2 ${mobileGridColumns}`
+            ? `tw-grid tw-grid-cols-[auto_80px_minmax(0,1fr)] tw-gap-y-2 ${mobileGridColumns}`
             : `tw-grid tw-grid-cols-[44px_96px_minmax(0,1fr)] tw-gap-x-3 tw-gap-y-2 ${desktopGridColumns}`
         }
       >
@@ -520,16 +520,6 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
               )}
             </span>
           </button>
-          {mobile && (
-            <MediaTypeBadge
-              mimeType={badgeMimeType}
-              dropId={drop.id}
-              size="xs"
-              showTooltip={false}
-              className="tw-pointer-events-none tw-absolute tw-right-0 tw-top-0 tw-z-[2]"
-              iconClassName="!tw-border-0 !tw-bg-transparent !tw-text-white tw-drop-shadow-md"
-            />
-          )}
         </div>
 
         {/* Reuse the card's top padding for the title's 44px touch target. */}
@@ -537,14 +527,13 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
           className={`tw-col-start-3 tw-row-start-1 tw-flex tw-min-w-0 tw-flex-col ${mobile ? "-tw-mt-4" : ""}`}
         >
           <div className="tw-flex tw-min-w-0 tw-items-start tw-gap-2">
-            {!mobile && (
-              <MediaTypeBadge
-                mimeType={badgeMimeType}
-                dropId={drop.id}
-                size="xs"
-                className="tw-size-6 tw-justify-center"
-              />
-            )}
+            <MediaTypeBadge
+              mimeType={badgeMimeType}
+              dropId={drop.id}
+              size="xs"
+              showTooltip={!mobile}
+              className={`tw-size-6 tw-justify-center ${mobile ? "tw-mt-4" : ""}`}
+            />
             <h3
               id={titleId}
               className={`tw-m-0 tw-flex tw-min-h-6 tw-min-w-0 tw-items-center ${mobile ? "tw-flex-1" : "tw-flex-initial"}`}
