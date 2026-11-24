@@ -69,7 +69,6 @@ export interface MyStreamWaveTabsHeaderActionContext {
 }
 
 interface MyStreamWaveTabsHeaderProps {
-  readonly phoneActionsPending?: boolean | undefined;
   readonly wave: ApiWave;
   readonly activeContentTab: MyStreamWaveTab;
   readonly isCompact: boolean;
@@ -338,7 +337,6 @@ export default function MyStreamWaveTabsHeader({
   renderLeadingActions,
   renderTrailingActions,
   renderOverflowMenuItems,
-  phoneActionsPending = false,
 }: MyStreamWaveTabsHeaderProps) {
   const locale = useBrowserLocale();
   const { toggleRightSidebar, isRightSidebarOpen } = useSidebarState();
@@ -507,7 +505,6 @@ export default function MyStreamWaveTabsHeader({
   const compactActions =
     isCompact && compactMenuItems.length > 0 ? (
       <CompactWaveActions
-        disabled={isPhoneWave && phoneActionsPending}
         items={compactMenuItems}
         compactTrigger={isCompactWave}
         phone={isPhoneWave}
