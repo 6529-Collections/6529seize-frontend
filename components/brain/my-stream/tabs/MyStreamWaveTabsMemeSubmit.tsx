@@ -177,8 +177,10 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
   // Closed state - submissions have ended
   if (isClosed) {
     const tooltipText = closingTime
-      ? `Submissions closed on ${formatSubmissionWindowTime(closingTime, zone)}`
-      : "Submissions are closed";
+      ? t(locale, "waves.dropEligibility.closedAt", {
+          date: formatSubmissionWindowTime(closingTime, zone),
+        })
+      : t(locale, "waves.dropEligibility.closedReason");
 
     return renderRestriction(
       t(locale, "waves.dropEligibility.closed"),
@@ -190,8 +192,10 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
   // Coming soon state - submissions haven't started
   if (isComingSoon) {
     const tooltipText = openingTime
-      ? `Submissions open on ${formatSubmissionWindowTime(openingTime, zone)}`
-      : "Submissions will open soon";
+      ? t(locale, "waves.dropEligibility.opensAt", {
+          date: formatSubmissionWindowTime(openingTime, zone),
+        })
+      : t(locale, "waves.dropEligibility.opensSoonReason");
 
     return renderRestriction(
       t(locale, "waves.dropEligibility.openSoon"),
@@ -202,6 +206,24 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
 
   // Not eligible state - user doesn't have permission to submit
   if (waveInfo.participation.isEligible === false) {
+    if (phoneMenu && onShowSubmissionHelp) {
+      return (
+        <button
+          type="button"
+          className={restrictedClass}
+          onClick={() =>
+            onShowSubmissionHelp({
+              label: t(locale, "waves.dropEligibility.howToSubmit"),
+              restrictionKind: "memes-nomination",
+              restrictionMessage: null,
+            })
+          }
+        >
+          <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
+          <span>{t(locale, "waves.dropEligibility.howToSubmit")}</span>
+        </button>
+      );
+    }
     return (
       <MainStageNominationPopover>
         <button
@@ -234,10 +256,18 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
   // Maximum submissions reached state
   if (waveInfo.participation.hasReachedLimit) {
     const maxSubmissions = waveInfo.participation.maxSubmissions ?? "?";
-    const submissionText =
-      maxSubmissions === 1 ? "1 submission" : `${maxSubmissions} submissions`;
-
-    const tooltipText = `You have already submitted the maximum allowed (${submissionText})`;
+    const tooltipText = t(
+      locale,
+      maxSubmissions === 1
+        ? "waves.dropEligibility.limitOneReason"
+        : "waves.dropEligibility.limitManyReason",
+      {
+        count:
+          typeof maxSubmissions === "number"
+            ? formatInteger(locale, maxSubmissions)
+            : maxSubmissions,
+      }
+    );
 
     return renderRestriction(
       t(locale, "waves.dropEligibility.limitReached"),
@@ -283,7 +313,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
 
   let tooltipText = "Submit your art for The Memes";
   if (!canSubmit) {
-    tooltipText = "You cannot submit at this time";
+    tooltipText = t(locale, "waves.dropEligibility.unavailableReason");
   } else if (hasLimitedRemaining) {
     tooltipText = `You have ${remainingSubmissionCount} submission${
       remainingSubmissionCount === 1 ? "" : "s"

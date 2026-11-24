@@ -82,6 +82,16 @@ export default function PhoneWaveTabs({
   const primary = showAll ? [...everyday, ...reference] : everyday.slice(0, 4);
   const secondary = showAll ? [] : [...everyday.slice(4), ...reference];
   const activeSecondary = secondary.find((tab) => tab.key === activeKey);
+  if (isOpen && secondary.length === 0) setIsOpen(false);
+  const rowLayout = JSON.stringify(
+    primary.map((tab) => [
+      tab.key,
+      tab.label,
+      tab.badgeCount,
+      Boolean(tab.action),
+      Boolean(tab.leadingIcon),
+    ])
+  );
   const hasTabPanels = primary.some((tab) => tab.panelId);
   useEffect(() => {
     const row = rowRef.current;
@@ -100,7 +110,7 @@ export default function PhoneWaveTabs({
     );
     if (activeTab) observer.observe(activeTab);
     return () => observer.disconnect();
-  }, [activeKey, activeSecondary?.label]);
+  }, [activeKey, activeSecondary?.label, rowLayout]);
 
   return (
     <>

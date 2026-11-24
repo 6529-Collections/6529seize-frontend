@@ -546,15 +546,26 @@ async function expectSheetTop(sheet: Locator, expectedY: number) {
     .toBeCloseTo(expectedY, 0);
 }
 
+async function getDialogSurfaceBounds(dialog: Locator, selector: string) {
+  return dialog.evaluate((element, selector) => {
+    const surface = element.matches(selector)
+      ? element
+      : element.querySelector(selector);
+    if (!surface) return null;
+    const { x, y, width, height } = surface.getBoundingClientRect();
+    return { x, y, width, height };
+  }, selector);
+}
+
 async function expectCreationSheet(page: Page, sheet: Locator) {
   const viewport = page.viewportSize();
   if (!viewport) throw new Error("Viewport missing");
   await expect
     .poll(async () => {
-      const bounds = await page
-        .getByRole("dialog")
-        .locator(".mobile-wrapper-dialog")
-        .boundingBox();
+      const bounds = await getDialogSurfaceBounds(
+        sheet,
+        ".mobile-wrapper-dialog"
+      );
       return Boolean(
         bounds &&
         bounds.y > 0 &&
@@ -575,10 +586,10 @@ async function expectFullScreenInformationView(
 ) {
   await expect
     .poll(async () => {
-      const bounds = await page
-        .getByRole("dialog")
-        .locator("[data-mobile-navigation-view]")
-        .boundingBox();
+      const bounds = await getDialogSurfaceBounds(
+        view,
+        "[data-mobile-navigation-view]"
+      );
       const viewport = page.viewportSize()!;
       return (
         bounds !== null &&
@@ -1745,6 +1756,22 @@ async function openSubmissionExplanation(page: Page, desktopLabel: string) {
   return { action, details, phone };
 }
 
+async function tabToSubmissionRules(page: Page, dialog: Locator) {
+  const rules = dialog.getByRole("link", { name: "View submission rules" });
+  await expect
+    .poll(() =>
+      dialog.evaluate((element) => element.contains(document.activeElement))
+    )
+    .toBe(true);
+  for (let presses = 0; presses < 6; presses += 1) {
+    await page.keyboard.press("Tab");
+    if (await rules.evaluate((element) => element === document.activeElement))
+      break;
+  }
+  await expect(rules).toBeFocused();
+  return rules;
+}
+
 /** Open contextual rules with the keyboard while leaving a chat draft pending. */
 async function openLockedSubmissionRules(page: Page, draft: string) {
   await page
@@ -1761,16 +1788,15 @@ async function openLockedSubmissionRules(page: Page, draft: string) {
       exact: true,
     })
   ).toBeVisible();
-  if (phone)
-    await details.getByRole("link", { name: "View submission rules" }).focus();
-  else {
+  const rules = phone
+    ? await tabToSubmissionRules(page, details)
+    : details.getByRole("link", { name: "View submission rules" });
+  if (!phone) {
     await page.keyboard.press("Tab");
     await page.keyboard.press("Tab");
+    await expect(rules).toBeFocused();
   }
-  await expect(
-    details.getByRole("link", { name: "View submission rules" })
-  ).toBeFocused();
-  await page.keyboard.press("Enter");
+  await rules.press("Enter");
 }
 
 async function expectSubmissionLockAppearance(
@@ -1871,6 +1897,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       "Trusted phone touch input; iOS bridge simulated."
     );
     test.setTimeout(150_000);
+    await page.setViewportSize({ width: 320, height: 740 });
     await installSurfaceSimulation(
       page.context(),
       "capacitor-ios-sim",
@@ -1930,6 +1957,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       { label: "Art", path: `/waves/${WAVE}?tab=chat&curation=edge-art` },
       { label: "Settings", path: `/waves/${WAVE}?tab=configuration` },
     ];
+    let scrollingRows = 0;
     for (const view of cases) {
       await test.step(`${view.label}${view.subTab ? ` / ${view.subTab}` : ""}`, async () => {
         sandbox.setCompetition("alpha", {
@@ -1964,6 +1992,11 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         }
         const row = phoneWaveTabs(page);
         await row.click({ trial: true });
+        const scrollStart = await row.evaluate((element) => {
+          if (element.scrollWidth <= element.clientWidth + 1) return 0;
+          element.scrollLeft = element.scrollWidth;
+          return element.scrollLeft;
+        });
         const box = await row.boundingBox();
         expect(box).not.toBeNull();
         const y = box!.y + box!.height / 2;
@@ -1992,6 +2025,12 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
             touchPoints: [],
           });
           await expect(page).toHaveURL(initialUrl);
+          if (scrollStart > 0) {
+            scrollingRows += 1;
+            await expect
+              .poll(() => row.evaluate((element) => element.scrollLeft))
+              .toBeLessThan(scrollStart - 4);
+          }
           await client.send("Input.dispatchTouchEvent", {
             type: "touchStart",
             touchPoints: [{ x: 16, y }],
@@ -2031,6 +2070,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         }
       });
     }
+    expect(scrollingRows).toBeGreaterThan(0);
     expect(sandbox.requests).toEqual([]);
     expect(mainStage.requests).toEqual([]);
     await expectNoUnsafeSandboxMutations(baseURL);
@@ -3234,7 +3274,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       const actionScope = phone ? await openPhoneWaveActions(page) : page;
       await expect(
         actionScope.getByRole("button", {
-          name: "Submission Limit Reached",
+          name: phone ? "How to Submit" : "Submission Limit Reached",
           exact: true,
         })
       ).toHaveCount(0);
@@ -4486,11 +4526,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         );
         await expect(details).not.toContainText("Chat access is separate");
         await expectNoHorizontalOverflow(page);
+        const rules = phone
+          ? await tabToSubmissionRules(page, details)
+          : details.getByRole("link", { name: "View submission rules" });
         if (!phone) await page.keyboard.press("Tab");
-        const rules = details.getByRole("link", {
-          name: "View submission rules",
-        });
-        if (phone) await rules.focus();
         await expect(rules).toBeFocused();
         await rules.press("Enter");
         await expect(selectedWaveSection(page, "Settings")).toBeVisible();
@@ -14789,6 +14828,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await page.reload();
     await page.goto(ROOT);
     await expect(
+      page.getByRole("region", { name: "Decisions", exact: true })
+    ).toBeVisible();
+    await expect(
       page.getByRole("link", { name: "New decision", exact: true })
     ).toHaveCount(0);
   });
@@ -15967,6 +16009,30 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         const trigger = sheet.getByRole("button", { name: label, exact: true });
         await trigger.click();
         await expect(sheet).toHaveAccessibleName(label);
+        if (label === "Edit Visibility access") {
+          await sheet
+            .getByRole("button", { name: "Make wave public", exact: true })
+            .click();
+          const confirmation = page.getByRole("dialog", {
+            name: "Make wave public?",
+            exact: true,
+          });
+          await expect(
+            confirmation.getByRole("heading", {
+              name: "Make wave public?",
+              exact: true,
+            })
+          ).toBeVisible();
+          await confirmation
+            .getByRole("button", { name: "Make public", exact: true })
+            .click({ trial: true });
+          await confirmation
+            .getByRole("button", { name: "Cancel", exact: true })
+            .click();
+          await expect(confirmation).toHaveCount(0);
+          await expect(sheet).toHaveCount(1);
+          await expect(sheet).toHaveAccessibleName(label);
+        }
         await expect(
           sheet.getByRole("button", { name: "Back", exact: true })
         ).toHaveCount(1);

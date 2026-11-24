@@ -169,4 +169,44 @@ describe("PhoneWaveTabs", () => {
       screen.getByRole("button", { name: "Decisions 4" })
     ).toHaveAccessibleDescription("Wave sections");
   });
+
+  it("keeps overflow closed after it disappears and returns", async () => {
+    const props = { primaryKeys: PRIMARY_KEYS, activeKey: "chat" };
+    const { rerender } = render(
+      <PhoneWaveTabs {...props} tabs={EXAMPLE_TABS} />
+    );
+    fireEvent.click(screen.getByRole("button", { name: "More" }));
+    await screen.findByRole("dialog", { name: "Wave sections" });
+    rerender(<PhoneWaveTabs {...props} tabs={EXAMPLE_TABS.slice(0, 5)} />);
+    expect(screen.queryByRole("dialog", { name: "Wave sections" })).toBeNull();
+    rerender(<PhoneWaveTabs {...props} tabs={EXAMPLE_TABS} />);
+    expect(screen.getByRole("button", { name: "More" })).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    );
+    expect(screen.queryByRole("dialog", { name: "Wave sections" })).toBeNull();
+  });
+
+  it("reveals the active section when another section is inserted before it", () => {
+    const reveal = jest.spyOn(Element.prototype, "scrollIntoView");
+    try {
+      const tabs = [EXAMPLE_TABS[0]!, EXAMPLE_TABS[5]!, EXAMPLE_TABS[6]!];
+      const props = { primaryKeys: PRIMARY_KEYS, activeKey: "decisions" };
+      const { rerender } = render(<PhoneWaveTabs {...props} tabs={tabs} />);
+      reveal.mockClear();
+      rerender(
+        <PhoneWaveTabs
+          {...props}
+          tabs={[
+            ...tabs.slice(0, 2),
+            { key: "curation:art", label: "Art", onSelect: jest.fn() },
+            tabs[2]!,
+          ]}
+        />
+      );
+      expect(reveal).toHaveBeenCalled();
+    } finally {
+      reveal.mockRestore();
+    }
+  });
 });

@@ -1707,6 +1707,15 @@ const WAVE_DROP_ELIGIBILITY_MESSAGES = objectMessages("waves.dropEligibility", {
   openSoon: "Submissions Open Soon",
   limitReached: "Submission Limit Reached",
   unavailable: "Submission Unavailable",
+  closedAt: "Submissions closed on {date}",
+  closedReason: "Submissions are closed",
+  opensAt: "Submissions open on {date}",
+  opensSoonReason: "Submissions will open soon",
+  limitOneReason:
+    "You have already submitted the maximum allowed (1 submission)",
+  limitManyReason:
+    "You have already submitted the maximum allowed ({count} submissions)",
+  unavailableReason: "You cannot submit at this time",
   submitMeme: "Submit Meme",
   submitMemeClosingSoon: "Submit Meme (Closes Soon!)",
   submitWorkToMemes: "Submit Work to The Memes",
