@@ -105,8 +105,8 @@ the `More` menu.
    Secure Classic setup shows the v0.4.1 minimum under the secure action, during
    wallet signing, and below **Open in 6529 Desktop Classic**. **Connect only** signs in
    the receiving app with a short-lived, one-time code.
-4. Mobile shows a full-width QR. Both desktop targets show the 6529 logo and
-   a launch control naming the selected app. The heading reads **Connect as
+4. Mobile shows a full-width QR. Both desktop targets show the selected app's
+   icon and a launch control naming it. The heading reads **Connect as
    {handle}**, with **with Post Signing & DM Encryption** for secure setup.
 5. Copy with the icon inside the link field. The adjacent refresh icon generates
    a new Connect-only code directly. For secure setup, refresh clears the displayed
