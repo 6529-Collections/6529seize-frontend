@@ -16,6 +16,10 @@ import { HttpFile } from '../http/http';
 
 export class ApiIdentitySubscriptionActions {
     'actions': Array<ApiIdentitySubscriptionTargetAction>;
+    /**
+    * Returned by GET only. Indicates whether the requested identity follows the authenticated viewer.
+    */
+    'follows_viewer'?: boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -26,6 +30,12 @@ export class ApiIdentitySubscriptionActions {
             "name": "actions",
             "baseName": "actions",
             "type": "Array<ApiIdentitySubscriptionTargetAction>",
+            "format": ""
+        },
+        {
+            "name": "follows_viewer",
+            "baseName": "follows_viewer",
+            "type": "boolean",
             "format": ""
         }    ];
 

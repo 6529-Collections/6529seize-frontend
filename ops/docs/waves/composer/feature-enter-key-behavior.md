@@ -30,9 +30,10 @@ Send button for submission.
 
 Ordinary and encrypted chat share the rich-text editor, focus treatment, input
 sizing and keyboard/safe-area handling. Custom emoji render inline while composing.
-Encrypted chat keeps its own encrypted sending and attachments and omits GIF,
-Poll and Storm. Placeholders are **Write a message** for ordinary messages and
-**Write an encrypted message** for encrypted messages on every device.
+Encrypted chat uses its own encrypted sending, attachments, GIFs, and polls
+when enabled. On mobile, **+** opens its tray with **Attach**, **Poll** when
+available, and **GIF**. Placeholders are **Write a message** for ordinary
+messages and **Write an encrypted message** for encrypted messages on every device.
 
 Expanded browser actions use flat icon buttons with a rounded-square hover
 background and tooltips. Upload uses a paperclip. The narrow-row plus toggle

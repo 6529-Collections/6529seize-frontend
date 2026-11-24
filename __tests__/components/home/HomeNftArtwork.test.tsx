@@ -50,7 +50,7 @@ it("centers Latest Drop artwork in its column without stretching the frame", () 
     animation: "video.mp4",
     metadata: { animation_details: { format: "MP4" } },
   } as ApiMemesExtendedData;
-  render(<NowMintingSection nft={nft} isFetching={false} />);
+  render(<NowMintingSection nft={nft} />);
   const artwork = screen.getByTestId("artwork");
   expect(artwork.closest("[data-home-artwork-column]")).toHaveClass(
     "tw-flex",
@@ -97,9 +97,7 @@ it.each([
       animation,
       metadata: { animation_details: { format } },
     } as ApiMemesExtendedData;
-    const { container } = render(
-      <NowMintingSection nft={nft} isFetching={false} />
-    );
+    const { container } = render(<NowMintingSection nft={nft} />);
     // The mocked renderer contains no img, so eligibility must come from the NFT.
     expect(container.querySelector("img")).toBeNull();
     const column = container.querySelector("[data-home-artwork-column]");

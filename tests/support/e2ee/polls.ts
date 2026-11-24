@@ -1,11 +1,13 @@
 import type { Page } from "@playwright/test";
 import { expect } from "../../testHelpers";
+import { openComposerActions } from "./e2eeUi";
 
 export async function postEncryptedPoll(
   page: Page,
   question: string,
   multi: boolean
 ) {
+  await openComposerActions(page);
   await page.getByRole("button", { name: "Create poll" }).click();
   const form = page.getByRole("form", { name: "Create poll" });
   await form.getByLabel("Question", { exact: true }).fill(question);

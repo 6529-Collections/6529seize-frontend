@@ -540,9 +540,6 @@ describe("wave-rules.helpers", () => {
       })
     ).toEqual({
       value: "Private group",
-      valueHref: undefined,
-      valueGroupId: undefined,
-      valueLinkLabel: undefined,
     });
   });
 
@@ -554,9 +551,6 @@ describe("wave-rules.helpers", () => {
       })
     ).toEqual({
       value: "Anyone",
-      valueHref: undefined,
-      valueGroupId: undefined,
-      valueLinkLabel: undefined,
     });
   });
 
@@ -575,9 +569,6 @@ describe("wave-rules.helpers", () => {
       })
     ).toEqual({
       value: "Private group",
-      valueHref: undefined,
-      valueGroupId: undefined,
-      valueLinkLabel: undefined,
     });
   });
 
@@ -585,40 +576,34 @@ describe("wave-rules.helpers", () => {
     expect(
       getScopeRuleValue({
         scope: {
-          group: {
-            id: "stale-group-id",
-            is_hidden: false,
-          },
+          group: { is_hidden: false },
         },
         fallback: "Anyone",
       })
     ).toEqual({
       value: "Group unavailable",
-      valueHref: undefined,
-      valueGroupId: undefined,
-      valueLinkLabel: undefined,
     });
   });
 
-  it("links visible scope groups to criteria and members", () => {
-    expect(
-      getScopeRuleValue({
-        scope: {
-          group: {
-            id: "artists & curators",
-            name: "Artists and curators",
-            is_hidden: false,
+  it.each([undefined, "Artists and curators"])(
+    "links visible scope groups to criteria and members with saved name %s",
+    (name) => {
+      expect(
+        getScopeRuleValue({
+          scope: {
+            group: {
+              id: "artists & curators",
+              ...(name ? { name } : {}),
+              is_hidden: false,
+            },
           },
-        },
-        fallback: "Anyone",
-      })
-    ).toEqual({
-      value: "Artists and curators",
-      valueHref: "/network?page=1&group=artists%20%26%20curators",
-      valueGroupId: "artists & curators",
-      valueLinkLabel: "Inspect Artists and curators group criteria and members",
-    });
-  });
+          fallback: "Anyone",
+        })
+      ).toEqual({
+        valueGroupId: "artists & curators",
+      });
+    }
+  );
 });
 
 describe("create-wave final review", () => {

@@ -9,10 +9,12 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 import { AuthContext, type AuthContextType } from "@/components/auth/Auth";
+import { createMockAuthContext } from "@/__tests__/utils/testContexts";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   commonApiDeleteWithBody,
+  commonApiFetch,
   commonApiPost,
 } from "@/services/api/common-api";
 
@@ -24,18 +26,20 @@ jest.mock("@tanstack/react-query", () => {
 });
 jest.mock("@/services/api/common-api", () => ({
   commonApiDeleteWithBody: jest.fn(),
+  commonApiFetch: jest.fn(),
   commonApiPost: jest.fn(),
 }));
 
 const useQueryMock = useQuery as jest.Mock;
 const commonApiPostMock = commonApiPost as jest.Mock;
 const commonApiDeleteWithBodyMock = commonApiDeleteWithBody as jest.Mock;
+const commonApiFetchMock = commonApiFetch as jest.Mock;
 
 describe("UserFollowBtn", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    commonApiPostMock.mockResolvedValue(undefined);
-    commonApiDeleteWithBodyMock.mockResolvedValue(undefined);
+    commonApiPostMock.mockResolvedValue({ actions: ["DROP_CREATED"] });
+    commonApiDeleteWithBodyMock.mockResolvedValue({ actions: [] });
   });
 
   it("isolates follow status when the authenticated identity or acting-as role changes", () => {
@@ -99,6 +103,10 @@ describe("UserFollowBtn", () => {
 
   function setup({
     following,
+    followsViewer = false,
+    liveStatus = false,
+    isDirectProfileSession = true,
+    initialFollowing = false,
     requestSuccess = true,
     onDirectMessage,
     directMessageLoading,
@@ -107,6 +115,10 @@ describe("UserFollowBtn", () => {
     onUnblock,
   }: {
     readonly following: boolean;
+    readonly followsViewer?: boolean | undefined;
+    readonly liveStatus?: boolean | undefined;
+    readonly isDirectProfileSession?: boolean | undefined;
+    readonly initialFollowing?: boolean | undefined;
     readonly requestSuccess?: boolean | undefined;
     readonly onDirectMessage?: jest.Mock | undefined;
     readonly directMessageLoading?: boolean | undefined;
@@ -114,10 +126,20 @@ describe("UserFollowBtn", () => {
     readonly blocked?: boolean | undefined;
     readonly onUnblock?: jest.Mock | undefined;
   }) {
-    useQueryMock.mockReturnValue({
-      data: following ? { actions: [1] } : { actions: [] },
-      isFetching: false,
-    });
+    const status = {
+      actions: following ? ["DROP_CREATED"] : [],
+      follows_viewer: followsViewer,
+    };
+    if (liveStatus) {
+      commonApiFetchMock.mockResolvedValue(status);
+      useQueryMock.mockImplementation(
+        jest.requireActual<typeof import("@tanstack/react-query")>(
+          "@tanstack/react-query"
+        ).useQuery
+      );
+    } else {
+      useQueryMock.mockReturnValue({ data: status, isFetching: false });
+    }
     const requestAuth = jest
       .fn()
       .mockResolvedValue({ success: requestSuccess });
@@ -130,7 +152,13 @@ describe("UserFollowBtn", () => {
     });
     render(
       <QueryClientProvider client={queryClient}>
-        <AuthContext.Provider value={{ setToast, requestAuth } as any}>
+        <AuthContext.Provider
+          value={createMockAuthContext({
+            setToast,
+            requestAuth,
+            isDirectProfileSession,
+          })}
+        >
           <ReactQueryWrapperContext.Provider
             value={{ onIdentityFollowChange: jest.fn() } as any}
           >
@@ -142,6 +170,7 @@ describe("UserFollowBtn", () => {
               showMuteButton={false}
               blocked={blocked}
               onUnblock={onUnblock}
+              initialFollowing={initialFollowing}
             />
           </ReactQueryWrapperContext.Provider>
         </AuthContext.Provider>
@@ -167,10 +196,12 @@ describe("UserFollowBtn", () => {
     expect(commonApiDeleteWithBodyMock).not.toHaveBeenCalled();
   });
 
-  it("unfollows when already following", async () => {
+  it("opens Following before unfollowing", async () => {
     const user = userEvent.setup();
     setup({ following: true });
-    await user.click(screen.getByRole("button", { name: "Unfollow" }));
+    await user.click(screen.getByRole("button", { name: "Following" }));
+    expect(commonApiDeleteWithBodyMock).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("menuitem", { name: "Unfollow" }));
 
     await waitFor(() => {
       expect(commonApiDeleteWithBodyMock).toHaveBeenCalledWith(
@@ -180,6 +211,60 @@ describe("UserFollowBtn", () => {
       );
     });
     expect(commonApiPostMock).not.toHaveBeenCalled();
+  });
+
+  it("follows back immediately when the other profile follows you", async () => {
+    const user = userEvent.setup();
+    setup({ following: false, followsViewer: true });
+    await user.click(screen.getByRole("button", { name: "Follow back" }));
+    await waitFor(() => expect(commonApiPostMock).toHaveBeenCalledTimes(1));
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+  });
+
+  it("preserves the reverse relationship after following and unfollowing", async () => {
+    const user = userEvent.setup();
+    setup({ following: false, followsViewer: true, liveStatus: true });
+    await user.click(
+      await screen.findByRole("button", { name: "Follow back" })
+    );
+    const following = await screen.findByRole("button", { name: "Following" });
+    expect(following).toHaveAccessibleDescription("You follow each other");
+    await user.click(following);
+    await user.click(screen.getByRole("menuitem", { name: "Unfollow" }));
+    expect(
+      await screen.findByRole("button", { name: "Follow back" })
+    ).toBeEnabled();
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("uses the notification's outgoing follow state in a non-direct session", () => {
+    setup({
+      following: false,
+      followsViewer: true,
+      liveStatus: true,
+      isDirectProfileSession: false,
+      initialFollowing: true,
+    });
+
+    const trigger = screen.getByRole("button", { name: "Following" });
+    expect(trigger).not.toHaveAccessibleDescription();
+    expect(commonApiFetchMock).not.toHaveBeenCalled();
+  });
+
+  it("describes a mutual follow and supports keyboard dismissal", async () => {
+    const user = userEvent.setup();
+    setup({ following: true, followsViewer: true });
+    const trigger = screen.getByRole("button", { name: "Following" });
+    expect(trigger).toHaveAccessibleDescription("You follow each other");
+    trigger.focus();
+    await user.keyboard("{Enter}");
+    expect(screen.getByRole("menu")).toHaveAccessibleDescription(
+      "You follow each other"
+    );
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
+    expect(commonApiDeleteWithBodyMock).not.toHaveBeenCalled();
   });
 
   it("replaces Follow with Unblock for a blocked profile", async () => {
@@ -226,7 +311,7 @@ describe("UserFollowBtn", () => {
     {
       action: "unfollow",
       following: true,
-      buttonName: "Unfollow",
+      buttonName: "Following",
       getRequestMock: () => commonApiDeleteWithBodyMock,
       toastTitle: "Couldn't unfollow this profile.",
     },
@@ -240,6 +325,9 @@ describe("UserFollowBtn", () => {
       const followButton = screen.getByRole("button", { name: buttonName });
 
       await user.click(followButton);
+      if (following) {
+        await user.click(screen.getByRole("menuitem", { name: "Unfollow" }));
+      }
 
       await waitFor(() => {
         expect(setToast).toHaveBeenCalledWith(

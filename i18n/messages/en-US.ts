@@ -1483,6 +1483,18 @@ const FOLLOWERS_MESSAGES = objectMessages("followers", {
   "profile.avatarAlt": "{handle}'s profile image",
 } as const);
 
+const PROFILE_FOLLOW_MESSAGES = objectMessages("profile.follow", {
+  followBack: "Follow back",
+  mutualStatus: "You follow each other",
+  unfollow: "Unfollow",
+  unblock: "Unblock",
+  unblockProfile: "Unblock {handle}",
+  "error.follow": "Couldn't follow this profile.",
+  "error.unfollow": "Couldn't unfollow this profile.",
+  "error.authenticate": "Couldn't verify your sign-in.",
+  "error.retry": "Please try again.",
+} as const);
+
 const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   "pinControl.pinTooltip": "Pin",
   "pinControl.unpinTooltip": "Unpin",
@@ -2502,7 +2514,6 @@ const WAVE_STORM_COMPOSER_MESSAGES = objectMessages("waves.stormComposer", {
 
 const WAVE_CHAT_SETTINGS_MESSAGES = objectMessages("waves.chatSettings", {
   "access.public": "Public",
-  "access.inspectGroup": "Inspect {groupName} group criteria and members",
   "access.label": "Chat access",
   "access.privateGroup": "Private group",
   "access.unavailableGroup": "Group unavailable",
@@ -3926,6 +3937,7 @@ export const EN_US_ROOT_MESSAGES = {
   "headerShare.shareModal.backdropAriaLabel": "Dismiss share modal",
   "headerShare.connectModal.title": "Connect Device",
   "headerShare.connectModal.mobileTitle": "Connect 6529 Mobile",
+  "headerShare.connectModal.newDesktopTitle": "Connect 6529 Desktop",
   "headerShare.connectModal.desktopTitle": "Connect 6529 Desktop Classic",
   "headerShare.connectModal.chooseApp": "Which app are you connecting?",
   "headerShare.connectModal.only": "Connect only",
@@ -3947,8 +3959,9 @@ export const EN_US_ROOT_MESSAGES = {
   "headerShare.menu.qrTarget": "QR code target",
   "headerShare.menu.browser": "Browser",
   "headerShare.menu.app": "App",
-  "headerShare.menu.mobile": "6529 Mobile",
-  "headerShare.menu.desktop": "6529 Desktop Classic",
+  "headerShare.menu.mobile": "Mobile",
+  "headerShare.menu.desktop": "Desktop",
+  "headerShare.menu.desktopClassic": "Desktop Classic",
   "desktop.profiles.restoreError":
     "Your saved profiles could not be opened. You can browse signed out, or restart 6529 Desktop and allow access to the system keychain to restore them.",
   "desktop.profiles.restart": "Restart to restore profiles",
@@ -5615,6 +5628,7 @@ export const EN_US_ROOT_MESSAGES = {
   ...USER_PROFILE_HEADER_MESSAGES,
   ...USER_CIC_TYPE_MESSAGES,
   ...FOLLOWERS_MESSAGES,
+  ...PROFILE_FOLLOW_MESSAGES,
   ...WAVES_SIDEBAR_MESSAGES,
   ...wavesRightPanelMessages,
   ...QUICK_DM_MESSAGES,
