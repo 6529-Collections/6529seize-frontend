@@ -321,6 +321,140 @@ describe("writeChainEntry", () => {
   });
 });
 
+describe("who may enter, read from the chain", () => {
+  const GROUP: Hex = `0x${"9a".repeat(32)}`;
+  const membershipPath = `/v1/groups/${GROUP}/members/${VOTER}`;
+  const byAuthorPath = `/v1/entries/by-author/${VOTER}`;
+  const reads = new Map<string, () => unknown>();
+
+  const enter = (consent = jest.fn().mockResolvedValue(null)) =>
+    writeChainEntry(config, WALLET, {
+      request: request(),
+      competitionId: COMPETITION_UUID,
+      consent,
+    });
+  const entryRow = (overrides: Record<string, unknown>) => ({
+    entryId: `0x${"e0".repeat(32)}`,
+    decisionId: DECISION,
+    author: VOTER,
+    status: "active",
+    ...overrides,
+  });
+
+  beforeEach(() => {
+    reads.clear();
+    gatewayGet.mockImplementation(async (path: string) => {
+      const read = reads.get(path);
+      if (read === undefined) {
+        throw new Error(`unexpected read ${path}`);
+      }
+      return read();
+    });
+  });
+
+  it("refuses an author outside the decision's submit group before any prompt", async () => {
+    gateway.getDecision.mockResolvedValue(
+      decision({ submitGroup: { groupId: GROUP, version: 0 } })
+    );
+    reads.set(membershipPath, () => ({
+      groupId: GROUP,
+      principalId: VOTER,
+      member: false,
+    }));
+    const consent = jest.fn().mockResolvedValue(null);
+    await expect(enter(consent)).rejects.toThrow(
+      "You aren't in the group that can enter this decision."
+    );
+    expect(gatewayGet).toHaveBeenCalledWith(membershipPath, {
+      signal: undefined,
+      query: { at: "head", version: 0 },
+      nullOn404: true,
+    });
+    expect(consent).not.toHaveBeenCalled();
+    expect(uploadDoc).not.toHaveBeenCalled();
+    expect(run).not.toHaveBeenCalled();
+  });
+
+  it("enters for a member, and leaves the check to the chain when the gateway can't say", async () => {
+    gateway.getDecision.mockResolvedValue(
+      decision({ submitGroup: { groupId: GROUP, version: 3 } })
+    );
+    reads.set(membershipPath, () => ({
+      groupId: GROUP,
+      principalId: VOTER,
+      member: true,
+    }));
+    await expect(enter()).resolves.toMatchObject({ txId: TX });
+
+    reads.set(membershipPath, () => null);
+    await expect(enter()).resolves.toMatchObject({ txId: TX });
+    expect(run).toHaveBeenCalledTimes(2);
+  });
+
+  it("reads no group when everyone may enter", async () => {
+    gateway.getDecision.mockResolvedValue(
+      decision({ submitGroup: { groupId: `0x${"00".repeat(32)}`, version: 0 } })
+    );
+    await expect(enter()).resolves.toMatchObject({ txId: TX });
+    expect(gatewayGet).not.toHaveBeenCalled();
+  });
+
+  it("refuses a membership answer for someone else", async () => {
+    gateway.getDecision.mockResolvedValue(
+      decision({ submitGroup: { groupId: GROUP, version: 0 } })
+    );
+    reads.set(membershipPath, () => ({
+      groupId: GROUP,
+      principalId: OTHER,
+      member: true,
+    }));
+    await expect(enter()).rejects.toThrow("answered for a different object");
+    expect(run).not.toHaveBeenCalled();
+  });
+
+  it("refuses an author who has as many entries in the running as the decision allows", async () => {
+    gateway.getDecision.mockResolvedValue(
+      decision({
+        config: {
+          participationStart: "0",
+          participationEnd: "0",
+          maxEntriesPerAuthor: 2,
+        },
+      })
+    );
+    reads.set(byAuthorPath, () => [
+      entryRow({}),
+      entryRow({ decisionId: OTHER }),
+      entryRow({ status: "withdrawn" }),
+      entryRow({}),
+    ]);
+    const consent = jest.fn().mockResolvedValue(null);
+    await expect(enter(consent)).rejects.toThrow(
+      "You already have 2 entries in this decision, the most it allows."
+    );
+    expect(consent).not.toHaveBeenCalled();
+    expect(run).not.toHaveBeenCalled();
+  });
+
+  it("enters below the limit, counting only this decision's active entries", async () => {
+    gateway.getDecision.mockResolvedValue(
+      decision({
+        config: {
+          participationStart: "0",
+          participationEnd: "0",
+          maxEntriesPerAuthor: "2",
+        },
+      })
+    );
+    reads.set(byAuthorPath, () => [
+      entryRow({}),
+      entryRow({ decisionId: OTHER }),
+      entryRow({ status: "winner" }),
+    ]);
+    await expect(enter()).resolves.toMatchObject({ txId: TX });
+  });
+});
+
 describe("writeChainWithdrawal", () => {
   beforeEach(() => {
     gateway.getEntry.mockResolvedValue({

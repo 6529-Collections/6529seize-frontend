@@ -49,6 +49,7 @@ import {
   invalidateChainEntryQueries,
   useChainEntrySubmit,
 } from "@/components/chain-waves/useChainEntryWriters";
+import { isChainMadeDecision } from "@/lib/chain-waves/entryGateway";
 import {
   createCompetitionEntry,
   invalidateCompetition,
@@ -115,7 +116,14 @@ export default function CompetitionEntryForm({
   // they open there at the switch-on.
   const entriesPaused = useWavesWritesPaused("entries");
   const submitChainEntry = useChainEntrySubmit(competition);
-  const canSubmitEntry = competition.permissions.submit && !entriesPaused;
+  // 6529.io's API shows a decision made on the 6529 Network closed to
+  // submissions, since its own runtime doesn't run it. Once entries go to
+  // the network, its writer reads the chain's decision and refuses an
+  // entry the viewer can't make.
+  const canEnter =
+    competition.permissions.submit ||
+    (submitChainEntry !== null && isChainMadeDecision(competition));
+  const canSubmitEntry = canEnter && !entriesPaused;
   const router = useRouter();
   const client = useQueryClient();
   const sign = useCompetitionSignature();
@@ -489,9 +497,7 @@ export default function CompetitionEntryForm({
         <output className="tw-block tw-text-sm tw-text-iron-400">
           {t(
             locale,
-            competition.permissions.submit
-              ? "wavesMove.paused"
-              : "competitions.submitClosed"
+            canEnter ? "wavesMove.paused" : "competitions.submitClosed"
           )}
         </output>
       )}

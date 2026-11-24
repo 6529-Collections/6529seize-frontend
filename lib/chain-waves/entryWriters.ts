@@ -6,6 +6,7 @@ import { ChainOperationError } from "@/lib/chain-identity/operation";
 import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
 import { freshDocNonce, storeDoc } from "./docs";
 import {
+  assertCanSubmit,
   assertDecisionOpen,
   getCheckedDecision,
   isTakingEntries,
@@ -198,6 +199,9 @@ export async function writeChainEntry(
       "This decision isn't taking entries right now."
     );
   }
+  // Who may enter is the chain's to say, also for a decision 6529.io's API
+  // shows closed to submissions because it was made on the chain.
+  await assertCanSubmit(decision, author.principalId, signal);
   const fields = entryFieldsOf(input.request);
   const prompt: ChainWalletPrompt = async (ask) => {
     input.onStage?.("wallet");

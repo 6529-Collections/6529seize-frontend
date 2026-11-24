@@ -1,7 +1,7 @@
 import type { Hex } from "viem";
 import { chainGatewayGet } from "@/lib/chain-identity/gateway";
 import { ChainOperationError } from "@/lib/chain-identity/operation";
-import { wavesGateway, type ChainDecision } from "./gateway";
+import { wavesGateway, type ChainDecision, type ChainEntry } from "./gateway";
 import { chainIdOf, isChainId, LegacyObjectKind, resolveWave } from "./ids";
 
 /**
@@ -64,7 +64,8 @@ const NOT_ON_CHAIN = "This decision isn't on the 6529 Network.";
 const OTHER_OBJECT =
   "The 6529 Network gateway answered for a different object. Nothing was signed.";
 
-const asMs = (value: unknown): number => {
+/** A config value (a decimal string or a number) as a number; 0 if neither. */
+const asNumber = (value: unknown): number => {
   const parsed =
     typeof value === "string" || typeof value === "number"
       ? Number(value)
@@ -77,8 +78,8 @@ export function isTakingEntries(
   decision: ChainDecision,
   nowMs: number
 ): boolean {
-  const start = asMs(decision.config["participationStart"]);
-  const end = asMs(decision.config["participationEnd"]);
+  const start = asNumber(decision.config["participationStart"]);
+  const end = asNumber(decision.config["participationEnd"]);
   return start <= nowMs && (end === 0 || nowMs <= end);
 }
 
@@ -135,6 +136,158 @@ export function apiChainId(record: unknown): Hex | null {
   return typeof value === "string" && isChainId(value)
     ? (lower(value) as Hex)
     : null;
+}
+
+/**
+ * Whether 6529.io's API names the competition a decision made on the 6529
+ * Network: it has a `chain_id` and `legacy_origin` false. 6529.io's runtime
+ * doesn't run such a decision, so the API gives it `permissions.submit` and
+ * `permissions.vote` false; once entries go to the 6529 Network the writer
+ * decides from the chain's decision instead (assertCanSubmit). An imported
+ * decision (`legacy_origin` true, or no such field) keeps 6529.io's
+ * permissions.
+ */
+export function isChainMadeDecision(record: unknown): boolean {
+  return (
+    apiChainId(record) !== null &&
+    (record as { readonly legacy_origin?: unknown }).legacy_origin === false
+  );
+}
+
+const ZERO_ID = /^0x0{64}$/i;
+/** Pages of an author's entries the entry limit's count reads, 500 each. */
+const AUTHOR_ENTRY_PAGES = 10;
+const AUTHOR_ENTRY_PAGE = 500;
+
+/**
+ * The decision's submit group, or null when everyone may enter. The
+ * gateway's decision names it (`submitGroup`: a GroupRef, version 0
+ * following the group's current version); ChainDecision doesn't type it.
+ */
+function submitGroupOf(
+  decision: ChainDecision
+): { readonly groupId: Hex; readonly version: number } | null {
+  const group = (decision as unknown as { readonly submitGroup?: unknown })
+    .submitGroup;
+  if (typeof group !== "object" || group === null) {
+    return null;
+  }
+  const { groupId, version } = group as {
+    readonly groupId?: unknown;
+    readonly version?: unknown;
+  };
+  if (
+    typeof groupId !== "string" ||
+    !isChainId(groupId) ||
+    ZERO_ID.test(groupId)
+  ) {
+    return null;
+  }
+  return {
+    groupId: lower(groupId) as Hex,
+    version: typeof version === "number" ? version : 0,
+  };
+}
+
+/** Whether the author is in the group, or null when the gateway can't say. */
+async function isGroupMember(
+  group: { readonly groupId: Hex; readonly version: number },
+  author: Hex,
+  signal?: AbortSignal
+): Promise<boolean | null> {
+  const answer = await chainGatewayGet<{
+    readonly groupId?: string;
+    readonly principalId?: string;
+    readonly member?: unknown;
+  } | null>(`/v1/groups/${group.groupId}/members/${lower(author)}`, {
+    signal,
+    query: { ...HEAD, version: group.version },
+    nullOn404: true,
+  });
+  if (answer === null || typeof answer.member !== "boolean") {
+    return null;
+  }
+  if (
+    lower(answer.groupId ?? "") !== group.groupId ||
+    lower(answer.principalId ?? "") !== lower(author)
+  ) {
+    throw new ChainOperationError("draft_mismatch", OTHER_OBJECT);
+  }
+  return answer.member;
+}
+
+/**
+ * How many of the author's entries in the decision are in the running,
+ * counted up to `atLeast`: the reads stop once that many are found.
+ */
+async function activeEntriesOf(
+  author: Hex,
+  decisionId: Hex,
+  atLeast: number,
+  signal?: AbortSignal
+): Promise<number> {
+  let count = 0;
+  let after: string | undefined;
+  for (let page = 0; page < AUTHOR_ENTRY_PAGES; page += 1) {
+    const rows = await chainGatewayGet<readonly ChainEntry[]>(
+      `/v1/entries/by-author/${lower(author)}`,
+      { signal, query: { ...HEAD, limit: AUTHOR_ENTRY_PAGE, after } }
+    );
+    count += rows.filter(
+      (entry) =>
+        entry.status === "active" &&
+        lower(entry.decisionId) === lower(decisionId) &&
+        lower(entry.author) === lower(author)
+    ).length;
+    const last = rows.at(-1)?.entryId;
+    if (
+      count >= atLeast ||
+      rows.length < AUTHOR_ENTRY_PAGE ||
+      last === undefined ||
+      lower(last) === after
+    ) {
+      return count;
+    }
+    after = lower(last);
+  }
+  return count;
+}
+
+/**
+ * Throws a short message when the chain would refuse the author's entry in
+ * this decision (P61 1.16 4.6 checks 6 and 7): the author isn't in its
+ * submit group, or already has as many entries in the running as it allows.
+ * The chain refuses those only once the entry is in a block, and takes the
+ * fee, so they are read before anything is signed. A read the gateway
+ * can't answer (404) leaves the check to the chain.
+ */
+export async function assertCanSubmit(
+  decision: ChainDecision,
+  author: Hex,
+  signal?: AbortSignal
+): Promise<void> {
+  const group = submitGroupOf(decision);
+  if (
+    group !== null &&
+    (await isGroupMember(group, author, signal)) === false
+  ) {
+    throw new ChainOperationError(
+      "rejected",
+      "You aren't in the group that can enter this decision."
+    );
+  }
+  const limit = asNumber(decision.config["maxEntriesPerAuthor"]);
+  if (
+    limit > 0 &&
+    (await activeEntriesOf(author, decision.decisionId, limit, signal)) >= limit
+  ) {
+    throw new ChainOperationError(
+      "rejected",
+      limit === 1
+        ? "You already have an entry in this decision, the most it allows."
+        : `You already have ${limit} entries in this decision, the most it allows.`
+    );
+  }
 }
 
 /** Throws unless the decision is in the wave 6529.io's `waveId` names. */
