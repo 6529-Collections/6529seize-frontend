@@ -50,6 +50,7 @@ import { getGrantRepCategoriesToDisplay } from "./grantRepCategoryOptions";
 import GrantRepCategorySuggestions from "./GrantRepCategorySuggestions";
 import GrantRepSubmissionGuidance from "./GrantRepSubmissionGuidance";
 import GrantRepStats from "./GrantRepStats";
+import useRepCategoryNavigation from "./useRepCategoryNavigation";
 
 import { isRatingValue } from "../ratingsManagement";
 
@@ -142,8 +143,6 @@ function GrantRepForm({
   const categoryErrorId = useId();
   const typedCategoryErrorId = useId();
   const submissionGuidanceId = useId();
-  const searchListId = useId();
-  const optionIdPrefix = `${searchListId}-option-`;
   const searchInputRef = useRef<HTMLInputElement>(null);
   const selectionRequest = useRef(0);
   const amountFocusSource = useRef<Element | null>(null);
@@ -308,9 +307,6 @@ function GrantRepForm({
   // --- End derived rep state ---
 
   const [isOpen, setIsOpen] = useState(false);
-  const [highlightedCategory, setHighlightedCategory] = useState<string | null>(
-    null
-  );
 
   const listRef = useRef<HTMLFormElement>(null);
   useClickAway(listRef, () => setIsOpen(false));
@@ -485,51 +481,26 @@ function GrantRepForm({
     !selectedCategory &&
     (repSearchState !== RepSearchState.HAVE_RESULTS ||
       categoriesToDisplay.length > 0);
-  const activeSuggestionIndex = Math.max(
-    0,
-    categoriesToDisplay.indexOf(highlightedCategory ?? "")
-  );
-  const hasSelectableSuggestions =
-    showSearchDropdown &&
-    repSearchState === RepSearchState.HAVE_RESULTS &&
-    categoriesToDisplay.length > 0;
-
-  const handleSearchKeyDown = (
-    event: React.KeyboardEvent<HTMLInputElement>
-  ) => {
-    if (
-      event.nativeEvent.isComposing ||
-      event.metaKey ||
-      event.ctrlKey ||
-      event.altKey ||
-      !hasSelectableSuggestions
-    ) {
-      return;
-    }
-    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-      event.preventDefault();
-      const direction = event.key === "ArrowDown" ? 1 : -1;
-      const index =
-        (activeSuggestionIndex + direction + categoriesToDisplay.length) %
-        categoriesToDisplay.length;
-      setHighlightedCategory(categoriesToDisplay[index] ?? null);
-      document.getElementById(`${optionIdPrefix}${index}`)?.scrollIntoView({
-        block: "nearest",
-        inline: "nearest",
-      });
-    } else if (event.key === "Enter") {
-      event.preventDefault();
-      const category = categoriesToDisplay[activeSuggestionIndex];
-      if (category) void onRepSelect(category);
-    }
-  };
+  const {
+    searchListId,
+    optionIdPrefix,
+    activeSuggestionIndex,
+    activeSuggestionId,
+    handleSearchKeyDown,
+    resetHighlightedCategory,
+  } = useRepCategoryNavigation({
+    categories: categoriesToDisplay,
+    enabled:
+      showSearchDropdown && repSearchState === RepSearchState.HAVE_RESULTS,
+    onSelect: onRepSelect,
+  });
 
   const handleRepSearchChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const newValue = event.target.value;
     setIsOpen(true);
-    setHighlightedCategory(null);
+    resetHighlightedCategory();
     selectionRequest.current++;
     amountFocusSource.current = null;
     setCheckingAvailability(false);
@@ -598,11 +569,7 @@ function GrantRepForm({
                 aria-autocomplete="list"
                 aria-expanded={showSearchDropdown}
                 aria-controls={showSearchDropdown ? searchListId : undefined}
-                aria-activedescendant={
-                  hasSelectableSuggestions
-                    ? `${optionIdPrefix}${activeSuggestionIndex}`
-                    : undefined
-                }
+                aria-activedescendant={activeSuggestionId}
                 data-dialog-expand
                 required
                 autoComplete="off"
