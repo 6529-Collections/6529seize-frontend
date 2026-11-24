@@ -6836,12 +6836,22 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     ).toBeVisible();
     await expect(save).toHaveCount(0);
     await expect(helper).toBeVisible();
+    const restingRowTop = (await row.boundingBox())!.y;
     await panel
       .getByRole("button", { name: "Select all", exact: true })
       .click();
     await expect(checkbox).toBeChecked();
+    const selectionDone = panel.getByRole("button", {
+      name: "Done",
+      exact: true,
+    });
+    await expect(selectionDone).toHaveCSS("height", "32px");
+    await expect(selectionDone).toHaveCSS("padding-left", "14px");
+    await expect(selectionDone).toHaveCSS("padding-right", "14px");
+    expect((await row.boundingBox())!.y).toBe(restingRowTop);
     await panel.getByRole("button", { name: "Done", exact: true }).click();
     await expect(checkbox).not.toBeChecked();
+    expect((await row.boundingBox())!.y).toBe(restingRowTop);
     await expect(
       panel.getByRole("button", { name: "Done", exact: true })
     ).toHaveCount(0);
@@ -7206,6 +7216,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         });
         await expect(balance).toBeVisible();
         await expect(select).toHaveCSS("color", "rgb(206, 207, 212)");
+        await expect(select).toHaveCSS("height", "44px");
+        await expect(select).toHaveCSS("padding-left", "14px");
+        await expect(select).toHaveCSS("padding-right", "14px");
         expect((await balance.boundingBox())!.y).toBeLessThan(
           (await select.boundingBox())!.y
         );
@@ -7384,6 +7397,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           await select.focus();
           await select.press("Enter");
         }
+        await expect(
+          panel.getByRole("button", { name: "Done", exact: true })
+        ).toHaveCSS("height", "44px");
         if (testInfo.project.use.hasTouch) {
           await expect(
             panel.getByRole("button", { name: "Done", exact: true })

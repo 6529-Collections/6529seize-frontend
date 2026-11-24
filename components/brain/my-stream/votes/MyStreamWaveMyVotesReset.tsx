@@ -61,7 +61,9 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
   const locale = useBrowserLocale();
   const { isApp } = useDeviceInfo();
   const isMobileViewport = useIsMobileLayoutViewport();
-  const buttonClassName = `${COMPACT_ACTION_BUTTON_CLASS} ${isApp || isMobileViewport ? "tw-min-h-11" : "tw-h-8"}`;
+  const buttonHeightClassName =
+    isApp || isMobileViewport ? "tw-min-h-11" : "tw-h-8";
+  const buttonClassName = `${COMPACT_ACTION_BUTTON_CLASS} ${buttonHeightClassName}`;
   const { setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
   const queryClient = useQueryClient();
@@ -245,7 +247,7 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
                   onClick={onToggleSelection}
                   disabled={isResetting}
                   aria-pressed={mobile ? isSelecting : undefined}
-                  className="tw-ml-auto tw-min-h-11 tw-min-w-11 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-1 tw-text-sm tw-font-medium tw-text-iron-300 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 enabled:tw-cursor-pointer disabled:tw-opacity-50 enabled:desktop-hover:hover:tw-bg-iron-900/50 enabled:desktop-hover:hover:tw-text-iron-100 motion-reduce:tw-transition-none"
+                  className={`${buttonHeightClassName} tw-ml-auto tw-inline-flex tw-min-w-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3.5 tw-py-0 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 enabled:tw-cursor-pointer disabled:tw-opacity-50 enabled:desktop-hover:hover:tw-bg-iron-900/50 enabled:desktop-hover:hover:tw-text-iron-100 motion-reduce:tw-transition-none`}
                 >
                   {t(
                     locale,
