@@ -11521,8 +11521,8 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       expect(chatBounds!.width).toBeLessThan(64);
       await expect(more).toBeInViewport({ ratio: 1 });
       const ink = await page
-        .getByRole("button")
-        .locator(":scope[data-wave-phone-more]")
+        .getByRole("main")
+        .locator("[data-wave-phone-more]")
         .locator("[data-wave-tab-label]")
         .evaluate((label) => {
           const text = document.createRange();
