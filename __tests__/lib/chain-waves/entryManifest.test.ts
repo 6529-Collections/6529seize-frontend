@@ -1,5 +1,5 @@
 import { sha256 } from "js-sha256";
-import { bytesToString, type Hex } from "viem";
+import { bytesToString, getAddress, type Hex } from "viem";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import {
@@ -25,6 +25,8 @@ import { DECISION, VOTER, WALLET, WAVE } from "./wavesDraftFixture";
 const NONCE_WORD = `0x${"5a".repeat(16)}${"00".repeat(16)}` as Hex;
 const WAVE_UUID = "7d0a2c4e-9a1b-4c3d-8e5f-0a1b2c3d4e5f";
 const TERMS = "I made this work and may submit it.";
+// A made-up wallet in its EIP-55 form, mixed case as wallets sign with it.
+const SIGNER = getAddress(`0x${"ab12".repeat(10)}`);
 
 const memesRequest = (): ApiCreateDropRequest => ({
   collaborator_ids: ["3b1f6a2c-0000-4000-8000-000000000001"],
@@ -131,7 +133,7 @@ describe("the entry manifest", () => {
       action: "ENTRY_CREATE",
       audience: "api.example",
       actorProfileId: "profile-1",
-      actorWallet: WALLET,
+      actorWallet: SIGNER,
       waveId: WAVE_UUID,
       competitionId: "9e0a2c4e-9a1b-4c3d-8e5f-0a1b2c3d4e5f",
       entryId: null,
@@ -152,7 +154,9 @@ describe("the entry manifest", () => {
       terms: TERMS,
       terms_sha256: `0x${sha256(TERMS)}`,
       config_version: 4,
-      signer_address: WALLET,
+      // The envelope's own wallet, as the signed message has it.
+      signer_address: (JSON.parse(message) as { actor_wallet: string })
+        .actor_wallet,
       is_safe_signature: false,
       client_drop_id: null,
       signature_message: message,
@@ -169,8 +173,10 @@ describe("the entry manifest", () => {
   });
 
   it("carries a drop signature whose hash the manifest rebuilds", () => {
+    expect(SIGNER).not.toBe(SIGNER.toLowerCase());
     const unsigned: ApiCreateDropRequest = {
       ...memesRequest(),
+      signer_address: SIGNER,
       client_drop_id: "c0ffee00-0000-4000-8000-000000000000",
     };
     const hash = new DropHasher().hash({
@@ -185,7 +191,7 @@ describe("the entry manifest", () => {
     const consent = dropConsent(signed, TERMS);
     expect(consent).toMatchObject({
       scheme: "6529-drop",
-      signer_address: WALLET,
+      signer_address: SIGNER,
       client_drop_id: "c0ffee00-0000-4000-8000-000000000000",
       signature_message: `signed ${hash}`,
     });

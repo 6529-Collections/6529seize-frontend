@@ -59,8 +59,11 @@ import { DocClass, docBytes, docCid, docCommitment } from "./docs";
  *     `terms_of_service` = `terms` (when set); signed as the hash, or as
  *     `signature_message` when that is set.
  *   `terms` is the terms text the author accepted, `terms_sha256` 0x and
- *   sha256 of it (null without terms). `consentPayload` below rebuilds what
- *   each scheme's signature covers from the manifest.
+ *   sha256 of it (null without terms). `signer_address` is the wallet as
+ *   the signed request or envelope wrote it, case and all: DropHasher hashes
+ *   it as written, so a lowercased one could not rebuild the drop signature.
+ *   Compare it with other addresses case-insensitively. `consentPayload`
+ *   below rebuilds what each scheme's signature covers from the manifest.
  */
 
 export const ENTRY_MANIFEST_VERSION = 1;
@@ -72,6 +75,7 @@ export interface EntryConsent {
   readonly terms: string | null;
   readonly terms_sha256: string | null;
   readonly config_version: number | null;
+  /** As signed, case and all (compare case-insensitively). */
   readonly signer_address: string;
   /** Null when the signed request had no `is_safe_signature`. */
   readonly is_safe_signature: boolean | null;
@@ -167,7 +171,7 @@ export function competitionConsent(input: {
     terms: input.terms,
     terms_sha256: termsHash(input.terms),
     config_version: input.configVersion,
-    signer_address: envelope.actor_wallet.toLowerCase(),
+    signer_address: envelope.actor_wallet,
     is_safe_signature: input.isSafeSignature,
     client_drop_id: null,
     signature_message: input.signature.message,
@@ -191,7 +195,7 @@ export function dropConsent(
     terms,
     terms_sha256: termsHash(terms),
     config_version: null,
-    signer_address: request.signer_address.toLowerCase(),
+    signer_address: request.signer_address,
     is_safe_signature: request.is_safe_signature ?? null,
     client_drop_id: request.client_drop_id ?? null,
     signature_message: request.signature_message ?? null,
