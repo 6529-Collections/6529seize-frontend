@@ -164,8 +164,8 @@ export default function PrivilegedDropCreator({
     activeDrop
   );
   // Entries move to the 6529 Network: from the freeze the composer says so
-  // instead of opening for an entry.
-  const entriesPausedForMove = useWavesWritesPaused();
+  // instead of opening for an entry, until entries open there.
+  const entriesPausedForMove = useWavesWritesPaused("entries");
   const competition = presentationCompetition(wave);
   const { submissionRestriction, chatRestriction } = useDropPrivileges({
     isLoggedIn: hasProfile || isProfileLoadingForWallet,
