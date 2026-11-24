@@ -500,6 +500,7 @@ export const E2EE_MESSAGES = {
   "e2ee.composer.placeholder": "Write an encrypted message",
   "e2ee.composer.send": "Send",
   "e2ee.composer.attach": "Attach files",
+  "e2ee.composer.attachShort": "Attach",
   "e2ee.composer.gifPrivacy":
     "GIF searches and previews connect to GIPHY and are not end-to-end encrypted. The GIF you send is encrypted as an attachment.",
   "e2ee.composer.gifDownloading": "Downloading GIF…",

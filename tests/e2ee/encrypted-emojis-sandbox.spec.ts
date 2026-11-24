@@ -16,6 +16,7 @@ import {
   expectMessage,
   gotoPath,
   messageRow,
+  openComposerActions,
   openConversationFromList,
   openMessageActions,
   startChat,
@@ -95,6 +96,36 @@ test.describe("Encrypted emoji picker @medium @local-only @e2ee", () => {
     const attachmentTrigger = alice.page.getByRole("button", {
       name: "Attach files",
     });
+    const toggle = alice.page.getByRole("button", {
+      name: /^(Show|Hide) composer actions$/u,
+    });
+    if (testInfo.project.use.isMobile) {
+      await expect(toggle).toHaveAttribute("aria-expanded", "false");
+      await expect(attachmentTrigger).toBeHidden();
+      const collapsed = await input.boundingBox();
+      await openComposerActions(alice.page);
+      await expect(toggle).toHaveAttribute("aria-expanded", "true");
+      const tray = alice.page.getByRole("group", { name: "Composer actions" });
+      await expect(tray.getByRole("button")).toHaveText([
+        "Attach",
+        "Poll",
+        "GIF",
+      ]);
+      const open = await input.boundingBox();
+      const trayBounds = await tray.boundingBox();
+      expect(open?.x).toBe(collapsed?.x);
+      expect(open?.width).toBe(collapsed?.width);
+      expect(trayBounds!.y).toBeGreaterThanOrEqual(open!.y + open!.height);
+      await testInfo.attach("encrypted composer action tray", {
+        body: await tray.screenshot(),
+        contentType: "image/png",
+      });
+      await toggle.click();
+      await expect(tray).toBeHidden();
+      await openComposerActions(alice.page);
+    } else {
+      await expect(toggle).toBeHidden();
+    }
     const attachmentShape = await attachmentTrigger.evaluate((element) => {
       const bounds = element.getBoundingClientRect();
       const iconBounds = element.querySelector("svg")?.getBoundingClientRect();
@@ -105,13 +136,11 @@ test.describe("Encrypted emoji picker @medium @local-only @e2ee", () => {
         iconHeight: iconBounds?.height,
       };
     });
-    expect(attachmentShape).toEqual({
-      width: 36,
-      height: 36,
-      iconWidth: 18,
-      iconHeight: 18,
-    });
+    expect(attachmentShape.iconWidth).toBe(18);
+    expect(attachmentShape.iconHeight).toBe(18);
     if (!testInfo.project.use.isMobile) {
+      expect(attachmentShape.width).toBe(36);
+      expect(attachmentShape.height).toBe(36);
       await attachmentTrigger.hover();
       await expect(alice.page.getByRole("tooltip")).toHaveText("Attach files");
       await emojiTrigger.hover();
@@ -134,6 +163,9 @@ test.describe("Encrypted emoji picker @medium @local-only @e2ee", () => {
       "The empty composer stays on one line"
     ).toBeLessThan(60);
     await input.fill("Secret hello ");
+    if (testInfo.project.use.isMobile) {
+      await expect(attachmentTrigger).toBeHidden();
+    }
     await emojiTrigger.focus();
     await emojiTrigger.press("Enter");
     await expect(

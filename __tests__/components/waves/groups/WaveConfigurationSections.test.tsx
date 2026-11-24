@@ -54,17 +54,8 @@ jest.mock("@/components/waves/groups/WaveConfigurationPersonalDisplay", () => ({
 
 jest.mock("@/components/waves/specs/groups/group/WaveGroup", () => ({
   __esModule: true,
-  default: ({
-    type,
-    showMembersSummary,
-  }: {
-    readonly type: WaveGroupType;
-    readonly showMembersSummary?: boolean;
-  }) => (
-    <div
-      data-testid={`group-${type}`}
-      data-members-summary={showMembersSummary ? "true" : "false"}
-    />
+  default: ({ type }: { readonly type: WaveGroupType }) => (
+    <div data-testid={`group-${type}`} />
   ),
 }));
 
@@ -104,11 +95,6 @@ describe("WaveConfigurationSections", () => {
     expect(
       screen.getByTestId(`group-${WaveGroupType.ADMIN}`)
     ).toBeInTheDocument();
-    expect(
-      screen
-        .getAllByTestId(/^group-/)
-        .every((group) => group.getAttribute("data-members-summary") === "true")
-    ).toBe(true);
     expect(
       screen.queryByTestId(`group-${WaveGroupType.DROP}`)
     ).not.toBeInTheDocument();

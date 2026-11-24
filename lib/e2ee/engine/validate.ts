@@ -48,11 +48,17 @@ export function isValidMetadata(value: unknown): value is GroupMetadata {
   const nameOk =
     meta.name === null ||
     (typeof meta.name === "string" && [...meta.name].length <= MAX_GROUP_NAME);
+  const createdOk =
+    meta.created === undefined ||
+    (typeof meta.created === "number" &&
+      Number.isSafeInteger(meta.created) &&
+      meta.created >= 0);
   return (
     meta.v === 1 &&
     typeof meta.g === "string" &&
-    (meta.kind === "dm" || meta.kind === "group") &&
+    (meta.kind === "dm" || meta.kind === "group" || meta.kind === "self") &&
     nameOk &&
+    createdOk &&
     isProfileList(meta.admins) &&
     typeof meta.created_by === "string" &&
     meta.history === "from_join"
@@ -106,10 +112,25 @@ function principals(members: readonly MemberRef[]): Set<string> {
   return out;
 }
 
+/**
+ * A self group holds only its creator's devices (D175, P60 §2): a commit by
+ * anyone else, or one adding anyone else's device, is invalid.
+ */
+function checkSelfGroup(input: CommitValidationInput): CommitValidation | null {
+  const owner = input.metadataBefore.created_by;
+  const outsider =
+    input.committer.profileId !== owner ||
+    input.added.some((leaf) => !leaf.ok || leaf.profileId !== owner);
+  return outsider ? invalid("self-outsider") : null;
+}
+
 function checkAdds(
   input: CommitValidationInput,
   committerIsAdmin: boolean
 ): CommitValidation | null {
+  if (input.metadataBefore.kind === "self") {
+    return checkSelfGroup(input);
+  }
   const before = principals(input.membersBefore);
   const committer = input.committer.profileId;
   const newPrincipals = new Set<string>();

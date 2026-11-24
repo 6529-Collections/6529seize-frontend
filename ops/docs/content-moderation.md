@@ -299,13 +299,13 @@ The summary shows items needing review, quarantined posts, rejected checks
 today, and evaluator failures today. These totals cover all items independently
 of filters; today uses UTC.
 
-**Checks** covers REP categories, About text, group names, and posts. Filter by
+**Checks** covers REP categories, About text, and posts. Filter by
 content type, outcome, policy, trigger, review status, UTC date range, or an
 exact profile or subject ID. Filtered views and selected checks have direct
 links. For REP categories, use the opaque **Subject ID** shown in the check's
 **Context** section; category text is never used as a URL filter.
-**Public-facing text** is the stricter policy for REP, About, and group
-names; **Wave safety** is the permissive policy for posts and reports.
+**Public-facing text** is the stricter policy for REP and About text.
+**Wave safety** is the permissive policy for posts and reports.
 
 Select **Review check** to open saved evidence, scope and current state,
 evaluation history, decision history, and review actions. Desktop shows the
@@ -319,7 +319,7 @@ The action panel offers only actions valid for that item and requires a reason:
 
 - A REP category can be allowed or blocked for future exact category use,
   re-evaluated, or have its override revoked. Existing ratings do not change.
-- Rejected About text, group names, and posts can receive **Approve exact
+- Rejected About text and posts can receive **Approve exact
   resubmission**. This creates a single-use permit valid for seven days for
   the same author, content, and context. It publishes nothing from WatchTower;
   the author must submit again. Posting permissions and other safety checks

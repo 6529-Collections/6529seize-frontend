@@ -203,18 +203,21 @@ show the profile-creation welcome.
 ### Grant Rep Dialog
 
 - On desktop, Grant Rep and Rate NIC keep their top edge at about 14% of the
-  viewport height. Grant Rep keeps a fixed content height as categories and
-  amounts change; short viewports scroll inside. Rate NIC grows downward. The
+  viewport height. Grant Rep fits its visible content, with a short resize
+  transition when assigned categories, rating details, guidance or errors change.
+  Reduced-motion settings remove that transition. Short viewports scroll inside
+  while the actions remain reachable. Rate NIC grows downward. The
   rater and receiver lists for REP keep that positioning. NIC rater and receiver lists start about 10%
   down and grow to at most 80% of the viewport height. Long content scrolls
   inside. Mobile keeps the bottom sheet.
-- The fixed layout starts with always-visible summary rows above
+- The compact layout starts with summary rows above
   category search: `Your available REP:` and `Your REP assigned to [profile]:`.
   Both use grouped numbers and remain visible when your assigned total is zero.
   They appear as plain aligned info rows, without a separate filled background.
-  Search, your assigned categories, the amount label and field, a small
-  `Current Rep` / `Adjustment` row, the primary action and `Cancel` stay in place.
-  The adjustment row reserves space until the category and its rating data are ready.
+  Search, your assigned categories, the amount label and field, the primary
+  action and `Cancel` remain available. `Current Rep` / `Adjustment` appears only
+  when the category and its rating data are ready. The actions follow the visible
+  content with the same compact section spacing, without a reserved blank area.
   The amount label includes the same total-rating hint as Rate NIC.
   `You assigned` uses an 11px uppercase label. Its category
   pills use the profile tag style: 38px height, 8px corners, subtle fill and
@@ -228,8 +231,9 @@ show the profile-creation welcome.
   empty search or selecting `Change category` opens the
   `Type at least 3 characters.` prompt without searching the network.
 - Pause after typing a category name. Grant Rep checks that exact name. Matching
-  categories appear as optional suggestions above the amount section, which
-  stays visible while you type. Category names are case-sensitive, so `artist`
+  categories appear in a floating suggestion panel below the search field,
+  without moving the amount field or actions. Moving focus to the amount or
+  actions closes the panel. Category names are case-sensitive, so `artist`
   and `Artist` can hold separate ratings.
 - Similar categories remain independent and selectable. The exact
   `MemesNominee` pill is marked as counting toward the 50,000 REP submission

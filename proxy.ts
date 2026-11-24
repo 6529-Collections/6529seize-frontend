@@ -294,8 +294,8 @@ function resolveLegacyStreamQueryRedirect(req: NextRequest): string {
   return `${destination.pathname}${destination.search}`;
 }
 
-// The old app home opened a wave with `/?wave=<id>`. `/` is prerendered
-// without its query, so the wave route serves these links, on every device.
+// The old app home opened a wave with `/?wave=<id>`. The wave route serves
+// these legacy links on every device.
 function resolveHomeWaveRedirect(
   req: NextRequest,
   normalizedPathname: string

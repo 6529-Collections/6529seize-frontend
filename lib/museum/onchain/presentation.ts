@@ -1,138 +1,77 @@
 import type { Hex } from "viem";
-import type { OnchainWorkImage } from "./media";
+import {
+  asRecord,
+  bodyOf,
+  bodyText,
+  cleanLabel,
+  familyOf,
+  identifiersOf,
+  MUSEUM_ID_PATTERN,
+  onchainMuseumRecordHref,
+  push,
+  refText,
+  slug,
+} from "./fields";
 import type { OnchainMuseumRecord, OnchainMuseumSnapshot } from "./museum";
-
-export const ONCHAIN_MUSEUM_BASE_PATH = "/museum/network-onchain";
-
-export function onchainMuseumRecordHref(subjectId: Hex): string {
-  return `${ONCHAIN_MUSEUM_BASE_PATH}/records/${subjectId.toLowerCase()}`;
-}
-
-export const ONCHAIN_MUSEUM_TEXTS_HREF = `${ONCHAIN_MUSEUM_BASE_PATH}/texts`;
-
-const SUBJECT_ID_PATTERN = /^0x[0-9a-f]{64}$/u;
-/** A Museum identifier used as a label, such as 6529NM.2026.003.COND.01. */
-const MUSEUM_ID_PATTERN = /^6529NM[-.][A-Z0-9.-]+$/u;
-
-export function parseSubjectIdParam(value: string): Hex | null {
-  const lower = value.toLowerCase();
-  return SUBJECT_ID_PATTERN.test(lower) ? (lower as Hex) : null;
-}
-
-/** Entity types in the order the index presents them. */
-const ENTITY_TYPE_ORDER = [
-  "WORK",
-  "ARTIST",
-  "PROJECT_OR_SERIES",
-  "CURATED_ACQUISITION",
-  "ACQUISITION_PROGRAM",
-  "ACCESSION",
-  "COLLECTION",
-  "INSTITUTION",
-  "ORGANIZATION",
-  "RESEARCH_PUBLICATION",
-  "AGENT",
-  "MEDIA_REFERENCE",
-];
-
-/** Which entity types a text folder's ID may name, best first. */
-const CONTEXT_ENTITY_ORDER = [
-  "ACCESSION",
-  "ACQUISITION_PROGRAM",
-  "CURATED_ACQUISITION",
-];
+import { referencedSubjectId, registryCaip10 } from "./profile";
+import {
+  buildTextGroups,
+  type OnchainTextGroup,
+  type OnchainTextGroupKind,
+} from "./texts";
 
 /**
- * Words for registry values. The route supplies them from its messages so
+ * Index groups for PRV_ENTITY records: the profile kind, with agents that
+ * created a work shown as artists, collections no one holds as projects and
+ * sets that carry an accession number as accessions.
+ */
+const ENTITY_GROUP_ORDER = [
+  "work",
+  "artist",
+  "project",
+  "acquisition",
+  "program",
+  "accession",
+  "lot",
+  "object",
+  "collection",
+  "group",
+  "publication",
+  "agent",
+  "digital_object",
+];
+
+/** Families shown as object records on the index. */
+const RECORD_FAMILIES = new Set([
+  "PRV_DECISION",
+  "PRV_RIGHTS",
+  "PRV_OBSERVATION",
+  "PRV_EVENT",
+  "PRV_ATTESTATION",
+]);
+
+/**
+ * Words for profile values. The route supplies them from its messages so
  * this module stays free of copy.
  */
 export interface OnchainLabeler {
-  entityTypePlural(type: string): string;
-  entityTypeSingular(type: string): string;
-  recordType(literal: string): string;
-  recordTypePlural(literal: string): string;
-  relationType(type: string): string;
+  /** Plural heading of an entity group, such as "Works". */
+  entityGroup(key: string): string;
+  /** Singular name of an entity group, such as "Work". */
+  entitySingular(key: string): string;
+  /** Singular name of a family, such as "Relation". */
+  family(recordType: string): string;
+  /** Singular name of a family's kind, such as "Condition report". */
+  recordKind(recordType: string, kind: string): string;
+  /** Plural heading of a family's kind, such as "Condition reports". */
+  recordKindPlural(recordType: string, kind: string): string;
+  documentKind(kind: string): string;
+  /** A statement with no named subject, by its kind and date. */
+  dated(kind: string, isoDate: string): string;
+  /** A relation read as a phrase: "CENTURY #31, by Casey Reas". */
+  relation(kind: string, source: string, target: string): string;
   textGroup(kind: OnchainTextGroupKind): string;
-}
-
-export type OnchainTextGroupKind =
-  | "accession"
-  | "proposedGift"
-  | "program"
-  | "programWorks"
-  | "programArtists"
-  | "institutionalPractice"
-  | "institutionalProfiles"
-  | "policies"
-  | "dataArchitecture"
-  | "documentation"
-  | "contributing"
-  | "other";
-
-const TEXT_GROUP_ORDER: readonly OnchainTextGroupKind[] = [
-  "accession",
-  "proposedGift",
-  "program",
-  "programWorks",
-  "programArtists",
-  "institutionalPractice",
-  "institutionalProfiles",
-  "policies",
-  "dataArchitecture",
-  "documentation",
-  "contributing",
-  "other",
-];
-
-export function payloadString(
-  record: OnchainMuseumRecord,
-  key: string
-): string | null {
-  if (record.content?.kind !== "json") return null;
-  const value = record.content.payload[key];
-  return typeof value === "string" && value.trim() !== "" ? value : null;
-}
-
-export function payloadRecord(
-  record: OnchainMuseumRecord,
-  key: string
-): Record<string, unknown> | null {
-  if (record.content?.kind !== "json") return null;
-  return asRecord(record.content.payload[key]);
-}
-
-export function asRecord(value: unknown): Record<string, unknown> | null {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
-}
-
-export function payloadStrings(value: unknown): string[] {
-  return Array.isArray(value)
-    ? value.filter((item): item is string => typeof item === "string")
-    : [];
-}
-
-function entityKey(record: OnchainMuseumRecord): string | null {
-  return (
-    payloadString(record, "entity_id") ?? payloadString(record, "record_id")
-  );
-}
-
-/** Drops Markdown emphasis that a text's first heading carries. */
-export function cleanLabel(label: string): string {
-  return label
-    .replaceAll(/[*`]/gu, "")
-    .replaceAll(/(^|\s)_+|_+(\s|$)/gu, "$1$2")
-    .replaceAll(/\s+/gu, " ")
-    .trim();
-}
-
-function normalizeTitle(value: string): string {
-  return cleanLabel(value)
-    .toLocaleLowerCase("en-US")
-    .replaceAll(/[^\p{L}\p{N}]+/gu, " ")
-    .trim();
+  unverifiedGroup(): string;
 }
 
 export interface OnchainLink {
@@ -142,20 +81,14 @@ export interface OnchainLink {
   readonly subjectId: Hex | null;
 }
 
-export interface OnchainTextGroup {
-  readonly key: string;
-  readonly anchor: string;
-  readonly kind: OnchainTextGroupKind;
-  /** The Museum ID in the texts' folder, such as an accession number. */
-  readonly contextId: string | null;
-  /** The kind of group, such as "Accession". */
-  readonly kicker: string;
-  /** The group's name: the record it belongs to, or the kind. */
-  readonly heading: string;
-  /** The entity the group's texts belong to, when it is on-chain. */
-  readonly contextHref: string | null;
-  readonly contextSubjectId: Hex | null;
-  readonly records: readonly OnchainMuseumRecord[];
+/** A verified relation seen from one of its ends. */
+export interface OnchainEdge {
+  readonly relation: OnchainMuseumRecord;
+  readonly kind: string;
+  /** `out` when the record is the relation's source. */
+  readonly direction: "out" | "in";
+  readonly other: OnchainMuseumRecord | null;
+  readonly otherRef: unknown;
 }
 
 export interface OnchainMuseumGroup {
@@ -168,11 +101,21 @@ export interface OnchainMuseumGroup {
 export interface OnchainMuseumView {
   readonly snapshot: OnchainMuseumSnapshot;
   labelOf(record: OnchainMuseumRecord): string;
-  /** The singular kind of a record: "Work", "Relation", "Text". */
+  /** The singular kind of a record: "Work", "Relation", "Essay". */
   kindOf(record: OnchainMuseumRecord): string;
-  resolve(id: string): OnchainLink;
-  recordById(id: string): OnchainMuseumRecord | null;
+  /** The index group of an entity, such as `work` or `artist`. */
+  groupKeyOf(record: OnchainMuseumRecord): string | null;
   find(subjectId: Hex): OnchainMuseumRecord | null;
+  /** The verified record a profile reference names in this registry. */
+  recordForRef(ref: unknown): OnchainMuseumRecord | null;
+  resolveRef(ref: unknown): OnchainLink;
+  /** Verified relations with this record at one end. */
+  edgesOf(record: OnchainMuseumRecord): readonly OnchainEdge[];
+  /** Verified records whose `about` or `body.target` names this record. */
+  recordsAbout(record: OnchainMuseumRecord): readonly OnchainMuseumRecord[];
+  /** The records this record's `about` and `body.target` name. */
+  aboutOf(record: OnchainMuseumRecord): readonly OnchainMuseumRecord[];
+  readonly declarationRecord: OnchainMuseumRecord | null;
   readonly entityGroups: readonly OnchainMuseumGroup[];
   readonly recordGroups: readonly OnchainMuseumGroup[];
   readonly textGroups: readonly OnchainTextGroup[];
@@ -182,125 +125,275 @@ export interface OnchainMuseumView {
   readonly unverified: readonly OnchainMuseumRecord[];
 }
 
-interface TextGroupKey {
-  readonly kind: OnchainTextGroupKind;
-  readonly contextId: string | null;
-}
-
-function recordsTextGroupKey(parts: readonly string[]): TextGroupKey {
-  const [, second, third, , section] = parts;
-  if (!third) return { kind: "other", contextId: null };
-  if (second === "accessions") return { kind: "accession", contextId: third };
-  if (second === "proposed-gifts") {
-    return { kind: "proposedGift", contextId: third };
-  }
-  if (second === "programs") {
-    if (section === "works") return { kind: "programWorks", contextId: third };
-    if (section === "artists") {
-      return { kind: "programArtists", contextId: third };
-    }
-    return { kind: "program", contextId: third };
-  }
-  if (second === "institutional-practice") {
-    return {
-      kind:
-        third === "profiles"
-          ? "institutionalProfiles"
-          : "institutionalPractice",
-      contextId: null,
-    };
-  }
-  return { kind: "other", contextId: null };
-}
-
-/** Places a text by its repository path. */
-export function textGroupKey(path: string | null): TextGroupKey {
-  const parts = (path ?? "").split("/");
-  const [first, second] = parts;
-  if (first === "records") return recordsTextGroupKey(parts);
-  if (first === "policies") return { kind: "policies", contextId: null };
-  if (first === "docs") {
-    return {
-      kind: second?.startsWith("data-architecture")
-        ? "dataArchitecture"
-        : "documentation",
-      contextId: null,
-    };
-  }
-  if (parts.length === 1 && first !== "") {
-    return { kind: "contributing", contextId: null };
-  }
-  return { kind: "other", contextId: null };
-}
-
-function slug(value: string): string {
-  return value
-    .toLowerCase()
-    .replaceAll(/[^a-z0-9]+/gu, "-")
-    .replaceAll(/^-|-$/gu, "");
-}
-
-interface ViewOptions {
-  readonly labeler: OnchainLabeler;
-  readonly compare: (left: string, right: string) => number;
-}
-
 type Compare = (left: string, right: string) => number;
 
-function referencesOf(record: OnchainMuseumRecord): string[] {
-  return record.content?.kind === "json"
-    ? payloadStrings(record.content.payload["references"])
-    : [];
+export interface ViewOptions {
+  readonly labeler: OnchainLabeler;
+  readonly compare: Compare;
 }
 
-function sourceRecordIds(record: OnchainMuseumRecord): string[] {
-  return record.content?.kind === "json"
-    ? payloadStrings(record.content.payload["source_record_ids"])
-    : [];
+/** The references a record's `about` and `body.target` hold. */
+function aboutRefs(record: OnchainMuseumRecord): unknown[] {
+  const refs: unknown[] = (record.profile?.about ?? []).map((item) => item.ref);
+  const target = bodyOf(record)["target"];
+  if (familyOf(record) !== "PRV_RELATION" && target !== undefined) {
+    refs.push(target);
+  }
+  return refs;
 }
 
-/** Readable labels for every record, relations last as they name others. */
+export interface Graph {
+  readonly refSubject: (ref: unknown) => Hex | null;
+  readonly bySubject: ReadonlyMap<string, OnchainMuseumRecord>;
+  readonly edges: ReadonlyMap<string, OnchainEdge[]>;
+  readonly about: ReadonlyMap<string, OnchainMuseumRecord[]>;
+}
+
+type Resolve = (ref: unknown) => OnchainMuseumRecord | null;
+
+/** A verified relation as an edge at each verified end. */
+function relationEdges(
+  record: OnchainMuseumRecord,
+  verified: Resolve
+): [string, OnchainEdge][] {
+  const { source, target } = bodyOf(record);
+  const from = verified(source);
+  const to = verified(target);
+  const base = { relation: record, kind: record.profile?.kind ?? "" };
+  const edges: [string, OnchainEdge][] = [];
+  if (from !== null) {
+    edges.push([
+      from.subjectId,
+      { ...base, direction: "out", other: to, otherRef: target },
+    ]);
+  }
+  if (to !== null) {
+    edges.push([
+      to.subjectId,
+      { ...base, direction: "in", other: from, otherRef: source },
+    ]);
+  }
+  return edges;
+}
+
+/** The distinct verified records a statement's `about` and target name. */
+function namedRecords(
+  record: OnchainMuseumRecord,
+  verified: Resolve
+): OnchainMuseumRecord[] {
+  const named = new Map<string, OnchainMuseumRecord>();
+  for (const ref of aboutRefs(record)) {
+    const item = verified(ref);
+    if (item !== null) named.set(item.subjectId, item);
+  }
+  return [...named.values()];
+}
+
+function buildGraph(snapshot: OnchainMuseumSnapshot): Graph {
+  const { registry, declaration } = snapshot;
+  const registryId = registryCaip10(registry.checks.chainId, registry.registry);
+  const bySubject = new Map<string, OnchainMuseumRecord>();
+  for (const record of snapshot.records) {
+    bySubject.set(record.subjectId.toLowerCase(), record);
+  }
+  const ns =
+    declaration.ns ??
+    snapshot.records.find((record) => record.profile !== null)?.profile?.ns ??
+    "";
+  const refSubject = (ref: unknown) => referencedSubjectId(ref, ns, registryId);
+  const verified: Resolve = (ref) => {
+    const id = refSubject(ref);
+    const record = id === null ? undefined : bySubject.get(id);
+    return record?.profile ? record : null;
+  };
+  const edges = new Map<string, OnchainEdge[]>();
+  const about = new Map<string, OnchainMuseumRecord[]>();
+  for (const record of snapshot.records) {
+    if (record.profile === null) continue;
+    if (familyOf(record) === "PRV_RELATION") {
+      for (const [subjectId, edge] of relationEdges(record, verified)) {
+        push(edges, subjectId, edge);
+      }
+    } else {
+      for (const named of namedRecords(record, verified)) {
+        push(about, named.subjectId, record);
+      }
+    }
+  }
+  return { refSubject, bySubject, edges, about };
+}
+
+interface EntityRoles {
+  /** Agents a work is created by. */
+  readonly creators: ReadonlySet<string>;
+  /** Collections something holds. */
+  readonly held: ReadonlySet<string>;
+  /** Sets whose members are all objects: accession lots. */
+  readonly lots: ReadonlySet<string>;
+}
+
+function entityGroupKey(
+  record: OnchainMuseumRecord,
+  { creators, held, lots }: EntityRoles
+): string | null {
+  if (record.profile === null || familyOf(record) !== "PRV_ENTITY") return null;
+  const { kind } = record.profile;
+  if (kind === "agent") {
+    return creators.has(record.subjectId) ? "artist" : "agent";
+  }
+  if (kind === "collection") {
+    return held.has(record.subjectId) ? "collection" : "project";
+  }
+  if (kind === "set") {
+    if (lots.has(record.subjectId)) return "lot";
+    return identifiersOf(record, "accession_number").length > 0
+      ? "accession"
+      : "acquisition";
+  }
+  return kind;
+}
+
+function isLot(record: OnchainMuseumRecord, graph: Graph): boolean {
+  const members = bodyOf(record)["members"];
+  return (
+    record.profile?.kind === "set" &&
+    Array.isArray(members) &&
+    members.length > 0 &&
+    members.every((member) => {
+      const id = graph.refSubject(member);
+      const item = id === null ? undefined : graph.bySubject.get(id);
+      return item?.profile?.kind === "object";
+    })
+  );
+}
+
+/** Agents a work names in `body.created_by` or by a `created_by` relation. */
+function workCreators(record: OnchainMuseumRecord, graph: Graph): string[] {
+  const createdBy = bodyOf(record)["created_by"];
+  const embedded = (Array.isArray(createdBy) ? createdBy : [])
+    .map((item) => graph.refSubject(asRecord(item)?.["agent"]))
+    .filter((id): id is Hex => id !== null);
+  const related = (graph.edges.get(record.subjectId) ?? [])
+    .filter((edge) => edge.kind === "created_by" && edge.direction === "out")
+    .flatMap((edge) => (edge.other === null ? [] : [edge.other.subjectId]));
+  return [...embedded, ...related];
+}
+
+function entityRoles(
+  records: readonly OnchainMuseumRecord[],
+  graph: Graph
+): EntityRoles {
+  const works = records.filter(
+    (record) =>
+      record.profile?.kind === "work" && familyOf(record) === "PRV_ENTITY"
+  );
+  const held = [...graph.edges.values()]
+    .flat()
+    .filter((edge) => edge.kind === "held_by" && edge.direction === "in")
+    .flatMap((edge) => (edge.other === null ? [] : [edge.other.subjectId]));
+  return {
+    creators: new Set(works.flatMap((work) => workCreators(work, graph))),
+    held: new Set(held),
+    lots: new Set(
+      records
+        .filter((record) => isLot(record, graph))
+        .map((record) => record.subjectId)
+    ),
+  };
+}
+
+interface Labels {
+  readonly labelOf: (record: OnchainMuseumRecord) => string;
+  readonly kindOf: (record: OnchainMuseumRecord) => string;
+}
+
 function buildLabels(
   records: readonly OnchainMuseumRecord[],
-  byId: ReadonlyMap<string, OnchainMuseumRecord>,
+  graph: Graph,
   labeler: OnchainLabeler,
-  kindOf: (record: OnchainMuseumRecord) => string
-): Map<string, string> {
-  const labels = new Map<string, string>();
-  const baseLabel = (record: OnchainMuseumRecord): string => {
-    const cleaned = cleanLabel(record.label);
-    const title = payloadString(record, "title");
-    if (record.recordType === "WORK_DESCRIPTION" && title !== null) {
-      return `${kindOf(record)}: ${cleanLabel(title)}`;
+  groupKeyOf: (record: OnchainMuseumRecord) => string | null
+): Labels {
+  const kindOf = (record: OnchainMuseumRecord): string => {
+    const family = familyOf(record);
+    const groupKey = groupKeyOf(record);
+    if (groupKey !== null) return labeler.entitySingular(groupKey);
+    if (record.profile === null) return labeler.family(family);
+    if (family === "PRV_DOCUMENT") {
+      return labeler.documentKind(record.profile.kind);
     }
-    if (!MUSEUM_ID_PATTERN.test(cleaned)) return cleaned;
-    const objectId = payloadString(record, "object_id");
-    const object = objectId === null ? undefined : byId.get(objectId);
-    const objectTitle =
-      object === undefined ? null : payloadString(object, "title");
-    return objectTitle === null
-      ? `${kindOf(record)} ${cleaned}`
-      : `${kindOf(record)}: ${cleanLabel(objectTitle)}`;
+    if (RECORD_FAMILIES.has(family)) {
+      return labeler.recordKind(family, record.profile.kind);
+    }
+    return labeler.family(family);
   };
-  const relations: OnchainMuseumRecord[] = [];
+  const labels = new Map<string, string>();
+  const labelOf = (record: OnchainMuseumRecord) =>
+    labels.get(record.subjectId) ?? cleanLabel(record.label);
+  const recordLabel = (ref: unknown): string | null => {
+    const id = graph.refSubject(ref);
+    const record = id === null ? undefined : graph.bySubject.get(id);
+    return record === undefined ? null : labelOf(record);
+  };
+  const refLabel = (ref: unknown): string => {
+    const label = recordLabel(ref);
+    if (label !== null) return label;
+    if (typeof ref === "string") return ref;
+    const localId = asRecord(ref)?.["local_id"];
+    return typeof localId === "string" ? localId : "";
+  };
+  const ownLabel = (record: OnchainMuseumRecord): string | null => {
+    const family = familyOf(record);
+    if (family === "PRV_ENTITY") {
+      const label = cleanLabel(bodyText(record, "label") ?? record.label);
+      return MUSEUM_ID_PATTERN.test(label)
+        ? `${kindOf(record)} ${label}`
+        : label;
+    }
+    if (family === "PRV_DOCUMENT") return bodyText(record, "title");
+    if (family === "PRV_REGISTRY") return bodyText(record, "name");
+    return null;
+  };
+  const deferred: OnchainMuseumRecord[] = [];
   for (const record of records) {
-    if (record.recordType === "PUBLIC_RELATION") relations.push(record);
-    else labels.set(record.subjectId, baseLabel(record));
+    const own = record.profile === null ? null : ownLabel(record);
+    if (own !== null) labels.set(record.subjectId, cleanLabel(own));
+    else if (record.profile !== null) deferred.push(record);
   }
-  for (const record of relations) {
-    const type = payloadString(record, "relation_type");
-    const names = referencesOf(record)
-      .map((id) => byId.get(id))
-      .filter((item): item is OnchainMuseumRecord => item !== undefined)
-      .map((item) => labels.get(item.subjectId) ?? item.label);
+  // Statements about a record next, then relations, which name both kinds.
+  deferred.sort(
+    (left, right) =>
+      Number(familyOf(left) === "PRV_RELATION") -
+      Number(familyOf(right) === "PRV_RELATION")
+  );
+  for (const record of deferred) {
+    if (familyOf(record) === "PRV_RELATION") {
+      const { source, target } = bodyOf(record);
+      labels.set(
+        record.subjectId,
+        labeler.relation(
+          record.profile?.kind ?? "",
+          refLabel(source),
+          refLabel(target)
+        )
+      );
+      continue;
+    }
+    const subject = aboutRefs(record)
+      .map(recordLabel)
+      .find((item): item is string => item !== null);
+    const observedTo = bodyOf(record)["observed_to"];
+    if (subject === undefined && typeof observedTo === "string") {
+      labels.set(record.subjectId, labeler.dated(kindOf(record), observedTo));
+      continue;
+    }
     labels.set(
       record.subjectId,
-      type === null || names.length === 0
-        ? baseLabel(record)
-        : `${labeler.relationType(type)}: ${names.join(" · ")}`
+      subject === undefined
+        ? `${kindOf(record)} ${record.profile?.localId ?? ""}`.trim()
+        : `${kindOf(record)}: ${subject}`
     );
   }
-  return labels;
+  return { labelOf, kindOf };
 }
 
 interface IndexGroups {
@@ -311,19 +404,11 @@ interface IndexGroups {
   readonly relationCount: number;
 }
 
-function push(
-  map: Map<string, OnchainMuseumRecord[]>,
-  key: string,
-  record: OnchainMuseumRecord
-): void {
-  map.set(key, [...(map.get(key) ?? []), record]);
-}
-
 function buildIndexGroups(
   records: readonly OnchainMuseumRecord[],
-  labeler: OnchainLabeler,
-  compare: Compare,
-  sortByLabel: (left: OnchainMuseumRecord, right: OnchainMuseumRecord) => number
+  groupKeyOf: (record: OnchainMuseumRecord) => string | null,
+  { labeler, compare }: ViewOptions,
+  byLabel: (left: OnchainMuseumRecord, right: OnchainMuseumRecord) => number
 ): IndexGroups {
   const entities = new Map<string, OnchainMuseumRecord[]>();
   const others = new Map<string, OnchainMuseumRecord[]>();
@@ -331,16 +416,25 @@ function buildIndexGroups(
   const unverified: OnchainMuseumRecord[] = [];
   let relationCount = 0;
   for (const record of records) {
+    const family = familyOf(record);
     if (record.state !== "verified") unverified.push(record);
-    if (record.recordType === "PUBLIC_DOCUMENT") texts.push(record);
-    else if (record.recordType === "PUBLIC_RELATION") relationCount += 1;
-    else if (record.recordType === "PUBLIC_ENTITY") {
-      push(entities, payloadString(record, "entity_type") ?? "UNKNOWN", record);
-    } else push(others, record.recordType ?? "UNKNOWN", record);
+    const groupKey = groupKeyOf(record);
+    if (family === "PRV_DOCUMENT") texts.push(record);
+    else if (record.profile === null) push(others, "unverified", record);
+    else if (family === "PRV_RELATION") relationCount += 1;
+    else if (groupKey !== null) push(entities, groupKey, record);
+    else if (RECORD_FAMILIES.has(family)) {
+      push(others, `${family}.${record.profile.kind}`, record);
+    }
   }
   const order = (key: string) => {
-    const index = ENTITY_TYPE_ORDER.indexOf(key);
-    return index === -1 ? ENTITY_TYPE_ORDER.length : index;
+    const index = ENTITY_GROUP_ORDER.indexOf(key);
+    return index === -1 ? ENTITY_GROUP_ORDER.length : index;
+  };
+  const recordHeading = (key: string) => {
+    if (key === "unverified") return labeler.unverifiedGroup();
+    const [family = "", kind = ""] = key.split(".");
+    return labeler.recordKindPlural(family, kind);
   };
   return {
     entityGroups: [...entities.entries()]
@@ -350,15 +444,15 @@ function buildIndexGroups(
       .map(([key, items]) => ({
         key,
         anchor: `entities-${slug(key)}`,
-        heading: labeler.entityTypePlural(key),
-        records: [...items].sort(sortByLabel),
+        heading: labeler.entityGroup(key),
+        records: [...items].sort(byLabel),
       })),
     recordGroups: [...others.entries()]
       .map(([key, items]) => ({
         key,
         anchor: `records-${slug(key)}`,
-        heading: labeler.recordTypePlural(key),
-        records: [...items].sort(sortByLabel),
+        heading: recordHeading(key),
+        records: [...items].sort(byLabel),
       }))
       .sort((left, right) => compare(left.heading, right.heading)),
     texts,
@@ -367,115 +461,57 @@ function buildIndexGroups(
   };
 }
 
-/** The verified entity a text folder's Museum ID names, if any. */
-function contextEntity(
-  records: readonly OnchainMuseumRecord[],
-  contextId: string
-): OnchainMuseumRecord | null {
-  for (const type of CONTEXT_ENTITY_ORDER) {
-    const match = records.find(
-      (record) =>
-        record.state === "verified" &&
-        payloadString(record, "entity_type") === type &&
-        (entityKey(record) === contextId ||
-          sourceRecordIds(record).includes(contextId))
-    );
-    if (match !== undefined) return match;
-  }
-  return null;
-}
-
-function buildTextGroups(
-  records: readonly OnchainMuseumRecord[],
-  texts: readonly OnchainMuseumRecord[],
-  labeler: OnchainLabeler,
-  compare: Compare,
-  labelOf: (record: OnchainMuseumRecord) => string
-): OnchainTextGroup[] {
-  const groups = new Map<string, OnchainTextGroup>();
-  const members = new Map<string, OnchainMuseumRecord[]>();
-  for (const text of texts) {
-    const { kind, contextId } = textGroupKey(text.documentPath);
-    const key = `${kind}:${contextId ?? ""}`;
-    push(members, key, text);
-    if (groups.has(key)) continue;
-    const context =
-      contextId === null ? null : contextEntity(records, contextId);
-    groups.set(key, {
-      key,
-      anchor: `texts-${slug(key)}`,
-      kind,
-      contextId,
-      kicker: labeler.textGroup(kind),
-      heading:
-        context === null
-          ? (contextId ?? labeler.textGroup(kind))
-          : labelOf(context),
-      contextHref:
-        context === null ? null : onchainMuseumRecordHref(context.subjectId),
-      contextSubjectId: context?.subjectId ?? null,
-      records: [],
-    });
-  }
-  const byLabel = (left: OnchainMuseumRecord, right: OnchainMuseumRecord) =>
-    compare(labelOf(left), labelOf(right));
-  return [...groups.values()]
-    .map((group) => ({
-      ...group,
-      records: [...(members.get(group.key) ?? [])].sort(byLabel),
-    }))
-    .sort(
-      (left, right) =>
-        TEXT_GROUP_ORDER.indexOf(left.kind) -
-          TEXT_GROUP_ORDER.indexOf(right.kind) || compare(left.key, right.key)
-    );
-}
-
 /**
  * Derives everything the pages show from a verified snapshot: readable
- * labels, entity links, index groups and text groups. Only verified records
- * contribute content; every record keeps its on-chain label as a fallback.
+ * labels, references resolved to records, relations by record, index groups
+ * and text groups. Only verified payloads contribute content; every record
+ * keeps its on-chain label as a fallback.
  */
 export function buildOnchainMuseumView(
   snapshot: OnchainMuseumSnapshot,
-  { labeler, compare }: ViewOptions
+  options: ViewOptions
 ): OnchainMuseumView {
   const { records } = snapshot;
-  const byId = new Map<string, OnchainMuseumRecord>();
-  const bySubject = new Map<string, OnchainMuseumRecord>();
-  for (const record of records) {
-    bySubject.set(record.subjectId.toLowerCase(), record);
-    const key = record.state === "verified" ? entityKey(record) : null;
-    if (key !== null && !byId.has(key)) byId.set(key, record);
-  }
-  const kindOf = (record: OnchainMuseumRecord): string => {
-    const entityType = payloadString(record, "entity_type");
-    return entityType === null
-      ? labeler.recordType(record.recordType ?? "UNKNOWN")
-      : labeler.entityTypeSingular(entityType);
+  const graph = buildGraph(snapshot);
+  const roles = entityRoles(records, graph);
+  const groupKeys = new Map<string, string | null>();
+  const groupKeyOf = (record: OnchainMuseumRecord) => {
+    if (!groupKeys.has(record.subjectId)) {
+      groupKeys.set(record.subjectId, entityGroupKey(record, roles));
+    }
+    return groupKeys.get(record.subjectId) ?? null;
   };
-  const labels = buildLabels(records, byId, labeler, kindOf);
-  const labelOf = (record: OnchainMuseumRecord) =>
-    labels.get(record.subjectId) ?? record.label;
-  const resolve = (id: string): OnchainLink => {
-    const record = byId.get(id);
-    return record === undefined
-      ? { id, label: id, href: null, subjectId: null }
+  const { labelOf, kindOf } = buildLabels(
+    records,
+    graph,
+    options.labeler,
+    groupKeyOf
+  );
+  const recordForRef = (ref: unknown) => {
+    const id = graph.refSubject(ref);
+    const record = id === null ? undefined : graph.bySubject.get(id);
+    return record?.profile ? record : null;
+  };
+  const resolveRef = (ref: unknown): OnchainLink => {
+    const record = recordForRef(ref);
+    const asText = refText(ref);
+    return record === null
+      ? { id: asText, label: asText, href: null, subjectId: null }
       : {
-          id,
+          id: record.subjectId,
           label: labelOf(record),
           href: onchainMuseumRecordHref(record.subjectId),
           subjectId: record.subjectId,
         };
   };
-  const index = buildIndexGroups(records, labeler, compare, (left, right) =>
-    compare(labelOf(left), labelOf(right))
+  const index = buildIndexGroups(records, groupKeyOf, options, (left, right) =>
+    options.compare(labelOf(left), labelOf(right))
   );
   const textGroups = buildTextGroups(
-    records,
     index.texts,
-    labeler,
-    compare,
+    records,
+    graph,
+    options,
     labelOf
   );
   const groupBySubject = new Map<string, OnchainTextGroup>();
@@ -484,14 +520,26 @@ export function buildOnchainMuseumView(
       groupBySubject.set(record.subjectId, group);
     }
   }
+  const declarationId = snapshot.declaration.subjectId;
 
   return {
     snapshot,
     labelOf,
     kindOf,
-    resolve,
-    recordById: (id) => byId.get(id) ?? null,
-    find: (subjectId) => bySubject.get(subjectId.toLowerCase()) ?? null,
+    groupKeyOf,
+    find: (subjectId) => graph.bySubject.get(subjectId.toLowerCase()) ?? null,
+    recordForRef,
+    resolveRef,
+    edgesOf: (record) => graph.edges.get(record.subjectId) ?? [],
+    recordsAbout: (record) => graph.about.get(record.subjectId) ?? [],
+    aboutOf: (record) =>
+      aboutRefs(record)
+        .map(recordForRef)
+        .filter((item): item is OnchainMuseumRecord => item !== null),
+    declarationRecord:
+      declarationId === null
+        ? null
+        : (graph.bySubject.get(declarationId.toLowerCase()) ?? null),
     entityGroups: index.entityGroups,
     recordGroups: index.recordGroups,
     textGroups,
@@ -500,151 +548,4 @@ export function buildOnchainMuseumView(
     relationCount: index.relationCount,
     unverified: index.unverified,
   };
-}
-
-/** Verified relation records that reference an entity ID. */
-export function relationsReferencing(
-  snapshot: OnchainMuseumSnapshot,
-  entityId: string
-): OnchainMuseumRecord[] {
-  return snapshot.records.filter(
-    (record) =>
-      record.state === "verified" &&
-      record.recordType === "PUBLIC_RELATION" &&
-      record.content?.kind === "json" &&
-      payloadStrings(record.content.payload["references"]).includes(entityId)
-  );
-}
-
-/** The works an entity names among its source records, such as an accession's. */
-export function worksNamedBy(
-  view: OnchainMuseumView,
-  record: OnchainMuseumRecord
-): OnchainMuseumRecord[] {
-  return sourceRecordIds(record)
-    .map((id) => view.recordById(id))
-    .filter(
-      (item): item is OnchainMuseumRecord =>
-        item !== null && payloadString(item, "entity_type") === "WORK"
-    );
-}
-
-export interface OnchainWorkImageView {
-  readonly image: OnchainWorkImage;
-  /**
-   * The credit as the Museum records it: the object description's credit
-   * line, else the media record's own credit. Null when the only credit is
-   * a working label for a Museum-made derivative; build one from the parts.
-   */
-  readonly recordedCredit: string | null;
-  readonly artists: readonly string[];
-  readonly title: string;
-  /** The program or acquisition the work was selected through, if any. */
-  readonly program: string | null;
-}
-
-/** The media record's credit, unless it labels a Museum-made derivative. */
-function mediaCredit(
-  view: OnchainMuseumView,
-  mediaIds: readonly string[]
-): string | null {
-  for (const id of mediaIds) {
-    const media = view.recordById(id);
-    const profile =
-      media === null
-        ? null
-        : asRecord(payloadRecord(media, "profile")?.["media"]);
-    const credit = profile?.["credit"];
-    if (
-      profile?.["media_role"] !== "museum_generated_public_derivative" &&
-      typeof credit === "string" &&
-      credit.trim() !== ""
-    ) {
-      return credit;
-    }
-  }
-  return null;
-}
-
-/** The credit line of the work's object description, if it has one. */
-function descriptionCredit(
-  view: OnchainMuseumView,
-  record: OnchainMuseumRecord
-): string | null {
-  for (const id of sourceRecordIds(record)) {
-    const description = view.recordById(id);
-    if (description?.recordType !== "WORK_DESCRIPTION") continue;
-    const credit = payloadString(description, "credit_line");
-    if (credit !== null) return credit;
-  }
-  return null;
-}
-
-function profileIds(record: OnchainMuseumRecord, key: string): string[] {
-  return payloadStrings(payloadRecord(record, "profile")?.[key]);
-}
-
-/**
- * A work's verified presentation image: keyed by the work's ID in accession
- * manifests, by one of its source record IDs in program manifests.
- */
-export function workImage(
-  view: OnchainMuseumView,
-  record: OnchainMuseumRecord
-): OnchainWorkImageView | null {
-  if (payloadString(record, "entity_type") !== "WORK") return null;
-  const { images } = view.snapshot.media;
-  const keys = [entityKey(record), ...sourceRecordIds(record)].filter(
-    (key): key is string => key !== null
-  );
-  const image = keys
-    .map((key) => images[key])
-    .find((item) => item !== undefined);
-  if (image === undefined) return null;
-  const mediaIds = [
-    ...(image.mediaEntityId === null ? [] : [image.mediaEntityId]),
-    ...(record.content?.kind === "json"
-      ? payloadStrings(record.content.payload["media_entity_ids"])
-      : []),
-  ];
-  const resolved = (ids: readonly string[]) =>
-    ids
-      .map((id) => view.resolve(id))
-      .filter((link) => link.href !== null)
-      .map((link) => link.label);
-  return {
-    image,
-    recordedCredit:
-      descriptionCredit(view, record) ?? mediaCredit(view, mediaIds),
-    artists: resolved(profileIds(record, "creator_entity_ids")),
-    title: payloadString(record, "preferred_label") ?? cleanLabel(record.label),
-    program:
-      resolved([
-        ...profileIds(record, "acquisition_entity_ids"),
-        ...profileIds(record, "program_entity_ids"),
-      ])[0] ?? null,
-  };
-}
-
-/** The status of a work in the collection, from its profile. */
-export function collectionStatus(record: OnchainMuseumRecord): string | null {
-  const membership = asRecord(
-    payloadRecord(record, "profile")?.["collection_membership"]
-  );
-  const status = membership?.["status"];
-  return typeof status === "string" ? status : null;
-}
-
-/** Texts whose title names the given title, for a work or an artist. */
-export function textsNaming(
-  view: OnchainMuseumView,
-  title: string,
-  mode: "equals" | "includes"
-): OnchainMuseumRecord[] {
-  const wanted = normalizeTitle(title);
-  if (wanted === "") return [];
-  return view.texts.filter((text) => {
-    const label = normalizeTitle(view.labelOf(text));
-    return mode === "equals" ? label === wanted : label.includes(wanted);
-  });
 }

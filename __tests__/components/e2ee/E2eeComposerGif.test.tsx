@@ -7,6 +7,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 import type { ComponentProps } from "react";
+import { createPortal } from "react-dom";
 import { E2eeComposer } from "@/components/e2ee/conversation/E2eeComposer";
 import { downloadGiphyGif, GifDownloadError } from "@/lib/e2ee/giphy";
 import { composerText, setComposerText } from "./composerTestUtils";
@@ -37,18 +38,21 @@ jest.mock("@/components/waves/LazyCreateDropGifPicker", () => ({
     onSelect: (url: string) => void;
     description?: string;
   }) =>
-    show ? (
-      <div role="dialog" aria-label="GIF search">
-        <p>{description}</p>
-        <button
-          onClick={() =>
-            onSelect("https://media.giphy.com/media/test/giphy.gif")
-          }
-        >
-          Select test GIF
-        </button>
-      </div>
-    ) : null,
+    show
+      ? createPortal(
+          <div role="dialog" aria-label="GIF search">
+            <p>{description}</p>
+            <button
+              onClick={() =>
+                onSelect("https://media.giphy.com/media/test/giphy.gif")
+              }
+            >
+              Select test GIF
+            </button>
+          </div>,
+          document.body
+        )
+      : null,
 }));
 
 type Props = ComponentProps<typeof E2eeComposer>;
@@ -136,6 +140,89 @@ it("blocks sending during download and supports cancellation without losing the 
   expect(composerText(input!)).toBe("Keep this draft");
   expect(engine.send).not.toHaveBeenCalled();
   expect(screen.getByRole("button", { name: "Send" })).toBeEnabled();
+});
+
+it("keeps the GIF picker and cancellation working with the mobile tray collapsed", async () => {
+  const viewport = jest.replaceProperty(window, "innerWidth", 390);
+  try {
+    let resolve!: (file: File) => void;
+    mockDownload.mockReturnValue(
+      new Promise((done) => {
+        resolve = done;
+      })
+    );
+    const { input } = setup();
+    setComposerText(input!, "Keep this draft");
+    const openTray = () =>
+      fireEvent.click(
+        screen.getByRole("button", { name: "Show composer actions" })
+      );
+
+    expect(screen.queryByRole("button", { name: "Add GIF" })).toBeNull();
+    openTray();
+    expect(screen.getByRole("button", { name: "Add GIF" })).toHaveTextContent(
+      "GIF"
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Add GIF" }));
+    expect(
+      screen.getByRole("button", { name: "Show composer actions" })
+    ).toHaveFocus();
+
+    const picker = screen.getByRole("dialog", { name: "GIF search" });
+    const selectGif = screen.getByRole("button", { name: "Select test GIF" });
+    act(() => selectGif.focus());
+    fireEvent.pointerDown(selectGif);
+    expect(picker).toBeVisible();
+    expect(selectGif).toHaveFocus();
+    fireEvent.click(selectGif);
+
+    expect(screen.getByRole("button", { name: "Send" })).toBeDisabled();
+    const signal = mockDownload.mock.calls[0]![1];
+
+    openTray();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Cancel GIF download" })
+    );
+    expect(signal.aborted).toBe(true);
+    await act(async () => resolve(gif()));
+    expect(screen.queryByText("giphy.gif")).not.toBeInTheDocument();
+    expect(composerText(input!)).toBe("Keep this draft");
+    expect(screen.getByRole("button", { name: "Send" })).toBeEnabled();
+  } finally {
+    viewport.restore();
+  }
+});
+
+it("dismisses the mobile action group on Escape, focus leaving, or an outside tap", () => {
+  const viewport = jest.replaceProperty(window, "innerWidth", 390);
+  try {
+    setup();
+    const toggle = screen.getByRole("button", {
+      name: "Show composer actions",
+    });
+    const open = () => {
+      fireEvent.click(toggle);
+      return screen.getByRole("group", { name: "Composer actions" });
+    };
+
+    const tray = open();
+    fireEvent.keyDown(screen.getByRole("button", { name: "Add GIF" }), {
+      key: "Escape",
+    });
+    expect(toggle).toHaveFocus();
+    expect(tray).toHaveAttribute("aria-hidden", "true");
+    expect(tray).toHaveAttribute("inert");
+
+    open();
+    fireEvent.focusOut(toggle, { relatedTarget: document.body });
+    expect(tray).toHaveAttribute("aria-hidden", "true");
+
+    open();
+    fireEvent.pointerDown(document.body);
+    expect(tray).toHaveAttribute("aria-hidden", "true");
+  } finally {
+    viewport.restore();
+  }
 });
 
 it("reports a failed download and allows retry", async () => {

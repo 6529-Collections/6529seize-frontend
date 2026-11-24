@@ -89,6 +89,7 @@ let sandboxArtistActivityEnabled = false;
 let sandboxSharedPostsEnabled = false;
 let sandboxSharedPostFeedEnabled = false;
 let sandboxProfileRepRating = null;
+let sandboxProfileRepPreviewRating = null;
 let sandboxCreatedWaveType = "CHAT";
 let sandboxRuleGroupSequence = 0;
 const sandboxRuleGroups = new Map();
@@ -2637,13 +2638,24 @@ function handleDiagnostics(method, pathname, url, res) {
     sandboxSharedPostsEnabled = true;
     return writeJsonResponse(res, { ok: true });
   }
-  if (pathname === "/__composer-sandbox/profile-rep" && method === "POST") {
+  if (
+    method === "POST" &&
+    [
+      "/__composer-sandbox/profile-rep",
+      "/__composer-sandbox/profile-rep-preview",
+    ].includes(pathname)
+  ) {
     const rating = Number(url.searchParams.get("rating") ?? Number.NaN);
     if (!Number.isSafeInteger(rating)) {
       writeJson(res, 400, { error: "Expected an integer REP rating." });
       return true;
     }
-    sandboxProfileRepRating = rating;
+    if (pathname.endsWith("-preview")) {
+      // Keep the interactive preview independent of per-test fixture resets.
+      sandboxProfileRepPreviewRating = rating;
+    } else {
+      sandboxProfileRepRating = rating;
+    }
     return writeJsonResponse(res, { ok: true });
   }
 
@@ -3187,11 +3199,26 @@ function handleSharedPostFeedFixture(pathname, url, res) {
 
 // The profile document and the browser can read the same saved fixture.
 function handleProfileRepFixture(pathname, res) {
-  if (sandboxProfileRepRating === null) return false;
+  const currentRating =
+    sandboxProfileRepRating ?? sandboxProfileRepPreviewRating;
+  if (currentRating === null) return false;
+  if (pathname === "/api/profiles/following-artist-0/rep/ratings/received") {
+    return writeJsonResponse(res, {
+      rep_rates_left_for_rater: 80,
+      rating_stats: [
+        {
+          category: "Artist",
+          rating: currentRating,
+          contributor_count: 1,
+          rater_contribution: currentRating,
+        },
+      ],
+    });
+  }
   const rating = {
-    total_rep: sandboxProfileRepRating,
+    total_rep: currentRating,
     contributor_count: 1,
-    authenticated_user_contribution: sandboxProfileRepRating,
+    authenticated_user_contribution: currentRating,
   };
   if (pathname === "/api/profiles/following-artist-0/rep/overview") {
     return writeJsonResponse(res, { ...rating, contributors: emptyPage() });
@@ -3589,11 +3616,17 @@ function buildPublicRuntime() {
       process.env.MEDIA_RESOLVER_ENDPOINT || "https://media.6529.io",
     // Signed posts on too, so device setup offers the combined grant
     // ("Sign to enable both") that the E2EE pack signs in through.
+    // Read-state sync between one user's devices (D175) is on too; set the
+    // variable to "false" to run the pack without it.
     ...(isE2eeSandbox
       ? {
           NEXT_PUBLIC_E2EE_DM_ENABLED: "true",
           NEXT_PUBLIC_E2EE_POLLS_ENABLED: "true",
           NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES: "true",
+          NEXT_PUBLIC_E2EE_READ_SYNC:
+            process.env.NEXT_PUBLIC_E2EE_READ_SYNC === "false"
+              ? "false"
+              : "true",
           GIPHY_API_KEY: "e2ee-sandbox-fixture",
         }
       : {}),

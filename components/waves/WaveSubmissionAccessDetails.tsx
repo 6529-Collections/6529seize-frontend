@@ -66,8 +66,8 @@ function SubmissionScope({
     scopeValue = (
       <WaveRulesGroupMembersLink
         groupId={groupId}
-        href={`/network?page=1&group=${encodeURIComponent(groupId)}`}
         groupDetails={details}
+        showCountTooltip={false}
       />
     );
   } else if (isHidden || fetchGroupDetails) {

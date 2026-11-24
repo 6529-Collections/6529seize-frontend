@@ -208,7 +208,7 @@ describe("WaveConfigurationCurations", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("First curation")).toBeInTheDocument();
     const memberLink = await screen.findByRole("link", {
-      name: "Inspect Artists group criteria and members: 17 users",
+      name: "17 users",
     });
     expect(memberLink).toHaveAttribute("href", "/network?page=1&group=group-1");
     expect(memberLink).toHaveAccessibleDescription(
@@ -250,7 +250,7 @@ describe("WaveConfigurationCurations", () => {
   it("discards private group criteria when the active session changes", async () => {
     renderWithQueryClient(<WaveConfigurationCurations wave={wave} />);
     await screen.findByRole("link", {
-      name: "Inspect Artists group criteria and members: 17 users",
+      name: "17 users",
     });
 
     jest.mocked(getCurrentProfileQueryViewer).mockReturnValue("second-session");

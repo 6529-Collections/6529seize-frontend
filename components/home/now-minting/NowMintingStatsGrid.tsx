@@ -28,7 +28,6 @@ export default function NowMintingStatsGrid({
   const { claim: manifoldClaim, isError } = useDropForgeManifoldClaim(nftId);
   const { contract } = useDropForgeMintingConfig();
   const status = manifoldClaim?.status;
-  const isStatusLoading = !manifoldClaim && !isError;
 
   const { connectedProfile } = useAuth();
   const { balance, isLoading: isBalanceLoading } = useNftBalance({
@@ -45,8 +44,7 @@ export default function NowMintingStatsGrid({
 
   const editionSize = isError
     ? t(locale, "home.nowMinting.stats.unavailable")
-    : manifoldClaim &&
-      formatEditionSize(manifoldClaim).replace(" / ", "/");
+    : manifoldClaim && formatEditionSize(manifoldClaim).replace(" / ", "/");
   const mintPrice = isError
     ? t(locale, "home.nowMinting.stats.unavailable")
     : manifoldClaim && formatClaimCost(manifoldClaim);
@@ -106,16 +104,16 @@ export default function NowMintingStatsGrid({
         appearance="compact"
         compactLabelSize="large"
         label={t(locale, "home.nowMinting.stats.status")}
-        value={statusLabel}
+        value={statusLabel ?? "—"}
         status={statusTone}
-        isLoading={isStatusLoading}
       />
       <NowMintingStatsItem
         appearance="compact"
         compactLabelSize="large"
         label={t(locale, "home.nowMinting.stats.mintPrice")}
-        value={<span className="sm:tw-whitespace-normal">{mintPrice}</span>}
-        isLoading={isStatusLoading}
+        value={
+          <span className="sm:tw-whitespace-normal">{mintPrice ?? "—"}</span>
+        }
       />
       <NowMintingStatsItem
         appearance="compact"
