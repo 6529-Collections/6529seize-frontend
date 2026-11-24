@@ -60,10 +60,9 @@ import { reportDropSubmissionFailure } from "@/utils/monitoring/dropSubmissionMo
 import { removeTemporaryThreadReply } from "./drops/reply-threads/pending-replies";
 import { acceptCreatedDrop } from "./create-drop-content/accept-created-drop";
 import { useDeviceSigningPrewarm } from "@/hooks/device-signing/useDeviceSigningPrewarm";
-import {
-  CHAIN_ENTRY_STAGE_LABEL,
-  useChainEntrySender,
-} from "./create-drop-content/useChainEntrySender";
+import { useChainEntrySender } from "./create-drop-content/useChainEntrySender";
+import { ChainEntryStageLine } from "./create-drop-content/ChainEntryStageLine";
+import { useDropEnqueue } from "./create-drop-content/useDropEnqueue";
 
 export default function CreateDrop({
   activeDrop,
@@ -650,50 +649,14 @@ export default function CreateDrop({
     ]
   );
 
-  const onDropEnqueued = useCallback(
-    (dropRequest: DropMutationBody) => {
-      // Clear unread divider when user sends a message
-      if (unreadDividerContext) {
-        unreadDividerContext.setUnreadDividerSerialNo(null);
-      }
-
-      // Trigger UI updates
-      onDropAddedToQueue();
-
-      if (dropRequest.drop.drop_type === ApiDropType.Chat) {
-        markChatSubmitted();
-      }
-
-      // Explicitly blur any focused input to close keyboard for drop flows.
-      if (
-        dropRequest.drop.drop_type !== ApiDropType.Chat &&
-        document.activeElement instanceof HTMLElement
-      ) {
-        document.activeElement.blur();
-      }
-    },
-    [markChatSubmitted, onDropAddedToQueue, unreadDividerContext]
-  );
-
-  const enqueueDrop = useCallback(
-    (dropRequest: DropMutationBody): boolean | Promise<boolean> => {
-      if (refusePausedDrop(dropRequest)) return false;
-      const isEntry = dropRequest.drop.drop_type !== ApiDropType.Chat;
-
-      // An entry goes to the 6529 Network once entries do; the answer says
-      // when it went out.
-      const accepted =
-        sendChainEntry && isEntry
-          ? sendChainEntry(dropRequest)
-          : queueDrop(dropRequest);
-      if (accepted === false) {
-        return false;
-      }
-      onDropEnqueued(dropRequest);
-      return accepted;
-    },
-    [onDropEnqueued, queueDrop, refusePausedDrop, sendChainEntry, setToast]
-  );
+  const enqueueDrop = useDropEnqueue({
+    refusePausedDrop,
+    sendChainEntry,
+    queueDrop,
+    onDropAddedToQueue,
+    markChatSubmitted,
+    unreadDividerContext,
+  });
 
   const submitWithGuidelines = useWaveGuidelinesSubmission({
     enqueueDrop,
@@ -820,14 +783,7 @@ export default function CreateDrop({
   return (
     <>
       {dropComposerContent}
-      {chainEntryStage !== null && (
-        <p
-          role="status"
-          className="tw-mb-0 tw-mt-1 tw-px-1 tw-text-xs tw-leading-5 tw-text-iron-400"
-        >
-          {CHAIN_ENTRY_STAGE_LABEL[chainEntryStage]}
-        </p>
-      )}
+      <ChainEntryStageLine stage={chainEntryStage} />
       <CreateDropSubmissionDialogs
         allMention={allMention}
         guidelinesAgreement={guidelinesAgreement}
