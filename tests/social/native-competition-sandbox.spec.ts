@@ -6836,6 +6836,13 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     ).toBeVisible();
     await expect(save).toHaveCount(0);
     await expect(helper).toBeVisible();
+    const checkboxLeft = (await checkmark.boundingBox())!.x;
+    expect(checkboxLeft).toBe(
+      (await panel.getByRole("button", { name: /^Sort by:/ }).boundingBox())!.x
+    );
+    expect(checkboxLeft).toBe(
+      (await panel.getByText(/^Available in wave\s*75$/).boundingBox())!.x
+    );
     const restingRowTop = (await row.boundingBox())!.y;
     await panel
       .getByRole("button", { name: "Select all", exact: true })
@@ -7417,6 +7424,18 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         for (const width of [320, 390]) {
           await page.setViewportSize({ width, height: 844 });
           const sortBounds = (await sort.boundingBox())!;
+          const checkbox = row.getByRole("checkbox");
+          const checkboxLeft = (await row
+            .getByRole("checkbox")
+            .locator("..")
+            .locator('[aria-hidden="true"]')
+            .boundingBox())!.x;
+          expect(checkboxLeft).toBe(sortBounds.x);
+          expect(checkboxLeft).toBe(
+            (await panel.getByText(/^Available in wave/).boundingBox())!.x
+          );
+          expect((await checkbox.boundingBox())!.width).toBe(44);
+          expect((await checkbox.boundingBox())!.height).toBe(44);
           const selectAllBounds = (await selectAll.boundingBox())!;
           expect(
             Math.abs(sortBounds.y - selectAllBounds.y)

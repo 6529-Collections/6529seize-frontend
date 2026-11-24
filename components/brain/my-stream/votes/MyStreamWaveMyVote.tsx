@@ -440,7 +440,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
               >
                 <label
                   htmlFor={selectionInputId}
-                  className="tw-relative tw-flex tw-size-11 tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg"
+                  className="tw-relative tw-flex tw-size-11 tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-start tw-rounded-lg"
                 >
                   <input
                     id={selectionInputId}
