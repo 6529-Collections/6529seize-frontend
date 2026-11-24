@@ -2322,6 +2322,89 @@
       ]
     },
     {
+      "id": "profiles.network-move",
+      "kind": "business_rule",
+      "title": "Identities move to the 6529 Network",
+      "aliases": [
+        "can't edit my profile",
+        "edit profile missing",
+        "profile changes paused",
+        "rep paused",
+        "nic paused",
+        "identity freeze",
+        "6529 Network move"
+      ],
+      "keywords": [
+        "profile",
+        "handle",
+        "rep",
+        "nic",
+        "proxy",
+        "consolidation",
+        "delegation",
+        "freeze",
+        "6529 Network"
+      ],
+      "facts": [
+        "Profiles, handles, ratings, consolidations and delegations move from 6529.io to the 6529 Network. A notice above the profile tabs says when.",
+        "From the freeze (Wednesday 25 November 2026 00:00 UTC) you can't change them for about 24 hours. Edit profile, Add statement, statement removal, Set primary, Add wallet, Rep and NIC rating, group bulk ratings, Assign Proxy and new Allocate Rep or Allocate NIC proxy actions, and Create profile are paused or hidden, and a request sent anyway shows Paused for the move to the 6529 Network.",
+        "From the switch-on (Thursday 26 November 2026 00:00 UTC) you change them on the 6529 Network, through this site.",
+        "Wave and drop ratings, follows, artwork alerts and profile preferences are not affected.",
+        "From the freeze, new delegations and consolidations on NFTDelegation don't count for 6529. Delegations and consolidations as of the freeze moved to the 6529 Network. The Delegation Center under /safe-collecting says so on every page.",
+        "NextGen mints still read delegations from NFTDelegation, not from the 6529 Network."
+      ],
+      "canonical_path": "/{user}",
+      "related_paths": ["/{user}", "/{user}/proxy", "/network", "/safe-collecting"],
+      "tags": ["profiles", "rep", "proxy"],
+      "source_refs": [
+        "ops/docs/profiles/feature-identity-move-to-6529-network.md",
+        "lib/identity-move/schedule.ts"
+      ]
+    },
+    {
+      "id": "profiles.network-identity",
+      "kind": "route",
+      "environments": ["local", "staging"],
+      "title": "Your identity on the 6529 Network",
+      "aliases": [
+        "6529 Network identity",
+        "create identity",
+        "claim handle",
+        "add wallet",
+        "remove wallet",
+        "sign on this browser",
+        "REP left to give",
+        "get fake6529",
+        "fees on the 6529 Network"
+      ],
+      "keywords": [
+        "identity",
+        "handle",
+        "profile",
+        "wallet",
+        "fees",
+        "fake6529",
+        "session key",
+        "delegation"
+      ],
+      "facts": [
+        "/network/identity shows the connected wallet's identity on the 6529 Network: create an identity, get $fake6529 for fees, move $fake6529 to the identity, see the REP and NIC left to give, claim a handle, save the profile, add or remove wallets, and give this browser a key.",
+        "Each change shows the most it can cost in $fake6529 before the wallet is asked, then waits until the 6529 Network has made it final. The identity pays for its own changes; the wallet pays for creating an identity and for moving $fake6529.",
+        "Your TDH is the most REP you can give across everyone, and the most NIC. The page and the REP and NIC forms on profile pages show what is left, read from the 6529 Network.",
+        "Sign on this browser: the wallet signs once to give this browser a key for 30 days that signs REP, NIC and profile changes without a wallet prompt each time.",
+        "Adding a wallet needs both wallets: the identity's wallet signs first, and 6529.io holds that signature. The new wallet then signs in to 6529.io, on any device, opens /network/identity and signs the request there.",
+        "Removing a wallet shows, before signing, the date until which that wallet can't join another identity or create one, from the 6529 Network's rule. It can rejoin the same identity at any time.",
+        "The Delegation Center landing page lists, registers and revokes delegations on the 6529 Network."
+      ],
+      "canonical_path": "/network/identity",
+      "related_paths": ["/network/identity", "/safe-collecting"],
+      "tags": ["profiles", "identity", "delegation"],
+      "source_refs": [
+        "ops/docs/profiles/feature-identity-on-6529-network.md",
+        "lib/chain-identity/identityOps.ts"
+      ]
+    },
+    {
       "id": "profiles.brain-tab",
       "kind": "route",
       "title": "Profile Brain tab",

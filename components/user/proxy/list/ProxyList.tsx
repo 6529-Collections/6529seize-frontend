@@ -8,6 +8,7 @@ import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import ProxyListItem from "./ProxyListItem";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import Button from "@/components/utils/button/Button";
+import { useIdentityEditingPaused } from "@/hooks/useIdentityMovePhase";
 
 export enum ProfileProxyListType {
   ALL = "ALL",
@@ -37,12 +38,15 @@ export default function ProxyList({
   const [proxyType, setProxyType] = useState<ProfileProxyListType>(
     ProfileProxyListType.ALL
   );
+  // Every action this form offers gives REP or NIC, which move to the
+  // 6529 Network at the freeze.
+  const identityEditingPaused = useIdentityEditingPaused();
 
   return (
     <div className="tailwind-scope tw-space-y-6">
       <div className="tw-mt-4 sm:tw-mt-6 tw-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-3">
         <ProxyListFilters selected={proxyType} setSelected={setProxyType} />
-        {isSelf && (
+        {isSelf && !identityEditingPaused && (
           <CommonAnimationOpacity elementClasses="tw-ml-auto tw-shrink-0">
             <Button
               variant="primary"

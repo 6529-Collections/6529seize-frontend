@@ -6,6 +6,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import Button from "@/components/utils/button/Button";
 import type { ButtonSize } from "@/components/utils/button/buttonStyles";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useIdentityEditingPaused } from "@/hooks/useIdentityMovePhase";
 import { t } from "@/i18n/messages";
 
 export default function UserPageIdentityStatementsAddButton({
@@ -18,6 +19,11 @@ export default function UserPageIdentityStatementsAddButton({
   const locale = useBrowserLocale();
   const [isAddStatementsOpen, setIsAddStatementsOpen] =
     useState<boolean>(false);
+  const identityEditingPaused = useIdentityEditingPaused();
+
+  if (identityEditingPaused) {
+    return null;
+  }
 
   return (
     <div>

@@ -9,6 +9,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useIdentityEditingPaused } from "@/hooks/useIdentityMovePhase";
 import { t } from "@/i18n/messages";
 export default function UserPageIdentityStatementsStatementsList({
   statements,
@@ -24,7 +25,11 @@ export default function UserPageIdentityStatementsStatementsList({
   const locale = useBrowserLocale();
   const { address } = useSeizeConnectContext();
   const { activeProfileProxy } = useContext(AuthContext);
-  const canEdit = amIUser({ profile, address }) && !activeProfileProxy;
+  const identityEditingPaused = useIdentityEditingPaused();
+  const canEdit =
+    amIUser({ profile, address }) &&
+    !activeProfileProxy &&
+    !identityEditingPaused;
 
   if (loading) {
     return (

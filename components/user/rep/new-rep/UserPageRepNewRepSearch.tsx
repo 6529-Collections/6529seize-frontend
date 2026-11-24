@@ -35,12 +35,18 @@ import {
   ReactQueryWrapperContext,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { AuthContext } from "@/components/auth/Auth";
+import {
+  chainRatingBlockedText,
+  chainRatingFailureText,
+} from "@/components/chain-identity/chainErrorMessage";
+import { useChainRatingWriter } from "@/components/chain-identity/useChainRatingWriter";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
 import { RATING_INPUT_SURFACE_CLASS } from "@/components/user/utils/rate/ratingInputStyles";
 import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
+import ChainRatingNote from "@/components/chain-identity/ChainRatingNote";
 import { useRepAllocation } from "@/hooks/useRepAllocation";
 import { getRepCategoryViolation } from "@/components/utils/input/rep-category/repCategoryValidation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -156,6 +162,7 @@ function GrantRepForm({
   const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
+  const chainWrite = useChainRatingWriter();
 
   const [repSearch, setRepSearch] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -247,6 +254,7 @@ function GrantRepForm({
     heroAvailableRep,
     minMaxValues,
     isError,
+    chainError,
     retry,
   } = useRepAllocation({
     profile,
@@ -385,10 +393,12 @@ function GrantRepForm({
       amount: number;
       category: string;
     }) =>
-      await commonApiPost<{ amount: number; category: string }, void>({
-        endpoint: `profiles/${profile.query ?? ""}/rep/rating`,
-        body: { amount, category },
-      }),
+      chainWrite
+        ? await chainWrite({ matter: "REP", profile, category, amount })
+        : await commonApiPost<{ amount: number; category: string }, void>({
+            endpoint: `profiles/${profile.query ?? ""}/rep/rating`,
+            body: { amount, category },
+          }),
     onSuccess: async () => {
       setToast({
         message: t(locale, "rep.categories.grant.toast.updated"),
@@ -411,11 +421,15 @@ function GrantRepForm({
       setToast({
         type: "error",
         title: t(locale, "rep.categories.grant.toast.updateFailed"),
-        description: t(locale, "rep.categories.grant.toast.tryAgain"),
-        details: getToastErrorDetails(
-          error,
-          getErrorMessage(error, t(locale, GENERIC_ERROR_KEY))
-        ),
+        ...(chainWrite
+          ? { description: chainRatingFailureText(locale, error) }
+          : {
+              description: t(locale, "rep.categories.grant.toast.tryAgain"),
+              details: getToastErrorDetails(
+                error,
+                getErrorMessage(error, t(locale, GENERIC_ERROR_KEY))
+              ),
+            }),
       });
     },
   });
@@ -426,7 +440,8 @@ function GrantRepForm({
     if (Number.isNaN(amount)) return;
     setMutating(true);
     try {
-      const { success } = await requestAuth();
+      // On the 6529 Network the rating carries its own signature.
+      const { success } = chainWrite ? { success: true } : await requestAuth();
       if (!success) {
         setToast({
           message: t(locale, "rep.categories.grant.toast.loginRequired"),
@@ -520,6 +535,7 @@ function GrantRepForm({
             overAllowance={overAllowance}
             id={availableRepId}
           />
+          <ChainRatingNote />
           <form
             ref={listRef}
             onSubmit={onSearchSubmit}
@@ -704,10 +720,14 @@ function GrantRepForm({
 
           {isError && (
             <div role="alert" className="tw-mt-3 tw-text-xs tw-text-iron-400">
-              {t(locale, "rep.categories.edit.loadError")}{" "}
-              <Button variant="ghost" size="sm" onClick={retry}>
-                {t(locale, "rep.categories.edit.retry")}
-              </Button>
+              {chainRatingBlockedText(locale, chainError) ?? (
+                <>
+                  {t(locale, "rep.categories.edit.loadError")}{" "}
+                  <Button variant="ghost" size="sm" onClick={retry}>
+                    {t(locale, "rep.categories.edit.retry")}
+                  </Button>
+                </>
+              )}
             </div>
           )}
           {formError && (
