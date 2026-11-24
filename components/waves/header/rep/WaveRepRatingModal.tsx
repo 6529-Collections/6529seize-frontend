@@ -21,11 +21,20 @@ import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useWaveRepAllocation } from "@/hooks/useWaveRepAllocation";
 import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWriters";
+import { useChainWavesActive } from "@/hooks/useWavesMovePhase";
+import { isRepCategoryName } from "@/lib/chain/codec/rules";
 import { scheduleIndexRefresh } from "@/lib/chain-waves/optimistic";
 import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useContext, useEffect, useId, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
 
 const WAVE_REP_CATEGORY_PATTERN = /^[\p{L}\p{N}?!,.'() ]{1,100}$/u;
 const CATEGORY_SETTLE_DELAY_MS = 350;
@@ -64,15 +73,24 @@ export default function WaveRepRatingModal({
       waveId: wave.id,
       category: settledCategory || null,
     });
+  // On the 6529 Network a category name is ASCII letters, digits, spaces
+  // and & ' . - _, starting with a letter or digit.
+  const chainActive = useChainWavesActive();
+  const categoryAllowed = useCallback(
+    (name: string) =>
+      WAVE_REP_CATEGORY_PATTERN.test(name) &&
+      (!chainActive || isRepCategoryName(name)),
+    [chainActive]
+  );
   useKeyboardFocusScroll(contentRef);
 
   useEffect(() => {
-    if (WAVE_REP_CATEGORY_PATTERN.test(debouncedCategory)) {
+    if (categoryAllowed(debouncedCategory)) {
       setSettledCategory(debouncedCategory);
     }
-  }, [debouncedCategory]);
+  }, [debouncedCategory, categoryAllowed]);
 
-  const categoryValid = WAVE_REP_CATEGORY_PATTERN.test(trimmedCategory);
+  const categoryValid = categoryAllowed(trimmedCategory);
   const categorySettled = trimmedCategory === settledCategory;
   const allocationReady = categoryValid && categorySettled && !isLoading;
 
@@ -335,7 +353,9 @@ export default function WaveRepRatingModal({
             >
               {categoryValid
                 ? ""
-                : "Use 1-100 letters, numbers, spaces, apostrophes, or basic punctuation."}
+                : WAVE_REP_CATEGORY_PATTERN.test(trimmedCategory)
+                  ? "On the 6529 Network a category uses only letters A-Z, numbers, single spaces and & ' . - _, and starts with a letter or number."
+                  : "Use 1-100 letters, numbers, spaces, apostrophes, or basic punctuation."}
             </p>
           </div>
 

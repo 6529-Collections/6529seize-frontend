@@ -28,6 +28,7 @@ jest.mock("@/services/api/common-api", () => ({
 
 jest.mock("@/hooks/useWavesMovePhase", () => ({
   useWavesWritesPaused: jest.fn(() => false),
+  useChainWavesActive: jest.fn(() => false),
 }));
 jest.mock("@/components/chain-waves/useChainWavesWriters", () => ({
   useChainWavesWriters: jest.fn(() => null),
@@ -325,6 +326,27 @@ describe("WaveRepRatingModal", () => {
       expect(commonApiPostMock).not.toHaveBeenCalled();
     } finally {
       writers.useChainWavesWriters.mockReturnValue(null);
+    }
+  });
+
+  it("holds a category to the 6529 Network's rule once wave REP goes there", async () => {
+    const phase = jest.requireMock("@/hooks/useWavesMovePhase");
+    phase.useChainWavesActive.mockReturnValue(true);
+    try {
+      renderModal();
+      fireEvent.change(screen.getByLabelText("Category"), {
+        target: { value: "Art, design" },
+      });
+      expect(
+        await screen.findByText(
+          "On the 6529 Network a category uses only letters A-Z, numbers, single spaces and & ' . - _, and starts with a letter or number."
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Save Wave REP" })
+      ).toBeDisabled();
+    } finally {
+      phase.useChainWavesActive.mockReturnValue(false);
     }
   });
 
