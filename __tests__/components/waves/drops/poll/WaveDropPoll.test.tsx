@@ -1,5 +1,3 @@
-import { toApiWaveMin } from "@/helpers/waves/wave.helpers";
-import type { ApiWave } from "@/generated/models/ApiWave";
 import WaveDropPoll from "@/components/waves/drops/poll/WaveDropPoll";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -93,12 +91,11 @@ const createPoll = (overrides: Partial<ApiDropPoll> = {}): ApiDropPoll => ({
 
 interface CreateDropOptions {
   readonly canChat?: boolean;
-  readonly directMessage?: boolean;
 }
 
 const createDrop = (
   poll: ApiDropPoll,
-  { canChat = true, directMessage = false }: CreateDropOptions = {}
+  { canChat = true }: CreateDropOptions = {}
 ): ApiDrop =>
   ({
     id: "drop-1",
@@ -106,7 +103,6 @@ const createDrop = (
       id: "wave-1",
       name: "Wave 1",
       authenticated_user_eligible_to_chat: canChat,
-      is_direct_message: directMessage,
     },
     poll,
   }) as unknown as ApiDrop;
@@ -226,80 +222,6 @@ describe("WaveDropPoll", () => {
     } finally {
       writers.useChainWavesWriters.mockReturnValue(null);
     }
-  });
-
-  it("keeps a direct message's poll on the pause that doesn't lift, since direct messages don't move", () => {
-    const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
-    renderPoll(createPoll(), { directMessage: true });
-    expect(wavesMove.useWavesWritesPaused).toHaveBeenCalledWith(undefined);
-    renderPoll(createPoll());
-    expect(wavesMove.useWavesWritesPaused).toHaveBeenLastCalledWith("polls");
-  });
-
-  it("finds a direct message from the wave the chat feed gives its drops", () => {
-    const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
-    // The chat feed replaces each drop's wave with toApiWaveMin(wave).
-    const feedWave = (isDirectMessage: boolean) =>
-      toApiWaveMin({
-        id: "wave-1",
-        name: "Wave 1",
-        picture: null,
-        description_drop: { id: "drop-0" },
-        last_drop_time: 0,
-        author: { handle: "author" },
-        voting: {
-          authenticated_user_eligible: true,
-          scope: { group: null },
-          period: null,
-          credit_type: "TDH",
-          forbid_negative_votes: false,
-          credit_nfts: [],
-          credit_scope: "WAVE",
-        },
-        participation: {
-          authenticated_user_eligible: true,
-          scope: { group: null },
-          submission_strategy: null,
-        },
-        chat: {
-          authenticated_user_eligible: true,
-          scope: {
-            group: { id: "group-1", is_direct_message: isDirectMessage },
-          },
-          links_disabled: false,
-        },
-        visibility: { scope: { group: null } },
-        wave: {
-          authenticated_user_eligible_for_admin: false,
-          admin_group: { group: null },
-          admin_drop_deletion_enabled: false,
-        },
-        pinned: false,
-        identity_wave: false,
-      } as unknown as ApiWave);
-    const renderFromFeed = (isDirectMessage: boolean) =>
-      render(
-        <QueryClientProvider client={new QueryClient()}>
-          <WaveDropPoll
-            drop={
-              {
-                id: "drop-1",
-                wave: feedWave(isDirectMessage),
-                poll: createPoll(),
-              } as unknown as ApiDrop
-            }
-          />
-        </QueryClientProvider>
-      );
-
-    wavesMove.useWavesWritesPaused.mockClear();
-    renderFromFeed(true);
-    expect(wavesMove.useWavesWritesPaused).toHaveBeenCalledWith(undefined);
-    expect(wavesMove.useWavesWritesPaused).not.toHaveBeenCalledWith("polls");
-
-    wavesMove.useWavesWritesPaused.mockClear();
-    renderFromFeed(false);
-    expect(wavesMove.useWavesWritesPaused).toHaveBeenCalledWith("polls");
   });
 
   it("keeps unrestricted polls voteable when the viewer cannot chat", () => {

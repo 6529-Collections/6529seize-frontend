@@ -52,6 +52,18 @@ describe("toApiWaveMin and the move to the 6529 Network", () => {
     }
   );
 
+  it("carries whether the wave is a direct message, from its chat group", () => {
+    const dm = wave({
+      chat: {
+        authenticated_user_eligible: true,
+        scope: { group: { id: "g1", is_direct_message: true } },
+        links_disabled: false,
+      },
+    });
+    expect(toApiWaveMin(dm).is_direct_message).toBe(true);
+    expect(toApiWaveMin(wave({})).is_direct_message).toBe(false);
+  });
+
   it("adds nothing when the API doesn't send it", () => {
     expect(toApiWaveMin(wave({}))).not.toHaveProperty("stays_on_site");
   });

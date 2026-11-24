@@ -202,11 +202,9 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
   const isViewerChatEligible =
     waveEligibility?.authenticated_user_eligible_to_chat ??
     drop.wave.authenticated_user_eligible_to_chat;
-  // Poll ballots move to the 6529 Network: the results stay readable.
-  // Direct-message waves don't move there, so their polls stay paused.
-  const pollBallotsPaused = useWavesWritesPaused(
-    drop.wave.is_direct_message === true ? undefined : "polls"
-  );
+  // Poll ballots move to the 6529 Network: the results stay readable. A
+  // poll in a wave that stays on 6529.io (direct messages too) keeps working.
+  const pollBallotsPaused = useWavesWritesPaused("polls");
   const canRespondToPoll =
     !pollBallotsPaused &&
     getCanRespondToPoll({
