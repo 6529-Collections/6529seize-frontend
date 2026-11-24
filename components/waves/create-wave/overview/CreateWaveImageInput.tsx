@@ -7,7 +7,9 @@ import type { ChangeEvent, DragEvent } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 
 import { WAVE_IMAGE_TYPES, getWaveImageFileError } from "./wave-image-file";
-const ACCEPTED_FORMATS_DISPLAY = WAVE_IMAGE_TYPES.join(",");
+const ACCEPTED_FORMATS_DISPLAY = WAVE_IMAGE_TYPES.map(
+  (format) => `.${format.replace("image/", "")}`
+).join(", ");
 
 const getFirstFile = (
   files: FileList | readonly File[] | null | undefined
