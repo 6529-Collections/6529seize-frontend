@@ -1515,7 +1515,7 @@ describe("HeaderShare", () => {
         await screen.findByRole("heading", { name: "Connect Device" })
       ).toBeInTheDocument();
       const modal = screen.getByTestId("header-share-modal");
-      expect(modal).toHaveClass("tw-max-w-md");
+      expect(modal).toHaveClass("tw-max-w-md", "sm:tw-max-w-xl");
       expect(modal.querySelector("#header-share-content")).toBeNull();
       expect(
         screen.getByRole("button", { name: "6529 Mobile" })
