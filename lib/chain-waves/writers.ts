@@ -234,36 +234,17 @@ async function ballotWallet(
   minTdh: bigint,
   signal?: AbortSignal
 ): Promise<BallotThrough> {
-  let below: BallotThrough | null = null;
   const candidates = [
     wallet,
     ...identity.wallets.filter((item) => lower(item) !== lower(wallet)),
   ];
+  let below: BallotThrough | null = null;
   for (const candidate of candidates) {
-    // The poll counts the cluster on its snapshot day; a node keeps the
-    // latest two days, so an older poll reads today's list instead.
-    const onDay = await wavesGateway.getTdhDayWallet(
-      snapshotDay,
-      candidate,
-      signal
-    );
-    const leaf =
-      onDay === undefined
-        ? (await wavesGateway.getTdhWallet(candidate, signal))?.leaf
-        : onDay;
-    if (leaf) {
-      const alone = leaf.walletCount > CLUSTER_MAX;
-      const readTdh = alone ? leaf.walletTdh : leaf.identityTdh;
-      const through: BallotThrough = {
-        wallet: candidate,
-        cid: alone ? loneClusterCid(candidate) : leaf.cid,
-        tdh: onDay === undefined ? null : asBigInt(readTdh),
-      };
-      if (through.tdh === null || through.tdh >= minTdh) {
-        return through;
-      }
-      below ??= through;
+    const through = await throughWallet(candidate, snapshotDay, signal);
+    if (through && (through.tdh === null || through.tdh >= minTdh)) {
+      return through;
     }
+    below ??= through;
   }
   if (below) {
     return below;
@@ -272,6 +253,31 @@ async function ballotWallet(
     "rejected",
     "None of this identity's wallets holds TDH, so it has no ballot in this poll."
   );
+}
+
+/** How a ballot through `wallet` is counted, or null when it holds no TDH. */
+async function throughWallet(
+  wallet: Hex,
+  snapshotDay: number,
+  signal?: AbortSignal
+): Promise<BallotThrough | null> {
+  // The poll counts the cluster on its snapshot day; a node keeps the
+  // latest two days, so an older poll reads today's list instead.
+  const onDay = await wavesGateway.getTdhDayWallet(snapshotDay, wallet, signal);
+  const leaf =
+    onDay === undefined
+      ? (await wavesGateway.getTdhWallet(wallet, signal))?.leaf
+      : onDay;
+  if (!leaf) {
+    return null;
+  }
+  const alone = leaf.walletCount > CLUSTER_MAX;
+  const readTdh = alone ? leaf.walletTdh : leaf.identityTdh;
+  return {
+    wallet,
+    cid: alone ? loneClusterCid(wallet) : leaf.cid,
+    tdh: onDay === undefined ? null : asBigInt(readTdh),
+  };
 }
 
 /**
