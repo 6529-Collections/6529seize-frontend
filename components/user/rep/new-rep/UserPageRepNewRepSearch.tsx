@@ -6,7 +6,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
+import { commonApiFetch } from "@/services/api/common-api";
 import {
   useCallback,
   useContext,
@@ -35,14 +35,8 @@ import {
   ReactQueryWrapperContext,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { AuthContext } from "@/components/auth/Auth";
-import {
-  chainRatingBlockedText,
-  chainRatingFailureText,
-} from "@/components/chain-identity/chainErrorMessage";
-import { useChainRatingWriter } from "@/components/chain-identity/useChainRatingWriter";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
-import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
 import { RATING_INPUT_SURFACE_CLASS } from "@/components/user/utils/rate/ratingInputStyles";
 import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
@@ -57,6 +51,7 @@ import GrantRepCategorySuggestions from "./GrantRepCategorySuggestions";
 import GrantRepSubmissionGuidance from "./GrantRepSubmissionGuidance";
 import GrantRepStats from "./GrantRepStats";
 import useRepCategoryNavigation from "./useRepCategoryNavigation";
+import { useGrantRepWrite } from "./useGrantRepWrite";
 
 import { isRatingValue } from "../ratingsManagement";
 
@@ -161,9 +156,9 @@ function GrantRepForm({
   }, []);
   const queryClient = useQueryClient();
   const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
-  const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
+  const { setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
-  const chainWrite = useChainRatingWriter();
+  const grantRep = useGrantRepWrite(profile);
 
   const [repSearch, setRepSearch] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -387,19 +382,7 @@ function GrantRepForm({
   };
 
   const addRepMutation = useMutation({
-    mutationFn: async ({
-      amount,
-      category,
-    }: {
-      amount: number;
-      category: string;
-    }) =>
-      chainWrite
-        ? await chainWrite({ matter: "REP", profile, category, amount })
-        : await commonApiPost<{ amount: number; category: string }, void>({
-            endpoint: `profiles/${profile.query ?? ""}/rep/rating`,
-            body: { amount, category },
-          }),
+    mutationFn: grantRep.write,
     onSuccess: async () => {
       setToast({
         message: t(locale, "rep.categories.grant.toast.updated"),
@@ -422,15 +405,10 @@ function GrantRepForm({
       setToast({
         type: "error",
         title: t(locale, "rep.categories.grant.toast.updateFailed"),
-        ...(chainWrite
-          ? { description: chainRatingFailureText(locale, error) }
-          : {
-              description: t(locale, "rep.categories.grant.toast.tryAgain"),
-              details: getToastErrorDetails(
-                error,
-                getErrorMessage(error, t(locale, GENERIC_ERROR_KEY))
-              ),
-            }),
+        ...grantRep.failureToast(
+          error,
+          getErrorMessage(error, t(locale, GENERIC_ERROR_KEY))
+        ),
       });
     },
   });
@@ -441,8 +419,7 @@ function GrantRepForm({
     if (Number.isNaN(amount)) return;
     setMutating(true);
     try {
-      // On the 6529 Network the rating carries its own signature.
-      const { success } = chainWrite ? { success: true } : await requestAuth();
+      const { success } = await grantRep.signIn();
       if (!success) {
         setToast({
           message: t(locale, "rep.categories.grant.toast.loginRequired"),
@@ -755,7 +732,7 @@ function GrantRepForm({
 
           {isError && (
             <div role="alert" className="tw-mt-3 tw-text-xs tw-text-iron-400">
-              {chainRatingBlockedText(locale, chainError) ?? (
+              {grantRep.blockedText(chainError) ?? (
                 <>
                   {t(locale, "rep.categories.edit.loadError")}{" "}
                   <Button variant="ghost" size="sm" onClick={retry}>
