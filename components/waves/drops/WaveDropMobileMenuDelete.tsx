@@ -10,12 +10,17 @@ import { isSignedWriteCancelled } from "@/lib/device-signing/signing-decision";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { AuthContext } from "@/components/auth/Auth";
 import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
-import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
+import {
+  chainWriteDetails,
+  chainWriteFailure,
+} from "@/components/chain-waves/chainWavesErrorMessage";
 import {
   invalidateChainEntryQueries,
   useChainEntryWriters,
 } from "@/components/chain-waves/useChainEntryWriters";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { ChainEntryPendingError } from "@/lib/chain-waves/entryWriters";
 import Button from "@/components/utils/button/Button";
 
 interface WaveDropMobileMenuDeleteProps {
@@ -32,6 +37,7 @@ const WaveDropMobileMenuDelete: React.FC<WaveDropMobileMenuDeleteProps> = ({
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
   const { processDropRemoved } = useMyStreamActions();
   const queryClient = useQueryClient();
+  const locale = useBrowserLocale();
   // On the 6529 Network an entry's delete is its author's withdrawal; the
   // delete controls offer it to the author only.
   const chainEntries = useChainEntryWriters();
@@ -62,13 +68,25 @@ const WaveDropMobileMenuDelete: React.FC<WaveDropMobileMenuDeleteProps> = ({
       if (isSignedWriteCancelled(error) || isUserRejectedSigningError(error)) {
         return;
       }
+      // Sent, not final yet: it may still land.
+      if (error instanceof ChainEntryPendingError) {
+        setToast({ message: error.message, type: "warning" });
+        return;
+      }
+      // The 6529 Network's reason in plain words, with no second line;
+      // 6529.io's own wording for its delete.
       setToast({
         type: "error",
         title: chainWithdrawal
           ? "Couldn't withdraw this entry."
           : "Couldn't delete this drop.",
-        description: "Please try again.",
-        details: getToastErrorDetails(error),
+        description: chainWriteFailure(
+          locale,
+          error,
+          "Please try again.",
+          "withdrawal"
+        ),
+        details: chainWriteDetails(error),
       });
     },
     onSettled: () => {

@@ -9,7 +9,9 @@ import type { TraitsData } from "@/components/waves/memes/submission/types/Trait
 import { commonApiPost } from "@/services/api/common-api";
 import { getAuthStateFingerprint } from "@/services/auth/auth-token-fingerprint";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, renderHook, waitFor } from "@testing-library/react";
+import { act, render, renderHook, waitFor } from "@testing-library/react";
+import { AppToastContent } from "@/components/utils/toast/AppToast";
+import { ChainOperationError } from "@/lib/chain-identity/operation";
 import type { ReactNode } from "react";
 import { prepareProposalCard } from "@/components/waves/memes/submission/utils/prepareProposalCard";
 import { createInitialState } from "@/components/waves/memes/submission/hooks/artworkSubmissionFormState";
@@ -434,4 +436,52 @@ describe("useArtworkSubmissionMutation on the 6529 Network", () => {
     expect(mockNativeEntry).not.toHaveBeenCalled();
     expect(setToast).not.toHaveBeenCalled();
   });
+
+  it.each([
+    [
+      "a refusal before anything was sent",
+      new ChainOperationError(
+        "rejected",
+        "This wallet has no identity on the 6529 Network yet."
+      ),
+      "This wallet has no identity on the 6529 Network yet.",
+    ],
+    [
+      "a block's refusal",
+      new ChainOperationError(
+        "failed",
+        "The 6529 Network refused this change: ENTRY_LIMIT.",
+        "ENTRY_LIMIT"
+      ),
+      "The change didn't go through, and its fee was still charged. You already have as many entries in this decision as it allows.",
+    ],
+  ])(
+    "shows the network's reason for %s, not 6529.io's connection error",
+    async (_case, error, reason) => {
+      mockChainEntrySubmit.mockRejectedValue(error);
+      const { result, setToast } = setupHook();
+      await act(async () => {
+        await result.current.submitArtwork(
+          submissionData,
+          "0xabc",
+          false,
+          submitOptions
+        );
+      });
+      // The form's error line.
+      expect(result.current.submissionPhase).toBe("error");
+      expect(result.current.submissionError).toBe(reason);
+      // The toast, as 6529.io shows it through its own toast helpers.
+      expect(setToast).toHaveBeenCalledTimes(1);
+      expect(setToast.mock.calls[0][0].details).toBeUndefined();
+      const toast = render(
+        <AppToastContent toast={setToast.mock.calls[0][0]} />
+      ).container;
+      expect(toast).toHaveTextContent("Couldn't submit this artwork.");
+      expect(toast).toHaveTextContent(reason);
+      expect(toast).not.toHaveTextContent(
+        /Network error|Wallet error|Please try again/
+      );
+    }
+  );
 });

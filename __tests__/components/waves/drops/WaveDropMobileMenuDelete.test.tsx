@@ -6,6 +6,9 @@ import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { deleteDrop } from "@/services/api/signed-drop-writes";
+import { AppToastContent } from "@/components/utils/toast/AppToast";
+import { ChainOperationError } from "@/lib/chain-identity/operation";
+import { ChainEntryPendingError } from "@/lib/chain-waves/entryWriters";
 
 jest.mock("framer-motion", () => ({
   motion: {
@@ -140,9 +143,12 @@ describe("WaveDropMobileMenuDelete", () => {
       expect(mockProcessDropRemoved).toHaveBeenCalledWith("w", "1");
     });
 
-    it("says when the withdrawal fails", async () => {
+    it("says why the withdrawal failed, in the network's words", async () => {
       mockWithdrawEntry.mockRejectedValue(
-        new Error("This entry is no longer in the running.")
+        new ChainOperationError(
+          "rejected",
+          "This wallet has no identity on the 6529 Network yet."
+        )
       );
       const user = userEvent.setup();
       renderComponent();
@@ -155,11 +161,48 @@ describe("WaveDropMobileMenuDelete", () => {
           expect.objectContaining({
             type: "error",
             title: "Couldn't withdraw this entry.",
+            description: "This wallet has no identity on the 6529 Network yet.",
+            details: undefined,
           })
         )
       );
+      // As 6529.io shows it, through its own toast helpers.
+      const shown = render(
+        <AppToastContent toast={setToast.mock.calls.at(-1)?.[0]} />
+      ).container;
+      expect(shown).toHaveTextContent(
+        "This wallet has no identity on the 6529 Network yet."
+      );
+      expect(shown).not.toHaveTextContent(
+        /Network error|Wallet error|Please try again/
+      );
       expect(onDropDeleted).not.toHaveBeenCalled();
       expect(screen.getByText("Are you sure?")).toBeInTheDocument();
+    });
+
+    it("says a withdrawal that isn't final yet was sent", async () => {
+      mockWithdrawEntry.mockRejectedValue(
+        new ChainEntryPendingError(
+          "Your withdrawal was sent to the 6529 Network but isn't final yet. Check again in a few minutes.",
+          null
+        )
+      );
+      const user = userEvent.setup();
+      renderComponent();
+
+      await user.click(screen.getByText("Withdraw"));
+      await user.click(screen.getByText("Are you sure?"));
+
+      await waitFor(() =>
+        expect(setToast).toHaveBeenCalledWith({
+          message:
+            "Your withdrawal was sent to the 6529 Network but isn't final yet. Check again in a few minutes.",
+          type: "warning",
+        })
+      );
+      expect(setToast).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: "error" })
+      );
     });
 
     it("stays quiet when the wallet prompt is declined", async () => {

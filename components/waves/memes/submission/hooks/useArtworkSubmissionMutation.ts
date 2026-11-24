@@ -30,6 +30,7 @@ import {
   type ProposalFrameMetadata,
 } from "@/lib/proposal-card/metadata";
 import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
+import { chainWriteFailure } from "@/components/chain-waves/chainWavesErrorMessage";
 import {
   invalidateChainEntryQueries,
   useChainEntrySubmit,
@@ -56,6 +57,20 @@ export type SubmittedArtwork = ApiDrop | ChainSubmittedArtwork;
 export const isChainSubmittedArtwork = (
   artwork: SubmittedArtwork
 ): artwork is ChainSubmittedArtwork => "chainEntry" in artwork;
+
+/**
+ * The 6529 Network's reason an entry didn't go in, in plain words (a
+ * refusal from a block says the fee was charged), or null for 6529.io's
+ * own errors. 6529.io's sanitizer would read "Network" or "wallet" in it
+ * as a connection problem.
+ */
+const chainEntryFailure = (
+  locale: ReturnType<typeof useBrowserLocale>,
+  error: unknown
+): string | null => {
+  const reason = chainWriteFailure(locale, error, "", "entry");
+  return reason === "" ? null : reason;
+};
 
 /**
  * Interface for the artwork submission data
@@ -205,6 +220,7 @@ function useArtworkSubmissionPost(
   ) => void
 ) {
   const { setToast, requestAuth } = useAuth();
+  const locale = useBrowserLocale();
   const submitCompetitionEntry = useCompetitionEntrySubmit(competition);
   const submitChainEntry = useChainEntrySubmit(competition);
   const queryClient = useQueryClient();
@@ -308,6 +324,16 @@ function useArtworkSubmissionPost(
       if (error.message === ACTIVE_WALLET_CHANGED_ERROR) {
         updatePhase("error", variables.callbacks, error.message);
         setToast({ message: variables.identityChangedMessage, type: "error" });
+        return;
+      }
+      const chainReason = chainEntryFailure(locale, error);
+      if (chainReason !== null) {
+        updatePhase("error", variables.callbacks, chainReason);
+        setToast({
+          type: "error",
+          title: "Couldn't submit this artwork.",
+          description: chainReason,
+        });
         return;
       }
       const errorMsg =
@@ -570,9 +596,10 @@ export function useArtworkSubmissionMutation(
         return null;
       }
       const errorMessage =
-        error instanceof Error
+        chainEntryFailure(locale, error) ??
+        (error instanceof Error
           ? error.message
-          : "Submission failed. Please try again.";
+          : "Submission failed. Please try again.");
       updatePhase(
         "error",
         { onPhaseChange: options.onPhaseChange },

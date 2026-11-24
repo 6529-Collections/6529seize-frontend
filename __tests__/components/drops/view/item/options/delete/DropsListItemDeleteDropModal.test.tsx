@@ -6,6 +6,8 @@ import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { useMutation } from "@tanstack/react-query";
+import { AppToastContent } from "@/components/utils/toast/AppToast";
+import { ChainOperationError } from "@/lib/chain-identity/operation";
 
 jest.mock("@tanstack/react-query");
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
@@ -203,6 +205,38 @@ describe("DropsListItemDeleteDropModal", () => {
       expect(mockInvalidateChainEntryQueries).toHaveBeenCalledWith(
         undefined,
         "w"
+      );
+    });
+
+    it("says the network's reason for a refused withdrawal, with no second line", async () => {
+      const refusal = new ChainOperationError(
+        "failed",
+        "The 6529 Network refused this change: ENTRY_NOT_ACTIVE.",
+        "ENTRY_NOT_ACTIVE"
+      );
+      useMutationMock.mockImplementation((opts) => ({
+        mutateAsync: async () => {
+          opts.onError?.(refusal);
+          opts.onSettled?.();
+          throw refusal;
+        },
+      }));
+      const user = userEvent.setup();
+      renderModal();
+
+      await user.click(screen.getByRole("button", { name: "Withdraw" }));
+
+      await waitFor(() => expect(auth.setToast).toHaveBeenCalled());
+      const toast = auth.setToast.mock.calls[0][0];
+      expect(toast.details).toBeUndefined();
+      // As 6529.io shows it, through its own toast helpers.
+      const shown = render(<AppToastContent toast={toast} />).container;
+      expect(shown).toHaveTextContent("Couldn't withdraw this entry.");
+      expect(shown).toHaveTextContent(
+        "The change didn't go through, and its fee was still charged. This entry is no longer in the running, so it can't be withdrawn."
+      );
+      expect(shown).not.toHaveTextContent(
+        /Network error|Wallet error|Please try again/
       );
     });
 

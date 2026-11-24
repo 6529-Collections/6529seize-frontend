@@ -28,6 +28,11 @@ import {
 } from "@/helpers/waves/drop.helpers";
 import { fetchWaveMetadata } from "@/services/api/waves-v2-api";
 import { ChainEntryPendingError } from "@/lib/chain-waves/entryWriters";
+import { ChainOperationError } from "@/lib/chain-identity/operation";
+import {
+  AppToastContent,
+  type AppToastInput,
+} from "@/components/utils/toast/AppToast";
 
 const mockReportDropSubmissionFailure = jest.fn();
 jest.mock("@/utils/monitoring/dropSubmissionMonitoring", () => ({
@@ -1554,6 +1559,11 @@ describe("CreateDrop", () => {
   });
 
   describe("on the 6529 Network", () => {
+    /** The toast as 6529.io shows it, through its own toast helpers. */
+    const shownToast = (toast: AppToastInput) =>
+      render(<AppToastContent toast={toast} />).container;
+    const SANITIZED = /Network error|Wallet error|Please try again/;
+
     const renderComposer = (
       fixedDropMode: DropMode,
       setToast: jest.Mock = jest.fn(),
@@ -1630,7 +1640,10 @@ describe("CreateDrop", () => {
     it("says why the 6529 Network didn't take an entry", async () => {
       const setToast = jest.fn();
       mockChainEntrySubmit.mockRejectedValue(
-        new Error("This decision isn't on the 6529 Network.")
+        new ChainOperationError(
+          "rejected",
+          "This decision isn't on the 6529 Network."
+        )
       );
       renderComposer(DropMode.PARTICIPATION, setToast);
 
@@ -1641,9 +1654,16 @@ describe("CreateDrop", () => {
           expect.objectContaining({
             type: "error",
             title: "Couldn't send this entry to the 6529 Network.",
+            description:
+              "This decision isn't on the 6529 Network. Nothing was sent. Your entry is still here.",
           })
         )
       );
+      const toast = shownToast(setToast.mock.calls[0][0]);
+      expect(toast).toHaveTextContent(
+        "This decision isn't on the 6529 Network."
+      );
+      expect(toast).not.toHaveTextContent(SANITIZED);
       await waitFor(() =>
         expect(mockProcessDropRemoved).toHaveBeenCalledWith(
           "1",
@@ -1776,19 +1796,25 @@ describe("CreateDrop", () => {
           expect.objectContaining({
             type: "error",
             title: "Couldn't send this entry to the 6529 Network.",
-            description: "Nothing was sent. Your entry is still here.",
           })
         )
       );
+      const toast = shownToast(setToast.mock.calls[0][0]);
+      expect(toast).toHaveTextContent(
+        "This wallet has no identity on the 6529 Network yet. Nothing was sent. Your entry is still here."
+      );
+      expect(toast).not.toHaveTextContent(SANITIZED);
     });
 
-    it("says a failure after the entry went out without claiming nothing was sent", async () => {
+    it("says a block's refusal charged the fee, without claiming nothing was sent", async () => {
       const setToast = jest.fn();
       mockChainEntrySubmit.mockImplementation(
         async ({ onStage }: { onStage: (stage: string) => void }) => {
           onStage("sending");
-          throw new Error(
-            "The 6529 Network refused this change: NOT_ELIGIBLE."
+          throw new ChainOperationError(
+            "failed",
+            "The 6529 Network refused this change: NOT_ELIGIBLE.",
+            "NOT_ELIGIBLE"
           );
         }
       );
@@ -1805,7 +1831,13 @@ describe("CreateDrop", () => {
           })
         )
       );
-      expect(setToast.mock.calls[0][0]).not.toHaveProperty("description");
+      expect(setToast.mock.calls[0][0].details).toBeUndefined();
+      const toast = shownToast(setToast.mock.calls[0][0]);
+      expect(toast).toHaveTextContent(
+        "The change didn't go through, and its fee was still charged. You can't enter this decision."
+      );
+      expect(toast).not.toHaveTextContent("Nothing was sent");
+      expect(toast).not.toHaveTextContent(SANITIZED);
     });
 
     it("says an entry a sender already cleared wasn't saved when its prompt is declined", async () => {

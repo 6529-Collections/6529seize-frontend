@@ -57,6 +57,52 @@ describe("chainWavesErrorMessage", () => {
     ).toBe(`${CHARGED} ${sentence}`);
   });
 
+  it.each([
+    ["NOT_ELIGIBLE", "You can't enter this decision."],
+    [
+      "ENTRY_LIMIT",
+      "You already have as many entries in this decision as it allows.",
+    ],
+    ["ACTIVE_ENTRY_LIMIT", "This decision has as many entries as it can take."],
+    ["PARTICIPATION_CLOSED", "This decision isn't taking entries right now."],
+    ["DECISION_NOT_OPEN", "This decision isn't taking entries."],
+    ["NOT_FOUND", "This decision isn't on the 6529 Network."],
+    ["WAVE_CLOSED", "This wave is closed."],
+    [
+      "RESULT_PENDING",
+      "This decision is counting its result. Try again in a few minutes.",
+    ],
+  ])("words %s for an entry", (name, sentence) => {
+    expect(chainWavesErrorMessage("en-US", refused(name), "entry")).toBe(
+      `${CHARGED} ${sentence}`
+    );
+  });
+
+  it.each([
+    [
+      "ENTRY_NOT_ACTIVE",
+      "This entry is no longer in the running, so it can't be withdrawn.",
+    ],
+    ["NOT_AUTHORIZED_FOR_OBJECT", "Only the entry's author can withdraw it."],
+    ["NOT_FOUND", "This entry isn't on the 6529 Network."],
+  ])("words %s for a withdrawal", (name, sentence) => {
+    expect(chainWavesErrorMessage("en-US", refused(name), "withdrawal")).toBe(
+      `${CHARGED} ${sentence}`
+    );
+  });
+
+  it("keeps a vote's wording for the names entries word their own way", () => {
+    expect(chainWavesErrorMessage("en-US", refused("ENTRY_NOT_ACTIVE"))).toBe(
+      `${CHARGED} This entry no longer takes votes.`
+    );
+    expect(chainWavesErrorMessage("en-US", refused("NOT_FOUND"))).toBe(
+      `${CHARGED} This isn't on the 6529 Network.`
+    );
+    expect(chainWavesErrorMessage("en-US", refused("NOT_ELIGIBLE"))).toBe(
+      `${CHARGED} You can't vote in this decision.`
+    );
+  });
+
   it("reads the name from the gateway's wording when the error carries no name", () => {
     expect(
       chainWavesErrorMessage(

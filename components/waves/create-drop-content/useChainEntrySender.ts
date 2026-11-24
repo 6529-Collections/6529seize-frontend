@@ -4,6 +4,10 @@ import { useCallback, useRef, useState } from "react";
 import { useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
 import {
+  chainWriteDetails,
+  chainWriteFailure,
+} from "@/components/chain-waves/chainWavesErrorMessage";
+import {
   invalidateChainEntryQueries,
   useChainEntrySubmit,
   type ChainEntrySubmit,
@@ -12,8 +16,9 @@ import type { AppToastInput } from "@/components/utils/toast/AppToast";
 import { removeTemporaryThreadReply } from "@/components/waves/drops/reply-threads/pending-replies";
 import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import type { ApiCompetition } from "@/generated/models/ApiCompetition";
-import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import type { SupportedLocale } from "@/i18n/locales";
 import { ChainOperationError } from "@/lib/chain-identity/operation";
 import {
   ChainEntryPendingError,
@@ -75,9 +80,12 @@ const nextTask = () =>
 
 /**
  * The toast for an entry the 6529 Network didn't take, or null when the
- * wallet prompt was declined and the entry is still in the composer.
+ * wallet prompt was declined and the entry is still in the composer. The
+ * network's reason is the description, in plain words, with no details
+ * under it; a refusal from a block says the fee was charged.
  */
 function failureToast(
+  locale: SupportedLocale,
   error: unknown,
   sent: boolean,
   keepsDraft: boolean
@@ -85,19 +93,21 @@ function failureToast(
   if (isUserRejectedSigningError(error)) {
     return keepsDraft ? null : { message: CHAIN_ENTRY_LOST, type: "warning" };
   }
-  let description: string | undefined;
-  if (!sent) {
-    description = keepsDraft ? CHAIN_ENTRY_KEPT : CHAIN_ENTRY_LOST;
-  }
+  const reason = chainWriteFailure(locale, error, "", "entry");
+  const kept = keepsDraft ? CHAIN_ENTRY_KEPT : CHAIN_ENTRY_LOST;
+  const description = [reason, sent ? "" : kept]
+    .filter((line) => line !== "")
+    .join(" ");
   return {
     type: "error",
     title: CHAIN_ENTRY_FAILED,
-    ...(description === undefined ? {} : { description }),
-    details: getToastErrorDetails(error),
+    ...(description === "" ? {} : { description }),
+    details: chainWriteDetails(error),
   };
 }
 
 interface SendContext {
+  readonly locale: SupportedLocale;
   readonly terms: string | null;
   readonly setStage: (stage: ChainEntryStage) => void;
   readonly setToast: (toast: AppToastInput) => void;
@@ -169,6 +179,7 @@ function sendEntry(
           succeeded({ message: error.message, type: "warning" });
         } else if (body.onError?.(error) !== true) {
           const toast = failureToast(
+            context.locale,
             error,
             sent,
             body.keepsDraftWhenRefused === true
@@ -221,6 +232,7 @@ export function useChainEntrySender({
 }): ChainEntrySender {
   const submit = useChainEntrySubmit(competition);
   const { setToast } = useAuth();
+  const locale = useBrowserLocale();
   const queryClient = useQueryClient();
   const { processDropRemoved } = useMyStreamActions();
   const inFlightRef = useRef(false);
@@ -243,6 +255,7 @@ export function useChainEntrySender({
       inFlightRef.current = true;
       setStage("preparing");
       return sendEntry(submit, body, {
+        locale,
         terms,
         setStage,
         setToast,
@@ -255,7 +268,15 @@ export function useChainEntrySender({
         },
       });
     },
-    [onAllDropsAdded, processDropRemoved, queryClient, setToast, submit, terms]
+    [
+      locale,
+      onAllDropsAdded,
+      processDropRemoved,
+      queryClient,
+      setToast,
+      submit,
+      terms,
+    ]
   );
 
   return { stage, send: submit ? send : null };

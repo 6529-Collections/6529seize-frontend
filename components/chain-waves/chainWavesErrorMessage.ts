@@ -10,10 +10,10 @@ import { ChainGatewayError } from "@/lib/chain-identity/gateway";
 import { ChainOperationError } from "@/lib/chain-identity/operation";
 
 /**
- * The 6529 Network's refusals of votes, poll ballots and wave REP, in plain
- * words (chain-tx `codes`). Other refusals (fees, browser keys, ratings) and
- * errors before the chain answered are worded as the identity flows word
- * them.
+ * The 6529 Network's refusals of votes, poll ballots, wave REP, entries and
+ * their withdrawal, in plain words (chain-tx `codes`). Other refusals (fees,
+ * browser keys, ratings) and errors before the chain answered are worded as
+ * the identity flows word them.
  */
 const WAVES_REFUSALS: Readonly<Record<string, string>> = {
   NOT_FOUND: "This isn't on the 6529 Network.",
@@ -42,13 +42,35 @@ const WAVES_REFUSALS: Readonly<Record<string, string>> = {
 };
 
 /** Which write a refusal answers, for the sentences that differ by write. */
-type ChainWavesWrite = "vote" | "ballot" | "rating";
+type ChainWavesWrite = "vote" | "ballot" | "rating" | "entry" | "withdrawal";
 
-/** NOT_ELIGIBLE: outside the decision's vote group, the poll's or the wave's. */
-const NOT_ELIGIBLE: Readonly<Record<ChainWavesWrite, string>> = {
-  vote: "You can't vote in this decision.",
-  ballot: "You can't answer this poll.",
-  rating: "You can't rate this wave.",
+/**
+ * The sentences that differ by write; other names read as WAVES_REFUSALS
+ * has them. NOT_ELIGIBLE: outside the decision's vote group, the poll's,
+ * the wave's, or the decision's submit group. An entry's and a
+ * withdrawal's names are SUBMISSION_CREATE's and SUBMISSION_WITHDRAW's.
+ */
+const BY_WRITE: Readonly<
+  Record<ChainWavesWrite, Readonly<Record<string, string>>>
+> = {
+  vote: { NOT_ELIGIBLE: "You can't vote in this decision." },
+  ballot: { NOT_ELIGIBLE: "You can't answer this poll." },
+  rating: { NOT_ELIGIBLE: "You can't rate this wave." },
+  entry: {
+    NOT_FOUND: "This decision isn't on the 6529 Network.",
+    DECISION_NOT_OPEN: "This decision isn't taking entries.",
+    PARTICIPATION_CLOSED: "This decision isn't taking entries right now.",
+    NOT_ELIGIBLE: "You can't enter this decision.",
+    ENTRY_LIMIT:
+      "You already have as many entries in this decision as it allows.",
+    ACTIVE_ENTRY_LIMIT: "This decision has as many entries as it can take.",
+  },
+  withdrawal: {
+    NOT_FOUND: "This entry isn't on the 6529 Network.",
+    NOT_AUTHORIZED_FOR_OBJECT: "Only the entry's author can withdraw it.",
+    ENTRY_NOT_ACTIVE:
+      "This entry is no longer in the running, so it can't be withdrawn.",
+  },
 };
 
 const refusalSentence = (
@@ -58,12 +80,12 @@ const refusalSentence = (
   if (name === null) {
     return undefined;
   }
-  return name === "NOT_ELIGIBLE" ? NOT_ELIGIBLE[write] : WAVES_REFUSALS[name];
+  return BY_WRITE[write][name] ?? WAVES_REFUSALS[name];
 };
 
 /**
- * What to tell someone whose vote, ballot or wave REP change didn't go in,
- * or null when they declined it in the wallet. A refusal from a block says
+ * What to tell someone whose vote, ballot, wave REP change, entry or
+ * withdrawal didn't go in, or null when they declined it in the wallet. A refusal from a block says
  * the fee was still charged.
  */
 export function chainWavesErrorMessage(
