@@ -145,9 +145,9 @@ export default function WaveDropLongContent({
           Math.min(0, container.scrollTop + topDelta)
         );
       }
-      keepFocusVisible(button, contentElement, container);
     };
     correctPosition();
+    keepFocusVisible(button, contentElement, container);
 
     // A newly revealed image/card can resize after the toggle. Keep this
     // anchor only until the next reader interaction; never fight scrolling.
@@ -157,6 +157,7 @@ export default function WaveDropLongContent({
         ? undefined
         : new ResizeObserver(() => {
             correctPosition();
+            if (isExpanded) keepFocusVisible(button, contentElement, container);
             expectedScrollTop = container.scrollTop;
           });
     const stopAnchoring = () => observer?.disconnect();

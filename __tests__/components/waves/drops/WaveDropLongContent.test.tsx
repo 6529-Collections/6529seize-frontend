@@ -249,7 +249,7 @@ describe("WaveDropLongContent", () => {
     expect(focus).toHaveBeenCalledWith({ preventScroll: true });
   });
 
-  it("anchors delayed content resizing and releases the anchor when the reader scrolls", () => {
+  it("anchors delayed resizing, yields to scrolling, and keeps the collapsed toggle focused", () => {
     const originalObserver = globalThis.ResizeObserver;
     let notifyResize = () => {};
     const disconnect = jest.fn();
@@ -281,6 +281,19 @@ describe("WaveDropLongContent", () => {
       expect(disconnect).not.toHaveBeenCalled();
       fireEvent.wheel(scrollContainer);
       expect(disconnect).toHaveBeenCalled();
+
+      jest
+        .spyOn(scrollContainer, "getBoundingClientRect")
+        .mockReturnValue({ top: 0, bottom: 500 } as DOMRect);
+      const toggle = screen.getByRole("button", { name: "Show less" });
+      const toggleBounds = jest
+        .spyOn(toggle, "getBoundingClientRect")
+        .mockReturnValue({ top: 200, bottom: 244 } as DOMRect);
+      toggle.focus();
+      fireEvent.click(toggle);
+      toggleBounds.mockReturnValue({ top: 600, bottom: 644 } as DOMRect);
+      notifyResize();
+      expect(screen.getByRole("button", { name: "Show more" })).toHaveFocus();
     } finally {
       globalThis.ResizeObserver = originalObserver;
     }
