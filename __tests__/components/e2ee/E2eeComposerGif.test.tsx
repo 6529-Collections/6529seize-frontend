@@ -210,15 +210,16 @@ it("dismisses the mobile action group on Escape, focus leaving, or an outside ta
       key: "Escape",
     });
     expect(toggle).toHaveFocus();
-    expect(tray).not.toBeVisible();
+    expect(tray).toHaveAttribute("aria-hidden", "true");
+    expect(tray).toHaveAttribute("inert");
 
     open();
     fireEvent.focusOut(toggle, { relatedTarget: document.body });
-    expect(tray).not.toBeVisible();
+    expect(tray).toHaveAttribute("aria-hidden", "true");
 
     open();
     fireEvent.pointerDown(document.body);
-    expect(tray).not.toBeVisible();
+    expect(tray).toHaveAttribute("aria-hidden", "true");
   } finally {
     viewport.restore();
   }
