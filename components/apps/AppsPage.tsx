@@ -60,6 +60,21 @@ export default function AppsPage() {
             <MobileAppDownloads />
           </AppPanel>
 
+          <Link
+            href="/desktop"
+            aria-labelledby="6529-desktop-test-heading"
+            aria-describedby="6529-desktop-test-description"
+            className="tw-block tw-rounded-xl tw-no-underline tw-transition-colors hover:tw-bg-iron-900 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-primary-400"
+          >
+            <AppPanel
+              id="6529-desktop-test"
+              icon={ComputerDesktopIcon}
+              title={t(APPS_LOCALE, "apps.newDesktop.title")}
+              description={t(APPS_LOCALE, "apps.newDesktop.description")}
+              linked
+            />
+          </Link>
+
           <AppPanel
             id="6529-desktop"
             icon={ComputerDesktopIcon}

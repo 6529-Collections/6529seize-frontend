@@ -1,9 +1,15 @@
 import { toDataURL } from "qrcode";
 
 import { publicEnv } from "@/config/env";
+import { getAppEnvironment } from "@/config/appEnvironment";
 import { stripCollectedReturnFromTokenRoute } from "@/helpers/profile-collected-navigation";
 import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
+import {
+  getApiBase,
+  PUBLIC_PRODUCTION_API_BASE,
+} from "@/services/api/api-endpoints";
 import type { createConnectionShare } from "@/services/auth/session-v2.utils";
+import { SubMode } from "./constants";
 
 export type NativeConnectionShare = Awaited<
   ReturnType<typeof createConnectionShare>
@@ -245,15 +251,26 @@ export function buildNativeConnectionShareUrls({
   };
 }
 
-export function getDesktopConnectionShareScheme(): string {
-  return publicEnv.DESKTOP_CLASSIC_SCHEME ?? "classiccore6529";
+export function getDesktopConnectionShareScheme(
+  target: SubMode.DESKTOP | SubMode.DESKTOP_CLASSIC
+): string {
+  return target === SubMode.DESKTOP_CLASSIC
+    ? (publicEnv.DESKTOP_CLASSIC_SCHEME ?? "classiccore6529")
+    : (publicEnv.CORE_SCHEME ?? "core6529");
 }
 
-export function buildDesktopConnectionShareLink(
+/** The installed Tauri app redeems its one-time code on the production API. */
+export function canConnectNewDesktop(): boolean {
+  return (
+    getAppEnvironment(publicEnv.BASE_ENDPOINT).isProduction &&
+    getApiBase() === PUBLIC_PRODUCTION_API_BASE
+  );
+}
+
+export function buildDesktopConnectionSharePath(
   share: NativeConnectionShare,
-  addressKey: string,
-  coreScheme: string
-): { readonly url: string; readonly expiresAt: number } | null {
+  addressKey: string
+): { readonly routerPath: string; readonly expiresAt: number } | null {
   const expiresAt = Date.parse(share.expires_at);
   if (
     share.target_client_type !== "desktop" ||
@@ -271,10 +288,7 @@ export function buildDesktopConnectionShareLink(
   });
   return {
     expiresAt,
-    url: buildNavigateDeepLinkUrl({
-      scheme: coreScheme,
-      routerPath: `/accept-connection-sharing?${params}`,
-    }),
+    routerPath: `/accept-connection-sharing?${params}`,
   };
 }
 

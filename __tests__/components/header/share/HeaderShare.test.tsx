@@ -966,6 +966,14 @@ describe("HeaderShare", () => {
     const HeaderShare = HeaderConnectHarness;
     const chooseConnectOnly = () =>
       userEvent.click(screen.getByRole("button", { name: "Connect only" }));
+    function setConnectionEnvironment(siteUrl: string, apiUrl: string) {
+      const site = jest.replaceProperty(publicEnv, "BASE_ENDPOINT", siteUrl);
+      const api = jest.replaceProperty(publicEnv, "API_ENDPOINT", apiUrl);
+      return () => {
+        site.restore();
+        api.restore();
+      };
+    }
     beforeEach(() => {
       mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
       mockIsMobile.mockReturnValue(false);
@@ -987,20 +995,27 @@ describe("HeaderShare", () => {
     });
 
     it.each([
-      ["native", undefined],
-      ["desktop", undefined],
-      ["desktop", "stagingclassiccore6529"],
-      ["desktop", "localclassiccore6529"],
+      ["6529 Mobile", "native", undefined],
+      ["6529 Desktop", "desktop", undefined],
+      ["6529 Desktop Classic", "desktop", undefined],
+      ["6529 Desktop Classic", "desktop", "stagingclassiccore6529"],
+      ["6529 Desktop Classic", "desktop", "localclassiccore6529"],
     ] as const)(
-      "offers combined %s setup with Classic scheme %s",
-      /** Desktop gets a private app link and version notice. Mobile gets a QR code. */
-      async (target, configuredScheme) => {
+      "offers combined setup for %s (%s) with Classic override %s",
+      async (appName, target, configuredScheme) => {
+        const restoreEnvironment = setConnectionEnvironment(
+          "https://6529.io",
+          "https://api.6529.io"
+        );
         const schemeOverride = jest.replaceProperty(
           publicEnv,
           "DESKTOP_CLASSIC_SCHEME",
           configuredScheme
         );
-        const expectedScheme = configuredScheme ?? "classiccore6529";
+        const isClassic = appName === "6529 Desktop Classic";
+        const expectedScheme = isClassic
+          ? (configuredScheme ?? "classiccore6529")
+          : "core6529";
         const flags = require("@/lib/device-signing/feature");
         const e2ee = require("@/config/e2eeEnv");
         const signing = jest
@@ -1084,8 +1099,10 @@ describe("HeaderShare", () => {
           });
           if (target === "desktop") {
             await userEvent.click(
-              screen.getByRole("button", { name: "6529 Desktop Classic" })
+              screen.getByRole("button", { name: appName })
             );
+          }
+          if (isClassic) {
             const version = screen.getByText("v0.4.1");
             expect(version).toHaveClass("tw-font-semibold");
             expect(version.parentElement).toHaveClass("tw-text-xs");
@@ -1099,14 +1116,12 @@ describe("HeaderShare", () => {
           expect(
             await screen.findByText("Check your wallet to sign")
           ).toBeVisible();
-          const targetTitle =
-            target === "desktop"
-              ? "Connect 6529 Desktop Classic"
-              : "Connect 6529 Mobile";
           expect(
-            screen.getByRole("dialog", { name: targetTitle })
+            screen.getByRole("dialog", {
+              name: `Connect ${appName}`,
+            })
           ).toBeVisible();
-          if (target === "desktop") {
+          if (isClassic) {
             expect(screen.getByText("v0.4.1").parentElement).toHaveClass(
               "tw-text-sm"
             );
@@ -1127,6 +1142,13 @@ describe("HeaderShare", () => {
               "href",
               `${expectedScheme}://navigate/accept-connection-sharing?connection_share_code=combined-1&address=${address}#device_setup_key=setup-secret-1`
             );
+          } else {
+            expect(screen.queryByText("v0.4.1")).not.toBeInTheDocument();
+            expect(
+              screen.getByAltText("Private device setup QR code")
+            ).toBeVisible();
+          }
+          if (isClassic) {
             const version = within(
               screen.getByTestId("desktop-connection-panel")
             ).getByText("v0.4.1");
@@ -1136,9 +1158,6 @@ describe("HeaderShare", () => {
             );
           } else {
             expect(screen.queryByText("v0.4.1")).not.toBeInTheDocument();
-            expect(
-              screen.getByAltText("Private device setup QR code")
-            ).toBeVisible();
           }
           await userEvent.click(
             screen.getByRole("button", { name: "Generate new code" })
@@ -1185,11 +1204,11 @@ describe("HeaderShare", () => {
           ).toBeVisible();
           expect(
             screen.getByRole("button", {
-              name:
-                target === "desktop" ? "6529 Desktop Classic" : "6529 Mobile",
+              name: appName,
             })
           ).toHaveAttribute("aria-pressed", "true");
         } finally {
+          restoreEnvironment();
           schemeOverride.restore();
           signing.mockRestore();
           grants.mockRestore();
@@ -1480,7 +1499,7 @@ describe("HeaderShare", () => {
       );
     });
 
-    it("shows only Mobile and Desktop connection targets", async () => {
+    it("shows Mobile, Desktop and Desktop Classic connection targets", async () => {
       renderWithProviders(<HeaderShare />);
 
       await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
@@ -1494,6 +1513,9 @@ describe("HeaderShare", () => {
       expect(
         screen.getByRole("button", { name: "6529 Mobile" })
       ).toHaveAttribute("aria-pressed", "true");
+      expect(
+        screen.getByRole("button", { name: "6529 Desktop" })
+      ).toBeInTheDocument();
       expect(
         screen.getByRole("button", { name: "6529 Desktop Classic" })
       ).toBeInTheDocument();
@@ -1735,31 +1757,38 @@ describe("HeaderShare", () => {
       consoleError.mockRestore();
     });
 
-    it("falls back to Mobile if Desktop becomes unavailable", async () => {
-      const { rerender } = renderWithProviders(<HeaderShare />);
+    it.each(["6529 Desktop", "6529 Desktop Classic"])(
+      "falls back to Mobile if %s becomes unavailable",
+      async (appName) => {
+        const { rerender } = renderWithProviders(<HeaderShare />);
 
-      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
-      await userEvent.click(
-        await screen.findByRole("button", { name: "6529 Desktop Classic" })
-      );
-      expect(
-        screen.getByRole("button", { name: "6529 Desktop Classic" })
-      ).toHaveAttribute("aria-pressed", "true");
+        await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+        await userEvent.click(
+          await screen.findByRole("button", { name: appName })
+        );
+        expect(screen.getByRole("button", { name: appName })).toHaveAttribute(
+          "aria-pressed",
+          "true"
+        );
 
-      mockUseElectron.mockReturnValue(true);
-      rerender(
-        <QueryClientProvider client={queryClient}>
-          <HeaderShare />
-        </QueryClientProvider>
-      );
+        mockUseElectron.mockReturnValue(true);
+        rerender(
+          <QueryClientProvider client={queryClient}>
+            <HeaderShare />
+          </QueryClientProvider>
+        );
 
-      expect(
-        screen.queryByRole("button", { name: "6529 Desktop Classic" })
-      ).toBeNull();
-      expect(
-        screen.getByRole("button", { name: "6529 Mobile" })
-      ).toHaveAttribute("aria-pressed", "true");
-    });
+        expect(
+          screen.queryByRole("button", { name: "6529 Desktop Classic" })
+        ).toBeNull();
+        expect(
+          screen.queryByRole("button", { name: "6529 Desktop" })
+        ).toBeNull();
+        expect(
+          screen.getByRole("button", { name: "6529 Mobile" })
+        ).toHaveAttribute("aria-pressed", "true");
+      }
+    );
 
     it("aborts in-flight connection-share creation when the modal closes", async () => {
       const signals: AbortSignal[] = [];
@@ -2184,6 +2213,68 @@ describe("HeaderShare", () => {
         }
       }
     );
+
+    it("opens Connect only in the new Desktop app with a production share code", async () => {
+      const restoreEnvironment = setConnectionEnvironment(
+        "https://6529.io",
+        "https://api.6529.io"
+      );
+      try {
+        renderWithProviders(<HeaderShare />);
+        await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+        await userEvent.click(
+          screen.getByRole("button", { name: "6529 Desktop" })
+        );
+        await chooseConnectOnly();
+
+        const launch = await screen.findByRole("link", {
+          name: "Open in 6529 Desktop",
+        });
+        expect(launch).toHaveAttribute(
+          "href",
+          "core6529://navigate/accept-connection-sharing?connection_share_code=mock-desktop-share-code&address=0x1234567890123456789012345678901234567890"
+        );
+        await userEvent.click(
+          screen.getByRole("button", { name: "Copy link" })
+        );
+        expect(navigator.clipboard.writeText).toHaveBeenLastCalledWith(
+          launch.getAttribute("href")
+        );
+      } finally {
+        restoreEnvironment();
+      }
+    });
+
+    it("offers just a credential-free Desktop launch on staging", async () => {
+      const restoreEnvironment = setConnectionEnvironment(
+        "https://staging.6529.io",
+        "https://api.staging.6529.io"
+      );
+      try {
+        renderWithProviders(<HeaderShare />);
+        await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+        await userEvent.click(
+          screen.getByRole("button", { name: "6529 Desktop" })
+        );
+
+        expect(
+          screen.getByRole("link", {
+            name: "Open in 6529 Desktop",
+          })
+        ).toHaveAttribute("href", "core6529://navigate/waves");
+        expect(
+          screen.queryByRole("button", { name: "Connect only" })
+        ).toBeNull();
+        expect(
+          screen.queryByRole("button", {
+            name: "Connect with Post Signing & DM Encryption",
+          })
+        ).toBeNull();
+        expect(screen.queryByRole("button", { name: "Copy link" })).toBeNull();
+      } finally {
+        restoreEnvironment();
+      }
+    });
 
     it("does not publish a Desktop URL from a stale generation", async () => {
       const firstAddress = "0x1111111111111111111111111111111111111111";

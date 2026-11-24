@@ -16,21 +16,24 @@ import type { RequestSignedMessagesGrant } from "@/components/auth/authSignedMes
 import SignedMessagesEnableStatus from "@/components/device-signing/SignedMessagesEnableStatus";
 import Button from "@/components/utils/button/Button";
 import { useEnableSignedMessages } from "@/hooks/device-signing/useEnableSignedMessages";
-import type { ConnectionSetupTarget } from "@/lib/device-signing/connection-setup-envelope";
 import { createConnectionShare } from "@/services/auth/session-v2.utils";
 import { publicEnv } from "@/config/env";
 import { t } from "@/i18n/messages";
-import { HEADER_SHARE_LOCALE } from "./constants";
+import {
+  HEADER_SHARE_LOCALE,
+  isDesktopConnectionTarget,
+  SubMode,
+} from "./constants";
 import { DesktopConnectionVersionNotice } from "./DesktopConnectionLink";
 import { getDesktopConnectionShareScheme } from "./shareUtils";
 
 /** Source-side wallet approval. The receiving app never needs a live wallet. */
 export default function DeviceConnectionShare({
-  target,
+  subMode,
   renderLink,
   footer,
 }: {
-  readonly target: ConnectionSetupTarget;
+  readonly subMode: SubMode;
   readonly renderLink: (
     link: { readonly url: string; readonly qr: string },
     refresh: () => void,
@@ -38,6 +41,7 @@ export default function DeviceConnectionShare({
   ) => ReactNode;
   readonly footer: ReactNode;
 }) {
+  const target = isDesktopConnectionTarget(subMode) ? "desktop" : "native";
   const { connectedProfile, activeProfileProxy } = useAuth();
   const { address } = useSeizeConnectContext();
   const sign = useAppGrantSigner();
@@ -51,7 +55,7 @@ export default function DeviceConnectionShare({
     address?.toLowerCase(),
     connectedProfile?.id,
     activeProfileProxy?.id,
-    target,
+    subMode,
   ]);
   const activeLink = link?.context === context ? link : null;
   const latest = useRef(context);
@@ -96,10 +100,9 @@ export default function DeviceConnectionShare({
           expires <= Date.now()
         )
           throw new Error("Invalid device setup share");
-        const scheme =
-          target === "desktop"
-            ? getDesktopConnectionShareScheme()
-            : (publicEnv.MOBILE_APP_SCHEME ?? "mobile6529");
+        const scheme = isDesktopConnectionTarget(subMode)
+          ? getDesktopConnectionShareScheme(subMode)
+          : (publicEnv.MOBILE_APP_SCHEME ?? "mobile6529");
         const route =
           target === "desktop"
             ? "navigate/accept-connection-sharing"
@@ -127,7 +130,15 @@ export default function DeviceConnectionShare({
         };
       }
     },
-    [activeProfileProxy, address, connectedProfile, context, sign, target]
+    [
+      activeProfileProxy,
+      address,
+      connectedProfile,
+      context,
+      sign,
+      subMode,
+      target,
+    ]
   );
   const onEnabled = useCallback(() => undefined, []);
   const flow = useEnableSignedMessages({ requestGrant, onEnabled });
@@ -159,7 +170,7 @@ export default function DeviceConnectionShare({
         status={flow.status}
         onReconnect={flow.reconnect}
       />
-      {!activeLink && target === "desktop" && (
+      {!activeLink && subMode === SubMode.DESKTOP_CLASSIC && (
         <DesktopConnectionVersionNotice />
       )}
       {!activeLink && !flow.isEnabling && (

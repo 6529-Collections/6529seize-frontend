@@ -57,7 +57,20 @@ describe("6529 Apps page", () => {
     expect(metadata.description).toContain("6529 Desktop");
   });
 
-  it("links the entire third section to the validator page", () => {
+  it("links the Desktop test release card to the download page", () => {
+    render(<AppsRoute />);
+
+    const desktopLink = screen.getByRole("link", { name: "6529 Desktop" });
+    expect(desktopLink).toHaveAttribute("href", "/desktop");
+    expect(desktopLink).toHaveAccessibleDescription(
+      "Test release for Windows and Apple silicon Macs."
+    );
+    expect(desktopLink).toContainElement(
+      screen.getByRole("heading", { level: 2, name: "6529 Desktop" })
+    );
+  });
+
+  it("lists the app cards in order and links the entire Validator card", () => {
     render(<AppsRoute />);
 
     const validatorLink = screen.getByRole("link", {
@@ -79,13 +92,14 @@ describe("6529 Apps page", () => {
         .map((heading) => heading.textContent)
     ).toEqual([
       "6529 Mobile",
+      "6529 Desktop",
       "6529 Desktop Classic",
       "6529 Validator",
       "6529 AI",
     ]);
   });
 
-  it("links the entire fourth section to 6529 AI", () => {
+  it("links the entire 6529 AI card to its download page", () => {
     render(<AppsRoute />);
 
     const aiLink = screen.getByRole("link", { name: "6529 AI" });
