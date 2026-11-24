@@ -271,16 +271,66 @@ test.describe("Profile NIC activity @local-only", () => {
         ).toBeLessThanOrEqual(1);
       }
       await filter.click();
-      const menu = page.getByRole("list", { name: "Activity types" });
-      await expect(menu).toBeVisible();
-      const menuBox = await menu.boundingBox();
-      if (!menuBox) throw new Error("Missing activity type menu");
-      expect(menuBox.x).toBeGreaterThanOrEqual(row.x);
-      expect(menuBox.x + menuBox.width).toBeLessThanOrEqual(row.x + row.width);
+      const menu = page.getByRole("dialog", { name: "Activity types" });
+      await expect(
+        menu.getByRole("heading", { name: "Activity types" })
+      ).toBeVisible();
+      const panel = page
+        .getByRole("dialog", { name: "Activity types" })
+        .getByRole("button", { name: "Handle", exact: true });
+      for (const label of [
+        "Rating",
+        "Handle",
+        "Classification",
+        "Social Media Account",
+      ]) {
+        const option = page
+          .getByRole("dialog", { name: "Activity types" })
+          .getByRole("button", { name: label, exact: true });
+        await expect(option).toHaveAttribute("aria-pressed", "true");
+        await option.click();
+        await expect(option).toHaveAttribute("aria-pressed", "false");
+        await expect(
+          menu.getByRole("heading", { name: "Activity types" })
+        ).toBeVisible();
+        await option.click();
+        await expect(option).toHaveAttribute("aria-pressed", "true");
+        await expect(
+          menu.getByRole("heading", { name: "Activity types" })
+        ).toBeVisible();
+      }
+      await expect(panel).toBeInViewport();
+      if (width === 390)
+        await page.screenshot({
+          path: test.info().outputPath("activity-types-sheet.png"),
+        });
+      await menu
+        .getByRole("button", { name: "Close panel", exact: true })
+        .click();
+      await expect(menu).toHaveCount(0);
+      await expect(filter).toBeFocused();
+      await filter.click();
       await page.keyboard.press("Escape");
       await expect(menu).toHaveCount(0);
       await expect(filter).toBeFocused();
       await expectNoHorizontalOverflow(page);
+    }
+    if (test.info().project.name === "web-desktop-chromium") {
+      await page.setViewportSize({ width: 1440, height: 1000 });
+      await selectNic(page, 1440);
+      await filter.click();
+      const desktopMenu = page.getByRole("list", { name: "Activity types" });
+      await expect(desktopMenu).toBeVisible();
+      await expect(
+        page.getByRole("dialog", { name: "Activity types" })
+      ).toHaveCount(0);
+      await desktopMenu
+        .getByRole("button", { name: "Handle", exact: true })
+        .click();
+      await expect(desktopMenu).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(desktopMenu).toHaveCount(0);
+      await expect(filter).toBeFocused();
     }
   });
   for (const width of [1440, 820, 390]) {

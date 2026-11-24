@@ -449,6 +449,9 @@ safe area and software keyboard.
 
 ## Activity Log Behavior
 
+- On mobile web and in the app, the activity-type filter opens a bottom sheet.
+  Select or deselect multiple types without closing it; use the close button,
+  backdrop, or swipe down when finished. Desktop keeps its dropdown.
 - Direction filters retain compact tabs on desktop and mobile.
 - Entries are compact rows separated by thin dividers.
 - NIC changes explicitly name NIC, including historical activity stored as CIC.

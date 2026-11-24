@@ -5680,6 +5680,7 @@ export const EN_US_ROOT_MESSAGES = {
   ...WAVE_REP_DETAILS_MESSAGES,
   ...PROFILE_ACTIVITY_RATE_MESSAGES,
   "profileActivity.heading": "Activity Log",
+  "profileActivity.types": "Activity types",
   "profileActivity.loading": "Loading activity log",
   "profileActivity.loadError": "Unable to load activity log.",
   "profileActivity.retry": "Retry",
