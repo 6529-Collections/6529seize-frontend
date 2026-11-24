@@ -9,6 +9,7 @@ import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useChainWavesActive } from "@/hooks/useWavesMovePhase";
 import { OP_VOTE_SET } from "@/lib/chain-identity/identityOps";
+import { chainGateway } from "@/lib/chain-identity/gateway";
 import { formatDate } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/chain-identity";
@@ -59,6 +60,19 @@ export default function ChainIdentitySession({
   });
   const [plan, setPlan] = useState<SessionPlan | null>(null);
   const chainWavesActive = useChainWavesActive();
+  // A key that can't sign votes is offered them only once the chain runs
+  // VOTE_SET: a new grant before that would leave votes out again.
+  const keyLacksVotes =
+    sessionKey !== null && !sessionKeyCanSign(sessionKey, OP_VOTE_SET);
+  const chainRunsVotes = useQuery({
+    queryKey: [QueryKey.CHAIN_IDENTITY, "runs-vote-set"],
+    queryFn: async () =>
+      (await chainGateway.getOps()).ops?.some(
+        (op) => op.opType === OP_VOTE_SET
+      ) ?? false,
+    enabled: chainWavesActive && keyLacksVotes,
+    staleTime: 60_000,
+  });
   const action = useChainAction(() => {
     setPlan(null);
     onChanged();
@@ -114,7 +128,7 @@ export default function ChainIdentitySession({
     // A key enrolled before votes reached the 6529 Network can't sign them;
     // a new grant for a new key adds them.
     const needsVotes =
-      chainWavesActive && !sessionKeyCanSign(sessionKey, OP_VOTE_SET);
+      chainWavesActive && keyLacksVotes && chainRunsVotes.data === true;
     return (
       <ChainSection
         id="chain-identity-session"
