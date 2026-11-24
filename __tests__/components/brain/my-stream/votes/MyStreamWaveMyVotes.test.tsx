@@ -15,6 +15,12 @@ const mockApprovalStatus = jest.fn(() => ({
 }));
 
 jest.mock("@/hooks/useWaveDropsLeaderboard");
+jest.mock(
+  "@/hooks/content-moderation/usePublicProfileModerationStatus",
+  () => ({
+    usePublicProfileModerationStatus: jest.fn(),
+  })
+);
 jest.mock("@/hooks/useIntersectionObserver", () => ({
   useIntersectionObserver: (cb: any) => {
     intersectionCb = cb;
