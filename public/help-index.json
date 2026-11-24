@@ -1319,7 +1319,7 @@
         "Find the 6529 Desktop test release at /desktop, from the 6529 Apps page or by searching 6529 Desktop in Pages.",
         "The test release supports Windows x64 and Apple silicon Macs. The download page links to the install guide, known issues, and release history.",
         "On 6529.io, open Connect Device in the account menu and choose 6529 Desktop for a one-time connection link.",
-        "On staging, Open in 6529 Desktop opens Waves in the installed app. Use Connect Device on 6529.io to connect an account."
+        "A staging connection link opens Accept connection in 6529 Desktop. The installed app uses the production API and requires a code issued by 6529.io to sign in."
       ],
       "canonical_path": "/desktop",
       "related_paths": [
@@ -2065,7 +2065,7 @@
         "Connect only creates an additional signed-in app session. Connect with Post Signing & DM Encryption requests a browser-wallet signature first, then one private link both signs in and enrolls the receiving app without connecting a wallet there. The source session remains connected and the source browser need not enable encryption itself.",
         "After choosing a connection mode, the modal title names the selected app. Secure Classic setup shows the 6529 Desktop Classic v0.4.1 minimum below the secure action, during signing, and below Open in 6529 Desktop Classic.",
         "Mobile shows a full-width QR. Both desktop choices use a launch control naming the selected app. The link field includes a copy icon with refresh beside it. Back returns to the app and connection choices.",
-        "In staging, 6529 Desktop only offers a launch link that opens Waves. Generate a code on 6529.io to connect an account in the installed Tauri app.",
+        "Staging and 6529.io offer the same 6529 Desktop connection options and open Accept connection in the installed app. Accepting a staging-issued code fails because the app redeems codes with the production API.",
         "Connect-only refresh generates a new code directly. Secure refresh removes the displayed link and returns to the wallet-signing state for a fresh signature. Copy and refresh are unavailable during preparation; preparation failures can be retried.",
         "The regular app QR scanner accepts secure and Connect-only connection links. A device camera can open a link when its app link handler supports that URL. Secure acceptance lists Signed Posts and Encrypted DMs with Accept and enable both. Connect-only acceptance uses Accept connection without granting those permissions. Successful acceptance opens Home. If secure setup fails after sign-in, the app keeps the session and asks you to open a fresh secure link.",
         "Generating a secure QR does not create an active device. The receiving app registers it when setup completes. Working receiver keys and history are preserved; source history is not copied. Restore encrypted backup for earlier history on a new device.",

@@ -966,9 +966,18 @@ describe("HeaderShare", () => {
     const HeaderShare = HeaderConnectHarness;
     const chooseConnectOnly = () =>
       userEvent.click(screen.getByRole("button", { name: "Connect only" }));
-    function setConnectionEnvironment(siteUrl: string, apiUrl: string) {
-      const site = jest.replaceProperty(publicEnv, "BASE_ENDPOINT", siteUrl);
-      const api = jest.replaceProperty(publicEnv, "API_ENDPOINT", apiUrl);
+    function setConnectionEnvironment(environment: "production" | "staging") {
+      const host = environment === "staging" ? "staging.6529.io" : "6529.io";
+      const site = jest.replaceProperty(
+        publicEnv,
+        "BASE_ENDPOINT",
+        `https://${host}`
+      );
+      const api = jest.replaceProperty(
+        publicEnv,
+        "API_ENDPOINT",
+        `https://api.${host}`
+      );
       return () => {
         site.restore();
         api.restore();
@@ -995,18 +1004,16 @@ describe("HeaderShare", () => {
     });
 
     it.each([
-      ["6529 Mobile", "native", undefined],
-      ["6529 Desktop", "desktop", undefined],
-      ["6529 Desktop Classic", "desktop", undefined],
-      ["6529 Desktop Classic", "desktop", "stagingclassiccore6529"],
-      ["6529 Desktop Classic", "desktop", "localclassiccore6529"],
+      ["6529 Mobile", "native", undefined, "production"],
+      ["6529 Desktop", "desktop", undefined, "production"],
+      ["6529 Desktop", "desktop", undefined, "staging"],
+      ["6529 Desktop Classic", "desktop", undefined, "production"],
+      ["6529 Desktop Classic", "desktop", "stagingclassiccore6529", "staging"],
+      ["6529 Desktop Classic", "desktop", "localclassiccore6529", "production"],
     ] as const)(
-      "offers combined setup for %s (%s) with Classic override %s",
-      async (appName, target, configuredScheme) => {
-        const restoreEnvironment = setConnectionEnvironment(
-          "https://6529.io",
-          "https://api.6529.io"
-        );
+      "offers combined setup for %s (%s) with Classic override %s on %s",
+      async (appName, target, configuredScheme, environment) => {
+        const restoreEnvironment = setConnectionEnvironment(environment);
         const schemeOverride = jest.replaceProperty(
           publicEnv,
           "DESKTOP_CLASSIC_SCHEME",
@@ -1094,14 +1101,14 @@ describe("HeaderShare", () => {
             screen.getByRole("dialog", { name: "Connect Device" })
           ).toBeVisible();
           expect(screen.queryByText("v0.4.1")).not.toBeInTheDocument();
-          const secureButton = screen.getByRole("button", {
-            name: "Connect with Post Signing & DM Encryption",
-          });
           if (target === "desktop") {
             await userEvent.click(
               screen.getByRole("button", { name: appName })
             );
           }
+          const secureButton = screen.getByRole("button", {
+            name: "Connect with Post Signing & DM Encryption",
+          });
           if (isClassic) {
             const version = screen.getByText("v0.4.1");
             expect(version).toHaveClass("tw-font-semibold");
@@ -1508,7 +1515,7 @@ describe("HeaderShare", () => {
         await screen.findByRole("heading", { name: "Connect Device" })
       ).toBeInTheDocument();
       const modal = screen.getByTestId("header-share-modal");
-      expect(modal).toHaveClass("tw-max-w-md");
+      expect(modal).toHaveClass("tw-max-w-md", "sm:tw-max-w-xl");
       expect(modal.querySelector("#header-share-content")).toBeNull();
       expect(
         screen.getByRole("button", { name: "6529 Mobile" })
@@ -2214,67 +2221,36 @@ describe("HeaderShare", () => {
       }
     );
 
-    it("opens Connect only in the new Desktop app with a production share code", async () => {
-      const restoreEnvironment = setConnectionEnvironment(
-        "https://6529.io",
-        "https://api.6529.io"
-      );
-      try {
-        renderWithProviders(<HeaderShare />);
-        await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
-        await userEvent.click(
-          screen.getByRole("button", { name: "6529 Desktop" })
-        );
-        await chooseConnectOnly();
+    it.each(["production", "staging"] as const)(
+      "opens Connect only in the new Desktop app with a %s share code",
+      async (environment) => {
+        const restoreEnvironment = setConnectionEnvironment(environment);
+        try {
+          renderWithProviders(<HeaderShare />);
+          await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+          await userEvent.click(
+            screen.getByRole("button", { name: "6529 Desktop" })
+          );
+          await chooseConnectOnly();
 
-        const launch = await screen.findByRole("link", {
-          name: "Open in 6529 Desktop",
-        });
-        expect(launch).toHaveAttribute(
-          "href",
-          "core6529://navigate/accept-connection-sharing?connection_share_code=mock-desktop-share-code&address=0x1234567890123456789012345678901234567890"
-        );
-        await userEvent.click(
-          screen.getByRole("button", { name: "Copy link" })
-        );
-        expect(navigator.clipboard.writeText).toHaveBeenLastCalledWith(
-          launch.getAttribute("href")
-        );
-      } finally {
-        restoreEnvironment();
-      }
-    });
-
-    it("offers just a credential-free Desktop launch on staging", async () => {
-      const restoreEnvironment = setConnectionEnvironment(
-        "https://staging.6529.io",
-        "https://api.staging.6529.io"
-      );
-      try {
-        renderWithProviders(<HeaderShare />);
-        await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
-        await userEvent.click(
-          screen.getByRole("button", { name: "6529 Desktop" })
-        );
-
-        expect(
-          screen.getByRole("link", {
+          const launch = await screen.findByRole("link", {
             name: "Open in 6529 Desktop",
-          })
-        ).toHaveAttribute("href", "core6529://navigate/waves");
-        expect(
-          screen.queryByRole("button", { name: "Connect only" })
-        ).toBeNull();
-        expect(
-          screen.queryByRole("button", {
-            name: "Connect with Post Signing & DM Encryption",
-          })
-        ).toBeNull();
-        expect(screen.queryByRole("button", { name: "Copy link" })).toBeNull();
-      } finally {
-        restoreEnvironment();
+          });
+          expect(launch).toHaveAttribute(
+            "href",
+            "core6529://navigate/accept-connection-sharing?connection_share_code=mock-desktop-share-code&address=0x1234567890123456789012345678901234567890"
+          );
+          await userEvent.click(
+            screen.getByRole("button", { name: "Copy link" })
+          );
+          expect(navigator.clipboard.writeText).toHaveBeenLastCalledWith(
+            launch.getAttribute("href")
+          );
+        } finally {
+          restoreEnvironment();
+        }
       }
-    });
+    );
 
     it("does not publish a Desktop URL from a stale generation", async () => {
       const firstAddress = "0x1111111111111111111111111111111111111111";

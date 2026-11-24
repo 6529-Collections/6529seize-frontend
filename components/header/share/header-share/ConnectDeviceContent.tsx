@@ -13,11 +13,6 @@ import Image from "next/image";
 import { type ReactNode, useId, useLayoutEffect, useRef } from "react";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import type { HeaderShareModalViewProps } from "./HeaderShareModalView.types";
-import {
-  buildNavigateDeepLinkUrl,
-  canConnectNewDesktop,
-  getDesktopConnectionShareScheme,
-} from "./shareUtils";
 
 export function ConnectDeviceContent({
   account,
@@ -110,8 +105,6 @@ export function ConnectDeviceChoices({
 }) {
   const minimumVersionId = useId();
   const isClassic = activeSubTab === SubMode.DESKTOP_CLASSIC;
-  const isLaunchOnly =
-    activeSubTab === SubMode.DESKTOP && !canConnectNewDesktop();
   return (
     <>
       <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
@@ -122,19 +115,14 @@ export function ConnectDeviceChoices({
         isElectron={isElectron}
         onSubTabChange={setActiveSubTab}
       />
-      {isLaunchOnly ? (
-        <DesktopLaunchOnly />
-      ) : (
-        <Button
-          variant="secondary"
-          size="md"
-          onClick={() => setConnectionMode("only")}
-        >
-          {t(HEADER_SHARE_LOCALE, "headerShare.connectModal.only")}
-        </Button>
-      )}
-      {!isLaunchOnly &&
-        canSetUp &&
+      <Button
+        variant="secondary"
+        size="md"
+        onClick={() => setConnectionMode("only")}
+      >
+        {t(HEADER_SHARE_LOCALE, "headerShare.connectModal.only")}
+      </Button>
+      {canSetUp &&
         isAppDeviceGrantsEnabled() &&
         isSignedMessagesEnabled() &&
         isE2eeEnabled() && (
@@ -154,28 +142,5 @@ export function ConnectDeviceChoices({
           </div>
         )}
     </>
-  );
-}
-
-function DesktopLaunchOnly() {
-  const descriptionId = useId();
-  const url = buildNavigateDeepLinkUrl({
-    scheme: getDesktopConnectionShareScheme(SubMode.DESKTOP),
-    routerPath: "/waves",
-  });
-
-  return (
-    <div className="tw-flex tw-flex-col tw-gap-2">
-      <a
-        href={url}
-        aria-describedby={descriptionId}
-        className="tw-inline-flex tw-min-h-10 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-px-4 tw-py-2 tw-text-center tw-text-sm tw-font-semibold tw-text-iron-50 tw-no-underline hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-300"
-      >
-        {t(HEADER_SHARE_LOCALE, "headerShare.social.desktop")}
-      </a>
-      <p id={descriptionId} className="tw-m-0 tw-text-sm tw-text-iron-300">
-        {t(HEADER_SHARE_LOCALE, "headerShare.connectModal.desktopLaunchOnly")}
-      </p>
-    </div>
   );
 }
