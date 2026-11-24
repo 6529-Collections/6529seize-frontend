@@ -85,7 +85,11 @@ export default function CompetitionVotes({
           role="tabpanel"
           id={`competition-${competition.id}-votes-${key}`}
           aria-label={labels[key]}
-          className={embedded && key === "mine" ? "-tw-mx-4" : undefined}
+          className={
+            embedded && key === "mine"
+              ? "-tw-mx-4 max-lg:!tw-mt-0 [.capacitor-native_&]:!tw-mt-0"
+              : undefined
+          }
           hidden={active !== key}
         >
           {active === key && key === "mine" && <CompetitionPersonalVotes />}

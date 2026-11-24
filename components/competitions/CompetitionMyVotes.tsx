@@ -22,6 +22,7 @@ import {
 } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
+import { usePublicProfileModerationStatus } from "@/hooks/content-moderation/usePublicProfileModerationStatus";
 import { isAuthSessionForProfile } from "@/components/auth/auth-session-scope";
 import { getWalletAddress } from "@/services/auth/auth.utils";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
@@ -56,6 +57,8 @@ import { t } from "@/i18n/messages";
 import { useInView } from "@/hooks/useInView";
 import { formatInteger } from "@/i18n/format";
 import type { ApiCompetitionMyVote } from "@/generated/models/ApiCompetitionMyVote";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 
 function VisibleVoteInput(props: ComponentProps<typeof CompetitionVoteForm>) {
   const [ref, visible] = useInView<HTMLDivElement>({ rootMargin: "200px 0px" });
@@ -73,11 +76,13 @@ function UnavailableVote({
   retry,
   disabled,
   onSubmittingChange,
+  mobile,
 }: {
   readonly vote: ApiCompetitionMyVote;
   readonly onSubmittingChange: (submitting: boolean) => void;
   readonly retry: () => void;
   readonly disabled: boolean;
+  readonly mobile: boolean;
 }) {
   const { competition } = useCompetition();
   const locale = useBrowserLocale();
@@ -109,6 +114,9 @@ function UnavailableVote({
         disabled={disabled}
         budgetEnabled={visible}
         onSubmittingChange={onSubmittingChange}
+        compact
+        myVotes
+        mobile={mobile}
       />
     </article>
   );
@@ -179,6 +187,11 @@ function ScopedCompetitionMyVotes({
   readonly viewer: string | null;
 }) {
   const { competition, wave } = useCompetition();
+  const { isApp } = useDeviceInfo();
+  const isMobileViewport = useIsMobileLayoutViewport();
+  const mobile = isApp || isMobileViewport;
+  const [selectionMode, setSelectionMode] = useState(false);
+  const isSelecting = selectionMode;
   const locale = useBrowserLocale();
   const [sort, setSort] = useLocalPreference<ApiCompetitionMyVotesSort>(
     `competitionMyVotesSort_${competition.wave_id}_${competition.id}_${viewer ?? "anonymous"}`,
@@ -265,6 +278,8 @@ function ScopedCompetitionMyVotes({
   }, []);
   const client = useQueryClient();
   const { requestAuth, connectedProfile, activeProfileProxy } = useAuth();
+  // Warm the existing posting check before the first Explain vote gesture.
+  usePublicProfileModerationStatus(connectedProfile?.id);
   const sign = useCompetitionSignatureFor(competition);
   const pendingResets = useRef(new Map<string, ApiSetCompetitionVoteRequest>());
   const activeScope = useRef(true);
@@ -339,6 +354,12 @@ function ScopedCompetitionMyVotes({
     );
   const toolbar = (
     <MyStreamWaveMyVotesReset
+      mobile={mobile}
+      isSelecting={isSelecting}
+      onToggleSelection={() => {
+        setSelectionMode(mobile && !selectionMode);
+        setSelected(new Set());
+      }}
       toolbarContent={
         <CompetitionMyVotesSort
           sort={sort}
@@ -362,11 +383,12 @@ function ScopedCompetitionMyVotes({
       isVotingClosed={!competition.permissions.vote}
       resetVote={resetVote}
       onResettingChange={setResetting}
-      onToggleSelectAll={() =>
+      onToggleSelectAll={() => {
+        setSelectionMode(true);
         setSelected(
           allSelected ? new Set() : new Set(votes.map((vote) => vote.drop_id))
-        )
-      }
+        );
+      }}
       removeSelected={(dropId) =>
         setSelected((current) => {
           const next = new Set(current);
@@ -416,6 +438,7 @@ function ScopedCompetitionMyVotes({
             <UnavailableVote
               key={vote.entry_id}
               vote={vote}
+              mobile={mobile}
               disabled={!competition.permissions.vote || resetting}
               onSubmittingChange={onSubmittingChange}
               retry={() => {
@@ -434,6 +457,12 @@ function ScopedCompetitionMyVotes({
             className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800"
           >
             <MyStreamWaveMyVote
+              mobile={mobile}
+              isSelecting={isSelecting}
+              onEnterSelection={() => {
+                setSelectionMode(true);
+                setSelected((current) => new Set(current).add(vote.drop_id));
+              }}
               drop={result.data.drop}
               isResetting={resetting}
               isChecked={selected.has(vote.drop_id)}
@@ -459,6 +488,8 @@ function ScopedCompetitionMyVotes({
                   dropId={vote.drop_id}
                   disabled={isClosed || resetting}
                   compact
+                  myVotes
+                  mobile={mobile}
                   onSubmittingChange={onSubmittingChange}
                   onExplainVote={
                     entryDrop.wave.authenticated_user_eligible_to_chat !==
