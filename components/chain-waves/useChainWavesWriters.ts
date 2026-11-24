@@ -5,7 +5,11 @@ import type { Hex } from "viem";
 import { WagmiContext } from "wagmi";
 import { getAccount } from "wagmi/actions";
 import { useAuth } from "@/components/auth/Auth";
+import { formatFake6529 } from "@/components/chain-identity/chainAmount";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useChainWavesActive } from "@/hooks/useWavesMovePhase";
+import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/chain-identity";
 import { ChainOperationError } from "@/lib/chain-identity/operation";
 import {
   writeChainPollBallot,
@@ -38,16 +42,26 @@ const integer = (value: number): bigint => BigInt(Math.trunc(value));
  * Votes, poll ballots and wave REP on the 6529 Network once waves have moved
  * there and this build has the chain flows on; null before that, so
  * 6529.io's own requests run. Each signs with this browser's session key
- * when its grant covers the operation, else with the connected wallet.
+ * when its grant covers the operation and the fee is within the key's cap,
+ * else with the connected wallet; above the cap a toast says the fee before
+ * the wallet asks.
  */
 export function useChainWavesWriters(): ChainWavesWriters | null {
   const active = useChainWavesActive();
   const config = useContext(WagmiContext);
-  const { activeProfileProxy } = useAuth();
+  const { activeProfileProxy, setToast } = useAuth();
+  const locale = useBrowserLocale();
   return useMemo(() => {
     if (!active || !config) {
       return null;
     }
+    const onWalletFee = (maxFee: bigint) =>
+      setToast({
+        message: t(locale, "chainIdentity.action.walletFee", {
+          amount: formatFake6529(locale, maxFee, true),
+        }),
+        type: "warning",
+      });
     const connectedWallet = (): Hex => {
       if (activeProfileProxy) {
         throw new ChainOperationError(
@@ -69,18 +83,21 @@ export function useChainWavesWriters(): ChainWavesWriters | null {
         writeChainVote(config, connectedWallet(), {
           dropId,
           amount: integer(amount),
+          onWalletFee,
         }),
       pollBallot: ({ pollId, optionNumbers }) =>
         writeChainPollBallot(config, connectedWallet(), {
           pollId,
           optionNumbers,
+          onWalletFee,
         }),
       waveRating: ({ waveId, category, amount }) =>
         writeChainWaveRating(config, connectedWallet(), {
           waveId,
           category,
           value: integer(amount),
+          onWalletFee,
         }),
     };
-  }, [active, activeProfileProxy, config]);
+  }, [active, activeProfileProxy, config, locale, setToast]);
 }

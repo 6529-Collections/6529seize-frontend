@@ -81,11 +81,17 @@ const identity = (version: number, docCid: string = CURRENT_CID): ChainIdentity 
     profile: { docCid, version, updatedHeight: 9 },
   }) as unknown as ChainIdentity;
 
-const draftFor = (salt: string) => ({
+const draftFor = (salt: string, maxFee = "1") => ({
   txId: "0x01",
-  typedData: { domain: { name: "6529 Network", version: "1", salt } },
-  fee: { maxFee: "1" },
+  typedData: {
+    domain: { name: "6529 Network", version: "1", salt },
+    primaryType: "ProfileReplace",
+    message: { header: { maxFee, maxWork: "100000" } },
+  },
+  fee: { maxFee, maxWork: "100000", sizeBytes: 300 },
 });
+/** 1 $fake6529: far above 20 times a profile change's fee at the floor. */
+const ABOVE_CAP = (10n ** 18n).toString();
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -360,6 +366,81 @@ describe("saving the profile", () => {
     expect(onWalletPrompt).not.toHaveBeenCalled();
     expect(signTypedData).not.toHaveBeenCalled();
     expect(gateway["uploadDoc"]).not.toHaveBeenCalled();
+  });
+
+  it("lets this browser's key sign a change whose fee is within its cap", async () => {
+    const prepared = await prepareProfileReplace(
+      identity(1),
+      new Map([["bio", "gm"]]),
+      { config, wallet: WALLET, sessionKey: session, onWalletFallback: jest.fn() }
+    );
+    expect(prepared.signer.keyType).toBe(2);
+    expect(signWithSessionKey).toHaveBeenCalledTimes(1);
+    expect(signTypedData).not.toHaveBeenCalled();
+    expect(draftOperation).toHaveBeenCalledTimes(1);
+    expect((draftOperation as jest.Mock).mock.calls[0]![0]).toMatchObject({
+      keyType: 2,
+      keyId: session.keyId,
+    });
+  });
+
+  it("keeps the key's document and lets the wallet sign the change above the key's cap", async () => {
+    const order: string[] = [];
+    (signWithSessionKey as jest.Mock).mockImplementation(async () => {
+      order.push("key signs");
+      return `0x${"5a".repeat(64)}`;
+    });
+    (draftOperation as jest.Mock)
+      .mockImplementationOnce(async () => {
+        order.push("draft");
+        return draftFor(NETWORK, ABOVE_CAP);
+      })
+      .mockImplementationOnce(async () => {
+        order.push("draft");
+        return draftFor(NETWORK);
+      });
+    const onWalletPrompt = jest.fn();
+    const prepared = await prepareProfileReplace(
+      identity(1),
+      new Map([["bio", "gm"]]),
+      {
+        config,
+        wallet: WALLET,
+        sessionKey: session,
+        onWalletPrompt,
+        onWalletFallback: () => order.push("fallback"),
+      }
+    );
+    expect(order).toEqual(["key signs", "draft", "fallback", "draft"]);
+    // The wallet is asked nothing until the page has shown the fee.
+    expect(signTypedData).not.toHaveBeenCalled();
+    expect(onWalletPrompt).not.toHaveBeenCalled();
+    expect(gateway["uploadDoc"]).toHaveBeenCalledTimes(1);
+    expect(prepared.signer.keyType).toBe(1);
+    expect(prepared.draft.fee.maxFee).toBe("1");
+    const [keyDraft, walletDraft] = (draftOperation as jest.Mock).mock.calls;
+    expect(walletDraft![0]).toMatchObject({
+      keyType: 1,
+      signer: WALLET.toLowerCase(),
+    });
+    // The same document, by its CID.
+    expect(walletDraft![0].body.docCid).toBe(keyDraft![0].body.docCid);
+  });
+
+  it("refuses unsigned above the key's cap when the page doesn't take the wallet", async () => {
+    (draftOperation as jest.Mock).mockResolvedValue(draftFor(NETWORK, ABOVE_CAP));
+    await expect(
+      prepareProfileReplace(identity(1), new Map([["bio", "gm"]]), {
+        config,
+        wallet: WALLET,
+        sessionKey: session,
+      })
+    ).rejects.toMatchObject({
+      reason: "fee_above_cap",
+      values: { maxFee: ABOVE_CAP },
+    });
+    expect(signTypedData).not.toHaveBeenCalled();
+    expect(draftOperation).toHaveBeenCalledTimes(1);
   });
 
   it("refuses a transaction draft for another network", async () => {

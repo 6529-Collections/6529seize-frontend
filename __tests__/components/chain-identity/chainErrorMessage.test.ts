@@ -175,6 +175,15 @@ describe("errors that aren't the 6529 Network's", () => {
       "The change was sent but isn't final yet. Check again in a few minutes."
     );
   });
+
+  it("says the fee when it is above what this browser's key signs on its own", () => {
+    const aboveCap = new ChainOperationError("fee_above_cap", "x", null, {
+      maxFee: "412500000000000001",
+    });
+    expect(chainFailureText(L, aboveCap)).toBe(
+      "Nothing changed. The fee, at most 0.412501 $fake6529, is more than this browser's key signs on its own. Sign this change with your wallet."
+    );
+  });
 });
 
 it("tells a profile page's rater, before any prompt, that the identity can't pay", () => {

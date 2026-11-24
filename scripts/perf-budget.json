@@ -42,8 +42,8 @@
       "label": "Profile",
       "route": "[user]/(profile)",
       "chunks": 65,
-      "gzip_bytes": 1567386,
-      "brotli_bytes": 1333197
+      "gzip_bytes": 1580135,
+      "brotli_bytes": 1343693
     },
     {
       "id": "museum",

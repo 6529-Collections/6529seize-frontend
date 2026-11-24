@@ -205,8 +205,9 @@ show the profile-creation welcome.
 - On desktop, Grant Rep and Rate NIC keep their top edge at about 14% of the
   viewport height. Grant Rep fits its visible content, with a short resize
   transition when assigned categories, rating details, guidance or errors change.
-  Reduced-motion settings remove that transition. Short viewports scroll inside
-  while the actions remain reachable. Rate NIC grows downward. The
+  Reduced-motion settings remove that transition. Grant Rep grows to about 80%
+  of the viewport height; its content scrolls while the actions remain reachable.
+  Rate NIC grows downward. The
   rater and receiver lists for REP keep that positioning. NIC rater and receiver lists start about 10%
   down and grow to at most 80% of the viewport height. Long content scrolls
   inside. Mobile keeps the bottom sheet.
@@ -225,24 +226,35 @@ show the profile-creation welcome.
   highlight. The group is omitted when you have no existing contributions.
   Typing filters your assigned categories; after selection, all assigned pills
   remain available. Short lists fit their content without reserving an empty
-  second row; longer personal lists scroll within a capped area.
+  second row; longer lists use the dialog's content scroll area.
 - Category search accepts 3-100 characters for searching all categories;
   existing assigned-category chips can be selected without typing. Focusing an
   empty search or selecting `Change category` opens the
   `Type at least 3 characters.` prompt without searching the network.
-- Pause after typing a category name. Grant Rep checks that exact name. Matching
-  categories appear in a floating suggestion panel below the search field,
-  without moving the amount field or actions. Moving focus to the amount or
-  actions closes the panel. Category names are case-sensitive, so `artist`
-  and `Artist` can hold separate ratings.
+- Pause after typing a category name. Grant Rep checks that exact name. Every
+  matching suggestion appears below the search field as wrapping pills on desktop
+  and phones. Suggestions use the dialog's content scroll area. The amount input
+  stays visible below the pills on desktop and phones, retaining any amount draft
+  while you search. The phone sheet fits its content while searching and stays
+  within the space available above the keyboard. Moving focus to the amount or
+  actions closes suggestions. Category names are case-sensitive, so `artist` and
+  `Artist` can hold separate ratings.
+- Existing ratings load in the background without a visible loading row. You can
+  search and enter an amount while waiting. Assigned category pills appear when
+  ready, and saving remains disabled until your ratings and allowance are known.
+- The first suggestion is active, shown with a soft grey fill. Use the arrow
+  keys to move through suggestions and Enter to pick the active category.
+  A blue outline appears only when a suggestion itself has keyboard focus.
 - Similar categories remain independent and selectable. The exact
   `MemesNominee` pill is marked as counting toward the 50,000 REP submission
   requirement. When the typed value differs from it only by capitalization,
   spacing, punctuation, or Unicode width, the exact pill is surfaced first; the
-  typed value remains available and look-alikes use subdued styling. Search
-  guidance stays neutral until a category is ready. Using exact `MemesNominee`
-  confirms the requirement in green. Using a look-alike shows an amber note
+  typed value remains available. Category names use the same light text;
+  only the `Counts for submissions` badge is green. On phones,
+  the matching typed portion of a suggestion is dimmer. Guidance appears once,
+  directly below the field. Typing a look-alike immediately shows the amber note
   explaining that only exact `MemesNominee` counts toward the requirement.
+  Using exact `MemesNominee` confirms the requirement in green.
 - Pick a suggestion to use its exact spelling. After you pick a suggestion or
   an assigned category, the amount receives focus when the current rating loads,
   provided focus is still on the category selection control. You can edit the
