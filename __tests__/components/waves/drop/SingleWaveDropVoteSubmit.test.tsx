@@ -392,6 +392,45 @@ describe("SingleWaveDropVoteSubmit", () => {
     }
   });
 
+  it("waits for the wallet and the block on the 6529 Network before it closes", async () => {
+    const writers = jest.requireMock(
+      "@/components/chain-waves/useChainWavesWriters"
+    );
+    let resolveVote!: () => void;
+    const vote = jest.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveVote = resolve;
+        })
+    );
+    writers.useChainWavesWriters.mockReturnValue({ vote });
+    const onVoteRequestStarted = jest.fn();
+    const onVoteApplied = jest.fn();
+    try {
+      renderComponent({
+        onVoteApplied,
+        onVoteRequestStarted,
+        submissionMode: SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH,
+      });
+      fireEvent.click(screen.getByRole("button"));
+      await advanceTimers(300);
+      await waitFor(() => expect(vote).toHaveBeenCalled());
+
+      // Background mode would close here; on the chain the vote isn't in yet.
+      await advanceTimers(backgroundModalCloseDelayMs);
+      expect(onVoteRequestStarted).not.toHaveBeenCalled();
+      expect(onVoteApplied).not.toHaveBeenCalled();
+
+      await act(async () => {
+        resolveVote();
+        await flushMicrotasks();
+      });
+      await waitFor(() => expect(onVoteApplied).toHaveBeenCalled());
+    } finally {
+      writers.useChainWavesWriters.mockReturnValue(null);
+    }
+  });
+
   it("warns when a direct negative rating is submitted to a no-negative wave", () => {
     renderComponent({
       drop: {

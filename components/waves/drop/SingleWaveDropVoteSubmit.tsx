@@ -156,6 +156,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
           contextProfile: activeProfileProxy
             ? undefined
             : connectedProfile?.handle,
+          fromChain: chainWriters !== null,
         });
       },
       onError: (error) => {
@@ -514,9 +515,13 @@ const SingleWaveDropVoteSubmit = forwardRef<
         return;
       }
 
+      // On the 6529 Network the wallet or this browser's key signs after the
+      // click, and the vote counts once a block holds it: the dialog waits
+      // for that before it says the vote went in.
       if (
         submissionMode ===
-        SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH
+          SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH &&
+        chainWriters === null
       ) {
         submitVoteInBackground();
         return;

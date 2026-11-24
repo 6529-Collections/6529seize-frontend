@@ -11,6 +11,9 @@ import { DropVoteState } from "@/hooks/drops/types";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { commonApiPost } from "@/services/api/common-api";
 import { applyWaveDropVoteUpdate } from "@/hooks/waves/invalidateWaveApprovalStatusQueries";
+import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWriters";
+import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
+import { withViewerVote } from "@/lib/chain-waves/optimistic";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
@@ -58,28 +61,44 @@ export default function DropListItemRateGiveSubmit({
   const { voteState } = useDropInteractionRules(drop);
   const { applyOptimisticDropUpdate } = useMyStreamActions();
   const optimisticRollbackRef = useRef<(() => void) | null>(null);
+  const chainWriters = useChainWavesWriters();
 
   const rateChangeMutation = useMutation({
-    mutationFn: async (param: { rate: number; category: string }) =>
-      await commonApiPost<DropRateChangeRequest, ApiDrop>({
+    mutationFn: async (param: {
+      rate: number;
+      category: string;
+    }): Promise<ApiDrop> => {
+      if (chainWriters) {
+        // On the 6529 Network the vote carries its own signature; the caches
+        // show it until 6529.io's index reads it from the chain.
+        await chainWriters.vote({ dropId: drop.id, amount: param.rate });
+        return withViewerVote(drop, param.rate);
+      }
+      return await commonApiPost<DropRateChangeRequest, ApiDrop>({
         endpoint: `drops/${drop.id}/ratings`,
         body: {
           rating: param.rate,
           category: param.category,
         },
-      }),
+      });
+    },
     onSuccess: (updatedDrop) => {
       onSuccessfulRateChange();
       applyWaveDropVoteUpdate(queryClient, updatedDrop, drop.wave.id, {
         contextProfile: activeProfileProxy
           ? undefined
           : connectedProfile?.handle,
+        fromChain: chainWriters !== null,
       });
       optimisticRollbackRef.current = null;
     },
     onError: (error) => {
       optimisticRollbackRef.current?.();
       optimisticRollbackRef.current = null;
+      // Cancelled at the wallet prompt: nothing was sent.
+      if (isUserRejectedSigningError(error)) {
+        return;
+      }
       setToast({
         type: "error",
         title: "Couldn't submit your rating.",
@@ -103,7 +122,8 @@ export default function DropListItemRateGiveSubmit({
     }
     if (!rate || mutating) return;
     setMutating(true);
-    const { success } = await requestAuth();
+    // On the 6529 Network each vote carries its own signature.
+    const { success } = chainWriters ? { success: true } : await requestAuth();
     if (!success) {
       setMutating(false);
       return;
@@ -188,6 +208,7 @@ export default function DropListItemRateGiveSubmit({
     voteState,
     setToast,
     applyOptimisticDropUpdate,
+    chainWriters,
   ]);
 
   useEffect(() => {
