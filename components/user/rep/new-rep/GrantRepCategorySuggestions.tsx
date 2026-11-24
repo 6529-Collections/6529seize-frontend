@@ -45,13 +45,14 @@ export default function GrantRepCategorySuggestions({
           {t(locale, "rep.categories.grant.youAssigned")}
         </span>
       </legend>
-      <div className="tw-flex tw-max-h-[88px] tw-min-h-[42px] tw-flex-wrap tw-content-start tw-gap-2 tw-overflow-y-auto tw-p-0.5">
+      <div className="tw-flex tw-min-h-[42px] tw-flex-wrap tw-content-start tw-gap-2 tw-p-0.5">
         {matches?.map((item) => (
           <button
             key={item.category}
             type="button"
             disabled={disabled}
             aria-pressed={selectedCategory === item.category}
+            onMouseDown={(event) => event.preventDefault()}
             onClick={() => onSelect(item.category)}
             className={`tw-group tw-inline-flex tw-h-[38px] tw-max-w-full tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-[13px] tw-text-left tw-text-sm tw-font-medium tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50 motion-reduce:tw-transition-none ${selectedCategory === item.category ? "tw-border-white/30 tw-bg-white/10 tw-text-iron-50" : "tw-border-white/[0.06] tw-bg-white/5 tw-text-iron-100 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-white/[0.085]"}`}
           >

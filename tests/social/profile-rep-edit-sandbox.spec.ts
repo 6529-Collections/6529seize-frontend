@@ -87,6 +87,66 @@ async function expectCompactGrantLayout(grant: Locator) {
     .toBe(16);
 }
 
+async function expectCategorySearchLayout(grant: Locator, isMobile: boolean) {
+  if (!isMobile) {
+    await expectCompactGrantLayout(grant);
+    return;
+  }
+
+  // A focused category expands phone sheets; the footer stays below the body.
+  await expectGrantTransitionFinished(grant);
+  await expect
+    .poll(() =>
+      grant.locator(".mobile-wrapper-dialog").evaluate((panel) => {
+        const bounds = panel.getBoundingClientRect();
+        const viewport = window.visualViewport;
+        const container = panel.parentElement!.parentElement!;
+        const topReserve = Number.parseFloat(
+          getComputedStyle(container).paddingTop
+        );
+        return {
+          top: Math.round(bounds.top - (viewport?.offsetTop ?? 0) - topReserve),
+          height: Math.round(
+            bounds.height - (viewport?.height ?? innerHeight) + topReserve
+          ),
+        };
+      })
+    )
+    .toEqual({ top: 0, height: 0 });
+  await expect
+    .poll(async () => {
+      const [body, action] = await Promise.all([
+        grant.getByTestId("grant-rep-body").boundingBox(),
+        grant
+          .getByTestId("grant-rep-footer")
+          .getByRole("button")
+          .first()
+          .boundingBox(),
+      ]);
+      return body && action
+        ? Math.round(action.y - body.y - body.height)
+        : Infinity;
+    })
+    .toBe(16);
+  expect(
+    await grant
+      .locator(".mobile-wrapper-dialog")
+      .evaluate((panel) =>
+        [...panel.querySelectorAll("*")]
+          .filter((element) =>
+            ["auto", "scroll"].includes(getComputedStyle(element).overflowY)
+          )
+          .map((element) => element.getAttribute("data-testid"))
+      )
+  ).toEqual(["grant-rep-body"]);
+  for (const action of await grant
+    .getByTestId("grant-rep-footer")
+    .getByRole("button")
+    .all()) {
+    await expect(action).toBeInViewport();
+  }
+}
+
 async function seedSession(page: Page, role: string | null) {
   const address = "0x0000000000000000000000000000000000000529";
   const jwt = [
@@ -565,7 +625,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await openProfile(page);
     await page.getByRole("button", { name: "Grant Rep", exact: true }).click();
     const grant = page.getByRole("dialog", { name: "Grant Rep", exact: true });
-    const search = grant.getByRole("textbox", {
+    const search = grant.getByRole("combobox", {
       name: "Category to grant REP for",
       exact: true,
     });
@@ -608,7 +668,8 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       grant.getByText("Type at least 3 characters.", { exact: true })
     ).toBeVisible();
     await expectGrantTransitionFinished(grant);
-    await expectCompactGrantLayout(grant);
+    await expectCategorySearchLayout(grant, isMobile);
+    if (isMobile) await expect(amount).toBeHidden();
     expect(searches).toBe(0);
     await surface.screenshot({
       path: testInfo.outputPath("grant-rep-category-step.png"),
@@ -616,17 +677,17 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await search.fill("mus");
     await expect(own.getByRole("button")).toHaveCount(0);
     await expect(
-      grant.getByRole("button", { name: "Music", exact: true })
+      grant.getByRole("option", { name: "Music", exact: true })
     ).toBeVisible();
-    await expectCompactGrantLayout(grant);
+    await expectCategorySearchLayout(grant, isMobile);
     await expect(
       grant.getByRole("button", { name: "Grant Rep", exact: true })
     ).toBeEnabled();
     await expect(search).toBeFocused();
     await expect(
-      grant.getByRole("button", { name: "mus", exact: true })
+      grant.getByRole("option", { name: "mus", exact: true })
     ).toHaveCount(0);
-    const musicSuggestion = grant.getByRole("button", {
+    const musicSuggestion = grant.getByRole("option", {
       name: "Music",
       exact: true,
     });
@@ -674,6 +735,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expect(
       grant.getByText("Type at least 3 characters.", { exact: true })
     ).toBeVisible();
+    await expectCategorySearchLayout(grant, isMobile);
     await chooseCategory(
       own.getByRole("button", { name: "Research -25", exact: true })
     );
@@ -733,6 +795,13 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await grant
       .getByRole("button", { name: "Change category", exact: true })
       .click();
+    if (isMobile) {
+      await expect(grant.getByTestId("grant-rep-amount")).toBeHidden();
+      await grant
+        .getByRole("heading", { name: "Grant Rep", exact: true })
+        .click();
+      await expect(grant.getByTestId("grant-rep-amount")).toBeVisible();
+    }
     await amount.fill("45");
     await chooseCategory(
       own.getByRole("button", { name: "Artist 1,000", exact: true })
@@ -753,9 +822,226 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     });
   });
 
+  test("keeps every category suggestion available with clear guidance and one content scroller", async ({
+    page,
+    baseURL,
+    isMobile,
+  }, testInfo) => {
+    const api = getSandboxApiOrigin(baseURL);
+    const categories = [
+      "Memes nominee",
+      "Memes Nominee",
+      "MEMES NOMINEE",
+      "Memes nomineer",
+      "Memes Nominees",
+      "TheMemesNomination",
+      "Photography",
+      ...Array.from(
+        { length: 24 },
+        (_, index) => `Community category ${index}`
+      ),
+      "MemesNominee",
+    ];
+    let writes = 0;
+    if (isMobile) await page.setViewportSize({ width: 320, height: 727 });
+    await page.route(
+      `${api}/api/profiles/${TARGET}/rep/ratings/received?*`,
+      (route) => route.fulfill({ json: allowance })
+    );
+    await page.route(
+      (url) =>
+        /^\/api\/+rep\/categories(?:\/availability)?$/.test(url.pathname),
+      (route) =>
+        route.fulfill({
+          json: new URL(route.request().url()).pathname.endsWith(
+            "/availability"
+          )
+            ? true
+            : categories,
+        })
+    );
+    await page.route(`${api}/api/profiles/${TARGET}/rep/rating`, (route) => {
+      writes++;
+      return route.fulfill({
+        status: 500,
+        json: { message: "Unexpected REP write" },
+      });
+    });
+    await openProfile(page);
+    await page.getByRole("button", { name: "Grant Rep", exact: true }).click();
+    const grant = page.getByRole("dialog", { name: "Grant Rep", exact: true });
+    const search = grant.getByRole("combobox", {
+      name: "Category to grant REP for",
+      exact: true,
+    });
+    const amount = grant.getByRole("textbox", {
+      name: "Your total REP for this category",
+      exact: true,
+    });
+    await amount.fill("35");
+
+    for (const query of ["memes nominee", "memes no"]) {
+      await search.fill(query);
+      const list = grant.getByRole("listbox");
+      const options = list.getByRole("option");
+      await expect(options).toHaveCount(categories.length);
+      if (isMobile) await expectCategorySearchLayout(grant, true);
+      for (const category of categories) {
+        const name =
+          category === "MemesNominee"
+            ? "MemesNominee Counts for submissions"
+            : category;
+        await expect(
+          list.getByRole("option", { name, exact: true })
+        ).toBeVisible();
+      }
+      const listId = await list.getAttribute("id");
+      expect(listId).toBeTruthy();
+      await expect(search).toHaveAttribute("aria-controls", listId ?? "");
+      await expect(search).toHaveAttribute("aria-expanded", "true");
+      const first = options.first();
+      await expect(first).toHaveAccessibleName(
+        "MemesNominee Counts for submissions"
+      );
+      await expect(first).toHaveAttribute("aria-selected", "true");
+      const firstId = await first.getAttribute("id");
+      expect(firstId).toBeTruthy();
+      await expect(search).toHaveAttribute(
+        "aria-activedescendant",
+        firstId ?? ""
+      );
+      if (!isMobile) {
+        const last = options.last();
+        await search.press("ArrowUp");
+        await expect(last).toHaveAttribute("aria-selected", "true");
+        await expect(last).toBeInViewport();
+        expect(
+          await grant
+            .getByTestId("grant-rep-body")
+            .evaluate((body) => body.scrollTop)
+        ).toBeGreaterThan(0);
+        await search.press("ArrowDown");
+        await expect(first).toHaveAttribute("aria-selected", "true");
+        await expect(first).toBeInViewport();
+      }
+      await expect(
+        grant.getByRole("button", { name: /show (?:all|more)/i })
+      ).toHaveCount(0);
+      const warning = grant.getByText(
+        `"${query}" is a separate category. Only MemesNominee counts for submissions.`,
+        { exact: true }
+      );
+      await expect(warning).toHaveCount(1);
+      await expect(warning).toBeVisible();
+      const [inputBox, warningBox, firstBox] = await Promise.all([
+        search.boundingBox(),
+        warning.boundingBox(),
+        first.boundingBox(),
+      ]);
+      expect(warningBox!.y).toBeGreaterThanOrEqual(
+        inputBox!.y + inputBox!.height
+      );
+      expect(firstBox!.y).toBeGreaterThanOrEqual(
+        warningBox!.y + warningBox!.height
+      );
+      expect(
+        await list.evaluate((element) => {
+          const body = element.closest('[data-testid="grant-rep-body"]');
+          const owners: string[] = [];
+          for (
+            let current: Element | null = element;
+            current && current !== body;
+            current = current.parentElement
+          ) {
+            if (
+              ["auto", "scroll"].includes(getComputedStyle(current).overflowY)
+            )
+              owners.push(current.className);
+          }
+          return { hasBody: body !== null, owners };
+        })
+      ).toEqual({ hasBody: true, owners: [] });
+
+      const boxes = await options.evaluateAll((elements) =>
+        elements.map((element) => {
+          const box = element.getBoundingClientRect();
+          return { x: box.x, y: box.y, width: box.width, height: box.height };
+        })
+      );
+      if (isMobile) {
+        await expect(grant.getByTestId("grant-rep-amount")).toBeHidden();
+        for (const box of boxes) {
+          expect(box.height).toBe(48);
+          expect(box.x).toBeCloseTo(boxes[0]!.x, 1);
+          expect(box.width).toBeCloseTo(boxes[0]!.width, 1);
+        }
+      } else {
+        await expect(amount).toBeVisible();
+        expect(
+          new Set(boxes.map((box) => Math.round(box.y))).size
+        ).toBeLessThan(categories.length);
+        expect((await amount.boundingBox())!.y).toBeGreaterThanOrEqual(
+          Math.max(...boxes.map((box) => box.y + box.height))
+        );
+      }
+    }
+
+    await search.scrollIntoViewIfNeeded();
+    await expectGrantTransitionFinished(grant);
+    await grant.locator(".mobile-wrapper-dialog").screenshot({
+      path: testInfo.outputPath("grant-rep-all-category-results.png"),
+    });
+    const list = grant.getByRole("listbox");
+    const lookalike = list.getByRole("option", {
+      name: "Memes nominee",
+      exact: true,
+    });
+    if (isMobile) {
+      await lookalike.tap();
+    } else {
+      await search.press("ArrowDown");
+      await expect(lookalike).toHaveAttribute("aria-selected", "true");
+      await expect(search).toHaveValue("memes no");
+      await search.press("Enter");
+    }
+    await expect(search).toHaveValue("Memes nominee");
+    await expect(amount).toBeVisible();
+    await expect(amount).toHaveValue("35");
+    await expect(
+      grant.getByText(
+        '"Memes nominee" is a separate category. Only MemesNominee counts for submissions.',
+        { exact: true }
+      )
+    ).toHaveCount(1);
+    await grant
+      .getByRole("button", { name: "Change category", exact: true })
+      .click();
+    await search.fill("memes no");
+    const canonical = grant.getByRole("option", {
+      name: "MemesNominee Counts for submissions",
+      exact: true,
+    });
+    await expect(canonical).toBeVisible();
+    if (isMobile) await canonical.tap();
+    else await search.press("Enter");
+    await expect(search).toHaveValue("MemesNominee");
+    await expect(amount).toBeVisible();
+    await expect(grant.getByText(/Memes submissions require/)).toHaveCount(1);
+    await expect(
+      grant.getByText(/is a separate category\. Only MemesNominee/)
+    ).toHaveCount(0);
+    await expectNoHorizontalOverflow(page);
+    await expectAxeClean(page);
+    expect(writes).toBe(0);
+    await grant.locator(".mobile-wrapper-dialog").screenshot({
+      path: testInfo.outputPath("grant-rep-category-suggestions.png"),
+    });
+  });
+
   test("opens Grant Rep without chip groups when no REP is assigned", async ({
     page,
     baseURL,
+    isMobile,
   }, testInfo) => {
     const api = getSandboxApiOrigin(baseURL);
     await page.route(
@@ -789,7 +1075,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await page.getByRole("button", { name: "Grant Rep", exact: true }).click();
     const grant = page.getByRole("dialog", { name: "Grant Rep", exact: true });
     await expect(
-      grant.getByRole("textbox", {
+      grant.getByRole("combobox", {
         name: "Category to grant REP for",
         exact: true,
       })
@@ -816,7 +1102,8 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expect(
       grant.getByText("No REP assigned yet.", { exact: true })
     ).toHaveCount(0);
-    await expect(grant.getByRole("textbox")).toHaveCount(2);
+    await expect(grant.getByRole("textbox")).toHaveCount(1);
+    await expect(grant.getByRole("combobox")).toHaveCount(1);
     await expect(
       grant.getByRole("textbox", {
         name: "Your total REP for this category",
@@ -834,23 +1121,34 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       name: "Your total REP for this category",
       exact: true,
     });
-    const search = grant.getByRole("textbox", {
+    const search = grant.getByRole("combobox", {
       name: "Category to grant REP for",
       exact: true,
     });
     const action = grant.getByRole("button", { name: "Cancel", exact: true });
     await expectGrantTransitionFinished(grant);
-    const initialAmount = await amount.boundingBox();
-    const initialAction = await action.boundingBox();
     await search.click();
     await expect(
       grant.getByText("Type at least 3 characters.", { exact: true })
     ).toBeVisible();
-    await expectCompactGrantLayout(grant);
-    await expect
-      .poll(async () => (await amount.boundingBox())?.y)
-      .toBeCloseTo(initialAmount!.y, 0);
-    expect((await action.boundingBox())!.y).toBeCloseTo(initialAction!.y, 0);
+    await expectCategorySearchLayout(grant, isMobile);
+    if (isMobile) {
+      await expect(grant.getByTestId("grant-rep-amount")).toBeHidden();
+      await grant
+        .getByRole("heading", { name: "Grant Rep", exact: true })
+        .click();
+      await expect(grant.getByTestId("grant-rep-amount")).toBeVisible();
+    } else {
+      const prompt = grant.getByText("Type at least 3 characters.", {
+        exact: true,
+      });
+      const promptBox = await prompt.boundingBox();
+      const amountBox = await amount.boundingBox();
+      expect(amountBox!.y).toBeGreaterThanOrEqual(
+        promptBox!.y + promptBox!.height
+      );
+    }
+    await expect(action).toBeInViewport();
     await amount.click();
     await expect(
       grant.getByText("Type at least 3 characters.", { exact: true })
@@ -905,7 +1203,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await openProfile(page);
     await page.getByRole("button", { name: "Grant Rep", exact: true }).click();
     const grant = page.getByRole("dialog", { name: "Grant Rep", exact: true });
-    const search = grant.getByRole("textbox", {
+    const search = grant.getByRole("combobox", {
       name: "Category to grant REP for",
       exact: true,
     });
@@ -923,7 +1221,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
         const list = group.lastElementChild!;
         return list.scrollHeight > list.clientHeight;
       })
-    ).toBe(true);
+    ).toBe(false);
     await assigned
       .getByRole("button", { name: "Assigned category 11 12", exact: true })
       .click();
@@ -940,10 +1238,11 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       .click();
     await search.fill("Unavailable category");
     await expect(search).toHaveAttribute("aria-invalid", "true");
-    await expectCompactGrantLayout(grant);
+    await expectCategorySearchLayout(grant, isMobile);
     await search.fill("MemesNominee");
     await expect(search).toHaveAttribute("aria-invalid", "false");
     await expect(grant.getByText(/50,000/)).toBeVisible();
+    await expect(amount).toBeVisible();
     await amount.click();
     await page.setViewportSize({ width: isMobile ? 320 : 1280, height: 520 });
     const cancel = grant.getByRole("button", { name: "Cancel", exact: true });
@@ -2413,7 +2712,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expectCompactGrantLayout(grant);
     await expectDesktopRatingPosition(page, "Grant Rep");
     await grant
-      .getByRole("textbox", { name: "Category to grant REP for", exact: true })
+      .getByRole("combobox", { name: "Category to grant REP for", exact: true })
       .fill(CATEGORY);
     const amount = grant.getByRole("textbox", {
       name: "Your total REP for this category",

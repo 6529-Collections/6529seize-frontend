@@ -1,4 +1,11 @@
-import { act, render, screen, waitFor, within } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { useContext } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -18,18 +25,26 @@ jest.mock(
       readonly state: string;
       readonly categories: readonly string[];
       readonly onRepSelect: (category: string) => void;
+      readonly activeIndex?: number;
+      readonly optionIdPrefix?: string;
     }) => (
       <div data-testid="dropdown">
         <span>{props.state}</span>
-        {props.categories.map((category) => (
-          <button
-            key={category}
-            type="button"
-            onClick={() => props.onRepSelect(category)}
-          >
-            {category}
-          </button>
-        ))}
+        {(props.state === "HAVE_RESULTS" ? props.categories : []).map(
+          (category, index) => (
+            <button
+              key={category}
+              type="button"
+              role="option"
+              id={`${props.optionIdPrefix ?? "mock-option-"}${index}`}
+              aria-selected={props.activeIndex === index}
+              tabIndex={-1}
+              onClick={() => props.onRepSelect(category)}
+            >
+              {category}
+            </button>
+          )
+        )}
       </div>
     )
 );
@@ -151,13 +166,13 @@ describe("UserPageRepNewRepSearch", () => {
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
     await user.click(screen.getByRole("button", { name: "Change category" }));
     await user.type(
-      screen.getByRole("textbox", { name: "Category to grant REP for" }),
+      screen.getByRole("combobox", { name: "Category to grant REP for" }),
       "mus"
     );
     expect(
       screen.queryByRole("button", { name: "AI 1,000" })
     ).not.toBeInTheDocument();
-    await user.click(await screen.findByRole("button", { name: "Music" }));
+    await user.click(await screen.findByRole("option", { name: "Music" }));
     expect(
       screen.getByRole("textbox", { name: "Your total REP for this category" })
     ).toHaveValue("0");
@@ -175,7 +190,7 @@ describe("UserPageRepNewRepSearch", () => {
         endpoint: "rep/categories/availability?param=Music",
       })
     );
-    const search = screen.getByRole("textbox", {
+    const search = screen.getByRole("combobox", {
       name: "Category to grant REP for",
     });
     await user.click(search);
@@ -210,7 +225,7 @@ describe("UserPageRepNewRepSearch", () => {
         />
       );
       expect(
-        screen.getByRole("textbox", { name: "Category to grant REP for" })
+        screen.getByRole("combobox", { name: "Category to grant REP for" })
       ).toHaveValue("");
       expect(screen.queryByRole("group")).not.toBeInTheDocument();
       expect(screen.getByText("Your available REP:")).toBeVisible();
@@ -296,7 +311,7 @@ describe("UserPageRepNewRepSearch", () => {
         profile={{ query: "recipient" } as ApiIdentity}
       />
     );
-    const search = screen.getByRole("textbox", {
+    const search = screen.getByRole("combobox", {
       name: "Category to grant REP for",
     });
     await user.type(search, "Other{enter}");
@@ -334,7 +349,7 @@ describe("UserPageRepNewRepSearch", () => {
       );
     }
     const { rerender } = render(<Harness identity="first" />);
-    const search = screen.getByRole("textbox", {
+    const search = screen.getByRole("combobox", {
       name: "Category to grant REP for",
     });
     await user.type(search, "Art{Enter}");
@@ -346,7 +361,7 @@ describe("UserPageRepNewRepSearch", () => {
       )
     );
     rerender(<Harness identity="second" />);
-    const nextSearch = screen.getByRole("textbox", {
+    const nextSearch = screen.getByRole("combobox", {
       name: "Category to grant REP for",
     });
     const nextAmount = screen.getByRole("textbox", {
@@ -375,7 +390,7 @@ describe("UserPageRepNewRepSearch", () => {
       };
       const { rerender } = render(<UserPageRepNewRepSearch {...props} />);
       await user.type(
-        screen.getByRole("textbox", { name: "Category to grant REP for" }),
+        screen.getByRole("combobox", { name: "Category to grant REP for" }),
         "Art{Enter}"
       );
       await screen.findByRole("button", { name: "Change category" });
@@ -433,7 +448,7 @@ describe("UserPageRepNewRepSearch", () => {
     expect(amount).toHaveClass("focus:tw-ring-primary-400");
     expect(amount).toHaveAttribute("aria-invalid", "false");
     await user.type(
-      screen.getByRole("textbox", { name: "Category to grant REP for" }),
+      screen.getByRole("combobox", { name: "Category to grant REP for" }),
       "Art{Enter}"
     );
     await screen.findByRole("button", { name: "Change category" });
@@ -502,7 +517,7 @@ describe("UserPageRepNewRepSearch", () => {
     expect(commonApiPost).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "Grant Rep" })).toBeDisabled();
     await user.type(
-      screen.getByRole("textbox", { name: "Category to grant REP for" }),
+      screen.getByRole("combobox", { name: "Category to grant REP for" }),
       "Art{Enter}"
     );
     await screen.findByRole("button", { name: "Change category" });
@@ -573,7 +588,7 @@ describe("UserPageRepNewRepSearch", () => {
     await user.click(screen.getByRole("button", { name: "Save" }));
     expect(await screen.findByTestId("error")).toBeInTheDocument();
     expect(
-      screen.getByRole("textbox", { name: "Category to grant REP for" })
+      screen.getByRole("combobox", { name: "Category to grant REP for" })
     ).toHaveAttribute("aria-invalid", "false");
     expect(amount).toHaveValue("35");
     expect(onSuccess).not.toHaveBeenCalled();
@@ -646,7 +661,7 @@ describe("UserPageRepNewRepSearch", () => {
     expect(onSuccess).not.toHaveBeenCalled();
     expect(nextAmount).toHaveValue("45");
     expect(
-      screen.getByRole("textbox", { name: "Category to grant REP for" })
+      screen.getByRole("combobox", { name: "Category to grant REP for" })
     ).not.toHaveAttribute("readonly");
     expect(commonApiPost).toHaveBeenCalledTimes(1);
     expect(onProfileRepModify).toHaveBeenCalledWith(
@@ -669,7 +684,7 @@ describe("UserPageRepNewRepSearch", () => {
     };
     const { rerender } = render(<UserPageRepNewRepSearch {...props} />);
     await user.type(
-      screen.getByRole("textbox", { name: "Category to grant REP for" }),
+      screen.getByRole("combobox", { name: "Category to grant REP for" }),
       "Art"
     );
     const amount = screen.getByRole("textbox", {
@@ -706,7 +721,7 @@ describe("UserPageRepNewRepSearch", () => {
     const { rerender } = render(<UserPageRepNewRepSearch {...props} />);
     suggestedCategories = ["Art"];
     await user.type(
-      screen.getByRole("textbox", { name: "Category to grant REP for" }),
+      screen.getByRole("combobox", { name: "Category to grant REP for" }),
       "Art"
     );
     const amount = screen.getByRole("textbox", {
@@ -754,7 +769,7 @@ describe("UserPageRepNewRepSearch", () => {
         profile={{ query: "recipient" } as ApiIdentity}
       />
     );
-    const search = screen.getByRole("textbox", {
+    const search = screen.getByRole("combobox", {
       name: "Category to grant REP for",
     });
     await user.type(search, "Art");
@@ -842,7 +857,7 @@ describe("UserPageRepNewRepSearch", () => {
       />
     );
 
-    const search = screen.getByRole("textbox", {
+    const search = screen.getByRole("combobox", {
       name: "Category to grant REP for",
     });
     await user.click(search);
@@ -862,7 +877,7 @@ describe("UserPageRepNewRepSearch", () => {
         profile={{ query: "recipient" } as ApiIdentity}
       />
     );
-    const search = screen.getByRole("textbox", {
+    const search = screen.getByRole("combobox", {
       name: "Category to grant REP for",
     });
     expect(search).toHaveAttribute("aria-invalid", "false");
@@ -898,7 +913,7 @@ describe("UserPageRepNewRepSearch", () => {
         profile={{ query: "recipient" } as ApiIdentity}
       />
     );
-    const search = screen.getByRole("textbox", {
+    const search = screen.getByRole("combobox", {
       name: "Category to grant REP for",
     });
     const amount = screen.getByRole("textbox", {
@@ -946,7 +961,7 @@ describe("UserPageRepNewRepSearch", () => {
         profile={{ query: "recipient" } as ApiIdentity}
       />
     );
-    const search = screen.getByRole("textbox", {
+    const search = screen.getByRole("combobox", {
       name: "Category to grant REP for",
     });
     await user.type(search, " Artist ");
@@ -962,8 +977,9 @@ describe("UserPageRepNewRepSearch", () => {
     expect(screen.getByRole("button", { name: "Grant Rep" })).toBeDisabled();
   });
 
-  it("reuses approval when Enter confirms the typed category and preserves the amount", async () => {
+  it("reuses approval when Enter confirms the typed category without suggestions and preserves the amount", async () => {
     const user = userEvent.setup();
+    suggestedCategories = [];
     mockAllocation.mockImplementation(({ category }) => ({
       ...allocation,
       repState: category
@@ -976,7 +992,7 @@ describe("UserPageRepNewRepSearch", () => {
         profile={{ query: "recipient" } as ApiIdentity}
       />
     );
-    const search = screen.getByRole("textbox", {
+    const search = screen.getByRole("combobox", {
       name: "Category to grant REP for",
     });
     const amount = screen.getByRole("textbox", {
@@ -1033,9 +1049,9 @@ describe("UserPageRepNewRepSearch", () => {
 
     await user.type(input, "meme");
     await waitFor(() =>
-      expect(screen.getByRole("button", { name: "MemesNominee" })).toBeVisible()
+      expect(screen.getByRole("option", { name: "MemesNominee" })).toBeVisible()
     );
-    await user.click(screen.getByRole("button", { name: "MemesNominee" }));
+    await user.click(screen.getByRole("option", { name: "MemesNominee" }));
     await waitFor(() => expect(input).toHaveValue("MemesNominee"));
     expect(
       within(screen.getByText(/Memes submissions require/)).getByText(
@@ -1048,7 +1064,7 @@ describe("UserPageRepNewRepSearch", () => {
     await user.keyboard("meme");
 
     await waitFor(() =>
-      expect(screen.getByRole("button", { name: "MemesNominee" })).toBeVisible()
+      expect(screen.getByRole("option", { name: "MemesNominee" })).toBeVisible()
     );
     expect(commonApiFetch).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -1085,7 +1101,7 @@ describe("UserPageRepNewRepSearch", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("keeps the canonical suggestion available when Enter is pressed on a look-alike", async () => {
+  it("selects the first loaded canonical suggestion when Enter is pressed on a look-alike", async () => {
     const user = userEvent.setup();
     render(
       <UserPageRepNewRepSearch
@@ -1095,16 +1111,130 @@ describe("UserPageRepNewRepSearch", () => {
     );
     const input = screen.getByPlaceholderText("Category to grant REP for");
 
-    await user.type(input, "memes nominee{enter}");
+    await user.type(input, "memes nominee");
+    const first = await screen.findByRole("option", { name: "MemesNominee" });
+    expect(first).toHaveAttribute("aria-selected", "true");
+    expect(input).toHaveAttribute("aria-activedescendant", first.id);
+    await user.keyboard("{Enter}");
 
-    expect(input).toHaveValue("memes nominee");
-    expect(screen.getByTestId("dropdown")).toBeInTheDocument();
+    await waitFor(() => expect(input).toHaveValue("MemesNominee"));
+    await waitFor(() =>
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+    );
     expect(
-      await screen.findByRole("button", { name: "MemesNominee" })
-    ).toBeVisible();
+      screen.getByRole("button", { name: "Change category" })
+    ).toBeInTheDocument();
+    expect(commonApiPost).not.toHaveBeenCalled();
+  });
+
+  it("keeps every returned suggestion and moves the active selection without changing the query", async () => {
+    const user = userEvent.setup();
+    const returned = Array.from(
+      { length: 16 },
+      (_, index) => `Community category ${index}`
+    );
+    suggestedCategories = [...returned, "MemesNominee"];
+    render(
+      <UserPageRepNewRepSearch
+        overview={null}
+        profile={{ query: "recipient" } as ApiIdentity}
+      />
+    );
+    const input = screen.getByRole("combobox", {
+      name: "Category to grant REP for",
+    });
+    await user.type(input, "memes no");
+
+    await waitFor(() => expect(screen.getAllByRole("option")).toHaveLength(17));
+    const list = screen.getByRole("listbox");
+    expect(input).toHaveAttribute("aria-controls", list.id);
+    expect(input).toHaveAttribute("aria-expanded", "true");
+    for (const category of returned) {
+      expect(
+        within(list).getByRole("option", { name: category })
+      ).toBeVisible();
+    }
+    const canonical = within(list).getByRole("option", {
+      name: "MemesNominee",
+    });
+    expect(canonical).toHaveAttribute("aria-selected", "true");
+    await user.keyboard("{ArrowDown}");
+    const next = within(list).getByRole("option", {
+      name: "Community category 0",
+      exact: true,
+    });
+    expect(next).toHaveAttribute("aria-selected", "true");
+    expect(input).toHaveAttribute("aria-activedescendant", next.id);
+    expect(input).toHaveValue("memes no");
+    await user.keyboard("{ArrowUp}");
+    expect(canonical).toHaveAttribute("aria-selected", "true");
+    await user.keyboard("{ArrowDown}{Enter}");
+    await waitFor(() => expect(input).toHaveValue("Community category 0"));
+    expect(commonApiFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "rep/categories/availability?param=Community+category+0",
+      })
+    );
+    expect(commonApiPost).not.toHaveBeenCalled();
+  });
+
+  it("shows one unchanged look-alike warning immediately while typing", async () => {
+    const user = userEvent.setup();
+    render(
+      <UserPageRepNewRepSearch
+        overview={null}
+        profile={{ query: "recipient" } as ApiIdentity}
+      />
+    );
+    const input = screen.getByRole("combobox", {
+      name: "Category to grant REP for",
+    });
+    await user.type(input, "Memes nominee");
+    const warning =
+      '"Memes nominee" is a separate category. Only MemesNominee counts for submissions.';
+    expect(screen.getAllByText(warning)).toHaveLength(1);
+    expect(
+      screen.queryByText(/Memes submissions require/)
+    ).not.toBeInTheDocument();
+    expect(commonApiPost).not.toHaveBeenCalled();
+  });
+
+  it("does not select a suggestion while Enter commits IME text", async () => {
+    const user = userEvent.setup();
+    render(
+      <UserPageRepNewRepSearch
+        overview={null}
+        profile={{ query: "recipient" } as ApiIdentity}
+      />
+    );
+    const input = screen.getByRole("combobox", {
+      name: "Category to grant REP for",
+    });
+    await user.type(input, "memes no");
+    await screen.findByRole("option", { name: "MemesNominee" });
+    const canonicalChecks = () =>
+      jest
+        .mocked(commonApiFetch)
+        .mock.calls.filter(
+          ([{ endpoint }]) =>
+            endpoint === "rep/categories/availability?param=MemesNominee"
+        ).length;
+    const checksBefore = canonicalChecks();
+    await act(async () => {
+      fireEvent.keyDown(input, {
+        key: "Enter",
+        code: "Enter",
+        isComposing: true,
+      });
+    });
+
+    expect(input).toHaveValue("memes no");
+    expect(screen.getByRole("listbox")).toBeVisible();
     expect(
       screen.queryByRole("button", { name: "Change category" })
     ).not.toBeInTheDocument();
+    expect(canonicalChecks()).toBe(checksBefore);
+    expect(commonApiPost).not.toHaveBeenCalled();
   });
 
   it("surfaces only the exact submission category ahead of its presentation variant", () => {
@@ -1171,7 +1301,7 @@ describe("UserPageRepNewRepSearch", () => {
       );
     }
     render(<Harness />);
-    const search = screen.getByRole("textbox", {
+    const search = screen.getByRole("combobox", {
       name: "Category to grant REP for",
     });
     const amount = screen.getByRole("textbox", {

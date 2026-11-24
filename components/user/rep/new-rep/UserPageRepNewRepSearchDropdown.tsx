@@ -7,18 +7,62 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { RepSearchState } from "./rep-search-types";
 
+function CategoryName({
+  category,
+  search,
+}: {
+  readonly category: string;
+  readonly search: string;
+}) {
+  const query = search.normalize("NFKC").toLowerCase().replace(/\s/gu, "");
+  if (!query) return category;
+
+  let normalized = "";
+  let offset = 0;
+  const positions: { start: number; end: number }[] = [];
+  for (const character of category) {
+    const part = character.normalize("NFKC").toLowerCase().replace(/\s/gu, "");
+    normalized += part;
+    for (let index = 0; index < part.length; index++) {
+      positions.push({ start: offset, end: offset + character.length });
+    }
+    offset += character.length;
+  }
+
+  const match = normalized.indexOf(query);
+  const start = positions[match]?.start;
+  const end = positions[match + query.length - 1]?.end;
+  if (start === undefined || end === undefined) return category;
+
+  return (
+    <>
+      {category.slice(0, start)}
+      <span className="tw-opacity-80 md:tw-opacity-100">
+        {category.slice(start, end)}
+      </span>
+      {category.slice(end)}
+    </>
+  );
+}
+
 export default function UserPageRepNewRepSearchDropdown({
   categories,
   onRepSelect,
   state,
   minSearchLength,
   maxSearchLength,
+  search = "",
+  activeIndex = 0,
+  optionIdPrefix = "rep-category-option-",
 }: {
   readonly categories: string[];
   readonly onRepSelect: (rep: string) => void;
   readonly state: RepSearchState;
   readonly minSearchLength: number;
   readonly maxSearchLength: number;
+  readonly search?: string;
+  readonly activeIndex?: number;
+  readonly optionIdPrefix?: string;
 }) {
   const locale = useBrowserLocale();
 
@@ -56,8 +100,8 @@ export default function UserPageRepNewRepSearchDropdown({
   }
 
   return (
-    <div className="tw-flex tw-max-h-80 tw-flex-wrap tw-gap-2 tw-overflow-y-auto tw-p-1">
-      {categories.map((category) => {
+    <div className="tw-flex tw-flex-col tw-gap-2 tw-p-1 md:tw-flex-row md:tw-flex-wrap">
+      {categories.map((category, index) => {
         const isMemesSubmissionCategory = category === MEMES_NOMINEE_CATEGORY;
         const isNonQualifyingLookalike = isMemesNomineeLookalike(category);
         let categoryAppearance =
@@ -75,19 +119,30 @@ export default function UserPageRepNewRepSearchDropdown({
           <button
             key={category}
             type="button"
+            role="option"
+            id={`${optionIdPrefix}${index}`}
+            aria-label={
+              isMemesSubmissionCategory
+                ? `${category} ${t(locale, "rep.categories.grant.submissionBadge")}`
+                : category
+            }
+            aria-selected={activeIndex === index}
+            tabIndex={-1}
             onMouseDown={(event) => event.preventDefault()}
             onClick={(event) => {
               event.stopPropagation();
               onRepSelect(category);
             }}
-            className={`tw-flex tw-max-w-full tw-cursor-pointer tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-rounded-lg tw-border tw-border-solid tw-min-h-8 tw-px-2.5 tw-py-1 tw-text-left tw-text-xs tw-font-normal tw-leading-5 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none ${categoryAppearance}`}
+            className={`tw-flex tw-min-h-12 tw-w-full tw-max-w-full tw-cursor-pointer tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-0 tw-rounded-lg tw-border tw-border-solid tw-px-2.5 tw-py-0.5 tw-text-left tw-text-sm tw-font-normal tw-leading-5 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none md:tw-min-h-8 md:tw-w-auto md:tw-gap-y-1 md:tw-py-1 md:tw-text-xs ${activeIndex === index ? "tw-ring-1 tw-ring-inset tw-ring-primary-400" : ""} ${categoryAppearance}`}
           >
             <span
               className={`tw-min-w-0 tw-max-w-full tw-break-words ${
-                isMemesSubmissionCategory ? "tw-font-medium" : ""
+                isMemesSubmissionCategory
+                  ? "tw-font-medium tw-text-emerald-400"
+                  : ""
               }`}
             >
-              {category}
+              <CategoryName category={category} search={search} />
             </span>
             {isMemesSubmissionCategory && (
               <span className="tw-whitespace-nowrap tw-text-[11px] tw-font-normal tw-leading-5 tw-text-emerald-300">
