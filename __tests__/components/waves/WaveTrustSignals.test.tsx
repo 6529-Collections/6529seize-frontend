@@ -142,7 +142,7 @@ describe("WaveTrustSignals", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("closes and disables score details while preserving the visible score", () => {
+  it("closes score details and keeps a non-interactive score label when details are disabled", () => {
     const props = {
       waveRep,
       waveScore,
@@ -156,14 +156,22 @@ describe("WaveTrustSignals", () => {
       screen.getByRole("dialog", { name: "Wave score details" })
     ).toBeInTheDocument();
     rerender(<WaveTrustSignals {...props} scoreDetailsDisabled />);
-    expect(trigger).toBeDisabled();
-    expect(trigger).toHaveTextContent("83");
+    const label = screen.getByLabelText(/^Wave score 83\./);
+    expect(label.tagName).toBe("SPAN");
+    expect(label).toHaveTextContent("83");
+    expect(label).not.toHaveAttribute("title");
+    expect(
+      screen.queryByRole("button", { name: /^Wave score 83\./ })
+    ).toBeNull();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    fireEvent.click(trigger);
+    fireEvent.click(label);
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     rerender(<WaveTrustSignals {...props} />);
-    expect(trigger).toBeEnabled();
-    fireEvent.click(trigger);
+    const enabledTrigger = screen.getByRole("button", {
+      name: /^Wave score 83\./,
+    });
+    expect(enabledTrigger).toBeEnabled();
+    fireEvent.click(enabledTrigger);
     expect(
       screen.getByRole("dialog", { name: "Wave score details" })
     ).toBeInTheDocument();
