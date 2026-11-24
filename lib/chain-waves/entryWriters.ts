@@ -149,6 +149,8 @@ export async function writeChainEntry(
   input: {
     readonly request: ApiCreateDropRequest;
     readonly competitionId: string | null;
+    /** The `chain_id` 6529.io's API gives the competition, when it does. */
+    readonly competitionChainId?: Hex | null | undefined;
     readonly consent: (fields: EntryFields) => Promise<EntryConsent | null>;
     readonly onStage?: ((stage: ChainEntryStage) => void) | undefined;
   },
@@ -162,7 +164,11 @@ export async function writeChainEntry(
   }
   const author = await identityOfWallet(wallet, signal);
   const decision = await resolveEntryDecision(
-    { waveId: input.request.wave_id, competitionId: input.competitionId },
+    {
+      waveId: input.request.wave_id,
+      competitionId: input.competitionId,
+      competitionChainId: input.competitionChainId,
+    },
     signal
   );
   assertDecisionOpen(decision);

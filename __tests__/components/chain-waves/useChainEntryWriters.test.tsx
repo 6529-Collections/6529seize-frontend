@@ -97,6 +97,32 @@ describe("useChainEntryWriters", () => {
 });
 
 describe("useChainEntrySubmit", () => {
+  it("passes the chain_id the API gives the competition, and null without one", async () => {
+    const chainId = `0x${"3c".repeat(32)}`;
+    const { result, rerender } = renderHook(
+      ({ value }: { value: ApiCompetition }) => useChainEntrySubmit(value),
+      {
+        wrapper,
+        initialProps: {
+          value: { ...competition(false), chain_id: chainId } as ApiCompetition,
+        },
+      }
+    );
+    await result.current?.({ request, terms: null });
+    expect(writeChainEntry).toHaveBeenLastCalledWith(
+      config,
+      WALLET,
+      expect.objectContaining({ competitionChainId: chainId })
+    );
+    rerender({ value: competition(false) });
+    await result.current?.({ request, terms: null });
+    expect(writeChainEntry).toHaveBeenLastCalledWith(
+      config,
+      WALLET,
+      expect.objectContaining({ competitionChainId: null })
+    );
+  });
+
   it("has the wallet sign the competition's ENTRY_CREATE consent over the entry", async () => {
     mockSign.mockResolvedValue({
       message: JSON.stringify({ actor_wallet: WALLET }),

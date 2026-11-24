@@ -195,6 +195,40 @@ describe("writeChainEntry", () => {
     expect(order).toEqual(["consent", "store", "sign"]);
   });
 
+  it("sends to the decision the API's chain_id names, for one made on the chain", async () => {
+    const chainMade: Hex = `0x${"3c".repeat(32)}`;
+    gateway.getDecision.mockResolvedValue(
+      decision({ decisionId: chainMade, configVersion: 2 })
+    );
+    await writeChainEntry(config, WALLET, {
+      request: request(),
+      competitionId: "9a404fbe-be9b-5cbb-a70b-872173014744",
+      competitionChainId: chainMade,
+      consent: async () => null,
+    });
+    expect(gateway.getDecision).toHaveBeenCalledWith(chainMade, undefined);
+    expect(gateway.getDecision).not.toHaveBeenCalledWith(
+      imported("9a404fbe-be9b-5cbb-a70b-872173014744", 0x0601),
+      undefined
+    );
+    expect(lastRequest().body.decisionId).toBe(chainMade);
+  });
+
+  it("refuses a chain_id whose decision is in another wave", async () => {
+    gateway.getDecision.mockResolvedValue(
+      decision({ decisionId: OTHER, waveId: `0x${"44".repeat(32)}` })
+    );
+    await expect(
+      writeChainEntry(config, WALLET, {
+        request: request(),
+        competitionId: COMPETITION_UUID,
+        competitionChainId: OTHER,
+        consent: async () => null,
+      })
+    ).rejects.toThrow("This decision isn't in this wave on the 6529 Network.");
+    expect(run).not.toHaveBeenCalled();
+  });
+
   it("finds the wave's one published decision when no competition is named", async () => {
     gateway.getWave.mockResolvedValue({ waveId: WAVE } as never);
     entries.getWaveDecisions.mockResolvedValue([

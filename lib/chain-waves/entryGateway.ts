@@ -2,7 +2,7 @@ import type { Hex } from "viem";
 import { chainGatewayGet } from "@/lib/chain-identity/gateway";
 import { ChainOperationError } from "@/lib/chain-identity/operation";
 import { wavesGateway, type ChainDecision } from "./gateway";
-import { chainIdOf, LegacyObjectKind, resolveWave } from "./ids";
+import { chainIdOf, isChainId, LegacyObjectKind, resolveWave } from "./ids";
 
 /**
  * The reads an entry needs beyond gateway.ts (WAVES-API "Decisions"): a
@@ -87,6 +87,22 @@ export async function getCheckedDecision(
   return found;
 }
 
+/**
+ * The `chain_id` 6529.io's API gives a competition or a wave, when it gives a
+ * well-formed one. A decision made on the 6529 Network has no UUID to derive
+ * its chain id from, so the API names it. Absent (before the API sends it)
+ * or null, the id is derived as before.
+ */
+export function apiChainId(record: unknown): Hex | null {
+  const value =
+    typeof record === "object" && record !== null
+      ? (record as { readonly chain_id?: unknown }).chain_id
+      : undefined;
+  return typeof value === "string" && isChainId(value)
+    ? (lower(value) as Hex)
+    : null;
+}
+
 /** Throws unless the decision is in the wave 6529.io's `waveId` names. */
 function assertDecisionInWave(decision: ChainDecision, waveId: string): void {
   const wave = chainIdOf(waveId, LegacyObjectKind.WAVE);
@@ -100,16 +116,24 @@ function assertDecisionInWave(decision: ChainDecision, waveId: string): void {
 
 /**
  * The decision an entry goes to: the 6529.io competition's when the wave
- * shows one, else the wave's one published decision (the one taking
- * entries now, when it has several). Either must be in `waveId`'s wave.
+ * shows one (by the `chain_id` 6529.io's API gives it, else by its id),
+ * else the wave's one published decision (the one taking entries now, when
+ * it has several). Either must be in `waveId`'s wave.
  */
 export async function resolveEntryDecision(
-  input: { readonly waveId: string; readonly competitionId: string | null },
+  input: {
+    readonly waveId: string;
+    readonly competitionId: string | null;
+    readonly competitionChainId?: Hex | null | undefined;
+  },
   signal?: AbortSignal,
   nowMs: number = Date.now()
 ): Promise<ChainDecision> {
   if (input.competitionId !== null) {
-    const decision = await getCheckedDecision(input.competitionId, signal);
+    const decision = await getCheckedDecision(
+      input.competitionChainId ?? input.competitionId,
+      signal
+    );
     assertDecisionInWave(decision, input.waveId);
     return decision;
   }

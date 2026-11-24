@@ -12,6 +12,7 @@ import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropReque
 import { useCompetitionSignatureFor } from "@/hooks/competitions/useCompetitionSignature";
 import { useChainWavesActive } from "@/hooks/useWavesMovePhase";
 import { ChainOperationError } from "@/lib/chain-identity/operation";
+import { apiChainId } from "@/lib/chain-waves/entryGateway";
 import {
   competitionConsent,
   competitionEntryPayload,
@@ -36,6 +37,8 @@ export interface ChainEntryWriters {
   readonly submitEntry: (input: {
     readonly request: ApiCreateDropRequest;
     readonly competitionId: string | null;
+    /** The `chain_id` 6529.io's API gives the competition, when it does. */
+    readonly competitionChainId?: Hex | null | undefined;
     readonly consent: (fields: EntryFields) => Promise<EntryConsent | null>;
     readonly onStage?: ((stage: ChainEntryStage) => void) | undefined;
   }) => Promise<ChainEntryReceipt>;
@@ -109,6 +112,7 @@ export function useChainEntrySubmit(
     writers.submitEntry({
       request,
       competitionId: competition?.id ?? null,
+      competitionChainId: apiChainId(competition),
       onStage,
       consent: async (fields) => {
         if (!competition) {
