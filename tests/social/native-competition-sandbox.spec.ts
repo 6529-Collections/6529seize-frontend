@@ -6881,11 +6881,30 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     expect(sandbox.requests).toHaveLength(0);
     await input.fill("40");
     await expect(save).toBeVisible();
-    await expect(
-      row
-        .getByRole("button", { name: "Save vote", exact: true })
-        .locator("span")
-    ).toHaveCSS("background-color", "rgb(63, 105, 252)");
+    const saveSurface = row
+      .getByRole("button", { name: "Save vote", exact: true })
+      .locator("span");
+    await expect(save).toHaveCSS("cursor", "pointer");
+    await expect(saveSurface).toHaveCSS("cursor", "pointer");
+    await expect(saveSurface).toHaveCSS(
+      "background-color",
+      "rgb(63, 105, 252)"
+    );
+    await save.hover({ position: { x: 2, y: 2 } });
+    await expect(saveSurface).toHaveCSS("background-color", "rgb(57, 95, 228)");
+    await saveSurface.hover();
+    await expect(saveSurface).toHaveCSS("background-color", "rgb(57, 95, 228)");
+    await input.fill("250");
+    await expect(save).toBeDisabled();
+    await expect(save).toHaveCSS("cursor", "not-allowed");
+    await expect(saveSurface).toHaveCSS("cursor", "not-allowed");
+    await save.hover();
+    await expect(saveSurface).toHaveCSS(
+      "background-color",
+      "rgb(63, 105, 252)"
+    );
+    await input.fill("40");
+    await page.mouse.move(0, 0);
     await row.screenshot({
       path: testInfo.outputPath("my-votes-desktop-editing.png"),
       animations: "disabled",

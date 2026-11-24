@@ -193,12 +193,12 @@ export function MyVotesInput({
                     ? MY_VOTES_FADE_TRANSITION
                     : MY_VOTES_EFFECT_TRANSITION
                 }
-                className={`tw-min-h-11 tw-min-w-11 tw-shrink-0 tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-bg-transparent tw-text-xs tw-font-semibold focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50 ${mobile ? "tw-px-2 tw-text-primary-300" : "tw-px-0 tw-py-1 tw-text-white"}`}
+                className={`tw-group/save tw-min-h-11 tw-min-w-11 tw-shrink-0 tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-bg-transparent tw-text-xs tw-font-semibold focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 enabled:tw-cursor-pointer disabled:tw-cursor-not-allowed disabled:tw-opacity-50 ${mobile ? "tw-px-2 tw-text-primary-300" : "tw-px-0 tw-py-1 tw-text-white"}`}
               >
                 {mobile ? (
                   saveLabel
                 ) : (
-                  <span className="tw-flex tw-h-9 tw-items-center tw-justify-center tw-rounded-md tw-bg-primary-500 tw-px-2">
+                  <span className="tw-flex tw-h-9 tw-items-center tw-justify-center tw-rounded-md tw-bg-primary-500 tw-px-2 tw-transition-colors tw-duration-200 group-active/save:tw-bg-primary-600 group-disabled/save:!tw-bg-primary-500 desktop-hover:group-hover/save:tw-bg-primary-600 motion-reduce:tw-transition-none">
                     {saveLabel}
                   </span>
                 )}
