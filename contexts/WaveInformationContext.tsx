@@ -31,6 +31,9 @@ interface WaveInformationHistoryState {
 }
 interface WaveInformationState {
   readonly request: WaveInformationRequest | null;
+  readonly registerBackGuard: (
+    guard: (leave: () => void) => boolean
+  ) => () => void;
   readonly open: (waveId: string, overlay?: boolean) => void;
   readonly close: () => void;
   readonly openSubview: (view: string, title: string) => void;
@@ -55,6 +58,17 @@ export function WaveInformationProvider({
   const desktopHandler = useRef<((waveId: string) => void) | null>(null);
   const requestSequence = useRef(0);
   const traversing = useRef(false);
+  const restoring = useRef(false);
+  const backGuard = useRef<((leave: () => void) => boolean) | null>(null);
+  const registerBackGuard = useCallback(
+    (guard: (leave: () => void) => boolean) => {
+      backGuard.current = guard;
+      return () => {
+        if (backGuard.current === guard) backGuard.current = null;
+      };
+    },
+    []
+  );
   const pathname = usePathname();
   // Public routes prerender without a query; it joins the route key after
   // hydration, before any sheet can open. Wave and chat routes read it now.
@@ -251,6 +265,21 @@ export function WaveInformationProvider({
   }, [request]);
   useEffect(() => {
     const onBack = (event: PopStateEvent) => {
+      if (restoring.current) {
+        restoring.current = false;
+        return;
+      }
+      if (
+        !traversing.current &&
+        backGuard.current?.(() => {
+          traversing.current = true;
+          window.history.back();
+        })
+      ) {
+        restoring.current = true;
+        window.history.forward();
+        return;
+      }
       traversing.current = false;
       const state = event.state as {
         waveInformation?: unknown;
@@ -294,6 +323,7 @@ export function WaveInformationProvider({
   const value = useMemo(
     () => ({
       request,
+      registerBackGuard,
       open,
       close,
       openSubview,
@@ -305,6 +335,7 @@ export function WaveInformationProvider({
     }),
     [
       request,
+      registerBackGuard,
       open,
       close,
       openSubview,

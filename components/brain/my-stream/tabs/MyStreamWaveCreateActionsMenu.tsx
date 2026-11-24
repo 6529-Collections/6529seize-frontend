@@ -19,6 +19,7 @@ import {
 import { useAuth } from "@/components/auth/Auth";
 import CreateWaveModal from "@/components/waves/create-wave/LazyCreateWaveModal";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { isWaveDirectMessage } from "@/helpers/waves/wave.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { t } from "@/i18n/messages";
@@ -30,47 +31,60 @@ interface MyStreamWaveCreateActionsMenuProps {
   readonly variant?: "desktop" | "mobile" | undefined;
 }
 
-export default function MyStreamWaveCreateActionsMenu({
+export function useWaveCreateMenuActions({
   wave,
   onCreated,
-  variant = "desktop",
-}: MyStreamWaveCreateActionsMenuProps) {
+  mobile,
+  includeCuration = true,
+}: {
+  readonly wave: ApiWave | undefined;
+  readonly onCreated?: ((curationId: string) => void) | undefined;
+  readonly mobile: boolean;
+  readonly includeCuration?: boolean;
+}) {
   const { connectedProfile, activeProfileProxy } = useAuth();
   const locale = useBrowserLocale();
-  const isMobileViewport = useIsMobileLayoutViewport();
-  const isMobile = variant === "mobile" || isMobileViewport;
-  const [isCreateCurationOpen, setIsCreateCurationOpen] = useState(false);
-  const [isCreateSubwaveOpen, setIsCreateSubwaveOpen] = useState(false);
-  const isDirectMessage = wave.chat?.scope?.group?.is_direct_message ?? false;
-  const waveConfig = wave.wave as typeof wave.wave | null | undefined;
+  const [action, setAction] = useState<{
+    readonly waveId: string;
+    readonly kind: "curation" | "subwave";
+  } | null>(null);
+  const activeAction = action?.waveId === wave?.id ? action : null;
+  if (action && !activeAction) setAction(null);
+  const openAction = (kind: "curation" | "subwave") => {
+    if (wave) setAction({ waveId: wave.id, kind });
+  };
+  const closeAction = () => setAction(null);
+  const isDirectMessage = wave ? isWaveDirectMessage(wave.id, wave) : false;
+  const waveConfig = wave?.wave as ApiWave["wave"] | null | undefined;
   const parentAdminGroup = waveConfig?.admin_group as
-    | typeof wave.wave.admin_group
+    | ApiWave["wave"]["admin_group"]
     | null
     | undefined;
   const parentAdminGroupId = parentAdminGroup?.group?.id ?? null;
-  const canCreateCuration =
+  const isWaveAdmin =
     waveConfig?.authenticated_user_eligible_for_admin === true;
+  const canCreateCuration = includeCuration && isWaveAdmin;
   const canCreateSubwave =
+    isWaveAdmin &&
     Boolean(connectedProfile) &&
     !activeProfileProxy &&
     !isDirectMessage &&
-    !wave.parent_wave &&
-    Boolean(parentAdminGroupId) &&
-    waveConfig?.authenticated_user_eligible_for_admin === true;
+    !wave?.parent_wave &&
+    Boolean(parentAdminGroupId);
 
-  const itemClassName =
-    "tw-group tw-flex tw-w-full tw-items-start tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2.5 tw-py-2 tw-text-left tw-transition-colors motion-reduce:tw-transition-none";
-  const iconClassName = isMobile
+  const iconClassName = mobile
     ? MOBILE_ACTION_ICON_CLASSES
     : "tw-flex tw-h-5 tw-shrink-0 tw-items-center tw-justify-center tw-text-iron-400 tw-transition-colors desktop-hover:group-hover:tw-text-white motion-reduce:tw-transition-none";
-  const iconSizeClassName = isMobile ? "tw-size-5" : "tw-size-[1.125rem]";
+  const iconSizeClassName = mobile ? "tw-size-5" : "tw-size-[1.125rem]";
 
   const actionLabel = (label: string, description: string) => (
     <span className="tw-flex tw-flex-col tw-gap-0.5">
       <span className={ACTION_LABEL_CLASSES}>{label}</span>
-      <span className="tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-400">
-        {description}
-      </span>
+      {!mobile && (
+        <span className="tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-400">
+          {description}
+        </span>
+      )}
     </span>
   );
   const menuItems: CompactMenuItem[] = [
@@ -89,7 +103,8 @@ export default function MyStreamWaveCreateActionsMenu({
               t(locale, "waves.create.actions.newCuration"),
               t(locale, "waves.create.actions.curationDescription")
             ),
-            onSelect: () => setIsCreateCurationOpen(true),
+            onSelect: () => openAction("curation"),
+            deferUntilClosed: true,
           },
         ]
       : []),
@@ -108,15 +123,63 @@ export default function MyStreamWaveCreateActionsMenu({
               t(locale, "waves.create.actions.newSubwave"),
               t(locale, "waves.create.actions.subwaveDescription")
             ),
-            onSelect: () => setIsCreateSubwaveOpen(true),
+            onSelect: () => openAction("subwave"),
+            deferUntilClosed: true,
           },
         ]
       : []),
   ];
 
-  if (menuItems.length === 0) {
+  const dialogs = (
+    <>
+      {wave && canCreateCuration && activeAction?.kind === "curation" && (
+        <MyStreamWaveCurationCreateDialog
+          mobileSheet
+          wave={wave}
+          isOpen
+          onClose={closeAction}
+          onSaved={(curation) => onCreated?.(curation.id)}
+        />
+      )}
+
+      {wave && connectedProfile && canCreateSubwave && (
+        <CreateWaveModal
+          mobileSheet
+          isOpen={activeAction?.kind === "subwave"}
+          onClose={closeAction}
+          profile={connectedProfile}
+          parentWaveId={wave.id}
+          parentWaveName={wave.name}
+          parentAdminGroupId={parentAdminGroupId}
+          parentViewGroupId={wave.visibility.scope.group?.id ?? null}
+        />
+      )}
+    </>
+  );
+
+  return { items: menuItems, dialogs };
+}
+
+export default function MyStreamWaveCreateActionsMenu({
+  wave,
+  onCreated,
+  variant = "desktop",
+}: MyStreamWaveCreateActionsMenuProps) {
+  const locale = useBrowserLocale();
+  const isMobileViewport = useIsMobileLayoutViewport();
+  const isMobile = variant === "mobile" || isMobileViewport;
+  const { items, dialogs } = useWaveCreateMenuActions({
+    wave,
+    onCreated,
+    mobile: isMobile,
+  });
+
+  if (items.length === 0) {
     return null;
   }
+
+  const itemClassName =
+    "tw-group tw-flex tw-w-full tw-items-start tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2.5 tw-py-2 tw-text-left tw-transition-colors motion-reduce:tw-transition-none";
 
   const buttonClassName = `${COMPACT_ACTION_BUTTON_CLASS} ${isMobile ? "tw-min-h-11" : "tw-h-8"}`;
   const trigger = (
@@ -135,7 +198,7 @@ export default function MyStreamWaveCreateActionsMenu({
             ariaLabel={t(locale, "waves.create.actions.openCreateMenu")}
             trigger={trigger}
             triggerClassName={buttonClassName}
-            items={menuItems}
+            items={items}
             itemClassName={`${MOBILE_ACTION_ITEM_CLASSES} tw-px-3`}
           />
         ) : (
@@ -146,7 +209,7 @@ export default function MyStreamWaveCreateActionsMenu({
             unstyledTrigger
             autoFocusItem={false}
             aria-label={t(locale, "waves.create.actions.openCreateMenu")}
-            items={menuItems}
+            items={items}
             menuWidthClassName="tw-w-80"
             unstyledMenu
             menuClassName="tailwind-scope tw-z-50 tw-mt-2 tw-rounded-xl tw-bg-iron-950 tw-py-0 tw-shadow-2xl tw-ring-1 tw-ring-iron-700/80 focus:tw-outline-none"
@@ -161,26 +224,7 @@ export default function MyStreamWaveCreateActionsMenu({
         )}
       </span>
 
-      {isCreateCurationOpen && (
-        <MyStreamWaveCurationCreateDialog
-          wave={wave}
-          isOpen={isCreateCurationOpen}
-          onClose={() => setIsCreateCurationOpen(false)}
-          onSaved={(curation) => onCreated(curation.id)}
-        />
-      )}
-
-      {connectedProfile && canCreateSubwave && (
-        <CreateWaveModal
-          isOpen={isCreateSubwaveOpen}
-          onClose={() => setIsCreateSubwaveOpen(false)}
-          profile={connectedProfile}
-          parentWaveId={wave.id}
-          parentWaveName={wave.name}
-          parentAdminGroupId={parentAdminGroupId}
-          parentViewGroupId={wave.visibility.scope.group?.id ?? null}
-        />
-      )}
+      {dialogs}
     </>
   );
 }

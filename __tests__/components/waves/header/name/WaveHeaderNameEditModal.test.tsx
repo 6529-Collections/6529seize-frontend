@@ -61,7 +61,8 @@ describe("WaveHeaderNameEditModal", () => {
     );
     expect(screen.getAllByRole("dialog")).toHaveLength(1);
     const input = screen.getByRole("textbox", { name: "Wave name" });
-    expect(input).not.toHaveAttribute("data-autofocus");
+    expect(input).toHaveAttribute("data-autofocus");
+    expect(input).toHaveFocus();
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
     await user.clear(input);
     await user.type(input, "New name");

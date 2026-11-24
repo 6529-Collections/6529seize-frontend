@@ -21,15 +21,21 @@ interface MyStreamWaveTabsLeaderboardProps {
   readonly renderAfterLeaderboard?: React.ReactNode;
 }
 
-const MyStreamWaveTabsLeaderboard: React.FC<
-  MyStreamWaveTabsLeaderboardProps
-> = ({
+interface LeaderboardTabOption {
+  readonly view: BrainView;
+  readonly label: string;
+  readonly active: boolean;
+}
+
+export function WaveLeaderboardTabOptions({
   wave,
   activeView,
-  onViewChange,
-  registerTabRef,
-  renderAfterLeaderboard,
-}) => {
+  children,
+}: {
+  readonly wave: ApiWave;
+  readonly activeView: BrainView;
+  readonly children: (tabs: readonly LeaderboardTabOption[]) => React.ReactNode;
+}) {
   const { flat, nativeCompetition } = useCompetitionNavigation();
   const {
     voting: { isCompleted },
@@ -55,43 +61,51 @@ const MyStreamWaveTabsLeaderboard: React.FC<
   const showWinnersTab = isApproveWave || firstDecisionDone;
   const winnersLabel = isApproveWave ? approveLabels.approved : "Winners";
 
+  return children([
+    { view: primaryView, label: primaryLabel, active: isPrimaryActive },
+    ...(showWinnersTab
+      ? [
+          {
+            view: BrainView.WINNERS,
+            label: winnersLabel,
+            active: activeView === BrainView.WINNERS,
+          },
+        ]
+      : []),
+  ]);
+}
+
+function MyStreamWaveTabsLeaderboard({
+  wave,
+  activeView,
+  onViewChange,
+  registerTabRef,
+  renderAfterLeaderboard,
+}: MyStreamWaveTabsLeaderboardProps) {
   return (
-    <>
-      <TabButton
-        type="button"
-        ref={(el) => {
-          registerTabRef?.(primaryView, el);
-        }}
-        onClick={() => onViewChange(primaryView)}
-        aria-current={isPrimaryActive ? "true" : undefined}
-        className={getTabButtonClassName(isPrimaryActive)}
-      >
-        <span className={getTabTextClassName({ isActive: isPrimaryActive })}>
-          {primaryLabel}
-        </span>
-      </TabButton>
-      {renderAfterLeaderboard}
-      {showWinnersTab && (
-        <TabButton
-          type="button"
-          ref={(el) => {
-            registerTabRef?.(BrainView.WINNERS, el);
-          }}
-          onClick={() => onViewChange(BrainView.WINNERS)}
-          aria-current={activeView === BrainView.WINNERS ? "true" : undefined}
-          className={getTabButtonClassName(activeView === BrainView.WINNERS)}
-        >
-          <span
-            className={getTabTextClassName({
-              isActive: activeView === BrainView.WINNERS,
-            })}
-          >
-            {winnersLabel}
-          </span>
-        </TabButton>
-      )}
-    </>
+    <WaveLeaderboardTabOptions wave={wave} activeView={activeView}>
+      {(tabs) =>
+        tabs.map(({ view, label, active }, index) => (
+          <React.Fragment key={view}>
+            <TabButton
+              type="button"
+              ref={(el) => {
+                registerTabRef?.(view, el);
+              }}
+              onClick={() => onViewChange(view)}
+              aria-current={active ? "true" : undefined}
+              className={getTabButtonClassName(active)}
+            >
+              <span className={getTabTextClassName({ isActive: active })}>
+                {label}
+              </span>
+            </TabButton>
+            {index === 0 && renderAfterLeaderboard}
+          </React.Fragment>
+        ))
+      }
+    </WaveLeaderboardTabOptions>
   );
-};
+}
 
 export default MyStreamWaveTabsLeaderboard;

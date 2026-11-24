@@ -723,11 +723,13 @@ describe("BrainMobile", () => {
       expect(mockRequestMainWavesList).toHaveBeenCalledTimes(
         isDirectMessage ? 0 : 1
       );
-      expect(mockClearLastVisited).toHaveBeenCalledWith(
-        isDirectMessage ? "dm" : "wave"
-      );
-      expect(mockSetActiveWave).toHaveBeenCalledWith(null, {
-        isDirectMessage,
+      await waitFor(() => {
+        expect(mockClearLastVisited).toHaveBeenCalledWith(
+          isDirectMessage ? "dm" : "wave"
+        );
+        expect(mockSetActiveWave).toHaveBeenCalledWith(null, {
+          isDirectMessage,
+        });
       });
     }
   );
@@ -752,9 +754,11 @@ describe("BrainMobile", () => {
     });
 
     expect(mockRequestMainWavesList).toHaveBeenCalledTimes(1);
-    expect(mockClearLastVisited).toHaveBeenCalledWith("wave");
-    expect(mockSetActiveWave).toHaveBeenCalledWith(null, {
-      isDirectMessage: false,
+    await waitFor(() => {
+      expect(mockClearLastVisited).toHaveBeenCalledWith("wave");
+      expect(mockSetActiveWave).toHaveBeenCalledWith(null, {
+        isDirectMessage: false,
+      });
     });
   });
 

@@ -4,6 +4,13 @@ import CreateWaveModal from "@/components/waves/create-wave/CreateWaveModal";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import CreateWave from "@/components/waves/create-wave/CreateWave";
 import CreateWaveProfileRequiredModal from "@/components/waves/create-wave/CreateWaveProfileRequiredModal";
+import MobileNavigationView from "@/components/mobile-navigation/MobileNavigationView";
+
+jest.mock("@/hooks/useMediaQuery", () => ({ useMediaQuery: () => true }));
+jest.mock("@/components/mobile-navigation/MobileNavigationView", () => ({
+  __esModule: true,
+  default: jest.fn(({ children }) => children),
+}));
 
 jest.mock(
   "@/components/waves/create-wave/CreateWaveProfileRequiredModal",
@@ -81,6 +88,39 @@ describe("CreateWaveModal", () => {
     expect(dialogProps.fixedHeight).toBe(true);
     expect(dialogProps.tall).toBe(true);
     expect(dialogProps.surfaceClassName).toContain("md:tw-max-h-[56rem]");
+    expect(MobileNavigationView).not.toHaveBeenCalled();
+  });
+
+  it("opts channel subwaves into the guarded tall sheet without changing their form", () => {
+    render(
+      <CreateWaveModal
+        mobileSheet
+        isOpen
+        onClose={jest.fn()}
+        profile={{ handle: "alice" } as ApiIdentity}
+        parentWaveId="parent-wave"
+        parentAdminGroupId="parent-admin-group"
+        parentViewGroupId="parent-view-group"
+      />
+    );
+    expect(MobileNavigationView).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isOpen: true,
+        presentation: "form",
+        formSize: "tall",
+        guardDrafts: false,
+      }),
+      undefined
+    );
+    expect(CreateWave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        parentWaveId: "parent-wave",
+        parentAdminGroupId: "parent-admin-group",
+        parentViewGroupId: "parent-view-group",
+      }),
+      undefined
+    );
+    expect(mockedDialog).not.toHaveBeenCalled();
   });
 
   it("returns profile setup to the originating parent wave", () => {
