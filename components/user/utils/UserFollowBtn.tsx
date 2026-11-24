@@ -176,6 +176,8 @@ export default function UserFollowBtn({
   followLabel,
   followingLabel,
   initialFollowing = false,
+  buttonClassName: customButtonClassName,
+  directMessageButtonClassName,
 }: {
   readonly handle: string;
   readonly size?: UserFollowBtnSize | undefined;
@@ -192,6 +194,8 @@ export default function UserFollowBtn({
   readonly followLabel?: string | undefined;
   readonly followingLabel?: string | undefined;
   readonly initialFollowing?: boolean | undefined;
+  readonly buttonClassName?: string | undefined;
+  readonly directMessageButtonClassName?: string | undefined;
 }) {
   const locale = useBrowserLocale();
   const queryClient = useQueryClient();
@@ -357,8 +361,7 @@ export default function UserFollowBtn({
 
   const directMessageTooltipId = `dm-${handle}`;
   const actionLoading = mutating || isInitialStatusLoading;
-  const buttonClassName =
-    size === UserFollowBtnSize.MEDIUM ? "!tw-text-[13px]" : undefined;
+  const buttonClassName = `${size === UserFollowBtnSize.MEDIUM ? "!tw-text-[13px]" : ""} ${customButtonClassName ?? ""}`;
   const actionContent = (
     <>
       <FollowStateIcon
@@ -381,7 +384,7 @@ export default function UserFollowBtn({
             disabled={isDirectMessagePending}
             type="button"
             aria-label="Send direct message"
-            className={`${DIRECT_MESSAGE_BUTTON_CLASSES[size]} tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-font-semibold tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out enabled:tw-cursor-pointer enabled:hover:tw-bg-iron-700 enabled:hover:tw-ring-iron-600 disabled:tw-cursor-default disabled:tw-opacity-70`}
+            className={`${directMessageButtonClassName ?? ""} ${DIRECT_MESSAGE_BUTTON_CLASSES[size]} tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-font-semibold tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out enabled:tw-cursor-pointer enabled:hover:tw-bg-iron-700 enabled:hover:tw-ring-iron-600 disabled:tw-cursor-default disabled:tw-opacity-70`}
             data-tooltip-id={directMessageTooltipId}
           >
             {isDirectMessagePending ? (

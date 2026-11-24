@@ -3,7 +3,8 @@
 import dynamic from "next/dynamic";
 import type { CSSProperties, ReactNode } from "react";
 import { Suspense, useCallback, useMemo, useRef } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useParams, usePathname, useSearchParams } from "next/navigation";
+import { isUserProfilePage } from "../user/layout/userTabs.config";
 import BottomNavigation from "../navigation/BottomNavigation";
 import { getActiveViewFromUrl } from "../navigation/ViewContext";
 import BrainMobileWaves from "../brain/mobile/BrainMobileWaves";
@@ -120,14 +121,16 @@ function AppLayoutFallback({ children }: Props) {
 function AppLayoutContent({ children }: Props) {
   useDeepLinkNavigation();
   const { isViewportLocked, registerRef, spaces } = useLayout();
-  const { setHeaderRef } = useHeaderContext();
+  const { setHeaderRef, headerRef: activeHeaderRef } = useHeaderContext();
   const headerRef = useRef<HTMLDivElement | null>(null);
   const pullContentRef = useRef<HTMLDivElement | null>(null);
   const pathname = usePathname();
+  const params = useParams();
+  const hasProfileBar = isUserProfilePage(pathname, params["user"]);
   // This content-height wrapper is not a scrollport on collection pages.
   // Clip horizontally without trapping sticky descendants or document scrolling.
   const overflowClassName =
-    pathname === "/the-memes"
+    pathname === "/the-memes" || hasProfileBar
       ? "tw-overflow-x-clip"
       : "tw-overflow-y-auto tw-overflow-x-hidden";
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
@@ -206,13 +209,13 @@ function AppLayoutContent({ children }: Props) {
         className={`${safeAreaClass} ${overflowClassName}`}
         style={streamRouteLoadingReserveStyle}
       >
-        <PullToRefresh contentRef={pullContentRef} triggerZoneRef={headerRef} />
+        <PullToRefresh contentRef={pullContentRef} triggerZoneRef={hasProfileBar ? activeHeaderRef : headerRef} />
         <div
           ref={pullContentRef}
           {...{ [PULL_TO_REFRESH_TRANSFORM_ROOT_ATTRIBUTE]: "true" }}
         >
           <div ref={headerWrapperRef}>
-            <TouchDeviceHeader />
+            {hasProfileBar ? null : <TouchDeviceHeader />}
           </div>
           <div
             ref={waveNavigationRef}

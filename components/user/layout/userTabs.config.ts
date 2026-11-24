@@ -108,6 +108,16 @@ export function getUserPageTabByRoute(route: string) {
   );
 }
 
+/** Only the shared profile shell owns the native profile bar and sticky tabs. */
+export function isUserProfilePage(pathname: string, user: unknown): boolean {
+  const segments = pathname.split("/").filter(Boolean);
+  return (
+    typeof user === "string" &&
+    segments.length <= 2 &&
+    getUserPageTabByRoute(segments[1] ?? "") !== undefined
+  );
+}
+
 export function getUserPageTabById(id: UserPageTabKey) {
   return USER_PAGE_TAB_MAP[id];
 }

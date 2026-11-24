@@ -9,6 +9,9 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import UserFollowBtn from "../utils/UserFollowBtn";
 import ProfileBlockActionMenu from "./ProfileBlockActionMenu";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
+import { PROFILE_MOBILE_ACTION_CLASS } from "./user-page-header-surface";
 
 export type ProfileAction = "block" | "unblock" | "suspend" | "reinstate";
 
@@ -24,15 +27,16 @@ export type ProfileModerationControls = Readonly<{
   onSelectAction: (action: ProfileAction) => void;
 }>;
 
-export default function ProfileHeaderRelationshipActions({
+export function ProfileHeaderActionMenu({
   moderationControls,
   profile,
+  placement,
 }: Readonly<{
   moderationControls: ProfileModerationControls;
   profile: ApiIdentity;
+  placement?: "inline" | "mobile" | "native-header" | undefined;
 }>) {
   const { connectedProfile } = useAuth();
-  const onDirectMessage = useProfileDirectMessage(profile);
   if (!profile.handle) {
     return null;
   }
@@ -54,8 +58,9 @@ export default function ProfileHeaderRelationshipActions({
       }
     : undefined;
 
-  const actionMenu = (
+  return (
     <ProfileBlockActionMenu
+      placement={placement}
       handle={profile.handle}
       hasArtistActivity={
         getSubmissionCount(profile) > 0 || getTrophyArtworkCount(profile) > 0
@@ -73,6 +78,28 @@ export default function ProfileHeaderRelationshipActions({
       onBlock={() => moderationControls.onSelectAction("block")}
     />
   );
+}
+
+export default function ProfileHeaderRelationshipActions({
+  moderationControls,
+  profile,
+}: Readonly<{
+  moderationControls: ProfileModerationControls;
+  profile: ApiIdentity;
+}>) {
+  const { connectedProfile } = useAuth();
+  const onDirectMessage = useProfileDirectMessage(profile);
+  const { isApp } = useDeviceInfo();
+  const isMobileViewport = useIsMobileLayoutViewport();
+  const isCompact = isApp || isMobileViewport;
+  const actionMenu = isApp ? null : (
+    <ProfileHeaderActionMenu
+      moderationControls={moderationControls}
+      profile={profile}
+      placement={isCompact ? "mobile" : "inline"}
+    />
+  );
+  if (!profile.handle) return null;
   if (!connectedProfile?.handle) return actionMenu;
 
   return (
@@ -88,6 +115,12 @@ export default function ProfileHeaderRelationshipActions({
       onUnblock={() => moderationControls.onSelectAction("unblock")}
       onDirectMessage={onDirectMessage}
       beforeFollowAction={actionMenu}
+      buttonClassName={isCompact ? PROFILE_MOBILE_ACTION_CLASS : undefined}
+      directMessageButtonClassName={
+        isCompact
+          ? `${PROFILE_MOBILE_ACTION_CLASS} !tw-size-9 !tw-min-w-9`
+          : undefined
+      }
     />
   );
 }

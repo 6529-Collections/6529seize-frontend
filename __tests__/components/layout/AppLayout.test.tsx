@@ -109,6 +109,7 @@ jest.mock("@/hooks/useDeepLinkNavigation", () => ({
   useDeepLinkNavigation: jest.fn(),
 }));
 jest.mock("next/navigation", () => ({
+  useParams: () => ({}),
   usePathname: () => usePathname(),
   useSearchParams: () => getSearchParams(),
 }));

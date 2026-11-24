@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import { usePathname } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
+import { isUserProfilePage } from "../user/layout/userTabs.config";
 import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
 import { useSidebarController } from "../../hooks/useSidebarController";
 import { SidebarProvider, useSidebarState } from "../../hooks/useSidebarState";
@@ -30,8 +31,11 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
   } = useSidebarController();
   const { isRightSidebarOpen } = useSidebarState();
   const pathname = usePathname();
+  const params = useParams();
   const smallWebOverflow =
-    pathname === "/the-memes" || /^\/the-memes\/\d+\/?$/.test(pathname)
+    pathname === "/the-memes" ||
+    /^\/the-memes\/\d+\/?$/.test(pathname) ||
+    isUserProfilePage(pathname, params["user"])
       ? "tw-overflow-x-clip"
       : "tw-overflow-auto";
 

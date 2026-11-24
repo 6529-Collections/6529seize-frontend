@@ -14,9 +14,12 @@ import {
   BellIcon,
   BellSlashIcon,
   EllipsisVerticalIcon,
+  EllipsisHorizontalIcon,
   MinusCircleIcon,
   NoSymbolIcon,
 } from "@heroicons/react/24/outline";
+import { PROFILE_MOBILE_ACTION_CLASS } from "./user-page-header-surface";
+import { PROFILE_TOP_BAR_BUTTON_CLASS } from "./UserPageMobileTopBar";
 
 const TRIGGER_CLASS_NAME =
   "tw-flex tw-size-9 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-p-0 tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-transition tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-default disabled:tw-opacity-60 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100";
@@ -35,6 +38,7 @@ type Props = Readonly<{
     | undefined;
   onBlock: () => void;
   showPersonalActions?: boolean | undefined;
+  placement?: "inline" | "mobile" | "native-header" | undefined;
 }>;
 
 export default function ProfileBlockActionMenu(props: Props) {
@@ -58,6 +62,7 @@ function ProfileActionsMenu({
   onBlock,
   showPersonalActions = true,
   scope,
+  placement = "inline",
 }: Props & { readonly scope: string }) {
   const locale = useBrowserLocale();
   const isMobileLayoutViewport = useIsMobileLayoutViewport();
@@ -123,9 +128,15 @@ function ProfileActionsMenu({
   ];
   if (items.length === 0) return null;
 
-  const trigger = (
-    <EllipsisVerticalIcon aria-hidden="true" className="tw-size-5" />
-  );
+  const Icon =
+    placement === "native-header"
+      ? EllipsisHorizontalIcon
+      : EllipsisVerticalIcon;
+  const trigger = <Icon aria-hidden="true" className="tw-size-5" />;
+  const triggerClassName =
+    placement === "native-header"
+      ? PROFILE_TOP_BAR_BUTTON_CLASS
+      : `${TRIGGER_CLASS_NAME} ${placement === "mobile" ? PROFILE_MOBILE_ACTION_CLASS : ""}`;
 
   if (isMobileLayoutViewport) {
     return (
@@ -134,7 +145,7 @@ function ProfileActionsMenu({
         ariaLabel={menuLabel}
         items={items}
         trigger={trigger}
-        triggerClassName={TRIGGER_CLASS_NAME}
+        triggerClassName={triggerClassName}
         disabled={disabled}
         onOpenChange={setMenuOpen}
       />
@@ -148,7 +159,7 @@ function ProfileActionsMenu({
       disabled={disabled}
       onOpenChange={setMenuOpen}
       trigger={trigger}
-      triggerClassName={TRIGGER_CLASS_NAME}
+      triggerClassName={triggerClassName}
       unstyledTrigger
       autoFocusItem={false}
       menuWidthClassName="tw-w-72"

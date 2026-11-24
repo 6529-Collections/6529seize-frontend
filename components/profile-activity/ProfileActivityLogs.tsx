@@ -21,6 +21,8 @@ import {
 } from "@/types/enums";
 import type { CommonSelectItem } from "../utils/select/CommonSelect";
 import CommonTabs from "../utils/select/tabs/CommonTabs";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 
 export interface ActivityLogParams {
   readonly page: number;
@@ -82,6 +84,10 @@ export default function ProfileActivityLogs({
   readonly children?: React.ReactNode | undefined;
 }) {
   const { activeGroupId } = useActiveGroup();
+  const { isApp } = useDeviceInfo();
+  const isMobileViewport = useIsMobileLayoutViewport();
+  const useProfilePills =
+    !!initialParams.handleOrWallet && (isApp || isMobileViewport);
   const [selectedFilters, setSelectedFilters] = useState<
     ProfileActivityLogType[]
   >(initialParams.logTypes);
@@ -142,7 +148,9 @@ export default function ProfileActivityLogs({
   });
 
   return (
-    <div className={`${initialParams.handleOrWallet ? "" : "tw-mt-2"} `}>
+    <div
+      className={`${initialParams.handleOrWallet ? "" : "tw-mt-2"} ${useProfilePills ? "[&_[role=tab]]:!tw-text-[13px] [&_[role=tab]]:!tw-font-medium" : ""}`}
+    >
       <div
         className={`${
           withMatterFilter
@@ -162,7 +170,7 @@ export default function ProfileActivityLogs({
                   activeItem={targetType}
                   filterLabel="Filter direction"
                   setSelected={onTargetType}
-                  variant="connected"
+                  variant={useProfilePills ? "sub-view" : "connected"}
                   connectedSize="sm"
                 />
               </div>
@@ -188,7 +196,7 @@ export default function ProfileActivityLogs({
                   activeItem={matter}
                   filterLabel="Filter matter"
                   setSelected={onMatterChange}
-                  variant="connected"
+                  variant={useProfilePills ? "sub-view" : "connected"}
                   connectedSize="sm"
                 />
               </div>
@@ -199,7 +207,7 @@ export default function ProfileActivityLogs({
                     activeItem={targetType}
                     filterLabel="Filter direction"
                     setSelected={onTargetType}
-                    variant="connected"
+                    variant={useProfilePills ? "sub-view" : "connected"}
                     connectedSize="sm"
                   />
                 </div>
