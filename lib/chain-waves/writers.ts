@@ -1,4 +1,4 @@
-import type { Hex } from "viem";
+import { concat, keccak256, pad, stringToBytes, toHex, type Hex } from "viem";
 import type { Config } from "wagmi";
 import type { ChainIdentity } from "@/lib/chain-identity/gateway";
 import {
@@ -114,6 +114,23 @@ export async function writeChainVote(
  * connected wallet when the day's list holds it, else the identity's first
  * wallet the list holds.
  */
+/**
+ * A TDH cluster above 16 wallets is read as a cluster of each wallet alone
+ * (chain-exec `tdh::as_read`): the ballot is kept under that wallet's own
+ * cid, `H("6529.TdhIdentity.v1", [w])`, an `address[]` encoded as
+ * `abi.encode` does.
+ */
+const CLUSTER_MAX = 16;
+export const loneClusterCid = (wallet: Hex): Hex =>
+  keccak256(
+    concat([
+      keccak256(stringToBytes("6529.TdhIdentity.v1")),
+      pad(toHex(64)),
+      pad(toHex(1)),
+      pad(wallet),
+    ])
+  );
+
 async function ballotWallet(
   wallet: Hex,
   identity: ChainIdentity,
@@ -137,7 +154,11 @@ async function ballotWallet(
         ? (await wavesGateway.getTdhWallet(candidate, signal))?.leaf
         : onDay;
     if (leaf) {
-      return { wallet: candidate, cid: leaf.cid };
+      return {
+        wallet: candidate,
+        cid:
+          leaf.walletCount > CLUSTER_MAX ? loneClusterCid(candidate) : leaf.cid,
+      };
     }
   }
   throw new ChainOperationError(

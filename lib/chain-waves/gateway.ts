@@ -89,7 +89,8 @@ export interface ChainWaveRating {
 
 const HEAD = { at: "head" } as const;
 const lower = (value: string): string => value.toLowerCase();
-const BALLOT_PAGES = 20;
+// chain-state `family::POLL_BALLOT`, as a ballots page's cursor starts.
+const POLL_BALLOT_FAMILY = "060c";
 
 export const wavesGateway = {
   getWave: (waveId: Hex, signal?: AbortSignal) =>
@@ -143,25 +144,30 @@ export const wavesGateway = {
       { signal, query: HEAD, nullOn404: true }
     ),
 
-  /** The cluster's ballot in the poll, or null when it has none yet. */
+  /**
+   * The cluster's ballot in the poll, or null when it has none yet. The
+   * ballots page by state key, `PollBallot[(pollId, cid)]` (family 0x060c,
+   * then the poll id, then the cid), so a cursor just below the cid's key
+   * lands on its ballot, however many the poll holds.
+   */
   findPollBallot: async (
     pollId: Hex,
     cid: Hex,
     signal?: AbortSignal
   ): Promise<ChainPollBallot | null> => {
-    let after: string | undefined;
-    for (let page = 0; page < BALLOT_PAGES; page += 1) {
-      const rows = await chainGatewayGet<readonly ChainPollBallot[]>(
-        `/v1/polls/${lower(pollId)}/ballots`,
-        { signal, query: { ...HEAD, limit: 500, after } }
-      );
-      const found = rows.find((row) => lower(row.cid) === lower(cid));
-      if (found || rows.length < 500) {
-        return found ?? null;
-      }
-      after = rows.at(-1)?.cid;
-    }
-    return null;
+    const before = BigInt(cid) - 1n;
+    const after =
+      before < 0n
+        ? undefined
+        : `0x${POLL_BALLOT_FAMILY}${lower(pollId).slice(2)}${before
+            .toString(16)
+            .padStart(64, "0")}`;
+    const rows = await chainGatewayGet<readonly ChainPollBallot[]>(
+      `/v1/polls/${lower(pollId)}/ballots`,
+      { signal, query: { ...HEAD, limit: 1, after } }
+    );
+    const row = rows[0];
+    return row && lower(row.cid) === lower(cid) ? row : null;
   },
 
   /**

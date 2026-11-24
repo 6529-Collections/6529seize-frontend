@@ -1,3 +1,4 @@
+import { encodeAbiParameters, keccak256, stringToBytes } from "viem";
 import type { Config } from "wagmi";
 import { chainGateway } from "@/lib/chain-identity/gateway";
 import { runOperation } from "@/lib/chain-identity/operation";
@@ -8,6 +9,7 @@ import {
   writeChainPollBallot,
   writeChainVote,
   writeChainWaveRating,
+  loneClusterCid,
 } from "@/lib/chain-waves/writers";
 import { DECISION, ENTRY, VOTER, WALLET } from "./wavesDraftFixture";
 import { repCategoryId } from "@/lib/chain/codec/ids";
@@ -207,6 +209,31 @@ describe("writeChainPollBallot", () => {
         wallet: OTHER_WALLET,
       },
     });
+  });
+
+  it("keys a ballot of a cluster above 16 wallets by the wallet's own cid", async () => {
+    gateway.getTdhDayWallet.mockImplementation(async (_day, wallet) =>
+      wallet === WALLET
+        ? ({ wallet, cid: CID, identityTdh: "9", walletCount: 17 } as never)
+        : null
+    );
+    await writeChainPollBallot(config, WALLET, {
+      pollId: DROP_UUID,
+      optionNumbers: [1],
+    });
+    // abi.encode(keccak256("6529.TdhIdentity.v1"), address[] [w]), hashed.
+    const lone = keccak256(
+      encodeAbiParameters(
+        [{ type: "bytes32" }, { type: "address[]" }],
+        [keccak256(stringToBytes("6529.TdhIdentity.v1")), [WALLET]]
+      )
+    );
+    expect(loneClusterCid(WALLET)).toBe(lone);
+    expect(gateway.findPollBallot).toHaveBeenCalledWith(
+      DROP_POLL,
+      lone,
+      undefined
+    );
   });
 
   it("reads today's list when the node no longer keeps the snapshot day", async () => {
