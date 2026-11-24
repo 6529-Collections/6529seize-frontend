@@ -5,6 +5,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { Dialog, DialogPanel, TransitionChild } from "@headlessui/react";
 import clsx from "clsx";
+import { getMobileDialogContentClassNames } from "./mobileWrapperDialogContent";
 import {
   Fragment,
   useCallback,
@@ -55,6 +56,8 @@ type MobileWrapperDialogProps = {
   readonly noPadding?: boolean | undefined;
   readonly tall?: boolean | undefined;
   readonly fixedHeight?: boolean | undefined;
+  /** Let an opted-in child own the dialog's single scrolling content area. */
+  readonly scrollableContent?: boolean | undefined;
   /** Also fit the software keyboard viewport in mobile browsers. */
   readonly fitVisualViewport?: boolean | undefined;
   /** Action-only sheets enter at their final position while the keyboard closes. */
@@ -290,40 +293,6 @@ function getSurfaceClassNames({
   );
 }
 
-function getContentClassNames({
-  allowOverflow,
-  noPadding,
-  showScrollbar,
-  hasDragHandle,
-  tabletModal,
-}: {
-  readonly allowOverflow?: boolean | undefined;
-  readonly noPadding?: boolean | undefined;
-  readonly showScrollbar?: boolean | undefined;
-  readonly hasDragHandle: boolean;
-  readonly tabletModal?: boolean | undefined;
-}) {
-  let paddingClassName = "tw-py-0";
-  if (!noPadding) {
-    paddingClassName = clsx(
-      "tw-pb-6",
-      hasDragHandle ? "tw-pt-0" : "tw-pt-4",
-      hasDragHandle && tabletModal && "md:tw-pt-4"
-    );
-  }
-
-  return clsx(
-    "tw-flex tw-min-h-0 tw-flex-1 tw-scroll-py-3 tw-flex-col",
-    allowOverflow
-      ? "mobile-wrapper-dialog-overflow-content tw-overflow-visible"
-      : "tw-overflow-y-auto",
-    paddingClassName,
-    showScrollbar &&
-      !allowOverflow &&
-      "tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
-  );
-}
-
 function getPanelStyle({
   canDragToClose,
   dragOffset,
@@ -452,6 +421,7 @@ export default function MobileWrapperDialog({
   noPadding,
   tall,
   fixedHeight,
+  scrollableContent = true,
   fitVisualViewport = true,
   avoidKeyboard = true,
   keyboardTransitionEasing,
@@ -547,12 +517,13 @@ export default function MobileWrapperDialog({
     allowOverflow,
     tabletModal,
   });
-  const contentClassNames = getContentClassNames({
+  const contentClassNames = getMobileDialogContentClassNames({
     allowOverflow,
     noPadding,
     showScrollbar,
     hasDragHandle: showTouchDragHandle,
     tabletModal,
+    scrollableContent,
   });
   const surfaceStyle = getSurfaceStyle({
     dialogHeight,
