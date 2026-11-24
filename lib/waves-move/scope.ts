@@ -22,6 +22,24 @@ export function waveMoveSignal(wave: unknown): boolean | null {
   return typeof stays === "boolean" ? !stays : null;
 }
 
+/**
+ * `target` with `source`'s stays_on_site, when it has one: for a wave
+ * object the site builds from another (the generated models don't carry the
+ * field yet).
+ */
+export function withStaysOnSite<T extends object>(
+  target: T,
+  source: unknown
+): T {
+  const stays =
+    typeof source === "object" && source !== null
+      ? (source as Record<string, unknown>)[WAVE_STAYS_FIELD]
+      : undefined;
+  return typeof stays === "boolean"
+    ? { ...target, [WAVE_STAYS_FIELD]: stays }
+    : target;
+}
+
 // What the pages have read, for the request guard, which sees only paths
 // and bodies: wave id to whether it moves, and drop id to its wave.
 const waveMoves = new Map<string, boolean>();

@@ -275,10 +275,15 @@ jest.mock(
   })
 );
 
-jest.mock("@/components/brain/notifications/NotificationsContainer", () => ({
-  __esModule: true,
-  default: () => <div data-testid="notifications" />,
-}));
+jest.mock("@/components/brain/notifications/NotificationsContainer", () => {
+  const {
+    useWavesMoveScope,
+  } = require("@/components/waves-move/WavesMoveScope");
+  return {
+    __esModule: true,
+    default: () => <div data-testid="notifications">{useWavesMoveScope()}</div>,
+  };
+});
 
 const mockCreateWaveModal = jest.fn(
   ({
@@ -647,6 +652,16 @@ describe("BrainMobile", () => {
     );
     await waitFor(() =>
       expect(screen.getByTestId("move-scope")).toHaveTextContent("moves")
+    );
+  });
+
+  it("leaves notifications outside the open wave's part in the move", async () => {
+    mockPathname = "/notifications";
+    // The shell still holds a wave's data, which doesn't own this view.
+    waveData = { ...createWave(false), stays_on_site: true };
+    render(<BrainMobile>child</BrainMobile>);
+    await waitFor(() =>
+      expect(screen.getByTestId("notifications")).toHaveTextContent("none")
     );
   });
 

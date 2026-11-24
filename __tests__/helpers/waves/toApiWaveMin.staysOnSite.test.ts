@@ -56,3 +56,17 @@ describe("toApiWaveMin and the move to the 6529 Network", () => {
     expect(toApiWaveMin(wave({}))).not.toHaveProperty("stays_on_site");
   });
 });
+
+describe("withStaysOnSite", () => {
+  it("copies the API's word only when it is a boolean", () => {
+    const { withStaysOnSite } = jest.requireActual("@/lib/waves-move/scope");
+    expect(withStaysOnSite({ id: "w1" }, { stays_on_site: true })).toEqual({
+      id: "w1",
+      stays_on_site: true,
+    });
+    expect(withStaysOnSite({ id: "w1" }, { stays_on_site: "yes" })).toEqual({
+      id: "w1",
+    });
+    expect(withStaysOnSite({ id: "w1" }, null)).toEqual({ id: "w1" });
+  });
+});

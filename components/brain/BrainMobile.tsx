@@ -111,6 +111,18 @@ const getRestoredWaveView = (
 ): BrainView | null =>
   isApp && currentWaveView?.waveId === waveId ? currentWaveView.view : null;
 
+// The views that show the open wave take its part in the move to the 6529
+// Network; the waves list, the profile feed, messages and notifications
+// show drops from many waves, each in its own.
+const VIEWS_OF_OTHER_WAVES: ReadonlySet<BrainView> = new Set([
+  BrainView.WAVES,
+  BrainView.PROFILE_FEED,
+  BrainView.MESSAGES,
+  BrainView.NOTIFICATIONS,
+]);
+const isOpenWaveView = (view: BrainView): boolean =>
+  !VIEWS_OF_OTHER_WAVES.has(view);
+
 function getWaveTab(view: BrainView): MyStreamWaveTab | undefined {
   const tab =
     view === BrainView.DEFAULT
@@ -568,7 +580,10 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
             }
             className="tw-relative tw-min-w-0 tw-flex-1"
           >
-            <WavesMoveScope wave={wave} waveId={wave?.id}>
+            <WavesMoveScope
+              wave={wave}
+              waveId={isOpenWaveView(activeView) ? wave?.id : undefined}
+            >
               <BrainMobileViewContent
                 activeView={activeView}
                 activeWaveId={waveId}
