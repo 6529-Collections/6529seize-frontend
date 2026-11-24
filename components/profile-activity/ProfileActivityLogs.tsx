@@ -162,9 +162,15 @@ export default function ProfileActivityLogs({
           <div className="tw-flex-none tw-whitespace-nowrap">{children}</div>
         )}
         {withFilters && !withMatterFilter && (
-          <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-3">
+          <div className="tw-relative tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-3">
             {initialParams.handleOrWallet && (
-              <div className="tw-w-full sm:tw-w-fit">
+              <div
+                className={
+                  useProfilePills
+                    ? "tw-w-max tw-min-w-0 tw-max-w-full tw-flex-auto"
+                    : "tw-w-full sm:tw-w-fit"
+                }
+              >
                 <CommonTabs
                   items={DIRECTION_TAB_ITEMS}
                   activeItem={targetType}
@@ -176,8 +182,15 @@ export default function ProfileActivityLogs({
               </div>
             )}
             {matter === RateMatter.NIC && (
-              <div className="tw-flex-1 md:tw-ml-auto md:tw-w-[17.5rem] md:tw-flex-none min-[1200px]:tw-w-[18rem] min-[1400px]:tw-w-[20rem]">
+              <div
+                className={
+                  useProfilePills
+                    ? "tw-w-max tw-max-w-full tw-flex-none"
+                    : "tw-flex-1 md:tw-ml-auto md:tw-w-[17.5rem] md:tw-flex-none min-[1200px]:tw-w-[18rem] min-[1400px]:tw-w-[20rem]"
+                }
+              >
                 <ProfileActivityLogsFilter
+                  inline={useProfilePills}
                   user={initialParams.handleOrWallet}
                   options={initialParams.logTypes}
                   selected={selectedFilters}

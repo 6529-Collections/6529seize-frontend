@@ -18,11 +18,13 @@ export default function ProfileActivityLogsFilter({
   selected,
   options,
   setSelected,
+  inline = false,
 }: {
   readonly user: string | null;
   readonly selected: ProfileActivityLogType[];
   readonly options: ProfileActivityLogType[];
   readonly setSelected: (selected: ProfileActivityLogType) => void;
+  readonly inline?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const prefersReducedMotion = useReducedMotion();
@@ -56,14 +58,14 @@ export default function ProfileActivityLogsFilter({
     <div className="tw-flex tw-w-full tw-items-center tw-space-x-4">
       <div className="tw-w-full">
         <div ref={listRef} className="tw-w-full">
-          <div className="tw-relative">
+          <div className={inline ? "tw-static" : "tw-relative"}>
             <button
               ref={triggerRef}
               type="button"
               aria-label={`Filter activity types: ${title}`}
               aria-expanded={isOpen}
               aria-controls={isOpen ? listId : undefined}
-              className={`${getDropdownTriggerClasses({ variant: "compact", metrics: getDropdownMenuMetrics("compact") })} tw-group tw-ml-auto tw-flex tw-w-fit tw-max-w-full tw-items-center`}
+              className={`${getDropdownTriggerClasses({ variant: "compact", metrics: getDropdownMenuMetrics("compact") })} tw-group tw-relative tw-flex tw-w-fit tw-max-w-full tw-items-center ${inline ? "" : "tw-ml-auto"}`}
               onClick={(e) => {
                 e.stopPropagation();
                 toggleOpen();
@@ -93,6 +95,11 @@ export default function ProfileActivityLogsFilter({
             <AnimatePresence mode="wait" initial={false}>
               {isOpen && (
                 <motion.div
+                  className={
+                    inline
+                      ? "tw-absolute tw-inset-x-0 tw-top-full tw-z-20"
+                      : undefined
+                  }
                   initial={
                     prefersReducedMotion
                       ? { opacity: 0 }
@@ -107,6 +114,7 @@ export default function ProfileActivityLogsFilter({
                   transition={{ duration: prefersReducedMotion ? 0 : 0.15 }}
                 >
                   <ProfileActivityLogsFilterList
+                    fitContainer={inline}
                     id={listId}
                     selected={selected}
                     options={options}

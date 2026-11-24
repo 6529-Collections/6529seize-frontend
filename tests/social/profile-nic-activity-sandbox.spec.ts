@@ -219,6 +219,70 @@ test.describe("Profile NIC activity @local-only", () => {
       }
     );
   });
+  test("NIC activity filters share the row when they fit and wrap to the left", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 576, height: 1000 });
+    await page.goto("/playwright", { waitUntil: "domcontentloaded" });
+    await page.getByRole("button", { name: "NIC", exact: true }).click();
+    const direction = page
+      .getByRole("tablist", { name: "Filter direction" })
+      .filter({ visible: true });
+    const filter = page.getByRole("button", {
+      name: /Filter activity types:/,
+    });
+
+    for (const width of [576, 411, 320, 390]) {
+      await page.setViewportSize({ width, height: 1000 });
+      await expect(filter).toBeVisible();
+      const [tabsBox, filterBox, row] = await Promise.all([
+        direction.boundingBox(),
+        filter.boundingBox(),
+        page
+          .getByRole("navigation", { name: "Profile sections" })
+          .boundingBox(),
+      ]);
+      if (!tabsBox || !filterBox || !row)
+        throw new Error("Missing activity filters");
+      const [firstTab, lastTab] = await Promise.all([
+        direction.getByRole("tab").first().boundingBox(),
+        direction.getByRole("tab").last().boundingBox(),
+      ]);
+      if (!firstTab || !lastTab)
+        throw new Error("Missing activity direction tabs");
+      const minimumRowWidth =
+        lastTab.x + lastTab.width - firstTab.x + filterBox.width + 12;
+      const chevronBox = await page
+        .getByRole("button", { name: /Filter activity types:/ })
+        .locator("svg")
+        .boundingBox();
+      if (!chevronBox) throw new Error("Missing activity filter chevron");
+      expect(chevronBox.x).toBeGreaterThanOrEqual(filterBox.x);
+      expect(chevronBox.x + chevronBox.width).toBeLessThanOrEqual(
+        filterBox.x + filterBox.width
+      );
+      if (minimumRowWidth > row.width) {
+        expect(filterBox.y).toBeGreaterThanOrEqual(tabsBox.y + tabsBox.height);
+        expect(Math.abs(filterBox.x - row.x)).toBeLessThanOrEqual(1);
+      } else {
+        expect(Math.abs(filterBox.y - tabsBox.y)).toBeLessThanOrEqual(2);
+        expect(
+          Math.abs(filterBox.x + filterBox.width - row.x - row.width)
+        ).toBeLessThanOrEqual(1);
+      }
+      await filter.click();
+      const menu = page.getByRole("list", { name: "Activity types" });
+      await expect(menu).toBeVisible();
+      const menuBox = await menu.boundingBox();
+      if (!menuBox) throw new Error("Missing activity type menu");
+      expect(menuBox.x).toBeGreaterThanOrEqual(row.x);
+      expect(menuBox.x + menuBox.width).toBeLessThanOrEqual(row.x + row.width);
+      await page.keyboard.press("Escape");
+      await expect(menu).toHaveCount(0);
+      await expect(filter).toBeFocused();
+      await expectNoHorizontalOverflow(page);
+    }
+  });
   for (const width of [1440, 820, 390]) {
     test(`${width}px fetches only the visible activity log`, async ({
       page,
