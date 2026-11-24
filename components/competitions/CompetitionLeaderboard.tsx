@@ -11,6 +11,7 @@ import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { isCompetitionAccessError } from "@/helpers/competition.helpers";
 import { useCompetition } from "@/contexts/CompetitionContext";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { useCompetitionResource } from "@/hooks/competitions/useCompetitionQueries";
 import { useCompetitionEntryDrops } from "@/hooks/competitions/useCompetitionEntryDrops";
 import { useCompetitionDropNavigation } from "@/hooks/competitions/useCompetitionDropNavigation";
@@ -75,6 +76,8 @@ function CompetitionLeaderboardEntry({
     wave.id,
     competition.capabilities
   );
+  // Votes move to the 6529 Network: the vote action locks with the rest.
+  const votesPaused = useWavesWritesPaused();
   const onDropClick = useCompetitionDropNavigation();
   const presentation = useMemo(
     () => competitionPresentationWave(wave, competition),
@@ -116,7 +119,7 @@ function CompetitionLeaderboardEntry({
     winningThresholdMinDurationMs:
       competition.winners.winning_threshold_min_duration_ms,
     isVotingClosed,
-    isVotingControlsLocked: !competition.permissions.vote,
+    isVotingControlsLocked: !competition.permissions.vote || votesPaused,
   };
   let card;
   if (viewMode === "list")

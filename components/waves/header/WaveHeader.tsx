@@ -16,6 +16,7 @@ import WaveNotificationSettings from "../specs/WaveNotificationSettings";
 import WaveAuthor from "../specs/WaveAuthor";
 import { getSafeCssColor } from "@/helpers/css-color.helpers";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import WaveHeaderPictureEdit from "./picture/WaveHeaderPictureEdit";
 import WaveRepButton from "./rep/WaveRepButton";
 import WaveHeaderTrustStats from "./WaveHeaderTrustStats";
@@ -61,11 +62,19 @@ export default function WaveHeader({
   const isDropWave = wave.wave.type !== ApiWaveType.Chat;
   const isDirectMessage = wave.chat.scope.group?.is_direct_message ?? false;
   const isSubwave = Boolean(wave.parent_wave);
+  const wavesWritesPaused = useWavesWritesPaused();
   const canEdit = useMemo(
     () =>
       !isDirectMessage &&
+      !wavesWritesPaused &&
       canEditWave({ connectedProfile, activeProfileProxy, wave }),
-    [activeProfileProxy, connectedProfile, isDirectMessage, wave]
+    [
+      activeProfileProxy,
+      connectedProfile,
+      isDirectMessage,
+      wave,
+      wavesWritesPaused,
+    ]
   );
 
   let ringClasses = "";

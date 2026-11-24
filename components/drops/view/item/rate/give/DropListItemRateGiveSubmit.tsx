@@ -25,6 +25,7 @@ export const VOTE_STATE_ERRORS: Record<DropVoteState, string | null> = {
   [DropVoteState.IS_WINNER]: null,
   [DropVoteState.VOTING_NOT_STARTED]: "Voting has not started yet",
   [DropVoteState.VOTING_ENDED]: "Voting has ended",
+  [DropVoteState.PAUSED]: "Paused for the move to the 6529 Network.",
 };
 
 const DropListItemRateGiveClap = dynamic(

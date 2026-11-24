@@ -3,6 +3,9 @@ import VotingModalButton from '@/components/voting/VotingModalButton';
 import { useDropInteractionRules } from '@/hooks/drops/useDropInteractionRules';
 
 jest.mock('@/hooks/drops/useDropInteractionRules');
+jest.mock('@/hooks/useWavesMovePhase', () => ({
+  useWavesPausedReason: jest.fn(() => null),
+}));
 
 const useRules = useDropInteractionRules as jest.Mock;
 
@@ -32,5 +35,31 @@ describe('VotingModalButton', () => {
     );
 
     expect(getByRole('button')).toHaveTextContent('You: 1 TDH');
+  });
+});
+
+describe('VotingModalButton while votes are paused for the move', () => {
+  const wavesMove = jest.requireMock('@/hooks/useWavesMovePhase');
+
+  afterEach(() => {
+    wavesMove.useWavesPausedReason.mockReturnValue(null);
+  });
+
+  it('shows a disabled vote with the reason', () => {
+    const onClick = jest.fn();
+    wavesMove.useWavesPausedReason.mockReturnValue(
+      'Paused for the move to the 6529 Network.'
+    );
+    useRules.mockReturnValue({ canShowVote: true, voteState: 'PAUSED' });
+    const { getByRole } = render(
+      <VotingModalButton drop={drop} onClick={onClick} />
+    );
+    const button = getByRole('button');
+    expect(button).toBeDisabled();
+    expect(button).toHaveAccessibleName(
+      'Vote Paused for the move to the 6529 Network.'
+    );
+    fireEvent.click(button);
+    expect(onClick).not.toHaveBeenCalled();
   });
 });

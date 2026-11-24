@@ -47,6 +47,7 @@ import displayTimeZoneMessages from "@/i18n/messages/displayTimeZone.en-US.json"
 import shareDropsImageMessages from "@/i18n/messages/shareDropsImage.en-US.json";
 import worldTimeZonesMessages from "@/i18n/messages/worldTimeZones.en-US.json";
 import wavesRightPanelMessages from "@/i18n/messages/wavesRightPanel.en-US.json";
+import wavesMoveMessages from "@/i18n/messages/wavesMove.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-connect";
 import { DEVICES_SECURITY_MESSAGES } from "@/i18n/messages/devices-security";
@@ -5612,6 +5613,7 @@ export const EN_US_ROOT_MESSAGES = {
   ...FOLLOWERS_MESSAGES,
   ...WAVES_SIDEBAR_MESSAGES,
   ...wavesRightPanelMessages,
+  ...wavesMoveMessages,
   ...QUICK_DM_MESSAGES,
   ...NOTIFICATIONS_FOLLOW_BUTTON_MESSAGES,
   ...NOTIFICATIONS_WAVE_CREATED_MESSAGES,

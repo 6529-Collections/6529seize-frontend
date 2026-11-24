@@ -18,6 +18,7 @@ import { t } from "@/i18n/messages";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useWaveRepAllocation } from "@/hooks/useWaveRepAllocation";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useContext, useEffect, useId, useRef, useState } from "react";
@@ -93,10 +94,21 @@ export default function WaveRepRatingModal({
   const amountValid = amount >= minMaxValues.min && amount <= minMaxValues.max;
   const haveChanged = amount !== currentRating;
   const isProxyMode = Boolean(activeProfileProxy);
+  // Wave REP moves to the 6529 Network: the allocation stays readable.
+  const wavesWritesPaused = useWavesWritesPaused();
   const isSaveDisabled =
-    isProxyMode || mutating || !allocationReady || !amountValid || !haveChanged;
+    wavesWritesPaused ||
+    isProxyMode ||
+    mutating ||
+    !allocationReady ||
+    !amountValid ||
+    !haveChanged;
   const canRemoveRating =
-    !isProxyMode && !mutating && allocationReady && currentRating !== 0;
+    !wavesWritesPaused &&
+    !isProxyMode &&
+    !mutating &&
+    allocationReady &&
+    currentRating !== 0;
   const hasNoAvailableWaveRep =
     allocationReady && availableWaveRep <= 0 && currentRating === 0;
 
@@ -159,6 +171,13 @@ export default function WaveRepRatingModal({
   });
 
   const saveRating = async (nextAmount: number) => {
+    if (wavesWritesPaused) {
+      setToast({
+        message: t(WAVE_REP_MODAL_LOCALE, "wavesMove.paused"),
+        type: "error",
+      });
+      return;
+    }
     if (isProxyMode) {
       setToast({
         message: "Wave REP can't be changed while acting as proxy.",
@@ -322,6 +341,14 @@ export default function WaveRepRatingModal({
                 className="tw-mb-0 tw-mt-3 tw-rounded-lg tw-border tw-border-solid tw-border-amber-500/30 tw-bg-amber-500/10 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-amber-200"
               >
                 {t(WAVE_REP_MODAL_LOCALE, "waves.rep.modal.noAvailableCredit")}
+              </p>
+            )}
+            {wavesWritesPaused && (
+              <p
+                role="status"
+                className="tw-mb-0 tw-mt-3 tw-text-sm tw-text-iron-400"
+              >
+                {t(WAVE_REP_MODAL_LOCALE, "wavesMove.paused")}
               </p>
             )}
           </div>

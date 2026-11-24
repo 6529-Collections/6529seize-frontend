@@ -91,6 +91,7 @@ import {
 } from "./waveDropAction.helpers";
 import { getWaveReplyEligibility } from "@/helpers/waves/wave-chat-replies.helpers";
 import { getMissingWaveNavigationRoute } from "@/helpers/waves/missing-wave-navigation.helpers";
+import WavesMoveNotice from "@/components/waves-move/WavesMoveNotice";
 
 export interface MyStreamWaveProps {
   readonly waveId: string;
@@ -289,6 +290,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     maxSubmissions: participationMaxSubmissions,
     startTime: participationStartTime,
     status: participationStatus,
+    isPausedForMove: participationIsPausedForMove,
   } = participation;
   const { isVotingControlsLocked: isApprovalVotingControlsLocked } =
     useApprovalWaveStatus({ wave: submissionWave });
@@ -428,6 +430,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
           maxSubmissions: participationMaxSubmissions,
           startTime: participationStartTime,
           status: participationStatus,
+          isPausedForMove: participationIsPausedForMove,
         },
         isApprovalVotingControlsLocked,
         zone: displayTimeZone,
@@ -442,6 +445,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
       participationMaxSubmissions,
       participationStartTime,
       participationStatus,
+      participationIsPausedForMove,
     ]
   );
 
@@ -738,6 +742,10 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
           onSelectCuration={onSelectCuration}
           chatSubmitDropAction={chatSubmitDropAction}
         />
+      )}
+
+      {!isDm && (
+        <WavesMoveNotice className="tw-mx-2 tw-my-2 tw-shrink-0 sm:tw-mx-4" />
       )}
 
       {defaultNavigation.resolve &&

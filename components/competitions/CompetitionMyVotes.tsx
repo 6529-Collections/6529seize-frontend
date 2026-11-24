@@ -52,6 +52,7 @@ import { CompetitionState, COMPETITION_BUTTON } from "./CompetitionState";
 import { CompetitionMyVotesSort } from "./CompetitionMyVotesSort";
 import { CompetitionLoadMore } from "./CompetitionLoadMore";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { t } from "@/i18n/messages";
 import { useInView } from "@/hooks/useInView";
 import { formatInteger } from "@/i18n/format";
@@ -180,6 +181,9 @@ function ScopedCompetitionMyVotes({
 }) {
   const { competition, wave } = useCompetition();
   const locale = useBrowserLocale();
+  // Votes move to the 6529 Network: shown, but not changeable here.
+  const votesPaused = useWavesWritesPaused();
+  const canVoteNow = competition.permissions.vote && !votesPaused;
   const [sort, setSort] = useLocalPreference<ApiCompetitionMyVotesSort>(
     `competitionMyVotesSort_${competition.wave_id}_${competition.id}_${viewer ?? "anonymous"}`,
     ApiCompetitionMyVotesSort.VoteAmount,
@@ -281,10 +285,7 @@ function ScopedCompetitionMyVotes({
     votes.length > 0 && votes.every((vote) => selected.has(vote.drop_id));
   const resetVote = async (dropId: string) => {
     const vote = votes.find((item) => item.drop_id === dropId);
-    if (
-      vote?.entry_status !== ApiCompetitionEntryStatus.Active ||
-      !competition.permissions.vote
-    )
+    if (vote?.entry_status !== ApiCompetitionEntryStatus.Active || !canVoteNow)
       throw new Error("Vote cannot be reset");
     const address = getWalletAddress();
     const assertCurrentActor = () => {
@@ -359,7 +360,7 @@ function ScopedCompetitionMyVotes({
           ? (credits.data?.remaining ?? null)
           : null
       }
-      isVotingClosed={!competition.permissions.vote}
+      isVotingClosed={!canVoteNow}
       resetVote={resetVote}
       onResettingChange={setResetting}
       onToggleSelectAll={() =>
@@ -416,7 +417,7 @@ function ScopedCompetitionMyVotes({
             <UnavailableVote
               key={vote.entry_id}
               vote={vote}
-              disabled={!competition.permissions.vote || resetting}
+              disabled={!canVoteNow || resetting}
               onSubmittingChange={onSubmittingChange}
               retry={() => {
                 void result.refetch();
@@ -426,7 +427,7 @@ function ScopedCompetitionMyVotes({
           );
         const entryDrop = result.data.drop;
         const isClosed =
-          !competition.permissions.vote ||
+          !canVoteNow ||
           result.data.entry.status !== ApiCompetitionEntryStatus.Active;
         return (
           <div

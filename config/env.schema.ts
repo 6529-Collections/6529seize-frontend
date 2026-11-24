@@ -139,6 +139,12 @@ export const publicEnvSchema = z.object({
   // Encrypted read-state sync between a user's own devices (D175, P60). On
   // only when exactly "true"; off by default in every build.
   NEXT_PUBLIC_E2EE_READ_SYNC: z.string().optional(),
+  // The waves freeze and switch-on as UTC instants, such as
+  // "2026-11-25T00:00:00Z" and "2026-11-26T00:00:00Z"
+  // (lib/waves-move/schedule.ts). Unless both are set and the switch-on comes
+  // after the freeze, nothing changes.
+  NEXT_PUBLIC_WAVES_FREEZE_AT: z.string().optional(),
+  NEXT_PUBLIC_WAVES_SWITCH_ON_AT: z.string().optional(),
   NEXT_PUBLIC_PROFILE_CMS_BUILDER_API_ENABLED: z.string().optional(),
   NEXT_PUBLIC_PROFILE_CMS_BUILDER_ENABLED: z.string().optional(),
   NEXT_PUBLIC_CLOUDFRONT_DOMAIN: z.string().optional(),

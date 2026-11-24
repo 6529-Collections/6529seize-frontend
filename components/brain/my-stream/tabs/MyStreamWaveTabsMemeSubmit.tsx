@@ -21,6 +21,8 @@ import { useWave, SubmissionStatus } from "@/hooks/useWave";
 import { useCountdown } from "@/hooks/useCountdown";
 import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { formatSubmissionWindowTime } from "../waveDropAction.helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 interface MyStreamWaveTabsMemeSubmitProps {
   readonly wave: ApiWave;
@@ -156,6 +158,21 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
         reason={tooltipText}
         className={WAVE_HEADER_RESTRICTION_BUTTON_CLASS}
         data-testid="info"
+        data-full-width="false"
+      >
+        <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
+      </WaveHeaderRestrictionButton>
+    );
+  }
+
+  // Paused state - entries move to the 6529 Network
+  if (waveInfo.participation.isPausedForMove) {
+    return (
+      <WaveHeaderRestrictionButton
+        label={t(DEFAULT_LOCALE, "wavesMove.submissionsPaused")}
+        reason={t(DEFAULT_LOCALE, "wavesMove.paused")}
+        className={WAVE_HEADER_RESTRICTION_BUTTON_CLASS}
+        data-testid="paused"
         data-full-width="false"
       >
         <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />

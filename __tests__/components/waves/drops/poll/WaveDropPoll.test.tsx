@@ -51,6 +51,10 @@ jest.mock("@/services/api/wave-drops-v2-api", () => ({
   fetchDropPollOptionVotersV2: jest.fn(),
 }));
 
+jest.mock("@/hooks/useWavesMovePhase", () => ({
+  useWavesWritesPaused: jest.fn(() => false),
+}));
+
 const voteDropPollV2Mock = voteDropPollV2 as jest.MockedFunction<
   typeof voteDropPollV2
 >;
@@ -174,6 +178,24 @@ describe("WaveDropPoll", () => {
       screen.getByRole("button", { name: "View results" })
     ).toBeInTheDocument();
     expect(voteDropPollV2Mock).not.toHaveBeenCalled();
+  });
+
+  it("shows results with the paused line while ballots move to the 6529 Network", () => {
+    const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
+    wavesMove.useWavesWritesPaused.mockReturnValue(true);
+    try {
+      renderPoll(createPoll());
+
+      expect(screen.queryByRole("radio", { name: "First" })).toBeNull();
+      expect(screen.getByText("2 votes")).toBeInTheDocument();
+      expect(
+        screen.getByText("Paused for the move to the 6529 Network.")
+      ).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Vote" })).toBeNull();
+      expect(voteDropPollV2Mock).not.toHaveBeenCalled();
+    } finally {
+      wavesMove.useWavesWritesPaused.mockReturnValue(false);
+    }
   });
 
   it("keeps unrestricted polls voteable when the viewer cannot chat", () => {

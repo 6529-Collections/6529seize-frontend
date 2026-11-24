@@ -7,6 +7,7 @@ import { useContext } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import WaveGroupMembersScope from "./WaveGroupMembersScope";
@@ -22,7 +23,9 @@ export default function WaveGroup({
   readonly wave: ApiWave;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const wavesWritesPaused = useWavesWritesPaused();
   const showEdit =
+    !wavesWritesPaused &&
     type !== WaveGroupType.DROP &&
     type !== WaveGroupType.VOTE &&
     canEditWave({ connectedProfile, activeProfileProxy, wave }) &&

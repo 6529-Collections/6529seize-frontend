@@ -10,6 +10,7 @@ import {
 import { assertWriteMatchesDisplayedWallet } from "../auth/displayed-wallet-guard";
 import { prepareSubmissionRequestKey } from "./submission-request-key";
 import { sessionAwareFetch } from "./session-aware-fetch";
+import { assertWavesWriteAllowed } from "@/lib/waves-move/writeGuard";
 
 type ApiErrorMode = "legacy-string" | "structured";
 type ApiRequestOrigin = "api" | "app";
@@ -394,6 +395,7 @@ const executeApiRequest = async <T>({
     headers,
     usesStoredSession: manageWalletAuth && storedSessionHeaders.has(headers),
   });
+  assertWavesWriteAllowed({ url, method, body });
   const requestStartedAtMs = getRequestTimingNow();
   let status: RequestStatus = "unknown";
   const requestInit = createRequestInit({

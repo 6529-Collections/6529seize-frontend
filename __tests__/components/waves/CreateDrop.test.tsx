@@ -37,6 +37,15 @@ jest.mock("@/utils/monitoring/dropSubmissionMonitoring", () => ({
 const mockSetQueryData = jest.fn();
 const mockInvalidateQueries = jest.fn(() => Promise.resolve());
 const mockProcessDropRemoved = jest.fn();
+const mockSenderOnError = jest.fn();
+const mockRemoveTemporaryThreadReply = jest.fn();
+jest.mock("@/components/waves/drops/reply-threads/pending-replies", () => ({
+  ...jest.requireActual(
+    "@/components/waves/drops/reply-threads/pending-replies"
+  ),
+  removeTemporaryThreadReply: (...args: unknown[]) =>
+    mockRemoveTemporaryThreadReply(...args),
+}));
 const mockRefreshWaveMessages = jest.fn();
 const mockProcessIncomingDrop = jest.fn();
 const mockApplyOptimisticDropUpdate = jest.fn();
@@ -79,6 +88,9 @@ jest.mock("@tanstack/react-query", () => {
   };
 });
 jest.mock("@/hooks/useWave", () => ({ useWave: jest.fn() }));
+jest.mock("@/hooks/useWavesMovePhase", () => ({
+  useWavesWritesPaused: jest.fn(() => false),
+}));
 jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
   getStructuredApiErrorCode: (error: unknown) => {
@@ -156,6 +168,29 @@ jest.mock("@/components/waves/CreateDropContent", () => (props: any) => (
         props.submitDrop({
           drop: {
             wave_id: props.wave.id,
+            drop_type: "CHAT",
+            title: null,
+            parts: [{ content: "Pick one", media: [], quoted_drop: null }],
+            poll: { options: ["A", "B"] },
+            referenced_nfts: [],
+            mentioned_users: [],
+            mentioned_waves: [],
+            metadata: [],
+            signature: null,
+            is_safe_signature: false,
+            signer_address: "",
+          },
+          dropId: null,
+        } as unknown as DropMutationBody)
+      }
+    >
+      submit chat poll
+    </button>
+    <button
+      onClick={() =>
+        props.submitDrop({
+          drop: {
+            wave_id: props.wave.id,
             drop_type: props.isDropMode ? "PARTICIPATORY" : "CHAT",
             parts: [
               {
@@ -198,6 +233,32 @@ jest.mock("@/components/waves/CreateCurationDropContent", () => ({
         }
       >
         submit curation
+      </button>
+      <button
+        onClick={() =>
+          props.submitDrop({
+            drop: { wave_id: props.wave.id, drop_type: "PARTICIPATORY" },
+            dropId: "optimistic-curation",
+            onError: mockSenderOnError,
+          })
+        }
+      >
+        submit shown curation
+      </button>
+      <button
+        onClick={() =>
+          props.submitDrop({
+            drop: {
+              wave_id: props.wave.id,
+              drop_type: "PARTICIPATORY",
+              reply_to: { drop_id: "parent-1", drop_part_id: 1 },
+            },
+            dropId: "optimistic-reply",
+            onError: mockSenderOnError,
+          })
+        }
+      >
+        submit shown curation reply
       </button>
       <div data-testid="initial-url">{props.initialUrl ?? ""}</div>
     </div>
@@ -1270,6 +1331,209 @@ describe("CreateDrop", () => {
       expect(blurSpy).toHaveBeenCalled();
     } finally {
       blurSpy.mockRestore();
+    }
+  });
+
+  it("refuses an entry while entries move to the 6529 Network", async () => {
+    const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
+    wavesMove.useWavesWritesPaused.mockReturnValue(true);
+    const setToast = jest.fn();
+    try {
+      render(
+        <AuthContext.Provider value={{ setToast } as any}>
+          <ReactQueryWrapperContext.Provider
+            value={{ waitAndInvalidateDrops: jest.fn() } as any}
+          >
+            <CreateDrop
+              activeDrop={null}
+              onCancelReplyQuote={() => {}}
+              onDropAddedToQueue={jest.fn()}
+              wave={wave}
+              dropId={null}
+              fixedDropMode={"PARTICIPATION" as any}
+              privileges={{ chatRestriction: null } as any}
+            />
+          </ReactQueryWrapperContext.Provider>
+        </AuthContext.Provider>
+      );
+
+      fireEvent.click(screen.getByText("submit current mode"));
+
+      await waitFor(() =>
+        expect(setToast).toHaveBeenCalledWith({
+          message: "Paused for the move to the 6529 Network.",
+          type: "error",
+        })
+      );
+      expect(commonApiPostMock).not.toHaveBeenCalled();
+    } finally {
+      wavesMove.useWavesWritesPaused.mockReturnValue(false);
+    }
+  });
+
+  it("refuses a chat post with a poll while polls move to the 6529 Network", async () => {
+    const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
+    wavesMove.useWavesWritesPaused.mockReturnValue(true);
+    const setToast = jest.fn();
+    try {
+      render(
+        <AuthContext.Provider value={{ setToast } as any}>
+          <ReactQueryWrapperContext.Provider
+            value={{ waitAndInvalidateDrops: jest.fn() } as any}
+          >
+            <CreateDrop
+              activeDrop={null}
+              onCancelReplyQuote={() => {}}
+              onDropAddedToQueue={jest.fn()}
+              wave={wave}
+              dropId={null}
+              fixedDropMode={"CHAT" as any}
+              privileges={{ chatRestriction: null } as any}
+            />
+          </ReactQueryWrapperContext.Provider>
+        </AuthContext.Provider>
+      );
+
+      fireEvent.click(screen.getByText("submit chat poll"));
+
+      await waitFor(() =>
+        expect(setToast).toHaveBeenCalledWith({
+          message: "Paused for the move to the 6529 Network.",
+          type: "error",
+        })
+      );
+      expect(commonApiPostMock).not.toHaveBeenCalled();
+    } finally {
+      wavesMove.useWavesWritesPaused.mockReturnValue(false);
+    }
+  });
+
+  it("keeps chat posts going while entries move to the 6529 Network", async () => {
+    const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
+    wavesMove.useWavesWritesPaused.mockReturnValue(true);
+    try {
+      render(
+        <AuthContext.Provider value={{ setToast: jest.fn() } as any}>
+          <ReactQueryWrapperContext.Provider
+            value={{ waitAndInvalidateDrops: jest.fn() } as any}
+          >
+            <CreateDrop
+              activeDrop={null}
+              onCancelReplyQuote={() => {}}
+              onDropAddedToQueue={jest.fn()}
+              wave={wave}
+              dropId={null}
+              fixedDropMode={"CHAT" as any}
+              privileges={{ chatRestriction: null } as any}
+            />
+          </ReactQueryWrapperContext.Provider>
+        </AuthContext.Provider>
+      );
+
+      fireEvent.click(screen.getByText("submit current mode"));
+
+      await waitFor(() => expect(commonApiPostMock).toHaveBeenCalled());
+      expect(commonApiPostMock.mock.calls[0][0].body.drop_type).toBe("CHAT");
+    } finally {
+      wavesMove.useWavesWritesPaused.mockReturnValue(false);
+    }
+  });
+
+  it("takes back an entry a sender already showed when the move refuses it", async () => {
+    jest.useFakeTimers();
+    const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
+    wavesMove.useWavesWritesPaused.mockReturnValue(true);
+    const setToast = jest.fn();
+    useWaveMock.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: true,
+    } as any);
+    try {
+      render(
+        <AuthContext.Provider value={{ setToast } as any}>
+          <ReactQueryWrapperContext.Provider
+            value={{ waitAndInvalidateDrops: jest.fn() } as any}
+          >
+            <CreateDrop
+              activeDrop={null}
+              onCancelReplyQuote={() => {}}
+              onDropAddedToQueue={jest.fn()}
+              wave={wave}
+              dropId={null}
+              fixedDropMode={"PARTICIPATION" as any}
+              privileges={{ chatRestriction: null } as any}
+            />
+          </ReactQueryWrapperContext.Provider>
+        </AuthContext.Provider>
+      );
+      fireEvent.click(screen.getByText("submit shown curation"));
+      act(() => {
+        jest.runOnlyPendingTimers();
+      });
+      expect(mockProcessDropRemoved).toHaveBeenCalledWith(
+        wave.id,
+        "optimistic-curation"
+      );
+      expect(mockSenderOnError).toHaveBeenCalledTimes(1);
+      expect(mockRemoveTemporaryThreadReply).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByText("submit shown curation reply"));
+      act(() => {
+        jest.runOnlyPendingTimers();
+      });
+      expect(mockRemoveTemporaryThreadReply).toHaveBeenCalledWith(
+        expect.anything(),
+        wave.id,
+        "optimistic-reply"
+      );
+      expect(mockProcessDropRemoved).toHaveBeenCalledWith(
+        wave.id,
+        "optimistic-reply"
+      );
+      expect(setToast).toHaveBeenCalledWith({
+        message: "Paused for the move to the 6529 Network.",
+        type: "error",
+      });
+      expect(commonApiPostMock).not.toHaveBeenCalled();
+    } finally {
+      wavesMove.useWavesWritesPaused.mockReturnValue(false);
+      jest.useRealTimers();
+    }
+  });
+
+  it("opens a submitter's composer outside drop mode at the freeze, so no entry or proposal opens", async () => {
+    const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
+    const setToast = jest.fn();
+    const submitterWave = {
+      ...wave,
+      chat: { authenticated_user_eligible: false },
+    };
+    const tree = () => (
+      <AuthContext.Provider value={{ setToast } as any}>
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={jest.fn()}
+            wave={submitterWave}
+            dropId={null}
+            fixedDropMode={"BOTH" as any}
+            privileges={{ chatRestriction: null } as any}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+    try {
+      const { rerender } = render(tree());
+      expect(screen.getByTestId("is-drop-mode")).toHaveTextContent("true");
+
+      wavesMove.useWavesWritesPaused.mockReturnValue(true);
+      rerender(tree());
+      expect(screen.getByTestId("is-drop-mode")).toHaveTextContent("false");
+    } finally {
+      wavesMove.useWavesWritesPaused.mockReturnValue(false);
     }
   });
 

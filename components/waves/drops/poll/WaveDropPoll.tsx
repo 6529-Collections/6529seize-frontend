@@ -12,6 +12,7 @@ import type { ApiDropPoll } from "@/generated/models/ApiDropPoll";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { preserveAuthenticatedPollVote } from "@/helpers/waves/poll-vote-reconciliation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { t } from "@/i18n/messages";
 import { voteDropPollV2 } from "@/services/api/wave-drops-v2-api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -195,10 +196,14 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
   const isViewerChatEligible =
     waveEligibility?.authenticated_user_eligible_to_chat ??
     drop.wave.authenticated_user_eligible_to_chat;
-  const canRespondToPoll = getCanRespondToPoll({
-    isViewerChatEligible,
-    poll,
-  });
+  // Poll ballots move to the 6529 Network: the results stay readable.
+  const pollBallotsPaused = useWavesWritesPaused();
+  const canRespondToPoll =
+    !pollBallotsPaused &&
+    getCanRespondToPoll({
+      isViewerChatEligible,
+      poll,
+    });
 
   const voteMutation = useMutation({
     mutationFn: async (options: readonly number[]) =>
@@ -677,6 +682,14 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
               <PollVotedStatus label={voteStatusLabel} updated={showUpdated} />
             )}
           </div>
+        </div>
+      )}
+
+      {pollBallotsPaused && poll.is_open && (
+        <div className={POLL_FOOTER_CLASS_NAME}>
+          <p className="tw-m-0 tw-text-xs tw-text-iron-400">
+            {t(locale, "wavesMove.paused")}
+          </p>
         </div>
       )}
     </div>

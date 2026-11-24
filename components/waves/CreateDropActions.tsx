@@ -22,6 +22,7 @@ import MyStreamActionTooltip from "@/components/brain/my-stream/MyStreamActionTo
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { createDropGifPickerLoader } from "./CreateDropGifPickerLoader";
 import LazyCreateDropGifPicker from "./LazyCreateDropGifPicker";
 import StormButton from "./StormButton";
@@ -184,6 +185,9 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
     const locale = useBrowserLocale();
     const actionTrayId = useId();
     const tooltipScopeId = useId();
+    // New polls move to the 6529 Network. A poll already in the draft stays,
+    // so it can be removed, and sending refuses it instead of dropping it.
+    const pollsPausedForMove = useWavesWritesPaused();
     const addGifLabel = t(locale, "waves.gifPicker.open");
     const showActionsLabel = t(locale, "waves.composer.actions.show");
     const hideActionsLabel = t(locale, "waves.composer.actions.hide");
@@ -332,7 +336,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
     });
 
     const pollAction =
-      canCreatePoll && !isPollActive ? (
+      canCreatePoll && !isPollActive && !pollsPausedForMove ? (
         <>
           <button
             type="button"
@@ -434,7 +438,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                             </span>
                           }
                         />
-                        {canCreatePoll && (
+                        {canCreatePoll && !pollsPausedForMove && (
                           <CompactActionButton
                             label={pollLabel}
                             disabled={isStormMode}

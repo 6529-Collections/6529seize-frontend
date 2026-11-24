@@ -48,6 +48,7 @@ import {
   isRejectedCompetitionCommand,
 } from "@/helpers/competition.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { t, type MessageKey } from "@/i18n/messages";
 import { COMPETITION_BUTTON, COMPETITION_INPUT } from "./CompetitionState";
 import { competitionSubmissionReceiptKey } from "@/helpers/competition-submission.helpers";
@@ -99,6 +100,9 @@ export default function CompetitionEntryForm({
   const { connectedProfile, activeProfileProxy, requestAuth } = useAuth();
   const viewer = useCompetitionViewer();
   const locale = useBrowserLocale();
+  // Entries move to the 6529 Network: the form stays, sending does not.
+  const entriesPaused = useWavesWritesPaused();
+  const canSubmitEntry = competition.permissions.submit && !entriesPaused;
   const router = useRouter();
   const client = useQueryClient();
   const sign = useCompetitionSignature();
@@ -161,7 +165,7 @@ export default function CompetitionEntryForm({
     metadataValid &&
     identityValid &&
     (!competition.participation.terms || terms) &&
-    competition.permissions.submit &&
+    canSubmitEntry &&
     competition.lifecycle === ApiCompetitionLifecycle.Published;
   const submit = async () => {
     if (busy || !ready) return;
@@ -422,9 +426,14 @@ export default function CompetitionEntryForm({
           {t(locale, failed)}
         </p>
       )}
-      {!competition.permissions.submit && (
+      {!canSubmitEntry && (
         <output className="tw-block tw-text-sm tw-text-iron-400">
-          {t(locale, "competitions.submitClosed")}
+          {t(
+            locale,
+            competition.permissions.submit
+              ? "wavesMove.paused"
+              : "competitions.submitClosed"
+          )}
         </output>
       )}
       <div className="tw-flex tw-flex-wrap tw-gap-2">

@@ -3618,6 +3618,47 @@
       ]
     },
     {
+      "id": "waves.network-move",
+      "kind": "business_rule",
+      "title": "Waves move to the 6529 Network",
+      "aliases": [
+        "can't vote",
+        "vote button disabled",
+        "votes paused",
+        "submissions paused",
+        "can't submit",
+        "can't edit wave",
+        "wave rep paused",
+        "waves freeze",
+        "6529 Network move"
+      ],
+      "keywords": [
+        "waves",
+        "vote",
+        "submission",
+        "entry",
+        "poll",
+        "wave rep",
+        "decision",
+        "group",
+        "freeze",
+        "6529 Network"
+      ],
+      "facts": [
+        "Votes, entries, polls, wave REP, and wave and decision settings move from 6529.io to the 6529 Network. A notice in each wave and on the waves list says when.",
+        "From the freeze until the switch-on, at the times the notice gives, you can't change them. Vote buttons are disabled, submissions show Submissions Paused, poll ballots show results only, the Wave REP dialog can't save, wave and decision settings have no edit controls, and new waves and decisions can't be created. A request sent anyway shows Paused for the move to the 6529 Network.",
+        "Chat keeps working: posts, replies, edits of chat posts, deletions of chat posts, reactions and direct messages are not affected. Curations, pins, boosts, bookmarks and notification settings are not affected either. Changing a group that a wave, a decision or a curation uses, and editing an entry post, are refused from the freeze; after the switch-on they stay closed on this site, like the rest.",
+        "After the switch-on these changes are made on the 6529 Network; each one opens again on this site as it moves there."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves", "/waves/create"],
+      "tags": ["waves", "voting", "submissions", "decisions"],
+      "source_refs": [
+        "ops/docs/waves/feature-waves-move-to-6529-network.md",
+        "lib/waves-move/schedule.ts"
+      ]
+    },
+    {
       "id": "waves.rules",
       "kind": "workflow",
       "title": "Wave rules",

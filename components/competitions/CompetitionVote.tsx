@@ -34,6 +34,7 @@ import {
   isCompetitionAccessError,
 } from "@/helpers/competition.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { t, type MessageKey } from "@/i18n/messages";
 import { formatInteger } from "@/i18n/format";
 import { getCompetitionConfigLabel } from "@/helpers/competition-labels.helpers";
@@ -148,6 +149,9 @@ export function CompetitionVoteForm({
     };
   }, [viewer]);
   const locale = useBrowserLocale();
+  // Votes move to the 6529 Network: shown, but not changeable here.
+  const votesPaused = useWavesWritesPaused();
+  const canVoteNow = competition.permissions.vote && !votesPaused;
   const explainTooltipId = useId();
   const creditType = competition.voting.credit_type;
   const creditLabel = Object.hasOwn(WAVE_VOTING_LABELS, creditType)
@@ -202,13 +206,7 @@ export function CompetitionVoteForm({
     numeric >= min &&
     numeric <= max;
   const submit = async () => {
-    if (
-      busy ||
-      !valid ||
-      reply?.isValid === false ||
-      disabled ||
-      !competition.permissions.vote
-    )
+    if (busy || !valid || reply?.isValid === false || disabled || !canVoteNow)
       return;
     const address = getWalletAddress();
     const isCurrentActor = () =>
@@ -364,7 +362,7 @@ export function CompetitionVoteForm({
               max={max ?? undefined}
               value={value}
               onChange={(event) => setVoteDraft(event.target.value)}
-              disabled={busy || disabled || !competition.permissions.vote}
+              disabled={busy || disabled || !canVoteNow}
               aria-invalid={!valid}
               aria-describedby={[rangeDescriptionId, errorDescriptionId]
                 .filter(Boolean)
@@ -380,7 +378,7 @@ export function CompetitionVoteForm({
               disabled={
                 busy ||
                 disabled ||
-                !competition.permissions.vote ||
+                !canVoteNow ||
                 !valid ||
                 numeric === credit.data.current_vote
               }
@@ -414,7 +412,7 @@ export function CompetitionVoteForm({
                 disabled={
                   busy ||
                   disabled ||
-                  !competition.permissions.vote ||
+                  !canVoteNow ||
                   credit.data.current_vote === null ||
                   credit.data.current_vote === 0
                 }
@@ -468,11 +466,7 @@ export function CompetitionVoteForm({
         unit={creditLabel}
         variant={controlVariant}
         disabled={
-          busy ||
-          disabled ||
-          !competition.permissions.vote ||
-          !valid ||
-          reply?.isValid === false
+          busy || disabled || !canVoteNow || !valid || reply?.isValid === false
         }
       >
         {busy ? t(locale, "competitions.saving") : undefined}
@@ -494,7 +488,7 @@ export function CompetitionVoteForm({
         {voteMode === "slider" ? (
           <fieldset
             className={`tw-m-0 tw-min-w-0 tw-border-0 tw-px-2 ${controlVariant === "compact" ? "tw-pb-0 tw-pt-8" : "tw-pb-2 tw-pt-0"}`}
-            disabled={busy || disabled || !competition.permissions.vote}
+            disabled={busy || disabled || !canVoteNow}
           >
             <legend className="tw-sr-only">
               {t(locale, "competitions.voteValue")}
@@ -530,7 +524,7 @@ export function CompetitionVoteForm({
               min={min ?? undefined}
               max={max ?? undefined}
               value={value}
-              disabled={busy || disabled || !competition.permissions.vote}
+              disabled={busy || disabled || !canVoteNow}
               aria-invalid={!valid}
               aria-describedby={errorDescriptionId}
               onChange={(event) => updateNumericDraft(event.target.value)}
@@ -550,9 +544,14 @@ export function CompetitionVoteForm({
       </div>
       <CompetitionCredits budget={credit.data} />
       {reply ? reply.renderContent(voteAction) : voteAction}
-      {(disabled || !competition.permissions.vote) && (
+      {(disabled || !canVoteNow) && (
         <p className="tw-text-sm tw-text-iron-400">
-          {t(locale, "competitions.voteClosed")}
+          {t(
+            locale,
+            disabled || !competition.permissions.vote
+              ? "competitions.voteClosed"
+              : "wavesMove.paused"
+          )}
         </p>
       )}
       {failed && (

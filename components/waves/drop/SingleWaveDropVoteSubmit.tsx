@@ -20,6 +20,7 @@ import {
   getVoteActionLabel,
 } from "@/components/voting/VoteActionButton";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useWavesPausedReason } from "@/hooks/useWavesMovePhase";
 import { AuthContext } from "@/components/auth/Auth";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import {
@@ -97,6 +98,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
     ref
   ) => {
     const locale = useBrowserLocale();
+    const pausedReason = useWavesPausedReason();
     const position = drop.rank;
     const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
       useContext(AuthContext);
@@ -163,6 +165,10 @@ const SingleWaveDropVoteSubmit = forwardRef<
     const getVoteError = () => {
       if (submitBlockReason) {
         return submitBlockReason;
+      }
+
+      if (pausedReason) {
+        return pausedReason;
       }
 
       if (!Number.isFinite(newRating)) {

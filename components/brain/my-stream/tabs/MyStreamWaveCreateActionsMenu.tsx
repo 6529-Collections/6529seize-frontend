@@ -21,6 +21,7 @@ import CreateWaveModal from "@/components/waves/create-wave/LazyCreateWaveModal"
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { t } from "@/i18n/messages";
 import MyStreamWaveCurationCreateDialog from "./MyStreamWaveCurationCreateDialog";
 
@@ -42,6 +43,8 @@ export default function MyStreamWaveCreateActionsMenu({
   const [isCreateCurationOpen, setIsCreateCurationOpen] = useState(false);
   const [isCreateSubwaveOpen, setIsCreateSubwaveOpen] = useState(false);
   const isDirectMessage = wave.chat?.scope?.group?.is_direct_message ?? false;
+  // New subwaves move to the 6529 Network with the other waves.
+  const wavesWritesPaused = useWavesWritesPaused();
   const waveConfig = wave.wave as typeof wave.wave | null | undefined;
   const parentAdminGroup = waveConfig?.admin_group as
     | typeof wave.wave.admin_group
@@ -55,6 +58,7 @@ export default function MyStreamWaveCreateActionsMenu({
     !activeProfileProxy &&
     !isDirectMessage &&
     !wave.parent_wave &&
+    !wavesWritesPaused &&
     Boolean(parentAdminGroupId) &&
     waveConfig?.authenticated_user_eligible_for_admin === true;
 

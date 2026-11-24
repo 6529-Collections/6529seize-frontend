@@ -26,6 +26,10 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
 }));
 
+jest.mock("@/hooks/useWavesMovePhase", () => ({
+  useWavesWritesPaused: jest.fn(() => false),
+}));
+
 const useWaveRepAllocationMock = useWaveRepAllocation as jest.Mock;
 const commonApiPostMock = commonApiPost as jest.Mock;
 
@@ -198,6 +202,28 @@ describe("WaveRepRatingModal", () => {
 
     expect(requestAuth).not.toHaveBeenCalled();
     expect(commonApiPostMock).not.toHaveBeenCalled();
+  });
+
+  it("does not post while wave REP moves to the 6529 Network", async () => {
+    const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
+    wavesMove.useWavesWritesPaused.mockReturnValue(true);
+    try {
+      const requestAuth = jest.fn().mockResolvedValue({ success: true });
+      renderModal({ requestAuth });
+      await changeAmount("15");
+
+      const saveButton = screen.getByRole("button", { name: "Save Wave REP" });
+      expect(saveButton).toBeDisabled();
+      expect(
+        screen.getByText("Paused for the move to the 6529 Network.")
+      ).toBeInTheDocument();
+      fireEvent.click(saveButton);
+
+      expect(requestAuth).not.toHaveBeenCalled();
+      expect(commonApiPostMock).not.toHaveBeenCalled();
+    } finally {
+      wavesMove.useWavesWritesPaused.mockReturnValue(false);
+    }
   });
 
   it("explains when the user has no available Wave REP credit", async () => {
