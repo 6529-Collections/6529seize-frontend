@@ -116,14 +116,24 @@ Votes, poll ballots and wave REP:
   network doesn't hold, gets a message saying so; nothing is sent.
 
 Entries, signed by the connected wallet (never by the browser key) and shown
-once their block is final:
+once 6529.io's index lists them:
 
 - A submission (the composer's drop mode, the Memes submission form, a
   decision's entry form) keeps its consent signature step, then stores the
   entry's manifest in the 6529 Network's document store and sends
   `SUBMISSION_CREATE`. A resubmission sends the new entry first, then
-  withdraws the old one.
-- An author's delete of their own entry withdraws it (`SUBMISSION_WITHDRAW`).
+  withdraws the old one; while the new entry isn't final, the original
+  stays.
+- Before any prompt, the page reads the decision on the chain: an author
+  outside its submit group, or at its limit of entries in the running, gets
+  a message saying so and nothing is sent. A declined wallet prompt, or a
+  refusal before anything was sent, leaves the entry in the composer.
+- A decision made on the 6529 Network comes from 6529.io's API with
+  `permissions.submit` false, since 6529.io doesn't run it; its entry form
+  still opens, and the chain's decision says who may enter. Imported
+  decisions keep 6529.io's permissions.
+- An author's delete of their own entry withdraws it (`SUBMISSION_WITHDRAW`),
+  from the drop menu and the mobile menu alike.
 
 The notice then gives the switch-on day as the day the move happened, and
 goes on: Your votes, poll ballots, wave REP and entries go there from this
