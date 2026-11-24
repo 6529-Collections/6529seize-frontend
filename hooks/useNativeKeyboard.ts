@@ -515,13 +515,15 @@ function setupBrowserKeyboardFallbackListeners(): void {
   let viewportAnimationFrame: number | null = null;
 
   const handleFocusIn = () => {
-    // iOS focus restoration to non-text controls must not cancel recovery
-    // from a missing did-hide.
+    // Focus must not cancel recovery from a missing did-hide. iOS focus
+    // restoration to non-text controls keeps it; on Android only a native
+    // show event (which clears it) means the keyboard actually reopened.
     if (
-      currentState.isIos &&
       nativeKeyboardLifecycleActive &&
       currentState.phase === "hiding" &&
-      !isKeyboardTextEntryElement(documentRef.activeElement)
+      (currentState.isAndroid ||
+        (currentState.isIos &&
+          !isKeyboardTextEntryElement(documentRef.activeElement)))
     ) {
       return;
     }
