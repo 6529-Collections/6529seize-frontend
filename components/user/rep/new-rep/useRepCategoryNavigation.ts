@@ -16,10 +16,8 @@ export default function useRepCategoryNavigation({
   const [highlightedCategory, setHighlightedCategory] = useState<string | null>(
     null
   );
-  const activeSuggestionIndex = Math.max(
-    0,
-    categories.indexOf(highlightedCategory ?? "")
-  );
+  const activeSuggestionIndex =
+    highlightedCategory === null ? 0 : categories.indexOf(highlightedCategory);
   const hasSelectableSuggestions = enabled && categories.length > 0;
 
   const handleSearchKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -35,9 +33,10 @@ export default function useRepCategoryNavigation({
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       event.preventDefault();
       const direction = event.key === "ArrowDown" ? 1 : -1;
+      const currentIndex =
+        activeSuggestionIndex < 0 && direction < 0 ? 0 : activeSuggestionIndex;
       const index =
-        (activeSuggestionIndex + direction + categories.length) %
-        categories.length;
+        (currentIndex + direction + categories.length) % categories.length;
       setHighlightedCategory(categories[index] ?? null);
       document.getElementById(`${optionIdPrefix}${index}`)?.scrollIntoView({
         block: "nearest",
@@ -54,9 +53,10 @@ export default function useRepCategoryNavigation({
     searchListId,
     optionIdPrefix,
     activeSuggestionIndex,
-    activeSuggestionId: hasSelectableSuggestions
-      ? `${optionIdPrefix}${activeSuggestionIndex}`
-      : undefined,
+    activeSuggestionId:
+      hasSelectableSuggestions && activeSuggestionIndex >= 0
+        ? `${optionIdPrefix}${activeSuggestionIndex}`
+        : undefined,
     handleSearchKeyDown,
     resetHighlightedCategory: () => setHighlightedCategory(null),
   };

@@ -133,7 +133,7 @@ export default function UserPageRepNewRepSearchDropdown({
               event.stopPropagation();
               onRepSelect(category);
             }}
-            className={`tw-flex tw-min-h-12 tw-w-full tw-max-w-full tw-cursor-pointer tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-0 tw-rounded-lg tw-border tw-border-solid tw-px-2.5 tw-py-0.5 tw-text-left tw-text-sm tw-font-normal tw-leading-5 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none md:tw-min-h-8 md:tw-w-auto md:tw-gap-y-1 md:tw-py-1 md:tw-text-xs ${activeIndex === index ? "tw-ring-1 tw-ring-inset tw-ring-primary-400" : ""} ${categoryAppearance}`}
+            className={`tw-flex tw-min-h-12 tw-w-full tw-max-w-full tw-cursor-pointer tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-0 tw-rounded-lg tw-border tw-border-solid tw-px-2.5 tw-py-0.5 tw-text-left tw-text-sm tw-font-normal tw-leading-5 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none md:tw-min-h-8 md:tw-w-auto md:tw-gap-y-1 md:tw-py-1 md:tw-text-xs ${activeIndex === index ? "tw-ring-1 tw-ring-inset tw-ring-primary-400 forced-colors:tw-outline forced-colors:tw-outline-2 forced-colors:-tw-outline-offset-2 forced-colors:tw-outline-[Highlight]" : ""} ${categoryAppearance}`}
           >
             <span
               className={`tw-min-w-0 tw-max-w-full tw-break-words ${

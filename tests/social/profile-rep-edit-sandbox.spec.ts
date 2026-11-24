@@ -986,6 +986,18 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       }
     }
 
+    await page.emulateMedia({ forcedColors: "active" });
+    try {
+      const active = grant.getByRole("option", { selected: true });
+      await expect(active).toHaveCSS("outline-style", "solid");
+      await expect(active).toHaveCSS("outline-width", "2px");
+      await expect(
+        grant.getByRole("option", { selected: false }).first()
+      ).not.toHaveCSS("outline-style", "solid");
+    } finally {
+      await page.emulateMedia({ forcedColors: "none" });
+    }
+
     await search.scrollIntoViewIfNeeded();
     await expectGrantTransitionFinished(grant);
     await grant.locator(".mobile-wrapper-dialog").screenshot({
