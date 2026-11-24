@@ -2,7 +2,9 @@ import {
   chainErrorMessage,
   chainRefusalName,
 } from "@/components/chain-identity/chainErrorMessage";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import type { SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { ChainGatewayError } from "@/lib/chain-identity/gateway";
 import { ChainOperationError } from "@/lib/chain-identity/operation";
 
@@ -14,6 +16,8 @@ import { ChainOperationError } from "@/lib/chain-identity/operation";
  */
 const WAVES_REFUSALS: Readonly<Record<string, string>> = {
   NOT_FOUND: "This isn't on the 6529 Network.",
+  DECISION_NOT_OPEN: "This decision isn't open.",
+  ENTRY_NOT_IN_DECISION: "This entry isn't in this decision.",
   STALE_VERSION:
     "This changed on the 6529 Network since you opened it. Try again.",
   WAVE_CLOSED: "This wave is closed.",
@@ -23,7 +27,6 @@ const WAVES_REFUSALS: Readonly<Record<string, string>> = {
   OVER_CREDIT: "You don't have enough voting credit for this vote.",
   NEGATIVE_FORBIDDEN: "Negative votes aren't allowed in this decision.",
   ENTRY_NOT_ACTIVE: "This entry no longer takes votes.",
-  NOT_ELIGIBLE: "You can't vote in this decision.",
   OVER_CAP: "This vote is above the limit for one entry.",
   VOTE_OUT_OF_RANGE: "This vote is outside the range this decision allows.",
   VOTE_LIMIT: "You've voted on as many entries as this decision allows.",
@@ -37,18 +40,51 @@ const WAVES_REFUSALS: Readonly<Record<string, string>> = {
   POLL_NOT_ELIGIBLE: "You can't answer this poll.",
 };
 
+/** Which write a refusal answers, for the sentences that differ by write. */
+export type ChainWavesWrite = "vote" | "ballot" | "rating";
+
+/** NOT_ELIGIBLE: outside the decision's vote group, the poll's or the wave's. */
+const NOT_ELIGIBLE: Readonly<Record<ChainWavesWrite, string>> = {
+  vote: "You can't vote in this decision.",
+  ballot: "You can't answer this poll.",
+  rating: "You can't rate this wave.",
+};
+
+const refusalSentence = (
+  name: string | null,
+  write: ChainWavesWrite
+): string | undefined => {
+  if (name === null) {
+    return undefined;
+  }
+  return name === "NOT_ELIGIBLE" ? NOT_ELIGIBLE[write] : WAVES_REFUSALS[name];
+};
+
 /**
  * What to tell someone whose vote, ballot or wave REP change didn't go in,
- * or null when they declined it in the wallet.
+ * or null when they declined it in the wallet. A refusal from a block says
+ * the fee was still charged.
  */
 export function chainWavesErrorMessage(
   locale: SupportedLocale,
-  error: unknown
+  error: unknown,
+  write: ChainWavesWrite = "vote"
 ): string | null {
-  const name = chainRefusalName(error);
-  const sentence = name === null ? undefined : WAVES_REFUSALS[name];
-  return sentence ?? chainErrorMessage(locale, error);
+  const reason =
+    refusalSentence(chainRefusalName(error), write) ??
+    chainErrorMessage(locale, error);
+  if (reason === null) {
+    return null;
+  }
+  return error instanceof ChainOperationError && error.reason === "failed"
+    ? t(locale, "chainIdentity.action.failedCharged", { reason })
+    : reason;
 }
+
+const isChainError = (error: unknown): boolean =>
+  error instanceof ChainOperationError ||
+  error instanceof ChainGatewayError ||
+  chainRefusalName(error) !== null;
 
 /**
  * The line under a failed write's title: the 6529 Network's reason in plain
@@ -57,13 +93,19 @@ export function chainWavesErrorMessage(
 export function chainWriteFailure(
   locale: SupportedLocale,
   error: unknown,
-  fallback: string
+  fallback: string,
+  write: ChainWavesWrite = "vote"
 ): string {
-  const isChain =
-    error instanceof ChainOperationError ||
-    error instanceof ChainGatewayError ||
-    chainRefusalName(error) !== null;
-  return isChain
-    ? (chainWavesErrorMessage(locale, error) ?? fallback)
+  return isChainError(error)
+    ? (chainWavesErrorMessage(locale, error, write) ?? fallback)
     : fallback;
+}
+
+/**
+ * A failed write's toast details: none when the write went to the 6529
+ * Network, whose reason is already the description. 6529.io's sanitizer
+ * would read "Network" or "wallet" in it as a connection problem.
+ */
+export function chainWriteDetails(error: unknown): string | undefined {
+  return isChainError(error) ? undefined : getToastErrorDetails(error);
 }

@@ -426,6 +426,12 @@ describe("SingleWaveDropVoteSubmit", () => {
         await flushMicrotasks();
       });
       await waitFor(() => expect(onVoteApplied).toHaveBeenCalled());
+
+      // Once the vote is in, the dialog closes, so a second click can't send
+      // it again.
+      await advanceTimers(300);
+      await advanceTimers(1000);
+      expect(onVoteRequestStarted).toHaveBeenCalledTimes(1);
     } finally {
       writers.useChainWavesWriters.mockReturnValue(null);
     }

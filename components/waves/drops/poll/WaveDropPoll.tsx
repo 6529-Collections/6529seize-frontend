@@ -9,8 +9,10 @@ import { useMyStreamActionsOptional } from "@/contexts/wave/MyStreamContext";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropPoll } from "@/generated/models/ApiDropPoll";
-import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import { chainWriteFailure } from "@/components/chain-waves/chainWavesErrorMessage";
+import {
+  chainWriteDetails,
+  chainWriteFailure,
+} from "@/components/chain-waves/chainWavesErrorMessage";
 import { preserveAuthenticatedPollVote } from "@/helpers/waves/poll-vote-reconciliation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
@@ -268,8 +270,13 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
       setToast({
         type: "error",
         title: "Couldn't submit your poll vote.",
-        description: chainWriteFailure(locale, error, "Please try again."),
-        details: getToastErrorDetails(error),
+        description: chainWriteFailure(
+          locale,
+          error,
+          "Please try again.",
+          "ballot"
+        ),
+        details: chainWriteDetails(error),
       });
     },
   });

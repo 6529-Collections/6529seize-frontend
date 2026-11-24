@@ -25,8 +25,10 @@ import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWrit
 import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
 import { withViewerVote } from "@/lib/chain-waves/optimistic";
 import { AuthContext } from "@/components/auth/Auth";
-import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import { chainWriteFailure } from "@/components/chain-waves/chainWavesErrorMessage";
+import {
+  chainWriteDetails,
+  chainWriteFailure,
+} from "@/components/chain-waves/chainWavesErrorMessage";
 import {
   SingleWaveDropVoteSize,
   SingleWaveDropVoteSubmissionMode,
@@ -169,7 +171,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
           type: "error",
           title: "Couldn't submit your vote.",
           description: chainWriteFailure(locale, error, "Please try again."),
-          details: getToastErrorDetails(error),
+          details: chainWriteDetails(error),
         });
       },
     });
@@ -454,6 +456,14 @@ const SingleWaveDropVoteSubmit = forwardRef<
 
       const successTimeout = setTimeout(() => {
         onVoteSuccess?.();
+        // A caller that closes on the background path (the vote dialogs)
+        // closes once the 6529 Network has taken the vote.
+        if (
+          submissionMode ===
+          SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH
+        ) {
+          onVoteRequestStarted?.();
+        }
       }, 1000);
       timeoutsRef.current.push(successTimeout);
 

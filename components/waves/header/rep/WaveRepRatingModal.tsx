@@ -15,8 +15,10 @@ import {
 } from "@/helpers/Helpers";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import { chainWriteFailure } from "@/components/chain-waves/chainWavesErrorMessage";
+import {
+  chainWriteDetails,
+  chainWriteFailure,
+} from "@/components/chain-waves/chainWavesErrorMessage";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useWaveRepAllocation } from "@/hooks/useWaveRepAllocation";
 import {
@@ -186,9 +188,10 @@ export default function WaveRepRatingModal({
         description: chainWriteFailure(
           DEFAULT_LOCALE,
           error,
-          "Please try again."
+          "Please try again.",
+          "rating"
         ),
-        details: getToastErrorDetails(error),
+        details: chainWriteDetails(error),
       });
     },
   });
@@ -247,9 +250,10 @@ export default function WaveRepRatingModal({
           description: chainWriteFailure(
             DEFAULT_LOCALE,
             error,
-            "Please try again."
+            "Please try again.",
+            "rating"
           ),
-          details: getToastErrorDetails(error),
+          details: chainWriteDetails(error),
         });
       }
     } finally {

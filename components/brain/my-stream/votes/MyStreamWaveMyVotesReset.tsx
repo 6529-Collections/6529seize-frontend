@@ -13,8 +13,10 @@ import type { DropRateChangeRequest } from "@/entities/IDrop";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AuthContext } from "@/components/auth/Auth";
-import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import { chainWriteFailure } from "@/components/chain-waves/chainWavesErrorMessage";
+import {
+  chainWriteDetails,
+  chainWriteFailure,
+} from "@/components/chain-waves/chainWavesErrorMessage";
 import {
   applyWaveDropVoteUpdate,
   invalidateWaveApprovalSummaryQueries,
@@ -124,7 +126,7 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
           error,
           t(locale, "waves.myVotes.tryAgain")
         ),
-        details: getToastErrorDetails(error),
+        details: chainWriteDetails(error),
       });
       throw error;
     },

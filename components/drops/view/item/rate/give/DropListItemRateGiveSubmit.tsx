@@ -6,8 +6,10 @@ import type { DropRateChangeRequest } from "@/entities/IDrop";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
 import { DropSize } from "@/helpers/waves/drop.helpers";
-import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import { chainWriteFailure } from "@/components/chain-waves/chainWavesErrorMessage";
+import {
+  chainWriteDetails,
+  chainWriteFailure,
+} from "@/components/chain-waves/chainWavesErrorMessage";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { DropVoteState } from "@/hooks/drops/types";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
@@ -109,7 +111,7 @@ export default function DropListItemRateGiveSubmit({
           error,
           "Please try again."
         ),
-        details: getToastErrorDetails(error),
+        details: chainWriteDetails(error),
       });
     },
     onSettled: () => {
