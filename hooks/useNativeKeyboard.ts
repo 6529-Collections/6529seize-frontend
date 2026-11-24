@@ -383,6 +383,11 @@ function markKeyboardHiddenFromFallback(): void {
   rememberKeyboardClosedViewportHeight();
 }
 
+/** A native will-hide arrived and its did-hide (or fallback) is still due. */
+function isNativeHidePending(): boolean {
+  return nativeKeyboardLifecycleActive && currentState.phase === "hiding";
+}
+
 function syncKeyboardVisibilityFromViewport(): void {
   // Native iOS events provide the final keyboard frame. Viewport updates can
   // arrive late and report device-specific intermediate geometry.
@@ -418,7 +423,7 @@ function syncKeyboardVisibilityFromViewport(): void {
     // During a native hide the viewport can still report the old keyboard
     // height. Keep the published closed layout and the pending fallback: only
     // a native show reopens it, so the hide always finishes.
-    if (nativeKeyboardLifecycleActive && currentState.phase === "hiding") {
+    if (isNativeHidePending()) {
       return;
     }
 
@@ -455,8 +460,7 @@ function syncKeyboardVisibilityFromViewport(): void {
 
 function scheduleKeyboardHideFallback(): void {
   clearHiddenFallbackTimeout();
-  const nativeHideIsPending =
-    nativeKeyboardLifecycleActive && currentState.phase === "hiding";
+  const nativeHideIsPending = isNativeHidePending();
   const fallbackDelay = nativeKeyboardLifecycleActive
     ? NATIVE_KEYBOARD_HIDE_FALLBACK_MS
     : FOCUSOUT_KEYBOARD_HIDE_FALLBACK_MS;
