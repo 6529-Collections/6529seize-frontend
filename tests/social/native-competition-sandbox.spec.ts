@@ -6881,6 +6881,18 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     expect(sandbox.requests).toHaveLength(0);
     await input.fill("40");
     await expect(save).toBeVisible();
+    const compactField = await input.evaluate((element) => {
+      const field = element.parentElement!;
+      const bounds = field.getBoundingClientRect();
+      return {
+        width: bounds.width,
+        right: bounds.right,
+        containsSave: !!field.querySelector('button[type="submit"]'),
+      };
+    });
+    expect(compactField.width).toBeLessThanOrEqual(192);
+    expect(compactField.containsSave).toBe(false);
+    expect((await save.boundingBox())!.x).toBeGreaterThan(compactField.right);
     const saveSurface = row
       .getByRole("button", { name: "Save vote", exact: true })
       .locator("span");
@@ -7364,9 +7376,14 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         const action = (await explain.boundingBox())!;
         if (width >= 1024) {
           expect((await controls.boundingBox())!.width).toBeLessThanOrEqual(
-            368
+            384
           );
         }
+        expect(
+          await input.evaluate(
+            (element) => element.parentElement!.getBoundingClientRect().width
+          )
+        ).toBeLessThanOrEqual(192);
         expect(field.height).toBeGreaterThanOrEqual(44);
         expect(action.height).toBeGreaterThanOrEqual(44);
         expect(Math.abs(field.y - action.y)).toBeLessThanOrEqual(1);

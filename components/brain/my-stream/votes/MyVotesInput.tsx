@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, type Ref } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
@@ -13,7 +13,7 @@ import {
 } from "./myVotesMotion";
 
 export const MY_VOTES_INPUT_LAYOUT =
-  "tw-col-span-3 tw-row-start-2 tw-w-full tw-min-w-0 tw-max-w-[23rem] [&_input]:tw-text-sm @[32rem]/my-vote:tw-col-span-2 @[32rem]/my-vote:tw-col-start-2 @[46rem]/my-vote:tw-col-span-1 @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-1 @[46rem]/my-vote:tw-self-center";
+  "tw-col-span-3 tw-row-start-2 tw-w-full tw-min-w-0 tw-max-w-96 [&_input]:tw-text-sm @[32rem]/my-vote:tw-col-span-2 @[32rem]/my-vote:tw-col-start-2 @[46rem]/my-vote:tw-col-span-1 @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-1 @[46rem]/my-vote:tw-self-center";
 
 interface MyVotesInputProps {
   readonly mobile: boolean;
@@ -84,6 +84,49 @@ function MyVotesExplainButton({
   );
 }
 
+function MyVotesSaveButton({
+  mobile,
+  visible,
+  disabled,
+  busy,
+  label,
+  ariaLabel,
+  buttonRef,
+}: {
+  readonly mobile: boolean;
+  readonly visible: boolean;
+  readonly disabled: boolean;
+  readonly busy: boolean;
+  readonly label: string;
+  readonly ariaLabel?: string | undefined;
+  readonly buttonRef: Ref<HTMLButtonElement>;
+}) {
+  const reduceMotion = useReducedMotion();
+  return (
+    <AnimatePresence initial={false}>
+      {visible && (
+        <motion.button
+          ref={buttonRef}
+          key="save"
+          type="submit"
+          disabled={disabled}
+          aria-busy={busy || undefined}
+          aria-label={ariaLabel}
+          initial={{ opacity: 0, scale: reduceMotion ? 1 : 0.94 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: reduceMotion ? 1 : 0.94 }}
+          transition={
+            reduceMotion ? MY_VOTES_FADE_TRANSITION : MY_VOTES_EFFECT_TRANSITION
+          }
+          className={`tw-inline-flex tw-min-h-11 tw-min-w-11 tw-shrink-0 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-px-2 tw-text-xs tw-font-semibold focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 enabled:tw-cursor-pointer disabled:tw-cursor-not-allowed disabled:tw-opacity-50 ${mobile ? "tw-bg-transparent tw-text-primary-300" : "tw-bg-primary-500 tw-text-white tw-transition-colors tw-duration-200 enabled:active:tw-bg-primary-600 enabled:desktop-hover:hover:tw-bg-primary-600 motion-reduce:tw-transition-none"}`}
+        >
+          <span className="tw-bg-inherit">{label}</span>
+        </motion.button>
+      )}
+    </AnimatePresence>
+  );
+}
+
 /** Presentation shared by My Votes adapters; the adapter owns voting rules. */
 export function MyVotesInput({
   mobile,
@@ -111,7 +154,6 @@ export function MyVotesInput({
   onExplain,
 }: MyVotesInputProps) {
   const locale = useBrowserLocale();
-  const reduceMotion = useReducedMotion();
   const explainTooltipId = useId();
   const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -130,12 +172,23 @@ export function MyVotesInput({
   const describedBy = [showHelper ? helperId : null, error ? errorId : null]
     .filter(Boolean)
     .join(" ");
+  const saveAction = (
+    <MyVotesSaveButton
+      mobile={mobile}
+      visible={changed || busy}
+      disabled={disabled || busy || !valid}
+      busy={busy}
+      label={saveLabel}
+      ariaLabel={saveAriaLabel}
+      buttonRef={saveRef}
+    />
+  );
 
   return (
     <>
       <form
         data-vote-controls
-        className={`tw-grid tw-w-full tw-min-w-0 tw-cursor-default tw-grid-cols-[minmax(0,1fr)_auto] tw-items-start tw-gap-x-2 tw-gap-y-1 ${className}`}
+        className={`tw-grid tw-w-full tw-min-w-0 tw-cursor-default tw-items-start tw-justify-start tw-gap-x-2 tw-gap-y-1 ${mobile ? "tw-grid-cols-[minmax(0,12rem)_auto]" : "tw-grid-cols-[minmax(0,12rem)_auto_auto]"} ${className}`}
         onSubmit={(event) => {
           event.preventDefault();
           if (changed && valid && !disabled && !busy) onSubmit();
@@ -146,7 +199,7 @@ export function MyVotesInput({
         </label>
         <div
           data-my-vote-field
-          className={`tw-flex tw-min-w-0 tw-items-center tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-pr-1 focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 ${onExplain ? "" : "tw-col-span-2"} ${!valid || error ? "tw-ring-2 tw-ring-inset tw-ring-rose-400" : ""}`}
+          className={`tw-flex tw-w-full tw-min-w-0 tw-max-w-48 tw-items-center tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-pr-1 focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 ${mobile && !onExplain ? "tw-col-span-2" : ""} ${!valid || error ? "tw-ring-2 tw-ring-inset tw-ring-rose-400" : ""}`}
         >
           <input
             ref={inputRef}
@@ -176,36 +229,9 @@ export function MyVotesInput({
           <span className="tw-max-w-[40%] tw-shrink-0 tw-truncate tw-px-1 tw-text-xs tw-text-iron-400">
             {unit}
           </span>
-          <AnimatePresence initial={false}>
-            {(changed || busy) && (
-              <motion.button
-                ref={saveRef}
-                key="save"
-                type="submit"
-                disabled={disabled || busy || !valid}
-                aria-busy={busy || undefined}
-                aria-label={saveAriaLabel}
-                initial={{ opacity: 0, scale: reduceMotion ? 1 : 0.94 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: reduceMotion ? 1 : 0.94 }}
-                transition={
-                  reduceMotion
-                    ? MY_VOTES_FADE_TRANSITION
-                    : MY_VOTES_EFFECT_TRANSITION
-                }
-                className={`tw-group/save tw-min-h-11 tw-min-w-11 tw-shrink-0 tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-bg-transparent tw-text-xs tw-font-semibold focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 enabled:tw-cursor-pointer disabled:tw-cursor-not-allowed disabled:tw-opacity-50 ${mobile ? "tw-px-2 tw-text-primary-300" : "tw-px-0 tw-py-1 tw-text-white"}`}
-              >
-                {mobile ? (
-                  saveLabel
-                ) : (
-                  <span className="tw-flex tw-h-9 tw-items-center tw-justify-center tw-rounded-md tw-bg-primary-500 tw-px-2 tw-transition-colors tw-duration-200 group-active/save:tw-bg-primary-600 group-disabled/save:!tw-bg-primary-500 desktop-hover:group-hover/save:tw-bg-primary-600 motion-reduce:tw-transition-none">
-                    {saveLabel}
-                  </span>
-                )}
-              </motion.button>
-            )}
-          </AnimatePresence>
+          {mobile && saveAction}
         </div>
+        {!mobile && saveAction}
         {onExplain && (
           <MyVotesExplainButton
             mobile={mobile}
@@ -219,7 +245,7 @@ export function MyVotesInput({
         {showHelper && (
           <p
             id={helperId}
-            className="tw-col-span-2 tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400"
+            className="tw-col-span-full tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400"
           >
             {helperText}
           </p>
@@ -228,7 +254,7 @@ export function MyVotesInput({
           <p
             id={errorId}
             role="alert"
-            className="tw-col-span-2 tw-m-0 tw-text-xs tw-leading-5 tw-text-rose-300"
+            className="tw-col-span-full tw-m-0 tw-text-xs tw-leading-5 tw-text-rose-300"
           >
             {error}
           </p>

@@ -328,7 +328,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   const mobileSelectionWidth = isSelecting ? 44 : 0;
   const desktopGridColumns = isVotingClosed
     ? ""
-    : "@[46rem]/my-vote:tw-grid-cols-[44px_96px_minmax(0,1fr)_23rem]";
+    : "@[46rem]/my-vote:tw-grid-cols-[44px_96px_minmax(0,1fr)_24rem]";
   const titleId = `my-vote-title-${drop.id}`;
   const longPress = useMyVoteLongPress(
     mobile && !isSelecting && !isSelectionDisabled,
