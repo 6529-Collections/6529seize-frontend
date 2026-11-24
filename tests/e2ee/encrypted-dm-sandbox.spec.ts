@@ -26,6 +26,7 @@ import {
   expectMessage,
   gotoPath,
   messageRow,
+  openComposerActions,
   openConversationFromList,
   openMessageActions,
   sendMessage,
@@ -1040,6 +1041,7 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     // Story 9: the image is encrypted in the browser and uploaded as a blob.
     const caption = "Here is the picture.";
     const pickedName = "picked-pixel.png";
+    await openComposerActions(alice.page);
     const chooser = alice.page.waitForEvent("filechooser");
     await alice.page
       .getByRole("button", { name: "Attach files", exact: true })
