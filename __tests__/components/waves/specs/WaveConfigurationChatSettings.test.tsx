@@ -115,6 +115,7 @@ it("saves both phone reply switches independently without replacing the other op
     open: false,
     collapsed: true,
     authenticated_user_eligible: true,
+    authenticated_user_can_delete: false,
   };
   render(
     <WaveInformationPanelContext.Provider

@@ -56,7 +56,6 @@ it.each([true, false])(
     render(<CompetitionHub waveId="wave" embedded />);
     const action = screen.queryByRole("link", {
       name: "New decision",
-      exact: true,
     });
     if (canCreate)
       expect(action).toHaveAttribute("href", "/waves/wave/decisions/new");

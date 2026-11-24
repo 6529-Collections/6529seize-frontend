@@ -356,7 +356,6 @@ describe("MyStreamWaveTabsMeme", () => {
     expect(
       within(moreActionsDialog).getByRole("button", {
         name: "Search messages",
-        exact: true,
       })
     ).toBeInTheDocument();
     expect(

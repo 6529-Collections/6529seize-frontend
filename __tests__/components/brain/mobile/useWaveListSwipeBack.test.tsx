@@ -138,7 +138,7 @@ it("carries release velocity into the shared spring and reveals the list before 
   jest.mocked(animate).mockReturnValue({
     cancel,
     then: finished.then.bind(finished),
-  } as ReturnType<typeof animate>);
+  } as unknown as ReturnType<typeof animate>);
   const onSwipeBack = jest.fn();
   const onIntentStart = jest.fn();
   const view = (enabled = true) => (
@@ -198,7 +198,7 @@ it("catches a returning spring without jumping and cancels safely on unmount", a
     cancel,
     stop,
     then: finished.then.bind(finished),
-  } as ReturnType<typeof animate>);
+  } as unknown as ReturnType<typeof animate>);
   const onSwipeBack = jest.fn();
   const { unmount } = render(
     <SwipeHarness

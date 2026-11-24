@@ -73,7 +73,7 @@ describe("PhoneWaveTabs", () => {
       <PhoneWaveTabs tabs={tabs} primaryKeys={PRIMARY_KEYS} activeKey="chat" />
     );
 
-    const art = screen.getByRole("button", { name: "Art", exact: true });
+    const art = screen.getByRole("button", { name: "Art" });
     fireEvent.click(art);
     expect(select).toHaveBeenCalledTimes(1);
     const action = screen.getByRole("button", { name: "Manage Art" });
@@ -140,7 +140,7 @@ describe("PhoneWaveTabs", () => {
         activeKey="curation:art"
       />
     );
-    const more = screen.getByRole("button", { name: "Art", exact: true });
+    const more = screen.getByRole("button", { name: "Art" });
     expect(more).toHaveAttribute("aria-current", "true");
     fireEvent.click(more);
     const sheet = await screen.findByRole("dialog", { name: "Wave sections" });

@@ -334,7 +334,7 @@ describe("MyStreamWaveTabsDefault", () => {
     expect(
       within(
         screen.getByRole("dialog", { name: "More wave actions" })
-      ).getByRole("button", { name: "Search messages", exact: true })
+      ).getByRole("button", { name: "Search messages" })
     ).toBeInTheDocument();
     expect(
       screen.getByRole("dialog", { name: "More wave actions" })
@@ -436,7 +436,7 @@ describe("MyStreamWaveTabsDefault", () => {
     expect(mockOpenInformation).toHaveBeenCalledWith("w1");
     fireEvent.click(screen.getByRole("button", { name: "More wave actions" }));
     expect(
-      screen.getByRole("button", { name: "Search messages", exact: true })
+      screen.getByRole("button", { name: "Search messages" })
     ).toBeInTheDocument();
   });
 
