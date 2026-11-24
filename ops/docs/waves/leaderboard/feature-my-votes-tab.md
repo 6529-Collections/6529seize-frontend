@@ -10,6 +10,8 @@ The control shows the current order, with **Available in wave** on the same
 toolbar when a wave-wide balance is available. The controls wrap on narrow screens.
 On mobile, the balance sits above the controls. **Select** / **Done** stays on
 the right; while selecting, **Select all** sits beside the sorting control.
+Desktop shows **Select all** directly beside sorting, without a separate
+**Select** step. **Done** appears after selecting rows and clears the selection.
 **Reset votes** and the selected count appear only after you select a row;
 clearing the selection hides them again. Choose an order:
 
@@ -78,11 +80,12 @@ while each profile loads. The placeholders stay still when reduced motion is ena
    `You haven't voted on any submissions in this wave yet.`
 3. Review each row: preview, title, rank (when available), author, total vote
    value, voter count, and your current vote input.
-4. Choose `Select` to enter selection and show `Select all`. Mobile also reveals
+4. On mobile, choose `Select` to enter selection and show `Select all` and
    checkboxes. Holding a mobile card enters selection and selects that card;
    scrolling cancels the hold.
-   Desktop checkboxes remain visible at rest. Clicking the row background or
-   checking its checkbox enters selection mode. `Done` leaves selection and clears selected rows.
+   Desktop checkboxes and `Select all` are available immediately. Click the row
+   background, check a checkbox, or choose `Select all` to select rows.
+   `Done` clears selected rows and leaves mobile selection mode.
    In selection mode, click a row
    outside its controls to select or deselect it. Artwork and title buttons open
    the drop, including with `Enter` or `Space`. Vote controls and profile links

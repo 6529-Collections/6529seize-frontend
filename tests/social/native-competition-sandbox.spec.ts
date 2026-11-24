@@ -6830,17 +6830,21 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await expect(panel.getByText(/^Available in wave\s*75$/)).toBeVisible();
     await expect(
       panel.getByRole("button", { name: "Select", exact: true })
-    ).toBeVisible();
+    ).toHaveCount(0);
     await expect(
       panel.getByRole("button", { name: "Select all", exact: true })
-    ).toHaveCount(0);
+    ).toBeVisible();
     await expect(save).toHaveCount(0);
     await expect(helper).toBeVisible();
-    const select = panel.getByRole("button", { name: "Select", exact: true });
-    await select.hover();
-    await expect(select).toHaveCSS("background-color", "rgba(28, 28, 33, 0.5)");
-    await page.mouse.move(0, 0);
-    await expect(select).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+    await panel
+      .getByRole("button", { name: "Select all", exact: true })
+      .click();
+    await expect(checkbox).toBeChecked();
+    await panel.getByRole("button", { name: "Done", exact: true }).click();
+    await expect(checkbox).not.toBeChecked();
+    await expect(
+      panel.getByRole("button", { name: "Done", exact: true })
+    ).toHaveCount(0);
     await expect(checkmark).toHaveCSS("opacity", "1");
     await row.hover();
     await expect(checkmark).toHaveCSS("opacity", "1");

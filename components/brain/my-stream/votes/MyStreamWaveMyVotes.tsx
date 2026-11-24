@@ -115,6 +115,7 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
       return;
     }
 
+    setSelectionMode(true);
     if (allItemsSelected) {
       setCheckedDrops(new Set<string>());
     } else {
@@ -180,7 +181,7 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
               mobile={mobile}
               isSelecting={isSelecting}
               onToggleSelection={() => {
-                setSelectionMode(!selectionMode);
+                setSelectionMode(mobile && !selectionMode);
                 setCheckedDrops(new Set());
               }}
               waveId={wave.id}

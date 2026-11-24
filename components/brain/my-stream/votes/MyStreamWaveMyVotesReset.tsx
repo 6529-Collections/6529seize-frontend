@@ -234,29 +234,27 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
               className={`tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2 ${mobile ? "" : "tw-flex-wrap"}`}
             >
               <div className="tw-min-w-0">{toolbarContent}</div>
-              {showResetControls && isSelecting && selectAllButton}
-              {!mobile &&
-                showResetControls &&
-                isSelecting &&
-                showResetActions &&
-                resetActions}
+              {showResetControls && (!mobile || isSelecting) && selectAllButton}
+              {!mobile && showResetControls && showResetActions && resetActions}
             </div>
-            {showResetControls && onToggleSelection && (
-              <button
-                type="button"
-                onClick={onToggleSelection}
-                disabled={isResetting}
-                aria-pressed={isSelecting}
-                className="tw-ml-auto tw-min-h-11 tw-min-w-11 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-1 tw-text-sm tw-font-medium tw-text-iron-300 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 enabled:tw-cursor-pointer disabled:tw-opacity-50 enabled:desktop-hover:hover:tw-bg-iron-900/50 enabled:desktop-hover:hover:tw-text-iron-100 motion-reduce:tw-transition-none"
-              >
-                {t(
-                  locale,
-                  isSelecting
-                    ? "waves.myVotes.doneSelecting"
-                    : "waves.myVotes.select"
-                )}
-              </button>
-            )}
+            {showResetControls &&
+              onToggleSelection &&
+              (mobile || selectedCount > 0) && (
+                <button
+                  type="button"
+                  onClick={onToggleSelection}
+                  disabled={isResetting}
+                  aria-pressed={mobile ? isSelecting : undefined}
+                  className="tw-ml-auto tw-min-h-11 tw-min-w-11 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-1 tw-text-sm tw-font-medium tw-text-iron-300 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 enabled:tw-cursor-pointer disabled:tw-opacity-50 enabled:desktop-hover:hover:tw-bg-iron-900/50 enabled:desktop-hover:hover:tw-text-iron-100 motion-reduce:tw-transition-none"
+                >
+                  {t(
+                    locale,
+                    mobile && !isSelecting
+                      ? "waves.myVotes.select"
+                      : "waves.myVotes.doneSelecting"
+                  )}
+                </button>
+              )}
             {mobile && showResetControls && isSelecting && showResetActions && (
               <div className="tw-basis-full">{resetActions}</div>
             )}

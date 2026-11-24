@@ -354,7 +354,7 @@ function ScopedCompetitionMyVotes({
       mobile={mobile}
       isSelecting={isSelecting}
       onToggleSelection={() => {
-        setSelectionMode(!selectionMode);
+        setSelectionMode(mobile && !selectionMode);
         setSelected(new Set());
       }}
       toolbarContent={
@@ -380,11 +380,12 @@ function ScopedCompetitionMyVotes({
       isVotingClosed={!competition.permissions.vote}
       resetVote={resetVote}
       onResettingChange={setResetting}
-      onToggleSelectAll={() =>
+      onToggleSelectAll={() => {
+        setSelectionMode(true);
         setSelected(
           allSelected ? new Set() : new Set(votes.map((vote) => vote.drop_id))
-        )
-      }
+        );
+      }}
       removeSelected={(dropId) =>
         setSelected((current) => {
           const next = new Set(current);
