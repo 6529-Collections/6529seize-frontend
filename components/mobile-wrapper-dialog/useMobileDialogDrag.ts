@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { HTMLAttributes, TouchEvent } from "react";
 
-const DISMISS_DRAG_DISTANCE_PX = 44;
-const DISMISS_DRAG_FLICK_DISTANCE_PX = 18;
-const DISMISS_DRAG_FLICK_VELOCITY_PX_MS = 0.42;
+const COMMIT_DRAG_DISTANCE_PX = 44;
+const COMMIT_DRAG_FLICK_DISTANCE_PX = 18;
+const COMMIT_DRAG_FLICK_VELOCITY_PX_MS = 0.42;
 const DISMISS_DRAG_SETTLE_MS = 150;
 const MAX_DRAG_OFFSET_PX = 260;
 const TABLET_MODAL_DESKTOP_QUERY = "(min-width: 768px)";
@@ -18,17 +18,18 @@ type MobileDialogDragOptions = {
   readonly enableDragToClose?: boolean | undefined;
   readonly tabletModal?: boolean | undefined;
   readonly onClose: () => void;
+  readonly onExpand?: (() => void) | undefined;
   readonly onAfterLeave?: (() => void) | undefined;
 };
 
-function shouldDismissDrag(releasedOffset: number, startedAt: number): boolean {
+function shouldCommitDrag(releasedOffset: number, startedAt: number): boolean {
   const elapsed = Math.max(performance.now() - startedAt, 1);
   const velocity = releasedOffset / elapsed;
 
   return (
-    releasedOffset >= DISMISS_DRAG_DISTANCE_PX ||
-    (releasedOffset >= DISMISS_DRAG_FLICK_DISTANCE_PX &&
-      velocity >= DISMISS_DRAG_FLICK_VELOCITY_PX_MS)
+    releasedOffset >= COMMIT_DRAG_DISTANCE_PX ||
+    (releasedOffset >= COMMIT_DRAG_FLICK_DISTANCE_PX &&
+      velocity >= COMMIT_DRAG_FLICK_VELOCITY_PX_MS)
   );
 }
 
@@ -82,8 +83,12 @@ function useDragOffsetState() {
   }, []);
 
   const setClampedDragOffset = useCallback(
-    (offset: number) => {
-      const clampedOffset = Math.min(Math.max(offset, 0), MAX_DRAG_OFFSET_PX);
+    (offset: number, canExpand = false) => {
+      const minOffset = canExpand ? -globalThis.innerHeight / 2 : 0;
+      const clampedOffset = Math.min(
+        Math.max(offset, minOffset),
+        MAX_DRAG_OFFSET_PX
+      );
       if (dragOffsetRef.current === clampedOffset) {
         return;
       }
@@ -114,6 +119,7 @@ export function useMobileDialogDrag({
   enableDragToClose,
   tabletModal,
   onClose,
+  onExpand,
   onAfterLeave,
 }: MobileDialogDragOptions) {
   const [isDragging, setIsDragging] = useState(false);
@@ -190,7 +196,7 @@ export function useMobileDialogDrag({
         !(event.target instanceof Element) ||
         !event.currentTarget.contains(event.target) ||
         event.target.closest(
-          'a, button, input, select, textarea, [contenteditable], [role="button"], [role="link"], [role="menuitem"], [role="tab"], [role="switch"], [tabindex]:not([tabindex="-1"])'
+          'a, button:not([data-mobile-dialog-resize-handle]), input, select, textarea, [contenteditable], [role="button"], [role="link"], [role="menuitem"], [role="tab"], [role="switch"], [tabindex]:not([tabindex="-1"])'
         )
       ) {
         return;
@@ -224,9 +230,9 @@ export function useMobileDialogDrag({
 
       // The header owns vertical touch gestures through touch-action. Content
       // below it keeps normal scrolling, including when already scrolled down.
-      setClampedDragOffset(nextOffset);
+      setClampedDragOffset(nextOffset, Boolean(onExpand));
     },
-    [canDragToClose, resetDrag, setClampedDragOffset]
+    [canDragToClose, onExpand, resetDrag, setClampedDragOffset]
   );
 
   const handleDragEnd = useCallback(() => {
@@ -242,7 +248,17 @@ export function useMobileDialogDrag({
     dragStartedAtRef.current = 0;
     cancelScheduledDragFrame();
 
-    if (shouldDismissDrag(releasedOffset, startedAt)) {
+    if (
+      releasedOffset < 0 &&
+      onExpand &&
+      shouldCommitDrag(-releasedOffset, startedAt)
+    ) {
+      onExpand();
+      resetDrag();
+      return;
+    }
+
+    if (shouldCommitDrag(releasedOffset, startedAt)) {
       setImmediateDragOffset(getDismissDragOffset());
       setIsDragging(false);
       dismissTimerRef.current = globalThis.setTimeout(() => {
@@ -259,6 +275,7 @@ export function useMobileDialogDrag({
     cancelScheduledDragFrame,
     getCurrentDragOffset,
     handleClose,
+    onExpand,
     resetDrag,
     setImmediateDragOffset,
   ]);

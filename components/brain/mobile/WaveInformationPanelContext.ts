@@ -16,6 +16,7 @@ export const WAVE_OPTIONS_VIEW = "wave-options";
 
 /** Editors share the information sheet's surface, focus trap and Back history. */
 export const WaveInformationPanelContext = createContext<{
+  readonly isPhone?: boolean;
   readonly view: string;
   readonly contentId: string;
   readonly container: HTMLDivElement | null;
@@ -24,8 +25,13 @@ export const WaveInformationPanelContext = createContext<{
   readonly prepareNavigation?: (destination: string) => void;
 } | null>(null);
 
-export function useWaveInformationPanel(title: string, viewId?: string) {
-  const sheet = useContext(WaveInformationPanelContext);
+export function useWaveInformationPanel(
+  title: string,
+  viewId?: string,
+  presentation: "page" | "modal" = "page"
+) {
+  const context = useContext(WaveInformationPanelContext);
+  const sheet = context?.isPhone && presentation === "modal" ? null : context;
   const generatedId = useId();
   const id = viewId ?? generatedId;
   const [standaloneOpen, setStandaloneOpen] = useState(false);
@@ -67,6 +73,7 @@ export function useWaveInformationPanel(title: string, viewId?: string) {
     open,
     close,
     isInSheet: sheet !== null,
+    isPhone: sheet?.isPhone === true,
     container: sheet?.container,
     contentId: sheet?.contentId ?? id,
   };

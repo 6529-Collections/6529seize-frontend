@@ -26,7 +26,7 @@ import { WaveChatWithUnread } from "./WaveChatWithUnread";
 import WaveChatActivity from "./WaveChatActivity";
 import MyStreamWavePending from "./MyStreamWavePending";
 import MyStreamWaveCurationContent from "./curations/MyStreamWaveCurationContent";
-import { useWaveData } from "@/hooks/useWaveData";
+import { useMyStreamWaveQuery } from "./MyStreamWaveQueryContext";
 import { useDrop } from "@/hooks/useDrop";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
@@ -54,10 +54,7 @@ import {
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import { createBreakpoint } from "react-use";
-import {
-  getWaveHomeRoute,
-  getWavePathRoute,
-} from "@/helpers/navigation.helpers";
+import { getWavePathRoute } from "@/helpers/navigation.helpers";
 import { useWaveViewMode } from "@/hooks/useWaveViewMode";
 import { useWave } from "@/hooks/useWave";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -90,7 +87,6 @@ import {
   getMemesHeaderDropActionState,
 } from "./waveDropAction.helpers";
 import { getWaveReplyEligibility } from "@/helpers/waves/wave-chat-replies.helpers";
-import { getMissingWaveNavigationRoute } from "@/helpers/waves/missing-wave-navigation.helpers";
 import WavesMoveNotice from "@/components/waves-move/WavesMoveNotice";
 import { WavesMoveScope } from "@/components/waves-move/WavesMoveScope";
 
@@ -137,30 +133,8 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     serverFeedSeed: { completeInitialRegistration },
   } = useMyStream();
   const { updateEligibility } = useWaveEligibility();
-  const {
-    data: wave,
-    isError,
-    isFetching,
-    refetch,
-  } = useWaveData({
-    waveId,
-    onWaveNotFound: isCompetitionPathname(pathname)
-      ? undefined
-      : () => {
-          const route = getMissingWaveNavigationRoute(waveId);
-          if (!route) return;
-          const params = route.searchParams;
-          params.delete("wave");
-          const basePath = getWaveHomeRoute({
-            isDirectMessage: route.pathname.startsWith("/messages"),
-            isApp,
-          });
-          const newUrl = params.toString()
-            ? `${basePath}?${params.toString()}`
-            : basePath;
-          router.push(newUrl, { scroll: false });
-        },
-  });
+  // MyStreamWave runs the wave's query, above the wave's move scope.
+  const { data: wave, isError, isFetching, refetch } = useMyStreamWaveQuery();
   const submissionTarget = useCompetitionSubmissionWave(wave, !competitionOnly);
   const submissionWave = submissionTarget.wave ?? wave;
   const metadataWaveId = wave?.id;

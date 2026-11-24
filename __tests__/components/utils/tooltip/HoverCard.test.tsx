@@ -340,7 +340,10 @@ describe("HoverCard", () => {
         <>
           <HoverCard
             content={
-              <button type="button" onKeyDown={(event) => event.preventDefault()}>
+              <button
+                type="button"
+                onKeyDown={(event) => event.preventDefault()}
+              >
                 Custom control
               </button>
             }
@@ -359,7 +362,9 @@ describe("HoverCard", () => {
       expect(outside).toHaveFocus();
       expect(screen.getByRole("dialog")).toBeInTheDocument();
 
-      const customControl = screen.getByRole("button", { name: "Custom control" });
+      const customControl = screen.getByRole("button", {
+        name: "Custom control",
+      });
       act(() => customControl.focus());
       expect(fireEvent.keyDown(customControl, { key: "Tab" })).toBe(false);
       expect(customControl).toHaveFocus();
@@ -562,4 +567,33 @@ describe("HoverCard", () => {
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
   });
+});
+
+it("closes an open card without sending Escape to its containing page", async () => {
+  const pageBack = jest.fn();
+  render(
+    <div onKeyDown={pageBack}>
+      <HoverCard
+        content="Score breakdown"
+        ariaLabel="Score details"
+        openOnClick
+        delayShow={0}
+      >
+        <button type="button">Score</button>
+      </HoverCard>
+    </div>
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Score" }));
+  await waitFor(() =>
+    expect(
+      screen.getByRole("dialog", { name: "Score details" })
+    ).toBeInTheDocument()
+  );
+  fireEvent.keyDown(screen.getByRole("button", { name: "Score" }), {
+    key: "Escape",
+  });
+  await waitFor(() =>
+    expect(screen.queryByRole("dialog", { name: "Score details" })).toBeNull()
+  );
+  expect(pageBack).not.toHaveBeenCalled();
 });

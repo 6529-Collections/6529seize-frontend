@@ -3,12 +3,13 @@ import useDialogKeyboard, {
   DIALOG_KEYBOARD_VIEWPORT_STYLE,
 } from "@/hooks/useDialogKeyboard";
 
+import { MobilePageContext } from "@/components/mobile-navigation/MobilePageContext";
 import IconButton from "@/components/utils/button/IconButton";
 
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FocusTrap } from "focus-trap-react";
-import { useId, useRef, type ReactNode } from "react";
+import { useContext, useId, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
@@ -81,6 +82,7 @@ export default function GroupAssignmentDialog({
     | ((payload: ApiCreateGroup) => Promise<ApiGroupFull | null>)
     | undefined;
 }) {
+  const phoneNavigation = useContext(MobilePageContext) !== null;
   const locale = useBrowserLocale();
   const keyboardViewportRef = useDialogKeyboard(!embedded);
   const modalRef = useRef<HTMLDialogElement>(null);
@@ -131,6 +133,7 @@ export default function GroupAssignmentDialog({
       showChooseGroup={showChooseGroup}
       criteriaDraft={criteriaDraft}
       isWaveAccessEditor={isWaveAccessEditor}
+      mobileCriteriaNavigation={embedded && phoneNavigation}
       collapseOnClickAway={false}
       startMode={startMode}
       onChange={onChange}

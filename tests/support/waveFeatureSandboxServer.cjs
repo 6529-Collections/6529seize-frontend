@@ -130,7 +130,7 @@ async function start() {
             if (stubs.has(args.path))
               return { path: args.path, namespace: "fixture" };
             if (
-              /MyStreamActionTooltip|MyStreamWaveCreateActionsMenu|MyStreamWaveCurationTabMenu|BrainLeftSidebarWaveDropTime/.test(
+              /MyStreamActionTooltip|MyStreamWaveCreateActionsMenu|MyStreamWaveCurationTabMenu|WaveCurationCreateButton|BrainLeftSidebarWaveDropTime/.test(
                 args.path
               )
             ) {

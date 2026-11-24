@@ -447,11 +447,11 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
                 />
               </div>
               {canShowVotingAction && (
-                <div className="tw-ml-auto tw-flex tw-min-w-0 tw-flex-1 tw-justify-end">
+                <div className="tw-ml-auto tw-flex tw-min-w-0 tw-flex-1 tw-justify-end max-md:tw-basis-full">
                   <VotingModalButton
                     drop={drop}
                     onClick={handleVoteButtonClick}
-                    className="tw-box-border tw-min-w-0 tw-max-w-full"
+                    className="max-md:[&>span]:tw-[overflow-wrap:anywhere] tw-box-border tw-min-w-0 tw-max-w-full max-md:tw-h-auto max-md:tw-min-h-11 max-md:tw-w-full max-md:[&>span]:tw-whitespace-normal"
                   >
                     {voteButtonLabel}
                   </VotingModalButton>

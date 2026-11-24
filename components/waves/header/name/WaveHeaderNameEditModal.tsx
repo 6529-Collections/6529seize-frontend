@@ -12,6 +12,7 @@ import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrappe
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import WaveHeaderNameEditInput from "./WaveHeaderNameEditInput";
+import { useMobilePageDraft } from "@/components/mobile-navigation/MobilePageContext";
 import Button from "@/components/utils/button/Button";
 
 export default function WaveHeaderNameEditModal({
@@ -37,6 +38,7 @@ export default function WaveHeaderNameEditModal({
   // values are computed during render rather than mirrored in an effect.
   const [draft, setDraft] = useState<string | null>(null);
   const name = draft ?? wave.name;
+  useMobilePageDraft(isOpen && name !== wave.name, isOpen && mutating);
   const isDisabled = mutating || name === wave.name;
 
   const handleClose = () => {
@@ -86,11 +88,7 @@ export default function WaveHeaderNameEditModal({
       onSubmit={onSubmit}
       className="tw-flex tw-flex-col tw-px-4 sm:tw-px-6"
     >
-      <WaveHeaderNameEditInput
-        name={name}
-        setName={setDraft}
-        autoFocus={!embedded}
-      />
+      <WaveHeaderNameEditInput name={name} setName={setDraft} autoFocus />
 
       <div className="tw-mt-4 tw-flex tw-justify-end">
         <Button
