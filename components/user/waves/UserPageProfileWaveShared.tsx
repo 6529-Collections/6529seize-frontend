@@ -1,6 +1,5 @@
 import SpinnerLoader from "@/components/common/SpinnerLoader";
 import Button from "@/components/utils/button/Button";
-import WaveChip from "@/components/waves/WaveChip";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import {
@@ -130,7 +129,6 @@ export function RetryButton({
 
 export function OfficialWaveSummary({
   waveName,
-  wavePicture = null,
   metadataLabel,
   mobileMetadataLabel = metadataLabel,
   profileCurationLabel,
@@ -140,7 +138,6 @@ export function OfficialWaveSummary({
   onAddPost,
 }: {
   readonly waveName: string;
-  readonly wavePicture?: string | null;
   readonly metadataLabel: string;
   readonly mobileMetadataLabel?: string;
   readonly profileCurationLabel?: string | null | undefined;
@@ -150,52 +147,44 @@ export function OfficialWaveSummary({
   readonly onAddPost?: (() => void) | undefined;
 }) {
   const locale = useBrowserLocale();
+  const hasManageControl =
+    canManageOwnOfficialWave && Boolean(manageCurationControl);
+  const hasAddPost = canManageOwnOfficialWave && onAddPost !== undefined;
 
   return (
-    <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-start tw-gap-x-3 tw-gap-y-3 lg:tw-gap-x-6 lg:tw-gap-y-0">
+    <div className="tw-relative tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-start tw-gap-x-3 tw-gap-y-3 lg:tw-gap-x-6 lg:tw-gap-y-0">
       <h2
-        className={`tw-col-start-1 tw-row-start-1 tw-m-0 tw-min-w-0 tw-max-w-full tw-text-lg tw-font-semibold tw-text-iron-100 max-lg:tw-break-words md:tw-text-xl ${canManageOwnOfficialWave ? "" : "tw-col-span-2 lg:tw-col-span-1"}`}
+        className={`tw-col-span-2 tw-col-start-1 tw-row-start-1 tw-m-0 tw-min-w-0 tw-max-w-full tw-text-lg tw-font-semibold tw-text-iron-100 max-lg:tw-break-words lg:tw-col-span-1 lg:tw-text-xl ${hasManageControl ? "tw-min-h-9 tw-pr-12 lg:tw-min-h-0 lg:tw-pr-0" : ""}`}
       >
-        {profileCurationLabel ??
-          t(locale, "profileCuration.header.fallbackTitle")}
+        <span className="tw-block tw-min-w-0">
+          {profileCurationLabel ??
+            t(locale, "profileCuration.header.fallbackTitle")}
+        </span>
       </h2>
       {canManageOwnOfficialWave && (
-        <div className="tw-col-start-2 tw-row-start-1 tw-flex tw-items-center tw-justify-end tw-gap-2 lg:tw-row-span-2 lg:tw-self-center">
-          {manageCurationControl}
-          {onAddPost !== undefined && (
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={onAddPost}
-              className="max-lg:tw-text-[13px]"
-            >
-              <PlusIcon className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0" />
-              <span>Add post</span>
-            </Button>
+        <div className="tw-contents lg:tw-col-start-2 lg:tw-row-span-2 lg:tw-row-start-1 lg:tw-flex lg:tw-items-center lg:tw-justify-end lg:tw-gap-2 lg:tw-self-center">
+          {hasManageControl && (
+            <div className="tw-absolute tw-right-0 tw-top-0 lg:tw-static">
+              {manageCurationControl}
+            </div>
+          )}
+          {hasAddPost && (
+            <div className="tw-col-start-2 tw-row-start-3 tw-self-center">
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={onAddPost}
+                className="max-lg:tw-text-[13px]"
+              >
+                <PlusIcon className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0" />
+                <span>Add post</span>
+              </Button>
+            </div>
           )}
         </div>
       )}
 
-      <div className="tw-col-span-2 tw-row-start-2 tw-min-w-0 tw-space-y-2 lg:tw-hidden">
-        <div className="tw-text-xs tw-font-medium tw-text-iron-500">
-          {t(locale, "profileCuration.header.sourceLabel")}
-        </div>
-        <WaveChip
-          className="max-lg:tw-max-w-[min(14rem,100%)]"
-          name={waveName}
-          picture={wavePicture}
-          onClick={onOpenWave}
-          ariaLabel={t(locale, "profileCuration.header.openSourceAria", {
-            waveName,
-          })}
-          showChevron
-        />
-        <div className="tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500">
-          {mobileMetadataLabel}
-        </div>
-      </div>
-
-      <div className="tw-mt-1 tw-hidden tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-meta tw-font-normal tw-leading-6 lg:tw-col-start-1 lg:tw-row-start-2 lg:tw-flex">
+      <div className="tw-col-span-2 tw-row-start-2 tw-mt-1 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-meta tw-font-normal tw-leading-6 lg:tw-col-span-1 lg:tw-col-start-1">
         <button
           type="button"
           onClick={onOpenWave}
@@ -213,13 +202,18 @@ export function OfficialWaveSummary({
           </span>
           <ArrowTopRightOnSquareIcon
             aria-hidden="true"
-            className="tw-size-4 tw-flex-shrink-0 tw-transition-transform tw-duration-150 group-hover:-tw-translate-y-0.5 group-hover:tw-translate-x-0.5 motion-reduce:tw-transform-none"
+            className="tw-hidden tw-size-4 tw-flex-shrink-0 tw-transition-transform tw-duration-150 group-hover:-tw-translate-y-0.5 group-hover:tw-translate-x-0.5 motion-reduce:tw-transform-none lg:tw-block"
           />
         </button>
-        <span className="tw-text-iron-600">•</span>
-        <span className="tw-tabular-nums tw-text-iron-500">
+        <span className="tw-hidden tw-text-iron-600 lg:tw-inline">•</span>
+        <span className="tw-hidden tw-tabular-nums tw-text-iron-500 lg:tw-inline">
           {metadataLabel}
         </span>
+      </div>
+      <div
+        className={`tw-row-start-3 tw-min-w-0 tw-self-center tw-text-meta tw-font-normal tw-tabular-nums tw-leading-5 tw-text-iron-500 lg:tw-hidden ${hasAddPost ? "tw-col-start-1" : "tw-col-span-2"}`}
+      >
+        {mobileMetadataLabel.replaceAll(" • ", "\u00a0•\u00a0")}
       </div>
     </div>
   );

@@ -470,15 +470,32 @@ test.describe("Profile editing @auth @medium @local-only", () => {
           page.getByText("12,345 source posts • 6,789 joined", { exact: true })
         ).toBeVisible();
         await expect(
-          page.getByText("Source Wave", { exact: true })
+          page.getByText("Source Wave:", { exact: true })
         ).toBeVisible();
+        const stats = page.getByText("12,345 source posts • 6,789 joined", {
+          exact: true,
+        });
+        expect(await stats.textContent()).toContain("\u00a0•\u00a0");
+        await expect(source.getByText(wave.name, { exact: true })).toHaveCSS(
+          "white-space",
+          "nowrap"
+        );
+        await expect(source.getByText(wave.name, { exact: true })).toHaveCSS(
+          "text-overflow",
+          "ellipsis"
+        );
         const widths = isCapacitorSimulationProject(testInfo.project.name)
           ? [390]
           : [320, 390, 768];
         for (const width of widths) {
           await page.setViewportSize({ width, height: 1000 });
           const headingBox = await heading.boundingBox();
+          const headingTextBox = await page
+            .getByRole("heading", { name: title, exact: true })
+            .locator("span")
+            .boundingBox();
           const sourceBox = await source.boundingBox();
+          await expect(heading).toHaveCSS("font-size", "18px");
           expect(sourceBox!.y).toBeGreaterThan(
             headingBox!.y + headingBox!.height
           );
@@ -490,21 +507,48 @@ test.describe("Profile editing @auth @medium @local-only", () => {
             await expect(add).toHaveCSS("font-size", "13px");
             const manageBox = await manage.boundingBox();
             const addBox = await add.boundingBox();
+            const statsBox = await stats.boundingBox();
             const sectionsBox = await page
               .getByRole("navigation", { name: "Profile sections" })
               .boundingBox();
             expect(Math.abs(headingBox!.y - manageBox!.y)).toBeLessThanOrEqual(
               1
             );
-            expect(headingBox!.x + headingBox!.width).toBeLessThanOrEqual(
-              manageBox!.x
+            expect(
+              headingTextBox!.x + headingTextBox!.width
+            ).toBeLessThanOrEqual(manageBox!.x);
+            expect(
+              Math.abs(
+                manageBox!.x +
+                  manageBox!.width -
+                  sectionsBox!.x -
+                  sectionsBox!.width
+              )
+            ).toBeLessThanOrEqual(1);
+            expect(statsBox!.y).toBeGreaterThanOrEqual(
+              sourceBox!.y + sourceBox!.height
             );
-            expect(manageBox!.x + manageBox!.width).toBeLessThan(addBox!.x);
+            expect(statsBox!.x + statsBox!.width).toBeLessThanOrEqual(
+              addBox!.x
+            );
+            expect(
+              Math.abs(
+                statsBox!.y +
+                  statsBox!.height / 2 -
+                  addBox!.y -
+                  addBox!.height / 2
+              )
+            ).toBeLessThanOrEqual(1);
             expect(
               Math.abs(
                 addBox!.x + addBox!.width - sectionsBox!.x - sectionsBox!.width
               )
             ).toBeLessThanOrEqual(1);
+          } else {
+            const sectionsBox = await page
+              .getByRole("navigation", { name: "Profile sections" })
+              .boundingBox();
+            expect(headingTextBox!.width).toBeCloseTo(sectionsBox!.width, 0);
           }
           await expectNoHorizontalOverflow(page);
         }
@@ -555,9 +599,13 @@ test.describe("Profile editing @auth @medium @local-only", () => {
         for (const width of [320, 390, 768]) {
           await page.setViewportSize({ width, height: 1000 });
           const headingBox = await shortHeading.boundingBox();
+          const headingTextBox = await page
+            .getByRole("heading", { name: "Art", exact: true })
+            .locator("span")
+            .boundingBox();
           const manageBox = await manage.boundingBox();
           expect(Math.abs(headingBox!.y - manageBox!.y)).toBeLessThanOrEqual(1);
-          expect(headingBox!.x + headingBox!.width).toBeLessThanOrEqual(
+          expect(headingTextBox!.x + headingTextBox!.width).toBeLessThanOrEqual(
             manageBox!.x
           );
           await expectNoHorizontalOverflow(page);

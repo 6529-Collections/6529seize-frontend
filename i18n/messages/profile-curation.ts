@@ -67,7 +67,6 @@ export const PROFILE_CURATION_MESSAGES = {
   "profileCuration.entry.startTitle": "Create your profile Curation",
   "profileCuration.header.fallbackTitle": "Curation",
   "profileCuration.header.source": "Source Wave:",
-  "profileCuration.header.sourceLabel": "Source Wave",
   "profileCuration.header.openSourceAria": "Open source Wave {waveName}",
   "profileCuration.header.controlsAria": "Curation source controls",
   "profileCuration.header.changeSource": "Change source",
