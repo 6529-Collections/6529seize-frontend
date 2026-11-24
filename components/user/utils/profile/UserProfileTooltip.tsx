@@ -127,6 +127,7 @@ export default function UserProfileTooltip({
             <UserFollowBtn
               handle={profileHandle}
               size={UserFollowBtnSize.SMALL}
+              insideHoverCard
               onDirectMessage={activeProfileProxy ? undefined : onDirectMessage}
             />
           </div>
