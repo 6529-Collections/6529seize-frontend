@@ -20,7 +20,7 @@ interface ChainOperationRequest {
   readonly primaryType: string;
 }
 
-export const OP_PROFILE_REPLACE = 0x0102;
+const OP_PROFILE_REPLACE = 0x0102;
 export const OP_RATING_SET = 0x0701;
 /** Rule version 7 lets a session key sign votes and poll ballots too. */
 export const OP_VOTE_SET = 0x0606;
