@@ -113,10 +113,9 @@ open again at the switch-on and go to the 6529 Network:
 - A wallet with no identity on the 6529 Network, or an entry, wave or poll the
   network doesn't hold, gets a message saying so; nothing is sent.
 
-The notice then reads: Votes, entries and wave settings moved to the 6529
-Network on Thursday 26 November. Your votes, poll ballots and wave REP go
-there from this site. Entries and wave settings can't be changed here yet.
-Chat keeps working.
+The notice then gives the switch-on day as the day the move happened, and
+goes on: Your votes, poll ballots and wave REP go there from this site.
+Entries and wave settings can't be changed here yet. Chat keeps working.
 
 Entries, wave and decision settings, groups and new polls stay paused until
 their own changes reach this site.
