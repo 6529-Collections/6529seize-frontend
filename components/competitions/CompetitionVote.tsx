@@ -52,6 +52,12 @@ import {
 import SingleWaveDropVoteSlider from "@/components/waves/drop/SingleWaveDropVoteSlider";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import { updateCompetitionVoteInCache } from "@/components/react-query-wrapper/utils/updateCompetitionVoteInCache";
+import {
+  MyVotesInput,
+  MY_VOTES_INPUT_LAYOUT,
+  MY_VOTES_MOBILE_INPUT_LAYOUT,
+} from "@/components/brain/my-stream/votes/MyVotesInput";
+import { triggerVoteSuccessHaptic } from "@/helpers/vote-haptics";
 
 const COMPACT_VOTE_LAYOUT =
   "tw-col-span-3 tw-row-start-3 tw-w-full tw-min-w-0 tw-@container/vote-controls @[32rem]/my-vote:tw-col-span-2 @[32rem]/my-vote:tw-col-start-2 @[46rem]/my-vote:tw-col-span-1 @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-span-2 @[46rem]/my-vote:tw-row-start-1";
@@ -91,6 +97,8 @@ export function CompetitionVoteForm({
   budgetEnabled = true,
   budgetVisibilityRef,
   compact = false,
+  myVotes = false,
+  mobile = false,
   modeControl,
   hidden,
   voteMode = "numeric",
@@ -121,6 +129,8 @@ export function CompetitionVoteForm({
       }
     | undefined;
   readonly compact?: boolean;
+  readonly myVotes?: boolean;
+  readonly mobile?: boolean;
   readonly modeControl?: ReactNode;
   readonly hidden?: boolean | undefined;
   readonly voteMode?: SingleWaveDropVoteMode | undefined;
@@ -148,6 +158,7 @@ export function CompetitionVoteForm({
     };
   }, [viewer]);
   const locale = useBrowserLocale();
+  const voteValueLabel = t(locale, "competitions.voteValue");
   const explainTooltipId = useId();
   const creditType = competition.voting.credit_type;
   const creditLabel = Object.hasOwn(WAVE_VOTING_LABELS, creditType)
@@ -186,6 +197,7 @@ export function CompetitionVoteForm({
     ? `competition-vote-error-${entryId}`
     : undefined;
   const rangeDescriptionId = `competition-vote-range-${entryId}`;
+  const voteInputId = `competition-vote-${entryId}`;
   const min = credit.data?.min_vote;
   const max = credit.data?.max_vote;
   const updateNumericDraft = (next: string) => {
@@ -268,6 +280,7 @@ export function CompetitionVoteForm({
         });
         void reply?.onVoteApplied();
         onVoteSuccess?.();
+        if (myVotes) triggerVoteSuccessHaptic();
       }
       void invalidateCompetition(client, identity).catch(() => undefined);
     } catch (error) {
@@ -299,6 +312,22 @@ export function CompetitionVoteForm({
       <p className="tw-text-sm tw-text-iron-400">
         {t(locale, "competitions.signIn")}
       </p>
+    );
+  if (credit.isPending && compact && myVotes)
+    return (
+      <div
+        ref={budgetVisibilityRef}
+        role="status"
+        aria-label={t(locale, "competitions.loading")}
+        className={`tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-2 ${mobile ? MY_VOTES_MOBILE_INPUT_LAYOUT : MY_VOTES_INPUT_LAYOUT}`}
+        aria-busy="true"
+        aria-live="off"
+      >
+        <div className="tw-h-[46px] tw-animate-pulse tw-rounded-lg tw-bg-iron-900 motion-reduce:tw-animate-none" />
+        {onExplainVote && (
+          <div className="tw-h-11 tw-w-20 tw-animate-pulse tw-rounded-lg tw-bg-iron-900 motion-reduce:tw-animate-none" />
+        )}
+      </div>
     );
   if (credit.isPending)
     return compact ? (
@@ -336,6 +365,64 @@ export function CompetitionVoteForm({
         }}
       />
     );
+  if (compact && myVotes)
+    return (
+      <div
+        ref={budgetVisibilityRef}
+        className={
+          mobile ? MY_VOTES_MOBILE_INPUT_LAYOUT : MY_VOTES_INPUT_LAYOUT
+        }
+      >
+        <MyVotesInput
+          mobile={mobile}
+          className=""
+          alwaysShowHelper={!mobile}
+          id={voteInputId}
+          label={voteValueLabel}
+          value={value}
+          currentVote={credit.data.current_vote ?? 0}
+          unit={creditLabel}
+          min={min ?? 0}
+          valid={valid}
+          disabled={disabled || !competition.permissions.vote}
+          busy={busy}
+          helperText={t(locale, "competitions.voteRange", {
+            min: formatInteger(locale, min ?? 0),
+            max: formatInteger(locale, max ?? 0),
+          })}
+          error={failed ? t(locale, failed) : null}
+          saveLabel={t(
+            locale,
+            busy ? "competitions.saving" : "competitions.vote"
+          )}
+          explainLabel={t(locale, "waves.voteRationale.explainAriaLabel")}
+          explainDescription={t(locale, "waves.voteRationale.savedDescription")}
+          canExplain={
+            credit.data.current_vote !== null && credit.data.current_vote !== 0
+          }
+          onChange={updateNumericDraft}
+          onBlur={() => {
+            if (value === "" || value === "-") {
+              setVoteDraft(String(credit.data.current_vote ?? 0));
+            }
+          }}
+          onSubmit={() => void submit()}
+          onExplain={
+            onExplainVote
+              ? () => {
+                  const total = credit.data.current_vote ?? 0;
+                  onExplainVote(
+                    total,
+                    lastVote?.source === source && lastVote.total === total
+                      ? lastVote.change
+                      : 0
+                  );
+                }
+              : undefined
+          }
+        />
+      </div>
+    );
   if (compact)
     return (
       <form
@@ -346,8 +433,8 @@ export function CompetitionVoteForm({
         }}
         className={`${COMPACT_VOTE_LAYOUT} tw-cursor-default`}
       >
-        <label className="tw-sr-only" htmlFor={`competition-vote-${entryId}`}>
-          {t(locale, "competitions.voteValue")}
+        <label className="tw-sr-only" htmlFor={voteInputId}>
+          {voteValueLabel}
         </label>
         <div
           ref={budgetVisibilityRef}
@@ -357,7 +444,7 @@ export function CompetitionVoteForm({
             className={`tw-col-span-2 tw-flex tw-min-w-0 tw-items-center tw-gap-x-1 tw-rounded-lg tw-bg-iron-900 tw-pr-1 tw-ring-1 tw-ring-inset tw-ring-iron-700 focus-within:tw-ring-2 focus-within:tw-ring-primary-400 @[24rem]/vote-controls:tw-col-span-1 @[46rem]/my-vote:tw-gap-x-2 ${onExplainVote ? "" : "@[24rem]/vote-controls:!tw-col-span-2"}`}
           >
             <input
-              id={`competition-vote-${entryId}`}
+              id={voteInputId}
               type="number"
               step="1"
               min={min ?? undefined}
@@ -496,9 +583,7 @@ export function CompetitionVoteForm({
             className={`tw-m-0 tw-min-w-0 tw-border-0 tw-px-2 ${controlVariant === "compact" ? "tw-pb-0 tw-pt-8" : "tw-pb-2 tw-pt-0"}`}
             disabled={busy || disabled || !competition.permissions.vote}
           >
-            <legend className="tw-sr-only">
-              {t(locale, "competitions.voteValue")}
-            </legend>
+            <legend className="tw-sr-only">{voteValueLabel}</legend>
             <SingleWaveDropVoteSlider
               voteValue={Number.isFinite(numeric) ? numeric : 0}
               minValue={min ?? 0}
@@ -515,14 +600,11 @@ export function CompetitionVoteForm({
           </fieldset>
         ) : (
           <div className="tw-relative">
-            <label
-              htmlFor={`competition-vote-${entryId}`}
-              className="tw-sr-only"
-            >
-              {t(locale, "competitions.voteValue")}
+            <label htmlFor={voteInputId} className="tw-sr-only">
+              {voteValueLabel}
             </label>
             <VoteNumericInput
-              id={`competition-vote-${entryId}`}
+              id={voteInputId}
               unit={creditLabel}
               variant={controlVariant}
               type="number"
