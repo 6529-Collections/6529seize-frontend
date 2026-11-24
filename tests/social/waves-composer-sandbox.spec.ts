@@ -916,7 +916,9 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expect(showLess).toHaveAttribute("aria-expanded", "true");
     await expect(longDrop).toContainText(LONG_DROP_END_MARKER);
     await expectSameScreenPosition(previewParagraph, originalTop);
-    expect(await screenTop(continuation)).toBeGreaterThan(originalTop);
+    await expect
+      .poll(() => screenTop(continuation))
+      .toBeGreaterThan(originalTop);
     await expect(longDrop.getByText(PREVIEW_TITLE)).toBeVisible();
     await expectSameScreenPosition(previewParagraph, originalTop);
 

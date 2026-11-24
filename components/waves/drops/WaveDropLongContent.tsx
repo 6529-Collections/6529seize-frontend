@@ -9,9 +9,14 @@ import { useWaveDropContentExpansion } from "./WaveDropContentExpansionContext";
 
 const BOTTOM_SCROLL_THRESHOLD_PX = 50;
 
+interface ExpandedTopPadding {
+  readonly cssValue: string;
+  readonly addedPixels: number;
+}
+
 interface PendingAnchor {
   readonly top: number;
-  readonly expandedTopPadding: string | undefined;
+  readonly expandedTopPadding: ExpandedTopPadding | undefined;
   readonly pinToBottom: boolean;
   readonly scrollContainer: HTMLDivElement;
 }
@@ -19,10 +24,13 @@ interface PendingAnchor {
 const getMinimumScrollTop = (container: HTMLDivElement) =>
   Math.min(0, container.clientHeight - container.scrollHeight);
 
-function getExpandedTopPadding(container: HTMLDivElement): string | undefined {
-  // The top sentinel is the final child in the reverse-scrolling list.
-  const topSentinel = container.lastElementChild;
-  if (!topSentinel || getMinimumScrollTop(container) < 0) return;
+function getExpandedTopPadding(
+  container: HTMLDivElement
+): ExpandedTopPadding | undefined {
+  const topSentinel = container.querySelector(
+    ":scope > [data-wave-drops-top-sentinel]"
+  );
+  if (!topSentinel || getMinimumScrollTop(container) < 0) return undefined;
 
   const viewportTop =
     container.getBoundingClientRect().top + container.clientTop;
@@ -30,25 +38,33 @@ function getExpandedTopPadding(container: HTMLDivElement): string | undefined {
     topSentinel.getBoundingClientRect().top - viewportTop;
   const existingPadding =
     Number.parseFloat(getComputedStyle(container).paddingTop) || 0;
-  if (spaceAboveHistory - existingPadding >= 1) {
-    return `${Math.ceil(spaceAboveHistory)}px`;
-  }
+  if (spaceAboveHistory - existingPadding < 1) return undefined;
+
+  const paddingTop = Math.ceil(spaceAboveHistory);
+  return {
+    cssValue: `${paddingTop}px`,
+    addedPixels: paddingTop - existingPadding,
+  };
 }
 
 function preserveEmptyTopSpace(
   container: HTMLDivElement,
-  expandedPadding: string | undefined
+  expandedPadding: ExpandedTopPadding | undefined
 ) {
-  if (expandedPadding === undefined) return;
+  if (expandedPadding === undefined) return undefined;
 
   // Short chats are bottom-aligned. Preserve their existing blank space above
   // the history so scrolling can reach the old reading position after growth.
+  // Restore the inline declaration so stylesheet padding can take effect again.
   const originalPadding = container.style.paddingTop;
-  container.style.paddingTop = expandedPadding;
-  return () => {
-    if (container.style.paddingTop === expandedPadding) {
-      container.style.paddingTop = originalPadding;
-    }
+  container.style.paddingTop = expandedPadding.cssValue;
+  return {
+    addedPixels: expandedPadding.addedPixels,
+    restore() {
+      if (container.style.paddingTop === expandedPadding.cssValue) {
+        container.style.paddingTop = originalPadding;
+      }
+    },
   };
 }
 
@@ -114,22 +130,22 @@ export default function WaveDropLongContent({
 
     const container = pendingAnchor.scrollContainer;
     const anchor = isExpanded ? contentElement : button;
-    let releaseEmptyTopSpace = preserveEmptyTopSpace(
+    let topSpace = preserveEmptyTopSpace(
       container,
       pendingAnchor.expandedTopPadding
     );
     const correctPosition = () => {
       if (pendingAnchor.pinToBottom) {
         container.scrollTop = 0;
-        return;
+      } else {
+        const topDelta = anchor.getBoundingClientRect().top - pendingAnchor.top;
+        // Layout may already have anchored or clamped the browser's position.
+        container.scrollTop = Math.max(
+          getMinimumScrollTop(container),
+          Math.min(0, container.scrollTop + topDelta)
+        );
       }
-      const topDelta = anchor.getBoundingClientRect().top - pendingAnchor.top;
-      // Layout may already have anchored or clamped the browser's position.
-      container.scrollTop = Math.max(
-        getMinimumScrollTop(container),
-        Math.min(0, container.scrollTop + topDelta)
-      );
-      if (isExpanded) keepFocusVisible(button, contentElement, container);
+      keepFocusVisible(button, contentElement, container);
     };
     correctPosition();
 
@@ -147,9 +163,17 @@ export default function WaveDropLongContent({
     const handleScroll = () => {
       if (Math.abs(container.scrollTop - expectedScrollTop) <= 2) return;
       stopAnchoring();
-      if (container.scrollTop < 0) return;
-      releaseEmptyTopSpace?.();
-      releaseEmptyTopSpace = undefined;
+      if (!topSpace) return;
+
+      // Removing the extra padding changes the scroll limit. Wait until the
+      // reader has scrolled inside the range the unpadded history can hold.
+      const unpaddedMinimum = Math.min(
+        0,
+        Math.ceil(getMinimumScrollTop(container) + topSpace.addedPixels)
+      );
+      if (container.scrollTop < unpaddedMinimum) return;
+      topSpace.restore();
+      topSpace = undefined;
     };
     observer?.observe(contentElement);
     const intentEvents = ["wheel", "touchstart", "pointerdown", "keydown"];
@@ -158,7 +182,7 @@ export default function WaveDropLongContent({
     container.addEventListener("scroll", handleScroll, { passive: true });
     return () => {
       stopAnchoring();
-      releaseEmptyTopSpace?.();
+      topSpace?.restore();
       for (const event of intentEvents)
         container.removeEventListener(event, stopAnchoring);
       container.removeEventListener("scroll", handleScroll);

@@ -152,10 +152,27 @@ describe("WaveDropLongContent", () => {
     expect(scrollContainer.scrollTop).toBe(-170);
   });
 
-  it("preserves the blank space above a short chat while opening a long message", () => {
+  it("restores a short chat's padding while scrolling through the expanded message", () => {
     const scrollContainer = document.createElement("div");
+    const getComputedStyleForOtherElements = globalThis.getComputedStyle;
+    const computedStyleSpy = jest
+      .spyOn(globalThis, "getComputedStyle")
+      .mockImplementation((element) => {
+        const computedStyle = getComputedStyleForOtherElements(element);
+        return element === scrollContainer
+          ? {
+              ...computedStyle,
+              paddingTop: scrollContainer.style.paddingTop || "12px",
+            }
+          : computedStyle;
+      });
     const topSentinel = document.createElement("div");
-    scrollContainer.append(document.createElement("div"), topSentinel);
+    topSentinel.dataset["waveDropsTopSentinel"] = "";
+    scrollContainer.append(
+      document.createElement("div"),
+      topSentinel,
+      document.createElement("div")
+    );
     jest
       .spyOn(topSentinel, "getBoundingClientRect")
       .mockReturnValue({ top: 100 } as DOMRect);
@@ -164,8 +181,9 @@ describe("WaveDropLongContent", () => {
       scrollHeight: {
         configurable: true,
         get: () => {
-          const padding =
-            Number.parseFloat(scrollContainer.style.paddingTop) || 0;
+          const padding = Number.parseFloat(
+            getComputedStyle(scrollContainer).paddingTop
+          );
           const historyHeight = screen.queryByRole("button", {
             name: "Show less",
           })
@@ -181,14 +199,24 @@ describe("WaveDropLongContent", () => {
       .mockReturnValueOnce({ top: 200 } as DOMRect)
       .mockReturnValue({ top: 50 } as DOMRect);
 
-    fireEvent.click(screen.getByRole("button", { name: "Show more" }));
+    try {
+      fireEvent.click(screen.getByRole("button", { name: "Show more" }));
 
-    expect(scrollContainer.style.paddingTop).toBe("100px");
-    expect(scrollContainer.scrollTop).toBe(-150);
+      expect(scrollContainer.style.paddingTop).toBe("100px");
+      expect(scrollContainer.scrollTop).toBe(-150);
 
-    scrollContainer.scrollTop = 0;
-    fireEvent.scroll(scrollContainer);
-    expect(scrollContainer.style.paddingTop).toBe("");
+      scrollContainer.scrollTop = -100;
+      fireEvent.scroll(scrollContainer);
+      expect(scrollContainer.style.paddingTop).toBe("100px");
+
+      scrollContainer.scrollTop = -40;
+      fireEvent.scroll(scrollContainer);
+      expect(scrollContainer.style.paddingTop).toBe("");
+      expect(getComputedStyle(scrollContainer).paddingTop).toBe("12px");
+      expect(scrollContainer.scrollTop).toBe(-40);
+    } finally {
+      computedStyleSpy.mockRestore();
+    }
   });
 
   it("returns to the latest drop when the message is collapsed at the bottom", () => {
