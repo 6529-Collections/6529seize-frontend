@@ -7449,6 +7449,8 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           width < 1024 && testInfo.project.use.hasTouch ? "0px" : "1px"
         );
         const actionHeight = testInfo.project.use.hasTouch ? 44 : 36;
+        await expect(explain).toHaveCSS("padding-left", "12px");
+        await expect(explain).toHaveCSS("padding-right", "12px");
         await expect(explain).toHaveCSS("height", `${actionHeight}px`);
         await expect(
           row.getByRole("button", { name: "Save vote", exact: true })

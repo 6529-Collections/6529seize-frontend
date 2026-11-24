@@ -71,7 +71,7 @@ function MyVotesExplainButton({
       {...props}
       variant="tertiary"
       size={null}
-      className={`tw-h-9 tw-min-h-9 tw-min-w-11 tw-whitespace-nowrap !tw-text-xs !tw-font-medium touch-only:tw-h-11 touch-only:tw-min-h-11 ${mobile ? "!tw-px-1 touch-only:!tw-border-0 touch-only:!tw-bg-transparent touch-only:!tw-text-iron-300 touch-only:!tw-shadow-none" : "!tw-px-3"}`}
+      className={`tw-h-9 tw-min-h-9 tw-min-w-11 tw-whitespace-nowrap !tw-px-3 !tw-text-xs !tw-font-medium touch-only:tw-h-11 touch-only:tw-min-h-11 ${mobile ? "touch-only:!tw-border-0 touch-only:!tw-bg-transparent touch-only:!tw-text-iron-300 touch-only:!tw-shadow-none" : ""}`}
     >
       {label}
     </Button>
