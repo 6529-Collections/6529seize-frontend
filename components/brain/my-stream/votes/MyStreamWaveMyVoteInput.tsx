@@ -5,6 +5,7 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { AuthContext } from "@/components/auth/Auth";
 import type { DropRateChangeRequest } from "@/entities/IDrop";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import { chainWriteFailure } from "@/components/chain-waves/chainWavesErrorMessage";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { commonApiPost } from "@/services/api/common-api";
@@ -255,7 +256,11 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
       setToast({
         type: "error",
         title: t(locale, "waves.myVotes.voteUpdateError"),
-        description: t(locale, "waves.myVotes.tryAgain"),
+        description: chainWriteFailure(
+          locale,
+          error,
+          t(locale, "waves.myVotes.tryAgain")
+        ),
         details: getToastErrorDetails(error),
       });
     },

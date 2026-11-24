@@ -36,7 +36,7 @@ import {
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWriters";
-import { ChainOperationError } from "@/lib/chain-identity/operation";
+import { chainWavesErrorMessage } from "@/components/chain-waves/chainWavesErrorMessage";
 import {
   budgetAfterVote,
   scheduleIndexRefresh,
@@ -325,9 +325,7 @@ export function CompetitionVoteForm({
       // Cancelled at the wallet prompt: nothing was sent.
       if (chainWriters && isUserRejectedSigningError(error)) return;
       setChainFailure(
-        chainWriters && error instanceof ChainOperationError
-          ? error.message
-          : null
+        chainWriters ? chainWavesErrorMessage(locale, error) : null
       );
       setFailed(
         getCompetitionSignatureFailureKey(error) ?? "competitions.failure"

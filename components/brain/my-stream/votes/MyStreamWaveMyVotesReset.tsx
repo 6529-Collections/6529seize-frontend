@@ -14,6 +14,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AuthContext } from "@/components/auth/Auth";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import { chainWriteFailure } from "@/components/chain-waves/chainWavesErrorMessage";
 import {
   applyWaveDropVoteUpdate,
   invalidateWaveApprovalSummaryQueries,
@@ -118,7 +119,11 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
       setToast({
         type: "error",
         title: t(locale, "waves.myVotes.resetError"),
-        description: t(locale, "waves.myVotes.tryAgain"),
+        description: chainWriteFailure(
+          locale,
+          error,
+          t(locale, "waves.myVotes.tryAgain")
+        ),
         details: getToastErrorDetails(error),
       });
       throw error;

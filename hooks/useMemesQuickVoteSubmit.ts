@@ -14,6 +14,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWriters";
 import { withViewerVote } from "@/lib/chain-waves/optimistic";
 import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
+import { chainWriteFailure } from "@/components/chain-waves/chainWavesErrorMessage";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
 import type { UseMutationResult } from "@tanstack/react-query";
 import type { Dispatch, ReactNode, SetStateAction } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -100,6 +102,11 @@ const getQueuedRatingErrorMessage = ({
   readonly error: unknown;
   readonly type: QueuedRating["type"];
 }): string => {
+  // The 6529 Network's reason in plain words, for a quick vote sent there.
+  const chainReason = chainWriteFailure(DEFAULT_LOCALE, error, "");
+  if (chainReason !== "") {
+    return chainReason;
+  }
   if (error instanceof Error) {
     return error.message;
   }

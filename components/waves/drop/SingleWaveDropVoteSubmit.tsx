@@ -26,6 +26,7 @@ import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
 import { withViewerVote } from "@/lib/chain-waves/optimistic";
 import { AuthContext } from "@/components/auth/Auth";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import { chainWriteFailure } from "@/components/chain-waves/chainWavesErrorMessage";
 import {
   SingleWaveDropVoteSize,
   SingleWaveDropVoteSubmissionMode,
@@ -167,7 +168,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
         setToast({
           type: "error",
           title: "Couldn't submit your vote.",
-          description: "Please try again.",
+          description: chainWriteFailure(locale, error, "Please try again."),
           details: getToastErrorDetails(error),
         });
       },

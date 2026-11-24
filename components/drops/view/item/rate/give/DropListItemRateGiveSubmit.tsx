@@ -7,6 +7,8 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import { chainWriteFailure } from "@/components/chain-waves/chainWavesErrorMessage";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { DropVoteState } from "@/hooks/drops/types";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { commonApiPost } from "@/services/api/common-api";
@@ -102,7 +104,11 @@ export default function DropListItemRateGiveSubmit({
       setToast({
         type: "error",
         title: "Couldn't submit your rating.",
-        description: "Please try again.",
+        description: chainWriteFailure(
+          DEFAULT_LOCALE,
+          error,
+          "Please try again."
+        ),
         details: getToastErrorDetails(error),
       });
     },

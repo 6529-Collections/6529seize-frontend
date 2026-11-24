@@ -16,6 +16,7 @@ import {
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import { chainWriteFailure } from "@/components/chain-waves/chainWavesErrorMessage";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useWaveRepAllocation } from "@/hooks/useWaveRepAllocation";
 import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
@@ -183,7 +184,11 @@ export default function WaveRepRatingModal({
       setToast({
         type: "error",
         title: "Couldn't update Wave REP.",
-        description: "Please try again.",
+        description: chainWriteFailure(
+          DEFAULT_LOCALE,
+          error,
+          "Please try again."
+        ),
         details: getToastErrorDetails(error),
       });
     },
@@ -240,7 +245,11 @@ export default function WaveRepRatingModal({
         setToast({
           type: "error",
           title: "Couldn't verify your session.",
-          description: "Please try again.",
+          description: chainWriteFailure(
+            DEFAULT_LOCALE,
+            error,
+            "Please try again."
+          ),
           details: getToastErrorDetails(error),
         });
       }
