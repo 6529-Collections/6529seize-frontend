@@ -64,7 +64,7 @@ next route.
    - Select `Connect wallet` to begin connecting immediately.
    - Keep browsing without a wallet and continue into current activity.
 3. Open `/network/health` from the heart shortcut when needed.
-4. Wait for the top slot to resolve:
+4. Look for the featured drop at the top of the page.
    - `Latest Drop` when the current mint is active, or no next winner is ready.
    - `Next Drop` when the current mint has ended and a next winner exists.
 5. If logged out, use `How to start` for the four-step guide, then continue
@@ -78,8 +78,9 @@ next route.
 
 ## State and Visibility Rules
 
-- Top slot shows a loading skeleton first, then resolves to `Latest Drop`,
-  `Next Drop`, or hidden when no eligible card exists.
+- The initial page includes the selected drop when its data is available.
+  The slot stays hidden while an initial decision is pending or no eligible card
+  exists.
 - The newcomer actions and How to start stay hidden while wallet state is
   initializing or connecting. They appear when that state settles without valid authentication.
   Authenticated visitors keep the dashboard-first order.
