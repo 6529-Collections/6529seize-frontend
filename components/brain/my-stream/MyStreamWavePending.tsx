@@ -16,6 +16,8 @@ import { t } from "@/i18n/messages";
 import WavePicture from "@/components/waves/WavePicture";
 import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
 import { useLayout } from "./layout/LayoutContext";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
 
 interface MyStreamWavePendingProps {
   readonly waveId: string;
@@ -45,6 +47,8 @@ export default function MyStreamWavePending({
   const isDirectMessage =
     getMessageIdFromPathname(pathname) === waveId ||
     directMessages.list.some((wave) => wave.id === waveId);
+  const isPhoneWave =
+    useMediaQuery(PHONE_WAVES_LAYOUT_QUERY) && !isDirectMessage;
   const showDescriptionPreview =
     !isDirectMessage && preview?.reserveDescriptionRow !== false;
   const hasProfileIdentity = Boolean(
@@ -64,9 +68,19 @@ export default function MyStreamWavePending({
   const backButtonSizeClass = isDirectMessage
     ? "tw-mt-0.5 tw-size-11 tw-self-start sm:-tw-ml-2.5 sm:desktop-hover:tw-h-9"
     : `tw-h-8 tw-w-6 @[21rem]/wave-header:tw-w-8 @[48rem]/wave-header:tw-mt-0.5 md:-tw-ml-2.5 md:tw-size-11 md:tw-self-start md:desktop-hover:tw-h-9 ${COMPACT_ACTION_TOUCH_TARGET_CLASS}`;
+  let nameClassName = hasProfileIdentity
+    ? "tw-block tw-truncate"
+    : "tw-block tw-min-h-6 tw-max-w-full tw-truncate tw-text-sm tw-font-normal tw-leading-6";
+  if (isPhoneWave) {
+    nameClassName =
+      "tw-flex tw-min-h-11 tw-max-w-full tw-items-center tw-text-sm tw-font-medium tw-leading-[18px]";
+  }
   const status = preview
     ? t(locale, "waves.loadingWave", { name: preview.name })
     : t(locale, "waves.loadingWaveUnknown");
+  const identityPadding = isDirectMessage
+    ? "tw-pt-0.5"
+    : "@[48rem]/wave-header:tw-pt-0.5";
 
   return (
     <div
@@ -75,7 +89,9 @@ export default function MyStreamWavePending({
       style={isApp ? waveViewStyle : undefined}
     >
       {!isApp && (
-        <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-x-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-2 tw-py-3 tw-@container/wave-header sm:tw-px-4 md:tw-py-2.5">
+        <div
+          className={`tw-flex tw-shrink-0 tw-items-center tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-@container/wave-header ${isPhoneWave ? "tw-min-h-14 tw-gap-2 tw-px-2 tw-pb-1 tw-pt-[max(0.25rem,env(safe-area-inset-top))]" : "tw-gap-x-2 tw-px-2 tw-py-3 sm:tw-px-4 md:tw-py-2.5"}`}
+        >
           <button
             type="button"
             aria-label={t(
@@ -85,14 +101,16 @@ export default function MyStreamWavePending({
                 : "waves.loadingBack"
             )}
             onClick={() => activeWave.set(null, { isDirectMessage })}
-            className={`tw-flex tw-shrink-0 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 lg:tw-hidden ${backButtonSizeClass}`}
+            className={`tw-flex tw-shrink-0 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 lg:tw-hidden ${isPhoneWave ? "tw-size-11" : backButtonSizeClass}`}
           >
             <ArrowLeftIcon aria-hidden="true" className="tw-size-4" />
           </button>
           <div
-            className={`tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-x-[13px] ${isDirectMessage ? "tw-pt-0.5" : "@[48rem]/wave-header:tw-pt-0.5"} ${showDescriptionPreview ? descriptionRowHeightClass : ""}`}
+            className={`tw-flex tw-min-w-0 tw-flex-1 tw-items-center ${isPhoneWave ? "tw-gap-2" : "tw-gap-x-[13px]"} ${isPhoneWave ? "" : identityPadding} ${showDescriptionPreview ? descriptionRowHeightClass : ""}`}
           >
-            <div className="tw-size-9 tw-shrink-0 tw-self-start tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950">
+            <div
+              className={`tw-size-9 tw-shrink-0 tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950 ${!isPhoneWave || preview?.parentWaveId ? "tw-self-start" : ""}`}
+            >
               {preview && (
                 <WavePicture
                   name={preview.name}
@@ -119,13 +137,7 @@ export default function MyStreamWavePending({
                 }
               >
                 <h1 className="tw-m-0 tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
-                  <span
-                    className={
-                      hasProfileIdentity
-                        ? "tw-block tw-truncate"
-                        : "tw-block tw-min-h-6 tw-max-w-full tw-truncate tw-text-sm tw-font-normal tw-leading-6"
-                    }
-                  >
+                  <span className={nameClassName}>
                     {preview?.name ?? t(locale, "waves.loadingWaveUnknown")}
                   </span>
                 </h1>

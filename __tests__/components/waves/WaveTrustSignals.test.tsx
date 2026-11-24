@@ -125,6 +125,33 @@ describe("WaveTrustSignals", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("closes and disables score details while preserving the visible score", () => {
+    const props = {
+      waveRep,
+      waveScore,
+      variant: "sidebar-inline",
+      mode: "summary",
+    } as const;
+    const { rerender } = render(<WaveTrustSignals {...props} />);
+    const trigger = screen.getByRole("button", { name: /^Wave score 83\./ });
+    fireEvent.click(trigger);
+    expect(
+      screen.getByRole("dialog", { name: "Wave score details" })
+    ).toBeInTheDocument();
+    rerender(<WaveTrustSignals {...props} scoreDetailsDisabled />);
+    expect(trigger).toBeDisabled();
+    expect(trigger).toHaveTextContent("83");
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    fireEvent.click(trigger);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    rerender(<WaveTrustSignals {...props} />);
+    expect(trigger).toBeEnabled();
+    fireEvent.click(trigger);
+    expect(
+      screen.getByRole("dialog", { name: "Wave score details" })
+    ).toBeInTheDocument();
+  });
+
   it("renders nothing in summary mode without a combined score", () => {
     const { container } = render(
       <WaveTrustSignals
@@ -142,12 +169,13 @@ describe("WaveTrustSignals", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("closes score details and keeps a non-interactive score label when details are disabled", () => {
+  it("keeps the phone header score non-interactive when details are disabled", () => {
     const props = {
       waveRep,
       waveScore,
-      variant: "sidebar-inline",
+      variant: "header-avatar",
       mode: "summary",
+      learnMoreHref: "/network/wave-score",
     } as const;
     const { rerender } = render(<WaveTrustSignals {...props} />);
     const trigger = screen.getByRole("button", { name: /^Wave score 83\./ });

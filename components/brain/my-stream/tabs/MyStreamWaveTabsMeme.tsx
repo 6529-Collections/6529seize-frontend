@@ -3,9 +3,11 @@
 import React, { useState } from "react";
 import type { CompactMenuItem } from "@/components/compact-menu";
 import { LockClosedIcon } from "@heroicons/react/24/outline";
-import WaveSubmissionHelpDialog, {
-  type WaveSubmissionHelpAction,
-} from "@/components/waves/header/WaveSubmissionHelpDialog";
+import WaveSubmissionHelpDialog from "@/components/waves/header/WaveSubmissionHelpDialog";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
+import { t } from "@/i18n/messages";
+import { getMemesSubmissionHelp } from "./memesSubmissionHelp";
 import { useWave, SubmissionStatus } from "@/hooks/useWave";
 import { createBreakpoint } from "react-use";
 import { useContentTab } from "@/components/brain/ContentTabContext";
@@ -42,9 +44,14 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
       includeCuration: false,
     });
   const [isMemesModalOpen, setIsMemesModalOpen] = useState(false);
-  const [submissionHelp, setSubmissionHelp] =
-    useState<WaveSubmissionHelpAction | null>(null);
+  const [isSubmissionHelpOpen, setIsSubmissionHelpOpen] = useState(false);
   const { participation } = useWave(wave);
+  const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
+  const submissionHelp = isSubmissionHelpOpen
+    ? getMemesSubmissionHelp(participation, zone, locale)
+    : null;
+  if (isSubmissionHelpOpen && !submissionHelp) setIsSubmissionHelpOpen(false);
   const hasSubmissionHelp =
     participation.status === SubmissionStatus.ACTIVE &&
     participation.isEligible === false;
@@ -75,7 +82,7 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
         phoneMenu={selectPhoneAction !== undefined}
         onShowSubmissionHelp={
           selectPhoneAction
-            ? (action) => selectPhoneAction(() => setSubmissionHelp(action))
+            ? () => selectPhoneAction(() => setIsSubmissionHelpOpen(true))
             : undefined
         }
       />
@@ -89,14 +96,9 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
       ? [
           {
             id: "submission-help",
-            label: "How to Submit",
+            label: t(locale, "waves.dropEligibility.howToSubmit"),
             icon: <LockClosedIcon className="tw-size-4" />,
-            onSelect: () =>
-              setSubmissionHelp({
-                label: "How to Submit",
-                restrictionMessage: null,
-                restrictionKind: "memes-nomination",
-              }),
+            onSelect: () => setIsSubmissionHelpOpen(true),
             deferUntilClosed: true,
           },
         ]
@@ -148,7 +150,7 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
       {submissionHelp && (
         <WaveSubmissionHelpDialog
           action={submissionHelp}
-          onClose={() => setSubmissionHelp(null)}
+          onClose={() => setIsSubmissionHelpOpen(false)}
         />
       )}
     </>

@@ -18,7 +18,8 @@ export type WaveSubmissionHelpAction = Pick<
   | "restrictionKind"
   | "accessWave"
   | "onViewRules"
->;
+> &
+  Partial<Pick<HeaderWaveDropAction, "canOpen">>;
 
 /** Both phone submission explanations use the existing sheet and content. */
 export default function WaveSubmissionHelpDialog({
@@ -47,7 +48,7 @@ export default function WaveSubmissionHelpDialog({
 
   return (
     <MobileWrapperDialog
-      isOpen={isOpen}
+      isOpen={isOpen && action.canOpen !== true}
       onClose={close}
       onAfterLeave={() => {
         onClose();

@@ -170,6 +170,38 @@ describe("PhoneWaveTabs", () => {
     ).toHaveAccessibleDescription("Wave sections");
   });
 
+  it("keeps the selected overflow tab associated with its tablist and panel", async () => {
+    const tabs = EXAMPLE_TABS.map((tab) => ({
+      ...tab,
+      panelId: `panel-${tab.key}`,
+    }));
+    render(
+      <>
+        <PhoneWaveTabs
+          tabs={tabs}
+          primaryKeys={PRIMARY_KEYS}
+          activeKey="decisions"
+        />
+        <section role="tabpanel" id="panel-decisions" aria-label="Decisions">
+          Decisions content
+        </section>
+      </>
+    );
+    const selected = screen.getByRole("tab", { name: "Decisions 4" });
+    expect(selected).toHaveAttribute("aria-selected", "true");
+    expect(selected).toHaveAttribute("aria-controls", "panel-decisions");
+    expect(
+      screen.getByRole("tablist", { name: "Wave sections" })
+    ).toHaveAttribute("aria-owns", selected.id);
+    expect(selected).toHaveAttribute("aria-haspopup", "dialog");
+    fireEvent.click(selected);
+    const dialog = await screen.findByRole("dialog", { name: "Wave sections" });
+    expect(selected.getAttribute("aria-controls")?.split(" ")).toEqual([
+      "panel-decisions",
+      dialog.id,
+    ]);
+  });
+
   it("keeps overflow closed after it disappears and returns", async () => {
     const props = { primaryKeys: PRIMARY_KEYS, activeKey: "chat" };
     const { rerender } = render(
@@ -204,7 +236,9 @@ describe("PhoneWaveTabs", () => {
           ]}
         />
       );
-      expect(reveal).toHaveBeenCalled();
+      expect(reveal.mock.contexts).toEqual([
+        screen.getByRole("button", { name: /^Decisions/ }),
+      ]);
     } finally {
       reveal.mockRestore();
     }

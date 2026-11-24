@@ -127,8 +127,22 @@ export default function HeaderTitleContent({
                 )}
               </button>
             ) : (
-              <span className="tw-w-full tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold">
-                {displayWave.name}
+              <span
+                className={
+                  phoneWave
+                    ? "tw-flex tw-min-h-11 tw-w-full tw-min-w-0 tw-items-center tw-text-sm tw-font-medium"
+                    : "tw-w-full tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold"
+                }
+              >
+                <span
+                  className={
+                    phoneWave
+                      ? "tw-line-clamp-2 tw-min-w-0 tw-break-words tw-leading-[18px]"
+                      : undefined
+                  }
+                >
+                  {displayWave.name}
+                </span>
               </span>
             )}
           </div>
