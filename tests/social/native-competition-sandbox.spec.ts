@@ -6916,6 +6916,13 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       "rgb(63, 105, 252)"
     );
     await input.fill("40");
+    await page.setViewportSize({ width: 960, height: 1080 });
+    await page.mouse.move(0, 0);
+    await expect(save).toHaveCSS("background-color", "rgb(63, 105, 252)");
+    await save.hover({ position: { x: 2, y: 2 } });
+    await expect(save).toHaveCSS("background-color", "rgb(57, 95, 228)");
+    await expect(save).toHaveCSS("cursor", "pointer");
+    await page.setViewportSize({ width: 1920, height: 1080 });
     await page.mouse.move(0, 0);
     await row.screenshot({
       path: testInfo.outputPath("my-votes-desktop-editing.png"),
@@ -7193,6 +7200,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await expect(
           row.getByRole("button", { name: "Save vote", exact: true })
         ).toBeEnabled();
+        await expect(
+          row.getByRole("button", { name: "Save vote", exact: true })
+        ).toHaveCSS("background-color", "rgb(63, 105, 252)");
         await input.fill("25");
         await expect(
           row.getByRole("button", { name: "Save vote", exact: true })
