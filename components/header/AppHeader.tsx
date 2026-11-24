@@ -584,13 +584,6 @@ export default function AppHeader() {
     rightActions = activeWave && (
       <div className="tw-ml-2 tw-flex tw-shrink-0 tw-items-center tw-gap-1">
         <WaveJoinCta wave={activeWave} variant="app-header" />
-        <PhoneWaveHeaderActions
-          key={activeWave.id}
-          wave={activeWave}
-          dropAction={headerDropAction}
-          items={appHeaderMoreMenuItems}
-          showBoostedDropsOptions={!isMemesWave}
-        />
       </div>
     );
   } else if (isMessageCompose) {
@@ -725,6 +718,26 @@ export default function AppHeader() {
           )}
         </div>
         {rightActions}
+        {/* Rotation hides phone actions while keeping their open dialogs mounted. */}
+        {activeWave && isCapacitor && isInsideWave && isWavesRoute && !isDm && (
+          <div
+            hidden={!isPhoneWave}
+            className={
+              isPhoneWave
+                ? "tw-flex tw-shrink-0 tw-items-center tw-gap-1"
+                : undefined
+            }
+          >
+            <PhoneWaveHeaderActions
+              key={activeWave.id}
+              wave={activeWave}
+              dropAction={headerDropAction}
+              items={appHeaderMoreMenuItems}
+              showBoostedDropsOptions={!isMemesWave}
+              showActions={isPhoneWave}
+            />
+          </div>
+        )}
       </div>
       <AppSidebar open={menuOpen} onClose={() => setMenuOpen(false)} />
     </div>

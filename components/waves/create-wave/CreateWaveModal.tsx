@@ -4,7 +4,7 @@ import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrappe
 import MobileNavigationView from "@/components/mobile-navigation/MobileNavigationView";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { getCreateSubwaveTitle } from "@/helpers/waves/create-subwave-title.helpers";
@@ -72,6 +72,14 @@ export default function CreateWaveModal({
 }: CreateWaveModalProps) {
   const locale = useBrowserLocale();
   const isPhone = useMediaQuery(PHONE_WAVES_LAYOUT_QUERY);
+  // Keep the form mounted when rotation crosses the phone breakpoint.
+  const [presentation, setPresentation] = useState({
+    isOpen,
+    phone: isPhone && mobileSheet,
+  });
+  if (presentation.isOpen !== isOpen) {
+    setPresentation({ isOpen, phone: isPhone && mobileSheet });
+  }
   const createWaveRef = useRef<CreateWaveHandles>(null);
   const requestClose = () => {
     if (createWaveRef.current) {
@@ -115,7 +123,7 @@ export default function CreateWaveModal({
       parentViewGroupId={parentViewGroupId}
     />
   );
-  if (isPhone && mobileSheet)
+  if (presentation.phone)
     return (
       <MobileNavigationView
         isOpen={isOpen}

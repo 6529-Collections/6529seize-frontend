@@ -14583,6 +14583,25 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       ).toHaveCount(1);
       const name = form.getByRole("textbox", { name: /Subwave Name/ });
       await name.fill("An unfinished subwave");
+      const viewport = page.viewportSize()!;
+      const inputBeforeRotation = await name.elementHandle();
+      await page.setViewportSize({ width: 844, height: 390 });
+      await expect(name).toHaveValue("An unfinished subwave");
+      expect(
+        await name.evaluate(
+          (element, original) => element === original,
+          inputBeforeRotation
+        )
+      ).toBe(true);
+      await page.setViewportSize(viewport);
+      await expect(name).toHaveValue("An unfinished subwave");
+      expect(
+        await name.evaluate(
+          (element, original) => element === original,
+          inputBeforeRotation
+        )
+      ).toBe(true);
+      await inputBeforeRotation?.dispose();
       await swipeInformationBack(page, form);
       await expect(name).toHaveValue("An unfinished subwave");
       await page.goBack();

@@ -102,11 +102,13 @@ export default function PhoneWaveHeaderActions({
   dropAction,
   items,
   showBoostedDropsOptions,
+  showActions = true,
 }: {
   readonly wave: ApiWave;
   readonly dropAction: HeaderWaveDropAction | null;
   readonly items: readonly CompactMenuItem[];
   readonly showBoostedDropsOptions: boolean;
+  readonly showActions?: boolean;
 }) {
   const information = useWaveInformation();
   const locale = useBrowserLocale();
@@ -154,34 +156,36 @@ export default function PhoneWaveHeaderActions({
 
   return (
     <>
-      <HeaderSearchButton
-        wave={wave}
-        renderTrigger={({ open }) => (
-          <CompactWaveActions
-            phone
-            items={[
-              waveDetails,
-              {
-                id: "search-messages",
-                label: t(locale, "waves.drops.searchModal.title"),
-                icon: (
-                  <MagnifyingGlassIcon
-                    className="tw-size-4"
-                    aria-hidden="true"
-                  />
-                ),
-                onSelect: open,
-                deferUntilClosed: true,
-              },
-              ...submitActions,
-              timeZone,
-              ...items,
-              ...boostedItems,
-              ...createItems,
-            ]}
-          />
-        )}
-      />
+      {showActions && (
+        <HeaderSearchButton
+          wave={wave}
+          renderTrigger={({ open }) => (
+            <CompactWaveActions
+              phone
+              items={[
+                waveDetails,
+                {
+                  id: "search-messages",
+                  label: t(locale, "waves.drops.searchModal.title"),
+                  icon: (
+                    <MagnifyingGlassIcon
+                      className="tw-size-4"
+                      aria-hidden="true"
+                    />
+                  ),
+                  onSelect: open,
+                  deferUntilClosed: true,
+                },
+                ...submitActions,
+                timeZone,
+                ...items,
+                ...boostedItems,
+                ...createItems,
+              ]}
+            />
+          )}
+        />
+      )}
       {dialogs}
       {isSubmissionHelpOpen && dropAction && (
         <WaveSubmissionHelpDialog
