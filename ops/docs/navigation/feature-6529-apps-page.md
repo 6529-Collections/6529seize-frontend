@@ -40,9 +40,10 @@ test release, 6529 Desktop Classic, and the official Apps page.
 2. Use `6529 Mobile` to choose the iOS App Store or Android Google Play.
 3. Select **6529 Desktop** for the Windows x64 or Apple silicon Mac test
    release, install guide, and release notes.
-4. Under **6529 Desktop Classic**, the matching desktop OS expands automatically when detected. Expand Windows,
-   macOS, or Linux yourself to choose another platform; phones, tablets and
-   unrecognized devices start with all desktop sections collapsed.
+4. Select **6529 Desktop Classic** to expand its downloads. Windows, macOS or
+   Linux opens automatically when the browser detects that OS. On phones,
+   tablets and unrecognized devices, choose an OS from the collapsed rows.
+   Select the Classic header again to close the downloads.
 5. Choose the Classic version appropriate for your OS, then the architecture or package
    format. `Download` opens the installer directly. Each installer shows
    `Arweave mirror · Coming soon` until its mirror is published, then shows a

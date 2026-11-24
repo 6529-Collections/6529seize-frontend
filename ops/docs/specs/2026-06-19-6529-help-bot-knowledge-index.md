@@ -38,6 +38,9 @@ keeps new-device history limitations explicit and names the environment-specific
 Mobile/Staging push body. Encrypted-messages help describes how the app sidebar
 closes before the sign-out dialog opens.
 
+The Apps page record explains how to open the collapsed 6529 Desktop Classic
+card and find the detected operating system's installers.
+
 The `media.video-player` record covers preview frames and the video-icon fallback
 for Additional Media and Promo Video in submission details. Additional Media
 keeps original video downloads deferred until Play; Promo Video retains metadata

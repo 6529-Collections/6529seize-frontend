@@ -104,6 +104,15 @@ test.describe("About Pages @smoke @medium @large", () => {
     );
     await page.goto("/about/6529-apps", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
+    const classic = page.getByRole("button", { name: "6529 Desktop Classic" });
+    await expect(classic).toHaveAttribute("aria-expanded", "false");
+    await expect(
+      page
+        .getByRole("region", { name: "6529 Desktop Classic" })
+        .locator("#desktop-classic-downloads")
+    ).toHaveCSS("height", "0px");
+    await classic.press("Enter");
+    await expect(classic).toHaveAttribute("aria-expanded", "true");
     const mac = page.getByRole("group").filter({
       has: page.getByText("macOS", { exact: true }),
     });
@@ -194,6 +203,19 @@ test.describe("About Pages @smoke @medium @large", () => {
     await expectNoHorizontalOverflow(page);
     await page.setViewportSize({ width: 390, height: 844 });
     await expectNoHorizontalOverflow(page);
+
+    await classic.click();
+    await expect(classic).toHaveAttribute("aria-expanded", "false");
+    await classic.focus();
+    await page.keyboard.press("Tab");
+    await expect(page.getByRole("link", { name: "6529 Validator" })).toBeFocused();
+    await classic.click();
+    await expect(classic).toHaveAttribute("aria-expanded", "true");
+    if (isMobile) {
+      await expect(mac).not.toHaveAttribute("open");
+    } else {
+      await expect(mac).toHaveAttribute("open");
+    }
 
     const validator = page.getByRole("link", {
       name: "6529 Validator",
