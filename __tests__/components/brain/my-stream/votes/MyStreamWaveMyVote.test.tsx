@@ -116,9 +116,6 @@ describe("MyStreamWaveMyVote", () => {
       pointer("pointerdown");
       act(() => jest.advanceTimersByTime(600));
       expect(select).toHaveBeenCalledTimes(1);
-      pointer("pointerup");
-      fireEvent.click(row);
-      expect(toggle).not.toHaveBeenCalled();
       rerender(
         <MyStreamWaveMyVote
           drop={drop}
@@ -128,9 +125,14 @@ describe("MyStreamWaveMyVote", () => {
           onDropClick={jest.fn()}
         />
       );
+      pointer("pointerup");
+      fireEvent.click(row, { detail: 1 });
+      expect(toggle).not.toHaveBeenCalled();
+      fireEvent.click(row, { detail: 1 });
+      expect(toggle).toHaveBeenCalledTimes(1);
       expect(screen.getByRole("checkbox")).toBeVisible();
       fireEvent.click(screen.getByRole("checkbox"));
-      expect(toggle).toHaveBeenCalledTimes(1);
+      expect(toggle).toHaveBeenCalledTimes(2);
       rerender(
         <MyStreamWaveMyVote
           drop={drop}

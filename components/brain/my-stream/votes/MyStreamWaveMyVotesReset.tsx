@@ -250,7 +250,6 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
                 type="button"
                 onClick={onToggleSelection}
                 disabled={isResetting}
-                aria-pressed={isSelecting}
                 className={`${buttonClassName} tw-ml-auto tw-text-iron-300 enabled:tw-cursor-pointer`}
               >
                 <span
