@@ -1929,6 +1929,35 @@ describe("CreateDrop", () => {
         wavesMove.useWavesWritesPaused.mockImplementation(() => false);
       }
     });
+
+    it("sends an entry after the switch-on while new polls stay paused", async () => {
+      const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
+      wavesMove.useWavesWritesPaused.mockImplementation(
+        (kind?: string) => kind === undefined
+      );
+      const setToast = jest.fn();
+      try {
+        renderComposer(DropMode.PARTICIPATION, setToast);
+
+        fireEvent.click(screen.getByText("submit optimistic drop"));
+
+        await waitFor(() =>
+          expect(mockChainEntrySubmit).toHaveBeenCalledWith(
+            expect.objectContaining({
+              request: expect.objectContaining({
+                drop_type: "PARTICIPATORY",
+              }),
+            })
+          )
+        );
+        expect(setToast).not.toHaveBeenCalledWith({
+          message: "Paused for the move to the 6529 Network.",
+          type: "error",
+        });
+      } finally {
+        wavesMove.useWavesWritesPaused.mockImplementation(() => false);
+      }
+    });
   });
 
   it("starts local slow mode cooldown after a chat drop", async () => {

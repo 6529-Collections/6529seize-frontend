@@ -5,11 +5,14 @@ import { WavesWritePausedError } from "@/lib/waves-move/writeGuard";
 import { removeTemporaryThreadReply } from "@/components/waves/drops/reply-threads/pending-replies";
 
 let mockPaused = false;
+// Set for the state after the switch-on, where kinds differ.
+let mockPausedFor: ((kind?: string) => boolean) | null = null;
 const mockSetToast = jest.fn();
 const mockQueryClient = {};
 
 jest.mock("@/hooks/useWavesMovePhase", () => ({
-  useWavesWritesPaused: () => mockPaused,
+  useWavesWritesPaused: (kind?: string) =>
+    mockPausedFor ? mockPausedFor(kind) : mockPaused,
 }));
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({ setToast: mockSetToast }),
@@ -35,6 +38,7 @@ describe("useWavesMoveDropGuard", () => {
     jest.useFakeTimers();
     jest.clearAllMocks();
     mockPaused = false;
+    mockPausedFor = null;
   });
   afterEach(() => jest.useRealTimers());
 
@@ -85,6 +89,25 @@ describe("useWavesMoveDropGuard", () => {
       message: "Paused for the move to the 6529 Network.",
       type: "error",
     });
+  });
+
+  it("lets an entry through after the switch-on while new polls stay paused", () => {
+    mockPausedFor = (kind) => kind === undefined;
+    const removed = jest.fn();
+    const { result } = renderHook(() => useWavesMoveDropGuard(removed));
+    const entry = send(ApiDropType.Participatory);
+    const poll = send(ApiDropType.Chat, { poll: { options: [] } });
+
+    expect(result.current.entriesPausedForMove).toBe(false);
+    expect(result.current.refuseDropMode()).toBe(false);
+    expect(result.current.refusePausedDrop(entry)).toBe(false);
+    expect(mockSetToast).not.toHaveBeenCalled();
+    expect(result.current.refusePausedDrop(poll)).toBe(true);
+    jest.runAllTimers();
+
+    expect(entry.onError).not.toHaveBeenCalled();
+    expect(removed).toHaveBeenCalledTimes(1);
+    expect(mockSetToast).toHaveBeenCalledTimes(1);
   });
 
   it("refuses drop mode with the paused line", () => {
