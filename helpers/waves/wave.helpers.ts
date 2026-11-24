@@ -107,6 +107,7 @@ export const toApiWaveMin = (wave: ApiWave): ApiWaveMin => {
     links_disabled: wave.chat.links_disabled,
     wave_author_handle: wave.author.handle ?? null,
     voting_credit_scope: wave.voting.credit_scope,
+    is_direct_message: wave.chat.scope.group?.is_direct_message ?? false,
   };
 
   // Whether the wave stays on 6529.io: a drop rebuilt from the full wave
