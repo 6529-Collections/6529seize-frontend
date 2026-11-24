@@ -87,6 +87,14 @@ async function expectCompactGrantLayout(grant: Locator) {
     .toBe(16);
 }
 
+function getGrantRepSurface(grant: Locator) {
+  return grant
+    .getByRole("heading", { name: "Grant Rep", exact: true })
+    .locator(
+      'xpath=ancestor::*[contains(concat(" ", normalize-space(@class), " "), " mobile-wrapper-dialog ")][1]'
+    );
+}
+
 async function expectCategorySearchLayout(grant: Locator, isMobile: boolean) {
   if (!isMobile) {
     await expectCompactGrantLayout(grant);
@@ -97,7 +105,7 @@ async function expectCategorySearchLayout(grant: Locator, isMobile: boolean) {
   await expectGrantTransitionFinished(grant);
   await expect
     .poll(() =>
-      grant.locator(".mobile-wrapper-dialog").evaluate((panel) => {
+      getGrantRepSurface(grant).evaluate((panel) => {
         const bounds = panel.getBoundingClientRect();
         const viewport = window.visualViewport;
         const container = panel.parentElement!.parentElement!;
@@ -129,15 +137,13 @@ async function expectCategorySearchLayout(grant: Locator, isMobile: boolean) {
     })
     .toBe(16);
   expect(
-    await grant
-      .locator(".mobile-wrapper-dialog")
-      .evaluate((panel) =>
-        [...panel.querySelectorAll("*")]
-          .filter((element) =>
-            ["auto", "scroll"].includes(getComputedStyle(element).overflowY)
-          )
-          .map((element) => element.getAttribute("data-testid"))
-      )
+    await getGrantRepSurface(grant).evaluate((panel) =>
+      [...panel.querySelectorAll("*")]
+        .filter((element) =>
+          ["auto", "scroll"].includes(getComputedStyle(element).overflowY)
+        )
+        .map((element) => element.getAttribute("data-testid"))
+    )
   ).toEqual(["grant-rep-body"]);
   for (const action of await grant
     .getByTestId("grant-rep-footer")
@@ -1000,7 +1006,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
 
     await search.scrollIntoViewIfNeeded();
     await expectGrantTransitionFinished(grant);
-    await grant.locator(".mobile-wrapper-dialog").screenshot({
+    await getGrantRepSurface(grant).screenshot({
       path: testInfo.outputPath("grant-rep-all-category-results.png"),
     });
     const list = grant.getByRole("listbox");
@@ -1045,7 +1051,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expectNoHorizontalOverflow(page);
     await expectAxeClean(page);
     expect(writes).toBe(0);
-    await grant.locator(".mobile-wrapper-dialog").screenshot({
+    await getGrantRepSurface(grant).screenshot({
       path: testInfo.outputPath("grant-rep-category-suggestions.png"),
     });
   });

@@ -1161,7 +1161,6 @@ describe("UserPageRepNewRepSearch", () => {
     await user.keyboard("{ArrowDown}");
     const next = within(list).getByRole("option", {
       name: "Community category 0",
-      exact: true,
     });
     expect(next).toHaveAttribute("aria-selected", "true");
     expect(input).toHaveAttribute("aria-activedescendant", next.id);

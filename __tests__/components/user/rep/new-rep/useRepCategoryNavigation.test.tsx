@@ -1,27 +1,45 @@
-import { act, renderHook } from "@testing-library/react";
-import type { KeyboardEvent as ReactKeyboardEvent } from "react";
+import {
+  createEvent,
+  fireEvent,
+  render,
+  renderHook,
+} from "@testing-library/react";
 import useRepCategoryNavigation from "@/components/user/rep/new-rep/useRepCategoryNavigation";
 
-function keyDown(key: string): ReactKeyboardEvent<HTMLInputElement> {
+function renderNavigation() {
+  const onSelect = jest.fn();
+  const { result, rerender } = renderHook(
+    ({ categories }) =>
+      useRepCategoryNavigation({ categories, enabled: true, onSelect }),
+    { initialProps: { categories: ["Art", "Music", "Photography"] } }
+  );
+  const { getByRole } = render(
+    <input
+      aria-label="Category search"
+      onKeyDown={(event) => result.current.handleSearchKeyDown(event)}
+    />
+  );
+  const input = getByRole("textbox", { name: "Category search" });
   return {
-    key,
-    nativeEvent: new KeyboardEvent("keydown", { key }),
-    metaKey: false,
-    ctrlKey: false,
-    altKey: false,
-    preventDefault: jest.fn(),
-  } as ReactKeyboardEvent<HTMLInputElement>;
+    result,
+    rerender,
+    onSelect,
+    keyDown: (key: string) => {
+      const event = createEvent.keyDown(input, {
+        key,
+        bubbles: true,
+        cancelable: true,
+      });
+      fireEvent(input, event);
+      return event;
+    },
+  };
 }
 
 describe("useRepCategoryNavigation", () => {
   it("preserves the highlighted category when results reorder", () => {
-    const onSelect = jest.fn();
-    const { result, rerender } = renderHook(
-      ({ categories }) =>
-        useRepCategoryNavigation({ categories, enabled: true, onSelect }),
-      { initialProps: { categories: ["Art", "Music", "Photography"] } }
-    );
-    act(() => result.current.handleSearchKeyDown(keyDown("ArrowDown")));
+    const { result, rerender, onSelect, keyDown } = renderNavigation();
+    keyDown("ArrowDown");
     expect(result.current.activeSuggestionIndex).toBe(1);
 
     rerender({ categories: ["Photography", "Art", "Music"] });
@@ -30,7 +48,7 @@ describe("useRepCategoryNavigation", () => {
     expect(result.current.activeSuggestionId).toBe(
       `${result.current.optionIdPrefix}2`
     );
-    act(() => result.current.handleSearchKeyDown(keyDown("Enter")));
+    keyDown("Enter");
     expect(onSelect).toHaveBeenCalledTimes(1);
     expect(onSelect).toHaveBeenCalledWith("Music");
   });
@@ -41,13 +59,8 @@ describe("useRepCategoryNavigation", () => {
   ])(
     "leaves a disappeared highlight unselected until $key chooses $category",
     ({ key, index, category }) => {
-      const onSelect = jest.fn();
-      const { result, rerender } = renderHook(
-        ({ categories }) =>
-          useRepCategoryNavigation({ categories, enabled: true, onSelect }),
-        { initialProps: { categories: ["Art", "Music", "Photography"] } }
-      );
-      act(() => result.current.handleSearchKeyDown(keyDown("ArrowDown")));
+      const { result, rerender, onSelect, keyDown } = renderNavigation();
+      keyDown("ArrowDown");
       expect(result.current.activeSuggestionIndex).toBe(1);
 
       rerender({ categories: ["Art", "Photography"] });
@@ -55,17 +68,16 @@ describe("useRepCategoryNavigation", () => {
       expect(result.current.activeSuggestionIndex).toBe(-1);
       expect(result.current.activeSuggestionId).toBeUndefined();
       const enter = keyDown("Enter");
-      act(() => result.current.handleSearchKeyDown(enter));
-      expect(enter.preventDefault).toHaveBeenCalledTimes(1);
+      expect(enter.defaultPrevented).toBe(true);
       expect(onSelect).not.toHaveBeenCalled();
 
-      act(() => result.current.handleSearchKeyDown(keyDown(key)));
+      keyDown(key);
 
       expect(result.current.activeSuggestionIndex).toBe(index);
       expect(result.current.activeSuggestionId).toBe(
         `${result.current.optionIdPrefix}${index}`
       );
-      act(() => result.current.handleSearchKeyDown(keyDown("Enter")));
+      keyDown("Enter");
       expect(onSelect).toHaveBeenCalledTimes(1);
       expect(onSelect).toHaveBeenCalledWith(category);
     }
