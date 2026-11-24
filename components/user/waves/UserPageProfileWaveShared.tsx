@@ -152,62 +152,13 @@ export function OfficialWaveSummary({
   const locale = useBrowserLocale();
 
   return (
-    <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-start tw-gap-x-3 tw-gap-y-3 lg:tw-flex lg:tw-items-center lg:tw-justify-between lg:tw-gap-6">
-      <div className="tw-contents lg:tw-block lg:tw-min-w-0 lg:tw-flex-1">
-        <h2 className="tw-col-start-1 tw-row-start-1 tw-m-0 tw-min-w-0 tw-max-w-full tw-text-lg tw-font-semibold tw-text-iron-100 max-lg:tw-break-words md:tw-text-xl">
-          {profileCurationLabel ??
-            t(locale, "profileCuration.header.fallbackTitle")}
-        </h2>
-
-        <div className="tw-col-span-2 tw-row-start-2 tw-min-w-0 tw-space-y-2 lg:tw-hidden">
-          <div className="tw-text-xs tw-font-medium tw-text-iron-500">
-            {t(locale, "profileCuration.header.sourceLabel")}
-          </div>
-          <WaveChip
-            className="max-lg:tw-max-w-[min(14rem,100%)]"
-            name={waveName}
-            picture={wavePicture}
-            onClick={onOpenWave}
-            ariaLabel={t(locale, "profileCuration.header.openSourceAria", {
-              waveName,
-            })}
-            showChevron
-          />
-          <div className="tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500">
-            {mobileMetadataLabel}
-          </div>
-        </div>
-
-        <div className="tw-mt-1 tw-hidden tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-meta tw-font-normal tw-leading-6 lg:tw-flex">
-          <button
-            type="button"
-            onClick={onOpenWave}
-            title={waveName}
-            aria-label={t(locale, "profileCuration.header.openSourceAria", {
-              waveName,
-            })}
-            className="desktop-hover:hover:tw-text-primary-100 tw-group -tw-ml-1 tw-inline-flex tw-min-h-8 tw-min-w-0 tw-max-w-full tw-cursor-pointer tw-items-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-1 tw-py-0 tw-text-left tw-text-meta tw-font-normal tw-text-primary-300 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-white/5"
-          >
-            <span className="tw-flex-shrink-0 tw-text-iron-500">
-              {t(locale, "profileCuration.header.source")}
-            </span>
-            <span className="tw-min-w-0 tw-truncate tw-font-medium tw-leading-6 tw-no-underline">
-              {waveName}
-            </span>
-            <ArrowTopRightOnSquareIcon
-              aria-hidden="true"
-              className="tw-size-4 tw-flex-shrink-0 tw-transition-transform tw-duration-150 group-hover:-tw-translate-y-0.5 group-hover:tw-translate-x-0.5 motion-reduce:tw-transform-none"
-            />
-          </button>
-          <span className="tw-text-iron-600">•</span>
-          <span className="tw-tabular-nums tw-text-iron-500">
-            {metadataLabel}
-          </span>
-        </div>
-      </div>
-
+    <div className="tw-flex tw-flex-wrap tw-items-start tw-gap-x-3 tw-gap-y-3 lg:tw-grid lg:tw-grid-cols-[minmax(0,1fr)_auto] lg:tw-gap-x-6 lg:tw-gap-y-0">
+      <h2 className="tw-m-0 tw-min-w-0 tw-max-w-full tw-flex-[1_1_max-content] tw-text-lg tw-font-semibold tw-text-iron-100 max-lg:tw-break-words md:tw-text-xl lg:tw-col-start-1 lg:tw-row-start-1">
+        {profileCurationLabel ??
+          t(locale, "profileCuration.header.fallbackTitle")}
+      </h2>
       {canManageOwnOfficialWave && (
-        <div className="tw-col-start-2 tw-row-start-1 tw-flex tw-flex-shrink-0 tw-items-center tw-justify-end tw-gap-2">
+        <div className="tw-ml-auto tw-flex tw-flex-none tw-items-center tw-justify-end tw-gap-2 lg:tw-col-start-2 lg:tw-row-span-2 lg:tw-row-start-1 lg:tw-self-center">
           {manageCurationControl}
           {onAddPost !== undefined && (
             <Button
@@ -222,6 +173,52 @@ export function OfficialWaveSummary({
           )}
         </div>
       )}
+
+      <div className="tw-w-full tw-min-w-0 tw-space-y-2 lg:tw-hidden">
+        <div className="tw-text-xs tw-font-medium tw-text-iron-500">
+          {t(locale, "profileCuration.header.sourceLabel")}
+        </div>
+        <WaveChip
+          className="max-lg:tw-max-w-[min(14rem,100%)]"
+          name={waveName}
+          picture={wavePicture}
+          onClick={onOpenWave}
+          ariaLabel={t(locale, "profileCuration.header.openSourceAria", {
+            waveName,
+          })}
+          showChevron
+        />
+        <div className="tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500">
+          {mobileMetadataLabel}
+        </div>
+      </div>
+
+      <div className="tw-mt-1 tw-hidden tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-meta tw-font-normal tw-leading-6 lg:tw-col-start-1 lg:tw-row-start-2 lg:tw-flex">
+        <button
+          type="button"
+          onClick={onOpenWave}
+          title={waveName}
+          aria-label={t(locale, "profileCuration.header.openSourceAria", {
+            waveName,
+          })}
+          className="desktop-hover:hover:tw-text-primary-100 tw-group -tw-ml-1 tw-inline-flex tw-min-h-8 tw-min-w-0 tw-max-w-full tw-cursor-pointer tw-items-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-1 tw-py-0 tw-text-left tw-text-meta tw-font-normal tw-text-primary-300 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-white/5"
+        >
+          <span className="tw-flex-shrink-0 tw-text-iron-500">
+            {t(locale, "profileCuration.header.source")}
+          </span>
+          <span className="tw-min-w-0 tw-truncate tw-font-medium tw-leading-6 tw-no-underline">
+            {waveName}
+          </span>
+          <ArrowTopRightOnSquareIcon
+            aria-hidden="true"
+            className="tw-size-4 tw-flex-shrink-0 tw-transition-transform tw-duration-150 group-hover:-tw-translate-y-0.5 group-hover:tw-translate-x-0.5 motion-reduce:tw-transform-none"
+          />
+        </button>
+        <span className="tw-text-iron-600">•</span>
+        <span className="tw-tabular-nums tw-text-iron-500">
+          {metadataLabel}
+        </span>
+      </div>
     </div>
   );
 }

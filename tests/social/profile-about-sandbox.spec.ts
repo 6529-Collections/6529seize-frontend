@@ -412,6 +412,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       wave.metrics.drops_count = 12345;
       wave.metrics.subscribers_count = 6789;
       const title = "A long collection title that wraps beside owner actions";
+      let curationName = title;
       let connected = true;
       await page.route("**/api/profiles/*/wave", (route) =>
         route.fulfill({
@@ -429,7 +430,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
           json: [
             {
               id: "profile-curation",
-              name: title,
+              name: curationName,
               wave_id: waveId,
               group_id: null,
               created_at: 1,
@@ -492,12 +493,10 @@ test.describe("Profile editing @auth @medium @local-only", () => {
             const sectionsBox = await page
               .getByRole("navigation", { name: "Profile sections" })
               .boundingBox();
-            expect(Math.abs(headingBox!.y - manageBox!.y)).toBeLessThanOrEqual(
-              1
+            expect(manageBox!.y).toBeGreaterThanOrEqual(
+              headingBox!.y + headingBox!.height
             );
-            expect(headingBox!.x + headingBox!.width).toBeLessThanOrEqual(
-              manageBox!.x
-            );
+            expect(headingBox!.width).toBeCloseTo(sectionsBox!.width, 0);
             expect(manageBox!.x + manageBox!.width).toBeLessThan(addBox!.x);
             expect(
               Math.abs(
@@ -536,6 +535,40 @@ test.describe("Profile editing @auth @medium @local-only", () => {
         fullPage: true,
         scale: "css",
       });
+      await page
+        .getByRole("heading", { name: title, exact: true })
+        .locator("..")
+        .screenshot({
+          path: testInfo.outputPath(`curation-header-${profile}.png`),
+          scale: "css",
+        });
+      if (owner && mobile) {
+        curationName = "Art";
+        await finishHostedWalletInitialization(page, () => page.reload());
+        const shortHeading = page.getByRole("heading", {
+          name: "Art",
+          exact: true,
+        });
+        await expect(shortHeading).toBeVisible();
+        for (const width of [320, 390, 768]) {
+          await page.setViewportSize({ width, height: 1000 });
+          const headingBox = await shortHeading.boundingBox();
+          const manageBox = await manage.boundingBox();
+          expect(Math.abs(headingBox!.y - manageBox!.y)).toBeLessThanOrEqual(1);
+          expect(headingBox!.x + headingBox!.width).toBeLessThanOrEqual(
+            manageBox!.x
+          );
+          await expectNoHorizontalOverflow(page);
+        }
+        await page.setViewportSize({ width: 390, height: 1000 });
+        await page
+          .getByRole("heading", { name: "Art", exact: true })
+          .locator("..")
+          .screenshot({
+            path: testInfo.outputPath(`curation-short-header-${profile}.png`),
+            scale: "css",
+          });
+      }
       connected = false;
       await finishHostedWalletInitialization(page, () => page.reload());
       const emptyTitle = owner ? "Create a Curation" : "No featured wave yet";
