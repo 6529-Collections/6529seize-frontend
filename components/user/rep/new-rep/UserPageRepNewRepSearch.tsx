@@ -689,7 +689,7 @@ function GrantRepForm({
             transition={transition}
             id={amountFormId}
             data-testid="grant-rep-amount"
-            className={`tw-mt-6 ${showSearchDropdown ? "tw-hidden md:tw-block" : ""}`}
+            className="tw-mt-6"
             onSubmit={(event) => {
               event.preventDefault();
               void onGrantRep();

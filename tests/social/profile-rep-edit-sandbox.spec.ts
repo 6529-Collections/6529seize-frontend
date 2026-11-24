@@ -653,7 +653,8 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     ).toBeVisible();
     await expectGrantTransitionFinished(grant);
     await expectCategorySearchLayout(grant, isMobile);
-    if (isMobile) await expect(amount).toBeHidden();
+    await expect(amount).toBeVisible();
+    await expect(amount).toHaveValue("35");
     expect(searches).toBe(0);
     await surface.screenshot({
       path: testInfo.outputPath("grant-rep-category-step.png"),
@@ -664,10 +665,15 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       grant.getByRole("option", { name: "Music", exact: true })
     ).toBeVisible();
     await expectCategorySearchLayout(grant, isMobile);
+    await expect(amount).toBeVisible();
+    await expect(amount).toHaveValue("35");
     await expect(
       grant.getByRole("button", { name: "Grant Rep", exact: true })
     ).toBeEnabled();
     await expect(search).toBeFocused();
+    await surface.screenshot({
+      path: testInfo.outputPath("grant-rep-search-with-amount.png"),
+    });
     await expect(
       grant.getByRole("option", { name: "mus", exact: true })
     ).toHaveCount(0);
@@ -779,13 +785,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await grant
       .getByRole("button", { name: "Change category", exact: true })
       .click();
-    if (isMobile) {
-      await expect(grant.getByTestId("grant-rep-amount")).toBeHidden();
-      await grant
-        .getByRole("heading", { name: "Grant Rep", exact: true })
-        .click();
-      await expect(grant.getByTestId("grant-rep-amount")).toBeVisible();
-    }
+    await expect(amount).toBeVisible();
     await amount.fill("45");
     await chooseCategory(
       own.getByRole("button", { name: "Artist 1,000", exact: true })
@@ -969,14 +969,11 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       for (const box of boxes) {
         expect(box.height).toBeGreaterThanOrEqual(32);
       }
-      if (isMobile) {
-        await expect(grant.getByTestId("grant-rep-amount")).toBeHidden();
-      } else {
-        await expect(amount).toBeVisible();
-        expect((await amount.boundingBox())!.y).toBeGreaterThanOrEqual(
-          Math.max(...boxes.map((box) => box.y + box.height))
-        );
-      }
+      await expect(amount).toBeVisible();
+      await expect(amount).toHaveValue("35");
+      expect((await amount.boundingBox())!.y).toBeGreaterThanOrEqual(
+        Math.max(...boxes.map((box) => box.y + box.height))
+      );
     }
 
     await page.emulateMedia({ forcedColors: "active" });
@@ -1152,22 +1149,15 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       grant.getByText("Type at least 3 characters.", { exact: true })
     ).toBeVisible();
     await expectCategorySearchLayout(grant, isMobile);
-    if (isMobile) {
-      await expect(grant.getByTestId("grant-rep-amount")).toBeHidden();
-      await grant
-        .getByRole("heading", { name: "Grant Rep", exact: true })
-        .click();
-      await expect(grant.getByTestId("grant-rep-amount")).toBeVisible();
-    } else {
-      const prompt = grant.getByText("Type at least 3 characters.", {
-        exact: true,
-      });
-      const promptBox = await prompt.boundingBox();
-      const amountBox = await amount.boundingBox();
-      expect(amountBox!.y).toBeGreaterThanOrEqual(
-        promptBox!.y + promptBox!.height
-      );
-    }
+    await expect(amount).toBeVisible();
+    const prompt = grant.getByText("Type at least 3 characters.", {
+      exact: true,
+    });
+    const promptBox = await prompt.boundingBox();
+    const amountBox = await amount.boundingBox();
+    expect(amountBox!.y).toBeGreaterThanOrEqual(
+      promptBox!.y + promptBox!.height
+    );
     await expect(action).toBeInViewport();
     await amount.click();
     await expect(
