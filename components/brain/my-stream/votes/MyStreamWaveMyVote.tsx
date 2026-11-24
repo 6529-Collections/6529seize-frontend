@@ -491,7 +491,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
         <div
           className={
             mobile
-              ? "tw-relative tw-col-start-2 tw-row-start-1 tw-size-16 [&_img]:!tw-object-cover [&_video]:!tw-object-cover"
+              ? "tw-relative tw-col-start-2 tw-row-start-1 tw-size-16"
               : "tw-relative tw-col-start-2 tw-row-start-1 tw-size-24"
           }
         >
@@ -514,7 +514,8 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
                   imageScale={ImageScale.AUTOx450}
                   previewImageUrl={previewImageUrl}
                   disableMediaInteraction={true}
-                  fillVideoContainer={mobile}
+                  isInertPreview
+                  fillVideoContainer
                 />
               )}
             </span>

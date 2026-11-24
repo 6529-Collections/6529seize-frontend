@@ -112,7 +112,8 @@ On mobile web below 1024px and in the app, cards keep the thumbnail beside the t
   it further. Hovering or focusing the title highlights it in blue.
 - `Available in wave` appears above the bordered sorting control and
   trailing `Select` / `Done` action, on the same surface as the list.
-- Mobile cards use a square-cropped 64px thumbnail with a small media badge.
+- Mobile cards use a 64px media frame with a small media badge. Artwork fits
+  inside the frame while preserving its original proportions.
   Opening the artwork retains its full presentation. Rank shares the row with
   totals and voter counts; all use matching 13px text.
 - Mobile vote fields use a filled surface and a focus ring. `Explain vote` is a

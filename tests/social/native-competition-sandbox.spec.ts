@@ -7054,6 +7054,95 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await expectNoHorizontalOverflow(page);
   });
 
+  for (const artwork of [
+    { orientation: "landscape", width: 160, height: 90, mime: "image/svg+xml" },
+    { orientation: "portrait", width: 90, height: 160, mime: "image/svg+xml" },
+    { orientation: "portrait-video", width: 64, height: 96, mime: "video/mp4" },
+  ]) {
+    test(`preserves ${artwork.orientation} artwork proportions in My Votes`, async ({
+      page,
+    }, testInfo) => {
+      const sandbox = await installCompetitionApi(page);
+      sandbox.setVote("alpha", 25);
+      const api = getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"]);
+      const response = await page.request.get(
+        `${api}/api/v2/waves/${WAVE}/drops`
+      );
+      const fixture = await response.json();
+      const waveResponse = await page.request.get(`${api}/api/waves/${WAVE}`);
+      const wave = await waveResponse.json();
+      const video = artwork.mime === "video/mp4";
+      const filename = `my-votes-${artwork.orientation}.${video ? "mp4" : "svg"}`;
+      const url = `https://d3lqz0a4bldqgf.cloudfront.net/drops/${entryDropId("alpha")}/${filename}`;
+      const media = [{ url, mime_type: artwork.mime }];
+      await installCollaborationDropFixture(page, () => ({
+        wave,
+        drop: {
+          ...fixture.drops[0],
+          id: entryDropId("alpha"),
+          media,
+        },
+      }));
+      await page.route(
+        (url) =>
+          url.pathname.endsWith(`/${filename}`) ||
+          (url.pathname === "/api/og-metadata/image" &&
+            (url.searchParams.get("url") ?? "").includes(filename)),
+        (route) =>
+          route.fulfill({
+            contentType: artwork.mime,
+            ...(video
+              ? { path: "tests/media/fixtures/portrait.mp4" }
+              : {
+                  body: `<svg xmlns="http://www.w3.org/2000/svg" width="${artwork.width}" height="${artwork.height}" viewBox="0 0 ${artwork.width} ${artwork.height}"><rect x="2" y="2" width="${artwork.width - 4}" height="${artwork.height - 4}" fill="#143f54" stroke="#f9b248" stroke-width="4"/><circle cx="${artwork.width / 2}" cy="${artwork.height / 2}" r="20" fill="#d6efef"/></svg>`,
+                }),
+          })
+      );
+      await page.goto(`${ROOT}/alpha?tab=votes`);
+      await dismissNextDevTools(page);
+      const row = page
+        .getByRole("tabpanel", { name: "My Votes", exact: true })
+        .getByRole("article")
+        .first();
+      const thumbnail = row.getByRole("button", { name: /^Open / });
+      const image = video
+        ? row.getByRole("button", { name: /^Open / }).locator("video")
+        : thumbnail.getByRole("img", {
+            name: "Media content",
+            exact: true,
+          });
+      for (const width of testInfo.project.use.hasTouch
+        ? [390]
+        : [1920, 960, 390]) {
+        await page.setViewportSize({ width, height: 1000 });
+        await expect(image).toBeVisible();
+        await expect(image).toHaveJSProperty(
+          video ? "videoWidth" : "naturalWidth",
+          artwork.width
+        );
+        await expect(image).toHaveJSProperty(
+          video ? "videoHeight" : "naturalHeight",
+          artwork.height
+        );
+        await expect(image).toHaveCSS("object-fit", "contain");
+        if (video) {
+          await expect(image).toHaveJSProperty("controls", false);
+          await expect(thumbnail.getByRole("button")).toHaveCount(0);
+        }
+        const size = width < 1024 ? 64 : 96;
+        expect((await thumbnail.boundingBox())!.width).toBe(size);
+        expect((await thumbnail.boundingBox())!.height).toBe(size);
+        await row.screenshot({
+          path: testInfo.outputPath(
+            `my-votes-${artwork.orientation}-${width}.png`
+          ),
+          animations: "disabled",
+        });
+        await expectNoHorizontalOverflow(page);
+      }
+    });
+  }
+
   test.describe("My Votes mobile presentation", () => {
     for (const surface of ["mobile web", "iOS app", "Android app"] as const) {
       test(`edits and selects compact votes in ${surface}`, async ({
