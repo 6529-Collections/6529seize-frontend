@@ -712,6 +712,30 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       await expect(
         page.getByRole("link", { name: "Preferences", exact: true })
       ).toBeVisible();
+      if ((page.viewportSize()?.width ?? 0) < 1024) {
+        const preferences = page.getByRole("link", {
+          name: "Preferences",
+          exact: true,
+        });
+        const heading = page.getByRole("heading", {
+          name: "playwright",
+          exact: true,
+        });
+        const [editBox, preferencesBox, headingBox] = await Promise.all([
+          edit.boundingBox(),
+          preferences.boundingBox(),
+          heading.boundingBox(),
+        ]);
+        if (!editBox || !preferencesBox || !headingBox) {
+          throw new Error("Owner header controls must have visible bounds");
+        }
+        expect(editBox.y + editBox.height).toBeLessThan(headingBox.y);
+        expect(Math.abs(editBox.y - preferencesBox.y)).toBeLessThanOrEqual(4);
+        expect(preferencesBox.x).toBeGreaterThan(editBox.x);
+        expect(preferencesBox.x + preferencesBox.width).toBeGreaterThan(
+          (page.viewportSize()?.width ?? 0) - 64
+        );
+      }
       await expect(
         tabs.getByRole("link", { name: "Brain", exact: true })
       ).toBeVisible();

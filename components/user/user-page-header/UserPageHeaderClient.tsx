@@ -96,17 +96,34 @@ function getAboutStatement(
 }
 
 function ProfilePreferencesButton({
-  compact = false,
+  iconOnly = false,
 }: {
-  readonly compact?: boolean;
+  readonly iconOnly?: boolean;
 }) {
+  if (iconOnly) {
+    return (
+      <ButtonLink
+        variant="tertiary"
+        size={null}
+        href={PROFILE_PREFERENCES_HREF}
+        aria-label={t(DEFAULT_LOCALE, PROFILE_PREFERENCES_BUTTON_KEY)}
+        title={t(DEFAULT_LOCALE, PROFILE_PREFERENCES_BUTTON_KEY)}
+        className="tw-group tw-size-11 !tw-rounded-full !tw-border-transparent !tw-bg-transparent !tw-p-1 !tw-shadow-none focus-visible:!tw-outline-none active:!tw-bg-transparent desktop-hover:hover:!tw-border-transparent desktop-hover:hover:!tw-bg-transparent"
+      >
+        <span className="tw-box-border tw-inline-flex tw-size-9 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/15 tw-bg-black/75 tw-text-iron-100 tw-shadow-[0_8px_24px_rgba(0,0,0,0.32)] tw-transition-colors group-focus-visible:tw-ring-2 group-focus-visible:tw-ring-primary-400 group-focus-visible:tw-ring-offset-2 group-focus-visible:tw-ring-offset-black desktop-hover:group-hover:tw-bg-black/90 motion-reduce:tw-transition-none">
+          <Cog6ToothIcon className="tw-size-[1.125rem]" aria-hidden="true" />
+        </span>
+      </ButtonLink>
+    );
+  }
+
   return (
     <ButtonLink
       variant="tertiary"
       size="sm"
       href={PROFILE_PREFERENCES_HREF}
       aria-label={t(DEFAULT_LOCALE, PROFILE_PREFERENCES_BUTTON_KEY)}
-      className={`${USER_PAGE_HEADER_SURFACE_CLASS} ${USER_PAGE_HEADER_INTERACTIVE_SURFACE_CLASS} ${compact ? PROFILE_MOBILE_ACTION_CLASS : USER_PAGE_HEADER_TOUCH_TARGET_CLASS}`}
+      className={`${USER_PAGE_HEADER_SURFACE_CLASS} ${USER_PAGE_HEADER_INTERACTIVE_SURFACE_CLASS} ${USER_PAGE_HEADER_TOUCH_TARGET_CLASS}`}
     >
       <Cog6ToothIcon className="tw-size-4" aria-hidden="true" />
       <span>{t(DEFAULT_LOCALE, PROFILE_PREFERENCES_BUTTON_KEY)}</span>
@@ -196,7 +213,6 @@ function ProfileHeaderActionColumn({
 type ProfileHeaderContentProps = Readonly<{
   isApp: boolean;
   nameRef: RefObject<HTMLDivElement | null>;
-  mobileEditProfileButton: ReactNode;
   editProfileButton: ReactNode;
   aboutStatement: CicStatement | null;
   banner1Color: string;
@@ -218,7 +234,6 @@ type ProfileHeaderContentProps = Readonly<{
 function ProfileHeaderContent({
   isApp,
   nameRef,
-  mobileEditProfileButton,
   editProfileButton,
   aboutStatement,
   banner1Color,
@@ -304,27 +319,21 @@ function ProfileHeaderContent({
           />
         </div>
 
-        {canManageProfilePreferences || websiteAction ? (
+        {websiteAction ? (
           <div
             className={`tw-mb-4 tw-flex tw-flex-wrap tw-items-center tw-gap-2 ${isApp ? "" : "lg:tw-hidden"}`}
           >
-            {mobileEditProfileButton}
-            {canManageProfilePreferences ? (
-              <ProfilePreferencesButton compact />
-            ) : null}
-            {websiteAction ? (
-              <ButtonLink
-                variant="secondary"
-                href={websiteAction.href}
-                className={PROFILE_MOBILE_ACTION_CLASS}
-                aria-label={t(DEFAULT_LOCALE, "profileCms.header.openWebsite", {
-                  handle: websiteAction.handle,
-                })}
-              >
-                <WebsiteIcon />
-                <span>{t(DEFAULT_LOCALE, "profileCms.header.website")}</span>
-              </ButtonLink>
-            ) : null}
+            <ButtonLink
+              variant="secondary"
+              href={websiteAction.href}
+              className={PROFILE_MOBILE_ACTION_CLASS}
+              aria-label={t(DEFAULT_LOCALE, "profileCms.header.openWebsite", {
+                handle: websiteAction.handle,
+              })}
+            >
+              <WebsiteIcon />
+              <span>{t(DEFAULT_LOCALE, "profileCms.header.website")}</span>
+            </ButtonLink>
           </div>
         ) : null}
 
@@ -668,11 +677,17 @@ export default function UserPageHeaderClient({
     <UserPageHeaderEditProfileDesktop {...editProfileProps} />
   ) : null;
   const mobileEditProfileButton = canEdit ? (
-    <UserPageHeaderEditProfile
-      {...editProfileProps}
-      triggerVariant="profile-action"
-    />
+    <UserPageHeaderEditProfile {...editProfileProps} />
   ) : null;
+  const mobileOwnerControls =
+    canEdit || canManageProfilePreferences ? (
+      <div className="tw-flex tw-items-center">
+        {mobileEditProfileButton}
+        {canManageProfilePreferences ? (
+          <ProfilePreferencesButton iconOnly />
+        ) : null}
+      </div>
+    ) : null;
 
   return (
     <div className="tailwind-scope">
@@ -681,6 +696,7 @@ export default function UserPageHeaderClient({
           headingRef={nameRef}
           label={profile.handle ?? profileLabel}
         >
+          {mobileOwnerControls}
           {followHandle ? (
             <ProfileHeaderActionMenu
               profile={profile}
@@ -702,12 +718,16 @@ export default function UserPageHeaderClient({
             canEdit={false}
             profileLabel={profileLabel}
           />
+          {!isApp && mobileOwnerControls ? (
+            <div className="tw-absolute tw-right-4 tw-top-3 tw-z-20 sm:tw-right-6 sm:tw-top-4 md:tw-right-8 lg:tw-hidden">
+              {mobileOwnerControls}
+            </div>
+          ) : null}
         </div>
 
         <ProfileHeaderContent
           isApp={isApp}
           nameRef={nameRef}
-          mobileEditProfileButton={mobileEditProfileButton}
           editProfileButton={editProfileButton}
           aboutStatement={aboutStatement}
           banner1Color={banner1Color}

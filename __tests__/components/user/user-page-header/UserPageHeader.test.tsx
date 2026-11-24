@@ -660,11 +660,13 @@ describe("UserPageHeader", () => {
     const preferencesButtons = screen.getAllByRole("link", {
       name: "Preferences",
     });
-    expect(preferencesButtons).toHaveLength(3);
+    expect(preferencesButtons).toHaveLength(2);
     expect(preferencesButtons[0]).toHaveClass(
       "tw-size-11",
-      "!tw-bg-transparent",
-      "min-[840px]:tw-hidden"
+      "!tw-bg-transparent"
+    );
+    expect(screen.getByTestId("banner").parentElement).toContainElement(
+      preferencesButtons[0]
     );
     preferencesButtons.slice(1).forEach((preferencesButton) => {
       expect(preferencesButton).toHaveClass(

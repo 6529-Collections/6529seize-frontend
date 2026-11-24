@@ -76,15 +76,17 @@ export default function UserPageMobileTopBar({
       data-pull-to-refresh-fixed-overlay="true"
       className={`tw-fixed tw-inset-x-0 tw-top-0 tw-z-[60] tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-pt-[env(safe-area-inset-top,0px)] tw-transition-[background-color,border-color] tw-duration-150 motion-reduce:tw-transition-none ${collapsed ? "tw-border-iron-800 tw-bg-black" : "tw-border-transparent tw-bg-transparent"}`}
     >
-      <div className="tw-grid tw-h-14 tw-grid-cols-[36px_minmax(0,1fr)_36px] tw-items-center tw-gap-3 tw-px-4">
-        <BackButton className={`${PROFILE_TOP_BAR_BUTTON_CLASS} !tw-size-9 !tw-rounded-full !tw-bg-black/60`} />
+      <div className="tw-grid tw-h-14 tw-grid-cols-[88px_minmax(0,1fr)_88px] tw-items-center tw-gap-3 tw-px-4">
+        <BackButton
+          className={`${PROFILE_TOP_BAR_BUTTON_CLASS} !tw-size-9 !tw-rounded-full !tw-bg-black/60`}
+        />
         <span
           aria-hidden={!collapsed}
           className={`tw-truncate tw-text-center tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-opacity tw-duration-150 motion-reduce:tw-transition-none ${collapsed ? "tw-opacity-100" : "tw-opacity-0"}`}
         >
           {label}
         </span>
-        {children}
+        <div className="tw-flex tw-items-center tw-justify-end">{children}</div>
       </div>
     </div>
   );
