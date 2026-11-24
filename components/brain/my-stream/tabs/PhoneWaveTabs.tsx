@@ -165,6 +165,7 @@ export default function PhoneWaveTabs({
               ref={settingsRef}
               type="button"
               aria-haspopup="dialog"
+              aria-description={sections}
               aria-expanded={isOpen}
               aria-current={activeSecondary ? "true" : undefined}
               aria-controls={isOpen ? dialogId : undefined}

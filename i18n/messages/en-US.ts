@@ -1681,6 +1681,14 @@ const WAVE_JOIN_MESSAGES = objectMessages("waves.join", {
 
 const WAVE_DROP_ELIGIBILITY_MESSAGES = objectMessages("waves.dropEligibility", {
   howToSubmit: "How to Submit",
+  closed: "Submissions Closed",
+  openSoon: "Submissions Open Soon",
+  limitReached: "Submission Limit Reached",
+  unavailable: "Submission Unavailable",
+  submitMeme: "Submit Meme",
+  submitMemeClosingSoon: "Submit Meme (Closes Soon!)",
+  submitWorkToMemes: "Submit Work to The Memes",
+  submitWork: "Submit Work",
   approvalLocked: "Approval controls are locked",
   loginRequired: "Please log in to make submissions",
   ended: "Submission period has ended",

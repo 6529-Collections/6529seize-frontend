@@ -437,12 +437,23 @@ async function verifyNativePreviewKeyboard(
   }
 }
 
+async function expectSheetTop(sheet: Locator, expectedY: number) {
+  await expect
+    .poll(
+      async () =>
+        (await sheet.getByTestId("mobile-dialog-header").boundingBox())?.y ??
+        Infinity
+    )
+    .toBeCloseTo(expectedY, 0);
+}
+
 async function expectCreationSheet(page: Page, sheet: Locator) {
   const viewport = page.viewportSize();
   if (!viewport) throw new Error("Viewport missing");
   await expect
     .poll(async () => {
-      const bounds = await sheet
+      const bounds = await page
+        .getByRole("dialog")
         .locator(".mobile-wrapper-dialog")
         .boundingBox();
       return Boolean(
@@ -465,7 +476,8 @@ async function expectFullScreenInformationView(
 ) {
   await expect
     .poll(async () => {
-      const bounds = await view
+      const bounds = await page
+        .getByRole("dialog")
         .locator("[data-mobile-navigation-view]")
         .boundingBox();
       const viewport = page.viewportSize()!;
@@ -575,8 +587,10 @@ const waveTabStrip = (page: Page) =>
     has: page.getByRole("tab", { name: "Chat", exact: true }),
   });
 
-const phoneWaveTabs = (page: Page) => page.locator("[data-wave-phone-tabs]");
-const phoneWaveMore = (page: Page) => page.locator("[data-wave-phone-more]");
+const phoneWaveTabs = (page: Page) =>
+  page.getByRole("main").locator("[data-wave-phone-tabs]");
+const phoneWaveMore = (page: Page) =>
+  page.getByRole("button").locator(":scope[data-wave-phone-more]");
 const phoneWaveSections = (page: Page) =>
   page.getByRole("dialog", { name: "Wave sections", exact: true });
 const waveSectionButton = (page: Page, name: string | RegExp, app: boolean) =>
@@ -592,7 +606,9 @@ async function selectWaveSection(
   app = false
 ) {
   const direct = waveSectionButton(page, name, app).and(
-    page.locator(":not([data-wave-phone-more])")
+    page
+      .getByRole(app ? "button" : "tab")
+      .locator(":scope:not([data-wave-phone-more])")
   );
   const more = phoneWaveMore(page);
   await expect(direct.or(more).first()).toBeVisible();
@@ -608,11 +624,17 @@ async function selectWaveSection(
 
 const selectedWaveSection = (page: Page, name: string | RegExp, app = false) =>
   waveSectionButton(page, name, app)
-    .and(page.locator(app ? '[aria-current="true"]' : '[aria-selected="true"]'))
+    .and(
+      page
+        .getByRole(app ? "button" : "tab")
+        .locator(
+          app ? ':scope[aria-current="true"]' : ':scope[aria-selected="true"]'
+        )
+    )
     .or(
       phoneWaveMore(page)
         .filter({ hasText: name })
-        .and(page.locator('[aria-current="true"]'))
+        .and(page.getByRole("button").locator(':scope[aria-current="true"]'))
     );
 async function expectWaveSectionOffered(
   page: Page,
@@ -3233,7 +3255,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
             expect(box?.width).toBeGreaterThanOrEqual(44);
             expect(box?.height).toBeGreaterThanOrEqual(44);
             await expect(
-              page.locator("[data-web-small-header=true]")
+              page
+                .getByRole("banner", { includeHidden: true })
+                .locator('xpath=ancestor::*[@data-web-small-header="true"]')
             ).toBeHidden();
             return;
           }
@@ -3301,9 +3325,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
               .getByRole("main")
               .locator("header")
               .filter({ has: identity });
-            await expect(
-              header.locator('span[aria-label^="Wave score 96"]')
-            ).toBeInViewport({ ratio: 1 });
+            await expect(header.getByLabel(/^Wave score 96/)).toBeInViewport({
+              ratio: 1,
+            });
             await expect(
               header.getByRole("button", { name: /^Wave score 96/ })
             ).toHaveCount(0);
@@ -3369,7 +3393,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
           ).toHaveCount(0);
         }
         const sections = phone
-          ? page.locator("[data-wave-phone-tabs]")
+          ? page.getByRole("main").locator("[data-wave-phone-tabs]")
           : waveTabStrip(page);
         await sections
           .getByRole(surface === "app" ? "button" : "tab", {
@@ -5214,7 +5238,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         const focusSurface =
           name === "More wave actions"
             ? action
-            : action.locator("span").first();
+            : page
+                .getByRole("button", { name, exact: true })
+                .locator("span")
+                .first();
         await expect(focusSurface).toHaveCSS("outline-style", "solid");
         await expect(focusSurface).toHaveCSS("outline-width", "2px");
         await expect(focusSurface).toHaveCSS(
@@ -6101,7 +6128,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         const x = view?.getBoundingClientRect().x;
         return x !== undefined && x > 20 && x < innerWidth - 140;
       });
-      const view = page.locator("[data-wave-details-spring]");
+      const view = page
+        .getByRole("dialog")
+        .locator("[data-wave-details-spring]");
       const before = await view.boundingBox();
       const header = await page
         .getByTestId("mobile-dialog-header")
@@ -6315,12 +6344,12 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       if (surface === "android") {
         await opener.click();
         await expect(dialog).toBeVisible();
-        await page.waitForFunction(
-          () =>
-            "__playwrightAppListeners" in globalThis &&
-            Array.isArray(globalThis.__playwrightAppListeners) &&
-            globalThis.__playwrightAppListeners.includes("backButton")
-        );
+        await page.waitForFunction(() => {
+          const runtime = globalThis as typeof globalThis & {
+            __playwrightAppListeners?: string[];
+          };
+          return runtime.__playwrightAppListeners?.includes("backButton");
+        });
         await page.evaluate(() =>
           globalThis.dispatchEvent(
             new CustomEvent("playwright:backButton", {
@@ -6424,7 +6453,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         )
         .toBe(width < 768 ? 44 : 24);
       if (width < 768) {
-        const text = title.locator("span").first();
+        const text = page
+          .getByRole("button", { name: /^About Local Composer Sandbox Wave/ })
+          .locator("span")
+          .first();
         await expect(text).toHaveCSS("font-size", "14px");
         await expect(text).toHaveCSS("line-height", "18px");
         await expect(text).toHaveCSS("-webkit-line-clamp", "2");
@@ -10331,7 +10363,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await expect(more).toHaveAttribute("aria-current", "true");
       const primary = row
         .getByRole(app ? "button" : "tab")
-        .and(page.locator(":not([data-wave-phone-more])"));
+        .and(
+          page
+            .getByRole(app ? "button" : "tab")
+            .locator(":scope:not([data-wave-phone-more])")
+        );
       await expect(primary).toHaveText([
         "Chat",
         "Leaderboard",
@@ -10381,7 +10417,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       const chatBounds = await chat.boundingBox();
       expect(chatBounds!.width).toBeLessThan(64);
       await expect(more).toBeInViewport({ ratio: 1 });
-      const ink = await more
+      const ink = await page
+        .getByRole("button")
+        .locator(":scope[data-wave-phone-more]")
         .locator("[data-wave-tab-label]")
         .evaluate((label) => {
           const text = document.createRange();
@@ -10481,15 +10519,20 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       curationCount = 4;
       await page.reload();
       await expect(
-        row.getByRole(tabRole).and(page.locator(":not([data-wave-phone-more])"))
+        row
+          .getByRole(tabRole)
+          .and(
+            page
+              .getByRole(app ? "button" : "tab")
+              .locator(":scope:not([data-wave-phone-more])")
+          )
       ).toHaveText(["Chat", "Art", "Photos", "Important"]);
       const more = phoneWaveMore(page);
       await more.click();
       const sections = phoneWaveSections(page);
-      await expect(sections.locator("[data-wave-tab-value]")).toHaveText([
-        "Highlights",
-        "Decisions",
-      ]);
+      await expect(
+        sections.getByRole("button").locator(":scope[data-wave-tab-value]")
+      ).toHaveText(["Highlights", "Decisions"]);
       await sections
         .getByRole("button", { name: "Highlights", exact: true })
         .click();
@@ -10698,7 +10741,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       ).toHaveCount(0);
     } else {
       await expect(create).toHaveText("Create");
-      await expect(create.locator(":scope > span")).toHaveCSS("height", "32px");
+      await expect(
+        page
+          .getByRole("button", { name: "Open create menu", exact: true })
+          .locator(":scope > span")
+      ).toHaveCSS("height", "32px");
     }
     await create.click();
     const createOptions = app
@@ -13647,7 +13694,8 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       );
       await page.goto(`/waves/${WAVE}?tab=chat`);
       let menu = await openPhoneWaveActions(page);
-      const ids = await menu
+      const ids = await page
+        .getByRole("dialog", { name: "More wave actions", exact: true })
         .locator("[data-menu-item-id]")
         .evaluateAll((elements) =>
           elements.map((element) => element.getAttribute("data-menu-item-id"))
@@ -13675,7 +13723,14 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await expect(menu).toHaveCount(0);
       menu = await openPhoneWaveActions(page);
       await expect(utcToggle).toHaveAttribute("aria-pressed", "true");
-      await expect(utcToggle.locator("svg")).toHaveCount(2);
+      await expect(
+        page
+          .getByRole("button", {
+            name: "Show times in UTC for now",
+            exact: true,
+          })
+          .locator("svg")
+      ).toHaveCount(2);
       await page.screenshot({
         path: testInfo.outputPath(`phone-actions-grouped-${surface}.png`),
         animations: "disabled",
@@ -13696,15 +13751,17 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       });
       await expect(newCuration).toBeVisible();
       await expect(newCuration).toHaveText("Curation");
-      await expect(newCuration.locator(":scope > span")).toHaveCSS(
-        "font-size",
-        "13px"
-      );
-      await expect(newCuration.locator(":scope > span")).toHaveCSS(
-        "font-weight",
-        "500"
-      );
-      const tabs = page.locator("[data-wave-phone-tabs]");
+      await expect(
+        page
+          .getByRole("button", { name: "New curation", exact: true })
+          .locator(":scope > span")
+      ).toHaveCSS("font-size", "13px");
+      await expect(
+        page
+          .getByRole("button", { name: "New curation", exact: true })
+          .locator(":scope > span")
+      ).toHaveCSS("font-weight", "500");
+      const tabs = page.getByRole("main").locator("[data-wave-phone-tabs]");
       const [tabBounds, curationBounds] = await Promise.all([
         tabs.boundingBox(),
         newCuration.boundingBox(),
@@ -13734,14 +13791,16 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       });
       await expect(newDecision).toBeVisible();
       await expect(newDecision).toHaveText("Decision");
-      await expect(newDecision.locator(":scope > span")).toHaveCSS(
-        "font-size",
-        "13px"
-      );
-      await expect(newDecision.locator(":scope > span")).toHaveCSS(
-        "font-weight",
-        "500"
-      );
+      await expect(
+        collection
+          .getByRole("link", { name: "New decision", exact: true })
+          .locator(":scope > span")
+      ).toHaveCSS("font-size", "13px");
+      await expect(
+        collection
+          .getByRole("link", { name: "New decision", exact: true })
+          .locator(":scope > span")
+      ).toHaveCSS("font-weight", "500");
       const [curationAction, decisionAction] = await Promise.all([
         newCuration.boundingBox(),
         newDecision.boundingBox(),
@@ -13924,7 +13983,8 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       ).toBeVisible();
       await expect
         .poll(() =>
-          sheet
+          page
+            .getByRole("dialog")
             .locator("[data-wave-details-spring]")
             .evaluate((element) => element.getBoundingClientRect().x)
         )

@@ -423,11 +423,13 @@ export default function AppHeader() {
   const isCreateRoute = pathname === "/waves/create" || isMessageCompose;
   const isInsideWave = !!waveId;
   const isPhoneWidth = useMediaQuery(PHONE_WAVES_LAYOUT_QUERY);
-  const waveScoreQuery = new URLSearchParams({
-    returnTo: searchParams.size ? `${pathname}?${searchParams}` : pathname,
-  });
   const isPhoneWave =
     isCapacitor && isPhoneWidth && isInsideWave && isWavesRoute && !isDm;
+  const waveScoreQuery = isPhoneWave
+    ? new URLSearchParams({
+        returnTo: searchParams.size ? `${pathname}?${searchParams}` : pathname,
+      })
+    : undefined;
   const waveParam = getActiveWaveIdFromUrl({ pathname, searchParams });
   const activeView = getActiveViewFromUrl({
     activeWaveId: waveParam,

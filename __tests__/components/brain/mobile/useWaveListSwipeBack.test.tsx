@@ -158,7 +158,10 @@ it("carries release velocity into the shared spring and reveals the list before 
   expect(animate).toHaveBeenCalledWith(
     124,
     window.innerWidth,
-    expect.objectContaining({ ...MOTION_SPRINGS.spatial.default, velocity: 2480 })
+    expect.objectContaining({
+      ...MOTION_SPRINGS.spatial.default,
+      velocity: 2480,
+    })
   );
   const options = jest.mocked(animate).mock.calls[0]![2]!;
   const page = screen.getByTestId("page");

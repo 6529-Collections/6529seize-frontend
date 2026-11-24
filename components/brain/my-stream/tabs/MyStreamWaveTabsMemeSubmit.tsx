@@ -24,7 +24,8 @@ import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { formatSubmissionWindowTime } from "../waveDropAction.helpers";
 import type { WaveSubmissionHelpAction } from "@/components/waves/header/WaveSubmissionHelpDialog";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t } from "@/i18n/messages";
+import { t, type MessageKey } from "@/i18n/messages";
+import { formatInteger } from "@/i18n/format";
 
 interface MyStreamWaveTabsMemeSubmitProps {
   readonly wave: ApiWave;
@@ -41,9 +42,9 @@ const HEADER_ACTION_BUTTON_TEXT_CLASS =
   "tw-sr-only tw-min-w-0 tw-truncate sm:tw-not-sr-only sm:tw-inline";
 const NOT_ELIGIBLE_BUTTON_CLASS =
   "tw-group tw-flex tw-cursor-help tw-items-center tw-justify-center tw-gap-x-1.5 tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-colors tw-duration-[180ms] tw-ease-out desktop-hover:hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
-const ACTIVE_LABEL_SUBMIT_MEME = "Submit Meme";
+const ACTIVE_LABEL_SUBMIT_MEME = "waves.dropEligibility.submitMeme";
 
-const getActiveLabels = ({
+const getActiveLabelKeys = ({
   canSubmit,
   isEndingVerySoon,
   isEndingHighlyUrgent,
@@ -53,11 +54,11 @@ const getActiveLabels = ({
   isEndingVerySoon: boolean;
   isEndingHighlyUrgent: boolean;
   isEndingSoon: boolean;
-}): { activeLabelFull: string; activeLabelCompact: string } => {
+}): { activeLabelFull: MessageKey; activeLabelCompact: MessageKey } => {
   if (!canSubmit) {
     return {
-      activeLabelFull: "Submit Work to The Memes",
-      activeLabelCompact: "Submit Work",
+      activeLabelFull: "waves.dropEligibility.submitWorkToMemes",
+      activeLabelCompact: "waves.dropEligibility.submitWork",
     };
   }
 
@@ -77,14 +78,14 @@ const getActiveLabels = ({
 
   if (isEndingSoon) {
     return {
-      activeLabelFull: "Submit Meme (Closes Soon!)",
+      activeLabelFull: "waves.dropEligibility.submitMemeClosingSoon",
       activeLabelCompact: ACTIVE_LABEL_SUBMIT_MEME,
     };
   }
 
   return {
-    activeLabelFull: "Submit Work to The Memes",
-    activeLabelCompact: "Submit Work",
+    activeLabelFull: "waves.dropEligibility.submitWorkToMemes",
+    activeLabelCompact: "waves.dropEligibility.submitWork",
   };
 };
 
@@ -179,7 +180,11 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
       ? `Submissions closed on ${formatSubmissionWindowTime(closingTime, zone)}`
       : "Submissions are closed";
 
-    return renderRestriction("Submissions Closed", tooltipText, "closed");
+    return renderRestriction(
+      t(locale, "waves.dropEligibility.closed"),
+      tooltipText,
+      "closed"
+    );
   }
 
   // Coming soon state - submissions haven't started
@@ -188,7 +193,11 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
       ? `Submissions open on ${formatSubmissionWindowTime(openingTime, zone)}`
       : "Submissions will open soon";
 
-    return renderRestriction("Submissions Open Soon", tooltipText, "info");
+    return renderRestriction(
+      t(locale, "waves.dropEligibility.openSoon"),
+      tooltipText,
+      "info"
+    );
   }
 
   // Not eligible state - user doesn't have permission to submit
@@ -215,7 +224,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
                 : `${HEADER_ACTION_BUTTON_TEXT_CLASS} tw-border-x-0 tw-border-b tw-border-t-0 tw-border-dashed tw-border-iron-600/70 tw-pb-px tw-transition-colors group-hover:tw-border-iron-400/80`
             }
           >
-            How to Submit
+            {t(locale, "waves.dropEligibility.howToSubmit")}
           </span>
         </button>
       </MainStageNominationPopover>
@@ -230,7 +239,11 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
 
     const tooltipText = `You have already submitted the maximum allowed (${submissionText})`;
 
-    return renderRestriction("Submission Limit Reached", tooltipText, "info");
+    return renderRestriction(
+      t(locale, "waves.dropEligibility.limitReached"),
+      tooltipText,
+      "info"
+    );
   }
 
   // Check if user has limited remaining submissions
@@ -282,16 +295,21 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
   } else if (isEndingSoon) {
     tooltipText = `Submissions closing soon! Ends on ${formatSubmissionWindowTime(endTime, zone)}`;
   }
-  const { activeLabelFull, activeLabelCompact } = getActiveLabels({
+  const activeLabelKeys = getActiveLabelKeys({
     canSubmit,
     isEndingVerySoon,
     isEndingHighlyUrgent,
     isEndingSoon,
   });
+  const activeLabelFull = t(locale, activeLabelKeys.activeLabelFull);
+  const activeLabelCompact = t(locale, activeLabelKeys.activeLabelCompact);
   const showSplitActiveLabels = activeLabelCompact !== activeLabelFull;
 
   if (!canSubmit) {
-    return renderRestriction("Submission Unavailable", tooltipText);
+    return renderRestriction(
+      t(locale, "waves.dropEligibility.unavailable"),
+      tooltipText
+    );
   }
 
   let activeIcon = (
@@ -322,7 +340,9 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
         {activeIcon}
         <span>{activeLabelFull}</span>
         {hasLimitedRemaining && (
-          <span className="tw-text-iron-400">{remainingSubmissionCount}</span>
+          <span className="tw-text-iron-400">
+            {formatInteger(locale, remainingSubmissionCount)}
+          </span>
         )}
       </button>
     );

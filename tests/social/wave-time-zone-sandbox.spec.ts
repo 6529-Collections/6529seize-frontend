@@ -285,7 +285,7 @@ test.describe("Display time zone @auth @local-only", () => {
       testInfo.project.name === "web-mobile-chromium" ? [320, 375, 430] : [375];
     for (const width of phoneWidths) {
       await page.setViewportSize({ width, height: 900 });
-      const phoneScore = header.locator('span[aria-label^="Wave score"]');
+      const phoneScore = header.getByLabel(/^Wave score/);
       await expect(phoneScore).toBeInViewport({ ratio: 1 });
       await expect(score).toHaveCount(0);
       await expect(
@@ -371,7 +371,11 @@ test.describe("Display time zone @auth @local-only", () => {
       name: "Show times in UTC for now",
     });
     await expect(utcToggle).toHaveAttribute("aria-pressed", "true");
-    await expect(utcToggle.locator("svg")).toHaveCount(2);
+    await expect(
+      page
+        .getByRole("button", { name: "Show times in UTC for now", exact: true })
+        .locator("svg")
+    ).toHaveCount(2);
     await utcToggle.click();
     await expect(actions).toHaveCount(0);
     await expect(seededPostTime(page)).toHaveText("Apr 21, 2024");
