@@ -2628,7 +2628,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     page,
     baseURL,
     browserName,
-  }) => {
+  }, testInfo) => {
     const api = getSandboxApiOrigin(baseURL);
     let rating = 20;
     await setSandboxProfileRep(api, rating);
@@ -2717,8 +2717,14 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       .click();
     const grant = page.getByRole("dialog", { name: "Grant Rep", exact: true });
     const loading = grant.getByText("Loading ratings…", { exact: true });
-    await expect(loading).toBeVisible();
-    expect((await loading.boundingBox())!.height).toBeLessThanOrEqual(24);
+    await expect(loading).toHaveCSS("position", "absolute");
+    await expect(loading).toHaveCSS("clip", "rect(0px, 0px, 0px, 0px)");
+    const loadingBox = await loading.boundingBox();
+    expect(loadingBox!.height).toBe(1);
+    expect(loadingBox!.width).toBe(1);
+    await expect(
+      grant.getByRole("group", { name: "You assigned", exact: true })
+    ).toHaveCount(0);
     await expectCompactGrantLayout(grant);
     await expectDesktopRatingPosition(page, "Grant Rep");
     await grant
@@ -2731,6 +2737,8 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     let pendingFocusRing = "";
     const cancel = grant.getByRole("button", { name: "Cancel", exact: true });
     try {
+      await expect(amount).toBeVisible();
+      await expect(amount).toBeEditable();
       await amount.fill("35");
       await expect(amount).toHaveAttribute("aria-invalid", "false");
       await expect(
@@ -2745,6 +2753,9 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       await expect(
         grant.getByRole("button", { name: "Grant Rep", exact: true })
       ).toBeDisabled();
+      await getGrantRepSurface(grant).screenshot({
+        path: testInfo.outputPath("grant-rep-background-ratings.png"),
+      });
     } finally {
       releaseAllowance();
     }

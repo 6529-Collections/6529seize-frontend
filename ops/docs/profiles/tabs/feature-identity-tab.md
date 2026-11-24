@@ -239,6 +239,9 @@ show the profile-creation welcome.
   within the space available above the keyboard. Moving focus to the amount or
   actions closes suggestions. Category names are case-sensitive, so `artist` and
   `Artist` can hold separate ratings.
+- Existing ratings load in the background without a visible loading row. You can
+  search and enter an amount while waiting. Assigned category pills appear when
+  ready, and saving remains disabled until your ratings and allowance are known.
 - The first suggestion is active, shown with a soft grey fill. Use the arrow
   keys to move through suggestions and Enter to pick the active category.
   A blue outline appears only when a suggestion itself has keyboard focus.
