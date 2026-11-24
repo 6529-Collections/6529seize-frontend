@@ -1,10 +1,17 @@
-import { render, screen } from "@testing-library/react";
+import { render, renderHook, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import MyStreamWaveCreateActionsMenu from "@/components/brain/my-stream/tabs/MyStreamWaveCreateActionsMenu";
+import MyStreamWaveCreateActionsMenu, {
+  useWaveCreateMenuActions,
+} from "@/components/brain/my-stream/tabs/MyStreamWaveCreateActionsMenu";
 import { useAuth } from "@/components/auth/Auth";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 
 const createWaveModalMock = jest.fn();
+let mockCreationPaused = false;
+jest.mock("@/hooks/useWavesMovePhase", () => ({
+  ...jest.requireActual("@/hooks/useWavesMovePhase"),
+  useWaveCreationPaused: () => mockCreationPaused,
+}));
 jest.mock("@/hooks/useIsMobileLayoutViewport", () => ({
   __esModule: true,
   default: jest.fn(),
@@ -97,11 +104,40 @@ const createWave = ({
 describe("MyStreamWaveCreateActionsMenu", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCreationPaused = false;
     jest.mocked(useIsMobileLayoutViewport).mockReturnValue(false);
     mockedUseAuth.mockReturnValue({
       connectedProfile: { handle: "alice" },
       activeProfileProxy: null,
     });
+  });
+
+  it("offers no new subwave while new waves are paused for the move", () => {
+    mockCreationPaused = true;
+    const { result } = renderHook(() =>
+      useWaveCreateMenuActions({ wave: createWave(), mobile: false })
+    );
+    expect(result.current.items.map(({ id }) => id)).not.toContain(
+      "create-subwave"
+    );
+    expect(result.current.items.length).toBeGreaterThan(0);
+  });
+
+  it("keeps subwave permission independent when curation creation moves to the tab row", () => {
+    const { result, rerender } = renderHook(
+      ({ eligible }) =>
+        useWaveCreateMenuActions({
+          wave: createWave({ eligible }),
+          mobile: true,
+          includeCuration: false,
+        }),
+      { initialProps: { eligible: true } }
+    );
+    expect(result.current.items.map(({ id }) => id)).toEqual([
+      "create-subwave",
+    ]);
+    rerender({ eligible: false });
+    expect(result.current.items).toEqual([]);
   });
 
   it("offers only curation and subwave actions to an eligible root-wave admin", async () => {
@@ -118,9 +154,7 @@ describe("MyStreamWaveCreateActionsMenu", () => {
     expect(
       screen.getByRole("button", { name: /^New curation/ })
     ).toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: /^New decision/ })
-    ).toBeNull();
+    expect(screen.queryByRole("button", { name: /^New decision/ })).toBeNull();
     await userEvent.click(screen.getByRole("button", { name: /^New subwave/ }));
 
     expect(screen.getByTestId("subwave-modal")).toBeInTheDocument();
@@ -220,6 +254,25 @@ describe("MyStreamWaveCreateActionsMenu", () => {
       screen.getByRole("button", { name: "Open create menu" })
     ).toHaveClass("tw-min-h-11");
   });
+
+  it.each(["desktop", "mobile"] as const)(
+    "keeps decision creation out of the %s wave menu",
+    async (variant) => {
+      render(
+        <MyStreamWaveCreateActionsMenu
+          wave={createWave()}
+          variant={variant}
+          onCreated={jest.fn()}
+        />
+      );
+      await userEvent.click(
+        screen.getByRole("button", { name: "Open create menu" })
+      );
+      expect(
+        screen.queryByRole("button", { name: "New decision" })
+      ).not.toBeInTheDocument();
+    }
+  );
 
   it("opens a concise sheet on mobile web and hands off after it closes", async () => {
     jest.mocked(useIsMobileLayoutViewport).mockReturnValue(true);

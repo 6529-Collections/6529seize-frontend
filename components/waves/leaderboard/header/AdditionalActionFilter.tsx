@@ -42,7 +42,9 @@ export function AdditionalActionFilter({
           />
         </svg>
       )}
-      <span>{t(locale, "memes.additionalAction.label")}</span>
+      <span className="tw-text-meta">
+        {t(locale, "memes.additionalAction.label")}
+      </span>
     </label>
   );
 }

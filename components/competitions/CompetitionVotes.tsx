@@ -9,6 +9,8 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { useCompetitionViewer } from "@/hooks/competitions/useCompetitionQueries";
 import HeaderUserConnect from "@/components/header/user/HeaderUserConnect";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
 import CompetitionMyVotes from "./CompetitionMyVotes";
 import CompetitionVoters from "./CompetitionVoters";
 import CompetitionVoteActivity from "./CompetitionVoteActivity";
@@ -18,13 +20,17 @@ const VOTE_TABS = ["mine", "all", "activity"] as const;
 function CompetitionPersonalVotes() {
   const viewer = useCompetitionViewer();
   const locale = useBrowserLocale();
+  const isPhone = useMediaQuery(PHONE_WAVES_LAYOUT_QUERY);
   if (!viewer)
     return (
       <div className="tw-flex tw-flex-col tw-items-start tw-gap-3 tw-p-4">
         <p className="tw-m-0 tw-text-sm tw-italic tw-text-iron-500">
           {t(locale, "competitions.signIn")}
         </p>
-        <HeaderUserConnect label={t(locale, "competitions.connectWallet")} />
+        <HeaderUserConnect
+          label={t(locale, "competitions.connectWallet")}
+          size={isPhone ? "sm" : "lg"}
+        />
       </div>
     );
   return <CompetitionMyVotes />;
@@ -56,7 +62,7 @@ export default function CompetitionVotes({
       key={competition.id}
     >
       <div
-        className={`tw-bg-iron-950 tw-py-1.5 [&_[role=tab][aria-selected=true]]:!tw-font-medium [&_[role=tablist]]:tw-flex-wrap [&_[role=tablist]]:tw-gap-y-2.5 ${embedded ? "-tw-mx-4 tw-px-4" : ""}`}
+        className={`tw-bg-iron-950 tw-py-1.5 [&_[role=tablist]]:tw-flex-wrap [&_[role=tablist]]:tw-gap-y-2.5 [&_button]:tw-text-meta [&_button]:tw-font-medium ${embedded ? "-tw-mx-4 tw-px-4" : ""}`}
       >
         <TabToggleWithOverflow
           transition

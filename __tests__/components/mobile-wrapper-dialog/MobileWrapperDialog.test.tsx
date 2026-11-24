@@ -542,6 +542,79 @@ describe("MobileWrapperDialog", () => {
       expect(onClose).toHaveBeenCalledTimes(1);
     });
 
+    it("expands an opted-in sheet with an upward grip drag and collapses it with the keyboard", async () => {
+      const onClose = jest.fn();
+      render(
+        <MobileWrapperDialog
+          {...defaultProps}
+          isOpen
+          expandableHeight
+          onClose={onClose}
+        />
+      );
+      const grip = screen.getByRole("button", { name: "Expand sheet" });
+      fireTouch(grip, "touchstart", 200);
+      fireTouch(grip, "touchmove", 120);
+      fireTouch(grip, "touchend");
+      expect(grip).toHaveAccessibleName("Collapse sheet");
+      expect(onClose).not.toHaveBeenCalled();
+
+      grip.focus();
+      await userEvent.keyboard("{Enter}");
+      expect(grip).toHaveAccessibleName("Expand sheet");
+      expect(grip).toHaveFocus();
+      expect(screen.getByTestId("child-content")).toBeVisible();
+    });
+
+    it("restores the expanded sheet after leaving a subview and still dismisses on a downward drag", async () => {
+      const onClose = jest.fn();
+      const user = userEvent.setup();
+
+      function Sheet() {
+        const [editing, setEditing] = useState(false);
+        const back = editing ? () => setEditing(false) : undefined;
+        return (
+          <MobileWrapperDialog
+            isOpen
+            title={editing ? "Edit wave" : "About wave"}
+            expandableHeight={!editing}
+            onClose={onClose}
+            onBack={back}
+            onEscape={back}
+          >
+            {editing ? (
+              <input aria-label="Wave name" />
+            ) : (
+              <button type="button" onClick={() => setEditing(true)}>
+                Edit
+              </button>
+            )}
+          </MobileWrapperDialog>
+        );
+      }
+
+      render(<Sheet />);
+      await user.click(screen.getByRole("button", { name: "Expand sheet" }));
+      await user.click(screen.getByRole("button", { name: "Edit" }));
+      expect(screen.getByRole("dialog", { name: "Edit wave" })).toBeVisible();
+      expect(
+        screen.queryByRole("button", { name: "Collapse sheet" })
+      ).not.toBeInTheDocument();
+
+      await user.click(screen.getByRole("textbox", { name: "Wave name" }));
+      await user.keyboard("{Escape}");
+      expect(
+        screen.getByRole("button", { name: "Collapse sheet" })
+      ).toBeVisible();
+      expect(onClose).not.toHaveBeenCalled();
+
+      const header = screen.getByTestId("mobile-dialog-header");
+      fireTouch(header, "touchstart", 20);
+      fireTouch(header, "touchmove", 110);
+      fireTouch(header, "touchend");
+      await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+    });
+
     it("closes a default sheet with a downward header swipe", async () => {
       const onClose = jest.fn();
       render(

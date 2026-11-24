@@ -1,3 +1,6 @@
+"use client";
+
+import { WaveScoreSummaryHoverCard } from "@/components/waves/WaveTrustSignals";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { formatInteger, formatNumber } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -57,6 +60,7 @@ export default function WaveHeaderTrustStats({
 }: {
   readonly wave: ApiWave;
 }) {
+  const scoreLearnMoreHref = `/network/wave-score?${new URLSearchParams({ returnTo: "/waves/" + wave.id })}`;
   const visibilityScore = formatScore(wave.wave_score?.visibility_score);
   const qualityScore = formatScore(wave.wave_score?.quality_score);
   const hotnessScore = formatScore(wave.wave_score?.hotness_score);
@@ -162,7 +166,22 @@ export default function WaveHeaderTrustStats({
             }`}
           >
             <dt className="tw-order-2 tw-shrink-0 tw-text-[13px] tw-font-normal tw-leading-5 tw-text-iron-500">
-              {stat.label}
+              {stat.id === "score" ? (
+                <WaveScoreSummaryHoverCard
+                  waveRep={wave.wave_rep}
+                  waveScore={wave.wave_score}
+                  learnMoreHref={scoreLearnMoreHref}
+                >
+                  <button
+                    type="button"
+                    className="tw-min-h-11 tw-rounded tw-border-0 tw-bg-transparent tw-p-0 tw-font-[inherit] tw-text-inherit tw-underline tw-decoration-iron-600 tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                  >
+                    {stat.label}
+                  </button>
+                </WaveScoreSummaryHoverCard>
+              ) : (
+                stat.label
+              )}
             </dt>
             <dd className="tw-order-1 tw-m-0 tw-flex tw-min-w-0 tw-items-baseline tw-gap-x-[5px] tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-50">
               <Icon

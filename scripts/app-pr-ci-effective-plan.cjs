@@ -146,7 +146,9 @@ function applyEffectiveAppPrCiPlan(plan) {
 
   const playwrightNativeCompetition = files.some(
     (file) =>
-      /^(?:components\/brain\/my-stream\/votes\/|__tests__\/components\/brain\/my-stream\/votes\/|helpers\/vote-haptics\.ts$)/u.test(file) ||
+      /^(?:components\/brain\/my-stream\/votes\/|__tests__\/components\/brain\/my-stream\/votes\/|helpers\/vote-haptics\.ts$)/u.test(
+        file
+      ) ||
       /^(?:components\/competitions\/|hooks\/competitions\/|__tests__\/competitions\/|app\/waves\/\[wave\]\/decisions\/|components\/waves\/create-wave\/|components\/waves\/leaderboard\/|__tests__\/components\/waves\/leaderboard\/|generated\/models\/ApiCompetition)/u.test(
         file
       ) ||
@@ -237,6 +239,12 @@ function applyEffectiveAppPrCiPlan(plan) {
         "components/brain/my-stream/MyStreamWavePending.tsx",
         "components/header/AppHeader.tsx",
         "components/brain/mobile/WaveInformationSheet.tsx",
+        "components/brain/my-stream/tabs/PhoneWaveTabs.tsx",
+        "components/mobile-navigation/MobileNavigationView.tsx",
+        "components/mobile-navigation/SpringNavigationSurface.tsx",
+        "components/mobile-navigation/MobilePageContext.tsx",
+        "components/mobile-navigation/useMobileFormHistory.ts",
+        "components/waves/specs/WaveSettingSwitch.tsx",
         "components/waves/specs/WaveNotificationSettings.tsx",
         "components/waves/specs/wave-notification-settings/WaveNotificationPreferenceButtons.tsx",
         "components/brain/mobile/WaveInformationPanelContext.ts",

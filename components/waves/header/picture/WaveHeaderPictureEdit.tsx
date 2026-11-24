@@ -1,5 +1,11 @@
 "use client";
 
+import { useRef, useState } from "react";
+import { useAuth } from "@/components/auth/Auth";
+import {
+  getWaveImageFileError,
+  WAVE_IMAGE_TYPES,
+} from "@/components/waves/create-wave/overview/wave-image-file";
 import { createPortal } from "react-dom";
 import {
   useWaveInformationPanel,
@@ -18,6 +24,9 @@ export default function WaveHeaderPictureEdit({
 }: {
   readonly wave: ApiWave;
 }) {
+  const input = useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const { setToast } = useAuth();
   const locale = useBrowserLocale();
   const panel = useWaveInformationPanel(
     t(locale, "waves.header.pictureEditTitle"),
@@ -25,21 +34,51 @@ export default function WaveHeaderPictureEdit({
   );
   const editor = (
     <WaveHeaderPictureEditModal
-      key={wave.id}
+      key={
+        selectedFile
+          ? `${selectedFile.name}:${selectedFile.lastModified}`
+          : wave.id
+      }
+      initialFile={panel.isPhone ? selectedFile : null}
       isOpen={panel.isOpen}
       wave={wave}
-      onClose={panel.close}
+      onClose={() => {
+        setSelectedFile(null);
+        panel.close();
+      }}
       embedded={panel.isInSheet}
     />
   );
 
   return (
     <>
+      {panel.isPhone && (
+        <input
+          ref={input}
+          type="file"
+          accept={WAVE_IMAGE_TYPES.join(",")}
+          className="tw-hidden"
+          aria-label={t(locale, "waves.information.choosePicture")}
+          onChange={(event) => {
+            const file = event.target.files?.item(0);
+            event.target.value = "";
+            if (!file) return;
+            const message = getWaveImageFileError(file);
+            if (message !== null) {
+              setToast({ type: "error", message });
+              return;
+            }
+            setSelectedFile(file);
+            panel.open();
+          }}
+        />
+      )}
       <button
         type="button"
         onClick={(e) => {
           e.stopPropagation();
-          panel.open(e.currentTarget);
+          if (panel.isPhone) input.current?.click();
+          else panel.open(e.currentTarget);
         }}
         aria-label={t(locale, "waves.header.pictureEditLabel")}
         aria-expanded={panel.isOpen}

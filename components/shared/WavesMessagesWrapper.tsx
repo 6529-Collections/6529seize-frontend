@@ -40,6 +40,7 @@ import {
   getDropQueryKey,
 } from "@/services/api/drop-api";
 import {
+  AnimatePresence,
   domAnimation,
   LazyMotion,
   m,
@@ -307,13 +308,15 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
           profile={connectedProfile}
         />
       )}
-      {informationOpen && informationWave.wave?.id === waveId && (
-        <WaveInformationSheet
-          key={information.request.id}
-          wave={informationWave.wave}
-          onClose={information.close}
-        />
-      )}
+      <AnimatePresence>
+        {informationOpen && informationWave.wave?.id === waveId && (
+          <WaveInformationSheet
+            key={information.request.id}
+            wave={informationWave.wave}
+            onClose={information.close}
+          />
+        )}
+      </AnimatePresence>
     </WaveChatScrollProvider>
   );
 };

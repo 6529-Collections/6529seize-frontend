@@ -275,9 +275,12 @@ on hover and show a dark hover surface; their resting header surface is transpar
   accessible name includes the score; hover or keyboard focus exposes the score
   details card, while touch activation opens the wave.
 - Swipe-back navigation is disabled on web, list routes, create overlays, and
-  focused drop views. Screen edges remain available to the system or browser.
-  Sliders, editors, media controls, and horizontally scrollable content keep
-  their normal touch behavior.
+  focused drop views. In a native wave channel, a rightward start within 32px
+  of the left edge takes Back priority on every tab, even over controls and
+  horizontally scrolling rows. Away from that zone, sliders, editors, media
+  controls and horizontally scrollable content keep their normal touch
+  behavior. Direct messages and browser navigation retain their existing
+  edge behavior.
 - Browser-default behavior is kept for modified clicks such as Cmd/Ctrl-click,
   Shift/Alt-click, middle-click, and right-click/context menu.
 - The mobile Profile Waves Feed link is a normal browser link, so opening it,

@@ -99,8 +99,10 @@ Users can:
     rules to that curation.
     On mobile and in the tablet overlay, both forms use the information panel
     at the same height. Back discards the draft and returns to Configuration.
-    Close or a downward header swipe dismisses the panel. Successful saves
-    return to Configuration. Failed saves keep the draft open. On desktop,
+    Phone information stays full-screen; a rightward swipe also goes back.
+    Back from the main phone information view returns to the thread. Tablet
+    overlays also offer Close. Successful saves return to Configuration. Failed
+    saves keep the draft open. On desktop,
     curations open in dialogs.
 
 ## Common Scenarios
