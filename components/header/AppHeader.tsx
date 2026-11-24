@@ -428,8 +428,8 @@ export default function AppHeader() {
   const waveScoreQuery = isPhoneWave
     ? new URLSearchParams({
         returnTo: searchParams.size ? `${pathname}?${searchParams}` : pathname,
-      })
-    : undefined;
+      }).toString()
+    : "";
   const waveParam = getActiveWaveIdFromUrl({ pathname, searchParams });
   const activeView = getActiveViewFromUrl({
     activeWaveId: waveParam,

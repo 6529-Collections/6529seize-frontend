@@ -165,9 +165,8 @@ describe("PhoneWaveTabs", () => {
       "aria-current",
       "true"
     );
-    expect(screen.getByRole("button", { name: "Decisions 4" })).toHaveAttribute(
-      "aria-description",
-      "Wave sections"
-    );
+    expect(
+      screen.getByRole("button", { name: "Decisions 4" })
+    ).toHaveAccessibleDescription("Wave sections");
   });
 });

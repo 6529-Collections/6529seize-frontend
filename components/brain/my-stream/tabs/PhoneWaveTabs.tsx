@@ -104,6 +104,9 @@ export default function PhoneWaveTabs({
 
   return (
     <>
+      <span id={`${dialogId}-description`} hidden>
+        {sections}
+      </span>
       <div className="tw-flex tw-w-full tw-min-w-0 tw-items-center tw-gap-1">
         <div
           ref={rowRef}
@@ -165,7 +168,7 @@ export default function PhoneWaveTabs({
               ref={settingsRef}
               type="button"
               aria-haspopup="dialog"
-              aria-description={sections}
+              aria-describedby={`${dialogId}-description`}
               aria-expanded={isOpen}
               aria-current={activeSecondary ? "true" : undefined}
               aria-controls={isOpen ? dialogId : undefined}
