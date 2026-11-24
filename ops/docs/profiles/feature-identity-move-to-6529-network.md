@@ -8,7 +8,7 @@ the 6529 Network takes them about 24 hours later. From then on you change them
 on the 6529 Network, through this site.
 
 The build setting `NEXT_PUBLIC_IDENTITY_FREEZE_AT` names the freeze as a UTC
-instant (for example `2026-11-24T00:00:00Z`). Without it nothing below applies.
+instant (for example `2026-11-25T00:00:00Z`). Without it nothing below applies.
 
 ## Location in the Site
 
@@ -21,8 +21,8 @@ instant (for example `2026-11-24T00:00:00Z`). Without it nothing below applies.
 
 | When | What it says |
 | --- | --- |
-| Before the freeze | Profiles, handles, ratings, consolidations and delegations move to the 6529 Network. From Tuesday 24 November 00:00 UTC you can't change them for about 24 hours. From Wednesday you change them on the 6529 Network, through this site. |
-| The 24 hours from the freeze | They are moving. You can't change them until the switch-on time (Wednesday 25 November 00:00 UTC). |
+| Before the freeze | Profiles, handles, ratings, consolidations and delegations move to the 6529 Network. From Wednesday 25 November 00:00 UTC you can't change them for about 24 hours. From Thursday you change them on the 6529 Network, through this site. |
+| The 24 hours from the freeze | They are moving. You can't change them until the switch-on time (Thursday 26 November 00:00 UTC). |
 | After the switch-on | They moved to the 6529 Network. You can't change them on this site yet. |
 
 Dates and times are shown in UTC. The notice changes at the freeze and at the
@@ -54,7 +54,7 @@ profile website studio are not affected.
 Every Delegation Center page under `/safe-collecting`, the consolidation
 builder included, shows from the time the setting is present:
 
-> From Tuesday 24 November 00:00 UTC, new delegations and consolidations on
+> From Wednesday 25 November 00:00 UTC, new delegations and consolidations on
 > NFTDelegation don't count for 6529. Your delegations and consolidations as of
 > that time moved to the 6529 Network. Make changes there, on this site.
 

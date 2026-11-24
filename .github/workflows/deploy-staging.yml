@@ -64,7 +64,7 @@ jobs:
       # App-socket PING keepalive (needs API #2354): on in staging, off in production.
       NEXT_PUBLIC_FEATURE_WS_PING: "true"
       # Identities move to the 6529 Network (lib/identity-move/schedule.ts).
-      NEXT_PUBLIC_IDENTITY_FREEZE_AT: "2026-11-24T00:00:00Z"
+      NEXT_PUBLIC_IDENTITY_FREEZE_AT: "2026-11-25T00:00:00Z"
       NEXTGEN_CHAIN_ID: ${{ vars.STAGING_NEXTGEN_CHAIN_ID || '1' }}
       ASSETS_FROM_S3: "false"
 
