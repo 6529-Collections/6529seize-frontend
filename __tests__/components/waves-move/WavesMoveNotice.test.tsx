@@ -7,6 +7,7 @@ import {
 } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import WavesMoveNotice from "@/components/waves-move/WavesMoveNotice";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import {
   useWavesMovePhase,
   useWavesPausedReason,
@@ -175,5 +176,108 @@ describe("useWavesMovePhase after a suspended tab returns", () => {
       document.dispatchEvent(new Event("visibilitychange"));
     });
     expect(result.current).toBe(true);
+  });
+});
+
+describe("a result due while waves are frozen", () => {
+  const DAY = 24 * HOUR;
+  // Results on the days `steps` lead to, at 16:00 UTC, rolling from Monday
+  // 2 November.
+  const waveWith = (steps: number[]) =>
+    ({
+      wave: {
+        decisions_strategy: {
+          first_decision_time: Date.UTC(2026, 10, 2, 16),
+          subsequent_decisions: steps,
+          is_rolling: true,
+        },
+      },
+      voting: { period: null },
+      pauses: [],
+    }) as unknown as ApiWave;
+  // Monday, Wednesday and Friday.
+  const mainStage = waveWith([2 * DAY, 2 * DAY, 3 * DAY]);
+  const SENTENCE =
+    "The result due Wednesday 16:00 UTC is counted on the 6529 Network after Thursday 00:00 UTC.";
+
+  afterEach(() => {
+    clearWavesFreeze();
+    jest.restoreAllMocks();
+    jest.useRealTimers();
+    localStorage.clear();
+  });
+
+  it("says the 6529 Network counts it after the switch-on, from the time it is due", () => {
+    setWavesFreezeSchedule();
+    // Wednesday 15:00 UTC: frozen, the 16:00 result not yet due.
+    jest.useFakeTimers({ now: WAVES_FREEZE_MS + 15 * HOUR });
+    render(<WavesMoveNotice wave={mainStage} />);
+    const notice = screen.getByTestId("waves-move-notice");
+    expect(notice).not.toHaveTextContent("The result due");
+
+    act(() => {
+      jest.advanceTimersByTime(HOUR + 1);
+    });
+    expect(notice).toHaveTextContent(
+      `You can't change them until Thursday 00:00 UTC. Chat keeps working. ${SENTENCE}`
+    );
+  });
+
+  it("still adds it when the clock reads a little early at the result time", () => {
+    setWavesFreezeSchedule();
+    jest.useFakeTimers({ now: WAVES_FREEZE_MS + 15 * HOUR });
+    render(<WavesMoveNotice wave={mainStage} />);
+    // The clock steps back 5 ms once the timer is set, so it reads early
+    // when the timer fires.
+    jest.setSystemTime(Date.now() - 5);
+    act(() => {
+      jest.advanceTimersByTime(HOUR + 1);
+    });
+    act(() => {
+      jest.advanceTimersByTime(10);
+    });
+    expect(screen.getByTestId("waves-move-notice")).toHaveTextContent(SENTENCE);
+  });
+
+  it("adds it when a page suspended across the result time is seen again", () => {
+    setWavesFreezeSchedule();
+    jest.useFakeTimers({ now: WAVES_FREEZE_MS + 15 * HOUR });
+    render(<WavesMoveNotice wave={mainStage} />);
+    // A suspended tab runs no timers: the clock moves on without them.
+    jest.setSystemTime(WAVES_FREEZE_MS + 17 * HOUR);
+    act(() => {
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    expect(screen.getByTestId("waves-move-notice")).toHaveTextContent(SENTENCE);
+  });
+
+  it("says nothing for a wave whose last result came before the freeze", () => {
+    setWavesFreezeSchedule();
+    jest.useFakeTimers({ now: WAVES_FREEZE_MS + 17 * HOUR });
+    // Mondays only.
+    render(<WavesMoveNotice wave={waveWith([7 * DAY])} />);
+    expect(screen.getByTestId("waves-move-notice")).not.toHaveTextContent(
+      "The result due"
+    );
+  });
+
+  it("stays hidden elsewhere once hidden with the sentence, and shows the sentence once only the plain notice was hidden", () => {
+    setWavesFreezeSchedule();
+    jest.useFakeTimers({ now: WAVES_FREEZE_MS + 17 * HOUR });
+    const mainStageView = render(<WavesMoveNotice wave={mainStage} />);
+    fireEvent.click(screen.getByRole("button", { name: "Hide this notice" }));
+    mainStageView.unmount();
+    // Another wave, or the waves list: the plain notice stays hidden.
+    const elsewhere = render(<WavesMoveNotice />);
+    expect(screen.queryByTestId("waves-move-notice")).toBeNull();
+    elsewhere.unmount();
+
+    localStorage.clear();
+    const plain = render(<WavesMoveNotice />);
+    fireEvent.click(screen.getByRole("button", { name: "Hide this notice" }));
+    plain.unmount();
+    // Back on the Main Stage the sentence is new: the notice shows.
+    render(<WavesMoveNotice wave={mainStage} />);
+    expect(screen.getByTestId("waves-move-notice")).toHaveTextContent(SENTENCE);
   });
 });

@@ -721,7 +721,10 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
         )}
 
         {!isDm && (
-          <WavesMoveNotice className="tw-mx-2 tw-my-2 tw-shrink-0 sm:tw-mx-4" />
+          <WavesMoveNotice
+            className="tw-mx-2 tw-my-2 tw-shrink-0 sm:tw-mx-4"
+            wave={wave}
+          />
         )}
 
         {defaultNavigation.resolve &&

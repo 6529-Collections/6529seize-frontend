@@ -1,15 +1,19 @@
 "use client";
 
 import { InformationCircleIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import { Time } from "@/helpers/time";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useWavesMovePhase } from "@/hooks/useWavesMovePhase";
 import { useWavesMoveScope } from "./WavesMoveScope";
 import { formatUtcDate } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { resultTimesBetween } from "@/lib/waves-move/frozenResults";
 import {
   getWavesMoveSchedule,
+  MAX_TIMER_DELAY_MS,
   type WavesMovePhase,
   type WavesMoveSchedule,
 } from "@/lib/waves-move/schedule";
@@ -81,32 +85,93 @@ const getWavesMoveNoticeText = (
 };
 
 /**
+ * While frozen, the latest of the wave's result times since the freeze that
+ * has passed: 6529.io won't settle it. The clock is read again at the next
+ * one, and when the page becomes visible.
+ */
+function useFrozenResult(
+  phase: WavesMovePhase,
+  schedule: WavesMoveSchedule | null,
+  wave: ApiWave | null | undefined
+): number | null {
+  const [nowMs, setNowMs] = useState(() => Time.currentMillis());
+  const times =
+    phase === "frozen" && schedule !== null
+      ? resultTimesBetween(wave, schedule.freezeAtMs, schedule.switchOnMs)
+      : [];
+  const passed = times.filter((time) => time <= nowMs).at(-1) ?? null;
+  const upcoming = times.find((time) => time > nowMs) ?? null;
+  useEffect(() => {
+    if (upcoming === null) {
+      return;
+    }
+    // Set again after each firing: a clock read early only waits once more.
+    const timer = setTimeout(
+      () => setNowMs(Time.currentMillis()),
+      Math.min(
+        Math.max(upcoming - Time.currentMillis(), 0) + 1,
+        MAX_TIMER_DELAY_MS
+      )
+    );
+    return () => clearTimeout(timer);
+  }, [upcoming, nowMs]);
+  useEffect(() => {
+    // A suspended tab or app runs no timers.
+    const onVisible = () => {
+      if (document.visibilityState === "visible") {
+        setNowMs(Time.currentMillis());
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, []);
+  return passed;
+}
+
+/**
  * Says when votes, entries and wave settings move to the 6529 Network and
  * what that means for changing them on this site. Renders nothing unless the
  * waves freeze and switch-on are set, and inside a wave that stays on
- * 6529.io. The viewer can hide it until it says something new.
+ * 6529.io. The viewer can hide it until it says something new. Given the
+ * wave, it also says that a result due while waves are frozen is counted on
+ * the 6529 Network after the switch-on.
  */
 export default function WavesMoveNotice({
   className = "",
   siteWide = false,
+  wave,
 }: {
   readonly className?: string | undefined;
   /** For creating a wave, which moves wherever it starts: ignores the scope. */
   readonly siteWide?: boolean | undefined;
+  /** The wave, for a result due while waves are frozen. */
+  readonly wave?: ApiWave | undefined;
 }) {
   const locale = useBrowserLocale();
   const phase = useWavesMovePhase();
   const scope = useWavesMoveScope();
   const schedule = getWavesMoveSchedule();
+  const frozenResultMs = useFrozenResult(phase, schedule, wave);
   // Read once: the server and the hydrating render show no phase, so this
   // never changes the first markup.
   const [dismissed, setDismissed] = useState<string | null>(readDismissed);
-  const text =
+  const noticeText =
     schedule === null || (scope === "stays" && !siteWide)
       ? null
       : getWavesMoveNoticeText(locale, phase, schedule);
+  const text =
+    noticeText !== null && schedule !== null && frozenResultMs !== null
+      ? `${noticeText} ${t(locale, "wavesMove.resultPending", {
+          resultWeekday: formatWeekday(locale, frozenResultMs),
+          resultTime: formatTime(locale, frozenResultMs),
+          switchOnWeekday: formatWeekday(locale, schedule.switchOnMs),
+          switchOnTime: formatTime(locale, schedule.switchOnMs),
+        })}`
+      : noticeText;
 
-  if (text === null || dismissed === text) {
+  // Hiding the notice with the result sentence also hides the plain notice
+  // elsewhere; hiding the plain one still shows the sentence when it comes.
+  if (text === null || dismissed?.startsWith(text) === true) {
     return null;
   }
 
