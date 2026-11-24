@@ -3936,7 +3936,7 @@ export const EN_US_ROOT_MESSAGES = {
   "headerShare.connectModal.newDesktopTitle": "Connect 6529 Desktop",
   "headerShare.connectModal.desktopTitle": "Connect 6529 Desktop Classic",
   "headerShare.connectModal.desktopLaunchOnly":
-    "Opens Waves in the installed app. To connect your account, use Connect Device on 6529.io.",
+    "Use Connect Device on {site} to sign in to Desktop.",
   "headerShare.connectModal.chooseApp": "Which app are you connecting?",
   "headerShare.connectModal.only": "Connect only",
   "headerShare.connectModal.secure":

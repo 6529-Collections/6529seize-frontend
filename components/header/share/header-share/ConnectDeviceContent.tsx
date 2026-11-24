@@ -3,12 +3,13 @@ import {
   isSignedMessagesEnabled,
 } from "@/lib/device-signing/feature";
 import { isE2eeEnabled } from "@/config/e2eeEnv";
+import { PRODUCTION_APP_ORIGIN } from "@/config/appEnvironment";
 import { ModalMenu } from "./HeaderShareMenu";
 import { DesktopConnectionVersionNotice } from "./DesktopConnectionLink";
 import { HEADER_SHARE_LOCALE, SubMode } from "./constants";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Button from "@/components/utils/button/Button";
-import { t } from "@/i18n/messages";
+import { t, tRich } from "@/i18n/messages";
 import Image from "next/image";
 import { type ReactNode, useId, useLayoutEffect, useRef } from "react";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
@@ -174,7 +175,17 @@ function DesktopLaunchOnly() {
         {t(HEADER_SHARE_LOCALE, "headerShare.social.desktop")}
       </a>
       <p id={descriptionId} className="tw-m-0 tw-text-sm tw-text-iron-300">
-        {t(HEADER_SHARE_LOCALE, "headerShare.connectModal.desktopLaunchOnly")}
+        {tRich(HEADER_SHARE_LOCALE, "headerShare.connectModal.desktopLaunchOnly", {
+          site: (
+            <a
+              key="site"
+              href={PRODUCTION_APP_ORIGIN}
+              className="tw-rounded-sm tw-text-iron-100 tw-underline tw-underline-offset-2 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-300"
+            >
+              6529.io
+            </a>
+          ),
+        })}
       </p>
     </div>
   );

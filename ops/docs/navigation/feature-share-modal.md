@@ -140,8 +140,8 @@ link to Home. The source session remains connected. See
 for history, backup and capability limits.
 
 On staging, the **6529 Desktop** choice offers **Open in 6529 Desktop**, which
-opens Waves without a connection code. Use **Connect Device** on 6529.io to
-connect an account in the installed Tauri app. Both sites use `core6529://`
+opens Waves without a connection code. For sign-in, follow the link to 6529.io
+and open **Connect Device** there. Both sites use `core6529://`
 to launch it, and the operating system selects the registered handler.
 
 ## Common Scenarios

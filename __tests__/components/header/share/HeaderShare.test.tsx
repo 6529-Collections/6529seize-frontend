@@ -2257,11 +2257,17 @@ describe("HeaderShare", () => {
           screen.getByRole("button", { name: "6529 Desktop" })
         );
 
-        expect(
-          screen.getByRole("link", {
-            name: "Open in 6529 Desktop",
-          })
-        ).toHaveAttribute("href", "core6529://navigate/waves");
+        const launchLink = screen.getByRole("link", {
+          name: "Open in 6529 Desktop",
+        });
+        expect(launchLink).toHaveAttribute("href", "core6529://navigate/waves");
+        expect(launchLink).toHaveAccessibleDescription(
+          "Use Connect Device on 6529.io to sign in to Desktop."
+        );
+        expect(screen.getByRole("link", { name: "6529.io" })).toHaveAttribute(
+          "href",
+          "https://6529.io"
+        );
         expect(
           screen.queryByRole("button", { name: "Connect only" })
         ).toBeNull();
