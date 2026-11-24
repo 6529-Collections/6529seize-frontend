@@ -7,6 +7,11 @@ import {
   setWavesFreezeSchedule,
   WAVES_FREEZE_MS,
 } from "@/__tests__/helpers/wavesFreeze";
+import {
+  forgetWaveMoves,
+  rememberDropWave,
+  rememberWaveMove,
+} from "@/lib/waves-move/scope";
 
 jest.mock("@/config/env", () => {
   const actual = jest.requireActual("@/config/env");
@@ -125,8 +130,15 @@ const READS: readonly Request[] = [
 ];
 
 describe("assertWavesWriteAllowed", () => {
+  // The pages read w1 as a wave that moves, and showed drop d1 in it.
+  beforeEach(() => {
+    rememberWaveMove("w1", true);
+    rememberDropWave("d1", "w1");
+  });
+
   afterEach(() => {
     clearWavesFreeze();
+    forgetWaveMoves();
     jest.useRealTimers();
   });
 
@@ -178,6 +190,46 @@ describe("assertWavesWriteAllowed", () => {
       expect(attempt(request)).not.toThrow();
     }
   );
+
+  describe("a wave that stays on 6529.io, or one no page has read", () => {
+    const writesOf = (waveId: string, dropId: string) => [
+      req("POST", "drops", { wave_id: waveId, drop_type: "PARTICIPATORY" }),
+      req("POST", `v2/drops/${dropId}/poll/vote`, { options: [1] }),
+      req("POST", `waves/${waveId}/rep/rating`, { amount: 5 }),
+      req("PATCH", `v3/waves/${waveId}`, { name: "Renamed" }),
+      req("POST", `v3/waves/${waveId}/competitions`, { title: "Decision" }),
+      req("POST", `v2/waves/${waveId}/metadata`, { data_key: "rules" }),
+    ];
+
+    it("keeps sending a staying wave's writes from the freeze", () => {
+      rememberWaveMove("w2", false);
+      rememberDropWave("d2", "w2");
+      setWavesFreezeSchedule();
+      at(WAVES_FREEZE_MS);
+      for (const request of writesOf("w2", "d2")) {
+        expect(attempt(request)).not.toThrow();
+      }
+    });
+
+    it("keeps sending an unread wave's writes, and leaves them to the API", () => {
+      setWavesFreezeSchedule();
+      at(WAVES_FREEZE_MS);
+      for (const request of writesOf("w3", "d3")) {
+        expect(attempt(request)).not.toThrow();
+      }
+    });
+
+    it("still refuses a new wave, which would move", () => {
+      setWavesFreezeSchedule();
+      at(WAVES_FREEZE_MS);
+      expect(attempt(req("POST", "waves", { name: "New" }))).toThrow(
+        WavesWritePausedError
+      );
+      expect(attempt(req("POST", "v3/waves", { name: "New" }))).toThrow(
+        WavesWritePausedError
+      );
+    });
+  });
 
   it("refuses as the API does, so nothing retries it", () => {
     setWavesFreezeSchedule();

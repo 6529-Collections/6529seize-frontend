@@ -14,6 +14,20 @@ Two build settings name the instants in UTC:
 both are set and the switch-on comes after the freeze, nothing below applies:
 the site shows no notice and pauses nothing.
 
+### Waves That Stay
+
+6529.io's API marks each wave, a drop's wave and each decision with
+`stays_on_site`. Inside a wave marked `true`, the notice doesn't show and
+nothing on this page pauses; its votes, entries, polls, wave REP and settings
+keep going to 6529.io's API, which keeps taking them. A wave whose object
+doesn't carry the field is treated the same way, so nothing pauses or
+announces a move the wave may not make. The waves list and the create-wave
+flow, which have no single wave, keep the notice, and creating a wave stays
+paused from the freeze.
+
+The browser's request guard follows the same rule: it refuses a write only
+for a wave a page has read as moving, and a new wave.
+
 ## Location in the Site
 
 - The notice: a wave's view (`/waves/{waveId}`, not direct messages, its

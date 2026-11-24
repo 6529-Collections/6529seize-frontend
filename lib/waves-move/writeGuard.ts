@@ -1,6 +1,7 @@
 import { getBrowserLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { isWavesWritePaused } from "./schedule";
+import { isKnownMovingWave, waveOfKnownDrop } from "./scope";
 
 const READ_METHODS: ReadonlySet<string> = new Set(["GET", "HEAD", "OPTIONS"]);
 
@@ -172,6 +173,40 @@ const isWavesWrite = (
   }
 };
 
+/**
+ * Whether a paused write's wave moves: a new wave does; any other write only
+ * when a page has read its wave as moving. A wave that stays on 6529.io, or
+ * one the site hasn't read, keeps its writes, and 6529.io's API decides.
+ */
+const isMovingWaveWrite = (
+  segments: readonly string[],
+  body: unknown
+): boolean => {
+  const [root, second, third] = segments;
+  const bodyWave = (): string | null => {
+    const waveId = parseBody(body)?.["wave_id"];
+    return typeof waveId === "string" ? waveId : null;
+  };
+  switch (root) {
+    case "drops":
+      return isKnownMovingWave(bodyWave());
+    case "waves":
+      return segments.length === 1 || isKnownMovingWave(second);
+    case "v2":
+      if (second !== "drops") {
+        return isKnownMovingWave(third);
+      }
+      // v2/drops (a new drop) names its wave; v2/drops/{id}/... its drop.
+      return isKnownMovingWave(
+        third === undefined ? bodyWave() : waveOfKnownDrop(third)
+      );
+    case "v3":
+      return segments.length === 2 || isKnownMovingWave(third);
+    default:
+      return false;
+  }
+};
+
 const getApiPathSegments = (url: string): string[] | null => {
   let pathname: string;
   try {
@@ -215,7 +250,8 @@ export function assertWavesWriteAllowed(request: {
   const segments = getApiPathSegments(request.url);
   if (
     segments !== null &&
-    isWavesWrite(request.method.toUpperCase(), segments, request.body)
+    isWavesWrite(request.method.toUpperCase(), segments, request.body) &&
+    isMovingWaveWrite(segments, request.body)
   ) {
     throw new WavesWritePausedError();
   }

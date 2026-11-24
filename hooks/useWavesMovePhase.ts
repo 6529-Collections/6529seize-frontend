@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { useWavesMoveScope } from "@/components/waves-move/WavesMoveScope";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import {
@@ -87,10 +88,13 @@ export function useWavesMovePhase(): WavesMovePhase {
 
 /**
  * Whether 6529.io's own vote, entry, poll, wave REP, wave and decision
- * writes are closed, following the clock.
+ * writes are closed, following the clock. Inside a wave that stays on
+ * 6529.io nothing is closed.
  */
 export function useWavesWritesPaused(): boolean {
-  return isWavesWritePausedPhase(useWavesMovePhase());
+  const phase = useWavesMovePhase();
+  const scope = useWavesMoveScope();
+  return scope !== "stays" && isWavesWritePausedPhase(phase);
 }
 
 /**

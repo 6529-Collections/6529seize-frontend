@@ -4,6 +4,7 @@ import { InformationCircleIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useWavesMovePhase } from "@/hooks/useWavesMovePhase";
+import { useWavesMoveScope } from "./WavesMoveScope";
 import { formatUtcDate } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -82,8 +83,8 @@ const getWavesMoveNoticeText = (
 /**
  * Says when votes, entries and wave settings move to the 6529 Network and
  * what that means for changing them on this site. Renders nothing unless the
- * waves freeze and switch-on are set. The viewer can hide it until it says
- * something new.
+ * waves freeze and switch-on are set, and inside a wave that stays on
+ * 6529.io. The viewer can hide it until it says something new.
  */
 export default function WavesMoveNotice({
   className = "",
@@ -92,12 +93,15 @@ export default function WavesMoveNotice({
 }) {
   const locale = useBrowserLocale();
   const phase = useWavesMovePhase();
+  const scope = useWavesMoveScope();
   const schedule = getWavesMoveSchedule();
   // Read once: the server and the hydrating render show no phase, so this
   // never changes the first markup.
   const [dismissed, setDismissed] = useState<string | null>(readDismissed);
   const text =
-    schedule === null ? null : getWavesMoveNoticeText(locale, phase, schedule);
+    schedule === null || scope === "stays"
+      ? null
+      : getWavesMoveNoticeText(locale, phase, schedule);
 
   if (text === null || dismissed === text) {
     return null;

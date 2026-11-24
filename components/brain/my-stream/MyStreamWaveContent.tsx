@@ -92,6 +92,7 @@ import {
 import { getWaveReplyEligibility } from "@/helpers/waves/wave-chat-replies.helpers";
 import { getMissingWaveNavigationRoute } from "@/helpers/waves/missing-wave-navigation.helpers";
 import WavesMoveNotice from "@/components/waves-move/WavesMoveNotice";
+import { WavesMoveScope } from "@/components/waves-move/WavesMoveScope";
 
 export interface MyStreamWaveProps {
   readonly waveId: string;
@@ -708,77 +709,79 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
   }
 
   return (
-    <div
-      ref={contentRef}
-      className="tailwind-scope tw-relative tw-flex tw-h-full tw-min-h-0 tw-min-w-0 tw-flex-col"
-      key={stableWaveKey}
-      data-testid="wave-content"
-    >
-      <WaveChatTitle
-        waveId={wave.id}
-        waveName={wave.name}
-        chatActive={activeTabContent === components[MyStreamWaveTab.CHAT]}
-      />
-      {competitionOnly ? (
-        <div className="tw-shrink-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-iron-950">
-          <MyStreamWaveDesktopTabs
-            wave={wave}
-            activeTab={activeContentTab}
-            setActiveTab={setActiveContentTab}
-            activeCurationId={null}
-            onSelectCuration={() => {}}
-            showCreateActionsMenu={false}
-            competitionOnly
-          />
-        </div>
-      ) : (
-        <MyStreamWaveTabs
-          wave={submissionWave ?? wave}
-          competitionSubmissionReady={Boolean(submissionTarget.wave)}
-          viewMode={viewMode}
-          onToggleViewMode={toggleViewMode}
-          showGalleryToggle={showGalleryToggle}
-          activeCurationId={activeCurationId}
-          onSelectCuration={onSelectCuration}
-          chatSubmitDropAction={chatSubmitDropAction}
+    <WavesMoveScope wave={wave} waveId={wave.id}>
+      <div
+        ref={contentRef}
+        className="tailwind-scope tw-relative tw-flex tw-h-full tw-min-h-0 tw-min-w-0 tw-flex-col"
+        key={stableWaveKey}
+        data-testid="wave-content"
+      >
+        <WaveChatTitle
+          waveId={wave.id}
+          waveName={wave.name}
+          chatActive={activeTabContent === components[MyStreamWaveTab.CHAT]}
         />
-      )}
-
-      {!isDm && (
-        <WavesMoveNotice className="tw-mx-2 tw-my-2 tw-shrink-0 sm:tw-mx-4" />
-      )}
-
-      {defaultNavigation.resolve &&
-        !isResolvingCompetitionTab &&
-        defaultNavigation.selection.isError && (
-          <DefaultCompetitionState selection={defaultNavigation.selection} />
+        {competitionOnly ? (
+          <div className="tw-shrink-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-iron-950">
+            <MyStreamWaveDesktopTabs
+              wave={wave}
+              activeTab={activeContentTab}
+              setActiveTab={setActiveContentTab}
+              activeCurationId={null}
+              onSelectCuration={() => {}}
+              showCreateActionsMenu={false}
+              competitionOnly
+            />
+          </div>
+        ) : (
+          <MyStreamWaveTabs
+            wave={submissionWave ?? wave}
+            competitionSubmissionReady={Boolean(submissionTarget.wave)}
+            viewMode={viewMode}
+            onToggleViewMode={toggleViewMode}
+            showGalleryToggle={showGalleryToggle}
+            activeCurationId={activeCurationId}
+            onSelectCuration={onSelectCuration}
+            chatSubmitDropAction={chatSubmitDropAction}
+          />
         )}
 
-      <div
-        className="tw-relative tw-min-h-0 tw-min-w-0 tw-flex-grow tw-overflow-hidden focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400"
-        role={isApp && flat ? "region" : "tabpanel"}
-        tabIndex={-1}
-        aria-label={isApp && flat ? wave.name : undefined}
-        id={
-          activeCurationId
-            ? `my-stream-wave-tabpanel-curation-${activeCurationId}`
-            : getContentTabPanelId(activeContentTab)
-        }
-      >
-        <WaveChatActivity
-          waveId={wave.id}
-          active={activeTabContent === components[MyStreamWaveTab.CHAT]}
-          chat={components[MyStreamWaveTab.CHAT]}
+        {!isDm && (
+          <WavesMoveNotice className="tw-mx-2 tw-my-2 tw-shrink-0 sm:tw-mx-4" />
+        )}
+
+        {defaultNavigation.resolve &&
+          !isResolvingCompetitionTab &&
+          defaultNavigation.selection.isError && (
+            <DefaultCompetitionState selection={defaultNavigation.selection} />
+          )}
+
+        <div
+          className="tw-relative tw-min-h-0 tw-min-w-0 tw-flex-grow tw-overflow-hidden focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400"
+          role={isApp && flat ? "region" : "tabpanel"}
+          tabIndex={-1}
+          aria-label={isApp && flat ? wave.name : undefined}
+          id={
+            activeCurationId
+              ? `my-stream-wave-tabpanel-curation-${activeCurationId}`
+              : getContentTabPanelId(activeContentTab)
+          }
         >
-          {activeTabContent}
-        </WaveChatActivity>
+          <WaveChatActivity
+            waveId={wave.id}
+            active={activeTabContent === components[MyStreamWaveTab.CHAT]}
+            chat={components[MyStreamWaveTab.CHAT]}
+          >
+            {activeTabContent}
+          </WaveChatActivity>
+        </div>
+        <MemesArtSubmissionModal
+          isOpen={isAppMemesSubmitModalOpen}
+          wave={submissionWave ?? wave}
+          onClose={closeAppMemesSubmit}
+        />
       </div>
-      <MemesArtSubmissionModal
-        isOpen={isAppMemesSubmitModalOpen}
-        wave={submissionWave ?? wave}
-        onClose={closeAppMemesSubmit}
-      />
-    </div>
+    </WavesMoveScope>
   );
 };
 

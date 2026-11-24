@@ -10,6 +10,11 @@ import {
   setWavesFreezeSchedule,
   WAVES_FREEZE_MS,
 } from "@/__tests__/helpers/wavesFreeze";
+import {
+  forgetWaveMoves,
+  rememberDropWave,
+  rememberWaveMove,
+} from "@/lib/waves-move/scope";
 
 jest.mock("@/config/env", () => {
   const actual = jest.requireActual("@/config/env");
@@ -36,6 +41,9 @@ jest.mock("@/services/auth/auth.utils", () => ({
 const fetchMock = globalThis.fetch as jest.Mock;
 
 beforeEach(() => {
+  // The pages read w1 as a wave that moves, and showed drop d1 in it.
+  rememberWaveMove("w1", true);
+  rememberDropWave("d1", "w1");
   setWavesFreezeSchedule();
   fetchMock.mockReset();
   fetchMock.mockResolvedValue({
@@ -48,6 +56,7 @@ beforeEach(() => {
 afterEach(() => {
   jest.useRealTimers();
   clearWavesFreeze();
+  forgetWaveMoves();
 });
 
 const WRITES: ReadonlyArray<readonly [string, () => Promise<unknown>]> = [
