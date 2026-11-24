@@ -124,11 +124,13 @@ shell HTML, and the browser makes the per-device decisions:
   local server on a different port, gets its own badge right after hydration.
 
 A route that reads no request data and fetches nothing while it renders is
-prerendered, `/` included. The layout sets `fetchCache = "force-no-store"`, so
-a route that fetches while it renders stays request-time; see Static Rendering
-Readiness for why it remains. Wave and chat routes (`/waves`, `/messages`,
-`/notifications`, `/my-stream`) stay request-time in their own segments, because
-the shell's wave providers read their query during the server render there.
+prerendered. The layout sets `fetchCache = "force-no-store"`, so a route that
+fetches while it renders stays request-time. The homepage waits for
+`connection()` before selecting the featured mint. It caches short-lived
+public inputs per worker and evaluates the grace deadline on every render.
+Wave and chat routes (`/waves`, `/messages`, `/notifications`, `/my-stream`)
+stay request-time in their own segments, where the shell's wave providers read
+the request query.
 
 Fixed-content pages opt out with `export const dynamic = "force-static"`.
 Next.js then prerenders them, gives them a cacheable `Cache-Control` header, and
@@ -172,10 +174,9 @@ caches fetches at build time.
 - A `force-static` page renders the shell with empty search params on the
   server and real ones in the browser, so shell UI that reads search params in
   the hydration render mismatches for URLs that carry them. A desktop load of
-  `/?view=messages` failed hydration (React error 418) that way. `/` therefore
-  exports no `dynamic` setting and prerenders in Next's default (`auto`) mode,
-  where a reader inside its own `<Suspense>` bails out to client rendering
-  instead of reading empty params.
+  `/?view=messages` failed hydration (React error 418) that way. The home
+  shell matches the initial query-independent render and reads these query
+  values in the browser.
 
 ### CSP Nonces
 

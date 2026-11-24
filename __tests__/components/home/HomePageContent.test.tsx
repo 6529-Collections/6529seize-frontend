@@ -74,7 +74,7 @@ describe("HomePageContent", () => {
         hasValidWalletAuth,
       } as ReturnType<typeof useSeizeConnectContext>);
 
-      render(<HomePageContent />);
+      render(<HomePageContent initialDrop={null} />);
 
       const intro = screen.queryByText("Newcomer intro");
       const steps = screen.queryByText("How to start");
@@ -102,7 +102,7 @@ it("fetches mint status once for Latest Drop without coupling the static hero", 
     connectionState: "disconnected",
     hasValidWalletAuth: false,
   } as ReturnType<typeof useSeizeConnectContext>);
-  render(<HomePageContent />);
+  render(<HomePageContent initialDrop={null} />);
   expect(useNowMintingStatus).toHaveBeenCalledTimes(1);
   const status = jest.mocked(useNowMintingStatus).mock.results[0]?.value;
   expect(jest.mocked(HeroHeader).mock.calls[0]?.[0]).not.toHaveProperty(
