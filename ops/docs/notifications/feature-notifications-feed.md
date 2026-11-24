@@ -23,6 +23,10 @@ with a multi-select cause filter, grouped reactions, and inline drop previews.
 - Open `/notifications` directly.
 - Open `/notifications?reload=true` to force one refetch/read pass.
 
+Select the gear beside **Notifications** in the desktop inbox or full feed
+to open the **Notifications** tab in [Preferences](feature-profile-preferences.md).
+In the mobile app, the gear is to the left of the feed filter.
+
 ## Desktop Inbox
 
 Hovering the desktop sidebar bell opens a floating inbox after 100ms while
