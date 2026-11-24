@@ -2,7 +2,11 @@ import { bytesToString, type Hex } from "viem";
 import type { Config } from "wagmi";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import { chainGateway, chainGatewayGet } from "@/lib/chain-identity/gateway";
+import {
+  ChainGatewayError,
+  chainGateway,
+  chainGatewayGet,
+} from "@/lib/chain-identity/gateway";
 import { derivedId } from "@/lib/chain/codec/ids";
 import {
   ChainOperationError,
@@ -391,6 +395,64 @@ describe("who may enter, read from the chain", () => {
     expect(run).toHaveBeenCalledTimes(2);
   });
 
+  it.each([
+    [503, "The TDH day isn't copied yet. Try again."],
+    [500, "The gateway failed."],
+    [0, "The 6529 Network gateway did not answer."],
+  ])(
+    "goes on to the prompt when the membership read answers %i",
+    async (status, message) => {
+      gateway.getDecision.mockResolvedValue(
+        decision({ submitGroup: { groupId: GROUP, version: 0 } })
+      );
+      reads.set(membershipPath, () => {
+        throw new ChainGatewayError(status, `http_${status}`, message);
+      });
+      const consent = jest.fn().mockResolvedValue(null);
+      await expect(enter(consent)).resolves.toMatchObject({ txId: TX });
+      expect(consent).toHaveBeenCalledTimes(1);
+      expect(run).toHaveBeenCalledTimes(1);
+    }
+  );
+
+  it("stops at a membership read the gateway refuses", async () => {
+    gateway.getDecision.mockResolvedValue(
+      decision({ submitGroup: { groupId: GROUP, version: 0 } })
+    );
+    reads.set(membershipPath, () => {
+      throw new ChainGatewayError(400, "bad_request", "Bad version.");
+    });
+    const consent = jest.fn().mockResolvedValue(null);
+    await expect(enter(consent)).rejects.toThrow("Bad version.");
+    expect(consent).not.toHaveBeenCalled();
+    expect(run).not.toHaveBeenCalled();
+  });
+
+  it("stops when the entry is cancelled during the membership read", async () => {
+    gateway.getDecision.mockResolvedValue(
+      decision({ submitGroup: { groupId: GROUP, version: 0 } })
+    );
+    const cancel = new AbortController();
+    reads.set(membershipPath, () => {
+      cancel.abort();
+      throw new ChainGatewayError(
+        0,
+        "network",
+        "The 6529 Network gateway did not answer."
+      );
+    });
+    const consent = jest.fn().mockResolvedValue(null);
+    await expect(
+      writeChainEntry(
+        config,
+        WALLET,
+        { request: request(), competitionId: COMPETITION_UUID, consent },
+        cancel.signal
+      )
+    ).rejects.toThrow("did not answer");
+    expect(consent).not.toHaveBeenCalled();
+  });
+
   it("reads no group when everyone may enter", async () => {
     gateway.getDecision.mockResolvedValue(
       decision({ submitGroup: { groupId: `0x${"00".repeat(32)}`, version: 0 } })
@@ -452,6 +514,49 @@ describe("who may enter, read from the chain", () => {
       entryRow({ status: "winner" }),
     ]);
     await expect(enter()).resolves.toMatchObject({ txId: TX });
+  });
+
+  it.each([
+    [404, "Not found."],
+    [503, "The TDH day isn't copied yet. Try again."],
+    [500, "The gateway failed."],
+  ])(
+    "goes on to the prompt when the author's entries read answers %i",
+    async (status, message) => {
+      gateway.getDecision.mockResolvedValue(
+        decision({
+          config: {
+            participationStart: "0",
+            participationEnd: "0",
+            maxEntriesPerAuthor: 1,
+          },
+        })
+      );
+      reads.set(byAuthorPath, () => {
+        throw new ChainGatewayError(status, `http_${status}`, message);
+      });
+      const consent = jest.fn().mockResolvedValue(null);
+      await expect(enter(consent)).resolves.toMatchObject({ txId: TX });
+      expect(consent).toHaveBeenCalledTimes(1);
+      expect(run).toHaveBeenCalledTimes(1);
+    }
+  );
+
+  it("stops at an author's entries read the gateway refuses", async () => {
+    gateway.getDecision.mockResolvedValue(
+      decision({
+        config: {
+          participationStart: "0",
+          participationEnd: "0",
+          maxEntriesPerAuthor: 1,
+        },
+      })
+    );
+    reads.set(byAuthorPath, () => {
+      throw new ChainGatewayError(400, "bad_request", "Bad cursor.");
+    });
+    await expect(enter()).rejects.toThrow("Bad cursor.");
+    expect(run).not.toHaveBeenCalled();
   });
 });
 

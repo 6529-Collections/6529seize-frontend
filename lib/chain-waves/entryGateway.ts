@@ -1,5 +1,8 @@
 import type { Hex } from "viem";
-import { chainGatewayGet } from "@/lib/chain-identity/gateway";
+import {
+  ChainGatewayError,
+  chainGatewayGet,
+} from "@/lib/chain-identity/gateway";
 import { ChainOperationError } from "@/lib/chain-identity/operation";
 import { wavesGateway, type ChainDecision, type ChainEntry } from "./gateway";
 import { chainIdOf, isChainId, LegacyObjectKind, resolveWave } from "./ids";
@@ -173,21 +176,49 @@ function submitGroupOf(
   };
 }
 
+/**
+ * `read`'s answer, or null when the gateway can't answer it: a 404, a 5xx
+ * (a group whose rule reads a TDH day the node hasn't copied yet answers
+ * 503) or no answer at all. Other refusals, and a read the caller
+ * cancelled, still throw.
+ */
+async function unlessUnanswered<T>(
+  read: () => Promise<T>,
+  signal?: AbortSignal
+): Promise<T | null> {
+  try {
+    return await read();
+  } catch (error) {
+    if (
+      signal?.aborted !== true &&
+      error instanceof ChainGatewayError &&
+      (error.status === 0 || error.status === 404 || error.status >= 500)
+    ) {
+      return null;
+    }
+    throw error;
+  }
+}
+
 /** Whether the author is in the group, or null when the gateway can't say. */
 async function isGroupMember(
   group: { readonly groupId: Hex; readonly version: number },
   author: Hex,
   signal?: AbortSignal
 ): Promise<boolean | null> {
-  const answer = await chainGatewayGet<{
-    readonly groupId?: string;
-    readonly principalId?: string;
-    readonly member?: unknown;
-  } | null>(`/v1/groups/${group.groupId}/members/${lower(author)}`, {
-    signal,
-    query: { ...HEAD, version: group.version },
-    nullOn404: true,
-  });
+  const answer = await unlessUnanswered(
+    () =>
+      chainGatewayGet<{
+        readonly groupId?: string;
+        readonly principalId?: string;
+        readonly member?: unknown;
+      } | null>(`/v1/groups/${group.groupId}/members/${lower(author)}`, {
+        signal,
+        query: { ...HEAD, version: group.version },
+        nullOn404: true,
+      }),
+    signal
+  );
   if (answer === null || typeof answer.member !== "boolean") {
     return null;
   }
@@ -202,21 +233,29 @@ async function isGroupMember(
 
 /**
  * How many of the author's entries in the decision are in the running,
- * counted up to `atLeast`: the reads stop once that many are found.
+ * counted up to `atLeast`: the reads stop once that many are found. Null
+ * when the gateway can't answer a page before then.
  */
 async function activeEntriesOf(
   author: Hex,
   decisionId: Hex,
   atLeast: number,
   signal?: AbortSignal
-): Promise<number> {
+): Promise<number | null> {
   let count = 0;
   let after: string | undefined;
   for (let page = 0; page < AUTHOR_ENTRY_PAGES; page += 1) {
-    const rows = await chainGatewayGet<readonly ChainEntry[]>(
-      `/v1/entries/by-author/${lower(author)}`,
-      { signal, query: { ...HEAD, limit: AUTHOR_ENTRY_PAGE, after } }
+    const rows = await unlessUnanswered(
+      () =>
+        chainGatewayGet<readonly ChainEntry[]>(
+          `/v1/entries/by-author/${lower(author)}`,
+          { signal, query: { ...HEAD, limit: AUTHOR_ENTRY_PAGE, after } }
+        ),
+      signal
     );
+    if (rows === null) {
+      return null;
+    }
     count += rows.filter(
       (entry) =>
         entry.status === "active" &&
@@ -242,8 +281,10 @@ async function activeEntriesOf(
  * this decision (P61 1.16 4.6 checks 6 and 7): the author isn't in its
  * submit group, or already has as many entries in the running as it allows.
  * The chain refuses those only once the entry is in a block, and takes the
- * fee, so they are read before anything is signed. A read the gateway
- * can't answer (404) leaves the check to the chain.
+ * fee, so they are read before anything is signed. When the gateway can't
+ * answer a read (a 404, a 5xx or no answer), that check is skipped: the
+ * entry goes on to the wallet's prompt and the chain decides. Any other
+ * refusal of a read stops the entry.
  */
 export async function assertCanSubmit(
   decision: ChainDecision,
@@ -261,10 +302,11 @@ export async function assertCanSubmit(
     );
   }
   const limit = asNumber(decision.config["maxEntriesPerAuthor"]);
-  if (
-    limit > 0 &&
-    (await activeEntriesOf(author, decision.decisionId, limit, signal)) >= limit
-  ) {
+  const active =
+    limit > 0
+      ? await activeEntriesOf(author, decision.decisionId, limit, signal)
+      : null;
+  if (active !== null && active >= limit) {
     throw new ChainOperationError(
       "rejected",
       limit === 1
