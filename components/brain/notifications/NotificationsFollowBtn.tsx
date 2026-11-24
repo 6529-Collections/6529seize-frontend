@@ -1,152 +1,32 @@
 "use client";
 
-import { useAuth } from "@/components/auth/Auth";
-import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import {
-  FOLLOW_BUTTON_SIZES,
+import UserFollowBtn, {
   UserFollowBtnSize,
 } from "@/components/user/utils/UserFollowBtn";
-import Button from "@/components/utils/button/Button";
-import type { ApiIdentitySubscriptionActions } from "@/generated/models/ApiIdentitySubscriptionActions";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
-import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import {
-  commonApiDeleteWithBody,
-  commonApiPost,
-} from "@/services/api/common-api";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
-import { useMutation } from "@tanstack/react-query";
-import type { FC } from "react";
-import { useContext, useState } from "react";
-import {
-  DEFAULT_SUBSCRIPTION_BODY,
-  FollowBtnCheckIcon,
-  FollowBtnPlusIcon,
-} from "./notificationsFollowShared";
 
-interface NotificationsFollowBtnProps {
+export default function NotificationsFollowBtn({
+  profile,
+  size = UserFollowBtnSize.MEDIUM,
+  followLabel,
+  followingLabel,
+}: {
   readonly profile: ApiProfileMin;
   readonly size?: UserFollowBtnSize | undefined;
   readonly followLabel?: string | undefined;
   readonly followingLabel?: string | undefined;
-}
-
-const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({
-  profile,
-  size = UserFollowBtnSize.MEDIUM,
-  followLabel = t(DEFAULT_LOCALE, "notifications.followButton.follow"),
-  followingLabel = t(DEFAULT_LOCALE, "notifications.followButton.following"),
-}) => {
-  const { onIdentityFollowChange } = useContext(ReactQueryWrapperContext);
-  const { setToast, requestAuth } = useAuth();
-  const [mutating, setMutating] = useState<boolean>(false);
-
+}) {
   const handle = profile.handle?.trim();
-  const following = profile.subscribed_actions.length > 0;
-  const label = following ? followingLabel : followLabel;
-
-  const followMutation = useMutation({
-    mutationFn: async () => {
-      if (!handle) {
-        throw new Error("Missing profile handle.");
-      }
-      await commonApiPost<
-        ApiIdentitySubscriptionActions,
-        ApiIdentitySubscriptionActions
-      >({
-        endpoint: `identities/${handle}/subscriptions`,
-        body: DEFAULT_SUBSCRIPTION_BODY,
-      });
-    },
-    onSuccess: () => {
-      onIdentityFollowChange();
-    },
-    onError: (error) => {
-      setToast({
-        type: "error",
-        title: "Couldn't follow this profile.",
-        description: "Please try again.",
-        details: getToastErrorDetails(error),
-      });
-    },
-    onSettled: () => {
-      setMutating(false);
-    },
-  });
-
-  const unFollowMutation = useMutation({
-    mutationFn: async () => {
-      if (!handle) {
-        throw new Error("Missing profile handle.");
-      }
-      await commonApiDeleteWithBody<
-        ApiIdentitySubscriptionActions,
-        ApiIdentitySubscriptionActions
-      >({
-        endpoint: `identities/${handle}/subscriptions`,
-        body: DEFAULT_SUBSCRIPTION_BODY,
-      });
-    },
-    onSuccess: () => {
-      onIdentityFollowChange();
-    },
-    onError: (error) => {
-      setToast({
-        type: "error",
-        title: "Couldn't unfollow this profile.",
-        description: "Please try again.",
-        details: getToastErrorDetails(error),
-      });
-    },
-    onSettled: () => {
-      setMutating(false);
-    },
-  });
-
-  const onFollow = async (): Promise<void> => {
-    if (!handle) {
-      setToast({
-        type: "error",
-        title: t(
-          DEFAULT_LOCALE,
-          "notifications.followButton.error.missingHandleTitle"
-        ),
-        description: t(
-          DEFAULT_LOCALE,
-          "notifications.followButton.error.missingHandleDescription"
-        ),
-      });
-      return;
-    }
-    setMutating(true);
-    const { success } = await requestAuth();
-    if (!success) {
-      setMutating(false);
-      return;
-    }
-    if (following) {
-      await unFollowMutation.mutateAsync();
-      return;
-    }
-    await followMutation.mutateAsync();
-  };
+  if (!handle) return null;
 
   return (
-    <div className="tw-flex tw-items-center tw-gap-x-2">
-      <Button
-        onClick={onFollow}
-        loading={mutating}
-        hideChildrenWhenLoading
-        variant={following ? "secondary" : "primary"}
-        size={FOLLOW_BUTTON_SIZES[size]}
-        aria-label={label}
-      >
-        {following ? <FollowBtnCheckIcon /> : <FollowBtnPlusIcon size={size} />}
-        <span>{label}</span>
-      </Button>
-    </div>
+    <UserFollowBtn
+      handle={handle}
+      size={size}
+      showMuteButton={false}
+      followLabel={followLabel}
+      followingLabel={followingLabel}
+      initialFollowing={profile.subscribed_actions.length > 0}
+    />
   );
-};
-
-export default NotificationsFollowBtn;
+}

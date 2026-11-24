@@ -1,45 +1,47 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import NotificationsFollowBtn from '@/components/brain/notifications/NotificationsFollowBtn';
-import { useMutation } from '@tanstack/react-query';
-import { AuthContext } from '@/components/auth/Auth';
-import { ReactQueryWrapperContext } from '@/components/react-query-wrapper/ReactQueryWrapper';
+import { render, screen } from "@testing-library/react";
+import NotificationsFollowBtn from "@/components/brain/notifications/NotificationsFollowBtn";
+import UserFollowBtn, {
+  UserFollowBtnSize,
+} from "@/components/user/utils/UserFollowBtn";
+import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import { ApiIdentitySubscriptionTargetAction } from "@/generated/models/ApiIdentitySubscriptionTargetAction";
 
-jest.mock('@tanstack/react-query');
+jest.mock("@/components/user/utils/UserFollowBtn", () => ({
+  __esModule: true,
+  default: jest.fn(() => <button>Account follow control</button>),
+  UserFollowBtnSize: { SMALL: "SMALL", MEDIUM: "MEDIUM" },
+}));
 
-const followCall = jest.fn();
-const unfollowCall = jest.fn();
-const mutations: any[] = [];
-(useMutation as jest.Mock).mockImplementation((config) => {
-  const fn = jest.fn(async () => { config.onSuccess?.(); });
-  mutations.push({ mutateAsync: fn });
-  return { mutateAsync: fn };
-});
+const profile = {
+  handle: "bob",
+  subscribed_actions: [ApiIdentitySubscriptionTargetAction.DropCreated],
+} as ApiProfileMin;
 
-const ctxAuth = { requestAuth: jest.fn().mockResolvedValue({ success: true }), setToast: jest.fn() } as any;
-const ctxRQ = { onIdentityFollowChange: jest.fn() } as any;
-
-function renderBtn(profile: any) {
-  mutations.length = 0;
-  return render(
-    <AuthContext.Provider value={ctxAuth}>
-      <ReactQueryWrapperContext.Provider value={ctxRQ}>
-        <NotificationsFollowBtn profile={profile} />
-      </ReactQueryWrapperContext.Provider>
-    </AuthContext.Provider>
+it("uses the shared account follow control with notification context", () => {
+  render(
+    <NotificationsFollowBtn
+      profile={profile}
+      size={UserFollowBtnSize.SMALL}
+      followLabel="Follow creator"
+      followingLabel="Following creator"
+    />
   );
-}
 
-it('follows when not currently following', async () => {
-  const user = userEvent.setup();
-  renderBtn({ handle: 'bob', subscribed_actions: [] });
-  await user.click(screen.getByRole('button'));
-  expect(mutations[0].mutateAsync).toHaveBeenCalled();
+  expect(
+    screen.getByRole("button", { name: "Account follow control" })
+  ).toBeInTheDocument();
+  expect(jest.mocked(UserFollowBtn).mock.calls[0]?.[0]).toMatchObject({
+    handle: "bob",
+    size: UserFollowBtnSize.SMALL,
+    showMuteButton: false,
+    initialFollowing: true,
+    followLabel: "Follow creator",
+    followingLabel: "Following creator",
+  });
 });
 
-it('unfollows when already following', async () => {
-  const user = userEvent.setup();
-  renderBtn({ handle: 'bob', subscribed_actions: ['x'] });
-  await user.click(screen.getByRole('button'));
-  expect(mutations[1].mutateAsync).toHaveBeenCalled();
+it("omits the follow control for a profile without a handle", () => {
+  render(<NotificationsFollowBtn profile={{ ...profile, handle: null }} />);
+
+  expect(screen.queryByRole("button")).not.toBeInTheDocument();
 });
