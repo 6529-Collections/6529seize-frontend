@@ -6932,23 +6932,22 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       "font-size",
       "13px"
     );
+    await expect(row.getByText("1st", { exact: true })).toBeVisible();
     await expect(
       row.getByRole("heading").locator("..").getByText("1st", { exact: true })
-    ).toBeVisible();
-    const titleButton = (await row
-      .getByRole("heading")
-      .getByRole("button")
+    ).toHaveCount(0);
+    const rank = (await row.getByText("1st", { exact: true }).boundingBox())!;
+    const voters = (await row
+      .getByText("1 voter", { exact: true })
       .boundingBox())!;
-    const rank = (await row
-      .getByRole("heading")
-      .locator("..")
-      .getByText("1st", { exact: true })
-      .locator("..")
-      .boundingBox())!;
-    expect(rank.x - titleButton.x - titleButton.width).toBeGreaterThanOrEqual(
-      7
+    expect(rank.x).toBeGreaterThan(voters.x + voters.width);
+    expect(
+      Math.abs(rank.y + rank.height / 2 - voters.y - voters.height / 2)
+    ).toBeLessThanOrEqual(1);
+    await expect(row.getByText("1st", { exact: true })).toHaveCSS(
+      "font-size",
+      "13px"
     );
-    expect(rank.x - titleButton.x - titleButton.width).toBeLessThanOrEqual(9);
     const picture = (await row
       .getByRole("button", { name: /^Open / })
       .boundingBox())!;
@@ -7120,6 +7119,23 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         });
         expect(
           Math.abs(authorAvatarBottom - thumbnail.y - thumbnail.height)
+        ).toBeLessThanOrEqual(1);
+        const compactRank = (await row
+          .getByText("1st", { exact: true })
+          .boundingBox())!;
+        const compactVoters = (await row
+          .getByText("1 voter", { exact: true })
+          .boundingBox())!;
+        expect(compactRank.x).toBeGreaterThan(
+          compactVoters.x + compactVoters.width
+        );
+        expect(
+          Math.abs(
+            compactRank.y +
+              compactRank.height / 2 -
+              compactVoters.y -
+              compactVoters.height / 2
+          )
         ).toBeLessThanOrEqual(1);
         await capture("rest");
         await panel.getByRole("button", { name: /^Sort by:/ }).click();
@@ -7369,7 +7385,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
               const rect = element.getBoundingClientRect();
               return {
                 tag: element.tagName,
-                width: rect.width,
+                elementWidth: rect.width,
                 scrollWidth: element.scrollWidth,
                 clientWidth: element.clientWidth,
                 left: rect.left - bounds.left,

@@ -387,6 +387,11 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
         winningThreshold={winningThreshold}
       />
       <MyVoteVoters drop={drop} mobile={mobile} />
+      {typeof drop.rank === "number" && (
+        <div className="tw-flex tw-shrink-0 tw-items-center [&_span]:!tw-text-[13px]">
+          <SingleWaveDropPosition rank={drop.rank} variant="simple" size="sm" />
+        </div>
+      )}
     </>
   );
 
@@ -550,17 +555,6 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
                 {dropTitle}
               </button>
             </h3>
-            {typeof drop.rank === "number" && (
-              <div
-                className={`tw-flex tw-shrink-0 ${mobile ? "tw-min-h-11 tw-items-end tw-pb-1" : "tw-min-h-6 tw-items-center"}`}
-              >
-                <SingleWaveDropPosition
-                  rank={drop.rank}
-                  variant="simple"
-                  size="sm"
-                />
-              </div>
-            )}
           </div>
           <MyVoteAuthor author={drop.author} mobile={mobile} />
           {!mobile && (
