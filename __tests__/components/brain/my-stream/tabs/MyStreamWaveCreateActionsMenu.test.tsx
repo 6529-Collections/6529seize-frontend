@@ -252,7 +252,7 @@ describe("MyStreamWaveCreateActionsMenu", () => {
         screen.getByRole("button", { name: "Open create menu" })
       );
       expect(
-        screen.queryByRole("button", { name: "New decision", exact: true })
+        screen.queryByRole("button", { name: "New decision" })
       ).not.toBeInTheDocument();
     }
   );

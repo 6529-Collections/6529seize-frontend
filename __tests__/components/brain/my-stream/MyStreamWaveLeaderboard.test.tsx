@@ -226,7 +226,6 @@ describe("MyStreamWaveLeaderboard", () => {
       renderLeaderboard();
       const help = screen.queryByRole("button", {
         name: "How to Submit",
-        exact: true,
       });
       expect(help).not.toBeInTheDocument();
       expect(headerProps.onCreateDrop !== undefined).toBe(eligible);

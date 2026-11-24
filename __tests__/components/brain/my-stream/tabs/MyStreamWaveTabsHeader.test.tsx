@@ -335,9 +335,7 @@ describe("MyStreamWaveTabsHeader", () => {
     expect(
       sheet.getByRole("button", { name: "Wave details" })
     ).toBeInTheDocument();
-    fireEvent.click(
-      sheet.getByRole("button", { name: "Search messages", exact: true })
-    );
+    fireEvent.click(sheet.getByRole("button", { name: "Search messages" }));
     await waitFor(() => expect(mockOpenWaveSearch).toHaveBeenCalledTimes(1));
     fireEvent.click(screen.getByRole("button", { name: "More wave actions" }));
     fireEvent.click(screen.getByRole("button", { name: "Wave details" }));
