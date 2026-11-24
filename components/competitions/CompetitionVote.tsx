@@ -382,7 +382,7 @@ export function CompetitionVoteForm({
           unit={creditLabel}
           min={min ?? 0}
           valid={valid}
-          disabled={disabled || !competition.permissions.vote}
+          disabled={disabled || !canVoteNow}
           busy={busy}
           helperText={t(locale, "competitions.voteRange", {
             min: formatInteger(locale, min ?? 0),

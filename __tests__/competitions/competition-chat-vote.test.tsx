@@ -25,6 +25,11 @@ import {
   invalidateCompetition,
 } from "@/services/api/competitions-api";
 
+let mockMovePaused = false;
+jest.mock("@/hooks/useWavesMovePhase", () => ({
+  ...jest.requireActual("@/hooks/useWavesMovePhase"),
+  useWavesWritesPaused: () => mockMovePaused,
+}));
 jest.mock("@/components/auth/auth-session-scope", () => ({
   isAuthSessionForProfile: jest.fn(() => true),
 }));
@@ -220,6 +225,34 @@ it("keeps Explain disabled and restores zero after an empty mobile draft when no
   expect(setCompetitionVote).not.toHaveBeenCalled();
   client.clear();
 });
+it("keeps the compact My Votes input closed while votes are paused for the move", async () => {
+  mockMovePaused = true;
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  try {
+    render(
+      <QueryClientProvider client={client}>
+        <CompetitionVoteForm
+          competition={context.competition as never}
+          entryId="entry"
+          dropId="drop"
+          disabled={false}
+          compact
+          myVotes
+        />
+      </QueryClientProvider>
+    );
+    expect(
+      await screen.findByRole("textbox", { name: "Your vote" })
+    ).toBeDisabled();
+    expect(setCompetitionVote).not.toHaveBeenCalled();
+  } finally {
+    mockMovePaused = false;
+    client.clear();
+  }
+});
+
 it("uses the entry budget and competition vote endpoint despite the parent wave's zero limits", async () => {
   mount();
   const input = await screen.findByRole("spinbutton", { name: "Your vote" });
