@@ -1,5 +1,5 @@
 import MyStreamWaveMyVote from "@/components/brain/my-stream/votes/MyStreamWaveMyVote";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ImageScale } from "@/helpers/image.helpers";
 import {
@@ -80,17 +80,94 @@ describe("MyStreamWaveMyVote", () => {
     (globalThis.getSelection as any) = () => ({ toString: () => "" });
   });
 
+  it("keeps mobile selection opt-in and cancels a hold when scrolling or unmounting", () => {
+    jest.useFakeTimers();
+    const select = jest.fn();
+    const toggle = jest.fn();
+    const { rerender, unmount } = render(
+      <MyStreamWaveMyVote
+        drop={drop}
+        mobile
+        isSelecting={false}
+        onEnterSelection={select}
+        onToggleCheck={toggle}
+        onDropClick={jest.fn()}
+      />
+    );
+    const row = screen.getByRole("article");
+    const pointer = (type: string, x = 20) => {
+      const event = new Event(type, { bubbles: true });
+      Object.assign(event, {
+        pointerType: "touch",
+        isPrimary: true,
+        clientX: x,
+        clientY: 20,
+      });
+      fireEvent(row, event);
+    };
+    try {
+      expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+      fireEvent.click(row);
+      expect(toggle).not.toHaveBeenCalled();
+      pointer("pointerdown");
+      pointer("pointermove", 50);
+      act(() => jest.advanceTimersByTime(600));
+      expect(select).not.toHaveBeenCalled();
+      pointer("pointerdown");
+      act(() => jest.advanceTimersByTime(600));
+      expect(select).toHaveBeenCalledTimes(1);
+      rerender(
+        <MyStreamWaveMyVote
+          drop={drop}
+          mobile
+          isSelecting
+          onToggleCheck={toggle}
+          onDropClick={jest.fn()}
+        />
+      );
+      pointer("pointerup");
+      fireEvent.click(row, { detail: 1 });
+      expect(toggle).not.toHaveBeenCalled();
+      fireEvent.click(row, { detail: 1 });
+      expect(toggle).toHaveBeenCalledTimes(1);
+      expect(screen.getByRole("checkbox")).toBeVisible();
+      fireEvent.click(screen.getByRole("checkbox"));
+      expect(toggle).toHaveBeenCalledTimes(2);
+      rerender(
+        <MyStreamWaveMyVote
+          drop={drop}
+          mobile
+          isSelecting={false}
+          onEnterSelection={select}
+          onToggleCheck={toggle}
+          onDropClick={jest.fn()}
+        />
+      );
+      pointer("pointerdown");
+      unmount();
+      act(() => jest.advanceTimersByTime(600));
+      expect(select).toHaveBeenCalledTimes(1);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it.each(["row", "total", "voters"] as const)(
     "toggles reset selection once without opening the submission when clicking the %s",
     (target) => {
       const onDropClick = jest.fn();
       const onToggleCheck = jest.fn();
+      const onEnterSelection = jest.fn();
       const { rerender } = render(
-        <MyStreamWaveMyVote
-          drop={drop}
-          onDropClick={onDropClick}
-          onToggleCheck={onToggleCheck}
-        />
+        <div tabIndex={-1}>
+          <MyStreamWaveMyVote
+            isSelecting={false}
+            onEnterSelection={onEnterSelection}
+            drop={drop}
+            onDropClick={onDropClick}
+            onToggleCheck={onToggleCheck}
+          />
+        </div>
       );
       const targets = {
         row: screen.getByRole("article", { name: "Drop Title" }),
@@ -100,17 +177,32 @@ describe("MyStreamWaveMyVote", () => {
 
       fireEvent.click(targets[target]);
 
+      expect(onEnterSelection).toHaveBeenCalledTimes(1);
+      expect(onToggleCheck).not.toHaveBeenCalled();
+      expect(onDropClick).not.toHaveBeenCalled();
+      rerender(
+        <div tabIndex={-1}>
+          <MyStreamWaveMyVote
+            drop={drop}
+            onDropClick={onDropClick}
+            onToggleCheck={onToggleCheck}
+          />
+        </div>
+      );
+      fireEvent.click(targets[target]);
       expect(onToggleCheck).toHaveBeenCalledTimes(1);
       expect(onToggleCheck).toHaveBeenCalledWith("d1");
       expect(onDropClick).not.toHaveBeenCalled();
 
       rerender(
-        <MyStreamWaveMyVote
-          drop={drop}
-          onDropClick={onDropClick}
-          onToggleCheck={onToggleCheck}
-          isChecked
-        />
+        <div tabIndex={-1}>
+          <MyStreamWaveMyVote
+            drop={drop}
+            onDropClick={onDropClick}
+            onToggleCheck={onToggleCheck}
+            isChecked
+          />
+        </div>
       );
       expect(screen.getByRole("checkbox")).toBeChecked();
       fireEvent.click(targets[target]);

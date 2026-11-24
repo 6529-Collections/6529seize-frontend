@@ -51,6 +51,10 @@ export const DE_DE_MESSAGES = {
     "Nachrichten konnten nicht geladen werden. Erneut versuchen",
 
   "waves.myVotes.sort": "Sortieren nach",
+  "waves.myVotes.select": "Auswählen",
+  "waves.myVotes.yourVotesInCredit": "Deine Stimmen in {credit}",
+  "waves.myVotes.maxRating": "{label} {value}",
+  "waves.myVotes.doneSelecting": "Fertig",
   "waves.myVotes.sort.voteAmount": "Deine Stimmenzahl",
   "waves.myVotes.sort.leaderboard": "Ranglistenposition",
   "waves.myVotes.sort.lastVoted": "Zuletzt abgestimmt",
