@@ -1,6 +1,12 @@
 "use client";
-import { WAVE_HEADER_TEXT_ACTION_SURFACE_CLASSES } from "@/components/brain/left-sidebar/waves/WaveHeaderActions";
-import { COMPACT_ACTION_BUTTON_CLASS } from "@/components/utils/button/compactActionButtonStyles";
+import {
+  WAVE_HEADER_MOBILE_TEXT_ACTION_SURFACE_CLASSES,
+  WAVE_HEADER_TEXT_ACTION_SURFACE_CLASSES,
+} from "@/components/brain/left-sidebar/waves/WaveHeaderActions";
+import {
+  COMPACT_ACTION_BUTTON_CLASS,
+  COMPACT_ACTION_TOUCH_TARGET_CLASS,
+} from "@/components/utils/button/compactActionButtonStyles";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -10,7 +16,6 @@ import {
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import { TabToggleWithOverflow } from "@/components/common/TabToggleWithOverflow";
-import MobileTabsScrollControls from "@/components/brain/my-stream/MobileTabsScrollControls";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import type { ApiCompetition } from "@/generated/models/ApiCompetition";
@@ -127,9 +132,15 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
   const { isApp } = useDeviceInfo();
   const isMobileViewport = useIsMobileLayoutViewport();
   const canCreateCompetition = hub.permissions.create_competition;
-  const createClassName = `${COMPACT_ACTION_BUTTON_CLASS} tw-no-underline hover:tw-no-underline ${isApp || isMobileViewport ? "tw-min-h-11" : "tw-h-8"}`;
+  const createClassName = `${COMPACT_ACTION_BUTTON_CLASS} ${isMobileViewport ? COMPACT_ACTION_TOUCH_TARGET_CLASS : ""} tw-h-8 tw-no-underline hover:tw-no-underline`;
   const createContent = (
-    <span className={WAVE_HEADER_TEXT_ACTION_SURFACE_CLASSES}>
+    <span
+      className={
+        isMobileViewport
+          ? WAVE_HEADER_MOBILE_TEXT_ACTION_SURFACE_CLASSES
+          : WAVE_HEADER_TEXT_ACTION_SURFACE_CLASSES
+      }
+    >
       <PlusIcon className="-tw-ml-1 tw-size-4 tw-shrink-0" aria-hidden="true" />
       <span>{t(locale, "competitions.createAction")}</span>
     </span>
@@ -184,15 +195,6 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
         <output className="tw-block tw-text-sm tw-text-iron-400">
           {t(locale, "competitions.empty")}
         </output>
-        {canCreateCompetition && (isApp || isMobileViewport) && (
-          <Link
-            href={getCompetitionRoute(hub.id, "new")}
-            className={`${createClassName} tw-inline-flex tw-items-center tw-gap-1.5`}
-          >
-            <PlusIcon aria-hidden="true" className="tw-size-4" />
-            {t(locale, "competitions.new")}
-          </Link>
-        )}
       </div>
     );
   const filters: CompetitionCollectionFilter[] = ["active", "history"];
@@ -217,7 +219,7 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
             data-competition-filters-scroll
             className={`tw-scroll-px-10 tw-overflow-x-auto ${isApp ? "tw-no-scrollbar tw-overscroll-x-contain" : "tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500"}`}
           >
-            <div className="tw-w-max tw-pr-px [&_[role=tab][aria-selected=true]]:!tw-font-medium">
+            <div className="tw-w-max tw-pr-px [&_button]:tw-text-meta [&_button]:tw-font-medium">
               <TabToggleWithOverflow
                 variant="compactPills"
                 maxVisibleTabs={isApp ? 1 : tabOptions.length}
@@ -227,15 +229,14 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
               />
             </div>
           </div>
-          <MobileTabsScrollControls
-            scrollerRef={filtersScrollerRef}
-            showButtons={false}
-          />
         </div>
         {canCreateCompetition && (
           <Link
             href={getCompetitionRoute(hub.id, "new")}
             className={createClassName}
+            aria-label={
+              isMobileViewport ? t(locale, "competitions.new") : undefined
+            }
           >
             {createContent}
           </Link>

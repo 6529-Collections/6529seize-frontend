@@ -59,10 +59,13 @@ Pin and mute use matching compact dark button surfaces.
   discarding. The selected information tab and its scroll position remain intact.
 - Select the Joined count in phone About to push a Members page. Rename opens
   with the field focused and keeps Save.
-- On phones, New subwave, New curation and Create curation use full-screen
-  modals sliding up with one title and an X Close control at the top right.
-  Swiping or tapping outside does not silently discard entered content; Close and Back ask before
-  discarding a draft. Criteria pages use the same single Back header.
+- On phones inside a wave, `+ Curation` at the end of the wave tab row and
+  Configuration's Create curation control open the same
+  shorter bottom sheet. New subwave opens a tall bottom sheet for its steps.
+  Each sheet slides up with one title and an X Close control at the top right.
+  Dragging cannot dismiss the creation forms. Close, outside dismissal and Back
+  protect entered drafts and ask before discarding. Criteria pages use one Back
+  header. Profile curation and ordinary new-wave dialogs keep their existing presentation.
 - In Curations, the section plus opens Create curation. A row's management
   control includes Edit Curation. Desktop and tablet keep their existing
   information-panel forms and controls. Failed saves keep drafts for retry.

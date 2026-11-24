@@ -77,7 +77,7 @@ export default function SpringNavigationSurface({
         drag.current.velocity = velocity;
         if (committed && onBack()) return;
         if (!reducedMotion)
-          void animate(x, 0, { ...MOTION_SPRINGS.spatial.slow, velocity });
+          void animate(x, 0, { ...MOTION_SPRINGS.spatial.default, velocity });
         drag.current.velocity = undefined;
       },
     },
@@ -98,7 +98,7 @@ export default function SpringNavigationSurface({
             : {
                 x: window.innerWidth,
                 transition: {
-                  ...MOTION_SPRINGS.spatial.slow,
+                  ...MOTION_SPRINGS.spatial.default,
                   velocity: drag.current.velocity ?? x.getVelocity(),
                 },
               },

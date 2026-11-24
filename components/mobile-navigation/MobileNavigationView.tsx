@@ -27,7 +27,7 @@ import {
 } from "@/components/brain/right-sidebar/BrainRightSidebarTypes";
 import SpringNavigationSurface from "./SpringNavigationSurface";
 import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
-import MobileWrapperDialogCloseButton from "@/components/mobile-wrapper-dialog/MobileWrapperDialogCloseButton";
+import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import {
   MobilePageContext,
   type MobilePageNavigation,
@@ -44,20 +44,21 @@ import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useHorizontalSwipe } from "@/hooks/useHorizontalSwipe";
 import { t } from "@/i18n/messages";
 
-function getPanelMotion(
-  presentation: "page" | "form",
-  reducedMotion: boolean,
-  exitTransition:
-    | typeof BRAIN_RIGHT_SIDEBAR_EXIT_TRANSITION
-    | typeof BRAIN_RIGHT_SIDEBAR_REDUCED_TRANSITION
-) {
-  const entrance = presentation === "form" ? { y: "100%" } : { x: "100%" };
-  const destination = reducedMotion ? 0 : "100%";
-  const exit =
-    presentation === "form"
-      ? { y: destination, transition: exitTransition }
-      : { x: destination, transition: exitTransition };
-  return { entrance, exit };
+function getPanelMotion(reducedMotion: boolean, springMotion: boolean) {
+  const transition = reducedMotion
+    ? BRAIN_RIGHT_SIDEBAR_REDUCED_TRANSITION
+    : BRAIN_RIGHT_SIDEBAR_ENTER_TRANSITION;
+  const exitTransition = reducedMotion
+    ? BRAIN_RIGHT_SIDEBAR_REDUCED_TRANSITION
+    : BRAIN_RIGHT_SIDEBAR_EXIT_TRANSITION;
+  return {
+    transition,
+    exitTransition,
+    initial: springMotion || reducedMotion ? false : { x: "100%" },
+    exit: springMotion
+      ? {}
+      : { x: reducedMotion ? 0 : "100%", transition: exitTransition },
+  } as const;
 }
 
 /** Keep mounted through AnimatePresence so Back and swipe share the same exit. */
@@ -69,7 +70,13 @@ export default function MobileNavigationView({
   pageKey,
   guardDrafts = true,
   springMotion = false,
+  isOpen = true,
+  onAfterLeave,
+  formSize = "compact",
 }: {
+  readonly isOpen?: boolean;
+  readonly onAfterLeave?: (() => void) | undefined;
+  readonly formSize?: "compact" | "tall";
   readonly guardDrafts?: boolean;
   readonly springMotion?: boolean;
   readonly title: string;
@@ -140,7 +147,7 @@ export default function MobileNavigationView({
     return true;
   };
   useMobileFormHistory(
-    presentation === "form" || parentPage !== null,
+    isOpen && (presentation === "form" || parentPage !== null),
     requestBack
   );
   const isPresent = useIsPresent();
@@ -170,13 +177,9 @@ export default function MobileNavigationView({
     [x]
   );
   const [mount, setMount] = useState<HTMLSpanElement | null>(null);
-  const viewportRef = useDialogKeyboard(true);
-  const transition = reducedMotion
-    ? BRAIN_RIGHT_SIDEBAR_REDUCED_TRANSITION
-    : BRAIN_RIGHT_SIDEBAR_ENTER_TRANSITION;
-  const exitTransition = reducedMotion
-    ? BRAIN_RIGHT_SIDEBAR_REDUCED_TRANSITION
-    : BRAIN_RIGHT_SIDEBAR_EXIT_TRANSITION;
+  const viewportRef = useDialogKeyboard(presentation === "page");
+  const panelMotion = getPanelMotion(reducedMotion, springMotion);
+  const { transition, exitTransition } = panelMotion;
   const onTouchStart = useHorizontalSwipe(
     {
       enabled: isPresent && presentation === "page" && !springMotion,
@@ -204,6 +207,7 @@ export default function MobileNavigationView({
     (pageKey && pageKey !== "about" ? 1 : 0) + navigationStack.size;
   const previousPage = useRef({ key: activePageKey, depth: pageDepth });
   useLayoutEffect(() => {
+    if (presentation === "form") return;
     if (reducedMotion) {
       x.stop();
       x.set(0);
@@ -217,14 +221,9 @@ export default function MobileNavigationView({
     if (backwards) return;
     const animation = animate(x, 0, transition);
     return () => animation.stop();
-  }, [activePageKey, pageDepth, reducedMotion, transition, x]);
+  }, [activePageKey, pageDepth, presentation, reducedMotion, transition, x]);
 
-  const { entrance, exit: panelExit } = getPanelMotion(
-    presentation,
-    reducedMotion,
-    exitTransition
-  );
-  const isFormRoot = presentation === "form" && !navigation;
+  const isTallForm = formSize === "tall" || Boolean(navigation);
 
   const content = (
     <m.div
@@ -239,29 +238,21 @@ export default function MobileNavigationView({
         className="tw-shrink-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-pt-[env(safe-area-inset-top,0px)]"
       >
         <div className="tw-flex tw-min-h-14 tw-items-center tw-gap-2 tw-px-2 tw-py-1">
-          {!isFormRoot && (
-            <IconButton
-              size={44}
-              aria-label={t(locale, "common.back")}
-              onClick={requestBack}
-            >
-              <ChevronLeftIcon className="tw-size-5" aria-hidden="true" />
-            </IconButton>
-          )}
+          <IconButton
+            size={44}
+            aria-label={t(locale, "common.back")}
+            onClick={requestBack}
+          >
+            <ChevronLeftIcon className="tw-size-5" aria-hidden="true" />
+          </IconButton>
           <DialogTitle
             key={title}
             ref={focusTitle}
             tabIndex={-1}
-            className={`tw-m-0 tw-min-w-0 tw-flex-1 tw-break-words tw-text-base tw-font-semibold focus:tw-outline-none ${isFormRoot ? "tw-pl-2" : "tw-pr-3"}`}
+            className="tw-m-0 tw-min-w-0 tw-flex-1 tw-break-words tw-pr-3 tw-text-base tw-font-semibold focus:tw-outline-none"
           >
             {title}
           </DialogTitle>
-          {isFormRoot && (
-            <MobileWrapperDialogCloseButton
-              label={t(locale, "common.close")}
-              onClick={requestBack}
-            />
-          )}
         </div>
       </header>
       <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-y-auto">
@@ -270,72 +261,105 @@ export default function MobileNavigationView({
     </m.div>
   );
 
+  const confirmation = (
+    <MobileWrapperConfirmationDialog
+      key={title}
+      isOpen={pendingLeave !== null}
+      title={t(locale, "waves.information.discardTitle")}
+      message={t(locale, "waves.information.discardMessage")}
+      confirmText={t(locale, "waves.create.dialog.discardConfirm")}
+      confirmVariant="destructive"
+      onClose={() => setPendingLeave(null)}
+      onConfirm={() => {
+        const leave = pendingLeave;
+        setPendingLeave(null);
+        leave?.();
+      }}
+      zIndexClassName="tw-z-[11000]"
+    />
+  );
+
   return (
     <MobilePageContext.Provider value={pageContext}>
       <LazyMotion features={domAnimation}>
-        <span hidden aria-hidden="true" ref={setMount} />
-        <Dialog
-          as={m.div}
-          ref={dialogRef}
-          open={mount !== null}
-          onClose={requestBack}
-          initialFocus={titleRef}
-          className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1010]"
-          exit={{ opacity: 1, transition: exitTransition }}
-          onKeyDown={(event) => {
-            if (
-              event.key === "Escape" &&
-              !event.defaultPrevented &&
-              event.target instanceof Element &&
-              event.target.closest('[role="dialog"], [role="alertdialog"]') ===
-                event.currentTarget
-            ) {
-              event.preventDefault();
-              requestBack();
-            }
-          }}
-        >
-          <div
-            ref={viewportRef}
-            className="tw-fixed tw-inset-x-0 tw-top-0 tw-overflow-hidden"
-            style={DIALOG_KEYBOARD_VIEWPORT_STYLE}
+        {presentation === "form" ? (
+          <MobileWrapperDialog
+            isOpen={isOpen}
+            onClose={requestBack}
+            onEscape={requestBack}
+            onBack={navigation ? requestBack : undefined}
+            onAfterLeave={onAfterLeave}
+            title={title}
+            showCloseButton={!navigation}
+            enableDragToClose={false}
+            preserveFocusOnEscape
+            tall={isTallForm}
+            fixedHeight={isTallForm}
+            fitVisualViewport
+            avoidKeyboard
+            noPadding
+            tabletModal
+            zIndexClassName="tw-z-[9999]"
+            headerClassName="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-py-4"
           >
-            <DialogPanel
+            {children}
+            {confirmation}
+          </MobileWrapperDialog>
+        ) : (
+          <>
+            <span hidden aria-hidden="true" ref={setMount} />
+            <Dialog
               as={m.div}
-              className="tw-h-full tw-min-h-0"
-              initial={springMotion || reducedMotion ? false : entrance}
-              animate={{ x: 0, y: 0, transition }}
-              exit={springMotion ? {} : panelExit}
+              ref={dialogRef}
+              open={mount !== null}
+              onClose={requestBack}
+              initialFocus={titleRef}
+              className={`tailwind-scope tw-fixed tw-inset-0 ${parentPage ? "tw-z-[10000]" : "tw-z-[1010]"}`}
+              exit={{ opacity: 1, transition: exitTransition }}
+              onKeyDown={(event) => {
+                if (
+                  event.key === "Escape" &&
+                  !event.defaultPrevented &&
+                  event.target instanceof Element &&
+                  event.target.closest(
+                    '[role="dialog"], [role="alertdialog"]'
+                  ) === event.currentTarget
+                ) {
+                  event.preventDefault();
+                  requestBack();
+                }
+              }}
             >
-              {springMotion ? (
-                <SpringNavigationSurface
-                  onBack={requestBack}
-                  scope={activePageKey ?? title}
-                  reducedMotion={reducedMotion}
+              <div
+                ref={viewportRef}
+                className="tw-fixed tw-inset-x-0 tw-top-0 tw-overflow-hidden"
+                style={DIALOG_KEYBOARD_VIEWPORT_STYLE}
+              >
+                <DialogPanel
+                  as={m.div}
+                  className="tw-h-full tw-min-h-0"
+                  initial={panelMotion.initial}
+                  animate={{ x: 0, y: 0, transition }}
+                  exit={panelMotion.exit}
                 >
-                  {content}
-                </SpringNavigationSurface>
-              ) : (
-                content
-              )}
-            </DialogPanel>
-          </div>
-        </Dialog>
+                  {springMotion ? (
+                    <SpringNavigationSurface
+                      onBack={requestBack}
+                      scope={activePageKey ?? title}
+                      reducedMotion={reducedMotion}
+                    >
+                      {content}
+                    </SpringNavigationSurface>
+                  ) : (
+                    content
+                  )}
+                </DialogPanel>
+              </div>
+            </Dialog>
+          </>
+        )}
       </LazyMotion>
-      <MobileWrapperConfirmationDialog
-        isOpen={pendingLeave !== null}
-        title={t(locale, "waves.information.discardTitle")}
-        message={t(locale, "waves.information.discardMessage")}
-        confirmText={t(locale, "waves.create.dialog.discardConfirm")}
-        confirmVariant="destructive"
-        onClose={() => setPendingLeave(null)}
-        onConfirm={() => {
-          const leave = pendingLeave;
-          setPendingLeave(null);
-          leave?.();
-        }}
-        zIndexClassName="tw-z-[11000]"
-      />
+      {presentation === "page" && confirmation}
     </MobilePageContext.Provider>
   );
 }

@@ -190,11 +190,12 @@ export function NativeCompetitionContent({
     <div
       ref={providedScrollContainer ? undefined : setScrollContainer}
       style={embedded && isApp ? waveViewStyle : undefined}
-      className={
+      className={clsx(
         embedded
           ? "tw-h-full tw-min-h-0 tw-space-y-5 tw-overflow-y-auto tw-p-4 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10 hover:tw-scrollbar-thumb-white/15"
-          : "tw-space-y-5"
-      }
+          : "tw-space-y-5",
+        embedded && isVotesView && "max-md:tw-bg-iron-950"
+      )}
     >
       {!embedded && (
         <div

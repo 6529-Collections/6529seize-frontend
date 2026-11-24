@@ -212,7 +212,7 @@ const getLeaderboardControlsFrame = (): HTMLElement => {
 
 describe("MyStreamWaveLeaderboard", () => {
   it.each([true, false])(
-    "offers contextual submission help only while submission is unavailable (%s)",
+    "keeps submission help in the actions menu and retains submission eligibility (%s)",
     (eligible) => {
       useWave.mockReturnValue({
         isMemesWave: false,
@@ -228,8 +228,7 @@ describe("MyStreamWaveLeaderboard", () => {
         name: "How to Submit",
         exact: true,
       });
-      if (eligible) expect(help).not.toBeInTheDocument();
-      else expect(help).toBeInTheDocument();
+      expect(help).not.toBeInTheDocument();
       expect(headerProps.onCreateDrop !== undefined).toBe(eligible);
     }
   );

@@ -1,18 +1,12 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, renderHook, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import MyStreamWaveCreateActionsMenu from "@/components/brain/my-stream/tabs/MyStreamWaveCreateActionsMenu";
+import MyStreamWaveCreateActionsMenu, {
+  useWaveCreateMenuActions,
+} from "@/components/brain/my-stream/tabs/MyStreamWaveCreateActionsMenu";
 import { useAuth } from "@/components/auth/Auth";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 
 const createWaveModalMock = jest.fn();
-const mockPush = jest.fn();
-jest.mock("next/navigation", () => ({ useRouter: () => ({ push: mockPush }) }));
-let mockCanCreateDecision = false;
-jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
-  useCompetitionHub: () => ({
-    data: { permissions: { create_competition: mockCanCreateDecision } },
-  }),
-}));
 jest.mock("@/hooks/useIsMobileLayoutViewport", () => ({
   __esModule: true,
   default: jest.fn(),
@@ -105,12 +99,28 @@ const createWave = ({
 describe("MyStreamWaveCreateActionsMenu", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockCanCreateDecision = false;
     jest.mocked(useIsMobileLayoutViewport).mockReturnValue(false);
     mockedUseAuth.mockReturnValue({
       connectedProfile: { handle: "alice" },
       activeProfileProxy: null,
     });
+  });
+
+  it("keeps subwave permission independent when curation creation moves to the tab row", () => {
+    const { result, rerender } = renderHook(
+      ({ eligible }) =>
+        useWaveCreateMenuActions({
+          wave: createWave({ eligible }),
+          mobile: true,
+          includeCuration: false,
+        }),
+      { initialProps: { eligible: true } }
+    );
+    expect(result.current.items.map(({ id }) => id)).toEqual([
+      "create-subwave",
+    ]);
+    rerender({ eligible: false });
+    expect(result.current.items).toEqual([]);
   });
 
   it("offers only curation and subwave actions to an eligible root-wave admin", async () => {
@@ -228,32 +238,22 @@ describe("MyStreamWaveCreateActionsMenu", () => {
     ).toHaveClass("tw-min-h-11");
   });
 
-  it.each([true, false])(
-    "uses the existing decision creation permission in the phone menu (%s)",
-    async (allowed) => {
-      mockCanCreateDecision = allowed;
+  it.each(["desktop", "mobile"] as const)(
+    "keeps decision creation out of the %s wave menu",
+    async (variant) => {
       render(
         <MyStreamWaveCreateActionsMenu
           wave={createWave()}
-          variant="mobile"
+          variant={variant}
           onCreated={jest.fn()}
         />
       );
       await userEvent.click(
         screen.getByRole("button", { name: "Open create menu" })
       );
-      const decision = screen.queryByRole("button", {
-        name: "New decision",
-        exact: true,
-      });
-      if (allowed) {
-        await userEvent.click(decision!);
-        await waitFor(() =>
-          expect(mockPush).toHaveBeenCalledWith(
-            "/waves/parent-wave/decisions/new"
-          )
-        );
-      } else expect(decision).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: "New decision", exact: true })
+      ).not.toBeInTheDocument();
     }
   );
 

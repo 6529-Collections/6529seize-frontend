@@ -34,7 +34,6 @@ import { WaveLeaderboardVirtualizedRows } from "@/components/waves/leaderboard/W
 import { Time } from "@/helpers/time";
 import CompetitionMySubmissions from "./CompetitionMySubmissions";
 import WaveLeaderboardError from "@/components/waves/leaderboard/WaveLeaderboardError";
-import WaveLeaderboardSubmissionHelp from "@/components/waves/leaderboard/WaveLeaderboardSubmissionHelp";
 
 const sorts: Partial<Record<WaveDropsLeaderboardSort, string>> = {
   RANK: "rating",
@@ -317,13 +316,6 @@ export default function CompetitionLeaderboard({
       className="tw-space-y-4"
       ref={providedScrollContainer ? undefined : localScrollContainer}
     >
-      {!competition.permissions.submit && (
-        <WaveLeaderboardSubmissionHelp
-          wave={presentation}
-          nomination={isMainStage && !ended}
-          reason={t(locale, "competitions.submitClosed")}
-        />
-      )}
       {isApprove ? (
         <WaveApprovalStatusBar
           wave={presentation}

@@ -10,28 +10,25 @@ import {
 import CompactWaveActions, {
   COMPACT_WAVE_ACTION_CLASSES,
 } from "@/components/brain/my-stream/tabs/CompactWaveActions";
-import MainStageNominationPopover, {
-  MainStageNominationPopoverContent,
-} from "@/components/brain/my-stream/tabs/MainStageNominationPopover";
+import MainStageNominationPopover from "@/components/brain/my-stream/tabs/MainStageNominationPopover";
 import { useWaveCreateMenuActions } from "@/components/brain/my-stream/tabs/MyStreamWaveCreateActionsMenu";
 import type { CompactMenuItem } from "@/components/compact-menu";
 import { useDisplayTimeZoneMenuItem } from "@/components/display-time-zone/DisplayTimeZoneSwitch";
-import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import WaveSubmissionHelpDialog from "@/components/waves/header/WaveSubmissionHelpDialog";
 import Button from "@/components/utils/button/Button";
 import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
 import WaveHeaderRestrictionButton, {
   WAVE_HEADER_RESTRICTION_SURFACE_CLASS,
 } from "@/components/waves/header/WaveHeaderRestrictionButton";
-import type {
-  HeaderWaveCreateNavigation,
-  HeaderWaveDropAction,
-} from "@/contexts/HeaderContext";
+import type { HeaderWaveDropAction } from "@/contexts/HeaderContext";
 import { useWaveInformation } from "@/contexts/WaveInformationContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 import HeaderSearchButton from "./header-search/HeaderSearchButton";
+import { getBoostedDropsDisplayPreferenceMenuItems } from "@/components/waves/boosted-drops/BoostedDropsDisplayPreference";
+import { useBoostedDropsDisplayPreference } from "@/hooks/useBoostedDropsDisplayPreference";
 
 const HEADER_RESTRICTION_BUTTON_CLASS = `${COMPACT_ACTION_TOUCH_TARGET_CLASS} ${WAVE_HEADER_RESTRICTION_SURFACE_CLASS} tw-size-9 tw-min-w-9`;
 
@@ -104,21 +101,29 @@ export default function PhoneWaveHeaderActions({
   wave,
   dropAction,
   items,
-  createNavigation,
+  showBoostedDropsOptions,
 }: {
   readonly wave: ApiWave;
   readonly dropAction: HeaderWaveDropAction | null;
   readonly items: readonly CompactMenuItem[];
-  readonly createNavigation: HeaderWaveCreateNavigation | null;
+  readonly showBoostedDropsOptions: boolean;
 }) {
   const information = useWaveInformation();
   const locale = useBrowserLocale();
   const timeZone = useDisplayTimeZoneMenuItem({ checkable: true });
   const [isSubmissionHelpOpen, setIsSubmissionHelpOpen] = useState(false);
+  const [boostedPreference, setBoostedPreference] =
+    useBoostedDropsDisplayPreference();
+  const boostedItems = showBoostedDropsOptions
+    ? getBoostedDropsDisplayPreferenceMenuItems({
+        preference: boostedPreference,
+        setPreference: setBoostedPreference,
+      })
+    : [];
   const { items: createItems, dialogs } = useWaveCreateMenuActions({
-    wave: createNavigation?.waveId === wave.id ? wave : undefined,
+    wave,
     mobile: true,
-    onCreated: (id) => createNavigation?.onCreated(id),
+    includeCuration: false,
   });
   const waveDetails: CompactMenuItem = {
     id: "wave-details",
@@ -127,25 +132,25 @@ export default function PhoneWaveHeaderActions({
     onSelect: () => information?.open(wave.id),
     deferUntilClosed: true,
   };
-  const isNominationHelp = dropAction?.restrictionKind === "memes-nomination";
-  const submitActions: CompactMenuItem[] =
-    dropAction && (dropAction.canOpen || isNominationHelp)
-      ? [
-          {
-            id: "submit-work",
-            label: dropAction.label,
-            icon: isNominationHelp ? (
-              <LockClosedIcon className="tw-size-4" aria-hidden="true" />
-            ) : (
-              <PlusIcon className="tw-size-4" aria-hidden="true" />
-            ),
-            onSelect: isNominationHelp
-              ? () => setIsSubmissionHelpOpen(true)
-              : dropAction.onOpen,
-            deferUntilClosed: true,
-          },
-        ]
-      : [];
+  const submitActions: CompactMenuItem[] = dropAction
+    ? [
+        {
+          id: dropAction.canOpen ? "submit-work" : "submission-help",
+          label: dropAction.canOpen
+            ? dropAction.label
+            : t(locale, "waves.dropEligibility.howToSubmit"),
+          icon: !dropAction.canOpen ? (
+            <LockClosedIcon className="tw-size-4" aria-hidden="true" />
+          ) : (
+            <PlusIcon className="tw-size-4" aria-hidden="true" />
+          ),
+          onSelect: dropAction.canOpen
+            ? dropAction.onOpen
+            : () => setIsSubmissionHelpOpen(true),
+          deferUntilClosed: true,
+        },
+      ]
+    : [];
 
   return (
     <>
@@ -171,29 +176,18 @@ export default function PhoneWaveHeaderActions({
               ...submitActions,
               timeZone,
               ...items,
+              ...boostedItems,
               ...createItems,
             ]}
-            renderAdditionalControls={
-              dropAction && !dropAction.canOpen && !isNominationHelp
-                ? () => <HeaderDropActionButton action={dropAction} inMenu />
-                : undefined
-            }
           />
         )}
       />
       {dialogs}
-      {isSubmissionHelpOpen && (
-        <MobileWrapperDialog
-          isOpen
+      {isSubmissionHelpOpen && dropAction && (
+        <WaveSubmissionHelpDialog
+          action={dropAction}
           onClose={() => setIsSubmissionHelpOpen(false)}
-          title={dropAction?.label ?? "How to Submit"}
-          ariaLabel="Main Stage submission eligibility"
-          headerVariant="minimal"
-        >
-          <div className="tw-px-4 tw-pb-6 sm:tw-px-6">
-            <MainStageNominationPopoverContent className="tw-w-full" />
-          </div>
-        </MobileWrapperDialog>
+        />
       )}
     </>
   );

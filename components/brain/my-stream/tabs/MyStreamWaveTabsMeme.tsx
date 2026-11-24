@@ -3,9 +3,10 @@
 import React, { useState } from "react";
 import type { CompactMenuItem } from "@/components/compact-menu";
 import { LockClosedIcon } from "@heroicons/react/24/outline";
-import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import WaveSubmissionHelpDialog, {
+  type WaveSubmissionHelpAction,
+} from "@/components/waves/header/WaveSubmissionHelpDialog";
 import { useWave, SubmissionStatus } from "@/hooks/useWave";
-import { MainStageNominationPopoverContent } from "./MainStageNominationPopover";
 import { createBreakpoint } from "react-use";
 import { useContentTab } from "@/components/brain/ContentTabContext";
 import MemesArtSubmissionModal from "@/components/waves/memes/LazyMemesArtSubmissionModal";
@@ -38,9 +39,11 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
       wave,
       onCreated: onSelectCuration,
       mobile: true,
+      includeCuration: false,
     });
   const [isMemesModalOpen, setIsMemesModalOpen] = useState(false);
-  const [isSubmissionHelpOpen, setIsSubmissionHelpOpen] = useState(false);
+  const [submissionHelp, setSubmissionHelp] =
+    useState<WaveSubmissionHelpAction | null>(null);
   const { participation } = useWave(wave);
   const hasSubmissionHelp =
     participation.status === SubmissionStatus.ACTIVE &&
@@ -70,6 +73,11 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
         wave={wave}
         iconOnly={isCondensed}
         phoneMenu={selectPhoneAction !== undefined}
+        onShowSubmissionHelp={
+          selectPhoneAction
+            ? (action) => selectPhoneAction(() => setSubmissionHelp(action))
+            : undefined
+        }
       />
     );
 
@@ -83,7 +91,12 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
             id: "submission-help",
             label: "How to Submit",
             icon: <LockClosedIcon className="tw-size-4" />,
-            onSelect: () => setIsSubmissionHelpOpen(true),
+            onSelect: () =>
+              setSubmissionHelp({
+                label: "How to Submit",
+                restrictionMessage: null,
+                restrictionKind: "memes-nomination",
+              }),
             deferUntilClosed: true,
           },
         ]
@@ -132,18 +145,11 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
         wave={wave}
         onClose={() => setIsMemesModalOpen(false)}
       />
-      {isSubmissionHelpOpen && (
-        <MobileWrapperDialog
-          isOpen
-          onClose={() => setIsSubmissionHelpOpen(false)}
-          ariaLabel="Main Stage submission eligibility"
-          title="How to Submit"
-          headerVariant="minimal"
-        >
-          <div className="tw-px-4 tw-pb-6 sm:tw-px-6">
-            <MainStageNominationPopoverContent className="tw-w-full" />
-          </div>
-        </MobileWrapperDialog>
+      {submissionHelp && (
+        <WaveSubmissionHelpDialog
+          action={submissionHelp}
+          onClose={() => setSubmissionHelp(null)}
+        />
       )}
     </>
   );

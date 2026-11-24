@@ -2,7 +2,6 @@
 
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import MobileNavigationView from "@/components/mobile-navigation/MobileNavigationView";
-import { AnimatePresence } from "framer-motion";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
 import { useRef } from "react";
@@ -20,6 +19,7 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { isAuthResolving } from "@/components/auth/authResolution";
 
 interface CreateWaveModalProps {
+  readonly mobileSheet?: boolean | undefined;
   readonly isOpen: boolean;
   readonly onClose: () => void;
   readonly profile?: ApiIdentity | null;
@@ -68,6 +68,7 @@ export default function CreateWaveModal({
   parentWaveName,
   parentAdminGroupId,
   parentViewGroupId,
+  mobileSheet = false,
 }: CreateWaveModalProps) {
   const locale = useBrowserLocale();
   const isPhone = useMediaQuery(PHONE_WAVES_LAYOUT_QUERY);
@@ -114,20 +115,18 @@ export default function CreateWaveModal({
       parentViewGroupId={parentViewGroupId}
     />
   );
-  if (isPhone)
+  if (isPhone && mobileSheet)
     return (
-      <AnimatePresence>
-        {isOpen && (
-          <MobileNavigationView
-            title={title}
-            onBack={requestClose}
-            presentation="form"
-            guardDrafts={false}
-          >
-            {form}
-          </MobileNavigationView>
-        )}
-      </AnimatePresence>
+      <MobileNavigationView
+        isOpen={isOpen}
+        title={title}
+        onBack={requestClose}
+        presentation="form"
+        formSize="tall"
+        guardDrafts={false}
+      >
+        {form}
+      </MobileNavigationView>
     );
 
   // Unsaved drafts request confirmation before this form can leave.

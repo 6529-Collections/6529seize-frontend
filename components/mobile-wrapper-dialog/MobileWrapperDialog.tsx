@@ -73,6 +73,7 @@ type MobileWrapperDialogProps = {
    * intentional full-bleed surface that requires the shared floating control.
    */
   readonly showHeaderCloseButton?: boolean | undefined;
+  readonly showCloseButton?: boolean | undefined;
   readonly showHeaderDivider?: boolean | undefined;
   readonly headerCloseButtonClassName?: string | undefined;
   readonly surfaceClassName?: string | undefined;
@@ -443,6 +444,7 @@ export default function MobileWrapperDialog({
   showDragHandle,
   enableDragToClose,
   showHeaderCloseButton = true,
+  showCloseButton = true,
   showHeaderDivider,
   headerCloseButtonClassName,
   surfaceClassName,
@@ -539,9 +541,11 @@ export default function MobileWrapperDialog({
     resize: canResize ? { isExpanded, dragOffset, isDragging } : undefined,
   });
   const showDesktopHeaderCloseButton =
-    dismissible && !!tabletModal && !showHeaderCloseButton;
-  const showFloatingCloseButton = dismissible && !showHeaderCloseButton;
-  const showInlineHeaderCloseButton = dismissible && !!showHeaderCloseButton;
+    dismissible && showCloseButton && !!tabletModal && !showHeaderCloseButton;
+  const showFloatingCloseButton =
+    dismissible && showCloseButton && !showHeaderCloseButton;
+  const showInlineHeaderCloseButton =
+    dismissible && showCloseButton && !!showHeaderCloseButton;
   const shouldHideOnDesktopHover =
     hideOnDesktopHover && !isMobileLayoutViewport && !isTouchDevice;
   const dialogOpen = isOpen && dialogMount !== null;

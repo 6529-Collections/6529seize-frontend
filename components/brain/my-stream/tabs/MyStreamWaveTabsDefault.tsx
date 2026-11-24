@@ -1,4 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
+import WaveSubmissionHelpDialog, {
+  type WaveSubmissionHelpAction,
+} from "@/components/waves/header/WaveSubmissionHelpDialog";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import {
   ChatBubbleLeftIcon,
   LockClosedIcon,
@@ -49,11 +54,15 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
   chatSubmitDropAction = null,
 }) => {
   const { activeContentTab, setActiveContentTab } = useContentTab();
+  const locale = useBrowserLocale();
+  const [submissionHelp, setSubmissionHelp] =
+    useState<WaveSubmissionHelpAction | null>(null);
   const { items: createItems, dialogs: createDialogs } =
     useWaveCreateMenuActions({
       wave,
       onCreated: onSelectCuration,
       mobile: true,
+      includeCuration: false,
     });
   const breakpoint = useBreakpoint();
   const showBackButton = breakpoint !== "LG";
@@ -90,6 +99,22 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
         >
           <PlusIcon className="tw-size-4 tw-shrink-0" aria-hidden="true" />
           <span>{action.label}</span>
+        </button>
+      );
+    }
+
+    if (showChatSubmitDropAction && !action.canOpen && selectPhoneAction) {
+      return (
+        <button
+          type="button"
+          className={menuClass}
+          onClick={() => selectPhoneAction(() => setSubmissionHelp(action))}
+        >
+          <LockClosedIcon
+            className="tw-size-4 tw-shrink-0"
+            aria-hidden="true"
+          />
+          <span>{t(locale, "waves.dropEligibility.howToSubmit")}</span>
         </button>
       );
     }
@@ -199,6 +224,12 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
         />
       </div>
       {createDialogs}
+      {submissionHelp && (
+        <WaveSubmissionHelpDialog
+          action={submissionHelp}
+          onClose={() => setSubmissionHelp(null)}
+        />
+      )}
     </div>
   );
 };

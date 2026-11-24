@@ -414,6 +414,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     : "list";
   const swipeBackHandlers = useWaveListSwipeBack({
     enabled: canSwipeBackToWaves,
+    edgeSwipeBack: hasWave && !isDirectMessage,
     scope: waveId ?? (isProfileFeed ? "profile-feed" : "root"),
     onIntentStart: handleSwipeBackIntent,
     onSwipeBack: handleSwipeBackToWaves,

@@ -20,6 +20,8 @@ function Harness({
   onBack,
   onRender,
   includePostBody = false,
+  priorityLeftEdgeWidth = 0,
+  replyDirection = -1,
 }: {
   readonly replyEnabled?: boolean;
   readonly onMove: jest.Mock;
@@ -27,6 +29,8 @@ function Harness({
   readonly onBack: jest.Mock;
   readonly onRender: jest.Mock;
   readonly includePostBody?: boolean;
+  readonly priorityLeftEdgeWidth?: number;
+  readonly replyDirection?: -1 | 1;
 }) {
   onRender();
   const back = useHorizontalSwipe(
@@ -36,6 +40,7 @@ function Harness({
       threshold: 100,
       intentRatio: 1.2,
       flick: true,
+      priorityLeftEdgeWidth,
       onMove,
       onEnd: onBack,
     },
@@ -44,7 +49,7 @@ function Harness({
   const reply = useHorizontalSwipe(
     {
       enabled: replyEnabled,
-      direction: -1,
+      direction: replyDirection,
       threshold: 96,
       onMove,
       onEnd: onReply,
@@ -108,6 +113,29 @@ it("gives a left drag to the message and a right drag to its containing wave, ex
   end(target, 300);
   expect(onBack).toHaveBeenCalledWith(true, 120, expect.any(Number));
   expect(onReply).toHaveBeenCalledTimes(1);
+});
+
+it("prioritizes edge Back over a child with the same direction without changing off-edge priority", () => {
+  const callbacks = {
+    onMove: jest.fn(),
+    onReply: jest.fn(),
+    onBack: jest.fn(),
+    onRender: jest.fn(),
+  };
+  render(
+    <Harness {...callbacks} priorityLeftEdgeWidth={32} replyDirection={1} />
+  );
+  const target = screen.getByTestId("text");
+  start(target, 28);
+  move(target, 160);
+  end(target, 160);
+  expect(callbacks.onBack).toHaveBeenCalledWith(true, 132, expect.any(Number));
+  expect(callbacks.onReply).not.toHaveBeenCalled();
+  start(target, 180);
+  move(target, 300);
+  end(target, 300);
+  expect(callbacks.onReply).toHaveBeenCalledWith(true, 120, expect.any(Number));
+  expect(callbacks.onBack).toHaveBeenCalledTimes(1);
 });
 
 it("accepts a post body that opens its chat but leaves embedded links and controls alone", () => {

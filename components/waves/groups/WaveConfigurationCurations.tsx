@@ -113,6 +113,7 @@ function WaveConfigurationCurationRow({
         )}
       </div>
       <MyStreamWaveCurationTabMenu
+        mobileSheet
         wave={wave}
         curation={curation}
         onDeleted={onDeleted}
@@ -239,6 +240,7 @@ function WaveConfigurationCurationsAuthorizedContent({
 
       {createPanel.isOpen && (
         <MyStreamWaveCurationCreateDialog
+          mobileSheet
           wave={wave}
           isOpen
           onClose={createPanel.close}

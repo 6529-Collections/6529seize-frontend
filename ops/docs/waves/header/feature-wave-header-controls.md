@@ -83,12 +83,15 @@ breakdown and Learn more. The site menu and global search are on the Waves list.
 2. The available submission or `How to Submit` control, `Show times in UTC for now`,
    and other existing view controls. The UTC action shows a checkmark when UTC is active;
    selecting it again restores the saved time setting.
-3. Eligible administrator actions: `New curation`, `New subwave`, and `New decision`.
+3. `New subwave`, for eligible administrators.
 
-The native app's subwave bar also offers `New subwave` to eligible administrators, including
-before the first subwave is created. These entries open the same existing creation
-flows and keep their original permission checks. Direct messages keep
-their own header and do not show Wave Score.
+Creation keeps its existing permission checks and save flows. `+ Curation` at the
+end of the phone wave tab row opens the Create curation sheet directly for eligible
+administrators. New curation and New decision are not in More wave actions.
+New subwave is not repeated in the subwave bar. New decision stays in the Decisions
+view beside its filter chips as `+ Decision`. Both create actions use the shared
+text-action style at 13px on phones and align to the same right edge. Direct
+messages keep their own header and do not show Wave Score.
 
 On desktop and tablets the top-right controls start with `Join` when the viewer has not joined the
 wave, then Add REP for eligible viewers, followed by the
@@ -107,11 +110,19 @@ the same hover-label styling as Profile Waves Feed.
 
 Unavailable submission actions show a lock icon at every width. Hover, focus,
 or select the lock to read the full restriction reason. The Memes `How to Submit`
-helper keeps its label when space allows and opens nomination guidance. On phones these controls are available from `More wave actions`.
+helper keeps its label when space allows and opens nomination guidance. On
+phones, choose `How to Submit` in `More wave actions`. The actions sheet closes
+before a bottom sheet opens with an X close control. Both Main Stage nomination
+guidance and other submission restrictions use this pattern, retaining their
+eligibility details and actions.
 On desktop and tablets, the Main Stage submit/help control sits before message
 search. A narrow center column uses a compact lock with the original
 accessible name. Other restricted controls keep their bordered surfaces.
 Add/Edit REP sits beside `Join` when both controls are shown.
+
+On supported phone wave channels, `More wave actions` also contains the
+`Boosted drops` display options: `Expanded`, `Compact`, and `Hidden`. The app
+and mobile web use the same device-local preference and mark the selected mode.
 
 ### Join Call to Action
 

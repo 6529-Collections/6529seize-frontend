@@ -52,7 +52,7 @@ export function CompetitionMyVotesSort({
     <span
       className={`${getDropdownTriggerClasses({ variant: "compact", border: "solid" })} tw-inline-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2 tw-whitespace-nowrap group-focus-visible:tw-outline group-focus-visible:tw-outline-2 group-focus-visible:tw-outline-offset-2 group-focus-visible:tw-outline-primary-400 desktop-hover:group-hover:tw-bg-iron-800`}
     >
-      <span className="tw-truncate">{labels[sort]}</span>
+      <span className="tw-truncate tw-text-meta">{labels[sort]}</span>
       <ChevronDownIcon
         aria-hidden="true"
         className={DROPDOWN_CHEVRON_CLASSES}

@@ -4,9 +4,9 @@ import type { CompactMenuItem } from "@/components/compact-menu";
 
 const items: CompactMenuItem[] = [
   {
-    id: "create-decision",
-    label: "New decision",
-    href: "/waves/wave/decisions/new",
+    id: "extra-wave-action",
+    label: "Open wave activity",
+    href: "/waves/wave/activity",
   },
   {
     id: "display-time-zone",
@@ -19,7 +19,6 @@ const items: CompactMenuItem[] = [
   { id: "search-messages", label: "Search messages" },
   { id: "submission-help", label: "How to Submit" },
   { id: "wave-details", label: "Wave details" },
-  { id: "create-curation", label: "New curation" },
 ];
 
 it("groups phone actions without losing extra actions and exposes the UTC toggle state", () => {
@@ -36,10 +35,9 @@ it("groups phone actions without losing extra actions and exposes the UTC toggle
     "wave-link",
     "submission-help",
     "display-time-zone",
+    "extra-wave-action",
     "toggle-view-mode",
-    "create-curation",
     "create-subwave",
-    "create-decision",
   ]);
   expect(within(sheet).getAllByRole("separator")).toHaveLength(2);
   expect(
@@ -48,8 +46,8 @@ it("groups phone actions without losing extra actions and exposes the UTC toggle
       .querySelector("svg")
   ).toBeInTheDocument();
   expect(
-    within(sheet).getByRole("link", { name: "New decision" })
-  ).toHaveAttribute("href", "/waves/wave/decisions/new");
+    within(sheet).getByRole("link", { name: "Open wave activity" })
+  ).toHaveAttribute("href", "/waves/wave/activity");
 });
 
 it("keeps non-phone action order and styling unchanged", () => {

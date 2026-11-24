@@ -53,6 +53,7 @@ import { useContentTab, type SetActiveContentTab } from "../ContentTabContext";
 import MyStreamActionTooltip from "./MyStreamActionTooltip";
 import MyStreamWaveCreateActionsMenu from "./tabs/MyStreamWaveCreateActionsMenu";
 import PhoneWaveTabs from "./tabs/PhoneWaveTabs";
+import WaveCurationCreateButton from "./tabs/WaveCurationCreateButton";
 import MyStreamWaveCurationTabMenu from "./tabs/MyStreamWaveCurationTabMenu";
 import MobileTabsScrollControls from "./MobileTabsScrollControls";
 import { useWaveFeatureUsage } from "@/hooks/useWaveFeatureUsage";
@@ -503,6 +504,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
             : undefined,
         action: canManageCurations ? (
           <MyStreamWaveCurationTabMenu
+            mobileSheet
             wave={wave}
             curation={curation}
             canSetAsProfileCuration={
@@ -626,7 +628,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       <div
         ref={featureUsageRef}
         data-competition-navigation={flat ? "flat" : undefined}
-        className="tw-flex tw-w-full tw-min-w-0 tw-px-2"
+        className="tw-flex tw-w-full tw-min-w-0 tw-pl-2 tw-pr-4 sm:tw-pl-4"
       >
         <PhoneWaveTabs
           key={wave.id}
@@ -636,6 +638,12 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
           }))}
           primaryKeys={PHONE_PRIMARY_TABS}
           activeKey={activeKey}
+          trailingAction={
+            <WaveCurationCreateButton
+              wave={wave}
+              onCreated={onSelectCuration}
+            />
+          }
         />
       </div>
     );

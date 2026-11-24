@@ -20,7 +20,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
 const TAB_LAYOUT =
-  "tw-flex tw-min-h-11 tw-min-w-11 tw-flex-none tw-items-center tw-justify-center tw-gap-1 tw-px-2 tw-text-center tw-text-xs tw-leading-4";
+  "tw-flex tw-min-h-11 tw-min-w-11 tw-flex-none tw-items-center tw-justify-center tw-gap-1 tw-px-2 tw-text-center tw-text-sm tw-leading-4";
 const TAB_LABEL =
   "tw-relative tw-inline-flex tw-items-center tw-self-stretch tw-whitespace-nowrap";
 
@@ -41,6 +41,7 @@ interface PhoneWaveTabsProps {
   readonly tabs: readonly PhoneWaveTab[];
   readonly primaryKeys: readonly string[];
   readonly activeKey: string;
+  readonly trailingAction?: ReactNode;
   readonly settingsRef?: Ref<HTMLButtonElement> | undefined;
   readonly settingsKey?: string | undefined;
 }
@@ -54,6 +55,7 @@ export default function PhoneWaveTabs({
   tabs,
   primaryKeys,
   activeKey,
+  trailingAction,
   settingsRef,
   settingsKey,
 }: PhoneWaveTabsProps) {
@@ -102,86 +104,89 @@ export default function PhoneWaveTabs({
 
   return (
     <>
-      <div
-        ref={rowRef}
-        className="tw-flex tw-min-w-0 tw-flex-1 tw-items-stretch tw-gap-1 tw-overflow-x-auto tw-overflow-y-hidden tw-overscroll-x-contain tw-scrollbar-none"
-        data-wave-phone-tabs=""
-      >
+      <div className="tw-flex tw-w-full tw-min-w-0 tw-items-center tw-gap-1">
         <div
-          className="tw-flex tw-flex-none tw-items-stretch tw-gap-1"
-          role={hasTabPanels ? "tablist" : undefined}
-          aria-label={hasTabPanels ? sections : undefined}
+          ref={rowRef}
+          className="tw-flex tw-min-w-0 tw-flex-1 tw-scroll-px-px tw-items-stretch tw-gap-1 tw-overflow-x-auto tw-overflow-y-hidden tw-overscroll-x-contain tw-pr-px tw-scrollbar-none"
+          data-wave-phone-tabs=""
         >
-          {primary.map((tab) => {
-            const selected = tab.key === activeKey;
-            const hasAction =
-              tab.action !== null &&
-              tab.action !== undefined &&
-              tab.action !== false;
-            const button = (
-              <TabButton
-                key={tab.key}
-                ref={tab.key === settingsKey ? settingsRef : undefined}
-                type="button"
-                role={tab.panelId ? "tab" : undefined}
-                aria-selected={tab.panelId ? selected : undefined}
-                aria-controls={tab.panelId}
-                aria-current={!tab.panelId && selected ? "true" : undefined}
-                data-wave-tab-value={tab.key.toLowerCase()}
-                data-curation-id={tab.curationId}
-                className={`${TAB_LAYOUT} ${getUnderlineTabClasses({ active: selected, externalIndicator: true })}`}
-                onClick={tab.onSelect}
-                onPointerEnter={tab.onIntent}
-                onFocus={tab.onIntent}
-              >
-                {tab.leadingIcon}
-                <span
-                  className={`${TAB_LABEL} ${selected ? UNDERLINE_TAB_TEXT_INDICATOR_CLASSES : ""}`}
-                  data-wave-tab-label=""
-                >
-                  {tab.label}
-                </span>
-                <TabBadge tab={tab} />
-              </TabButton>
-            );
-            return hasAction ? (
-              <div
-                key={tab.key}
-                className="tw-flex tw-flex-none tw-items-center"
-              >
-                {button}
-                {tab.action}
-              </div>
-            ) : (
-              button
-            );
-          })}
-        </div>
-        {secondary.length > 0 && (
-          <button
-            ref={settingsRef}
-            type="button"
-            aria-haspopup="dialog"
-            aria-expanded={isOpen}
-            aria-current={activeSecondary ? "true" : undefined}
-            aria-controls={isOpen ? dialogId : undefined}
-            data-wave-phone-more=""
-            className={`${TAB_LAYOUT} ${getUnderlineTabClasses({ active: Boolean(activeSecondary), externalIndicator: true })}`}
-            onClick={() => setIsOpen(true)}
+          <div
+            className="tw-flex tw-flex-none tw-items-stretch tw-gap-1"
+            role={hasTabPanels ? "tablist" : undefined}
+            aria-label={hasTabPanels ? sections : undefined}
           >
-            <span
-              className={`${TAB_LABEL} ${activeSecondary ? UNDERLINE_TAB_TEXT_INDICATOR_CLASSES : ""}`}
-              data-wave-tab-label=""
+            {primary.map((tab) => {
+              const selected = tab.key === activeKey;
+              const hasAction =
+                tab.action !== null &&
+                tab.action !== undefined &&
+                tab.action !== false;
+              const button = (
+                <TabButton
+                  key={tab.key}
+                  ref={tab.key === settingsKey ? settingsRef : undefined}
+                  type="button"
+                  role={tab.panelId ? "tab" : undefined}
+                  aria-selected={tab.panelId ? selected : undefined}
+                  aria-controls={tab.panelId}
+                  aria-current={!tab.panelId && selected ? "true" : undefined}
+                  data-wave-tab-value={tab.key.toLowerCase()}
+                  data-curation-id={tab.curationId}
+                  className={`${TAB_LAYOUT} ${getUnderlineTabClasses({ active: selected, externalIndicator: true })}`}
+                  onClick={tab.onSelect}
+                  onPointerEnter={tab.onIntent}
+                  onFocus={tab.onIntent}
+                >
+                  {tab.leadingIcon}
+                  <span
+                    className={`${TAB_LABEL} ${selected ? UNDERLINE_TAB_TEXT_INDICATOR_CLASSES : ""}`}
+                    data-wave-tab-label=""
+                  >
+                    {tab.label}
+                  </span>
+                  <TabBadge tab={tab} />
+                </TabButton>
+              );
+              return hasAction ? (
+                <div
+                  key={tab.key}
+                  className="tw-flex tw-flex-none tw-items-center"
+                >
+                  {button}
+                  {tab.action}
+                </div>
+              ) : (
+                button
+              );
+            })}
+          </div>
+          {secondary.length > 0 && (
+            <button
+              ref={settingsRef}
+              type="button"
+              aria-haspopup="dialog"
+              aria-expanded={isOpen}
+              aria-current={activeSecondary ? "true" : undefined}
+              aria-controls={isOpen ? dialogId : undefined}
+              data-wave-phone-more=""
+              className={`${TAB_LAYOUT} ${getUnderlineTabClasses({ active: Boolean(activeSecondary), externalIndicator: true })}`}
+              onClick={() => setIsOpen(true)}
             >
-              {activeSecondary?.label ?? more}
-            </span>
-            {activeSecondary && <TabBadge tab={activeSecondary} />}
-            <ChevronDownIcon
-              aria-hidden="true"
-              className="tw-size-3 tw-shrink-0"
-            />
-          </button>
-        )}
+              <span
+                className={`${TAB_LABEL} ${activeSecondary ? UNDERLINE_TAB_TEXT_INDICATOR_CLASSES : ""}`}
+                data-wave-tab-label=""
+              >
+                {activeSecondary?.label ?? more}
+              </span>
+              {activeSecondary && <TabBadge tab={activeSecondary} />}
+              <ChevronDownIcon
+                aria-hidden="true"
+                className="tw-size-3 tw-shrink-0"
+              />
+            </button>
+          )}
+        </div>
+        {trailingAction}
       </div>
       {secondary.length > 0 && (
         <MobileWrapperDialog

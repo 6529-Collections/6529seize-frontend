@@ -2,9 +2,8 @@
 import { useWaveChatPrefetch } from "@/hooks/competitions/useWaveChatPrefetch";
 import useCapacitor from "@/hooks/useCapacitor";
 
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
-import { useOptionalHeaderContext } from "@/contexts/HeaderContext";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { BrainView } from "./brainMobileViews";
@@ -29,6 +28,7 @@ import { useAuth } from "@/components/auth/Auth";
 import { getWaveHomeRoute } from "../../../helpers/navigation.helpers";
 import { useWaveCurationTabs } from "@/hooks/waves/useWaveCurationTabs";
 import MyStreamWaveCreateActionsMenu from "../my-stream/tabs/MyStreamWaveCreateActionsMenu";
+import WaveCurationCreateButton from "../my-stream/tabs/WaveCurationCreateButton";
 import MobileTabsScrollControls from "../my-stream/MobileTabsScrollControls";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -144,8 +144,6 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   const pathname = usePathname();
   const isCompetitionRoute = isCompetitionPathname(pathname);
   const phoneViewport = useMediaQuery(PHONE_WAVES_LAYOUT_QUERY);
-  const setWaveCreateNavigation =
-    useOptionalHeaderContext()?.setWaveCreateNavigation;
   const searchParams = useSearchParams();
   const { flat, nativeCompetition } = useCompetitionNavigation();
   const { activeContentTab } = useContentTab();
@@ -387,27 +385,6 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     [onViewChange, updateSelectedCuration]
   );
 
-  useEffect(() => {
-    if (
-      !isApp ||
-      !phoneWaveLayout ||
-      !waveId ||
-      !canManageCurations ||
-      !setWaveCreateNavigation
-    ) {
-      return;
-    }
-    setWaveCreateNavigation({ waveId, onCreated: onCurationClick });
-    return () => setWaveCreateNavigation(null);
-  }, [
-    isApp,
-    phoneWaveLayout,
-    waveId,
-    canManageCurations,
-    onCurationClick,
-    setWaveCreateNavigation,
-  ]);
-
   const showRoutedCompetitionTabs =
     flat && isCompetitionRoute && Boolean(nativeCompetition);
   const showSharedCompetitionTabs =
@@ -524,6 +501,11 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
         activeKey={tabs.find((tab) => tab.active)?.key ?? ""}
         settingsRef={showSettingsTab ? setConfigurationButtonRef : undefined}
         settingsKey={BrainView.CONFIGURATION}
+        trailingAction={
+          wave && (
+            <WaveCurationCreateButton wave={wave} onCreated={onCurationClick} />
+          )
+        }
       />
     );
   };
@@ -587,7 +569,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
           ? "wave.navigation.waveSections"
           : "wave.navigation.appSections"
       )}
-      className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-px-2 sm:tw-px-4 md:tw-px-6"
+      className={`tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] ${phoneWaveLayout ? "tw-pl-2 tw-pr-4 sm:tw-pl-4" : "tw-px-2 sm:tw-px-4 md:tw-px-6"}`}
     >
       {isWaveNavigationLoading && (
         <div className="tw-flex tw-min-h-12 tw-w-full tw-items-center tw-gap-1.5 tw-overflow-hidden tw-px-0.5">

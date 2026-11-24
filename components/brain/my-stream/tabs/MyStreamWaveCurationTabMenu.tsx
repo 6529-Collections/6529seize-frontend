@@ -30,6 +30,7 @@ import { commonApiDelete } from "@/services/api/common-api";
 import MyStreamWaveCurationCreateDialog from "./MyStreamWaveCurationCreateDialog";
 
 interface MyStreamWaveCurationTabMenuProps {
+  readonly mobileSheet?: boolean | undefined;
   readonly wave: ApiWave;
   readonly curation: ApiWaveCuration;
   readonly onDeleted?: (() => Promise<void> | void) | undefined;
@@ -189,6 +190,7 @@ export default function MyStreamWaveCurationTabMenu({
   triggerVariant = "tabs",
   triggerLabel,
   permissionMode = "standard",
+  mobileSheet = false,
   canChooseAnotherCuration = false,
   onChooseAnotherCuration,
   onChooseAnotherSourceWave,
@@ -434,6 +436,7 @@ export default function MyStreamWaveCurationTabMenu({
 
       {editPanel.isOpen && (
         <MyStreamWaveCurationCreateDialog
+          mobileSheet={mobileSheet}
           wave={wave}
           isOpen
           onClose={editPanel.close}

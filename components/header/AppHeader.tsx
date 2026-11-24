@@ -339,7 +339,7 @@ export default function AppHeader() {
   const locale = useBrowserLocale();
   const [menuOpen, setMenuOpen] = useState(false);
   const myStream = useMyStreamOptional();
-  const { waveDropAction, waveCreateNavigation } = useHeaderContext();
+  const { waveDropAction } = useHeaderContext();
   const { isCapacitor } = useCapacitor();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
   const searchParams = useSearchParams();
@@ -587,7 +587,7 @@ export default function AppHeader() {
           wave={activeWave}
           dropAction={headerDropAction}
           items={appHeaderMoreMenuItems}
-          createNavigation={waveCreateNavigation}
+          showBoostedDropsOptions={!isMemesWave}
         />
       </div>
     );
