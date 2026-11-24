@@ -43,6 +43,7 @@ const HEADER_ACTION_BUTTON_TEXT_CLASS =
 const NOT_ELIGIBLE_BUTTON_CLASS =
   "tw-group tw-flex tw-cursor-help tw-items-center tw-justify-center tw-gap-x-1.5 tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-colors tw-duration-[180ms] tw-ease-out desktop-hover:hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
 const ACTIVE_LABEL_SUBMIT_MEME = "waves.dropEligibility.submitMeme";
+const HOW_TO_SUBMIT_LABEL_KEY = "waves.dropEligibility.howToSubmit";
 
 const getActiveLabelKeys = ({
   canSubmit,
@@ -156,7 +157,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
           }
         >
           <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
-          <span>{t(locale, "waves.dropEligibility.howToSubmit")}</span>
+          <span>{t(locale, HOW_TO_SUBMIT_LABEL_KEY)}</span>
         </button>
       );
     }
@@ -213,14 +214,14 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
           className={restrictedClass}
           onClick={() =>
             onShowSubmissionHelp({
-              label: t(locale, "waves.dropEligibility.howToSubmit"),
+              label: t(locale, HOW_TO_SUBMIT_LABEL_KEY),
               restrictionKind: "memes-nomination",
               restrictionMessage: null,
             })
           }
         >
           <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
-          <span>{t(locale, "waves.dropEligibility.howToSubmit")}</span>
+          <span>{t(locale, HOW_TO_SUBMIT_LABEL_KEY)}</span>
         </button>
       );
     }
@@ -246,7 +247,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
                 : `${HEADER_ACTION_BUTTON_TEXT_CLASS} tw-border-x-0 tw-border-b tw-border-t-0 tw-border-dashed tw-border-iron-600/70 tw-pb-px tw-transition-colors group-hover:tw-border-iron-400/80`
             }
           >
-            {t(locale, "waves.dropEligibility.howToSubmit")}
+            {t(locale, HOW_TO_SUBMIT_LABEL_KEY)}
           </span>
         </button>
       </MainStageNominationPopover>
