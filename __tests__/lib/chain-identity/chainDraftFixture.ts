@@ -63,6 +63,7 @@ export function ratingDraft(
     readonly authRef?: Hex;
     readonly value?: bigint;
     readonly categoryName?: string;
+    readonly tipPerRU?: bigint;
   } = {}
 ): ChainDraft {
   const keyType = options.keyType ?? 1;
@@ -70,6 +71,7 @@ export function ratingDraft(
   const authRef = options.authRef ?? ZERO32;
   const value = options.value ?? 5n;
   const categoryName = options.categoryName ?? "Art";
+  const tipPerRU = options.tipPerRU ?? 0n;
   const header = txHeader({
     ruleVersion: 6,
     principal: RATER,
@@ -82,6 +84,7 @@ export function ratingDraft(
     feeMode: 3,
     maxFee: 2_250_000n,
     maxWork: 124_200n,
+    tipPerRU,
   });
   const body = {
     matter: 1,
@@ -124,7 +127,7 @@ export function ratingDraft(
           sponsorRef: ZERO32,
           maxFee: "2250000",
           maxWork: "124200",
-          tipPerRU: "0",
+          tipPerRU: tipPerRU.toString(),
         },
         body: {
           matter: 1,

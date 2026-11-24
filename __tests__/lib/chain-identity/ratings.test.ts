@@ -29,12 +29,22 @@ jest.mock("@/lib/chain-identity/state", () => ({
   readRaterSpent: jest.fn(),
   readIdentityBalance: jest.fn(),
 }));
+/** A RATING_SET draft as far as the writer reads it, with its signed fee. */
+function mockRatingDraft(maxFee: string) {
+  return {
+    txId: `0x${"77".repeat(32)}`,
+    typedData: {
+      primaryType: "RatingSet",
+      message: { header: { maxFee, maxWork: "124200" } },
+    },
+    unsigned: "0x4001",
+    fee: { maxFee, maxWork: "124200", sizeBytes: 300 },
+  };
+}
+
 jest.mock("@/lib/chain-identity/operation", () => ({
   ...jest.requireActual("@/lib/chain-identity/operation"),
-  draftOperation: jest.fn(async () => ({
-    txId: `0x${"77".repeat(32)}`,
-    fee: { maxFee: "100" },
-  })),
+  draftOperation: jest.fn(async () => mockRatingDraft("100")),
   submitAndAwait: jest.fn(async () => ({ status: "final" })),
 }));
 jest.mock("@/lib/chain-identity/session", () => ({
@@ -138,6 +148,7 @@ it("rates with this browser's key, no wallet prompt, at the current version", as
   await rate();
   expect(sessionSigner).toHaveBeenCalledWith(key);
   expect(walletSigner).not.toHaveBeenCalled();
+  expect(draftOperation).toHaveBeenCalledTimes(1);
   const [request, primaryType] = (draftOperation as jest.Mock).mock.calls[0];
   expect(primaryType).toBe("RatingSet");
   expect(request).toMatchObject({
@@ -153,6 +164,40 @@ it("rates with this browser's key, no wallet prompt, at the current version", as
       priorVersion: "77",
     },
   });
+});
+
+it("asks the wallet, saying the fee first, when it is above the key's cap", async () => {
+  (usableSessionKey as jest.Mock).mockResolvedValue(key);
+  // 1 $fake6529: far above 20 times this rating's fee at the floor.
+  (draftOperation as jest.Mock).mockImplementationOnce(async () =>
+    mockRatingDraft((10n ** 18n).toString())
+  );
+  const walletSign = jest.fn(async () => "0x5167");
+  (walletSigner as jest.Mock).mockReturnValue({ keyType: 1, sign: walletSign });
+  const onWalletFee = jest.fn();
+  await writeChainRating(config, WALLET, {
+    matter: "REP",
+    target: { handle: "rated_one", wallets: [] },
+    category: "Art",
+    value: 120n,
+    onWalletFee,
+  });
+  const drafts = (draftOperation as jest.Mock).mock.calls;
+  expect(drafts).toHaveLength(2);
+  expect(drafts[0][0]).toMatchObject({ keyType: 2, keyId: key.keyId });
+  expect(drafts[1][0]).toMatchObject({ keyType: 1, signer: WALLET });
+  expect(sessionSigner).not.toHaveBeenCalled();
+  expect(walletSigner).toHaveBeenCalledWith(config, WALLET);
+  // The wallet's own draft and its fee, said before the prompt.
+  expect(onWalletFee).toHaveBeenCalledWith(100n);
+  expect(onWalletFee.mock.invocationCallOrder[0]).toBeLessThan(
+    walletSign.mock.invocationCallOrder[0]!
+  );
+  expect(submitAndAwait).toHaveBeenCalledWith(
+    expect.objectContaining({ fee: expect.objectContaining({ maxFee: "100" }) }),
+    [{ role: 0, keyType: 1, sig: "0x5167" }],
+    undefined
+  );
 });
 
 it("asks the wallet when this browser has no key", async () => {
@@ -270,7 +315,7 @@ it("signs and sends once the identity covers the fee", async () => {
   await rate();
   expect(sign).toHaveBeenCalled();
   expect(submitAndAwait).toHaveBeenCalledWith(
-    expect.objectContaining({ fee: { maxFee: "100" } }),
+    expect.objectContaining({ fee: expect.objectContaining({ maxFee: "100" }) }),
     [{ role: 0, keyType: 1, sig: "0x5151" }],
     undefined
   );

@@ -32,7 +32,8 @@ export class ChainOperationError extends Error {
       | "rejected"
       | "failed"
       | "timeout"
-      | "stated",
+      | "stated"
+      | "fee_above_cap",
     message: string,
     /** The chain's result name when it refused the change, e.g. STALE_VERSION. */
     readonly resultName: string | null = null,
@@ -205,6 +206,9 @@ export function verifyDraft(
     // never one this site set or lowered: below it the chain fails the
     // change and still takes the fee.
     canonical(header["maxWork"]) === draft.fee.maxWork,
+    // This site never offers a tip. With one, the block could take the whole
+    // maxFee; without, what the change doesn't use comes back.
+    canonical(header["tipPerRU"] ?? 0) === "0",
     sameValue(request.body, typedData.message["body"]),
     sameValue(request.principal ?? ZERO_WORD, header["principal"]),
     canonical(header["keyType"]) === String(expectedKeyType),

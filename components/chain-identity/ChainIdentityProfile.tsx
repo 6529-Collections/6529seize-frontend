@@ -113,6 +113,8 @@ export default function ChainIdentityProfile({
   });
   // Only what the person changed; the rest reads from the current document.
   const [edits, setEdits] = useState<Partial<Draft>>({});
+  // The fee was above what this browser's key signs on its own.
+  const [walletSigns, setWalletSigns] = useState(false);
   const draft: Draft = { ...draftOf(current.data?.doc ?? null), ...edits };
   const action = useChainAction(() => {
     setEdits({});
@@ -133,6 +135,7 @@ export default function ChainIdentityProfile({
       return;
     }
     const fields = nextProfileFields(current.data.doc, edits);
+    setWalletSigns(false);
     void action.prepare(async (progress) => {
       const { draft: prepared, signer } = await prepareProfileReplace(
         identity,
@@ -143,6 +146,7 @@ export default function ChainIdentityProfile({
           sessionKey,
           onWalletPrompt: progress.walletPrompt,
           onDocumentSigned: progress.preparing,
+          onWalletFallback: () => setWalletSigns(true),
         }
       );
       return { draft: prepared, signer, payer: "identity" };
@@ -243,6 +247,9 @@ export default function ChainIdentityProfile({
         state={action.state}
         onConfirm={() => void action.confirm()}
         onCancel={action.cancel}
+        note={
+          walletSigns ? t(locale, "chainIdentity.profile.walletFee") : undefined
+        }
       />
     </ChainSection>
   );

@@ -47,7 +47,9 @@ The profile site builder saves its site's place in the same profile document
 of the signed-in profile's identity. It changes only the site's two fields
 and keeps every other field. It signs with this browser's key when there is
 one, without a wallet prompt, and otherwise asks a wallet of that identity
-to sign twice. Each save costs a $fake6529 fee from the identity's balance,
+to sign twice. When the fee is above what the key signs on its own (see
+Rules to Know), the builder sends no change and says the fee: save with the
+wallet instead. Each save costs a $fake6529 fee from the identity's balance,
 as a profile save on this page does, but the site builder doesn't show the
 fee before the wallet asks. If someone saved the profile in the meantime,
 the chain refuses the save and still takes its fee; the builder then tries
@@ -67,6 +69,11 @@ can't read.
 - The 6529 Network caps how many wallets an identity holds.
 - The browser's key stays in this browser and can't be copied out. Turn it
   off on this page to end it on the 6529 Network.
+- The browser's key signs a change on its own only when its fee is at most
+  20 times what the change costs at the 6529 Network's lowest fees. This
+  site sets that limit, and nothing the gateway sends raises it past a fixed
+  amount. Above it, the page says the fee and your wallet signs the change
+  instead: a toast for REP and NIC, a line by the fee for a profile save.
 - An added wallet has 23 hours to sign. 6529.io holds the first signature
   until then. From one browser, a wallet starts one join at a time.
 

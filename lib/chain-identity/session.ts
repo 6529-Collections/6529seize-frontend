@@ -20,7 +20,8 @@ import { readGrant } from "./state";
  * the identity's wallet, lets a key held only by this browser sign profile
  * changes and REP and NIC ratings, so each rating needs no wallet prompt.
  * Once the chain runs votes and poll ballots (rule version 7), the grant
- * lists them too.
+ * lists them too. The key signs only fees within its cap (`sessionFeeCap`);
+ * the wallet signs the rest.
  */
 
 /** How long a browser's key lasts, in days. */
