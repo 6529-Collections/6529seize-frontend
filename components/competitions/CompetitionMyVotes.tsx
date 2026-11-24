@@ -242,12 +242,18 @@ function ScopedCompetitionMyVotes({
     { include: "cards", sort },
     !!viewer
   );
+  // Votes reset on the 6529 Network, hidden until 6529.io's index reads them.
+  const [chainResets, setChainResets] = useState<ReadonlySet<string>>(
+    () => new Set()
+  );
   const votes = useMemo(
     () =>
       (query.data?.pages.flatMap((page) => page.data) ?? []).filter(
-        (vote) => vote.entry_status === ApiCompetitionEntryStatus.Active
+        (vote) =>
+          vote.entry_status === ApiCompetitionEntryStatus.Active &&
+          !chainResets.has(vote.drop_id)
       ),
-    [query.data]
+    [query.data, chainResets]
   );
   const cards = useMemo(
     () => ({
@@ -309,9 +315,21 @@ function ScopedCompetitionMyVotes({
       // On the 6529 Network the reset carries its own signature.
       assertActiveScope();
       await chainWriters.vote({ dropId, amount: 0 });
-      // 6529.io's index shows the reset once it has read the block; a
-      // refetch now would bring the old vote back.
-      scheduleIndexRefresh(() => invalidateCompetition(client, identity));
+      // The list drops the vote at once. 6529.io's index shows the reset
+      // once it has read the block; a refetch now would bring the old vote
+      // back.
+      setChainResets((current) => new Set(current).add(dropId));
+      scheduleIndexRefresh(async () => {
+        try {
+          await invalidateCompetition(client, identity);
+        } finally {
+          setChainResets((current) => {
+            const next = new Set(current);
+            next.delete(dropId);
+            return next;
+          });
+        }
+      });
       return;
     }
     const address = getWalletAddress();

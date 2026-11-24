@@ -25,7 +25,10 @@ import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWriters";
 import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
-import { scheduleIndexRefresh } from "@/lib/chain-waves/optimistic";
+import {
+  scheduleIndexRefresh,
+  withViewerVote,
+} from "@/lib/chain-waves/optimistic";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
@@ -45,6 +48,8 @@ interface MyStreamWaveMyVotesResetProps {
   readonly onToggleSelectAll: () => void;
   readonly removeSelected: (dropId: string) => void;
   readonly onResettingChange: (isResetting: boolean) => void;
+  /** The listed drop, for showing a reset on the 6529 Network at once. */
+  readonly findDrop?: ((dropId: string) => ApiDrop | undefined) | undefined;
 }
 
 const DEFAULT_DROP_RATE_CATEGORY = "Rep";
@@ -64,6 +69,7 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
   onToggleSelectAll,
   removeSelected,
   onResettingChange,
+  findDrop,
 }) => {
   const locale = useBrowserLocale();
   const { isApp } = useDeviceInfo();
@@ -89,10 +95,11 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
         return null;
       }
       if (chainWriters) {
-        // No drop comes back from the chain; the list refetches when the
-        // reset ends.
+        // No drop comes back from the chain: the listed drop shows the reset
+        // until 6529.io's index reads it.
         await chainWriters.vote({ dropId: param.dropId, amount: 0 });
-        return null;
+        const drop = findDrop?.(param.dropId);
+        return drop ? withViewerVote(drop, 0) : null;
       }
       return await commonApiPost<DropRateChangeRequest, ApiDrop>({
         endpoint: `drops/${param.dropId}/ratings`,
@@ -109,6 +116,7 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
             ? undefined
             : connectedProfile?.handle,
           invalidateWaveSummary: false,
+          fromChain: chainWriters !== null,
         });
       removeSelected(dropId);
     },
