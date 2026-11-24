@@ -75,7 +75,7 @@ export function useApprovalWaveStatus({
   const currentMillis = Time.currentMillis();
   const hasCallerOwnedDecisionPoints = decisionPoints !== undefined;
   // Votes move to the 6529 Network: the controls lock without closing.
-  const wavesWritesPaused = useWavesWritesPaused();
+  const wavesWritesPaused = useWavesWritesPaused("votes");
 
   const winningThreshold = useMemo(
     () =>

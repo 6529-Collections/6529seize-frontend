@@ -21,6 +21,9 @@ import {
 } from "@/components/voting/VoteActionButton";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useWavesPausedReason } from "@/hooks/useWavesMovePhase";
+import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWriters";
+import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
+import { withViewerVote } from "@/lib/chain-waves/optimistic";
 import { AuthContext } from "@/components/auth/Auth";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import {
@@ -98,7 +101,8 @@ const SingleWaveDropVoteSubmit = forwardRef<
     ref
   ) => {
     const locale = useBrowserLocale();
-    const pausedReason = useWavesPausedReason();
+    const pausedReason = useWavesPausedReason("votes");
+    const chainWriters = useChainWavesWriters();
     const position = drop.rank;
     const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
       useContext(AuthContext);
@@ -132,14 +136,21 @@ const SingleWaveDropVoteSubmit = forwardRef<
       particlesDuration + particlesDelay * particleCount + 2500;
 
     const rateChangeMutation = useMutation({
-      mutationFn: async (param: { rate: number }) =>
-        await commonApiPost<DropRateChangeRequest, ApiDrop>({
+      mutationFn: async (param: { rate: number }): Promise<ApiDrop> => {
+        if (chainWriters) {
+          // On the 6529 Network the vote carries its own signature; the
+          // caches show it until 6529.io's index reads it from the chain.
+          await chainWriters.vote({ dropId: drop.id, amount: param.rate });
+          return withViewerVote(drop, param.rate);
+        }
+        return await commonApiPost<DropRateChangeRequest, ApiDrop>({
           endpoint: `drops/${drop.id}/ratings`,
           body: {
             rating: param.rate,
             category: DEFAULT_DROP_RATE_CATEGORY,
           },
-        }),
+        });
+      },
       onSuccess: (updatedDrop) => {
         applyWaveDropVoteUpdate(queryClient, updatedDrop, drop.wave.id, {
           contextProfile: activeProfileProxy
@@ -148,6 +159,10 @@ const SingleWaveDropVoteSubmit = forwardRef<
         });
       },
       onError: (error) => {
+        // Cancelled at the wallet prompt: nothing was sent.
+        if (isUserRejectedSigningError(error)) {
+          return;
+        }
         setToast({
           type: "error",
           title: "Couldn't submit your vote.",
@@ -487,7 +502,8 @@ const SingleWaveDropVoteSubmit = forwardRef<
 
       let success = false;
       try {
-        ({ success } = await requestAuth());
+        // On the 6529 Network each vote carries its own signature.
+        ({ success } = chainWriters ? { success: true } : await requestAuth());
       } catch {
         resetLoadingState();
         return;

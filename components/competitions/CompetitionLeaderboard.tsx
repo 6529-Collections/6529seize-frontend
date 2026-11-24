@@ -77,7 +77,7 @@ function CompetitionLeaderboardEntry({
     competition.capabilities
   );
   // Votes move to the 6529 Network: the vote action locks with the rest.
-  const votesPaused = useWavesWritesPaused();
+  const votesPaused = useWavesWritesPaused("votes");
   const onDropClick = useCompetitionDropNavigation();
   const presentation = useMemo(
     () => competitionPresentationWave(wave, competition),

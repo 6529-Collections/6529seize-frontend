@@ -28,6 +28,7 @@ jest.mock("@/config/env", () => {
       return {
         ...actual.publicEnv,
         ...(globalThis as { __wavesFreeze?: object }).__wavesFreeze,
+        ...(globalThis as { __chainWaves?: object }).__chainWaves,
       };
     },
   };
@@ -175,5 +176,27 @@ describe("useWavesMovePhase after a suspended tab returns", () => {
       document.dispatchEvent(new Event("visibilitychange"));
     });
     expect(result.current).toBe(true);
+  });
+});
+
+describe("WavesMoveNotice with the chain flows on", () => {
+  afterEach(() => {
+    clearWavesFreeze();
+    (globalThis as { __chainWaves?: object }).__chainWaves = {};
+    jest.useRealTimers();
+  });
+
+  it("says votes, ballots and wave REP go to the 6529 Network after the switch-on", () => {
+    (globalThis as { __chainWaves?: object }).__chainWaves = {
+      NEXT_PUBLIC_FEATURE_CHAIN_WAVES: "true",
+      NEXT_PUBLIC_CHAIN_GATEWAY_URL: "https://gateway.example.test",
+      NEXT_PUBLIC_CHAIN_NETWORK_ID: `0x${"ab".repeat(32)}`,
+    };
+    setWavesFreezeSchedule();
+    jest.useFakeTimers({ now: WAVES_SWITCH_ON_MS + HOUR });
+    render(<WavesMoveNotice />);
+    expect(screen.getByTestId("waves-move-notice")).toHaveTextContent(
+      "Votes, entries and wave settings moved to the 6529 Network on Thursday 26 November. Your votes, poll ballots and wave REP go there from this site. Entries and wave settings can't be changed here yet. Chat keeps working."
+    );
   });
 });

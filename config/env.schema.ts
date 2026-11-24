@@ -166,6 +166,10 @@ export const publicEnvSchema = z.object({
   // after the freeze, nothing changes.
   NEXT_PUBLIC_WAVES_FREEZE_AT: z.string().optional(),
   NEXT_PUBLIC_WAVES_SWITCH_ON_AT: z.string().optional(),
+  // Votes, poll ballots and wave REP go to the 6529 Network through the
+  // chain gateway after the waves switch-on (lib/chain-waves/config.ts). On
+  // only when exactly "true" and NEXT_PUBLIC_CHAIN_GATEWAY_URL is set.
+  NEXT_PUBLIC_FEATURE_CHAIN_WAVES: z.string().optional(),
   NEXT_PUBLIC_PROFILE_CMS_BUILDER_API_ENABLED: z.string().optional(),
   NEXT_PUBLIC_PROFILE_CMS_BUILDER_ENABLED: z.string().optional(),
   NEXT_PUBLIC_CLOUDFRONT_DOMAIN: z.string().optional(),

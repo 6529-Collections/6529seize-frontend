@@ -5,6 +5,11 @@ import { useWavesMoveScope } from "@/components/waves-move/WavesMoveScope";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import {
+  isChainWavesEnabled,
+  isWavesWriteClosed,
+  type WavesChainWrite,
+} from "@/lib/chain-waves/config";
+import {
   getNextWavesMoveChangeMs,
   getWavesMovePhase,
   getWavesMoveSchedule,
@@ -87,14 +92,22 @@ export function useWavesMovePhase(): WavesMovePhase {
 }
 
 /**
- * Whether 6529.io's own vote, entry, poll, wave REP, wave and decision
- * writes are closed, following the clock. Inside a wave that stays on
+ * Whether a waves write is closed, following the clock: from the freeze,
+ * until it opens again on the 6529 Network. With `kind`, the write opens at
+ * the switch-on in builds with the chain flows on, at the call sites whose
+ * change sends it there; without a kind (new polls, and anything not yet
+ * sent to the 6529 Network) it stays closed. Inside a wave that stays on
  * 6529.io nothing is closed.
  */
-export function useWavesWritesPaused(): boolean {
+export function useWavesWritesPaused(kind?: WavesChainWrite): boolean {
   const phase = useWavesMovePhase();
   const scope = useWavesMoveScope();
-  return scope !== "stays" && isWavesWritePausedPhase(phase);
+  return scope !== "stays" && isWavesWriteClosed(phase, kind);
+}
+
+/** Whether waves writes go to the 6529 Network now. */
+export function useChainWavesActive(): boolean {
+  return useWavesMovePhase() === "moved" && isChainWavesEnabled();
 }
 
 /**
@@ -109,7 +122,7 @@ export function useWaveCreationPaused(): boolean {
  * "Paused for the move to the 6529 Network." while those writes are closed,
  * in the viewer's locale; null otherwise.
  */
-export function useWavesPausedReason(): string | null {
+export function useWavesPausedReason(kind?: WavesChainWrite): string | null {
   const locale = useBrowserLocale();
-  return useWavesWritesPaused() ? t(locale, "wavesMove.paused") : null;
+  return useWavesWritesPaused(kind) ? t(locale, "wavesMove.paused") : null;
 }

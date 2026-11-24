@@ -19,6 +19,8 @@ import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useWaveRepAllocation } from "@/hooks/useWaveRepAllocation";
 import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
+import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWriters";
+import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useContext, useEffect, useId, useRef, useState } from "react";
@@ -95,7 +97,7 @@ export default function WaveRepRatingModal({
   const haveChanged = amount !== currentRating;
   const isProxyMode = Boolean(activeProfileProxy);
   // Wave REP moves to the 6529 Network: the allocation stays readable.
-  const wavesWritesPaused = useWavesWritesPaused();
+  const wavesWritesPaused = useWavesWritesPaused("waveRep");
   const isSaveDisabled =
     wavesWritesPaused ||
     isProxyMode ||
@@ -112,6 +114,7 @@ export default function WaveRepRatingModal({
   const hasNoAvailableWaveRep =
     allocationReady && availableWaveRep <= 0 && currentRating === 0;
 
+  const chainWriters = useChainWavesWriters();
   const mutation = useMutation({
     mutationFn: async ({
       amount,
@@ -120,13 +123,15 @@ export default function WaveRepRatingModal({
       readonly amount: number;
       readonly category: string;
     }) =>
-      await commonApiPost<ApiChangeWaveRepRating, void>({
-        endpoint: `waves/${wave.id}/rep/rating`,
-        body: {
-          amount,
-          category,
-        },
-      }),
+      chainWriters
+        ? await chainWriters.waveRating({ waveId: wave.id, category, amount })
+        : await commonApiPost<ApiChangeWaveRepRating, void>({
+            endpoint: `waves/${wave.id}/rep/rating`,
+            body: {
+              amount,
+              category,
+            },
+          }),
     onSuccess: () => {
       setToast({
         message: "Wave REP updated.",
@@ -161,6 +166,10 @@ export default function WaveRepRatingModal({
       });
     },
     onError: (error) => {
+      // Cancelled at the wallet prompt: nothing was sent.
+      if (isUserRejectedSigningError(error)) {
+        return;
+      }
       setToast({
         type: "error",
         title: "Couldn't update Wave REP.",
@@ -199,7 +208,10 @@ export default function WaveRepRatingModal({
     let mutationStarted = false;
     let shouldClose = false;
     try {
-      const { success } = await requestAuth();
+      // On the 6529 Network the rating carries its own signature.
+      const { success } = chainWriters
+        ? { success: true }
+        : await requestAuth();
       if (!success) {
         setToast({
           message: "Log in to continue.",

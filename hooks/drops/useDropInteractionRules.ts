@@ -26,7 +26,8 @@ interface DropInteractionRules {
  */
 export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
   const { connectedProfile, activeProfileProxy } = useAuth();
-  const wavesWritesPaused = useWavesWritesPaused();
+  const votesPaused = useWavesWritesPaused("votes");
+  const entriesPaused = useWavesWritesPaused();
 
   // Check if this is a winner drop
   const isWinner = drop.drop_type === ApiDropType.Winner;
@@ -84,7 +85,7 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
 
     // Votes on entries move to the 6529 Network: shown, but not changeable
     // here. Ratings of chat drops stay on this site.
-    if (wavesWritesPaused && drop.drop_type !== ApiDropType.Chat) {
+    if (votesPaused && drop.drop_type !== ApiDropType.Chat) {
       return DropVoteState.PAUSED;
     }
 
@@ -132,7 +133,7 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
   // Deleting an entry withdraws or disqualifies it, which moves to the 6529
   // Network with the other entry changes. Chat drops stay deletable.
   const isEntryDeletePaused =
-    wavesWritesPaused && drop.drop_type !== ApiDropType.Chat;
+    entriesPaused && drop.drop_type !== ApiDropType.Chat;
   // Delete rules
   const canDelete =
     baseRules &&

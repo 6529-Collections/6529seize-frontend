@@ -11,6 +11,8 @@ import {
 } from "@/hooks/memesQuickVote.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
+import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWriters";
+import { withViewerVote } from "@/lib/chain-waves/optimistic";
 import type { UseMutationResult } from "@tanstack/react-query";
 import type { Dispatch, ReactNode, SetStateAction } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -131,7 +133,7 @@ const flushMemesQuickVoteRatings = async ({
     Error,
     {
       readonly amount: number;
-      readonly dropId: string;
+      readonly drop: ExtendedDrop;
     }
   >;
   readonly ratingQueueRef: RefValue<QueuedRating[]>;
@@ -166,7 +168,7 @@ const flushMemesQuickVoteRatings = async ({
 
         const response = await ratingMutation.mutateAsync({
           amount: queuedRating.amount,
-          dropId: queuedRating.drop.id,
+          drop: queuedRating.drop,
         });
         // An already-sent vote must still reconcile its original profile cache,
         // even if that runtime has since unmounted. Callbacks belong to it.
@@ -287,21 +289,33 @@ export const useMemesQuickVoteSubmit = ({
   const [pendingDropIds, setPendingDropIds] = useState<string[]>([]);
   const [pendingRatingCount, setPendingRatingCount] = useState(0);
 
+  const chainWriters = useChainWavesWriters();
+  // On the 6529 Network each vote carries its own signature.
+  const authenticate = useCallback(
+    () => (chainWriters ? Promise.resolve({ success: true }) : requestAuth()),
+    [chainWriters, requestAuth]
+  );
+
   const ratingMutation = useMutation({
-    mutationFn: ({
-      dropId,
+    mutationFn: async ({
+      drop,
       amount,
     }: {
-      readonly dropId: string;
+      readonly drop: ExtendedDrop;
       readonly amount: number;
-    }) =>
-      commonApiPost<DropRateChangeRequest, ApiDrop>({
-        endpoint: `drops/${dropId}/ratings`,
+    }): Promise<ApiDrop> => {
+      if (chainWriters) {
+        await chainWriters.vote({ dropId: drop.id, amount });
+        return withViewerVote(drop, amount);
+      }
+      return commonApiPost<DropRateChangeRequest, ApiDrop>({
+        endpoint: `drops/${drop.id}/ratings`,
         body: {
           rating: amount,
           category: DEFAULT_DROP_RATE_CATEGORY,
         },
-      }),
+      });
+    },
   });
 
   const flushQueuedRatings = useCallback(() => {
@@ -313,19 +327,19 @@ export const useMemesQuickVoteSubmit = ({
       queuedDropIdsRef,
       ratingMutation,
       ratingQueueRef,
-      requestAuth,
+      requestAuth: authenticate,
       setPendingDropIds,
       setPendingRatingCount,
       setToast,
     });
   }, [
+    authenticate,
     isFlushingRef,
     onRatingFailure,
     onRatingSuccess,
     queuedDropIdsRef,
     ratingMutation,
     ratingQueueRef,
-    requestAuth,
     setPendingDropIds,
     setPendingRatingCount,
     setToast,

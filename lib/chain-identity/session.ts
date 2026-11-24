@@ -3,6 +3,9 @@ import { chainGateway } from "./gateway";
 import {
   capabilityRevoke,
   createdGrantId,
+  IDENTITY_SESSION_OPS,
+  OP_POLL_BALLOT_SET,
+  OP_VOTE_SET,
   sessionKeyGrant,
 } from "./identityOps";
 import {
@@ -16,6 +19,8 @@ import { readGrant } from "./state";
  * "Enable chain actions on this browser": one CAPABILITY_GRANT, signed by
  * the identity's wallet, lets a key held only by this browser sign profile
  * changes and REP and NIC ratings, so each rating needs no wallet prompt.
+ * Once the chain runs votes and poll ballots (rule version 7), the grant
+ * lists them too.
  */
 
 /** How long a browser's key lasts, in days. */
@@ -30,9 +35,31 @@ export interface SessionPlan {
   readonly feeBudget: bigint;
   readonly expiresAtMs: number;
   readonly currencyAsset: Hex;
+  /** The operations the grant lists, ascending. */
+  readonly ops: readonly number[];
   /** The new key; nothing keeps it until the grant is final. */
   readonly pair: Awaited<ReturnType<typeof createSessionKeyPair>>;
 }
+
+/** Votes and poll ballots join the grant once the chain runs them. */
+const SESSION_WAVE_OPS: readonly number[] = [OP_VOTE_SET, OP_POLL_BALLOT_SET];
+
+/** The operations a new grant lists, given the ones the chain runs. */
+export function sessionOpsFor(running: readonly number[]): readonly number[] {
+  const ops = new Set(IDENTITY_SESSION_OPS);
+  for (const op of SESSION_WAVE_OPS) {
+    if (running.includes(op)) {
+      ops.add(op);
+    }
+  }
+  return [...ops].sort((a, b) => a - b);
+}
+
+/** Whether the key's grant lets it sign `opType`. */
+export const sessionKeyCanSign = (
+  record: StoredSessionKey,
+  opType: number
+): boolean => (record.ops ?? IDENTITY_SESSION_OPS).includes(opType);
 
 /** Sizes the fee budget from the network's current fees. Signs nothing. */
 export async function planSession(
@@ -41,7 +68,8 @@ export async function planSession(
   nowMs: number,
   signal?: AbortSignal
 ): Promise<SessionPlan> {
-  const { currencyAsset } = await chainGateway.getOps(signal);
+  const { currencyAsset, ops: running } = await chainGateway.getOps(signal);
+  const ops = sessionOpsFor(running?.map((op) => op.opType) ?? []);
   const pair = await createSessionKeyPair();
   const expiresAtMs = nowMs + SESSION_LIFETIME_MS;
   const probe = sessionKeyGrant(principalId, wallet, {
@@ -50,6 +78,7 @@ export async function planSession(
     currencyAsset,
     feeBudget: 1n,
     expiresAtMs,
+    ops,
   });
   const draft = await chainGateway.draft(probe.request, signal);
   const perOperation = BigInt(draft.fee.maxFee);
@@ -57,6 +86,7 @@ export async function planSession(
     feeBudget: (perOperation > 0n ? perOperation : 1n) * FEE_BUDGET_OPERATIONS,
     expiresAtMs,
     currencyAsset,
+    ops,
     pair,
   };
 }
@@ -73,6 +103,7 @@ export const sessionGrantOperation = (
     currencyAsset: plan.currencyAsset,
     feeBudget: plan.feeBudget,
     expiresAtMs: plan.expiresAtMs,
+    ops: plan.ops,
   });
 
 /** Keeps the key in this browser once its grant is final. */
@@ -88,6 +119,7 @@ export async function keepSessionKey(
     keyPair: plan.pair.keyPair,
     grantId: createdGrantId(grantTxId),
     expiresAtMs: plan.expiresAtMs,
+    ops: plan.ops,
   };
   await sessionKeyStore.write(record);
 }

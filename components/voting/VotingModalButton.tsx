@@ -19,7 +19,7 @@ const VotingModalButton: React.FC<VotingModalButtonProps> = ({
   children,
 }) => {
   const { canShowVote, voteState } = useDropInteractionRules(drop);
-  const pausedReason = useWavesPausedReason();
+  const pausedReason = useWavesPausedReason("votes");
 
   if (!canShowVote) {
     return null;

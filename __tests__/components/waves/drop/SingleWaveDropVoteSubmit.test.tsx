@@ -52,6 +52,9 @@ jest.mock("@/services/api/common-api", () => ({
 }));
 
 // Mock CSS module
+jest.mock("@/components/chain-waves/useChainWavesWriters", () => ({
+  useChainWavesWriters: jest.fn(() => null),
+}));
 jest.mock("@/components/waves/drop/VoteButton.module.css", () => ({
   buttonContent: "buttonContent",
   buttonText: "buttonText",
@@ -364,6 +367,29 @@ describe("SingleWaveDropVoteSubmit", () => {
         },
       });
     });
+  });
+
+  it("sends the vote to the 6529 Network once waves have moved there", async () => {
+    const writers = jest.requireMock(
+      "@/components/chain-waves/useChainWavesWriters"
+    );
+    const vote = jest.fn().mockResolvedValue(undefined);
+    writers.useChainWavesWriters.mockReturnValue({ vote });
+    try {
+      const mockCommonApiPost = jest.mocked(commonApi.commonApiPost);
+      renderComponent({ newRating: 150 });
+
+      fireEvent.click(screen.getByRole("button"));
+      await advanceTimers(300);
+
+      await waitFor(() => {
+        expect(vote).toHaveBeenCalledWith({ dropId: mockDrop.id, amount: 150 });
+      });
+      expect(mockAuthContext.requestAuth).not.toHaveBeenCalled();
+      expect(mockCommonApiPost).not.toHaveBeenCalled();
+    } finally {
+      writers.useChainWavesWriters.mockReturnValue(null);
+    }
   });
 
   it("warns when a direct negative rating is submitted to a no-negative wave", () => {

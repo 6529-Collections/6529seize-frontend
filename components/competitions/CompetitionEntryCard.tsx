@@ -30,7 +30,7 @@ export default function CompetitionEntryCard({
   const [query] = useCompetitionEntryDrops([{ entryId, dropId }]);
   const onDropClick = useCompetitionDropNavigation();
   // Votes move to the 6529 Network: the vote action locks with the rest.
-  const votesPaused = useWavesWritesPaused();
+  const votesPaused = useWavesWritesPaused("votes");
   if (!query || query.isPending) return <CompetitionState />;
   if (query.isError && (!query.data || isCompetitionAccessError(query.error)))
     return <CompetitionState error retry={() => void query.refetch()} />;

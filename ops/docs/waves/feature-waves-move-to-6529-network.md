@@ -92,6 +92,35 @@ mutes, notification settings, meme collaborations, direct-message deletion,
 and groups no wave, decision or curation uses (direct-message preferences,
 network filters) are not affected.
 
+## After the Switch-On
+
+In builds with `NEXT_PUBLIC_FEATURE_CHAIN_WAVES` set to `true` and a chain
+gateway (`NEXT_PUBLIC_CHAIN_GATEWAY_URL`), votes, poll ballots and wave REP
+open again at the switch-on and go to the 6529 Network:
+
+- Every vote control (the vote dialog, My Votes and its reset, quick vote,
+  decision vote forms) sends `VOTE_SET`; a poll ballot sends
+  `POLL_BALLOT_SET`; the Wave REP dialog sends `RATING_SET` with the wave as
+  its target. Each needs no 6529.io sign-in.
+- Each is signed by this browser's key when that key's grant lists the
+  operation, and otherwise by the connected wallet, one prompt each. The key
+  comes from the identity page:
+  `Enable chain actions on this browser`. A key enabled before the switch-on
+  can't sign votes; the identity page then offers
+  `Add votes to this browser`, one wallet signature for a new 30-day key.
+- The control waits until a block holds the change, then shows it. Totals on
+  the page follow once 6529.io's index reads the block.
+- A wallet with no identity on the 6529 Network, or an entry, wave or poll the
+  network doesn't hold, gets a message saying so; nothing is sent.
+
+The notice then reads: Votes, entries and wave settings moved to the 6529
+Network on Thursday 26 November. Your votes, poll ballots and wave REP go
+there from this site. Entries and wave settings can't be changed here yet.
+Chat keeps working.
+
+Entries, wave and decision settings, groups and new polls stay paused until
+their own changes reach this site.
+
 ## Changing the Dates
 
 The instants are baked into each build. Postponing means changing both

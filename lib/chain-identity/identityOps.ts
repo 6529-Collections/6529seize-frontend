@@ -20,8 +20,16 @@ interface ChainOperationRequest {
   readonly primaryType: string;
 }
 
-const OP_PROFILE_REPLACE = 0x0102;
-const OP_RATING_SET = 0x0701;
+export const OP_PROFILE_REPLACE = 0x0102;
+export const OP_RATING_SET = 0x0701;
+/** Rule version 7 lets a session key sign votes and poll ballots too. */
+export const OP_VOTE_SET = 0x0606;
+export const OP_POLL_BALLOT_SET = 0x0608;
+/** What a session key signs while the chain runs rule version 6. */
+export const IDENTITY_SESSION_OPS: readonly number[] = [
+  OP_PROFILE_REPLACE,
+  OP_RATING_SET,
+];
 const GRANTEE_KEY = 1;
 const KEY_TYPE_SESSION = 2;
 const ACCEPT_NONE = 1;
@@ -140,8 +148,9 @@ export function ratingSet(
 
 /**
  * CAPABILITY_GRANT for this browser's session key: PROFILE_REPLACE and
- * RATING_SET, REP and NIC budgets up to RATING_SET's own bound, a fee
- * budget in the network's currency, active at once until `expiresAtMs`.
+ * RATING_SET (and, once the chain runs them, VOTE_SET and POLL_BALLOT_SET),
+ * REP and NIC budgets up to RATING_SET's own bound, a fee budget in the
+ * network's currency, active at once until `expiresAtMs`.
  */
 export const sessionKeyGrant = (
   principal: Hex,
@@ -152,6 +161,8 @@ export const sessionKeyGrant = (
     readonly currencyAsset: Hex;
     readonly feeBudget: bigint;
     readonly expiresAtMs: number;
+    /** The operations the key may sign; the identity ones by default. */
+    readonly ops?: readonly number[] | undefined;
   }
 ): ChainOperationRequest =>
   operation("CAPABILITY_GRANT", "CapabilityGrant", principal, wallet(signer), {
@@ -159,7 +170,7 @@ export const sessionKeyGrant = (
     grantee: input.keyId,
     granteeKeyType: KEY_TYPE_SESSION,
     granteePublicKey: input.publicKeyHex,
-    ops: [OP_PROFILE_REPLACE, OP_RATING_SET],
+    ops: [...(input.ops ?? IDENTITY_SESSION_OPS)],
     flags: 0,
     scopes: [],
     budgets: [

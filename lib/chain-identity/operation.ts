@@ -281,14 +281,21 @@ const sleep = (ms: number, signal?: AbortSignal) =>
   });
 
 /**
- * Waits until the operation is final, and throws when the chain refused it.
- * A read that fails (a network blip, a busy gateway) is tried again: the
- * change may still land.
+ * How long a write waits: until its block is final, or until a block holds
+ * it with its result known (votes and ratings, which a later write replaces).
+ */
+export type ChainWait = "final" | "included";
+
+/**
+ * Waits until the operation is final (or, with `until` "included", until a
+ * block holds it), and throws when the chain refused it. A read that fails
+ * (a network blip, a busy gateway) is tried again: the change may still land.
  */
 export async function awaitFinal(
   txId: Hex,
   signal?: AbortSignal,
-  limit: number = POLL_LIMIT
+  limit: number = POLL_LIMIT,
+  until: ChainWait = "final"
 ): Promise<ChainTxStatus> {
   for (let attempt = 0; attempt < limit; attempt += 1) {
     let status: ChainTxStatus | null = null;
@@ -307,7 +314,10 @@ export async function awaitFinal(
         status.result?.name ?? null
       );
     }
-    if (status?.status === "final") {
+    if (
+      status?.status === "final" ||
+      (until === "included" && status?.status === "in_block")
+    ) {
       return status;
     }
     await sleep(POLL_MS, signal);
@@ -329,7 +339,8 @@ const UNANSWERED_POLLS = 10;
 export async function submitAndAwait(
   draft: ChainDraft,
   signatures: readonly ChainSignatureEntry[],
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  until: ChainWait = "final"
 ): Promise<ChainTxStatus> {
   try {
     await chainGateway.submit(draft.unsigned, signatures, signal);
@@ -342,7 +353,7 @@ export async function submitAndAwait(
       throw error;
     }
     try {
-      return await awaitFinal(draft.txId, signal, UNANSWERED_POLLS);
+      return await awaitFinal(draft.txId, signal, UNANSWERED_POLLS, until);
     } catch (waited) {
       if (
         waited instanceof ChainOperationError &&
@@ -357,20 +368,22 @@ export async function submitAndAwait(
       throw waited;
     }
   }
-  return awaitFinal(draft.txId, signal);
+  return awaitFinal(draft.txId, signal, POLL_LIMIT, until);
 }
 
 /** Signs a checked draft with one signer, submits it, waits until final. */
 async function signAndSubmit(
   draft: ChainDraft,
   signer: ChainSigner,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  until: ChainWait = "final"
 ): Promise<ChainTxStatus> {
   const sig = await signer.sign(draft);
   return submitAndAwait(
     draft,
     [{ role: 0, keyType: signer.keyType, sig }],
-    signal
+    signal,
+    until
   );
 }
 
@@ -383,9 +396,10 @@ export async function runOperation(
   request: ChainDraftRequest,
   primaryType: string,
   signer: ChainSigner,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  until: ChainWait = "final"
 ): Promise<{ readonly draft: ChainDraft; readonly status: ChainTxStatus }> {
   const draft = await draftOperation(request, primaryType, signal);
-  const status = await signAndSubmit(draft, signer, signal);
+  const status = await signAndSubmit(draft, signer, signal, until);
   return { draft, status };
 }

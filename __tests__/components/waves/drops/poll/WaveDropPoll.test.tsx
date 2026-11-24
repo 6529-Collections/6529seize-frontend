@@ -54,6 +54,9 @@ jest.mock("@/services/api/wave-drops-v2-api", () => ({
 jest.mock("@/hooks/useWavesMovePhase", () => ({
   useWavesWritesPaused: jest.fn(() => false),
 }));
+jest.mock("@/components/chain-waves/useChainWavesWriters", () => ({
+  useChainWavesWriters: jest.fn(() => null),
+}));
 
 const voteDropPollV2Mock = voteDropPollV2 as jest.MockedFunction<
   typeof voteDropPollV2
@@ -195,6 +198,29 @@ describe("WaveDropPoll", () => {
       expect(voteDropPollV2Mock).not.toHaveBeenCalled();
     } finally {
       wavesMove.useWavesWritesPaused.mockReturnValue(false);
+    }
+  });
+
+  it("sends the ballot to the 6529 Network once waves have moved there", async () => {
+    const writers = jest.requireMock(
+      "@/components/chain-waves/useChainWavesWriters"
+    );
+    const pollBallot = jest.fn().mockResolvedValue(undefined);
+    writers.useChainWavesWriters.mockReturnValue({ pollBallot });
+    try {
+      renderPoll(createPoll());
+      await userEvent.click(screen.getByRole("radio", { name: "Second" }));
+
+      await waitFor(() =>
+        expect(pollBallot).toHaveBeenCalledWith({
+          pollId: "poll-1",
+          optionNumbers: [2],
+        })
+      );
+      expect(mockRequestAuth).not.toHaveBeenCalled();
+      expect(voteDropPollV2Mock).not.toHaveBeenCalled();
+    } finally {
+      writers.useChainWavesWriters.mockReturnValue(null);
     }
   });
 

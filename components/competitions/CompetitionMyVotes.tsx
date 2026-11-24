@@ -54,6 +54,7 @@ import { CompetitionMyVotesSort } from "./CompetitionMyVotesSort";
 import { CompetitionLoadMore } from "./CompetitionLoadMore";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
+import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWriters";
 import { t } from "@/i18n/messages";
 import { useInView } from "@/hooks/useInView";
 import { formatInteger } from "@/i18n/format";
@@ -195,8 +196,9 @@ function ScopedCompetitionMyVotes({
   const isSelecting = selectionMode;
   const locale = useBrowserLocale();
   // Votes move to the 6529 Network: shown, but not changeable here.
-  const votesPaused = useWavesWritesPaused();
+  const votesPaused = useWavesWritesPaused("votes");
   const canVoteNow = competition.permissions.vote && !votesPaused;
+  const chainWriters = useChainWavesWriters();
   const [sort, setSort] = useLocalPreference<ApiCompetitionMyVotesSort>(
     `competitionMyVotesSort_${competition.wave_id}_${competition.id}_${viewer ?? "anonymous"}`,
     ApiCompetitionMyVotesSort.VoteAmount,
@@ -302,6 +304,13 @@ function ScopedCompetitionMyVotes({
     const vote = votes.find((item) => item.drop_id === dropId);
     if (vote?.entry_status !== ApiCompetitionEntryStatus.Active || !canVoteNow)
       throw new Error("Vote cannot be reset");
+    if (chainWriters) {
+      // On the 6529 Network the reset carries its own signature.
+      assertActiveScope();
+      await chainWriters.vote({ dropId, amount: 0 });
+      await invalidateCompetition(client, identity);
+      return;
+    }
     const address = getWalletAddress();
     const assertCurrentActor = () => {
       assertActiveScope();

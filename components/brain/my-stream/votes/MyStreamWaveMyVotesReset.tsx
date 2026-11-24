@@ -20,6 +20,8 @@ import {
 } from "@/hooks/waves/invalidateWaveApprovalStatusQueries";
 import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWriters";
+import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 
@@ -66,6 +68,7 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
   const buttonClassName = `${COMPACT_ACTION_BUTTON_CLASS} ${buttonHeightClassName}`;
   const { setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
+  const chainWriters = useChainWavesWriters();
   const queryClient = useQueryClient();
   // State for reset progress
   const [isResetting, setIsResetting] = useState(false);
@@ -78,6 +81,12 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
     mutationFn: async (param: { dropId: string }) => {
       if (resetVote) {
         await resetVote(param.dropId);
+        return null;
+      }
+      if (chainWriters) {
+        // No drop comes back from the chain; the list refetches when the
+        // reset ends.
+        await chainWriters.vote({ dropId: param.dropId, amount: 0 });
         return null;
       }
       return await commonApiPost<DropRateChangeRequest, ApiDrop>({
@@ -139,6 +148,11 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
 
     if (didResetAnyDrop && !resetVote) {
       invalidateWaveApprovalSummaryQueries(queryClient, waveId);
+    }
+    if (didResetAnyDrop && chainWriters && !resetVote) {
+      void queryClient.invalidateQueries({
+        queryKey: [QueryKey.DROPS_LEADERBOARD, { waveId }],
+      });
     }
   };
 

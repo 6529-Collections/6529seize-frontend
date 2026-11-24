@@ -5,8 +5,9 @@ import { createStore, del, get, set } from "@/lib/storage/idb-keyval";
 /**
  * This browser's session key for one identity: an Ed25519 key (keyType 2)
  * whose private half never leaves the browser. A CAPABILITY_GRANT signed by
- * the identity's wallet lets it sign PROFILE_REPLACE and RATING_SET, within
- * the grant's budgets, until the grant ends.
+ * the identity's wallet lets it sign PROFILE_REPLACE and RATING_SET (and,
+ * from rule version 7, VOTE_SET and POLL_BALLOT_SET), within the grant's
+ * budgets, until the grant ends.
  */
 export interface StoredSessionKey {
   /** Lowercase principal id. */
@@ -18,6 +19,11 @@ export interface StoredSessionKey {
   /** The grant that enrolled it: the CAPABILITY_GRANT's object id. */
   readonly grantId: Hex;
   readonly expiresAtMs: number;
+  /**
+   * The operations its grant lists. Keys kept before votes reached the
+   * chain have none here: they sign PROFILE_REPLACE and RATING_SET only.
+   */
+  readonly ops?: readonly number[] | undefined;
 }
 
 const ED25519 = { name: "Ed25519" } as const;

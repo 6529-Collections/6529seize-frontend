@@ -8,6 +8,7 @@ import { useWavesMoveScope } from "./WavesMoveScope";
 import { formatUtcDate } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { isChainWavesEnabled } from "@/lib/chain-waves/config";
 import {
   getWavesMoveSchedule,
   type WavesMovePhase,
@@ -72,9 +73,13 @@ const getWavesMoveNoticeText = (
         switchOnTime: formatTime(locale, switchOnMs),
       });
     case "moved":
-      return t(locale, "wavesMove.moved", {
-        switchOnDay: formatDay(locale, switchOnMs),
-      });
+      return t(
+        locale,
+        isChainWavesEnabled() ? "wavesMove.movedChain" : "wavesMove.moved",
+        {
+          switchOnDay: formatDay(locale, switchOnMs),
+        }
+      );
     case "none":
       return null;
   }

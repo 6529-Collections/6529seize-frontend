@@ -29,6 +29,9 @@ jest.mock("@/services/api/common-api", () => ({
 jest.mock("@/hooks/useWavesMovePhase", () => ({
   useWavesWritesPaused: jest.fn(() => false),
 }));
+jest.mock("@/components/chain-waves/useChainWavesWriters", () => ({
+  useChainWavesWriters: jest.fn(() => null),
+}));
 
 const useWaveRepAllocationMock = useWaveRepAllocation as jest.Mock;
 const commonApiPostMock = commonApiPost as jest.Mock;
@@ -297,6 +300,32 @@ describe("WaveRepRatingModal", () => {
     expect(invalidateQueriesSpy).toHaveBeenCalledWith({
       queryKey: [QueryKey.WAVE_REP_LOGS],
     });
+  });
+
+  it("sends wave REP to the 6529 Network once waves have moved there", async () => {
+    const writers = jest.requireMock(
+      "@/components/chain-waves/useChainWavesWriters"
+    );
+    const waveRating = jest.fn().mockResolvedValue(undefined);
+    writers.useChainWavesWriters.mockReturnValue({ waveRating });
+    try {
+      const requestAuth = jest.fn().mockResolvedValue({ success: true });
+      const { onClose } = renderModal({ requestAuth });
+      await changeAmount("15");
+
+      fireEvent.click(screen.getByRole("button", { name: "Save Wave REP" }));
+
+      await waitFor(() => expect(onClose).toHaveBeenCalled());
+      expect(waveRating).toHaveBeenCalledWith({
+        waveId: "wave-1",
+        category: "quality",
+        amount: 15,
+      });
+      expect(requestAuth).not.toHaveBeenCalled();
+      expect(commonApiPostMock).not.toHaveBeenCalled();
+    } finally {
+      writers.useChainWavesWriters.mockReturnValue(null);
+    }
   });
 
   it("can remove an existing category rating by saving zero", async () => {

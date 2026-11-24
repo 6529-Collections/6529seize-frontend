@@ -7,6 +7,8 @@ import type { Config } from "wagmi";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useChainWavesActive } from "@/hooks/useWavesMovePhase";
+import { OP_VOTE_SET } from "@/lib/chain-identity/identityOps";
 import { formatDate } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/chain-identity";
@@ -17,6 +19,7 @@ import {
   planSession,
   SESSION_LIFETIME_DAYS,
   sessionGrantOperation,
+  sessionKeyCanSign,
   sessionRevokeOperation,
   type SessionPlan,
 } from "@/lib/chain-identity/session";
@@ -32,7 +35,8 @@ import { useChainAction } from "./useChainAction";
 
 /**
  * "Enable chain actions on this browser": one wallet signature grants a key
- * kept in this browser PROFILE_REPLACE and RATING_SET for 30 days.
+ * kept in this browser PROFILE_REPLACE and RATING_SET for 30 days, and once
+ * waves have moved, VOTE_SET and POLL_BALLOT_SET too.
  */
 export default function ChainIdentitySession({
   wallet,
@@ -54,6 +58,7 @@ export default function ChainIdentitySession({
     staleTime: Infinity,
   });
   const [plan, setPlan] = useState<SessionPlan | null>(null);
+  const chainWavesActive = useChainWavesActive();
   const action = useChainAction(() => {
     setPlan(null);
     onChanged();
@@ -106,6 +111,10 @@ export default function ChainIdentitySession({
   }
 
   if (sessionKey) {
+    // A key enrolled before votes reached the 6529 Network can't sign them;
+    // a new grant for a new key adds them.
+    const needsVotes =
+      chainWavesActive && !sessionKeyCanSign(sessionKey, OP_VOTE_SET);
     return (
       <ChainSection
         id="chain-identity-session"
@@ -116,6 +125,22 @@ export default function ChainIdentitySession({
           }),
         })}
       >
+        {needsVotes && (
+          <>
+            <p className="tw-mb-3 tw-mt-0 tw-text-sm tw-text-iron-300">
+              {t(locale, "wavesMove.session.votesMissing")}
+            </p>
+            <Button
+              variant="primary"
+              size="md"
+              className="tw-mb-3 tw-mr-3"
+              disabled={action.busy || action.state.kind === "confirm"}
+              onClick={enable}
+            >
+              {t(locale, "wavesMove.session.addVotes")}
+            </Button>
+          </>
+        )}
         <Button
           variant="secondary"
           size="md"

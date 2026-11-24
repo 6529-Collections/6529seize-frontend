@@ -10,7 +10,7 @@ export const useMemesQuickVoteContext = () => {
   const { seizeSettings, isLoaded } = useSeizeSettings();
   // Quick vote only casts votes, which are paused for the move to the 6529
   // Network.
-  const wavesWritesPaused = useWavesWritesPaused();
+  const wavesWritesPaused = useWavesWritesPaused("votes");
 
   const contextProfile = useMemo(() => {
     const normalizedHandle = connectedProfile?.handle?.trim();

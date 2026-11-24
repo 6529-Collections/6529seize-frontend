@@ -14,6 +14,9 @@ import {
   WAVE_VOTING_LABELS,
 } from "@/helpers/waves/waves.constants";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWriters";
+import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
+import { withViewerVote } from "@/lib/chain-waves/optimistic";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { MyVotesInput } from "./MyVotesInput";
@@ -74,6 +77,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   const locale = useBrowserLocale();
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
+  const chainWriters = useChainWavesWriters();
   const queryClient = useQueryClient();
   const [isProcessing, setIsProcessing] = useState(false);
   const [voteLimitMessage, setVoteLimitMessage] = useState<string | null>(null);
@@ -199,14 +203,19 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   };
 
   const rateChangeMutation = useMutation({
-    mutationFn: async (param: VoteMutationVariables) =>
-      await commonApiPost<DropRateChangeRequest, ApiDrop>({
+    mutationFn: async (param: VoteMutationVariables): Promise<ApiDrop> => {
+      if (chainWriters) {
+        await chainWriters.vote({ dropId: drop.id, amount: param.rate });
+        return withViewerVote(drop, param.rate);
+      }
+      return await commonApiPost<DropRateChangeRequest, ApiDrop>({
         endpoint: `drops/${drop.id}/ratings`,
         body: {
           rating: param.rate,
           category: DEFAULT_DROP_RATE_CATEGORY,
         },
-      }),
+      });
+    },
     onSuccess: (response: ApiDrop, variables: VoteMutationVariables) => {
       const nextVoteValue =
         response.context_profile_context?.rating ?? variables.rate;
@@ -238,6 +247,10 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
       if (mobile) triggerVoteSuccessHaptic();
     },
     onError: (error) => {
+      // Cancelled at the wallet prompt: nothing was sent.
+      if (isUserRejectedSigningError(error)) {
+        return;
+      }
       setToast({
         type: "error",
         title: t(locale, "waves.myVotes.voteUpdateError"),
@@ -274,7 +287,10 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
     setIsProcessing(true);
 
     try {
-      const { success } = await requestAuth();
+      // On the 6529 Network each vote carries its own signature.
+      const { success } = chainWriters
+        ? { success: true }
+        : await requestAuth();
       if (!success) {
         setToast({
           message: t(locale, "waves.myVotes.authError"),

@@ -133,6 +133,11 @@ interface ChainOps {
    * create one again; null or absent when the chain doesn't say.
    */
   readonly rejoinWaitMs?: number | null;
+  /** The operations the head's rule version runs. */
+  readonly ops?: readonly {
+    readonly opType: number;
+    readonly name: string;
+  }[];
 }
 
 /** A wallet's place in the identities: bound, or when it last left one. */
@@ -451,3 +456,13 @@ export const chainGateway = {
       bare: true,
     }),
 };
+
+/**
+ * A GET on the node's API, unwrapped from its envelope, for the site's other
+ * chain clients (lib/chain-waves). The same base URL, timeout and refusals as
+ * `chainGateway`.
+ */
+export const chainGatewayGet = <T>(
+  path: string,
+  options: Pick<RequestOptions, "query" | "signal" | "nullOn404"> = {}
+): Promise<T> => request<T>("GET", path, options);

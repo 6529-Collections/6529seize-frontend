@@ -13,6 +13,8 @@ import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { preserveAuthenticatedPollVote } from "@/helpers/waves/poll-vote-reconciliation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
+import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWriters";
+import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
 import { t } from "@/i18n/messages";
 import { voteDropPollV2 } from "@/services/api/wave-drops-v2-api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -197,7 +199,7 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
     waveEligibility?.authenticated_user_eligible_to_chat ??
     drop.wave.authenticated_user_eligible_to_chat;
   // Poll ballots move to the 6529 Network: the results stay readable.
-  const pollBallotsPaused = useWavesWritesPaused();
+  const pollBallotsPaused = useWavesWritesPaused("polls");
   const canRespondToPoll =
     !pollBallotsPaused &&
     getCanRespondToPoll({
@@ -205,12 +207,23 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
       poll,
     });
 
+  const chainWriters = useChainWavesWriters();
   const voteMutation = useMutation({
-    mutationFn: async (options: readonly number[]) =>
-      await voteDropPollV2({
+    mutationFn: async (options: readonly number[]): Promise<ApiDrop> => {
+      if (chainWriters && poll) {
+        // On the 6529 Network the ballot carries its own signature; the poll
+        // shows it until 6529.io's index reads it from the chain.
+        await chainWriters.pollBallot({
+          pollId: poll.id,
+          optionNumbers: options,
+        });
+        return { ...drop, poll: getOptimisticPoll(poll, options) };
+      }
+      return await voteDropPollV2({
         drop,
         options,
-      }),
+      });
+    },
     onSuccess: (updatedDrop) => {
       if (updatedDrop.poll) {
         setLocalPollOverride({
@@ -240,6 +253,10 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
     },
     onError: (error) => {
       clearUpdatedVoteStatus();
+      // Cancelled at the wallet prompt: nothing was sent.
+      if (isUserRejectedSigningError(error)) {
+        return;
+      }
       setToast({
         type: "error",
         title: "Couldn't submit your poll vote.",
@@ -266,7 +283,10 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
         return false;
       }
 
-      const { success } = await requestAuth();
+      // On the 6529 Network each ballot carries its own signature.
+      const { success } = chainWriters
+        ? { success: true }
+        : await requestAuth();
       if (!success) {
         return false;
       }
@@ -299,6 +319,7 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
       return true;
     },
     [
+      chainWriters,
       drop.poll,
       flashUpdatedVoteStatus,
       interactionState,
