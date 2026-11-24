@@ -91,11 +91,12 @@ const createPoll = (overrides: Partial<ApiDropPoll> = {}): ApiDropPoll => ({
 
 interface CreateDropOptions {
   readonly canChat?: boolean;
+  readonly directMessage?: boolean;
 }
 
 const createDrop = (
   poll: ApiDropPoll,
-  { canChat = true }: CreateDropOptions = {}
+  { canChat = true, directMessage = false }: CreateDropOptions = {}
 ): ApiDrop =>
   ({
     id: "drop-1",
@@ -103,6 +104,7 @@ const createDrop = (
       id: "wave-1",
       name: "Wave 1",
       authenticated_user_eligible_to_chat: canChat,
+      is_direct_message: directMessage,
     },
     poll,
   }) as unknown as ApiDrop;
@@ -222,6 +224,14 @@ describe("WaveDropPoll", () => {
     } finally {
       writers.useChainWavesWriters.mockReturnValue(null);
     }
+  });
+
+  it("keeps a direct message's poll on the pause that doesn't lift, since direct messages don't move", () => {
+    const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
+    renderPoll(createPoll(), { directMessage: true });
+    expect(wavesMove.useWavesWritesPaused).toHaveBeenCalledWith(undefined);
+    renderPoll(createPoll());
+    expect(wavesMove.useWavesWritesPaused).toHaveBeenLastCalledWith("polls");
   });
 
   it("keeps unrestricted polls voteable when the viewer cannot chat", () => {

@@ -203,7 +203,10 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
     waveEligibility?.authenticated_user_eligible_to_chat ??
     drop.wave.authenticated_user_eligible_to_chat;
   // Poll ballots move to the 6529 Network: the results stay readable.
-  const pollBallotsPaused = useWavesWritesPaused("polls");
+  // Direct-message waves don't move there, so their polls stay paused.
+  const pollBallotsPaused = useWavesWritesPaused(
+    drop.wave.is_direct_message === true ? undefined : "polls"
+  );
   const canRespondToPoll =
     !pollBallotsPaused &&
     getCanRespondToPoll({
