@@ -14,6 +14,7 @@ import type { ChatSubmitDropAction } from "../chatSubmitDrop.types";
 interface MyStreamWaveTabsProps {
   readonly wave: ApiWave;
   readonly competitionSubmissionReady?: boolean | undefined;
+  readonly competitionSubmissionPending?: boolean | undefined;
   readonly viewMode: WaveViewMode;
   readonly onToggleViewMode: () => void;
   readonly showGalleryToggle: boolean;
@@ -31,10 +32,15 @@ export const MyStreamWaveTabs: React.FC<MyStreamWaveTabsProps> = ({
   onSelectCuration = () => {},
   chatSubmitDropAction = null,
   competitionSubmissionReady = false,
+  competitionSubmissionPending = false,
 }) => {
   const { isMemesWave } = useWave(wave);
   const { registerRef } = useLayout();
   const { isApp } = useDeviceInfo();
+  // The initial generic header can be replaced by the Main Stage header.
+  // Wait for that handoff before opening a phone action sheet on it.
+  const phoneActionsPending =
+    competitionSubmissionPending && !competitionSubmissionReady;
 
   // Reference to store tabs element for local measurements
   const tabsElementRef = useRef<HTMLDivElement | null>(null);
@@ -78,6 +84,7 @@ export const MyStreamWaveTabs: React.FC<MyStreamWaveTabsProps> = ({
               />
             ) : (
               <MyStreamWaveTabsDefault
+                phoneActionsPending={phoneActionsPending}
                 wave={wave}
                 viewMode={viewMode}
                 onToggleViewMode={onToggleViewMode}

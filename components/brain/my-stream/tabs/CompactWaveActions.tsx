@@ -42,12 +42,14 @@ export default function CompactWaveActions({
   triggerRef,
   compactTrigger = false,
   phone = false,
+  disabled = false,
   renderAdditionalControls,
 }: {
   readonly items: readonly CompactMenuItem[];
   readonly triggerRef?: Ref<HTMLButtonElement> | undefined;
   readonly compactTrigger?: boolean | undefined;
   readonly phone?: boolean | undefined;
+  readonly disabled?: boolean | undefined;
   readonly renderAdditionalControls?:
     | ((select: (action: () => void) => void) => ReactNode)
     | undefined;
@@ -197,6 +199,7 @@ export default function CompactWaveActions({
         type="button"
         ref={triggerRef}
         aria-label="More wave actions"
+        disabled={disabled}
         aria-haspopup="dialog"
         aria-expanded={isOpen}
         data-compact-wave-actions-trigger="true"

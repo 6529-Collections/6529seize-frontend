@@ -3188,6 +3188,43 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       releaseDetail();
     }
   });
+  test("waits for the final Main Stage header before enabling phone wave actions", async ({
+    page,
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== "web-mobile-chromium");
+    const sandbox = await installCompetitionApi(page, false, true, MEMES_WAVE);
+    sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha");
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    let held = false;
+    await page.route("**/v3/waves/**/default-competition", async (route) => {
+      held = true;
+      await gate;
+      await route.fallback();
+    });
+    try {
+      await page.goto(`/waves/${MEMES_WAVE}?tab=chat`);
+      await expect.poll(() => held).toBe(true);
+      const more = waveHeaderMore(page);
+      await expect(more).toBeVisible();
+      await expect(more).toBeDisabled();
+      release();
+      await expect(more).toBeEnabled();
+      const sheet = await openPhoneWaveActions(page);
+      await sheet
+        .getByRole("button", { name: "Search messages", exact: true })
+        .click();
+      const input = page.getByPlaceholder("Search messages", { exact: true });
+      await expect(input).toBeVisible();
+      await expect(input).toBeFocused();
+    } finally {
+      release();
+    }
+  });
+
   for (const surface of ["web", "app"] as const) {
     test(`locks Main Stage submission at three active entries (${surface})`, async ({
       page,

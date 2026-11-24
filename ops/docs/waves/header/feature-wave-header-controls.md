@@ -77,7 +77,8 @@ available score tucked beneath the avatar, the wave name, `Join` when available,
 when it exceeds the second line. Tapping the avatar or name opens details. The
 header score has no phone popover; tap Score in details statistics for its
 breakdown and Learn more. The site menu and global search are on the Waves list.
-`More wave actions` opens a sheet grouped with thin dividers:
+On compact web, the actions button becomes available when the channel header
+finishes loading. `More wave actions` opens a sheet grouped with thin dividers:
 
 1. Wave details, Search messages, and the existing sharing action.
 2. The available submission or `How to Submit` control, `Show times in UTC for now`,
