@@ -31,7 +31,10 @@ const MyStreamWaveMyVoteVotes: React.FC<MyStreamWaveMyVoteVotesProps> = ({
         {formatInteger(locale, drop.rating)}
       </span>
 
-      <div data-wave-typography="preserve" className="tw-font-semibold">
+      <div
+        data-wave-typography="preserve"
+        className="tw-font-semibold empty:tw-hidden"
+      >
         <DropVoteProgressing
           current={drop.rating}
           projected={

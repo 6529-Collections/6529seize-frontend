@@ -7530,6 +7530,28 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           )
         ).toMatch(/inset.*2px/);
         const thumbnail = row.getByRole("button", { name: /^Open / });
+        const statsGaps = await row
+          .getByText("Total", { exact: true })
+          .evaluate((label) => {
+            const total = label.parentElement!;
+            const value = label.nextElementSibling!;
+            const voters = total.nextElementSibling!;
+            const rank = voters.nextElementSibling!;
+            const labelBounds = label.getBoundingClientRect();
+            const valueBounds = value.getBoundingClientRect();
+            const votersBounds = voters.getBoundingClientRect();
+            const rankBounds = rank.getBoundingClientRect();
+            return {
+              labelToValue: valueBounds.left - labelBounds.right,
+              totalToVoters: votersBounds.left - valueBounds.right,
+              votersToRank: rankBounds.left - votersBounds.right,
+            };
+          });
+        expect(statsGaps).toEqual({
+          labelToValue: 6,
+          totalToVoters: 12,
+          votersToRank: 12,
+        });
         const thumbnailSize = width < 1024 ? 64 : 96;
         expect((await thumbnail.boundingBox())!.width).toBe(thumbnailSize);
         expect((await thumbnail.boundingBox())!.height).toBe(thumbnailSize);
