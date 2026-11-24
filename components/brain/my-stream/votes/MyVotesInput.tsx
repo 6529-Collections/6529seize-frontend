@@ -174,7 +174,7 @@ export function MyVotesInput({
   const [focused, setFocused] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  useKeyboardFocusScroll(formRef);
+  useKeyboardFocusScroll(formRef, "reveal", { appOnly: true });
   const saveRef = useRef<HTMLButtonElement>(null);
   const numeric = Number(value);
   const hasNumber = /^-?\d+$/.test(value) && Number.isSafeInteger(numeric);

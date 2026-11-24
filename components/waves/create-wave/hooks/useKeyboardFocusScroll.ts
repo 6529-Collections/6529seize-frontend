@@ -12,6 +12,17 @@ const TEXT_ENTRY_SELECTOR =
 // scrolling earlier fights the browser and leaves inputs half off-screen.
 const KEYBOARD_SETTLE_MS = 350;
 
+const getScrollContainer = (element: HTMLElement): HTMLElement => {
+  let parent = element;
+  while (
+    parent.parentElement &&
+    !/^(auto|scroll)$/.test(getComputedStyle(parent).overflowY)
+  ) {
+    parent = parent.parentElement;
+  }
+  return parent;
+};
+
 const scrollFieldIntoVisibleViewport = (field: HTMLElement) => {
   // scrollIntoView delegates to the browser, which knows which ancestor
   // actually scrolls (the create-wave flow scrolls inside a modal container,
@@ -25,16 +36,17 @@ const scrollFieldIntoVisibleViewport = (field: HTMLElement) => {
 // layout changes settle. Other consumers retain their existing centering.
 const scrollFieldWithinContainer = (
   container: HTMLElement,
-  field: HTMLElement
+  field: HTMLElement,
+  edgePadding = 12
 ) => {
   const viewport = globalThis.visualViewport;
   const bounds = container.getBoundingClientRect();
-  const top = Math.max(bounds.top, viewport?.offsetTop ?? 0) + 12;
+  const top = Math.max(bounds.top, viewport?.offsetTop ?? 0) + edgePadding;
   const bottom =
     Math.min(
       bounds.bottom,
       (viewport?.offsetTop ?? 0) + (viewport?.height ?? globalThis.innerHeight)
-    ) - 12;
+    ) - edgePadding;
   const fieldBounds = field.getBoundingClientRect();
   const target =
     field.closest("[data-keyboard-scroll-target]")?.getBoundingClientRect() ??
@@ -49,13 +61,14 @@ const scrollFieldWithinContainer = (
 /** Position touch inputs after keyboard layout settles. */
 export default function useKeyboardFocusScroll(
   containerRef: RefObject<HTMLElement | null>,
-  mode: "center" | "nearest" = "center"
+  mode: "center" | "nearest" | "reveal" = "center",
+  { appOnly = false }: { readonly appOnly?: boolean } = {}
 ) {
-  const { hasTouchScreen } = useDeviceInfo();
+  const { hasTouchScreen, isApp } = useDeviceInfo();
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!hasTouchScreen || !container) {
+    if (!hasTouchScreen || !container || (appOnly && !isApp)) {
       return;
     }
     // The shared sheet already follows each keyboard layout frame. A second
@@ -81,6 +94,10 @@ export default function useKeyboardFocusScroll(
     let timer: ReturnType<typeof setTimeout> | undefined;
     let activeField: HTMLElement | null = null;
     let activeTarget: Element | null = null;
+    // Vote forms sit inside the list's scrollport; move that scrollport only
+    // if the field remains clipped after the native keyboard layout settles.
+    const scrollContainer =
+      mode === "reveal" ? getScrollContainer(container) : container;
 
     const repositionActiveField = () => {
       if (
@@ -93,7 +110,11 @@ export default function useKeyboardFocusScroll(
           return;
         }
 
-        scrollFieldWithinContainer(container, activeField);
+        scrollFieldWithinContainer(
+          scrollContainer,
+          activeField,
+          mode === "reveal" ? 0 : 12
+        );
       }
     };
 
@@ -133,13 +154,14 @@ export default function useKeyboardFocusScroll(
       scheduleReposition();
     };
     const observer =
-      mode === "nearest" ? new ResizeObserver(scheduleReposition) : null;
+      mode !== "center" ? new ResizeObserver(scheduleReposition) : null;
     observer?.observe(container);
+    if (scrollContainer !== container) observer?.observe(scrollContainer);
 
     container.addEventListener("focusin", onFocusIn);
     container.addEventListener("focusout", onFocusOut);
     window.visualViewport?.addEventListener("resize", onViewportResize);
-    if (mode === "nearest") {
+    if (mode !== "center") {
       window.visualViewport?.addEventListener("scroll", scheduleReposition, {
         passive: true,
       });
@@ -152,5 +174,5 @@ export default function useKeyboardFocusScroll(
       observer?.disconnect();
       clearTimeout(timer);
     };
-  }, [hasTouchScreen, containerRef, mode]);
+  }, [hasTouchScreen, isApp, appOnly, containerRef, mode]);
 }

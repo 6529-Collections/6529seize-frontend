@@ -7682,32 +7682,55 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         expect(sandbox.requests).toHaveLength(0);
         await input.focus();
         await expect(row.getByText(/^Enter a whole number/)).toBeVisible();
+        const scrollPositions = () =>
+          input.evaluate((field) => {
+            const positions: number[] = [];
+            for (
+              let element: HTMLElement | null = field;
+              element;
+              element = element.parentElement
+            ) {
+              positions.push(element.scrollTop);
+            }
+            return positions;
+          });
+        const visiblePositions = await scrollPositions();
+        // Catch the delayed keyboard fallback: a visible amount must not
+        // receive a second scroll after the browser has focused it.
+        await page.waitForTimeout(450);
+        expect(await scrollPositions()).toEqual(visiblePositions);
         if (testInfo.project.use.hasTouch) {
-          if (surface === "mobile web") {
-            await page.setViewportSize({ width: 390, height: 420 });
-          } else {
-            await page.evaluate(() => {
-              const viewport = globalThis.visualViewport!;
-              Object.defineProperty(viewport, "height", {
-                configurable: true,
-                value: 420,
-              });
-              viewport.dispatchEvent(new Event("resize"));
-            });
-          }
-          await expect(input).toBeFocused();
-          await expect
-            .poll(() =>
-              input.evaluate((field) => {
-                const bounds = field.getBoundingClientRect();
+          for (const height of surface === "mobile web" ? [420] : [420, 300]) {
+            if (surface === "mobile web") {
+              await input.blur();
+              await page.setViewportSize({ width: 390, height });
+              // Headless Chromium has no software keyboard. Refocus against the
+              // smaller viewport to exercise the browser's native focus reveal.
+              await input.focus();
+            } else {
+              await page.evaluate((height) => {
                 const viewport = globalThis.visualViewport!;
-                return (
-                  bounds.top >= viewport.offsetTop &&
-                  bounds.bottom <= viewport.offsetTop + viewport.height
-                );
-              })
-            )
-            .toBe(true);
+                Object.defineProperty(viewport, "height", {
+                  configurable: true,
+                  value: height,
+                });
+                viewport.dispatchEvent(new Event("resize"));
+              }, height);
+            }
+            await expect(input).toBeFocused();
+            await expect
+              .poll(() =>
+                input.evaluate((field) => {
+                  const bounds = field.getBoundingClientRect();
+                  const viewport = globalThis.visualViewport!;
+                  return (
+                    bounds.top >= viewport.offsetTop &&
+                    bounds.bottom <= viewport.offsetTop + viewport.height
+                  );
+                })
+              )
+              .toBe(true);
+          }
           await page.screenshot({
             path: testInfo.outputPath("my-votes-focused-keyboard.png"),
             animations: "disabled",
