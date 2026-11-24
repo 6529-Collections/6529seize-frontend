@@ -143,7 +143,7 @@ const isV2Write = (segments: readonly string[], body: unknown): boolean => {
  * like deleting a direct message; the path alone can't tell them apart, so
  * the delete controls check the drop's or the wave's type.
  */
-export const isWavesWrite = (
+const isWavesWrite = (
   method: string,
   segments: readonly string[],
   body: unknown

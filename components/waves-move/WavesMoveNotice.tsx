@@ -51,7 +51,7 @@ const formatTime = (locale: SupportedLocale, ms: number): string =>
     hourCycle: "h23",
   });
 
-export const getWavesMoveNoticeText = (
+const getWavesMoveNoticeText = (
   locale: SupportedLocale,
   phase: WavesMovePhase,
   schedule: WavesMoveSchedule

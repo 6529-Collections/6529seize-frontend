@@ -33,8 +33,7 @@ import { ChatRestriction } from "@/hooks/useDropPriviledges";
 import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import { useUnreadDividerOptional } from "@/contexts/wave/UnreadDividerContext";
 import { useWave } from "@/hooks/useWave";
-import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
-import { WavesWritePausedError } from "@/lib/waves-move/writeGuard";
+import { useWavesMoveDropGuard } from "./useWavesMoveDropGuard";
 import {
   resolveWaveSubmissionExperience,
   WaveSubmissionExperience,
@@ -125,10 +124,8 @@ export default function CreateDrop({
   });
   const { markChatSubmitted, requestGuidelinesAgreement } = guidelinesAgreement;
   const { isMemesWave, isCurationWave, isQuorumWave } = useWave(wave);
-  // Entries and polls move to the 6529 Network; chat keeps working. A draft
-  // in drop mode keeps its mode across the freeze, so sending refuses it
-  // instead of posting it as chat.
-  const entriesPausedForMove = useWavesWritesPaused();
+  const { entriesPausedForMove, refuseDropMode, refusePausedDrop } =
+    useWavesMoveDropGuard(processDropRemoved);
   const nativeCompetition = presentationCompetition(wave);
   const submitCompetitionEntry = useCompetitionEntrySubmit(nativeCompetition);
   const resolvedSubmissionExperience = resolveWaveSubmissionExperience({
@@ -151,8 +148,7 @@ export default function CreateDrop({
       return true;
     }
     if (canUseChatComposer) return false;
-    // While entries are paused for the move, the composer opens for chat.
-    if (entriesPausedForMove) return false;
+    if (entriesPausedForMove) return false; // chat while the move pauses entries
     if (wave.participation.authenticated_user_eligible) return true;
     if (activeDrop) return false;
     return false;
@@ -210,13 +206,7 @@ export default function CreateDrop({
         return false;
       }
 
-      if (newIsDropMode && entriesPausedForMove) {
-        setToast({
-          message: t(locale, "wavesMove.paused"),
-          type: "error",
-        });
-        return false;
-      }
+      if (newIsDropMode && refuseDropMode()) return false;
 
       if (!newIsDropMode && !canUseChatComposer) {
         setToast({
@@ -228,14 +218,7 @@ export default function CreateDrop({
 
       return true;
     },
-    [
-      canUseChatComposer,
-      entriesPausedForMove,
-      fixedDropMode,
-      locale,
-      setToast,
-      wave,
-    ]
+    [canUseChatComposer, fixedDropMode, refuseDropMode, setToast, wave]
   );
 
   const onDropModeChange = useCallback(
@@ -623,34 +606,7 @@ export default function CreateDrop({
 
   const enqueueDrop = useCallback(
     (dropRequest: DropMutationBody): boolean => {
-      // Entries and polls move to the 6529 Network; chat keeps working. A
-      // sender that already showed the post (curation, quorum) gets it taken
-      // back as for a failed send.
-      if (
-        entriesPausedForMove &&
-        (dropRequest.drop.drop_type !== ApiDropType.Chat ||
-          !!dropRequest.drop.poll)
-      ) {
-        const optimisticId = dropRequest.dropId;
-        if (optimisticId) {
-          setTimeout(() => {
-            if (dropRequest.drop.reply_to) {
-              removeTemporaryThreadReply(
-                queryClient,
-                dropRequest.drop.wave_id,
-                optimisticId
-              );
-            }
-            processDropRemoved(dropRequest.drop.wave_id, optimisticId);
-          }, 0);
-        }
-        dropRequest.onError?.(new WavesWritePausedError());
-        setToast({
-          message: t(locale, "wavesMove.paused"),
-          type: "error",
-        });
-        return false;
-      }
+      if (refusePausedDrop(dropRequest)) return false;
 
       const slowModeChatReservation = reserveSlowModeChatQueueSlot(
         dropRequest.drop
@@ -699,16 +655,12 @@ export default function CreateDrop({
       return true;
     },
     [
-      entriesPausedForMove,
-      locale,
       markChatSubmitted,
       nativeCompetition,
       onDropAddedToQueue,
-      processDropRemoved,
       processNextDrop,
-      queryClient,
+      refusePausedDrop,
       reserveSlowModeChatQueueSlot,
-      setToast,
       submitCompetitionEntry,
       unreadDividerContext,
     ]
