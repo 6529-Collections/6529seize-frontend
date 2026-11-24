@@ -10,9 +10,64 @@ import { useWaveDropContentExpansion } from "./WaveDropContentExpansionContext";
 const BOTTOM_SCROLL_THRESHOLD_PX = 50;
 
 interface PendingAnchor {
-  readonly buttonTop: number;
+  readonly top: number;
+  readonly expandedTopPadding: string | undefined;
+  readonly pinToBottom: boolean;
   readonly scrollContainer: HTMLDivElement;
-  readonly wasAtBottom: boolean;
+}
+
+const getMinimumScrollTop = (container: HTMLDivElement) =>
+  Math.min(0, container.clientHeight - container.scrollHeight);
+
+function getExpandedTopPadding(container: HTMLDivElement): string | undefined {
+  // The top sentinel is the final child in the reverse-scrolling list.
+  const topSentinel = container.lastElementChild;
+  if (!topSentinel || getMinimumScrollTop(container) < 0) return;
+
+  const viewportTop =
+    container.getBoundingClientRect().top + container.clientTop;
+  const spaceAboveHistory =
+    topSentinel.getBoundingClientRect().top - viewportTop;
+  const existingPadding =
+    Number.parseFloat(getComputedStyle(container).paddingTop) || 0;
+  if (spaceAboveHistory - existingPadding >= 1) {
+    return `${Math.ceil(spaceAboveHistory)}px`;
+  }
+}
+
+function preserveEmptyTopSpace(
+  container: HTMLDivElement,
+  expandedPadding: string | undefined
+) {
+  if (expandedPadding === undefined) return;
+
+  // Short chats are bottom-aligned. Preserve their existing blank space above
+  // the history so scrolling can reach the old reading position after growth.
+  const originalPadding = container.style.paddingTop;
+  container.style.paddingTop = expandedPadding;
+  return () => {
+    if (container.style.paddingTop === expandedPadding) {
+      container.style.paddingTop = originalPadding;
+    }
+  };
+}
+
+function keepFocusVisible(
+  button: HTMLButtonElement,
+  content: HTMLDivElement,
+  container: HTMLDivElement
+) {
+  if (button.ownerDocument.activeElement !== button) return;
+
+  const toggleBounds = button.getBoundingClientRect();
+  const viewport = container.getBoundingClientRect();
+  if (viewport.bottom <= viewport.top) return;
+  if (
+    toggleBounds.top >= viewport.bottom ||
+    toggleBounds.bottom <= viewport.top
+  ) {
+    content.focus({ preventScroll: true });
+  }
 }
 
 interface WaveDropLongContentProps {
@@ -46,8 +101,10 @@ export default function WaveDropLongContent({
     }
 
     const button = buttonRef.current;
+    const contentElement = contentRef.current;
     if (
       !button ||
+      !contentElement ||
       scrollContainerRef.current !== pendingAnchor.scrollContainer
     ) {
       // The drop may have been virtualized before this layout effect. Its
@@ -56,47 +113,52 @@ export default function WaveDropLongContent({
     }
 
     const container = pendingAnchor.scrollContainer;
+    const anchor = isExpanded ? contentElement : button;
+    let releaseEmptyTopSpace = preserveEmptyTopSpace(
+      container,
+      pendingAnchor.expandedTopPadding
+    );
     const correctPosition = () => {
-      if (pendingAnchor.wasAtBottom) {
+      if (pendingAnchor.pinToBottom) {
         container.scrollTop = 0;
         return;
       }
-      const buttonTopDelta =
-        button.getBoundingClientRect().top - pendingAnchor.buttonTop;
-      const minimumScrollTop = Math.min(
-        0,
-        container.clientHeight - container.scrollHeight
-      );
+      const topDelta = anchor.getBoundingClientRect().top - pendingAnchor.top;
       // Layout may already have anchored or clamped the browser's position.
       container.scrollTop = Math.max(
-        minimumScrollTop,
-        Math.min(0, container.scrollTop + buttonTopDelta)
+        getMinimumScrollTop(container),
+        Math.min(0, container.scrollTop + topDelta)
       );
+      if (isExpanded) keepFocusVisible(button, contentElement, container);
     };
     correctPosition();
-
-    const contentElement = contentRef.current;
-    if (!contentElement || typeof ResizeObserver === "undefined") return;
 
     // A newly revealed image/card can resize after the toggle. Keep this
     // anchor only until the next reader interaction; never fight scrolling.
     let expectedScrollTop = container.scrollTop;
-    const observer = new ResizeObserver(() => {
-      correctPosition();
-      expectedScrollTop = container.scrollTop;
-    });
-    const stopAnchoring = () => observer.disconnect();
+    const observer =
+      typeof ResizeObserver === "undefined"
+        ? undefined
+        : new ResizeObserver(() => {
+            correctPosition();
+            expectedScrollTop = container.scrollTop;
+          });
+    const stopAnchoring = () => observer?.disconnect();
     const handleScroll = () => {
-      if (Math.abs(container.scrollTop - expectedScrollTop) > 2)
-        stopAnchoring();
+      if (Math.abs(container.scrollTop - expectedScrollTop) <= 2) return;
+      stopAnchoring();
+      if (container.scrollTop < 0) return;
+      releaseEmptyTopSpace?.();
+      releaseEmptyTopSpace = undefined;
     };
-    observer.observe(contentElement);
+    observer?.observe(contentElement);
     const intentEvents = ["wheel", "touchstart", "pointerdown", "keydown"];
     for (const event of intentEvents)
       container.addEventListener(event, stopAnchoring, { passive: true });
     container.addEventListener("scroll", handleScroll, { passive: true });
     return () => {
-      observer.disconnect();
+      stopAnchoring();
+      releaseEmptyTopSpace?.();
       for (const event of intentEvents)
         container.removeEventListener(event, stopAnchoring);
       container.removeEventListener("scroll", handleScroll);
@@ -110,13 +172,17 @@ export default function WaveDropLongContent({
   const handleToggle = (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
     const scrollContainer = scrollContainerRef.current;
-    const button = buttonRef.current;
-    if (scrollContainer && button) {
+    const anchor = isExpanded ? buttonRef.current : contentRef.current;
+    if (scrollContainer && anchor) {
       pendingAnchorRef.current = {
-        buttonTop: button.getBoundingClientRect().top,
-        scrollContainer,
-        wasAtBottom:
+        top: anchor.getBoundingClientRect().top,
+        expandedTopPadding: isExpanded
+          ? undefined
+          : getExpandedTopPadding(scrollContainer),
+        pinToBottom:
+          isExpanded &&
           Math.abs(scrollContainer.scrollTop) <= BOTTOM_SCROLL_THRESHOLD_PX,
+        scrollContainer,
       };
     }
     setExpanded(expansionKey, !isExpanded);
@@ -124,7 +190,12 @@ export default function WaveDropLongContent({
 
   return (
     <div>
-      <div id={contentId} ref={contentRef}>
+      <div
+        id={contentId}
+        ref={contentRef}
+        tabIndex={-1}
+        className="focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw--outline-offset-2 focus-visible:tw-outline-primary-400"
+      >
         {children(!isExpanded)}
       </div>
       <button
