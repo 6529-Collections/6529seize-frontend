@@ -243,7 +243,7 @@ export default function UserPageHeaderEditBanner({
         />
       )}
 
-      <div className="tw-gap-x-3 md:tw-flex md:tw-flex-row-reverse">
+      <div className="tw-gap-x-3 max-md:tw-sticky max-md:tw-bottom-0 max-md:tw-z-10 max-md:tw-bg-iron-950 md:tw-flex md:tw-flex-row-reverse">
         <UserSettingsSave
           compact
           loading={isSaving}

@@ -30,7 +30,7 @@ export interface HeaderShareModalViewProps {
   readonly setPageShareTarget: (target: PageShareTarget) => void;
   readonly shareConnectionSrc: string;
   readonly shareConnectionAppUrl: string;
-  readonly shareConnectionCoreUrl: string;
+  readonly shareConnectionDesktopPath: string;
   readonly mobileConnectionShareStatus: ConnectionShareStatus;
   readonly desktopConnectionShareStatus: ConnectionShareStatus;
   readonly terminalConnectionShareFailuresRef: MutableRef<

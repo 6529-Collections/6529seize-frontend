@@ -20,7 +20,7 @@ const MyStreamWaveMyVoteVotes: React.FC<MyStreamWaveMyVoteVotesProps> = ({
     typeof winningThreshold === "number" && winningThreshold > 0;
 
   return (
-    <div className="tw-flex tw-min-h-6 tw-items-center tw-gap-x-1.5 tw-text-sm tw-leading-5">
+    <div className="tw-flex tw-min-h-6 tw-items-center tw-gap-x-1.5 tw-text-[13px] tw-leading-5 [&_span]:!tw-text-[13px]">
       <span className="tw-text-iron-400">
         {t(locale, "waves.myVotes.total")}
       </span>
@@ -31,7 +31,10 @@ const MyStreamWaveMyVoteVotes: React.FC<MyStreamWaveMyVoteVotesProps> = ({
         {formatInteger(locale, drop.rating)}
       </span>
 
-      <div data-wave-typography="preserve" className="tw-font-semibold">
+      <div
+        data-wave-typography="preserve"
+        className="tw-font-semibold empty:tw-hidden"
+      >
         <DropVoteProgressing
           current={drop.rating}
           projected={
