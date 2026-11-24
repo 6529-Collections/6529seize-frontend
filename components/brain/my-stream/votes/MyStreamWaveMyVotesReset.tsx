@@ -21,6 +21,8 @@ import {
 import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWriters";
+import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
+import { scheduleIndexRefresh } from "@/lib/chain-waves/optimistic";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
@@ -108,6 +110,11 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
       removeSelected(dropId);
     },
     onError: (error) => {
+      // Cancelled at the wallet prompt: nothing more is sent, and that is not
+      // an error.
+      if (isUserRejectedSigningError(error)) {
+        throw error;
+      }
       setToast({
         type: "error",
         title: t(locale, "waves.myVotes.resetError"),
@@ -146,13 +153,17 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
       setTotalCount(0);
     }
 
-    if (didResetAnyDrop && !resetVote) {
-      invalidateWaveApprovalSummaryQueries(queryClient, waveId);
-    }
-    if (didResetAnyDrop && chainWriters && !resetVote) {
-      void queryClient.invalidateQueries({
-        queryKey: [QueryKey.DROPS_LEADERBOARD, { waveId }],
+    if (didResetAnyDrop && !resetVote && chainWriters) {
+      // 6529.io's index shows the resets once it has read their blocks; a
+      // refetch now would bring the old votes back.
+      scheduleIndexRefresh(async () => {
+        invalidateWaveApprovalSummaryQueries(queryClient, waveId);
+        await queryClient.invalidateQueries({
+          queryKey: [QueryKey.DROPS_LEADERBOARD, { waveId }],
+        });
       });
+    } else if (didResetAnyDrop && !resetVote) {
+      invalidateWaveApprovalSummaryQueries(queryClient, waveId);
     }
   };
 

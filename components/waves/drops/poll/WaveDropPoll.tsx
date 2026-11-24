@@ -14,6 +14,7 @@ import { preserveAuthenticatedPollVote } from "@/helpers/waves/poll-vote-reconci
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWriters";
+import { scheduleIndexRefresh } from "@/lib/chain-waves/optimistic";
 import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
 import { t } from "@/i18n/messages";
 import { voteDropPollV2 } from "@/services/api/wave-drops-v2-api";
@@ -240,16 +241,22 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
         updatedDrop,
         ProcessIncomingDropType.DROP_INSERT
       );
-      queryClient
-        .invalidateQueries({
-          queryKey: [QueryKey.DROP_POLL_VOTERS],
-        })
-        .catch(() => undefined);
-      queryClient
-        .invalidateQueries({
-          queryKey: [QueryKey.WAVE_POLLS],
-        })
-        .catch(() => undefined);
+      const refresh = () =>
+        Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: [QueryKey.DROP_POLL_VOTERS],
+          }),
+          queryClient.invalidateQueries({
+            queryKey: [QueryKey.WAVE_POLLS],
+          }),
+        ]);
+      // On the 6529 Network, 6529.io's index shows the ballot once it has
+      // read the block; a refetch now would show the old counts.
+      if (chainWriters) {
+        scheduleIndexRefresh(refresh);
+      } else {
+        refresh().catch(() => undefined);
+      }
     },
     onError: (error) => {
       clearUpdatedVoteStatus();

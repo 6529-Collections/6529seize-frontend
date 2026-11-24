@@ -20,6 +20,7 @@ import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useWaveRepAllocation } from "@/hooks/useWaveRepAllocation";
 import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWriters";
+import { scheduleIndexRefresh } from "@/lib/chain-waves/optimistic";
 import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -137,33 +138,42 @@ export default function WaveRepRatingModal({
         message: "Wave REP updated.",
         type: "success",
       });
-      queryClient.invalidateQueries({
-        queryKey: [QueryKey.WAVE_REP_RATING],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [QueryKey.WAVE_REP_CREDIT],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [QueryKey.WAVE_REP_OVERVIEW],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [QueryKey.WAVE_REP_CATEGORIES],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [QueryKey.WAVE_REP_CATEGORY_CONTRIBUTORS],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [QueryKey.WAVE_REP_LOGS],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [QueryKey.WAVE],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [QueryKey.WAVES_V2],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [QueryKey.WAVE_SUBWAVES],
-      });
+      const refresh = async () => {
+        queryClient.invalidateQueries({
+          queryKey: [QueryKey.WAVE_REP_RATING],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [QueryKey.WAVE_REP_CREDIT],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [QueryKey.WAVE_REP_OVERVIEW],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [QueryKey.WAVE_REP_CATEGORIES],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [QueryKey.WAVE_REP_CATEGORY_CONTRIBUTORS],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [QueryKey.WAVE_REP_LOGS],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [QueryKey.WAVE],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [QueryKey.WAVES_V2],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [QueryKey.WAVE_SUBWAVES],
+        });
+      };
+      // On the 6529 Network, 6529.io's index shows the change once it has
+      // read the block; a refetch now would show the old allocation.
+      if (chainWriters) {
+        scheduleIndexRefresh(refresh);
+      } else {
+        void refresh();
+      }
     },
     onError: (error) => {
       // Cancelled at the wallet prompt: nothing was sent.

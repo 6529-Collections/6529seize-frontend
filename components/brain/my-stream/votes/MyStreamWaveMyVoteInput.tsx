@@ -243,6 +243,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
         contextProfile: activeProfileProxy
           ? undefined
           : connectedProfile?.handle,
+        fromChain: chainWriters !== null,
       });
       if (mobile) triggerVoteSuccessHaptic();
     },

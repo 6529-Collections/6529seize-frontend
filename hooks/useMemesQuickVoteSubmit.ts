@@ -13,12 +13,15 @@ import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWriters";
 import { withViewerVote } from "@/lib/chain-waves/optimistic";
+import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
 import type { UseMutationResult } from "@tanstack/react-query";
 import type { Dispatch, ReactNode, SetStateAction } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { TypeOptions } from "react-toastify";
 
 const DEFAULT_DROP_RATE_CATEGORY = "Rep";
+// Shown where a vote the wallet prompt declined was queued.
+const NOTHING_SENT = "Nothing was sent.";
 
 type SetToast = (options: {
   readonly message: string | ReactNode;
@@ -188,11 +191,18 @@ const flushMemesQuickVoteRatings = async ({
           queuedRating.type
         );
       } catch (error) {
-        const message = getQueuedRatingErrorMessage({
-          error,
-          type: queuedRating.type,
-        });
-        if (isRuntimeActive()) setToast({ message, type: "error" });
+        // Cancelled at the wallet prompt: nothing was sent, and that is not
+        // an error to show.
+        const declined = isUserRejectedSigningError(error);
+        const message = declined
+          ? NOTHING_SENT
+          : getQueuedRatingErrorMessage({
+              error,
+              type: queuedRating.type,
+            });
+        if (isRuntimeActive() && !declined) {
+          setToast({ message, type: "error" });
+        }
         onRatingFailure(
           queuedRating.drop,
           queuedRating.amount,

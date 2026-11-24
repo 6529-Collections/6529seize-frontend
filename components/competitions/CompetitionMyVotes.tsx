@@ -55,6 +55,7 @@ import { CompetitionLoadMore } from "./CompetitionLoadMore";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWriters";
+import { scheduleIndexRefresh } from "@/lib/chain-waves/optimistic";
 import { t } from "@/i18n/messages";
 import { useInView } from "@/hooks/useInView";
 import { formatInteger } from "@/i18n/format";
@@ -308,7 +309,9 @@ function ScopedCompetitionMyVotes({
       // On the 6529 Network the reset carries its own signature.
       assertActiveScope();
       await chainWriters.vote({ dropId, amount: 0 });
-      await invalidateCompetition(client, identity);
+      // 6529.io's index shows the reset once it has read the block; a
+      // refetch now would bring the old vote back.
+      scheduleIndexRefresh(() => invalidateCompetition(client, identity));
       return;
     }
     const address = getWalletAddress();

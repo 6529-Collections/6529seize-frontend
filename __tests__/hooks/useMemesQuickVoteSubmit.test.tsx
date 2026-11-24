@@ -83,3 +83,32 @@ it("continues queued votes while the same runtime remains mounted", async () => 
   expect(onRatingSuccess).toHaveBeenCalledTimes(2);
   expect(result.current.pendingDropIds).toEqual([]);
 });
+
+it("keeps quiet when the wallet prompt is declined, and restores the drop", async () => {
+  post.mockRejectedValue(
+    Object.assign(new Error("User rejected the request."), { code: 4001 })
+  );
+  const { result, onRatingFailure, setToast } = setup();
+  await act(async () => {
+    await result.current.submitVote(drop("first"), 100);
+  });
+  expect(setToast).not.toHaveBeenCalled();
+  expect(onRatingFailure).toHaveBeenCalledWith(
+    drop("first"),
+    100,
+    "vote",
+    "Nothing was sent."
+  );
+});
+
+it("still says a refused vote failed", async () => {
+  post.mockRejectedValue(new Error("refused"));
+  const { result, onRatingFailure, setToast } = setup();
+  await act(async () => {
+    await result.current.submitVote(drop("first"), 100);
+  });
+  expect(setToast).toHaveBeenCalledWith(
+    expect.objectContaining({ type: "error" })
+  );
+  expect(onRatingFailure).toHaveBeenCalled();
+});
