@@ -146,6 +146,7 @@ function applyEffectiveAppPrCiPlan(plan) {
 
   const playwrightNativeCompetition = files.some(
     (file) =>
+      /^(?:components\/brain\/my-stream\/votes\/|__tests__\/components\/brain\/my-stream\/votes\/|helpers\/vote-haptics\.ts$)/u.test(file) ||
       /^(?:components\/competitions\/|hooks\/competitions\/|__tests__\/competitions\/|app\/waves\/\[wave\]\/decisions\/|components\/waves\/create-wave\/|components\/waves\/leaderboard\/|__tests__\/components\/waves\/leaderboard\/|generated\/models\/ApiCompetition)/u.test(
         file
       ) ||
