@@ -1,9 +1,9 @@
 import { getMintTimelineDetails } from "@/components/meme-calendar/meme-calendar.helpers";
+import { useLatestDropTransitionReady } from "@/components/home/now-minting/useLatestDropTransitionReady";
 import {
   getLatestDropTransitionTime,
-  useLatestDropTransitionReady,
-} from "@/components/home/now-minting/useLatestDropTransitionReady";
-import { HOME_LATEST_DROP_GRACE_PERIOD_MINUTES } from "@/helpers/mint-visibility.helpers";
+  HOME_LATEST_DROP_GRACE_PERIOD_MINUTES,
+} from "@/helpers/mint-visibility.helpers";
 import { act, renderHook } from "@testing-library/react";
 
 const MINUTE_IN_MILLISECONDS = 60_000;

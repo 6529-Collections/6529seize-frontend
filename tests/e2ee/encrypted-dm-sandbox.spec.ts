@@ -26,6 +26,7 @@ import {
   expectMessage,
   gotoPath,
   messageRow,
+  openComposerActions,
   openConversationFromList,
   openMessageActions,
   sendMessage,
@@ -861,10 +862,31 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
       fullPage: true,
     });
     if (!isMobileWebProject(testInfo.project.name)) {
+      await alice.page.route(
+        (url) => url.pathname.endsWith("/identities/bob/subscriptions"),
+        (route) =>
+          route.fulfill({
+            json: { actions: ["DROP_CREATED"], follows_viewer: true },
+          })
+      );
       await headerName.focus();
+      const hoverCard = alice.page.getByRole("dialog", {
+        name: "User profile for bob",
+      });
+      await expect(hoverCard).toBeVisible();
+      const following = hoverCard.getByRole("button", {
+        name: "Following",
+        exact: true,
+      });
+      await following.click();
+      const followMenu = hoverCard.getByRole("menu");
+      await expect(followMenu.getByText("You follow each other")).toBeVisible();
       await expect(
-        alice.page.getByRole("dialog", { name: "User profile for bob" })
-      ).toBeVisible();
+        followMenu.getByRole("menuitem", { name: "Unfollow" })
+      ).toBeInViewport();
+      await alice.page.keyboard.press("Escape");
+      await expect(followMenu).toHaveCount(0);
+      await expect(following).toBeFocused();
       await alice.page.keyboard.press("Escape");
     }
     await headerName.click();
@@ -1019,6 +1041,7 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     // Story 9: the image is encrypted in the browser and uploaded as a blob.
     const caption = "Here is the picture.";
     const pickedName = "picked-pixel.png";
+    await openComposerActions(alice.page);
     const chooser = alice.page.waitForEvent("filechooser");
     await alice.page
       .getByRole("button", { name: "Attach files", exact: true })

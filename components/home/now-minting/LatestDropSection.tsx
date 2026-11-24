@@ -2,30 +2,92 @@
 
 import { useNextMintDrop } from "@/hooks/useNextMintDrop";
 import type { NowMintingStatus } from "@/hooks/useNowMintingStatus";
-import { shouldShowNextMintInLatestDrop } from "@/helpers/mint-visibility.helpers";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { useState } from "react";
+import { useId, useState } from "react";
 import LatestDropNextMintSection from "./LatestDropNextMintSection";
 import NowMintingSection from "./NowMintingSection";
+import {
+  canResolveHomeDrop,
+  getHomeDropMintNumber,
+  resolveHomeDrop,
+  type HomeDropSelection,
+} from "./homeDropSelection";
 import { useLatestDropTransitionReady } from "./useLatestDropTransitionReady";
 
 export default function LatestDropSection({
+  initialDrop = null,
   mintStatus,
 }: {
+  readonly initialDrop?: HomeDropSelection | null;
   readonly mintStatus: NowMintingStatus;
 }) {
   const locale = useBrowserLocale();
-  const { nft, isFetching, isDropComplete, isStatusLoading, error, refetch } =
-    mintStatus;
-  const { nextMint, isLoading: isNextMintLoading } = useNextMintDrop();
+  const { nft, isFetching, isDropComplete, error, refetch } = mintStatus;
   const isLatestDropTransitionReady = useLatestDropTransitionReady({
     isDropComplete,
     mintNumber: nft?.id,
   });
-  const [resolvedMintNumber, setResolvedMintNumber] = useState<number>();
+  const isMintCompleteAndGraceElapsed =
+    isDropComplete && isLatestDropTransitionReady === true;
+  const winnerRequestId = useId();
+  // A winner request shared with other consumers may have started before grace.
+  const winnerRequestScope =
+    initialDrop && nft && isMintCompleteAndGraceElapsed
+      ? `${winnerRequestId}:${nft.id}`
+      : undefined;
+  const {
+    nextMint,
+    isLoading: isNextMintLoading,
+    isError: isNextMintError,
+    isFetchedAfterMount: hasRefreshedWinner,
+  } = useNextMintDrop({ winnerRequestScope });
+  const hasHydrated = useHasHydrated();
+  const [clientSelection, setClientSelection] = useState<{
+    readonly seed: HomeDropSelection | null;
+    readonly drop: HomeDropSelection | null;
+  } | null>(null);
+  const resolvedDrop =
+    clientSelection?.seed === initialDrop ? clientSelection.drop : initialDrop;
+  const initialMintNumber = getHomeDropMintNumber(initialDrop);
 
-  if (!nft && error !== null && error !== undefined) {
+  const isDecisionReady = canResolveHomeDrop({
+    mintStatus,
+    transitionReadiness: isLatestDropTransitionReady,
+    nextMint,
+    isNextMintLoading,
+    isNextMintError,
+  });
+  const visibleDrop =
+    hasHydrated && nft && isDecisionReady
+      ? resolveHomeDrop({
+          nft,
+          nextMint,
+          resolvedDrop,
+          hasServerSelection:
+            initialMintNumber === nft.id &&
+            initialDrop?.kind === resolvedDrop?.kind,
+          isMintCompleteAndGraceElapsed,
+          hasRefreshedWinner,
+        })
+      : resolvedDrop;
+
+  if (visibleDrop !== resolvedDrop) {
+    setClientSelection({ seed: initialDrop, drop: visibleDrop });
+  }
+
+  if (visibleDrop?.kind === "next") {
+    return <LatestDropNextMintSection drop={visibleDrop.drop} />;
+  }
+  if (
+    visibleDrop?.kind === "latest" &&
+    (!hasHydrated || !nft || visibleDrop.nft.id >= nft.id)
+  ) {
+    return <NowMintingSection nft={visibleDrop.nft} />;
+  }
+
+  if (hasHydrated && !nft && error !== null && error !== undefined) {
     return (
       <section className="tw-px-4 tw-py-6 md:tw-px-6 lg:tw-px-8">
         <p role="alert" className="tw-text-sm tw-text-iron-300">
@@ -46,28 +108,5 @@ export default function LatestDropSection({
     );
   }
 
-  const isDecisionLoading =
-    isStatusLoading ||
-    isNextMintLoading ||
-    isLatestDropTransitionReady === null;
-  // Detail hooks can retry a failed status query when they mount. Keep this
-  // mint's resolved panel mounted instead of restarting the initial decision.
-  if (nft && !isDecisionLoading && resolvedMintNumber !== nft.id) {
-    setResolvedMintNumber(nft.id);
-  }
-  if (isDecisionLoading && (!nft || resolvedMintNumber !== nft.id)) {
-    return <NowMintingSection nft={undefined} isFetching />;
-  }
-
-  const shouldShowNextMint = shouldShowNextMintInLatestDrop({
-    isMintEnded: isLatestDropTransitionReady === true,
-    nextMintExists: !!nextMint,
-  });
-
-  if (shouldShowNextMint && nextMint) {
-    return <LatestDropNextMintSection drop={nextMint} />;
-  }
-
-  // Initial selection waits for the decision; cached data stays visible on refresh.
-  return <NowMintingSection nft={nft} isFetching={isFetching} />;
+  return null;
 }

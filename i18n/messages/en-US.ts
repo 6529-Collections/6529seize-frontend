@@ -1480,6 +1480,18 @@ const FOLLOWERS_MESSAGES = objectMessages("followers", {
   "profile.avatarAlt": "{handle}'s profile image",
 } as const);
 
+const PROFILE_FOLLOW_MESSAGES = objectMessages("profile.follow", {
+  followBack: "Follow back",
+  mutualStatus: "You follow each other",
+  unfollow: "Unfollow",
+  unblock: "Unblock",
+  unblockProfile: "Unblock {handle}",
+  "error.follow": "Couldn't follow this profile.",
+  "error.unfollow": "Couldn't unfollow this profile.",
+  "error.authenticate": "Couldn't verify your sign-in.",
+  "error.retry": "Please try again.",
+} as const);
+
 const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   "pinControl.pinTooltip": "Pin",
   "pinControl.unpinTooltip": "Unpin",
@@ -5611,6 +5623,7 @@ export const EN_US_ROOT_MESSAGES = {
   ...USER_PROFILE_HEADER_MESSAGES,
   ...USER_CIC_TYPE_MESSAGES,
   ...FOLLOWERS_MESSAGES,
+  ...PROFILE_FOLLOW_MESSAGES,
   ...WAVES_SIDEBAR_MESSAGES,
   ...wavesRightPanelMessages,
   ...wavesMoveMessages,
