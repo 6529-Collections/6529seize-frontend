@@ -1,8 +1,5 @@
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
-import {
-  isMemesNomineeLookalike,
-  MEMES_NOMINEE_CATEGORY,
-} from "@/helpers/waves/memes-nomination";
+import { MEMES_NOMINEE_CATEGORY } from "@/helpers/waves/memes-nomination";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { RepSearchState } from "./rep-search-types";
@@ -103,16 +100,10 @@ export default function UserPageRepNewRepSearchDropdown({
     <div className="tw-flex tw-flex-col tw-gap-2 tw-p-1 md:tw-flex-row md:tw-flex-wrap">
       {categories.map((category, index) => {
         const isMemesSubmissionCategory = category === MEMES_NOMINEE_CATEGORY;
-        const isNonQualifyingLookalike = isMemesNomineeLookalike(category);
-        let categoryAppearance =
-          "tw-border-iron-700/60 tw-bg-transparent tw-text-iron-200 hover:tw-border-iron-600 hover:tw-bg-iron-800/60";
-        if (isMemesSubmissionCategory) {
-          categoryAppearance =
-            "tw-border-emerald-500/30 tw-bg-emerald-500/10 tw-text-white hover:tw-border-emerald-500/50 hover:tw-bg-emerald-500/15";
-        } else if (isNonQualifyingLookalike) {
-          categoryAppearance =
-            "tw-border-iron-700/60 tw-bg-transparent tw-text-iron-300 hover:tw-border-iron-600 hover:tw-bg-iron-800/60";
-        }
+        const categoryAppearance =
+          activeIndex === index
+            ? "tw-bg-iron-800/60 forced-colors:tw-bg-[Highlight] forced-colors:tw-text-[HighlightText] forced-colors:hover:tw-bg-[Highlight] forced-colors:[forced-color-adjust:none]"
+            : "tw-bg-transparent";
 
         // Safari can blur the search before the suggestion click fires.
         return (
@@ -133,19 +124,13 @@ export default function UserPageRepNewRepSearchDropdown({
               event.stopPropagation();
               onRepSelect(category);
             }}
-            className={`tw-flex tw-min-h-12 tw-w-full tw-max-w-full tw-cursor-pointer tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-0 tw-rounded-lg tw-border tw-border-solid tw-px-2.5 tw-py-0.5 tw-text-left tw-text-sm tw-font-normal tw-leading-5 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none md:tw-min-h-8 md:tw-w-auto md:tw-gap-y-1 md:tw-py-1 md:tw-text-xs ${activeIndex === index ? "tw-ring-1 tw-ring-inset tw-ring-primary-400 forced-colors:tw-outline forced-colors:tw-outline-2 forced-colors:-tw-outline-offset-2 forced-colors:tw-outline-[Highlight]" : ""} ${categoryAppearance}`}
+            className={`tw-flex tw-min-h-12 tw-w-full tw-max-w-full tw-cursor-pointer tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/60 tw-px-2.5 tw-py-0.5 tw-text-left tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-200 tw-transition-colors tw-duration-150 hover:tw-border-iron-600 hover:tw-bg-iron-800/60 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none md:tw-min-h-8 md:tw-w-auto md:tw-gap-y-1 md:tw-py-1 md:tw-text-xs ${categoryAppearance}`}
           >
-            <span
-              className={`tw-min-w-0 tw-max-w-full tw-break-words ${
-                isMemesSubmissionCategory
-                  ? "tw-font-medium tw-text-emerald-400"
-                  : ""
-              }`}
-            >
+            <span className="tw-min-w-0 tw-max-w-full tw-break-words">
               <CategoryName category={category} search={search} />
             </span>
             {isMemesSubmissionCategory && (
-              <span className="tw-whitespace-nowrap tw-text-[11px] tw-font-normal tw-leading-5 tw-text-emerald-300">
+              <span className="tw-whitespace-nowrap tw-text-[11px] tw-font-normal tw-leading-5 tw-text-emerald-300 forced-colors:tw-text-inherit">
                 {t(locale, "rep.categories.grant.submissionBadge")}
               </span>
             )}

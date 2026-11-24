@@ -38,24 +38,26 @@ describe("UserPageRepNewRepSearchDropdown", () => {
       />
     );
 
-    expect(screen.getByText("Counts for submissions")).toBeInTheDocument();
+    expect(screen.getByText("Counts for submissions")).toHaveClass(
+      "tw-text-emerald-300"
+    );
     expect(
       screen.getByRole("option", {
         name: "MemesNominee Counts for submissions",
       })
     ).toHaveClass(
-      "tw-border-emerald-500/30",
-      "tw-bg-emerald-500/10",
-      "tw-text-white"
+      "tw-border-iron-700/60",
+      "tw-bg-iron-800/60",
+      "tw-text-iron-200"
     );
     expect(
       screen.getByRole("option", { name: "Memes Nominee" })
     ).not.toHaveClass("tw-border-emerald-500/30", "tw-bg-emerald-500/10");
     expect(screen.getByRole("option", { name: "Memes Nominee" })).toHaveClass(
       "tw-bg-transparent",
-      "tw-text-iron-300"
+      "tw-text-iron-200"
     );
-    expect(screen.getByText("MemesNominee", { exact: true })).toHaveClass(
+    expect(screen.getByText("MemesNominee", { exact: true })).not.toHaveClass(
       "tw-text-emerald-400"
     );
   });

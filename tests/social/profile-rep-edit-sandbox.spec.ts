@@ -910,6 +910,17 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
         "MemesNominee Counts for submissions"
       );
       await expect(first).toHaveAttribute("aria-selected", "true");
+      await expect(first).toHaveCSS("color", "rgb(236, 236, 238)");
+      await expect(first).toHaveCSS(
+        "background-color",
+        "rgba(38, 39, 43, 0.6)"
+      );
+      await expect(first).toHaveCSS("box-shadow", "none");
+      await expect(first).not.toHaveCSS("outline-style", "solid");
+      await expect(first.getByText("Counts for submissions")).toHaveCSS(
+        "color",
+        "rgb(110, 231, 183)"
+      );
       const firstId = await first.getAttribute("id");
       expect(firstId).toBeTruthy();
       await expect(search).toHaveAttribute(
@@ -995,13 +1006,28 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await page.emulateMedia({ forcedColors: "active" });
     try {
       const active = grant.getByRole("option", { selected: true });
-      await expect(active).toHaveCSS("outline-style", "solid");
-      await expect(active).toHaveCSS("outline-width", "2px");
-      await expect(
-        grant.getByRole("option", { selected: false }).first()
-      ).not.toHaveCSS("outline-style", "solid");
+      const inactive = grant.getByRole("option", { selected: false }).first();
+      await expect(active).not.toHaveCSS("outline-style", "solid");
+      expect(
+        await active.evaluate(
+          (option) => getComputedStyle(option).backgroundColor
+        )
+      ).not.toBe(
+        await inactive.evaluate(
+          (option) => getComputedStyle(option).backgroundColor
+        )
+      );
     } finally {
       await page.emulateMedia({ forcedColors: "none" });
+    }
+
+    if (!isMobile) {
+      const active = grant.getByRole("option", { selected: true });
+      await active.focus();
+      await expect(active).toHaveCSS("outline-style", "solid");
+      await expect(active).toHaveCSS("outline-color", "rgb(82, 139, 255)");
+      await search.focus();
+      await expect(active).not.toHaveCSS("outline-style", "solid");
     }
 
     await search.scrollIntoViewIfNeeded();

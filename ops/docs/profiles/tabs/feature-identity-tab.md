@@ -240,14 +240,15 @@ show the profile-creation welcome.
   available height above the keyboard. Moving focus to the amount or actions
   closes suggestions. Category names are case-sensitive, so `artist` and `Artist`
   can hold separate ratings.
-- The first suggestion is active. Use the arrow keys to move through suggestions
-  and Enter to pick the active category.
+- The first suggestion is active, shown with a soft grey fill. Use the arrow
+  keys to move through suggestions and Enter to pick the active category.
+  A blue outline appears only when a suggestion itself has keyboard focus.
 - Similar categories remain independent and selectable. The exact
   `MemesNominee` pill is marked as counting toward the 50,000 REP submission
   requirement. When the typed value differs from it only by capitalization,
   spacing, punctuation, or Unicode width, the exact pill is surfaced first; the
-  typed value remains available. The exact category name and its
-  `Counts for submissions` badge are green; look-alikes stay plain. On phones,
+  typed value remains available. Category names use the same light text;
+  only the `Counts for submissions` badge is green. On phones,
   the matching typed portion of a suggestion is dimmer. Guidance appears once,
   directly below the field. Typing a look-alike immediately shows the amber note
   explaining that only exact `MemesNominee` counts toward the requirement.
