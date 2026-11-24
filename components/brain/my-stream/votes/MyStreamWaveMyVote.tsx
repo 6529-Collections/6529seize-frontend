@@ -163,7 +163,7 @@ function MyVoteAuthor({
       }
     >
       <div
-        className={`tw-relative tw-flex-shrink-0 tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-white/10 ${mobile ? "tw-mr-1 tw-size-5" : "tw-size-6"}`}
+        className={`tw-relative tw-flex-shrink-0 tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-white/10 ${mobile ? "tw-size-5" : "tw-size-6"}`}
       >
         {author.pfp ? (
           <Image
@@ -537,7 +537,8 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
               dropId={drop.id}
               size="xs"
               showTooltip={!mobile}
-              className={`tw-size-6 tw-justify-center ${mobile ? "tw-mt-4" : ""}`}
+              className={`tw-h-6 tw-justify-center ${mobile ? "tw-mt-4 tw-w-5" : "tw-w-6"}`}
+              iconClassName={mobile ? "[&_svg]:tw-size-[9px]" : ""}
             />
             <h3
               id={titleId}

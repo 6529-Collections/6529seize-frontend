@@ -77,6 +77,8 @@ async function expectCompactVoteMediaLayout(row: Locator) {
     const artworkBounds = artwork.getBoundingClientRect();
     const titleBounds = titleRange.getBoundingClientRect();
     const avatarBounds = author.firstElementChild!.getBoundingClientRect();
+    const mediaFrame = badge.firstElementChild!.getBoundingClientRect();
+    const mediaSymbol = badge.querySelector("svg")!.getBoundingClientRect();
     const handleBounds = authorRange.getBoundingClientRect();
     const levelBounds = author.lastElementChild!.getBoundingClientRect();
     const handleCenter = handleBounds.top + handleBounds.height / 2;
@@ -87,6 +89,11 @@ async function expectCompactVoteMediaLayout(row: Locator) {
       authorTextLeftGap: handleBounds.left - titleBounds.left,
       avatarWidth: avatarBounds.width,
       avatarHeight: avatarBounds.height,
+      mediaFrameWidth: mediaFrame.width,
+      mediaFrameHeight: mediaFrame.height,
+      mediaFrameLeftGap: mediaFrame.left - avatarBounds.left,
+      mediaSymbolWidth: mediaSymbol.width,
+      mediaSymbolHeight: mediaSymbol.height,
       avatarBottomGap: artworkBounds.bottom - avatarBounds.bottom,
       avatarCenterGap:
         avatarBounds.top + avatarBounds.height / 2 - handleCenter,
@@ -109,6 +116,11 @@ async function expectCompactVoteMediaLayout(row: Locator) {
   expect(alignment.authorTextLeftGap).toBe(0);
   expect(alignment.avatarWidth).toBe(20);
   expect(alignment.avatarHeight).toBe(20);
+  expect(alignment.mediaFrameWidth).toBe(20);
+  expect(alignment.mediaFrameHeight).toBe(20);
+  expect(alignment.mediaFrameLeftGap).toBe(0);
+  expect(alignment.mediaSymbolWidth).toBe(9);
+  expect(alignment.mediaSymbolHeight).toBe(9);
   expect(alignment.avatarBottomGap).toBe(0);
   expect(Math.abs(alignment.avatarCenterGap)).toBeLessThanOrEqual(1);
   expect(Math.abs(alignment.levelCenterGap)).toBeLessThanOrEqual(1);
