@@ -1,3 +1,4 @@
+import { ChainOperationError } from "@/lib/chain-identity/operation";
 import { repCategoryId } from "@/lib/chain/codec/ids";
 import { verifyDraft } from "@/lib/chain-identity/operation";
 import { pinnedTypes } from "@/lib/chain-identity/typedDataTypes";
@@ -107,15 +108,15 @@ describe("rule version 7's operations", () => {
         priorVoteVersion: 0,
         budgetScope: 1,
       })
-    ).toThrow(RangeError);
+    ).toThrow(ChainOperationError);
   });
 
   it("builds POLL_BALLOT_SET with one bit an option, option 1 first", () => {
     expect(pollSelection([1, 3])).toBe(0b101);
     expect(pollSelection([32])).toBe(2 ** 31);
-    expect(() => pollSelection([])).toThrow(RangeError);
-    expect(() => pollSelection([0])).toThrow(RangeError);
-    expect(() => pollSelection([33])).toThrow(RangeError);
+    expect(() => pollSelection([])).toThrow(ChainOperationError);
+    expect(() => pollSelection([0])).toThrow(ChainOperationError);
+    expect(() => pollSelection([33])).toThrow(ChainOperationError);
 
     const op = pollBallotSet(VOTER, wallet, {
       pollId: POLL,
@@ -175,7 +176,7 @@ describe("rule version 7's operations", () => {
         value: 1n,
         priorVersion: 0,
       })
-    ).toThrow(RangeError);
+    ).toThrow(ChainOperationError);
   });
 
   it.each([

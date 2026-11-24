@@ -3,6 +3,7 @@ import { repCategoryId } from "@/lib/chain/codec/ids";
 import { isRepCategoryName } from "@/lib/chain/codec/rules";
 import type { ChainDraftRequest } from "@/lib/chain-identity/gateway";
 import type { ChainActor } from "@/lib/chain-identity/identityOps";
+import { ChainOperationError } from "@/lib/chain-identity/operation";
 
 /**
  * Rule version 7's operations this site writes, as `/v1/draft` requests with
@@ -50,7 +51,10 @@ const word = (value: Hex): Hex => value.toLowerCase() as Hex;
 
 const int64 = (value: bigint, field: string): string => {
   if (value > INT64_MAX || value < -INT64_MAX) {
-    throw new RangeError(`${field} is out of range`);
+    throw new ChainOperationError(
+      "rejected",
+      `That number is outside what the 6529 Network takes (${field}).`
+    );
   }
   return value.toString();
 };
@@ -83,7 +87,7 @@ export const voteSet = (
  */
 export function pollSelection(optionNumbers: readonly number[]): number {
   if (optionNumbers.length === 0) {
-    throw new RangeError("a ballot names at least one option");
+    throw new ChainOperationError("rejected", "Choose at least one option.");
   }
   let selection = 0;
   for (const optionNo of optionNumbers) {
@@ -92,7 +96,10 @@ export function pollSelection(optionNumbers: readonly number[]): number {
       optionNo < 1 ||
       optionNo > MAX_POLL_OPTIONS
     ) {
-      throw new RangeError("not a poll option the 6529 Network takes");
+      throw new ChainOperationError(
+        "rejected",
+        "That isn't an option in this poll."
+      );
     }
     selection |= 1 << (optionNo - 1);
   }
@@ -127,7 +134,10 @@ export const pollBallotSet = (
 export function waveRatingCategoryId(name: string): Hex {
   const category = name.trim();
   if (category !== "" && !isRepCategoryName(category)) {
-    throw new RangeError("not a REP category the 6529 Network takes");
+    throw new ChainOperationError(
+      "rejected",
+      "On the 6529 Network a category uses only letters A-Z, numbers, single spaces and & ' . - _, and starts with a letter or number."
+    );
   }
   return category === "" ? ZERO_WORD : repCategoryId(category);
 }
