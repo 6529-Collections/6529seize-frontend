@@ -323,7 +323,7 @@ export function CompetitionVoteForm({
         aria-busy="true"
         aria-live="off"
       >
-        <div className="tw-h-[54px] tw-animate-pulse tw-rounded-lg tw-bg-iron-900 motion-reduce:tw-animate-none" />
+        <div className="tw-h-[46px] tw-animate-pulse tw-rounded-lg tw-bg-iron-900 motion-reduce:tw-animate-none" />
         {onExplainVote && (
           <div className="tw-h-11 tw-w-20 tw-animate-pulse tw-rounded-lg tw-bg-iron-900 motion-reduce:tw-animate-none" />
         )}

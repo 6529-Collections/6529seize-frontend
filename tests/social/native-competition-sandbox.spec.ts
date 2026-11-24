@@ -6887,19 +6887,21 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await expect(save).toBeVisible();
     await expect(
       row.getByRole("button", { name: "Explain vote", exact: true })
-    ).toHaveCSS("height", "44px");
-    await expect(save).toHaveCSS("height", "44px");
+    ).toHaveCSS("height", "36px");
+    await expect(save).toHaveCSS("height", "36px");
     const compactField = await input.evaluate((element) => {
       const field = element.parentElement!;
       const bounds = field.getBoundingClientRect();
       return {
         width: bounds.width,
+        height: bounds.height,
         right: bounds.right,
         containsSave: !!field.querySelector('button[type="submit"]'),
         containsUnit: field.textContent?.includes("TDH"),
       };
     });
     expect(compactField.containsUnit).toBe(true);
+    expect(compactField.height).toBe(46);
     expect(compactField.containsSave).toBe(true);
     const saveBounds = (await save.boundingBox())!;
     expect(saveBounds.x + saveBounds.width).toBeLessThan(compactField.right);
@@ -7446,10 +7448,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           "border-width",
           width < 1024 && testInfo.project.use.hasTouch ? "0px" : "1px"
         );
-        await expect(explain).toHaveCSS("height", "44px");
+        const actionHeight = testInfo.project.use.hasTouch ? 44 : 36;
+        await expect(explain).toHaveCSS("height", `${actionHeight}px`);
         await expect(
           row.getByRole("button", { name: "Save vote", exact: true })
-        ).toHaveCSS("height", "44px");
+        ).toHaveCSS("height", `${actionHeight}px`);
         await expect(input).toHaveCSS(
           "font-size",
           width < 1024 ? "16px" : "14px"
@@ -7471,10 +7474,12 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           const bounds = field.getBoundingClientRect();
           return {
             right: bounds.right,
+            height: bounds.height,
             containsSave: !!field.querySelector('button[type="submit"]'),
           };
         });
         expect(fieldBounds.containsSave).toBe(true);
+        expect(fieldBounds.height).toBe(46);
         expect(Math.abs(action.x - fieldBounds.right - 8)).toBeLessThanOrEqual(
           1
         );
@@ -7483,8 +7488,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           Math.abs(action.x + action.width - rowBounds.x - rowBounds.width + 16)
         ).toBeLessThanOrEqual(1);
         expect(field.height).toBeGreaterThanOrEqual(44);
-        expect(action.height).toBeGreaterThanOrEqual(44);
-        expect(Math.abs(field.y - action.y)).toBeLessThanOrEqual(1);
+        expect(action.height).toBeGreaterThanOrEqual(actionHeight);
+        expect(
+          Math.abs(field.y + field.height / 2 - action.y - action.height / 2)
+        ).toBeLessThanOrEqual(1);
         await expect(controls.getByText(/^Enter a whole number/)).toBeVisible();
         await expect(row.getByRole("heading").getByRole("button")).toHaveCSS(
           "white-space",

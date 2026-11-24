@@ -71,7 +71,7 @@ function MyVotesExplainButton({
       {...props}
       variant="tertiary"
       size={null}
-      className={`tw-h-11 tw-min-h-11 tw-min-w-11 tw-whitespace-nowrap !tw-text-xs !tw-font-medium ${mobile ? "!tw-px-1 touch-only:!tw-border-0 touch-only:!tw-bg-transparent touch-only:!tw-text-iron-300 touch-only:!tw-shadow-none" : "!tw-px-3"}`}
+      className={`tw-h-9 tw-min-h-9 tw-min-w-11 tw-whitespace-nowrap !tw-text-xs !tw-font-medium touch-only:tw-h-11 touch-only:tw-min-h-11 ${mobile ? "!tw-px-1 touch-only:!tw-border-0 touch-only:!tw-bg-transparent touch-only:!tw-text-iron-300 touch-only:!tw-shadow-none" : "!tw-px-3"}`}
     >
       {label}
     </Button>
@@ -112,7 +112,7 @@ function MyVotesSaveButton({
           transition={
             reduceMotion ? MY_VOTES_FADE_TRANSITION : MY_VOTES_EFFECT_TRANSITION
           }
-          className={`tw-inline-flex tw-h-11 tw-min-h-11 tw-min-w-11 tw-shrink-0 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-2 tw-text-xs tw-font-semibold tw-text-white tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 enabled:tw-cursor-pointer enabled:active:tw-bg-primary-600 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 enabled:desktop-hover:hover:tw-bg-primary-600 motion-reduce:tw-transition-none ${mobile ? "touch-only:!tw-bg-transparent touch-only:!tw-text-primary-300" : ""}`}
+          className={`tw-inline-flex tw-h-9 tw-min-h-9 tw-min-w-11 tw-shrink-0 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-2 tw-text-xs tw-font-semibold tw-text-white tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 enabled:tw-cursor-pointer enabled:active:tw-bg-primary-600 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 enabled:desktop-hover:hover:tw-bg-primary-600 touch-only:tw-h-11 touch-only:tw-min-h-11 motion-reduce:tw-transition-none ${mobile ? "touch-only:!tw-bg-transparent touch-only:!tw-text-primary-300" : ""}`}
         >
           <span className="tw-bg-inherit">{label}</span>
         </motion.button>
@@ -193,7 +193,7 @@ export function MyVotesInput({
         </label>
         <div
           data-my-vote-field
-          className={`tw-col-start-1 tw-row-start-1 tw-flex tw-w-full tw-min-w-0 tw-items-center tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-1 focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 ${!valid || error ? "tw-ring-2 tw-ring-inset tw-ring-rose-400" : ""}`}
+          className={`tw-col-start-1 tw-row-start-1 tw-flex tw-w-full tw-min-w-0 tw-items-center tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-1 focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 ${!valid || error ? "tw-ring-2 tw-ring-inset tw-ring-rose-400" : ""}`}
         >
           <input
             ref={inputRef}
