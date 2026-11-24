@@ -168,7 +168,7 @@ test("offers desktop bulk actions without mobile Select or Done controls", () =>
     </AuthContext.Provider>
   );
   expect(
-    screen.queryByRole("button", { name: "Select", exact: true })
+    screen.queryByRole("button", { name: /^Select$/ })
   ).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Select all" })).toBeEnabled();
   expect(screen.getByRole("button", { name: "Reset 1 vote" })).toBeEnabled();
