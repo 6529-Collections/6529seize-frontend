@@ -13,7 +13,7 @@ import {
   writeChainWaveRating,
 } from "@/lib/chain-waves/writers";
 
-export interface ChainWavesWriters {
+interface ChainWavesWriters {
   /** The viewer's absolute vote on the entry a drop is. */
   readonly vote: (input: {
     readonly dropId: string;

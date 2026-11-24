@@ -42,7 +42,7 @@ const WAVES_REFUSALS: Readonly<Record<string, string>> = {
 };
 
 /** Which write a refusal answers, for the sentences that differ by write. */
-export type ChainWavesWrite = "vote" | "ballot" | "rating";
+type ChainWavesWrite = "vote" | "ballot" | "rating";
 
 /** NOT_ELIGIBLE: outside the decision's vote group, the poll's or the wave's. */
 const NOT_ELIGIBLE: Readonly<Record<ChainWavesWrite, string>> = {

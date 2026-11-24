@@ -38,7 +38,8 @@ export async function identityOfWallet(
 
 /**
  * The connected wallet signs (every rule version 7 write but votes, ballots
- * and REP).
+ * and REP). Entries and their withdrawal use it.
+ * @api
  */
 export const walletSigning = (config: Config, wallet: Hex): ChainSigning => ({
   actor: { kind: "wallet", address: wallet },

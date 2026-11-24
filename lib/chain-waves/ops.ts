@@ -31,6 +31,11 @@ const signerFields = (
     ? { keyType: 1, signer: actor.address.toLowerCase() as Hex }
     : { keyType: 2, keyId: actor.keyId, authRef: actor.grantId };
 
+/**
+ * A rule version 7 operation's draft request and its EIP-712 primary type,
+ * for the actor that signs it. Entries and their withdrawal use it too.
+ * @api
+ */
 export const chainOperation = (
   opType: string,
   primaryType: string,

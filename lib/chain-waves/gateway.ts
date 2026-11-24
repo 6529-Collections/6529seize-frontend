@@ -38,7 +38,7 @@ export interface ChainEntry {
   readonly total: string;
 }
 
-export interface ChainVoterVotes {
+interface ChainVoterVotes {
   readonly decisionId: Hex;
   readonly voter: Hex;
   readonly votes: readonly {
@@ -67,7 +67,7 @@ interface ChainPollBallot {
   readonly version: number;
 }
 
-export interface ChainTdhLeaf {
+interface ChainTdhLeaf {
   readonly wallet: Hex;
   readonly cid: Hex;
   readonly identityTdh: string;
@@ -76,14 +76,14 @@ export interface ChainTdhLeaf {
   readonly walletCount: number;
 }
 
-export interface ChainTdhWallet {
+interface ChainTdhWallet {
   readonly day: number;
   readonly wallet: Hex;
   readonly leaf: ChainTdhLeaf | null;
   readonly principalId: Hex | null;
 }
 
-export interface ChainWaveRating {
+interface ChainWaveRating {
   readonly rater: Hex;
   readonly target: Hex;
   readonly category: { readonly id: Hex; readonly name: string | null };

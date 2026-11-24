@@ -38,7 +38,7 @@ export function budgetAfterVote(
 }
 
 /** How long 6529.io's index takes to read a block, about; then refetch. */
-export const INDEX_REFRESH_DELAY_MS = 15_000;
+const INDEX_REFRESH_DELAY_MS = 15_000;
 
 /**
  * Refetches once 6529.io's index has likely read the block. Refetching at
