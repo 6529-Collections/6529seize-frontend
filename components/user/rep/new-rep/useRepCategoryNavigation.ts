@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, type KeyboardEvent } from "react";
+import { useId, useLayoutEffect, useState, type KeyboardEvent } from "react";
 
 export default function useRepCategoryNavigation({
   categories,
@@ -19,6 +19,19 @@ export default function useRepCategoryNavigation({
   const activeSuggestionIndex =
     highlightedCategory === null ? 0 : categories.indexOf(highlightedCategory);
   const hasSelectableSuggestions = enabled && categories.length > 0;
+  const activeSuggestionId =
+    hasSelectableSuggestions && activeSuggestionIndex >= 0
+      ? `${optionIdPrefix}${activeSuggestionIndex}`
+      : undefined;
+
+  // Reordered results must reveal the rendered active option before paint.
+  useLayoutEffect(() => {
+    if (!activeSuggestionId) return;
+    document.getElementById(activeSuggestionId)?.scrollIntoView({
+      block: "nearest",
+      inline: "nearest",
+    });
+  }, [activeSuggestionId]);
 
   const handleSearchKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (
@@ -38,10 +51,6 @@ export default function useRepCategoryNavigation({
       const index =
         (currentIndex + direction + categories.length) % categories.length;
       setHighlightedCategory(categories[index] ?? null);
-      document.getElementById(`${optionIdPrefix}${index}`)?.scrollIntoView({
-        block: "nearest",
-        inline: "nearest",
-      });
     } else if (event.key === "Enter") {
       event.preventDefault();
       const category = categories[activeSuggestionIndex];
@@ -53,10 +62,7 @@ export default function useRepCategoryNavigation({
     searchListId,
     optionIdPrefix,
     activeSuggestionIndex,
-    activeSuggestionId:
-      hasSelectableSuggestions && activeSuggestionIndex >= 0
-        ? `${optionIdPrefix}${activeSuggestionIndex}`
-        : undefined,
+    activeSuggestionId,
     handleSearchKeyDown,
     resetHighlightedCategory: () => setHighlightedCategory(null),
   };

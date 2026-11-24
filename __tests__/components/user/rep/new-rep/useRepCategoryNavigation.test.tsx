@@ -6,6 +6,42 @@ import {
 } from "@testing-library/react";
 import useRepCategoryNavigation from "@/components/user/rep/new-rep/useRepCategoryNavigation";
 
+function NavigationHarness({
+  categories,
+  enabled,
+  onScroll,
+}: {
+  readonly categories: string[];
+  readonly enabled: boolean;
+  readonly onScroll: (options?: boolean | ScrollIntoViewOptions) => void;
+}) {
+  const navigation = useRepCategoryNavigation({
+    categories,
+    enabled,
+    onSelect: () => undefined,
+  });
+  return (
+    <>
+      <input
+        aria-label="Category search"
+        aria-activedescendant={navigation.activeSuggestionId}
+        onKeyDown={navigation.handleSearchKeyDown}
+      />
+      {categories.map((category, index) => (
+        <div
+          key={category}
+          id={`${navigation.optionIdPrefix}${index}`}
+          ref={(element) => {
+            if (element) element.scrollIntoView = onScroll;
+          }}
+        >
+          {category}
+        </div>
+      ))}
+    </>
+  );
+}
+
 function renderNavigation() {
   const onSelect = jest.fn();
   const { result, rerender } = renderHook(
@@ -37,6 +73,45 @@ function renderNavigation() {
 }
 
 describe("useRepCategoryNavigation", () => {
+  it("scrolls the committed highlighted option after reordering and stops when disabled", () => {
+    const onScroll = jest.fn();
+    const { getByRole, getByText, rerender } = render(
+      <NavigationHarness
+        categories={["Art", "Music", "Photography"]}
+        enabled
+        onScroll={onScroll}
+      />
+    );
+    expect(onScroll.mock.contexts.at(-1)).toBe(getByText("Art"));
+    fireEvent.keyDown(getByRole("textbox"), { key: "ArrowDown" });
+    expect(onScroll.mock.contexts.at(-1)).toBe(getByText("Music"));
+    onScroll.mockClear();
+
+    rerender(
+      <NavigationHarness
+        categories={["Photography", "Art", "Music"]}
+        enabled
+        onScroll={onScroll}
+      />
+    );
+    expect(onScroll).toHaveBeenCalledTimes(1);
+    expect(onScroll.mock.contexts[0]).toBe(getByText("Music"));
+    expect(onScroll).toHaveBeenCalledWith({
+      block: "nearest",
+      inline: "nearest",
+    });
+    onScroll.mockClear();
+
+    rerender(
+      <NavigationHarness
+        categories={["Music", "Art", "Photography"]}
+        enabled={false}
+        onScroll={onScroll}
+      />
+    );
+    expect(onScroll).not.toHaveBeenCalled();
+  });
+
   it("preserves the highlighted category when results reorder", () => {
     const { result, rerender, onSelect, keyDown } = renderNavigation();
     keyDown("ArrowDown");
