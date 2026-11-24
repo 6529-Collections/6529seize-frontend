@@ -174,9 +174,10 @@ DMs; the `in:` picker can include conversations you can read.
 - `⌘K` is available from mounted search triggers.
 - `⌘K` and `Ctrl+K` open the search appropriate to the mounted trigger's
   context.
-- `Pages` results come from navigation entries, not full-page text content.
-- `6529 Apps` has explicit aliases for `6529 Mobile`, `6529 Desktop`, `apps`,
-  `mobile`, `desktop`, and supported platform terms.
+- `Pages` searches a catalog of navigation and search-only entries.
+- `6529 Desktop`, `desktop`, and `/desktop` find the new Desktop download
+  page. `6529 Apps` has aliases for `6529 Mobile`, `6529 Desktop Classic`,
+  `apps`, `mobile`, and supported platform terms.
 - Page results change with runtime route visibility (for example wallet/device/region-gated entries).
 
 ## Related Pages

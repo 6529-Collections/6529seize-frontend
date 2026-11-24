@@ -30,13 +30,16 @@ short landscape iPhone chat viewports.
 
 The signing, encrypted-messages and connection-sharing records cover the shared
 permission consent flow, separate or combined grants, shared server device names,
-renewal versus revocation, Desktop secure sharing's Coming soon gate, and exact
-local notification previews without an in-app cooldown. Composer help describes
-the shared rich-text editor, inline custom emojis, mobile Return/Send and keyboard
+renewal versus revocation, Desktop connection links and staging code redemption,
+and exact local notification previews without an in-app cooldown. Composer help
+describes the shared rich-text editor, inline custom emojis, mobile Return/Send and keyboard
 clearance, while encrypted GIF/Poll/Storm remain unavailable. Notification help
 keeps new-device history limitations explicit and names the environment-specific
 Mobile/Staging push body. Encrypted-messages help describes how the app sidebar
 closes before the sign-out dialog opens.
+
+The Apps page record explains how to open the collapsed 6529 Desktop Classic
+card and find the detected operating system's installers.
 
 The `media.video-player` record covers preview frames and the video-icon fallback
 for Additional Media and Promo Video in submission details. Additional Media

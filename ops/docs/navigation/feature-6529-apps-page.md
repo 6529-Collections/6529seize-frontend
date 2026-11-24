@@ -5,24 +5,25 @@ Parent: [Navigation Index](README.md)
 ## Overview
 
 The `6529 Apps` page presents official mobile and desktop downloads in one
-place, followed by a third section for `6529 Validator` and a fourth for
-`6529 AI`. The whole Validator section links to `/validator`, with the
+place. **6529 Desktop** links to the test release at `/desktop`, and
+**6529 Desktop Classic** lists Classic installers. The page also links to
+`6529 Validator` and `6529 AI`. The whole Validator section links to `/validator`, with the
 description `Read more about 6529 validator`; the whole 6529 AI section links
 to `/ai`, with the description `Run open-weights AI models on your own
 computer, and chat with them in your browser`. Mobile and desktop options remain visible together rather than
 being hidden behind tabs.
 
-Ask `@help6529` "is there an app?" or "is there a 6529 app?" to find both
-6529 Mobile and 6529 Desktop Classic and the official Apps page. You do not need to
-choose a platform before asking.
+Ask `@help6529` "is there a 6529 app?" to find 6529 Mobile, the 6529 Desktop
+test release, 6529 Desktop Classic, and the official Apps page.
 
 ## Location in the Site
 
 - Route: `/about/6529-apps`
 - Sidebar and app menu: `About -> About 6529 -> 6529 Apps`
 - About contents menu: `About 6529 -> 6529 Apps`
-- Site-wide page search: `6529 Apps`, `6529 Mobile`, `6529 Desktop`, `apps`,
-  `mobile`, and `desktop` all find the page.
+- Site-wide page search: `6529 Apps`, `6529 Mobile`, and
+  `6529 Desktop Classic` find the Apps page. `6529 Desktop`, `desktop`, and
+  `/desktop` find the test-release download page directly.
 - Site footer: `6529 Apps` appears between `License` and `API` in the second
   text-link row.
 
@@ -37,19 +38,22 @@ choose a platform before asking.
 
 1. Open the `6529 Apps` page.
 2. Use `6529 Mobile` to choose the iOS App Store or Android Google Play.
-3. Under **6529 Desktop Classic**, the matching desktop OS expands automatically when detected. Expand Windows,
-   macOS, or Linux yourself to choose another platform; phones, tablets and
-   unrecognized devices start with all desktop sections collapsed.
-4. Choose the version appropriate for your OS, then the architecture or package
+3. Select **6529 Desktop** for the Windows x64 or Apple silicon Mac test
+   release, install guide, and release notes.
+4. Select **6529 Desktop Classic** to expand its downloads. Windows, macOS or
+   Linux opens automatically when the browser detects that OS. On phones,
+   tablets and unrecognized devices, choose an OS from the collapsed rows.
+   Select the Classic header again to close the downloads.
+5. Choose the Classic version appropriate for your OS, then the architecture or package
    format. `Download` opens the installer directly. Each installer shows
    `Arweave mirror · Coming soon` until its mirror is published, then shows a
    clickable `Arweave mirror` link.
-5. Select anywhere in the `6529 Validator` section to read more and download
+6. Select anywhere in the `6529 Validator` section to read more and download
    the validator from `/validator`. Signed-in members with a profile also get
    a direct `Validator` row in the primary navigation and can search `Pages`
    for `validator`, `6529 Validator`, or `/validator`. Newcomers see `Join 6529`
    in navigation and search instead.
-6. Select anywhere in the `6529 AI` section to download 6529 AI from `/ai`.
+7. Select anywhere in the `6529 AI` section to download 6529 AI from `/ai`.
    Everyone also gets a `6529 AI` row in the primary navigation, after the
    `Join 6529` / `Validator` slot, and can search `Pages` for `6529 AI` or
    `AI`.
@@ -78,8 +82,8 @@ keep both notice variants hidden.
 
 ## Edge Cases
 
-- The shared About contents button stays disabled until the page is interactive.
-  Clicks while it is disabled are not queued; click again once it is enabled.
+- The About contents and Desktop Classic download buttons become available
+  once the page is interactive.
 - Desktop releases are loaded independently, so available platforms can still
   appear when one platform's release manifest is temporarily unavailable.
 - macOS has separate current and macOS 12 download feeds. A failed current feed
