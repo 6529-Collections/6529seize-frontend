@@ -966,6 +966,23 @@ describe("HeaderShare", () => {
     const HeaderShare = HeaderConnectHarness;
     const chooseConnectOnly = () =>
       userEvent.click(screen.getByRole("button", { name: "Connect only" }));
+    function setConnectionEnvironment(environment: "production" | "staging") {
+      const host = environment === "staging" ? "staging.6529.io" : "6529.io";
+      const site = jest.replaceProperty(
+        publicEnv,
+        "BASE_ENDPOINT",
+        `https://${host}`
+      );
+      const api = jest.replaceProperty(
+        publicEnv,
+        "API_ENDPOINT",
+        `https://api.${host}`
+      );
+      return () => {
+        site.restore();
+        api.restore();
+      };
+    }
     beforeEach(() => {
       mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
       mockIsMobile.mockReturnValue(false);
@@ -987,20 +1004,25 @@ describe("HeaderShare", () => {
     });
 
     it.each([
-      ["native", undefined],
-      ["desktop", undefined],
-      ["desktop", "stagingclassiccore6529"],
-      ["desktop", "localclassiccore6529"],
+      ["Mobile", "native", undefined, "production"],
+      ["Desktop", "desktop", undefined, "production"],
+      ["Desktop", "desktop", undefined, "staging"],
+      ["Desktop Classic", "desktop", undefined, "production"],
+      ["Desktop Classic", "desktop", "stagingclassiccore6529", "staging"],
+      ["Desktop Classic", "desktop", "localclassiccore6529", "production"],
     ] as const)(
-      "offers combined %s setup with Classic scheme %s",
-      /** Desktop gets a private app link and version notice. Mobile gets a QR code. */
-      async (target, configuredScheme) => {
+      "offers combined setup for %s (%s) with Classic override %s on %s",
+      async (appName, target, configuredScheme, environment) => {
+        const restoreEnvironment = setConnectionEnvironment(environment);
         const schemeOverride = jest.replaceProperty(
           publicEnv,
           "DESKTOP_CLASSIC_SCHEME",
           configuredScheme
         );
-        const expectedScheme = configuredScheme ?? "classiccore6529";
+        const isClassic = appName === "Desktop Classic";
+        const expectedScheme = isClassic
+          ? (configuredScheme ?? "classiccore6529")
+          : "core6529";
         const flags = require("@/lib/device-signing/feature");
         const e2ee = require("@/config/e2eeEnv");
         const signing = jest
@@ -1079,13 +1101,15 @@ describe("HeaderShare", () => {
             screen.getByRole("dialog", { name: "Connect Device" })
           ).toBeVisible();
           expect(screen.queryByText("v0.4.1")).not.toBeInTheDocument();
+          if (target === "desktop") {
+            await userEvent.click(
+              screen.getByRole("button", { name: appName })
+            );
+          }
           const secureButton = screen.getByRole("button", {
             name: "Connect with Post Signing & DM Encryption",
           });
-          if (target === "desktop") {
-            await userEvent.click(
-              screen.getByRole("button", { name: "6529 Desktop Classic" })
-            );
+          if (isClassic) {
             const version = screen.getByText("v0.4.1");
             expect(version).toHaveClass("tw-font-semibold");
             expect(version.parentElement).toHaveClass("tw-text-xs");
@@ -1099,14 +1123,12 @@ describe("HeaderShare", () => {
           expect(
             await screen.findByText("Check your wallet to sign")
           ).toBeVisible();
-          const targetTitle =
-            target === "desktop"
-              ? "Connect 6529 Desktop Classic"
-              : "Connect 6529 Mobile";
           expect(
-            screen.getByRole("dialog", { name: targetTitle })
+            screen.getByRole("dialog", {
+              name: `Connect 6529 ${appName}`,
+            })
           ).toBeVisible();
-          if (target === "desktop") {
+          if (isClassic) {
             expect(screen.getByText("v0.4.1").parentElement).toHaveClass(
               "tw-text-sm"
             );
@@ -1121,12 +1143,28 @@ describe("HeaderShare", () => {
           ).toBeVisible();
           expect(setup.prepareConnectionDeviceSetup).toHaveBeenCalledTimes(1);
           if (target === "desktop") {
-            expect(
-              screen.getByTestId("desktop-connection-panel")
-            ).toHaveAttribute(
+            const desktopPanel = screen.getByTestId("desktop-connection-panel");
+            expect(desktopPanel).toHaveAttribute(
               "href",
               `${expectedScheme}://navigate/accept-connection-sharing?connection_share_code=combined-1&address=${address}#device_setup_key=setup-secret-1`
             );
+            expect(
+              within(desktopPanel).getByAltText(
+                isClassic ? "6529 Desktop Classic" : ""
+              )
+            ).toHaveAttribute(
+              "src",
+              isClassic
+                ? "/desktop-app-icons/desktop-classic.png"
+                : "/desktop-app-icons/desktop.png"
+            );
+          } else {
+            expect(screen.queryByText("v0.4.1")).not.toBeInTheDocument();
+            expect(
+              screen.getByAltText("Private device setup QR code")
+            ).toBeVisible();
+          }
+          if (isClassic) {
             const version = within(
               screen.getByTestId("desktop-connection-panel")
             ).getByText("v0.4.1");
@@ -1136,9 +1174,6 @@ describe("HeaderShare", () => {
             );
           } else {
             expect(screen.queryByText("v0.4.1")).not.toBeInTheDocument();
-            expect(
-              screen.getByAltText("Private device setup QR code")
-            ).toBeVisible();
           }
           await userEvent.click(
             screen.getByRole("button", { name: "Generate new code" })
@@ -1185,11 +1220,11 @@ describe("HeaderShare", () => {
           ).toBeVisible();
           expect(
             screen.getByRole("button", {
-              name:
-                target === "desktop" ? "6529 Desktop Classic" : "6529 Mobile",
+              name: appName,
             })
           ).toHaveAttribute("aria-pressed", "true");
         } finally {
+          restoreEnvironment();
           schemeOverride.restore();
           signing.mockRestore();
           grants.mockRestore();
@@ -1213,7 +1248,7 @@ describe("HeaderShare", () => {
         await userEvent.click(screen.getByRole("button", { name: "Back" }));
         await userEvent.click(
           screen.getByRole("button", {
-            name: target === "Desktop" ? "6529 Desktop Classic" : "6529 Mobile",
+            name: target === "Desktop" ? "Desktop Classic" : "Mobile",
           })
         );
         await chooseConnectOnly();
@@ -1320,8 +1355,7 @@ describe("HeaderShare", () => {
           );
           await userEvent.click(
             screen.getByRole("button", {
-              name:
-                target === "Desktop" ? "6529 Desktop Classic" : "6529 Mobile",
+              name: target === "Desktop" ? "Desktop Classic" : "Mobile",
             })
           );
           await chooseConnectOnly();
@@ -1480,7 +1514,7 @@ describe("HeaderShare", () => {
       );
     });
 
-    it("shows only Mobile and Desktop connection targets", async () => {
+    it("shows Mobile, Desktop and Desktop Classic connection targets", async () => {
       renderWithProviders(<HeaderShare />);
 
       await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
@@ -1492,10 +1526,13 @@ describe("HeaderShare", () => {
       expect(modal).toHaveClass("tw-max-w-md");
       expect(modal.querySelector("#header-share-content")).toBeNull();
       expect(
-        screen.getByRole("button", { name: "6529 Mobile" })
+        screen.getByRole("button", { name: "Mobile" })
       ).toHaveAttribute("aria-pressed", "true");
       expect(
-        screen.getByRole("button", { name: "6529 Desktop Classic" })
+        screen.getByRole("button", { name: "Desktop" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Desktop Classic" })
       ).toBeInTheDocument();
       expect(
         screen.getByRole("group", { name: "Device type" })
@@ -1554,7 +1591,7 @@ describe("HeaderShare", () => {
         await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
         await userEvent.click(
           screen.getByRole("button", {
-            name: target === "Desktop" ? "6529 Desktop Classic" : "6529 Mobile",
+            name: target === "Desktop" ? "Desktop Classic" : "Mobile",
           })
         );
         await chooseConnectOnly();
@@ -1735,31 +1772,38 @@ describe("HeaderShare", () => {
       consoleError.mockRestore();
     });
 
-    it("falls back to Mobile if Desktop becomes unavailable", async () => {
-      const { rerender } = renderWithProviders(<HeaderShare />);
+    it.each(["Desktop", "Desktop Classic"])(
+      "falls back to Mobile if %s becomes unavailable",
+      async (appName) => {
+        const { rerender } = renderWithProviders(<HeaderShare />);
 
-      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
-      await userEvent.click(
-        await screen.findByRole("button", { name: "6529 Desktop Classic" })
-      );
-      expect(
-        screen.getByRole("button", { name: "6529 Desktop Classic" })
-      ).toHaveAttribute("aria-pressed", "true");
+        await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+        await userEvent.click(
+          await screen.findByRole("button", { name: appName })
+        );
+        expect(screen.getByRole("button", { name: appName })).toHaveAttribute(
+          "aria-pressed",
+          "true"
+        );
 
-      mockUseElectron.mockReturnValue(true);
-      rerender(
-        <QueryClientProvider client={queryClient}>
-          <HeaderShare />
-        </QueryClientProvider>
-      );
+        mockUseElectron.mockReturnValue(true);
+        rerender(
+          <QueryClientProvider client={queryClient}>
+            <HeaderShare />
+          </QueryClientProvider>
+        );
 
-      expect(
-        screen.queryByRole("button", { name: "6529 Desktop Classic" })
-      ).toBeNull();
-      expect(
-        screen.getByRole("button", { name: "6529 Mobile" })
-      ).toHaveAttribute("aria-pressed", "true");
-    });
+        expect(
+          screen.queryByRole("button", { name: "Desktop Classic" })
+        ).toBeNull();
+        expect(
+          screen.queryByRole("button", { name: "Desktop" })
+        ).toBeNull();
+        expect(
+          screen.getByRole("button", { name: "Mobile" })
+        ).toHaveAttribute("aria-pressed", "true");
+      }
+    );
 
     it("aborts in-flight connection-share creation when the modal closes", async () => {
       const signals: AbortSignal[] = [];
@@ -2144,7 +2188,7 @@ describe("HeaderShare", () => {
             screen.getByRole("button", { name: "QR Code" })
           );
           await userEvent.click(
-            screen.getByRole("button", { name: "6529 Desktop Classic" })
+            screen.getByRole("button", { name: "Desktop Classic" })
           );
           await chooseConnectOnly();
 
@@ -2181,6 +2225,37 @@ describe("HeaderShare", () => {
           expect(mockAuthUtils.getRefreshToken).not.toHaveBeenCalled();
         } finally {
           schemeOverride.restore();
+        }
+      }
+    );
+
+    it.each(["production", "staging"] as const)(
+      "opens Connect only in the new Desktop app with a %s share code",
+      async (environment) => {
+        const restoreEnvironment = setConnectionEnvironment(environment);
+        try {
+          renderWithProviders(<HeaderShare />);
+          await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+          await userEvent.click(
+            screen.getByRole("button", { name: "Desktop" })
+          );
+          await chooseConnectOnly();
+
+          const launch = await screen.findByRole("link", {
+            name: "Open in 6529 Desktop",
+          });
+          expect(launch).toHaveAttribute(
+            "href",
+            "core6529://navigate/accept-connection-sharing?connection_share_code=mock-desktop-share-code&address=0x1234567890123456789012345678901234567890"
+          );
+          await userEvent.click(
+            screen.getByRole("button", { name: "Copy link" })
+          );
+          expect(navigator.clipboard.writeText).toHaveBeenLastCalledWith(
+            launch.getAttribute("href")
+          );
+        } finally {
+          restoreEnvironment();
         }
       }
     );
@@ -2241,7 +2316,7 @@ describe("HeaderShare", () => {
 
       await userEvent.click(screen.getByRole("button", { name: "Back" }));
       await userEvent.click(
-        screen.getByRole("button", { name: "6529 Desktop Classic" })
+        screen.getByRole("button", { name: "Desktop Classic" })
       );
       await chooseConnectOnly();
 
@@ -2274,7 +2349,7 @@ describe("HeaderShare", () => {
       await screen.findByTestId("header-share-modal");
       await userEvent.click(screen.getByRole("button", { name: "Back" }));
       await userEvent.click(
-        screen.getByRole("button", { name: "6529 Desktop Classic" })
+        screen.getByRole("button", { name: "Desktop Classic" })
       );
       await chooseConnectOnly();
 
@@ -2318,7 +2393,7 @@ describe("HeaderShare", () => {
         await screen.findByTestId("header-share-modal");
         await userEvent.click(screen.getByRole("button", { name: "Back" }));
         await userEvent.click(
-          screen.getByRole("button", { name: "6529 Desktop Classic" })
+          screen.getByRole("button", { name: "Desktop Classic" })
         );
         await chooseConnectOnly();
 
@@ -2349,7 +2424,7 @@ describe("HeaderShare", () => {
       renderWithProviders(<HeaderShare />);
       await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
       await userEvent.click(
-        screen.getByRole("button", { name: "6529 Desktop Classic" })
+        screen.getByRole("button", { name: "Desktop Classic" })
       );
       await chooseConnectOnly();
 
@@ -2422,7 +2497,7 @@ describe("HeaderShare", () => {
       );
       await userEvent.click(screen.getByRole("button", { name: "Back" }));
       await userEvent.click(
-        screen.getByRole("button", { name: "6529 Desktop Classic" })
+        screen.getByRole("button", { name: "Desktop Classic" })
       );
       await chooseConnectOnly();
       expect(

@@ -9,14 +9,16 @@ import {
 import {
   expectNoUnsafeSandboxMutations,
   fetchSandboxRequests,
+  hideNextDevOverlay,
   LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
   useLocalSandboxMutationGuard,
 } from "../support/localSandbox";
+import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import AxeBuilder from "@axe-core/playwright";
 import { ApiNotificationCause } from "../../generated/models/ApiNotificationCause";
 import type { ApiWaveDropsFeedV2 } from "../../generated/models/ApiWaveDropsFeedV2";
 import type { ApiNotificationsResponseV2 } from "../../generated/models/ApiNotificationsResponseV2";
-import type { Locator } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 import { ApiVotingCreditReleaseReason } from "../../generated/models/ApiVotingCreditReleaseReason";
 
 async function expectCenteredCloseControl(inbox: Locator) {
@@ -38,6 +40,30 @@ async function expectCenteredCloseControl(inbox: Locator) {
   expect(Math.abs(geometry.verticalOffset)).toBeLessThanOrEqual(0.5);
 }
 
+async function expectPreferencesGearTarget(gear: Locator) {
+  await expect(gear).toBeVisible({
+    timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+  });
+  const bounds = (await gear.boundingBox())!;
+  expect(bounds.width).toBeGreaterThanOrEqual(44);
+  expect(bounds.height).toBeGreaterThanOrEqual(44);
+  return bounds;
+}
+
+async function expectNotificationsPreferences(page: Page) {
+  await expect(page).toHaveURL(/\/preferences$/, {
+    timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+  });
+  await expect(
+    page
+      .getByRole("navigation", { name: "Preference sections" })
+      .getByRole("link", { name: "Notifications", exact: true })
+  ).toHaveAttribute("aria-current", "page");
+  await expect(
+    page.getByRole("radio", { name: "All", exact: true })
+  ).toBeChecked();
+}
+
 test.describe("Notifications inbox sandbox @auth @local-only", () => {
   useLocalSandboxMutationGuard(
     test,
@@ -45,6 +71,26 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     "Notifications inbox requires the local mock API runner."
   );
   test.beforeEach(async ({ page }) => {
+    await page.route("**/profile-preferences", (route) => {
+      if (route.request().method() !== "GET") return route.fallback();
+      return route.fulfill({
+        json: {
+          direct_message_policy: "EVERYONE",
+          direct_message_group_id: null,
+          direct_message_allow_people_i_follow: true,
+          direct_message_group_unavailable: false,
+          notification_level: "ALL",
+          notifications: {
+            direct_messages: true,
+            mentions_replies_quotes: true,
+            reactions_votes_boosts: true,
+            new_followers: true,
+            rep_and_nic: true,
+            subscription_coverage: true,
+          },
+        },
+      });
+    });
     await page.route("**/api/e2ee/emoji-pack", (route) =>
       route.fulfill({
         json: [
@@ -582,6 +628,10 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     ).toBeEnabled();
     await page.keyboard.press("Tab");
     await expect(
+      inbox.getByRole("link", { name: "Notification preferences" })
+    ).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(
       inbox.getByRole("button", { name: "Mark all as read" })
     ).toBeFocused();
     await inbox.getByRole("link", { name: "View all notifications" }).focus();
@@ -977,6 +1027,85 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("desktop gears open notification preferences from the inbox and full feed", async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-desktop-chromium",
+      "Desktop notifications headers"
+    );
+    await hideNextDevOverlay(page.context());
+    await page.goto("/waves", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    const bell = page.getByRole("link", { name: "Notifications", exact: true });
+    await bell.hover({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    const inbox = page.getByRole("region", {
+      name: "Notifications",
+      exact: true,
+    });
+    const inboxGear = inbox.getByRole("link", {
+      name: "Notification preferences",
+    });
+    await expectPreferencesGearTarget(inboxGear);
+    await inboxGear.click();
+    await expect(inbox).not.toBeVisible();
+    await expectNotificationsPreferences(page);
+
+    await page.goto("/notifications", { waitUntil: "domcontentloaded" });
+    const gear = page.getByRole("link", { name: "Notification preferences" });
+    await expectPreferencesGearTarget(gear);
+    await captureSafeScreenshot(page, testInfo, "desktop-notifications-page");
+    await gear.click();
+    await expectNotificationsPreferences(page);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
+  test("mobile app gear opens notification preferences from the filter row", async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-mobile-chromium",
+      "Mobile app notifications layout"
+    );
+    await hideNextDevOverlay(page.context());
+    await installSurfaceSimulation(
+      page.context(),
+      "capacitor-ios-sim",
+      baseURL
+    );
+    await page.goto("/notifications", { waitUntil: "domcontentloaded" });
+    const gear = page.getByRole("link", { name: "Notification preferences" });
+    const filter = page.getByRole("button", {
+      name: "Filter notifications: All",
+    });
+    const gearBounds = await expectPreferencesGearTarget(gear);
+    await expect(
+      page.getByRole("heading", { name: "Notifications", level: 1 })
+    ).toHaveCount(1);
+    await expect(filter).toBeVisible();
+    const filterBounds = (await filter.boundingBox())!;
+    expect(gearBounds.x + gearBounds.width).toBeLessThan(filterBounds.x);
+    expect(
+      Math.abs(
+        gearBounds.y +
+          gearBounds.height / 2 -
+          filterBounds.y -
+          filterBounds.height / 2
+      )
+    ).toBeLessThanOrEqual(1);
+    await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(
+      page,
+      testInfo,
+      "mobile-app-notifications-page"
+    );
+    await gear.tap();
+    await expectNotificationsPreferences(page);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("mobile bell keeps full-page navigation", async ({ page }, testInfo) => {
     // Desktop navigation and read actions are exercised by the two scenarios above.
     test.skip(
@@ -1002,6 +1131,9 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await expect(
       page.getByRole("region", { name: "Notifications", exact: true })
     ).toHaveCount(0);
+    await expectPreferencesGearTarget(
+      page.getByRole("link", { name: "Notification preferences" })
+    );
     await expectNoHorizontalOverflow(page);
     await captureSafeScreenshot(page, testInfo, "mobile-notifications-page");
   });

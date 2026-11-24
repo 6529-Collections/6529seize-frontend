@@ -3,17 +3,16 @@
 import { isAuthResolving } from "@/components/auth/authResolution";
 import AuthLoadingPlaceholder from "@/components/auth/AuthLoadingPlaceholder";
 import { E2eeMessagesSection } from "@/components/e2ee/sidebar/E2eeMessagesSection";
+import PreferencesGearLink from "@/components/preferences/PreferencesGearLink";
 import { isE2eeEnabled } from "@/config/e2eeEnv";
-import { getPreferencesHref } from "@/helpers/preferences-navigation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import useCreateModalState from "@/hooks/useCreateModalState";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Cog6ToothIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { PlusIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import Link from "next/link";
 import React, { useContext, useEffect, useRef, type ReactNode } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import { useMyStream } from "../../../../contexts/wave/MyStreamContext";
@@ -174,14 +173,10 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
                 <span className="tw-break-words tw-text-xl tw-font-semibold tw-text-iron-50">
                   {t(locale, "quickDm.listTitle")}
                 </span>
-                <Link
-                  href={getPreferencesHref({ tab: "messages" })}
-                  aria-label={t(locale, "profilePreferences.dm.linkLabel")}
-                  title={t(locale, "profilePreferences.dm.linkLabel")}
-                  className="tw-inline-flex tw-size-8 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
-                >
-                  <Cog6ToothIcon aria-hidden="true" className="tw-size-5" />
-                </Link>
+                <PreferencesGearLink
+                  tab="messages"
+                  label={t(locale, "profilePreferences.dm.linkLabel")}
+                />
               </div>
             )}
             {shouldRenderCreateDirectMessage && (

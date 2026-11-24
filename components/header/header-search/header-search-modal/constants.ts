@@ -1,4 +1,5 @@
 import PlusIcon from "@heroicons/react/24/outline/PlusIcon";
+import ComputerDesktopIcon from "@heroicons/react/24/outline/ComputerDesktopIcon";
 
 import BellIcon from "@/components/common/icons/BellIcon";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
@@ -74,6 +75,12 @@ export const DIRECT_NAVIGATION_PAGES: SidebarPageEntry[] = [
 ];
 
 export const SEARCH_ONLY_PAGES: SidebarPageEntry[] = [
+  {
+    name: t(DEFAULT_LOCALE, "apps.newDesktop.title"),
+    href: "/desktop",
+    section: HEADER_SEARCH_LABELS.about,
+    icon: ComputerDesktopIcon,
+  },
   {
     name: t(DEFAULT_LOCALE, "waves.sidebar.createWave"),
     href: "/waves/create",

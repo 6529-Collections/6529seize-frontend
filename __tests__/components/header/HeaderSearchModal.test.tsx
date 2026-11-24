@@ -645,10 +645,9 @@ describe("HeaderSearchModal", () => {
 
   it.each([
     "6529 Apps",
-    "6529 Desktop",
+    "6529 Desktop Classic",
     "6529 Mobile",
     "apps",
-    "desktop",
     "mobile",
   ])("finds the 6529 Apps page for %s", async (query) => {
     setup({
@@ -670,6 +669,19 @@ describe("HeaderSearchModal", () => {
       await screen.findByRole("link", { name: "6529 Apps" })
     ).toHaveAttribute("href", "/about/6529-apps");
   });
+
+  it.each(["6529 Desktop", "desktop", "/desktop", "desktop download"])(
+    "finds the new Desktop download page for %s",
+    async (query) => {
+      setup({ selectedCategory: "PAGES", useActualSidebarSections: true });
+
+      fireEvent.change(getSearchInput(), { target: { value: query } });
+
+      expect(
+        await screen.findByRole("link", { name: "6529 Desktop" })
+      ).toHaveAttribute("href", "/desktop");
+    }
+  );
 
   it("keeps Validator out of newcomer search navigation", () => {
     autoFlushDebounce = false;

@@ -1429,12 +1429,20 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       expect(spacing.headerGap).toBeGreaterThanOrEqual(19);
       expect(spacing.leftGutter).toBeGreaterThanOrEqual(19);
       expect(spacing.rightGutter).toBeGreaterThanOrEqual(19);
-      await expect(
-        page.getByRole("button", {
-          name: target === "Profile picture" ? "Save PFP" : "Save",
-          exact: true,
-        })
-      ).toBeInViewport();
+      const save = page.getByRole("button", {
+        name: target === "Profile picture" ? "Save PFP" : "Save",
+        exact: true,
+      });
+      await expect(save).toBeInViewport();
+      if (target === "Profile cover") {
+        await page.setViewportSize({ width: 390, height: 520 });
+        await expect(save).toBeInViewport({ ratio: 1 });
+        await page.screenshot({
+          path: testInfo.outputPath("profile-mobile-cover-short.png"),
+          scale: "css",
+        });
+        await page.setViewportSize({ width: 390, height: 844 });
+      }
       await expectNoHorizontalOverflow(page);
       await expectAxeClean(page, { include: ['[role="dialog"]'] });
       await page.screenshot({

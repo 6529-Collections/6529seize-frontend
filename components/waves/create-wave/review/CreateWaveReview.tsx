@@ -57,7 +57,12 @@ export default function CreateWaveReview({
   };
   const renderRuleValue = (row: WaveRuleRow) => {
     const groupId = groupIdsByRuleId[row.id];
-    if (row.id === "admin" && !groupId && connectedProfile?.primary_wallet) {
+    if (
+      row.id === "admin" &&
+      !groupId &&
+      row.value !== undefined &&
+      connectedProfile?.primary_wallet
+    ) {
       return (
         <CreateWaveRulesGroupMembers
           target={{

@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { useWaveById } from "@/hooks/useWaveById";
 import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
@@ -14,32 +15,47 @@ type NextMintDropState = {
   readonly isSettingsLoaded: boolean;
   readonly isFetching: boolean;
   readonly isLoading: boolean;
+  readonly isError: boolean;
+  readonly isFetchedAfterMount: boolean;
 };
 
-export const useNextMintDrop = (): NextMintDropState => {
+export const useNextMintDrop = ({
+  winnerRequestScope,
+}: {
+  readonly winnerRequestScope?: string | undefined;
+} = {}): NextMintDropState => {
   const { seizeSettings, isLoaded, loadError } = useSeizeSettings();
   const waveId = seizeSettings.memes_wave_id;
   const { wave } = useWaveById(waveId, {
     enabled: !!waveId,
   });
 
-  const { decisionPoints, isFetching, isLoading } = useWaveDecisions({
+  const {
+    decisionPoints,
+    isFetching,
+    isLoading,
+    isError,
+    isFetchedAfterMount,
+    hasLoadedDecisions,
+  } = useWaveDecisions({
     waveId: waveId ?? "",
     enabled: !!waveId,
     pageSize: 1,
+    requestScope: winnerRequestScope,
   });
 
   const latestDecision = decisionPoints[decisionPoints.length - 1];
   const rawNextMint = (getRenderableWaveDecisionWinners(
     latestDecision?.winners ?? []
   )[0]?.drop ?? null) as ApiDropV2View | null;
-  const nextMint =
-    rawNextMint && wave
-      ? {
-          ...rawNextMint,
-          wave: toApiWaveMin(wave),
-        }
-      : rawNextMint;
+  const currentWave = wave?.id === waveId ? wave : undefined;
+  const nextMint = useMemo(
+    () =>
+      rawNextMint && currentWave
+        ? { ...rawNextMint, wave: toApiWaveMin(currentWave) }
+        : rawNextMint,
+    [rawNextMint, currentWave]
+  );
 
   const nextMintTitle =
     nextMint?.title ??
@@ -56,5 +72,11 @@ export const useNextMintDrop = (): NextMintDropState => {
     isSettingsLoaded: isLoaded,
     isFetching: isFetching || (!isLoaded && !!waveId),
     isLoading: (!isLoaded && !loadError) || (!!waveId && isLoading),
+    // The homepage uses a fresh query scope and waits for a successful response.
+    isFetchedAfterMount:
+      winnerRequestScope === undefined
+        ? isFetchedAfterMount
+        : hasLoadedDecisions,
+    isError: (!isLoaded && !!loadError) || (!!waveId && isError),
   };
 };

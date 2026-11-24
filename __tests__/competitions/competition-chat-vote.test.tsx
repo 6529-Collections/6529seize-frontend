@@ -9,6 +9,7 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useLayoutEffect, useState } from "react";
 import CompetitionAwareDropVote from "@/components/competitions/CompetitionAwareDropVote";
+import { CompetitionVoteForm } from "@/components/competitions/CompetitionVote";
 import * as competitionVoteCache from "@/components/react-query-wrapper/utils/updateCompetitionVoteInCache";
 import { SingleWaveDropVoteSize } from "@/components/waves/drop/SingleWaveDropVote.types";
 import { SingleWaveDropVote } from "@/components/waves/drop/SingleWaveDropVote";
@@ -185,6 +186,39 @@ beforeEach(() => {
       remaining: initialBudget.available - Math.abs(body.value),
     }));
   jest.mocked(invalidateCompetition).mockResolvedValue(undefined);
+});
+it("keeps Explain disabled and restores zero after an empty mobile draft when no vote is saved", async () => {
+  jest
+    .mocked(fetchCompetitionCredits)
+    .mockResolvedValue({ ...initialBudget, current_vote: null });
+  const explain = jest.fn();
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  render(
+    <QueryClientProvider client={client}>
+      <CompetitionVoteForm
+        competition={context.competition as never}
+        entryId="entry"
+        dropId="drop"
+        disabled={false}
+        compact
+        myVotes
+        onExplainVote={explain}
+      />
+    </QueryClientProvider>
+  );
+  const input = await screen.findByRole("textbox", { name: "Your vote" });
+  expect(input).toHaveValue("0");
+  fireEvent.focus(input);
+  fireEvent.change(input, { target: { value: "-" } });
+  fireEvent.blur(input);
+  expect(input).toHaveValue("0");
+  expect(screen.getByRole("button", { name: "Explain vote" })).toBeDisabled();
+  fireEvent.click(screen.getByRole("button", { name: "Explain vote" }));
+  expect(explain).not.toHaveBeenCalled();
+  expect(setCompetitionVote).not.toHaveBeenCalled();
+  client.clear();
 });
 it("uses the entry budget and competition vote endpoint despite the parent wave's zero limits", async () => {
   mount();

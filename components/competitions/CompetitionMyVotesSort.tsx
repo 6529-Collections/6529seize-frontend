@@ -61,6 +61,7 @@ export function CompetitionMyVotesSort({
   );
   const items = Object.values(ApiCompetitionMyVotesSort).map((value) => ({
     id: value,
+    className: isMobile ? "first:tw-mt-3" : undefined,
     active: value === sort,
     label: (
       <span className="tw-flex tw-items-center tw-justify-between tw-gap-x-2">

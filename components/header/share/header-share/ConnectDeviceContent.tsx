@@ -104,7 +104,7 @@ export function ConnectDeviceChoices({
   readonly setConnectionMode: (mode: "only" | "secure") => void;
 }) {
   const minimumVersionId = useId();
-  const isDesktop = activeSubTab === SubMode.DESKTOP;
+  const isClassic = activeSubTab === SubMode.DESKTOP_CLASSIC;
   return (
     <>
       <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
@@ -131,12 +131,12 @@ export function ConnectDeviceChoices({
               variant="primary"
               size="md"
               className="!tw-h-auto tw-min-h-10 !tw-whitespace-normal tw-py-2"
-              aria-describedby={isDesktop ? minimumVersionId : undefined}
+              aria-describedby={isClassic ? minimumVersionId : undefined}
               onClick={() => setConnectionMode("secure")}
             >
               {t(HEADER_SHARE_LOCALE, "headerShare.connectModal.secure")}
             </Button>
-            {isDesktop && (
+            {isClassic && (
               <DesktopConnectionVersionNotice compact id={minimumVersionId} />
             )}
           </div>

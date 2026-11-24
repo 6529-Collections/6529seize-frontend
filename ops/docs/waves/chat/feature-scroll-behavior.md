@@ -38,8 +38,8 @@ An image drop keeps its place in the conversation when image processing finishes
    - Pending drops: button reveals pending drops and returns to latest.
    - No pending drops: button returns to latest when you are away from bottom.
 9. If unread control is also visible, unread and bottom controls render as a stacked pair.
-10. Long drops start with a shortened preview. Expanding or collapsing one
-    keeps the toggle at the same visual position while you read older history.
+10. Long drops start with a shortened preview. `Show more` keeps the visible
+    text in place and reveals the rest below it, including at the latest drop.
 
 ## Common Scenarios
 
@@ -53,7 +53,7 @@ An image drop keeps its place in the conversation when image processing finishes
 - Temporary outgoing drops can trigger short auto-scroll when users are pinned.
 - When older-page loading toggles on/off, scroll controls stay attached to the
   same thread container, so jump-to-latest/unread controls do not reset.
-- Expanding a long drop while pinned at latest keeps the thread at latest.
+- Use `Show less` at the end of the expanded text to return to the preview.
 - A long drop remembers whether it is expanded while virtual scrolling
   temporarily replaces the card with a same-height placeholder.
 

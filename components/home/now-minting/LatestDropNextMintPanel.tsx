@@ -118,7 +118,6 @@ export default function LatestDropNextMintPanel({
   const author = drop.author;
   const authorHandle = author.handle ?? author.primary_address;
   const authorName = author.handle ?? t(locale, "home.nextMint.anonymous");
-  const submittedAt = formatDropTimestamp(drop.created_at, locale);
   const description =
     drop.metadata.find((metadata) => metadata.data_key === "description")
       ?.data_value ?? null;
@@ -129,6 +128,9 @@ export default function LatestDropNextMintPanel({
     getMinuteClockSnapshot,
     getServerMinuteClockSnapshot
   );
+  // Local times depend on the visitor's time zone after hydration.
+  const submittedAt =
+    minuteClock === null ? null : formatDropTimestamp(drop.created_at, locale);
   const fallbackNow =
     minuteClock === null ? null : new Date(minuteClock * 60_000);
   let nextMintCardId: number | null = null;
@@ -141,14 +143,15 @@ export default function LatestDropNextMintPanel({
   const nextMintStart = nextMintCardId
     ? getMintTimelineDetails(nextMintCardId).instantUtc
     : null;
-  const nextMintDateTime = nextMintStart
-    ? formatFullDateTime(nextMintStart, "local", NEXT_MINT_DATE_LOCALE, {
-        hour12: false,
-      })
-    : "—";
+  const nextMintDateTime =
+    nextMintStart && minuteClock !== null
+      ? formatFullDateTime(nextMintStart, "local", NEXT_MINT_DATE_LOCALE, {
+          hour12: false,
+        })
+      : "—";
   return (
     <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.03] tw-bg-iron-950 tw-shadow-[0_24px_60px_rgba(0,0,0,0.2)] group-data-[home-next-drop]/home-next-drop:tw-border-white/[0.08] group-data-[home-next-drop]/home-next-drop:tw-shadow-none">
-      <div className="tw-grid tw-grid-cols-1 tw-items-stretch group-data-[home-next-drop]/home-next-drop:lg:tw-min-h-[min(clamp(480px,40vw,580px),calc(100svh_-_240px))] lg:tw-grid-cols-12 xl:tw-grid-cols-9">
+      <div className="tw-grid tw-grid-cols-1 tw-items-stretch lg:tw-grid-cols-12 group-data-[home-next-drop]/home-next-drop:lg:tw-min-h-[min(clamp(480px,40vw,580px),calc(100svh_-_240px))] xl:tw-grid-cols-9">
         <div
           data-home-artwork-column
           data-home-artwork-is-image={isImage}

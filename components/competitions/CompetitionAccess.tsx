@@ -67,7 +67,6 @@ export default function CompetitionAccess({
       ? null
       : {
           id: groupId,
-          name: groupQuery.data?.name ?? "",
           is_hidden: !groupQuery.data,
           is_direct_message: groupQuery.data?.is_direct_message ?? false,
         };

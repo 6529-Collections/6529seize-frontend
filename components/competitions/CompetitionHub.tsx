@@ -13,6 +13,7 @@ import { TabToggleWithOverflow } from "@/components/common/TabToggleWithOverflow
 import MobileTabsScrollControls from "@/components/brain/my-stream/MobileTabsScrollControls";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
+import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import type { ApiCompetition } from "@/generated/models/ApiCompetition";
 import type { ApiWaveV3 } from "@/generated/models/ApiWaveV3";
 import {
@@ -263,6 +264,8 @@ export default function CompetitionHub({
   readonly embedded?: boolean;
 }) {
   const locale = useBrowserLocale();
+  const { isApp } = useDeviceInfo();
+  const { waveViewStyle } = useLayout();
   const hub = useCompetitionHub(waveId);
   let content = <CompetitionState />;
   if (hub.isError)
@@ -277,7 +280,8 @@ export default function CompetitionHub({
   else if (hub.data) content = <CompetitionCollection hub={hub.data} />;
   return (
     <section
-      className="tw-flex tw-h-full tw-min-h-0 tw-flex-col"
+      style={embedded && isApp ? waveViewStyle : undefined}
+      className="tw-flex tw-h-full tw-min-h-0 tw-flex-col max-lg:tw-bg-iron-950 [.capacitor-native_&]:tw-bg-iron-950"
       aria-labelledby={embedded ? undefined : "competition-hub-heading"}
       aria-label={embedded ? t(locale, "competitions.title") : undefined}
     >
