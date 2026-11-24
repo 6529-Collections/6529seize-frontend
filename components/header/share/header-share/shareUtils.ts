@@ -1,13 +1,8 @@
 import { toDataURL } from "qrcode";
 
 import { publicEnv } from "@/config/env";
-import { getAppEnvironment } from "@/config/appEnvironment";
 import { stripCollectedReturnFromTokenRoute } from "@/helpers/profile-collected-navigation";
 import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
-import {
-  getApiBase,
-  PUBLIC_PRODUCTION_API_BASE,
-} from "@/services/api/api-endpoints";
 import type { createConnectionShare } from "@/services/auth/session-v2.utils";
 import { SubMode } from "./constants";
 
@@ -257,14 +252,6 @@ export function getDesktopConnectionShareScheme(
   return target === SubMode.DESKTOP_CLASSIC
     ? (publicEnv.DESKTOP_CLASSIC_SCHEME ?? "classiccore6529")
     : (publicEnv.CORE_SCHEME ?? "core6529");
-}
-
-/** The installed Tauri app redeems its one-time code on the production API. */
-export function canConnectNewDesktop(): boolean {
-  return (
-    getAppEnvironment(publicEnv.BASE_ENDPOINT).isProduction &&
-    getApiBase() === PUBLIC_PRODUCTION_API_BASE
-  );
 }
 
 export function buildDesktopConnectionSharePath(

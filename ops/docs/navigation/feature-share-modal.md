@@ -139,10 +139,10 @@ link to Home. The source session remains connected. See
 [Encrypted messages setup](../encrypted-messages.md#setup-through-connection-sharing)
 for history, backup and capability limits.
 
-On staging, the **6529 Desktop** choice offers **Open in 6529 Desktop**, which
-opens Waves without a connection code. For sign-in, follow the link to 6529.io
-and open **Connect Device** there. Both sites use `core6529://`
-to launch it, and the operating system selects the registered handler.
+Staging and 6529.io both open **Accept connection** in **6529 Desktop** using
+`core6529://`. The installed app uses the production API, so accepting a
+staging-issued link fails. Start **Connect Device** on 6529.io to sign in.
+The operating system selects the registered handler for the link.
 
 ## Common Scenarios
 

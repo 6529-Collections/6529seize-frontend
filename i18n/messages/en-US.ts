@@ -3935,8 +3935,6 @@ export const EN_US_ROOT_MESSAGES = {
   "headerShare.connectModal.mobileTitle": "Connect 6529 Mobile",
   "headerShare.connectModal.newDesktopTitle": "Connect 6529 Desktop",
   "headerShare.connectModal.desktopTitle": "Connect 6529 Desktop Classic",
-  "headerShare.connectModal.desktopLaunchOnly":
-    "Use Connect Device on {site} to sign in to Desktop.",
   "headerShare.connectModal.chooseApp": "Which app are you connecting?",
   "headerShare.connectModal.only": "Connect only",
   "headerShare.connectModal.secure":
