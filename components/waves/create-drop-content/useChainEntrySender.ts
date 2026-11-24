@@ -31,7 +31,7 @@ const CHAIN_ENTRY_LOST = "Nothing was sent. Your entry is not saved.";
 
 /** What the composer shows while an entry is on its way. */
 export const CHAIN_ENTRY_STAGE_LABEL: Record<ChainEntryStage, string> = {
-  preparing: "Sending to the 6529 Network.",
+  preparing: "Getting your entry ready.",
   wallet: "Waiting for your wallet.",
   sending: "Sending to the 6529 Network.",
 };

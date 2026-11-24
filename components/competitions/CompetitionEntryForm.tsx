@@ -65,6 +65,13 @@ import { COMPETITION_BUTTON, COMPETITION_INPUT } from "./CompetitionState";
 import { competitionSubmissionReceiptKey } from "@/helpers/competition-submission.helpers";
 import { getStructuredApiErrorCode } from "@/services/api/common-api";
 
+/** What the form shows while an entry is on its way to the 6529 Network. */
+const CHAIN_STAGE_LABEL: Record<ChainEntryStage, string> = {
+  preparing: "Getting your entry ready.",
+  wallet: "Waiting for your wallet.",
+  sending: "Sending to the 6529 Network.",
+};
+
 function getEntryReferences(
   snapshot: NonNullable<ReturnType<DropEditorHandles["getDropSnapshot"]>>,
   isWaveAdmin: boolean
@@ -478,9 +485,7 @@ export default function CompetitionEntryForm({
       )}
       {chainStage !== null && (
         <p role="status" className="tw-m-0 tw-text-sm tw-text-iron-400">
-          {chainStage === "wallet"
-            ? "Waiting for your wallet."
-            : "Sending to the 6529 Network."}
+          {CHAIN_STAGE_LABEL[chainStage]}
         </p>
       )}
       {chainPending !== null && (

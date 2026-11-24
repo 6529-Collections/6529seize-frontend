@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import CompetitionEntryForm from "@/components/competitions/CompetitionEntryForm";
 import { getCreateWaveDropRequest } from "@/components/waves/create-wave/services/createWaveDropRequest";
 import { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
@@ -310,6 +316,35 @@ describe("on the 6529 Network", () => {
       onStage: expect.any(Function),
     });
     expect(createCompetitionEntry).not.toHaveBeenCalled();
+  });
+
+  it("says where the entry stands, and says it is sending only once it is", async () => {
+    let finish!: () => void;
+    mockChainEntrySubmit.mockImplementation(
+      ({ onStage }: { onStage: (stage: string) => void }) =>
+        new Promise((resolve) => {
+          onStage("preparing");
+          finish = () => resolve({ entryId: "0xentry" });
+        })
+    );
+    const onClose = jest.fn();
+    render(<CompetitionEntryForm onClose={onClose} />);
+    fireEvent.click(screen.getByRole("button", { name: "Submit an entry" }));
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Getting your entry ready."
+    );
+    expect(screen.getByRole("status")).not.toHaveTextContent("Sending");
+    const { onStage } = mockChainEntrySubmit.mock.calls[0][0];
+    act(() => onStage("wallet"));
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Waiting for your wallet."
+    );
+    act(() => onStage("sending"));
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Sending to the 6529 Network."
+    );
+    act(() => finish());
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
   });
 
   it("says an entry that isn't final yet was sent and offers no second send", async () => {

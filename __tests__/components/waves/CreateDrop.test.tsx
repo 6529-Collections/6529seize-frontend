@@ -1675,8 +1675,9 @@ describe("CreateDrop", () => {
 
       fireEvent.click(screen.getByText("submit optimistic drop"));
       expect(await screen.findByRole("status")).toHaveTextContent(
-        "Sending to the 6529 Network."
+        "Getting your entry ready."
       );
+      expect(screen.getByRole("status")).not.toHaveTextContent("Sending");
       const { onStage } = mockChainEntrySubmit.mock.calls[0][0];
       act(() => onStage("wallet"));
       expect(screen.getByRole("status")).toHaveTextContent(
