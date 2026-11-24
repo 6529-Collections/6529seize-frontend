@@ -112,7 +112,7 @@ function MyVotesSaveButton({
           transition={
             reduceMotion ? MY_VOTES_FADE_TRANSITION : MY_VOTES_EFFECT_TRANSITION
           }
-          className={`tw-inline-flex tw-h-9 tw-min-h-9 tw-min-w-11 tw-shrink-0 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-2 tw-text-xs tw-font-semibold tw-text-white tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 enabled:tw-cursor-pointer enabled:active:tw-bg-primary-600 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 enabled:desktop-hover:hover:tw-bg-primary-600 touch-only:tw-h-11 touch-only:tw-min-h-11 motion-reduce:tw-transition-none ${mobile ? "touch-only:!tw-bg-transparent touch-only:!tw-text-primary-300" : ""}`}
+          className={`tw-inline-flex tw-h-9 tw-min-h-9 tw-min-w-11 tw-shrink-0 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-2 tw-text-xs tw-font-semibold tw-text-white tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 enabled:tw-cursor-pointer enabled:active:tw-bg-primary-600 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 @[40rem]/my-vote:tw-px-1.5 enabled:desktop-hover:hover:tw-bg-primary-600 touch-only:tw-h-11 touch-only:tw-min-h-11 motion-reduce:tw-transition-none ${mobile ? "touch-only:!tw-bg-transparent touch-only:!tw-text-primary-300" : ""}`}
         >
           <span className="tw-bg-inherit">{label}</span>
         </motion.button>
@@ -218,7 +218,7 @@ export function MyVotesInput({
               const next = event.target.value.replaceAll(",", "").trim();
               if (/^-?\d*$/.test(next)) onChange(next);
             }}
-            className="tw-h-11 tw-w-0 tw-min-w-0 tw-flex-1 tw-rounded-lg tw-border-0 tw-bg-transparent tw-py-0 tw-pl-2 tw-pr-1 tw-text-base tw-font-semibold !tw-tabular-nums tw-text-iron-50 tw-outline-none focus:tw-ring-0 disabled:tw-opacity-50"
+            className="tw-h-11 tw-w-0 tw-min-w-0 tw-flex-1 tw-rounded-lg tw-border-0 tw-bg-transparent tw-py-0 tw-pl-2 tw-pr-1 tw-text-base tw-font-semibold !tw-tabular-nums tw-text-iron-50 tw-outline-none focus:tw-ring-0 disabled:tw-opacity-50 @[40rem]/my-vote:tw-pl-1.5"
           />
           <span
             title={unit}
