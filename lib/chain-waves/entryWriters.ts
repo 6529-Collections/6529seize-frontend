@@ -83,7 +83,11 @@ const MAX_CAUSE_DEPTH = 5;
  */
 function declinedOr(error: unknown): unknown {
   let current: unknown = error;
-  for (let depth = 0; depth < MAX_CAUSE_DEPTH && current; depth += 1) {
+  for (
+    let depth = 0;
+    depth < MAX_CAUSE_DEPTH && current !== null && current !== undefined;
+    depth += 1
+  ) {
     if (isUserRejectedSigningError(current)) {
       return current;
     }

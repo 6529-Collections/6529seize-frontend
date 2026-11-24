@@ -666,9 +666,12 @@ export default function CreateDrop({
         setChainEntryStage(null);
         // As for a failed send: the optimistic row may be added after the
         // write settles, so it goes on the next task.
-        const { dropId } = body;
-        if (dropId) {
-          setTimeout(() => processDropRemoved(body.drop.wave_id, dropId), 0);
+        const optimisticId = body.dropId;
+        if (optimisticId) {
+          setTimeout(
+            () => processDropRemoved(body.drop.wave_id, optimisticId),
+            0
+          );
         }
         await invalidateChainEntryQueries(queryClient, body.drop.wave_id).catch(
           () => undefined
