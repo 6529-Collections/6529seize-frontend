@@ -11,6 +11,7 @@ import type {
   profileDocumentTypedData,
   ProfileDocSignature,
 } from "./profileDoc";
+import { sessionFeeAboveCap, withinSessionFeeCap } from "./sessionFeeCap";
 import { signWithSessionKey, type StoredSessionKey } from "./sessionKey";
 import { addressWord } from "./state";
 
@@ -44,10 +45,19 @@ export const walletSigner = (config: Config, address: Hex): ChainSigner => ({
   },
 });
 
-/** This browser's session key signs the draft's txId (keyType 2). */
+/**
+ * This browser's session key signs the draft's txId (keyType 2), and only
+ * when its fee is within the cap (`sessionFeeCap`). Above it nothing is
+ * signed; the caller lets the wallet sign once the page has said the fee.
+ */
 export const sessionSigner = (record: StoredSessionKey): ChainSigner => ({
   keyType: 2,
-  sign: (draft) => signWithSessionKey(record.keyPair.privateKey, draft.txId),
+  sign: async (draft) => {
+    if (!withinSessionFeeCap(draft)) {
+      throw sessionFeeAboveCap(draft);
+    }
+    return signWithSessionKey(record.keyPair.privateKey, draft.txId);
+  },
 });
 
 /** The connected wallet signs a plain message (`personal_sign`). */

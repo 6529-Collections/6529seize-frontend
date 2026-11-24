@@ -4,6 +4,7 @@ import "@/i18n/namespaces/chain-identity";
 import { ChainGatewayError } from "@/lib/chain-identity/gateway";
 import { ChainOperationError } from "@/lib/chain-identity/operation";
 import { ChainRelayError } from "@/lib/chain-identity/relay";
+import { formatFake6529 } from "./chainAmount";
 
 /**
  * The 6529 Network's refusals in plain words. The chain names each refusal
@@ -254,6 +255,12 @@ function siteRefusalMessage(
   }
   if (error.reason === "timeout") {
     return t(locale, "chainIdentity.error.notFinalYet");
+  }
+  const maxFee = error.values["maxFee"];
+  if (error.reason === "fee_above_cap" && maxFee !== undefined) {
+    return t(locale, "chainIdentity.error.sessionFeeCap", {
+      amount: formatFake6529(locale, BigInt(maxFee), true),
+    });
   }
   // These messages are this site's own, already in plain words.
   return error.message;

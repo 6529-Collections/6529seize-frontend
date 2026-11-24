@@ -14,6 +14,7 @@ import {
   submitAndAwait,
 } from "./operation";
 import { usableSessionKey } from "./session";
+import { withinSessionFeeCap } from "./sessionFeeCap";
 import { readIdentityBalance, readRaterSpent, readRating } from "./state";
 import { sessionSigner, walletSigner } from "./signers";
 
@@ -164,8 +165,10 @@ export function withinAllowance(
 /**
  * Sets the connected wallet's identity's REP or NIC rating of `target` to
  * `value`. This browser's session key signs when it has one for the
- * identity; otherwise the wallet signs. Refuses before anything is signed
- * when the rating is the rater's own or goes past its TDH.
+ * identity and the fee is within its cap; otherwise the wallet signs, and
+ * above the cap `onWalletFee` hears the fee first, so the page can say it.
+ * Refuses before anything is signed when the rating is the rater's own or
+ * goes past its TDH.
  */
 export async function writeChainRating(
   config: Config,
@@ -175,6 +178,8 @@ export async function writeChainRating(
     readonly target: ChainRatingTarget;
     readonly category: string | null;
     readonly value: bigint;
+    /** Called with the fee before the wallet signs in place of the key. */
+    readonly onWalletFee?: ((maxFee: bigint) => void) | undefined;
   },
   signal?: AbortSignal
 ): Promise<void> {
@@ -188,23 +193,35 @@ export async function writeChainRating(
       "OVER_RATING_BUDGET"
     );
   }
+  const draftFor = (actor: ChainActor) => {
+    const operation = ratingSet(allowance.rater, actor, {
+      matter: input.matter,
+      target: allowance.target,
+      category: input.category,
+      value: input.value,
+      priorVersion: allowance.version,
+    });
+    return draftOperation(operation.request, operation.primaryType, signal);
+  };
   const key = await usableSessionKey(allowance.rater);
-  const actor: ChainActor = key
-    ? { kind: "session", keyId: key.keyId, grantId: key.grantId }
-    : { kind: "wallet", address: raterWallet };
-  const operation = ratingSet(allowance.rater, actor, {
-    matter: input.matter,
-    target: allowance.target,
-    category: input.category,
-    value: input.value,
-    priorVersion: allowance.version,
-  });
-  const signer = key ? sessionSigner(key) : walletSigner(config, raterWallet);
-  const draft = await draftOperation(
-    operation.request,
-    operation.primaryType,
-    signal
-  );
+  const keyDraft =
+    key === null
+      ? null
+      : await draftFor({
+          kind: "session",
+          keyId: key.keyId,
+          grantId: key.grantId,
+        });
+  // Above the key's cap the wallet signs a draft of its own.
+  const aboveCap = keyDraft !== null && !withinSessionFeeCap(keyDraft);
+  const draft =
+    keyDraft !== null && !aboveCap
+      ? keyDraft
+      : await draftFor({ kind: "wallet", address: raterWallet });
+  const signer =
+    key !== null && !aboveCap
+      ? sessionSigner(key)
+      : walletSigner(config, raterWallet);
   // The identity pays the rating's fee: say so before any wallet prompt
   // when its balance can't cover the most the fee can be.
   const { currencyAsset } = await chainGateway.getOps(signal);
@@ -218,6 +235,9 @@ export async function writeChainRating(
       "Your identity doesn't have enough $fake6529 for this rating's fee.",
       "IDENTITY_FEE_SHORT"
     );
+  }
+  if (aboveCap) {
+    input.onWalletFee?.(BigInt(draft.fee.maxFee));
   }
   const sig = await signer.sign(draft);
   await submitAndAwait(

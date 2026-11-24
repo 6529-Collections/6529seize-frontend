@@ -116,3 +116,46 @@ it("keeps save off until a field differs from the saved profile: it would still 
   fireEvent.change(website, { target: { value: "https://a.test" } });
   expect(save).toBeDisabled();
 });
+
+it("says the wallet signs when the fee is above what this browser's key signs on its own", async () => {
+  (readCurrentProfile as jest.Mock).mockResolvedValue({
+    doc: {
+      principal: identity.principalId,
+      version: 3,
+      prev: "0x",
+      fields: new Map([["website", "https://a.test"]]),
+    },
+    unreadable: false,
+  });
+  (prepareProfileReplace as jest.Mock).mockImplementation(
+    async (
+      _identity: unknown,
+      _fields: unknown,
+      signing: { readonly onWalletFallback?: () => void }
+    ) => {
+      signing.onWalletFallback?.();
+      return {
+        draft: { fee: { maxFee: "412500000000000000" } },
+        signer: { keyType: 1, sign: jest.fn() },
+      };
+    }
+  );
+  renderProfile();
+  const website = await screen.findByLabelText("Website");
+  await waitFor(() => expect(website).toHaveValue("https://a.test"));
+  fireEvent.change(website, { target: { value: "https://b.test" } });
+  fireEvent.click(screen.getByRole("button", { name: "Save profile" }));
+  expect(
+    await screen.findByText(
+      "The fee is more than this browser's key signs on its own, so your wallet signs this change."
+    )
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText(
+      "Fee: at most 0.4125 $fake6529, from your identity's balance."
+    )
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "Sign with wallet" })
+  ).toBeInTheDocument();
+});

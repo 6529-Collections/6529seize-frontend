@@ -21,6 +21,7 @@ import {
   signedProfileDoc,
   type ProfileDoc,
 } from "./profileDoc";
+import { sessionFeeAboveCap, withinSessionFeeCap } from "./sessionFeeCap";
 import type { StoredSessionKey } from "./sessionKey";
 import { sessionSigner, signProfileDocument, walletSigner } from "./signers";
 
@@ -125,11 +126,19 @@ interface ProfileSaveSigning {
   readonly onWalletPrompt?: () => void;
   /** Called once the document is signed, while the change is drafted. */
   readonly onDocumentSigned?: () => void;
+  /**
+   * Called when the change's fee is above what the session key signs on its
+   * own (`sessionFeeCap`), before the change is drafted again for the wallet
+   * to sign. Without it, such a change is refused, and none is sent.
+   */
+  readonly onWalletFallback?: () => void;
 }
 
 /**
  * Signs and stores the next document, then drafts and checks the
  * PROFILE_REPLACE that points at it. Returns the draft and its signer.
+ * Above the session key's fee cap the wallet signs the change when the page
+ * takes that (`onWalletFallback`); otherwise it is refused.
  */
 export async function prepareProfileReplace(
   identity: ChainIdentity,
@@ -162,33 +171,47 @@ export async function prepareProfileReplace(
   signing.onDocumentSigned?.();
   const { bytes, cid } = signedProfileDoc(unsigned, signature);
   await chainGateway.uploadDoc(bytes, cid, signal);
-  const actor: ChainActor =
-    sessionKey === null
-      ? { kind: "wallet", address: wallet }
-      : { kind: "session", keyId: sessionKey.keyId, grantId: sessionKey.grantId };
-  const operation = profileReplace(
-    identity.principalId,
-    actor,
-    currentVersion,
-    cid
-  );
-  const draft = await draftOperation(
-    operation.request,
-    operation.primaryType,
-    signal
-  );
-  // The document and the transaction must name the same network.
-  if (draft.typedData.domain.salt.toLowerCase() !== networkId) {
-    throw new ChainOperationError(
-      "draft_mismatch",
-      "The gateway's draft is for another network. Nothing was changed."
+  const draftFor = async (actor: ChainActor): Promise<ChainDraft> => {
+    const operation = profileReplace(
+      identity.principalId,
+      actor,
+      currentVersion,
+      cid
     );
-  }
-  return {
-    draft,
-    signer:
-      sessionKey === null
-        ? walletSigner(config, wallet)
-        : sessionSigner(sessionKey),
+    const draft = await draftOperation(
+      operation.request,
+      operation.primaryType,
+      signal
+    );
+    // The document and the transaction must name the same network.
+    if (draft.typedData.domain.salt.toLowerCase() !== networkId) {
+      throw new ChainOperationError(
+        "draft_mismatch",
+        "The gateway's draft is for another network. Nothing was changed."
+      );
+    }
+    return draft;
   };
+  const byWallet = async () => ({
+    draft: await draftFor({ kind: "wallet", address: wallet }),
+    signer: walletSigner(config, wallet),
+  });
+  if (sessionKey === null) {
+    return byWallet();
+  }
+  const draft = await draftFor({
+    kind: "session",
+    keyId: sessionKey.keyId,
+    grantId: sessionKey.grantId,
+  });
+  if (withinSessionFeeCap(draft)) {
+    return { draft, signer: sessionSigner(sessionKey) };
+  }
+  if (signing.onWalletFallback === undefined) {
+    throw sessionFeeAboveCap(draft);
+  }
+  // The key's document stands (a key that can sign PROFILE_REPLACE signs
+  // it, and no node checks it); only the change goes to the wallet.
+  signing.onWalletFallback();
+  return byWallet();
 }

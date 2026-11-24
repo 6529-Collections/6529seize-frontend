@@ -1,6 +1,7 @@
 import { UserRejectedRequestError } from "viem";
 import type { Config } from "wagmi";
 import { getAccount } from "wagmi/actions";
+import { chainErrorMessage } from "@/components/chain-identity/chainErrorMessage";
 import {
   chainGateway,
   ChainGatewayError,
@@ -321,6 +322,29 @@ describe("the errors the site builder acts on", () => {
     await expect(
       chainProfileDocWriter(config).replaceProfileDoc(setSite, "session-key")
     ).rejects.toMatchObject({ code: "session_key_unusable" });
+  });
+
+  it("signs nothing and says the fee when it is above what the key signs on its own", async () => {
+    (prepareProfileReplace as jest.Mock).mockRejectedValueOnce(
+      new ChainOperationError("fee_above_cap", "x", null, {
+        maxFee: (10n ** 18n).toString(),
+      })
+    );
+    await expect(
+      chainProfileDocWriter(config, (error) =>
+        chainErrorMessage("en-US", error)
+      ).replaceProfileDoc(setSite, "session-key")
+    ).rejects.toEqual(
+      new ProfileDocWriteError(
+        "submit_failed",
+        "The fee, at most 1 $fake6529, is more than this browser's key signs on its own. Sign this change with your wallet."
+      )
+    );
+    // The builder doesn't take the wallet in the key's place: the person
+    // picks the wallet, having read the fee.
+    const signing = (prepareProfileReplace as jest.Mock).mock.calls[0][2];
+    expect(signing.onWalletFallback).toBeUndefined();
+    expect(submitAndAwait).not.toHaveBeenCalled();
   });
 
   it("reports a canceled wallet signature", async () => {

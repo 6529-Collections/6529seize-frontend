@@ -155,6 +155,16 @@ describe("what the signature is bound to", () => {
     expect(() => verifyDraft(shownLower, request, primaryType)).toThrow();
   });
 
+  it("refuses a draft that offers the block a tip", () => {
+    const { request, primaryType } = walletRequest();
+    const tipped = ratingDraft({ tipPerRU: 5n });
+    // The digest is right: the tip alone is refused.
+    expect(digestOf(tipped.typedData)).toBe(tipped.txId);
+    expect(() => verifyDraft(tipped, request, primaryType)).toThrow(
+      "The gateway's draft doesn't match this change. Nothing was signed."
+    );
+  });
+
   it("refuses a signed maxWork below the draft's", () => {
     const { request, primaryType } = walletRequest();
     const draft = ratingDraft();
