@@ -4094,8 +4094,9 @@ export const EN_US_ROOT_MESSAGES = {
   "headerShare.menu.qrTarget": "QR code target",
   "headerShare.menu.browser": "Browser",
   "headerShare.menu.app": "App",
-  "headerShare.menu.mobile": "6529 Mobile",
-  "headerShare.menu.desktop": "6529 Desktop Classic",
+  "headerShare.menu.mobile": "Mobile",
+  "headerShare.menu.desktop": "Desktop",
+  "headerShare.menu.desktopClassic": "Desktop Classic",
   "desktop.profiles.restoreError":
     "Your saved profiles could not be opened. You can browse signed out, or restart 6529 Desktop and allow access to the system keychain to restore them.",
   "desktop.profiles.restart": "Restart to restore profiles",
