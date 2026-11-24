@@ -82,8 +82,8 @@ keep both notice variants hidden.
 
 ## Edge Cases
 
-- The shared About contents button stays disabled until the page is interactive.
-  Clicks while it is disabled are not queued; click again once it is enabled.
+- The About contents and Desktop Classic download buttons become available
+  once the page is interactive.
 - Desktop releases are loaded independently, so available platforms can still
   appear when one platform's release manifest is temporarily unavailable.
 - macOS has separate current and macOS 12 download feeds. A failed current feed

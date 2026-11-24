@@ -52,11 +52,15 @@ export function DesktopConnectionLink({
         unoptimized
         priority
         loading="eager"
-        src="/6529Core.png"
+        src={
+          classic
+            ? "/desktop-app-icons/desktop-classic.png"
+            : "/desktop-app-icons/desktop.png"
+        }
         alt={classic ? t(HEADER_SHARE_LOCALE, "headerShare.core.alt") : ""}
         width={124}
         height={124}
-        className="tw-unselectable"
+        className="tw-rounded-[27%] tw-unselectable"
       />
       <div className="tw-flex tw-flex-col tw-items-center tw-gap-1.5">
         <span className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-border-solid tw-border-iron-200 tw-bg-iron-50 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-900 tw-transition-colors group-hover:tw-border-white group-hover:tw-bg-white group-hover:tw-text-black">

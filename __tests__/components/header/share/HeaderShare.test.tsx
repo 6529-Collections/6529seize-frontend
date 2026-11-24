@@ -1143,11 +1143,20 @@ describe("HeaderShare", () => {
           ).toBeVisible();
           expect(setup.prepareConnectionDeviceSetup).toHaveBeenCalledTimes(1);
           if (target === "desktop") {
-            expect(
-              screen.getByTestId("desktop-connection-panel")
-            ).toHaveAttribute(
+            const desktopPanel = screen.getByTestId("desktop-connection-panel");
+            expect(desktopPanel).toHaveAttribute(
               "href",
               `${expectedScheme}://navigate/accept-connection-sharing?connection_share_code=combined-1&address=${address}#device_setup_key=setup-secret-1`
+            );
+            expect(
+              within(desktopPanel).getByAltText(
+                isClassic ? "6529 Desktop Classic" : ""
+              )
+            ).toHaveAttribute(
+              "src",
+              isClassic
+                ? "/desktop-app-icons/desktop-classic.png"
+                : "/desktop-app-icons/desktop.png"
             );
           } else {
             expect(screen.queryByText("v0.4.1")).not.toBeInTheDocument();

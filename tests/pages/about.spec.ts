@@ -102,16 +102,34 @@ test.describe("About Pages @smoke @medium @large", () => {
         });
       }
     );
-    await page.goto("/about/6529-apps", { waitUntil: "domcontentloaded" });
-    await waitForRouteReady(page);
     const classic = page.getByRole("button", { name: "6529 Desktop Classic" });
+    let releaseScripts = () => {};
+    const scriptsReady = new Promise<void>((resolve) => {
+      releaseScripts = resolve;
+    });
+    await page.route("**/_next/static/**", async (route) => {
+      if (route.request().resourceType() === "script") await scriptsReady;
+      await route.fallback();
+    });
+    try {
+      await page.goto("/about/6529-apps", { waitUntil: "commit" });
+      await expect(classic).toBeDisabled();
+    } finally {
+      releaseScripts();
+    }
+    await waitForRouteReady(page);
+    await expect(classic).toBeEnabled();
     await expect(classic).toHaveAttribute("aria-expanded", "false");
     await expect(
       page
         .getByRole("region", { name: "6529 Desktop Classic" })
         .locator("#desktop-classic-downloads")
     ).toHaveCSS("height", "0px");
-    await classic.press("Enter");
+    if (isMobile) {
+      await classic.tap();
+    } else {
+      await classic.press("Enter");
+    }
     await expect(classic).toHaveAttribute("aria-expanded", "true");
     const mac = page.getByRole("group").filter({
       has: page.getByText("macOS", { exact: true }),
