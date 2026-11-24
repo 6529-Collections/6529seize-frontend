@@ -352,6 +352,33 @@ describe("writeChainPollBallot", () => {
     );
   });
 
+  it("answers through another wallet of a large cluster when the first is below the least TDH", async () => {
+    gateway.getPoll.mockResolvedValue({
+      pollId: DROP_POLL,
+      snapshotDay: 30,
+      status: "open",
+      closeTime: Date.now() + 3_600_000,
+      optionCount: 4,
+      maxChoices: 2,
+      minTdh: "10",
+    } as never);
+    gateway.getTdhDayWallet.mockImplementation(
+      async (_day, wallet) =>
+        ({
+          wallet,
+          cid: CID,
+          identityTdh: "500",
+          walletTdh: wallet === WALLET ? "3" : "40",
+          walletCount: 17,
+        }) as never
+    );
+    await writeChainPollBallot(config, WALLET, {
+      pollId: DROP_UUID,
+      optionNumbers: [2],
+    });
+    expect(lastRequest().body.wallet).toBe(OTHER_WALLET);
+  });
+
   it("leaves the least TDH to the chain off the snapshot day", async () => {
     gateway.getPoll.mockResolvedValue({
       pollId: DROP_POLL,

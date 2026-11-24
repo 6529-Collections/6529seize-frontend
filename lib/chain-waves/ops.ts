@@ -53,7 +53,9 @@ const int64 = (value: bigint, field: string): string => {
   if (value > INT64_MAX || value < -INT64_MAX) {
     throw new ChainOperationError(
       "rejected",
-      `That number is outside what the 6529 Network takes (${field}).`
+      "That number is outside what the 6529 Network takes.",
+      null,
+      { field }
     );
   }
   return value.toString();

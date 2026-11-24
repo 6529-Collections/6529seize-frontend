@@ -197,11 +197,6 @@ export async function writeChainVote(
 }
 
 /**
- * The wallet a ballot goes through: the TDH cluster that counts it. The
- * connected wallet when the day's list holds it, else the identity's first
- * wallet the list holds.
- */
-/**
  * A TDH cluster above 16 wallets is read as a cluster of each wallet alone
  * (chain-exec `tdh::as_read`): the ballot is kept under that wallet's own
  * cid, `H("6529.TdhIdentity.v1", [w])`, an `address[]` encoded as
@@ -218,17 +213,28 @@ export const loneClusterCid = (wallet: Hex): Hex =>
     ])
   );
 
-async function ballotWallet(
-  wallet: Hex,
-  identity: ChainIdentity,
-  snapshotDay: number,
-  signal?: AbortSignal
-): Promise<{
+interface BallotThrough {
   readonly wallet: Hex;
   readonly cid: Hex;
   /** The TDH the chain reads for the ballot; null off the snapshot day. */
   readonly tdh: bigint | null;
-}> {
+}
+
+/**
+ * The wallet a ballot goes through: the connected wallet, else the
+ * identity's next, whose cluster holds TDH on the poll's day and, where it
+ * can be read, at least the poll's least TDH. Above 16 wallets each wallet
+ * is read alone, so another wallet of the identity may qualify where the
+ * connected one doesn't.
+ */
+async function ballotWallet(
+  wallet: Hex,
+  identity: ChainIdentity,
+  snapshotDay: number,
+  minTdh: bigint,
+  signal?: AbortSignal
+): Promise<BallotThrough> {
+  let below: BallotThrough | null = null;
   const candidates = [
     wallet,
     ...identity.wallets.filter((item) => lower(item) !== lower(wallet)),
@@ -248,12 +254,19 @@ async function ballotWallet(
     if (leaf) {
       const alone = leaf.walletCount > CLUSTER_MAX;
       const readTdh = alone ? leaf.walletTdh : leaf.identityTdh;
-      return {
+      const through: BallotThrough = {
         wallet: candidate,
         cid: alone ? loneClusterCid(candidate) : leaf.cid,
         tdh: onDay === undefined ? null : asBigInt(readTdh),
       };
+      if (through.tdh === null || through.tdh >= minTdh) {
+        return through;
+      }
+      below ??= through;
     }
+  }
+  if (below) {
+    return below;
   }
   throw new ChainOperationError(
     "rejected",
@@ -306,10 +319,16 @@ export async function writeChainPollBallot(
   const poll = await resolvePoll(input.pollId, signal);
   const selection = pollSelection(input.optionNumbers);
   assertBallotTakeable(poll, selection, Date.now());
-  const through = await ballotWallet(wallet, voter, poll.snapshotDay, signal);
+  const minTdh = asBigInt(poll.minTdh) ?? 0n;
+  const through = await ballotWallet(
+    wallet,
+    voter,
+    poll.snapshotDay,
+    minTdh,
+    signal
+  );
   // Below the poll's least TDH on its snapshot day, the chain refuses the
   // ballot (POLL_NOT_ELIGIBLE) in a block.
-  const minTdh = asBigInt(poll.minTdh) ?? 0n;
   if (through.tdh !== null && through.tdh < minTdh) {
     refuse("You can't answer this poll.");
   }
