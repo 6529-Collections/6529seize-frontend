@@ -163,6 +163,35 @@ describe("MyStreamWaveTabsMemeSubmit", () => {
     );
   });
 
+  it("opens the same nomination content through the phone help callback", () => {
+    useWave.mockReturnValue({
+      ...baseInfo,
+      participation: {
+        status: SubmissionStatus.ACTIVE,
+        isEligible: false,
+        startTime: 0,
+        endTime: 0,
+      },
+    });
+    const onShowSubmissionHelp = jest.fn();
+    const onSubmit = jest.fn();
+    render(
+      <MyStreamWaveTabsMemeSubmit
+        wave={wave}
+        handleMemesSubmit={onSubmit}
+        phoneMenu
+        onShowSubmissionHelp={onShowSubmissionHelp}
+      />
+    );
+    fireEvent.click(screen.getByRole("button", { name: "How to Submit" }));
+    expect(onShowSubmissionHelp).toHaveBeenCalledWith({
+      label: "How to Submit",
+      restrictionKind: "memes-nomination",
+      restrictionMessage: null,
+    });
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
   it("labels an unavailable active submission as restricted", () => {
     renderComponent({
       ...baseInfo,

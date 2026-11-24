@@ -12,6 +12,10 @@ const useLayout = jest.fn();
 const useLocalPreference = jest.fn();
 const useWaveDecisions = jest.fn();
 const mockPush = jest.fn();
+jest.mock("@/hooks/useIsMobileLayoutViewport", () => ({
+  __esModule: true,
+  default: () => true,
+}));
 let dropsProps: any;
 let galleryProps: any;
 let gridProps: any;
@@ -207,6 +211,27 @@ const getLeaderboardControlsFrame = (): HTMLElement => {
 };
 
 describe("MyStreamWaveLeaderboard", () => {
+  it.each([true, false])(
+    "keeps submission help in the actions menu and retains submission eligibility (%s)",
+    (eligible) => {
+      useWave.mockReturnValue({
+        isMemesWave: false,
+        isCurationWave: false,
+        participation: {
+          isEligible: eligible,
+          canSubmitNow: eligible,
+          hasReachedLimit: false,
+        },
+      });
+      renderLeaderboard();
+      const help = screen.queryByRole("button", {
+        name: "How to Submit",
+      });
+      expect(help).not.toBeInTheDocument();
+      expect(headerProps.onCreateDrop !== undefined).toBe(eligible);
+    }
+  );
+
   afterAll(() => {
     resetIntersectionObserver();
   });

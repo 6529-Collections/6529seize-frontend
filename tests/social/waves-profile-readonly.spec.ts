@@ -1774,7 +1774,11 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     expect(settings.memes_wave_id).toMatch(/^[0-9a-f-]{36}$/i);
     await gotoReady(page, `/waves/${settings.memes_wave_id}`);
     await page
-      .getByRole("navigation", { name: "Wave sections" })
+      .getByRole("button")
+      .locator(":scope[data-wave-phone-more]")
+      .click();
+    await page
+      .getByRole("dialog", { name: "Wave sections", exact: true })
       .getByRole("button", { name: "Settings", exact: true })
       .click();
     const rules = page
@@ -2116,10 +2120,28 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     const waveTabs = page.getByRole("tablist").filter({
       has: page.getByRole("tab", { name: "Chat", exact: true }),
     });
-    for (const name of ["Chat", "Leaderboard", "Winners", "FAQ"]) {
+    for (const name of ["Chat", "Leaderboard", "Winners"]) {
       await expect(
         waveTabs.getByRole("tab", { name, exact: true })
       ).toBeAttached();
+    }
+    const faq = waveTabs.getByRole("tab", { name: "FAQ", exact: true });
+    if (await faq.count()) {
+      await expect(faq).toBeAttached();
+    } else {
+      await page.getByRole("main").locator("[data-wave-phone-more]").click();
+      const sections = page.getByRole("dialog", {
+        name: "Wave sections",
+        exact: true,
+      });
+      await expect(
+        sections.getByRole("button", { name: "FAQ", exact: true })
+      ).toBeVisible();
+      await expect(
+        sections.getByRole("button", { name: /^Outcomes?$/, exact: true })
+      ).toHaveCount(0);
+      await page.keyboard.press("Escape");
+      await expect(sections).toBeHidden();
     }
     await expect(
       waveTabs.getByRole("tab", { name: /^Outcomes?$/, exact: true })
@@ -2592,7 +2614,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       .locator("header")
       .filter({ has: page.getByRole("heading", { level: 1 }) });
     const utilityTrigger = header.getByRole("button", {
-      name: compact ? "Wave details" : "Show right sidebar",
+      name: compact ? "More wave actions" : "Show right sidebar",
       exact: true,
     });
     await expect(utilityTrigger).toBeVisible();
@@ -2740,6 +2762,12 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     }
 
     await utilityTrigger.click();
+    if (compact) {
+      await page
+        .getByRole("dialog", { name: "More wave actions", exact: true })
+        .getByRole("button", { name: "Wave details", exact: true })
+        .click();
+    }
     if (!compact) {
       await page.mouse.move(0, 0);
       const openToggle = page.getByRole("button", {
@@ -2761,7 +2789,9 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     }
     const aboutPanel = page
       .getByRole("complementary", { name: "Wave details" })
-      .or(page.getByRole("dialog", { name: "Wave details" }));
+      .or(
+        page.getByRole("dialog", { name: compact ? /^About / : "Wave details" })
+      );
     await expect(
       aboutPanel.getByRole("tab", { name: "About", exact: true })
     ).toBeVisible();

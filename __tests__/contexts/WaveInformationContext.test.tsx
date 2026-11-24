@@ -216,8 +216,7 @@ it("does not reopen a stale information request when returning to its original r
   expect(screen.queryByRole("dialog")).toBeNull();
 });
 it("uses one navigation entry when leaving information and preserves Back and Forward", async () => {
-  const originalUrl =
-    "/waves/wave/decisions/alpha?tab=votes&voteTab=activity";
+  const originalUrl = "/waves/wave/decisions/alpha?tab=votes&voteTab=activity";
   window.history.replaceState({ original: "kept" }, "", originalUrl);
   const { rerender } = render(
     <WaveInformationProvider>
@@ -462,4 +461,39 @@ it("starts a fresh About view when opening from a stale Forward history entry", 
   expect(screen.queryByText("Notification view")).toBeNull();
   fireEvent.click(screen.getByText("Open notifications"));
   expect(screen.getByText("Notification view")).toBeVisible();
+});
+
+it("restores a browser Back entry while a draft awaits discard confirmation", async () => {
+  let resume: (() => void) | undefined;
+  const guard = jest.fn((leave: () => void) => {
+    resume = leave;
+    return true;
+  });
+  function DraftGuard() {
+    const information = useWaveInformation()!;
+    useEffect(
+      () => information.registerBackGuard(guard),
+      [information.registerBackGuard]
+    );
+    return null;
+  }
+  window.history.replaceState({}, "", "/waves/wave?tab=chat");
+  render(
+    <WaveInformationProvider>
+      <DraftGuard />
+      <Harness />
+    </WaveInformationProvider>
+  );
+  fireEvent.click(screen.getByText("Open mobile information"));
+  fireEvent.click(screen.getByText("Open configuration editor"));
+  window.history.back();
+  await waitFor(() => expect(guard).toHaveBeenCalledTimes(1));
+  await waitFor(() =>
+    expect(window.history.state.waveInformationView).toBe("links-editor")
+  );
+  expect(screen.getByText("Edit links")).toBeVisible();
+  act(() => resume?.());
+  await waitFor(() => expect(screen.queryByText("Edit links")).toBeNull());
+  expect(screen.getByRole("dialog")).toBeVisible();
+  expect(guard).toHaveBeenCalledTimes(1);
 });

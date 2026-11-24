@@ -63,6 +63,8 @@ export function WaveTrustSignals({
   learnMoreHref,
   scoreDetailsDisabled = false,
 }: WaveTrustSignalsProps) {
+  const isStaticHeaderScore =
+    scoreDetailsDisabled && variant === "header-avatar";
   const visibilityScore = formatScore(waveScore?.visibility_score);
   const qualityScore = formatScore(waveScore?.quality_score);
   const hotnessScore = formatScore(waveScore?.hotness_score);
@@ -163,7 +165,7 @@ export function WaveTrustSignals({
       className: containerClasses,
       children: (
         <>
-          {hasRichTooltip ? (
+          {hasRichTooltip && !isStaticHeaderScore ? (
             <WaveScoreSummaryHoverCard
               disabled={scoreDetailsDisabled}
               learnMoreHref={learnMoreHref}
@@ -186,7 +188,7 @@ export function WaveTrustSignals({
             <span
               className={summaryChipClasses}
               aria-label={summaryLabel}
-              title={summaryTitle}
+              title={isStaticHeaderScore ? undefined : summaryTitle}
               {...inlineSidebarTooltipAttributes}
             >
               {summaryChipContent}

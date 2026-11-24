@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import MyStreamWaveTabsHeader from "@/components/brain/my-stream/tabs/MyStreamWaveTabsHeader";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import type { ReactNode } from "react";
@@ -17,6 +23,10 @@ jest.mock("react-use", () => ({
 }));
 
 const mockOpenWaveSearch = jest.fn();
+const mockOpenWaveInformation = jest.fn();
+jest.mock("@/contexts/WaveInformationContext", () => ({
+  useWaveInformation: () => ({ open: mockOpenWaveInformation }),
+}));
 jest.mock("@/components/brain/my-stream/tabs/MyStreamWaveSearch", () => ({
   useOpenMyStreamWaveSearch: () => ({
     open: mockOpenWaveSearch,
@@ -141,6 +151,7 @@ describe("MyStreamWaveTabsHeader", () => {
     mockIsRightSidebarOpen = false;
     mockToggleRightSidebar.mockClear();
     mockOpenWaveSearch.mockClear();
+    mockOpenWaveInformation.mockClear();
     mockConnectedProfile = { handle: "alice" };
     mockActiveProfileProxy = null;
     mockShowJoinCta = false;
@@ -293,7 +304,7 @@ describe("MyStreamWaveTabsHeader", () => {
     expect(joinButton).toHaveAttribute("data-tooltip-id", "header-actions");
   });
 
-  it("keeps Join reachable in the compact mobile header", () => {
+  it("keeps Join reachable and opens phone search and details from More", async () => {
     mockShowJoinCta = true;
     render(
       <MyStreamWaveTabsHeader
@@ -313,27 +324,25 @@ describe("MyStreamWaveTabsHeader", () => {
     expect(joinButton.parentElement).toBe(
       screen.getByRole("button", { name: "More wave actions" }).parentElement
     );
-    const search = screen.getByRole("button", {
-      name: "Search messages in this wave",
-    });
-    expect(search.nextElementSibling).toBe(
-      screen.getByRole("button", { name: "More wave actions" })
+    fireEvent.click(
+      screen.getByRole("button", { name: "About Follow The Repo" })
     );
-    fireEvent.click(search);
-    expect(mockOpenWaveSearch).toHaveBeenCalledTimes(1);
-    const details = screen.getByRole("button", { name: "Wave details" });
-    expect(details).toHaveAttribute("aria-expanded", "false");
-    fireEvent.click(details);
-    expect(mockToggleRightSidebar).toHaveBeenCalledTimes(1);
+    expect(mockOpenWaveInformation).toHaveBeenCalledWith(wave.id);
     fireEvent.click(screen.getByRole("button", { name: "More wave actions" }));
+    const sheet = within(
+      screen.getByRole("dialog", { name: "More wave actions" })
+    );
     expect(
-      within(
-        screen.getByRole("dialog", { name: "More wave actions" })
-      ).queryByRole("button", { name: "Search messages in this wave" })
-    ).toBeNull();
-    expect(screen.getAllByRole("button", { name: "Wave details" })).toEqual([
-      details,
-    ]);
+      sheet.getByRole("button", { name: "Wave details" })
+    ).toBeInTheDocument();
+    fireEvent.click(sheet.getByRole("button", { name: "Search messages" }));
+    await waitFor(() => expect(mockOpenWaveSearch).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole("button", { name: "More wave actions" }));
+    fireEvent.click(screen.getByRole("button", { name: "Wave details" }));
+    await waitFor(() =>
+      expect(mockOpenWaveInformation).toHaveBeenCalledTimes(2)
+    );
+    expect(mockOpenWaveInformation).toHaveBeenLastCalledWith(wave.id);
   });
 
   it.each(["logged out", "author", "proxy", "DM"])(

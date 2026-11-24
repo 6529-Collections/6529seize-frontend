@@ -92,6 +92,8 @@ swipe return to the feed at the saved reading position.
 - Reverse below the gesture threshold before release to cancel. A slow, short
   drag also stays in the conversation; a longer drag or quick flick returns to
   the list.
+- Returning to the Waves list moves the channel header, including the wave name
+  and Join action, with the content. The bottom navigation stays in place.
 - Vertical gestures and touches that begin on sliders, editors, media controls,
   or horizontally scrollable content do not trigger Back.
 - Profile routes hide `Back` when there is no valid in-app target (for example

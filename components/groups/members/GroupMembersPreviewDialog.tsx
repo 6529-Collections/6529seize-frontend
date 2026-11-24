@@ -1,5 +1,9 @@
 "use client";
 
+import { AnimatePresence } from "framer-motion";
+import { MobilePageContext } from "@/components/mobile-navigation/MobilePageContext";
+import MobileNavigationView from "@/components/mobile-navigation/MobileNavigationView";
+import type { ReactNode } from "react";
 import IconButton from "@/components/utils/button/IconButton";
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
@@ -9,7 +13,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useId, useState } from "react";
+import { useContext, useId, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import ProfileAvatar, {
@@ -33,6 +37,27 @@ import {
   getGroupMembersTargetKey,
   type GroupMembersPreviewTarget,
 } from "@/services/api/group-members-api";
+
+function PhoneMembersPage({
+  title,
+  onClose,
+  children,
+}: {
+  readonly title: string;
+  readonly onClose: () => void;
+  readonly children: ReactNode;
+}) {
+  const [open, setOpen] = useState(true);
+  return (
+    <AnimatePresence onExitComplete={onClose}>
+      {open && (
+        <MobileNavigationView title={title} onBack={() => setOpen(false)}>
+          {children}
+        </MobileNavigationView>
+      )}
+    </AnimatePresence>
+  );
+}
 
 const PAGE_SIZE = 20;
 
@@ -250,6 +275,7 @@ export default function GroupMembersPreviewDialog({
   readonly roleLabel: string;
   readonly onClose: () => void;
 }) {
+  const phonePage = useContext(MobilePageContext) !== null;
   const locale = useBrowserLocale();
   const searchInputId = useId();
   const [page, setPage] = useState(1);
@@ -289,6 +315,112 @@ export default function GroupMembersPreviewDialog({
       ? t(locale, "waves.create.groups.members.searchEmpty")
       : t(locale, "waves.create.groups.members.empty");
 
+  const content = (
+    <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-px-4 tw-pb-2 sm:tw-px-5">
+      <div className="tw-flex-shrink-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-pb-4 tw-pt-4">
+        <p className="tw-m-0 tw-text-sm tw-leading-5 tw-text-iron-400">
+          {t(locale, "waves.create.groups.members.dynamicDescription")}
+        </p>
+        <details className="tw-mt-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/50 tw-px-3 tw-py-2.5">
+          <summary className="tw-cursor-pointer tw-text-xs tw-font-semibold tw-text-iron-300 marker:tw-text-iron-500">
+            {t(locale, "waves.create.groups.members.criteriaSummary")}
+          </summary>
+          <div className="tw-mt-3">
+            <MembersCriteria
+              target={target}
+              unavailableMessage={t(
+                locale,
+                "waves.create.groups.members.criteriaUnavailable"
+              )}
+            />
+          </div>
+        </details>
+        <label
+          htmlFor={searchInputId}
+          className="tw-mb-1.5 tw-mt-4 tw-block tw-text-xs tw-font-semibold tw-text-iron-300"
+        >
+          {t(locale, "waves.create.groups.members.searchLabel")}
+        </label>
+        <div className="tw-relative">
+          <MagnifyingGlassIcon
+            aria-hidden="true"
+            className="tw-pointer-events-none tw-absolute tw-left-3 tw-top-1/2 tw-size-4 -tw-translate-y-1/2 tw-text-iron-500"
+          />
+          <input
+            id={searchInputId}
+            type="search"
+            maxLength={GROUP_MEMBERS_SEARCH_MAX_LENGTH}
+            value={search}
+            onChange={(event) => {
+              const value = event.target.value;
+              setSearch(value);
+              commitSearch(value);
+            }}
+            placeholder={t(
+              locale,
+              "waves.create.groups.members.searchPlaceholder"
+            )}
+            className="tw-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-py-2 tw-pl-9 tw-pr-10 tw-text-sm tw-text-iron-100 tw-outline-none placeholder:tw-text-iron-500 focus:tw-border-primary-500 focus:tw-ring-1 focus:tw-ring-primary-500"
+          />
+          {search.length > 0 ? (
+            <IconButton
+              type="button"
+              onClick={() => {
+                setSearch("");
+                commitSearch("");
+                commitSearch.flush();
+              }}
+              aria-label={t(locale, "waves.create.groups.members.clearSearch")}
+              size={32}
+              variant="muted"
+              shape="compact"
+              className="tw-absolute tw-right-1.5 tw-top-1/2 -tw-translate-y-1/2"
+            >
+              <XMarkIcon aria-hidden="true" className="tw-size-4" />
+            </IconButton>
+          ) : null}
+        </div>
+        <p
+          aria-live="polite"
+          className="tw-m-0 tw-mt-3 tw-text-xs tw-font-medium tw-text-iron-400"
+        >
+          {typeof data?.count === "number"
+            ? formatGroupMembersCount({ count: data.count, locale })
+            : t(locale, "waves.create.groups.members.countLoading")}
+        </p>
+      </div>
+
+      <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-py-4">
+        <MembersResults
+          data={data}
+          emptyMessage={emptyMessage}
+          isError={isError}
+          isFetching={isFetching}
+          onRetry={() => void refetch()}
+          showSkeleton={showSkeleton}
+        />
+      </div>
+
+      {data !== undefined && totalPages > 1 ? (
+        <CommonTablePagination
+          currentPage={page}
+          setCurrentPage={setPage}
+          totalPages={totalPages}
+          haveNextPage={data.next}
+          small={false}
+          loading={isFetching}
+          className="tw-flex-shrink-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5"
+        />
+      ) : null}
+    </div>
+  );
+  if (phonePage)
+    return (
+      <PhoneMembersPage title={roleLabel} onClose={onClose}>
+        {content}
+      </PhoneMembersPage>
+    );
+
   return (
     <MobileWrapperDialog
       title={roleLabel}
@@ -306,106 +438,7 @@ export default function GroupMembersPreviewDialog({
       titleClassName="tw-text-base !tw-font-bold !tw-text-white tw-tracking-tight"
       headerClassName="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-px-4 tw-pb-3 tw-pt-4 sm:tw-px-5"
     >
-      <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-px-4 tw-pb-2 sm:tw-px-5">
-        <div className="tw-flex-shrink-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-pb-4 tw-pt-4">
-          <p className="tw-m-0 tw-text-sm tw-leading-5 tw-text-iron-400">
-            {t(locale, "waves.create.groups.members.dynamicDescription")}
-          </p>
-          <details className="tw-mt-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/50 tw-px-3 tw-py-2.5">
-            <summary className="tw-cursor-pointer tw-text-xs tw-font-semibold tw-text-iron-300 marker:tw-text-iron-500">
-              {t(locale, "waves.create.groups.members.criteriaSummary")}
-            </summary>
-            <div className="tw-mt-3">
-              <MembersCriteria
-                target={target}
-                unavailableMessage={t(
-                  locale,
-                  "waves.create.groups.members.criteriaUnavailable"
-                )}
-              />
-            </div>
-          </details>
-          <label
-            htmlFor={searchInputId}
-            className="tw-mb-1.5 tw-mt-4 tw-block tw-text-xs tw-font-semibold tw-text-iron-300"
-          >
-            {t(locale, "waves.create.groups.members.searchLabel")}
-          </label>
-          <div className="tw-relative">
-            <MagnifyingGlassIcon
-              aria-hidden="true"
-              className="tw-pointer-events-none tw-absolute tw-left-3 tw-top-1/2 tw-size-4 -tw-translate-y-1/2 tw-text-iron-500"
-            />
-            <input
-              id={searchInputId}
-              type="search"
-              maxLength={GROUP_MEMBERS_SEARCH_MAX_LENGTH}
-              value={search}
-              onChange={(event) => {
-                const value = event.target.value;
-                setSearch(value);
-                commitSearch(value);
-              }}
-              placeholder={t(
-                locale,
-                "waves.create.groups.members.searchPlaceholder"
-              )}
-              className="tw-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-py-2 tw-pl-9 tw-pr-10 tw-text-sm tw-text-iron-100 tw-outline-none placeholder:tw-text-iron-500 focus:tw-border-primary-500 focus:tw-ring-1 focus:tw-ring-primary-500"
-            />
-            {search.length > 0 ? (
-              <IconButton
-                type="button"
-                onClick={() => {
-                  setSearch("");
-                  commitSearch("");
-                  commitSearch.flush();
-                }}
-                aria-label={t(
-                  locale,
-                  "waves.create.groups.members.clearSearch"
-                )}
-                size={32}
-                variant="muted"
-                shape="compact"
-                className="tw-absolute tw-right-1.5 tw-top-1/2 -tw-translate-y-1/2"
-              >
-                <XMarkIcon aria-hidden="true" className="tw-size-4" />
-              </IconButton>
-            ) : null}
-          </div>
-          <p
-            aria-live="polite"
-            className="tw-m-0 tw-mt-3 tw-text-xs tw-font-medium tw-text-iron-400"
-          >
-            {typeof data?.count === "number"
-              ? formatGroupMembersCount({ count: data.count, locale })
-              : t(locale, "waves.create.groups.members.countLoading")}
-          </p>
-        </div>
-
-        <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-py-4">
-          <MembersResults
-            data={data}
-            emptyMessage={emptyMessage}
-            isError={isError}
-            isFetching={isFetching}
-            onRetry={() => void refetch()}
-            showSkeleton={showSkeleton}
-          />
-        </div>
-
-        {data !== undefined && totalPages > 1 ? (
-          <CommonTablePagination
-            currentPage={page}
-            setCurrentPage={setPage}
-            totalPages={totalPages}
-            haveNextPage={data.next}
-            small={false}
-            loading={isFetching}
-            className="tw-flex-shrink-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5"
-          />
-        ) : null}
-      </div>
+      {content}
     </MobileWrapperDialog>
   );
 }

@@ -130,6 +130,64 @@ describe("DisplayTimeZoneSwitch", () => {
 });
 
 describe("useDisplayTimeZoneMenuItem", () => {
+  it("reflects a saved UTC preference and restores it after a temporary local override", () => {
+    setDisplayTimeZonePreference("UTC");
+    const { result } = renderHook(() =>
+      useDisplayTimeZoneMenuItem({ checkable: true })
+    );
+    expect(result.current).toMatchObject({ checked: true });
+    act(() => {
+      if (result.current.kind !== "section") result.current.onSelect?.();
+    });
+    expect(result.current).toMatchObject({
+      checked: false,
+      label: "Show times in UTC for now",
+    });
+    expect(getDisplayTimeZoneSnapshot()).toMatchObject({
+      preference: "UTC",
+      override: "local",
+    });
+    act(() => {
+      if (result.current.kind !== "section") result.current.onSelect?.();
+    });
+    expect(getDisplayTimeZoneSnapshot()).toMatchObject({
+      preference: "UTC",
+      override: null,
+    });
+  });
+
+  it("keeps the phone label stable and toggles its checkmark without changing the saved preference", () => {
+    const { result } = renderHook(() =>
+      useDisplayTimeZoneMenuItem({ checkable: true })
+    );
+    expect(result.current).toMatchObject({
+      label: "Show times in UTC for now",
+      checked: false,
+    });
+    act(() => {
+      if (result.current.kind !== "section") result.current.onSelect?.();
+    });
+    expect(result.current).toMatchObject({
+      label: "Show times in UTC for now",
+      checked: true,
+    });
+    expect(getDisplayTimeZoneSnapshot()).toMatchObject({
+      preference: "local",
+      override: "UTC",
+    });
+    act(() => {
+      if (result.current.kind !== "section") result.current.onSelect?.();
+    });
+    expect(result.current).toMatchObject({
+      label: "Show times in UTC for now",
+      checked: false,
+    });
+    expect(getDisplayTimeZoneSnapshot()).toMatchObject({
+      preference: "local",
+      override: null,
+    });
+  });
+
   it("switches to UTC and back from overflow menus", () => {
     const { result } = renderHook(() => useDisplayTimeZoneMenuItem());
     expect(result.current).toMatchObject({

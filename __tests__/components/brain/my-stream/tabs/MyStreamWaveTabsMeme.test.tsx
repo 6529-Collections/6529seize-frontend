@@ -16,6 +16,9 @@ const mockWriteText = jest.fn();
 const mockCopyToClipboard = jest.fn();
 const mockOpenInformation = jest.fn();
 let mockSubmissionEligible = true;
+let mockSubmissionReady = true;
+let mockSubmissionLimit = false;
+let mockOpenSubmissionHelp = false;
 
 jest.mock("@/contexts/WaveInformationContext", () => ({
   useWaveInformation: () => ({ open: mockOpenInformation }),
@@ -92,8 +95,29 @@ jest.mock(
   "@/components/brain/my-stream/tabs/MyStreamWaveTabsMemeSubmit",
   () => ({
     __esModule: true,
-    default: ({ handleMemesSubmit }: any) => (
-      <button onClick={handleMemesSubmit}>submit</button>
+    default: ({
+      handleMemesSubmit,
+      onShowSubmissionHelp,
+    }: {
+      readonly handleMemesSubmit: () => void;
+      readonly onShowSubmissionHelp?: (action: {
+        label: string;
+        restrictionMessage: string;
+      }) => void;
+    }) => (
+      <button
+        onClick={() =>
+          mockOpenSubmissionHelp
+            ? onShowSubmissionHelp?.({
+                label: "Submission Limit Reached",
+                restrictionMessage:
+                  "You have already submitted the maximum allowed (3 submissions)",
+              })
+            : handleMemesSubmit()
+        }
+      >
+        submit
+      </button>
     ),
   })
 );
@@ -105,7 +129,13 @@ jest.mock("@/hooks/useWave", () => ({
     NOT_STARTED: "NOT_STARTED",
   },
   useWave: () => ({
-    participation: { status: "ACTIVE", isEligible: mockSubmissionEligible },
+    participation: {
+      status: "ACTIVE",
+      isEligible: mockSubmissionEligible,
+      canSubmitNow: mockSubmissionReady,
+      hasReachedLimit: mockSubmissionLimit,
+      maxSubmissions: 3,
+    },
     isMemesWave: true,
     isRankWave: false,
     pauses: { filterDecisionsDuringPauses: (decisions: any) => decisions },
@@ -171,6 +201,9 @@ describe("MyStreamWaveTabsMeme", () => {
 
   beforeEach(() => {
     mockSubmissionEligible = true;
+    mockSubmissionReady = true;
+    mockSubmissionLimit = false;
+    mockOpenSubmissionHelp = false;
     mockPush.mockClear();
     mockUseBreakpoint.mockReturnValue("LG");
     useContentTab.mockReset();
@@ -199,6 +232,42 @@ describe("MyStreamWaveTabsMeme", () => {
     expect(screen.getByTestId("desktop")).toHaveTextContent("CHAT");
     fireEvent.click(screen.getByText("submit"));
     expect(screen.getByTestId("modal")).toHaveTextContent("open");
+  });
+
+  it("keeps live submission help open while blocked and closes it when submission becomes available", async () => {
+    mockUseBreakpoint.mockReturnValue("S");
+    mockSubmissionReady = false;
+    mockSubmissionLimit = true;
+    mockOpenSubmissionHelp = true;
+    useContentTab.mockReturnValue({
+      activeContentTab: "CHAT",
+      setActiveContentTab: jest.fn(),
+    });
+    const wave = createWave(false);
+    const view = () => (
+      <SidebarProvider>
+        <MyStreamWaveTabsMeme
+          wave={wave}
+          activeCurationId={null}
+          onSelectCuration={jest.fn()}
+        />
+      </SidebarProvider>
+    );
+    const { rerender } = render(view());
+    fireEvent.click(screen.getByRole("button", { name: "More wave actions" }));
+    fireEvent.click(screen.getByRole("button", { name: "submit" }));
+    const help = await screen.findByRole("dialog", { name: "How to Submit" });
+    expect(help).toHaveTextContent(
+      "You have already submitted the maximum allowed (3 submissions)"
+    );
+    rerender(view());
+    expect(
+      screen.getByRole("dialog", { name: "How to Submit" })
+    ).toHaveTextContent("3 submissions");
+    mockSubmissionLimit = false;
+    mockSubmissionReady = true;
+    rerender(view());
+    expect(screen.queryByRole("dialog", { name: "How to Submit" })).toBeNull();
   });
 
   it("keeps sharing out of the desktop Main Stage header", () => {
@@ -255,6 +324,7 @@ describe("MyStreamWaveTabsMeme", () => {
       </SidebarProvider>
     );
 
+    fireEvent.click(screen.getByRole("button", { name: "More wave actions" }));
     expect(screen.getByRole("button", { name: "submit" })).toBeInTheDocument();
   });
 
@@ -345,15 +415,6 @@ describe("MyStreamWaveTabsMeme", () => {
     const moreActionsButton = screen.getByRole("button", {
       name: "More wave actions",
     });
-    const submitButton = screen.getByRole("button", { name: "submit" });
-    const searchButton = screen.getByRole("button", {
-      name: "Search messages in this wave",
-    });
-    expect(submitButton.nextElementSibling).toBe(searchButton);
-    expect(searchButton.nextElementSibling).toBe(moreActionsButton);
-    expect(moreActionsButton.nextElementSibling).toBe(
-      screen.getByRole("button", { name: "Wave details" })
-    );
     fireEvent.click(screen.getByRole("button", { name: "About Wave" }));
     expect(mockOpenInformation).toHaveBeenCalledWith("w1");
     fireEvent.click(moreActionsButton);
@@ -362,23 +423,26 @@ describe("MyStreamWaveTabsMeme", () => {
     });
     expect(moreActionsDialog).toBeInTheDocument();
     expect(
-      within(moreActionsDialog).queryByRole("button", {
-        name: "Search messages in this wave",
+      within(moreActionsDialog).getByRole("button", {
+        name: "Search messages",
       })
-    ).toBeNull();
+    ).toBeInTheDocument();
+    expect(
+      within(moreActionsDialog).getByRole("button", { name: "submit" })
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Share wave" })
     ).toBeInTheDocument();
     expect(
-      within(moreActionsDialog).queryByRole("button", { name: "Wave details" })
-    ).toBeNull();
+      within(moreActionsDialog).getByRole("button", {
+        name: "Wave details",
+      })
+    ).toBeInTheDocument();
     fireEvent.click(
       within(moreActionsDialog).getByRole("button", { name: "Close panel" })
     );
     await waitFor(() => expect(moreActionsDialog).not.toBeInTheDocument());
-    fireEvent.click(screen.getByRole("button", { name: "Wave details" }));
-    expect(
-      screen.getByRole("button", { name: "Hide details" })
-    ).toHaveAttribute("aria-expanded", "true");
+    fireEvent.click(screen.getByRole("button", { name: "About Wave" }));
+    expect(mockOpenInformation).toHaveBeenCalledWith("w1");
   });
 });
