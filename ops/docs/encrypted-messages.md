@@ -69,7 +69,8 @@ sent as encrypted attachments. Their search and previews connect publicly to GIP
 
 ### Polls
 
-In supported builds, select **Create poll** in an encrypted DM or group chat.
+In supported builds, select **Create poll** on desktop, or open **+** and select
+**Poll** on mobile, in an encrypted DM or group chat.
 Enter a question and two to ten choices in the inline composer. Choose
 **Single** or **Multiple**, then select **Post poll**.
 
@@ -106,9 +107,12 @@ links and images do not open or load separately. Long previews end with an
 ellipsis. Custom emojis render inline at a compact size, while code keeps emoji
 shortcodes literal.
 
-The emoji button sits inside the right edge of the message input, with attachments
-on the left and Send on the right. It uses the regular composer’s desktop emoji
-popover and mobile slide panel. Encrypted emoji choices remain private and do not
+On mobile web and in the app, open **+** beside the message input for **Attach**,
+**Poll** when available, and **GIF**. The tray opens below the input and closes
+when you pick an action, start typing, or tap outside it. On desktop, these
+actions sit to the left of the input. The emoji button sits inside the right
+edge of the input and Send sits beside it. The emoji button uses the regular
+composer’s desktop popover and mobile slide panel. Encrypted emoji choices remain private and do not
 update ordinary reaction history. Selecting an emoji preserves the draft and
 inserts it at the caret. On desktop, the Send tooltip explains Enter to send and
 Shift+Enter for a new line. Mobile web and the app use the Send button; Return
