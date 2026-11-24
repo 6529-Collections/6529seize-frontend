@@ -130,7 +130,8 @@ describe("writeChainEntry", () => {
     // The competition's decision, by the id its import derives.
     expect(gateway.getDecision).toHaveBeenCalledWith(DECISION, undefined);
     expect(consent).toHaveBeenCalledWith(
-      expect.objectContaining({ title: "Entry", wave_id: WAVE_UUID })
+      expect.objectContaining({ title: "Entry", wave_id: WAVE_UUID }),
+      expect.any(Function)
     );
     const manifest = storedManifest();
     expect(manifest).toMatchObject({
@@ -482,7 +483,7 @@ describe("a write's progress", () => {
       }
     );
 
-  it("reports the wallet prompts, then the send", async () => {
+  it("says it is preparing, then waits for the wallet only while its prompt is open", async () => {
     signingRun(() => ({ draft: { txId: TX } }));
     const stages: string[] = [];
     await writeChainEntry(config, WALLET, {
@@ -491,7 +492,47 @@ describe("a write's progress", () => {
       consent: async () => null,
       onStage: (stage) => stages.push(stage),
     });
-    expect(stages).toEqual(["wallet", "wallet", "sending"]);
+    expect(stages).toEqual(["preparing", "wallet", "sending"]);
+  });
+
+  it("waits for the wallet during the consent's prompt, and prepares again after it", async () => {
+    signingRun(() => ({ draft: { txId: TX } }));
+    const stages: string[] = [];
+    let duringPrompt: string | undefined;
+    await writeChainEntry(config, WALLET, {
+      request: request(),
+      competitionId: COMPETITION_UUID,
+      consent: (_fields, prompt) =>
+        prompt(async () => {
+          duringPrompt = stages.at(-1);
+          return null;
+        }),
+      onStage: (stage) => stages.push(stage),
+    });
+    expect(duringPrompt).toBe("wallet");
+    expect(stages).toEqual([
+      "preparing",
+      "wallet",
+      "preparing",
+      "wallet",
+      "sending",
+    ]);
+  });
+
+  it("sends nothing when the consent's prompt is declined", async () => {
+    const stages: string[] = [];
+    const declined = Object.assign(new Error("User rejected"), { code: 4001 });
+    const error = await writeChainEntry(config, WALLET, {
+      request: request(),
+      competitionId: COMPETITION_UUID,
+      consent: (_fields, prompt) =>
+        prompt(() => Promise.reject(new Error("wrapped", { cause: declined }))),
+      onStage: (stage) => stages.push(stage),
+    }).catch((caught: unknown) => caught);
+    expect(error).toBe(declined);
+    expect(stages).not.toContain("sending");
+    expect(uploadDoc).not.toHaveBeenCalled();
+    expect(run).not.toHaveBeenCalled();
   });
 
   it("reads a wait that ends after the signature as sent, not failed", async () => {

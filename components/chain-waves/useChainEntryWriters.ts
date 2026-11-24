@@ -25,6 +25,7 @@ import {
   writeChainWithdrawal,
   type ChainEntryReceipt,
   type ChainEntryStage,
+  type ChainWalletPrompt,
 } from "@/lib/chain-waves/entryWriters";
 import { scheduleIndexRefresh } from "@/lib/chain-waves/optimistic";
 import { invalidateCompetitionWave } from "@/services/api/competitions-api";
@@ -32,14 +33,18 @@ import { invalidateCompetitionWave } from "@/services/api/competitions-api";
 export interface ChainEntryWriters {
   /**
    * A create-drop request as an entry. `consent` returns the author's
-   * signature over the entry and the terms, or null when none is asked.
+   * signature over the entry and the terms, or null when none is asked;
+   * `prompt` runs its wallet prompt.
    */
   readonly submitEntry: (input: {
     readonly request: ApiCreateDropRequest;
     readonly competitionId: string | null;
     /** The `chain_id` 6529.io's API gives the competition, when it does. */
     readonly competitionChainId?: Hex | null | undefined;
-    readonly consent: (fields: EntryFields) => Promise<EntryConsent | null>;
+    readonly consent: (
+      fields: EntryFields,
+      prompt: ChainWalletPrompt
+    ) => Promise<EntryConsent | null>;
     readonly onStage?: ((stage: ChainEntryStage) => void) | undefined;
   }) => Promise<ChainEntryReceipt>;
   /** Withdraws the viewer's own entry, the one a drop is. */
@@ -89,7 +94,10 @@ export type ChainEntrySubmit = (input: {
   readonly request: ApiCreateDropRequest;
   /** The terms the author accepted, for a wave without a competition. */
   readonly terms: string | null;
-  /** Told when the wallet is asked to sign and when the entry is sent. */
+  /**
+   * Told while the entry is made ready, while a wallet prompt is open, and
+   * once the signed entry is on its way.
+   */
   readonly onStage?: ((stage: ChainEntryStage) => void) | undefined;
 }) => Promise<ChainEntryReceipt>;
 
@@ -114,18 +122,15 @@ export function useChainEntrySubmit(
       competitionId: competition?.id ?? null,
       competitionChainId: apiChainId(competition),
       onStage,
-      consent: async (fields) => {
+      consent: async (fields, prompt) => {
         if (!competition) {
           return dropConsent(request, terms);
         }
         if (!competition.participation.signature_required) {
           return null;
         }
-        const signature = await sign(
-          "ENTRY_CREATE",
-          competitionEntryPayload(fields),
-          null,
-          null
+        const signature = await prompt(() =>
+          sign("ENTRY_CREATE", competitionEntryPayload(fields), null, null)
         );
         return competitionConsent({
           signature,

@@ -78,6 +78,7 @@ const CHAIN_ENTRY_FAILED = "Couldn't send this entry to the 6529 Network.";
 const CHAIN_ENTRY_IN_FLIGHT =
   "Your entry is still on its way. Wait for it before you send another.";
 const CHAIN_ENTRY_STAGE: Record<ChainEntryStage, string> = {
+  preparing: "Sending to the 6529 Network.",
   wallet: "Waiting for your wallet.",
   sending: "Sending to the 6529 Network.",
 };
@@ -698,7 +699,7 @@ export default function CreateDrop({
           return false;
         }
         chainEntryInFlightRef.current = true;
-        setChainEntryStage("wallet");
+        setChainEntryStage("preparing");
         void sendChainEntry(submitChainEntry, dropRequest);
       } else {
         const slowModeChatReservation = reserveSlowModeChatQueueSlot(

@@ -13,6 +13,7 @@ import { useChainWavesActive } from "@/hooks/useWavesMovePhase";
 import {
   writeChainEntry,
   writeChainWithdrawal,
+  type ChainWalletPrompt,
 } from "@/lib/chain-waves/entryWriters";
 
 const WALLET = "0x1111111111111111111111111111111111111111";
@@ -63,6 +64,12 @@ const competition = (signatureRequired: boolean) =>
 /** The consent callback the last writeChainEntry call got. */
 const lastConsent = () =>
   jest.mocked(writeChainEntry).mock.calls.at(-1)?.[2].consent;
+/** A wallet prompt that runs its ask; `mockPromptOpened` counts them. */
+const mockPromptOpened = jest.fn();
+const prompt: ChainWalletPrompt = (ask) => {
+  mockPromptOpened();
+  return ask();
+};
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -139,7 +146,8 @@ describe("useChainEntrySubmit", () => {
       expect.objectContaining({ request, competitionId: "competition-1" })
     );
 
-    const consent = await lastConsent()?.({ title: "Entry" });
+    const consent = await lastConsent()?.({ title: "Entry" }, prompt);
+    expect(mockPromptOpened).toHaveBeenCalledTimes(1);
     expect(mockSign).toHaveBeenCalledWith(
       "ENTRY_CREATE",
       { drop: { title: "Entry", signature: null }, drop_id: null },
@@ -161,8 +169,9 @@ describe("useChainEntrySubmit", () => {
       { wrapper }
     );
     await result.current?.({ request, terms: null });
-    await expect(lastConsent()?.({})).resolves.toBeNull();
+    await expect(lastConsent()?.({}, prompt)).resolves.toBeNull();
     expect(mockSign).not.toHaveBeenCalled();
+    expect(mockPromptOpened).not.toHaveBeenCalled();
   });
 
   it("carries the composer's drop signature for a wave without a competition", async () => {
@@ -178,12 +187,13 @@ describe("useChainEntrySubmit", () => {
       WALLET,
       expect.objectContaining({ competitionId: null })
     );
-    await expect(lastConsent()?.({})).resolves.toMatchObject({
+    await expect(lastConsent()?.({}, prompt)).resolves.toMatchObject({
       scheme: "6529-drop",
       terms: "Wave terms",
       signature: "0xdropsig",
     });
     expect(mockSign).not.toHaveBeenCalled();
+    expect(mockPromptOpened).not.toHaveBeenCalled();
   });
 });
 

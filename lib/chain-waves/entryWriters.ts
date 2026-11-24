@@ -48,10 +48,18 @@ export interface ChainEntryReceipt {
 }
 
 /**
- * Where a write stands: the wallet is asked to sign ("wallet"), or the
- * signed write is on its way and waits until final ("sending").
+ * Where a write stands: getting it ready (the reads, the manifest, the
+ * draft: "preparing"), a wallet prompt open ("wallet"), or the signed write
+ * on its way and waiting until final ("sending"). Nothing goes to the chain
+ * before "sending", so a write that fails earlier sent nothing.
  */
-export type ChainEntryStage = "wallet" | "sending";
+export type ChainEntryStage = "preparing" | "wallet" | "sending";
+
+/**
+ * Runs one wallet prompt, so the stage says the wallet is asked while it
+ * is open.
+ */
+export type ChainWalletPrompt = <T>(ask: () => Promise<T>) => Promise<T>;
 
 /**
  * A write the 6529 Network took but that wasn't final when the wait ended.
@@ -155,11 +163,19 @@ export async function writeChainEntry(
     readonly competitionId: string | null;
     /** The `chain_id` 6529.io's API gives the competition, when it does. */
     readonly competitionChainId?: Hex | null | undefined;
-    readonly consent: (fields: EntryFields) => Promise<EntryConsent | null>;
+    /**
+     * The author's consent; `prompt` runs the wallet's prompt for it, when
+     * there is one.
+     */
+    readonly consent: (
+      fields: EntryFields,
+      prompt: ChainWalletPrompt
+    ) => Promise<EntryConsent | null>;
     readonly onStage?: ((stage: ChainEntryStage) => void) | undefined;
   },
   signal?: AbortSignal
 ): Promise<ChainEntryReceipt> {
+  input.onStage?.("preparing");
   if (input.request.poll) {
     throw new ChainOperationError(
       "rejected",
@@ -183,10 +199,19 @@ export async function writeChainEntry(
     );
   }
   const fields = entryFieldsOf(input.request);
-  input.onStage?.("wallet");
-  const consent = await input.consent(fields).catch((error: unknown) => {
-    throw declinedOr(error);
-  });
+  const prompt: ChainWalletPrompt = async (ask) => {
+    input.onStage?.("wallet");
+    try {
+      return await ask();
+    } finally {
+      input.onStage?.("preparing");
+    }
+  };
+  const consent = await input
+    .consent(fields, prompt)
+    .catch((error: unknown) => {
+      throw declinedOr(error);
+    });
   const manifest = buildEntryManifest({
     nonceWord: freshDocNonce(),
     decisionId: decision.decisionId,
@@ -233,6 +258,7 @@ export async function writeChainWithdrawal(
   },
   signal?: AbortSignal
 ): Promise<void> {
+  input.onStage?.("preparing");
   const author = await identityOfWallet(wallet, signal);
   const entry = await resolveEntry(input.dropId, signal);
   if (lower(entry.author) !== lower(author.principalId)) {
