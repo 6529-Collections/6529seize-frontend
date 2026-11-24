@@ -45,7 +45,7 @@ describe("OfficialWaveSummary", () => {
 
     expect(screen.getByRole("heading", { name: "Art" })).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Open source Wave Daily" })
+      screen.getAllByRole("button", { name: "Open source Wave Daily" })[0]
     ).toBeInTheDocument();
   });
 

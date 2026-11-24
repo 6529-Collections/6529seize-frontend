@@ -17,7 +17,10 @@ controls.
 
 - Open your own profile and select `Curation`.
 - Open another profile's `Curation` tab to view its public collection.
-- Select the underlined source Wave name below the Curation title to open it.
+- Select the source Wave below the Curation title to open it. Mobile web and the
+  app show a `Source Wave` label and a wave chip with its picture, name, and
+  internal-navigation chevron. Source post and joined counts appear on their own
+  line with thousands separators.
 - Use `Manage curations` from a post's Wave action menu to add or remove that
   post from a named Curation you can manage.
 
@@ -68,6 +71,13 @@ leave without submitting. Their desktop dialogs also offer Cancel.
 - **Owner controls:** `Add post` is the primary action. `Manage` includes
   `Organize posts` under `This Curation` when available and groups profile display
   actions separately from actions that change the Curation itself.
+- **Mobile owner controls:** the title shares its row with a square `Manage`
+  icon button and `+ Add post` at the right. Long titles wrap beside the controls.
+  `Manage` opens a sheet with the same title on mobile web and in the app.
+- **Mobile empty states:** owner and visitor panels use the same compact frame.
+  The owner's `Create Curation` action is a single primary button, with
+  `Advanced Wave setup` as a text action below it. Existing setup and empty-state
+  copy stays the same.
 - **Profile display:** `Choose another Curation`, `Use another source Wave`,
   and `Hide from profile` only change what this profile displays. Hiding keeps
   the Curation, source Wave, Groups, and posts available.

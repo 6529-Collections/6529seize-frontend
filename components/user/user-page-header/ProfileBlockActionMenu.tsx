@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import IconButton from "@/components/utils/button/IconButton";
 import { useAuth } from "@/components/auth/Auth";
 import useArtistArtworkAlert from "@/hooks/useArtistArtworkAlert";
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
@@ -18,11 +19,6 @@ import {
   MinusCircleIcon,
   NoSymbolIcon,
 } from "@heroicons/react/24/outline";
-import { PROFILE_MOBILE_ACTION_CLASS } from "./user-page-header-surface";
-import { PROFILE_TOP_BAR_BUTTON_CLASS } from "./UserPageMobileTopBar";
-
-const TRIGGER_CLASS_NAME =
-  "tw-flex tw-size-9 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-p-0 tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-transition tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-default disabled:tw-opacity-60 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100";
 
 type Props = Readonly<{
   handle: string;
@@ -133,10 +129,6 @@ function ProfileActionsMenu({
       ? EllipsisHorizontalIcon
       : EllipsisVerticalIcon;
   const trigger = <Icon aria-hidden="true" className="tw-size-5" />;
-  const triggerClassName =
-    placement === "native-header"
-      ? PROFILE_TOP_BAR_BUTTON_CLASS
-      : `${TRIGGER_CLASS_NAME} ${placement === "mobile" ? PROFILE_MOBILE_ACTION_CLASS : ""}`;
 
   if (isMobileLayoutViewport) {
     return (
@@ -145,7 +137,23 @@ function ProfileActionsMenu({
         ariaLabel={menuLabel}
         items={items}
         trigger={trigger}
-        triggerClassName={triggerClassName}
+        renderTriggerButton={({
+          ariaLabel,
+          ariaExpanded,
+          disabled: triggerDisabled,
+          onClick,
+        }) => (
+          <IconButton
+            layout="profile-menu"
+            aria-label={ariaLabel}
+            aria-haspopup="dialog"
+            aria-expanded={ariaExpanded}
+            disabled={triggerDisabled}
+            onClick={onClick}
+          >
+            {trigger}
+          </IconButton>
+        )}
         disabled={disabled}
         onOpenChange={setMenuOpen}
       />
@@ -158,8 +166,12 @@ function ProfileActionsMenu({
       items={items}
       disabled={disabled}
       onOpenChange={setMenuOpen}
-      trigger={trigger}
-      triggerClassName={triggerClassName}
+      trigger={
+        <IconButton layout="profile-menu" aria-label={menuLabel}>
+          {trigger}
+        </IconButton>
+      }
+      triggerAsChild
       unstyledTrigger
       autoFocusItem={false}
       menuWidthClassName="tw-w-72"

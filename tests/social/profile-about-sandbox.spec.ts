@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import {
   CollectedCollectionType,
   type CollectedCard,
@@ -14,6 +15,7 @@ import {
 } from "../testHelpers";
 import {
   getSandboxApiOrigin,
+  hideNextDevOverlay,
   LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
   useLocalSandboxMutationGuard,
 } from "../support/localSandbox";
@@ -286,7 +288,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     );
   });
 
-  for (const profile of ["playwright", "sandbox-recipient"]) {
+  for (const profile of ["playwright", "following-artist-0"]) {
     test(`Brain wave rows scroll independently on ${profile === "playwright" ? "the owner's" : "a visitor's"} profile`, async ({
       page,
     }, testInfo) => {
@@ -387,6 +389,206 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       }
       await page.screenshot({
         path: testInfo.outputPath(`brain-wave-rows-${profile}.png`),
+        fullPage: true,
+        scale: "css",
+      });
+    });
+  }
+
+  for (const profile of ["playwright", "following-artist-0"]) {
+    test(`Curation profile layout preserves ${profile === "playwright" ? "owner" : "visitor"} controls and empty copy`, async ({
+      page,
+      baseURL,
+    }, testInfo) => {
+      await hideNextDevOverlay(page.context());
+      await seedSession(page);
+      await installHostedWalletReads(page);
+      const api = getSandboxApiOrigin(baseURL);
+      const waveId = "00000000-0000-4000-8000-000000000529";
+      const waveResponse = await page.request.get(`${api}/api/waves/${waveId}`);
+      const wave = (await waveResponse.json()) as ApiWave;
+      wave.name = "A source Wave with a long name";
+      wave.picture = "/6529.svg";
+      wave.metrics.drops_count = 12345;
+      wave.metrics.subscribers_count = 6789;
+      const title = "A long collection title that wraps beside owner actions";
+      let connected = true;
+      await page.route("**/api/profiles/*/wave", (route) =>
+        route.fulfill({
+          json: {
+            profile_wave_id: connected ? waveId : null,
+            profile_curation_id: connected ? "profile-curation" : null,
+          },
+        })
+      );
+      await page.route(`${api}/api/waves/${waveId}`, (route) =>
+        route.fulfill({ json: wave })
+      );
+      await page.route(`${api}/api/waves/${waveId}/curations`, (route) =>
+        route.fulfill({
+          json: [
+            {
+              id: "profile-curation",
+              name: title,
+              wave_id: waveId,
+              group_id: null,
+              created_at: 1,
+              updated_at: 1,
+              priority_order: 1,
+            },
+          ],
+        })
+      );
+      await page.route(`**/v2/waves/${waveId}/curations/*/drops?**`, (route) =>
+        route.fulfill({ json: { data: [], page: 1, next: false } })
+      );
+      await page.route(`${api}/api/waves?**`, (route) =>
+        route.fulfill({ json: [] })
+      );
+      await finishHostedWalletInitialization(page, () =>
+        page.goto(`/${profile}/curations`)
+      );
+      const heading = page.getByRole("heading", { name: title, exact: true });
+      await expect(heading).toBeVisible();
+      const mobile = testInfo.project.name !== "web-desktop-chromium";
+      const owner = profile === "playwright";
+      const source = page.getByRole("button", {
+        name: `Open source Wave ${wave.name}`,
+        exact: true,
+      });
+      const manage = page.getByRole("button", {
+        name: mobile ? "Manage" : "Curation options",
+        exact: true,
+      });
+      const add = page.getByRole("button", { name: "Add post", exact: true });
+      await expect(source).toBeVisible();
+      await expect(manage).toHaveCount(owner ? 1 : 0);
+      await expect(add).toHaveCount(owner ? 1 : 0);
+      if (mobile) {
+        await expect(
+          page.getByText("12,345 source posts • 6,789 joined", { exact: true })
+        ).toBeVisible();
+        await expect(
+          page.getByText("Source Wave", { exact: true })
+        ).toBeVisible();
+        const widths = isCapacitorSimulationProject(testInfo.project.name)
+          ? [390]
+          : [320, 390, 768];
+        for (const width of widths) {
+          await page.setViewportSize({ width, height: 1000 });
+          const headingBox = await heading.boundingBox();
+          const sourceBox = await source.boundingBox();
+          expect(sourceBox!.y).toBeGreaterThan(
+            headingBox!.y + headingBox!.height
+          );
+          if (owner) {
+            await expect(manage).toHaveCSS("width", "36px");
+            await expect(manage).toHaveCSS("height", "36px");
+            await expect(manage).toHaveText("");
+            await expect(add).toHaveCSS("height", "36px");
+            await expect(add).toHaveCSS("font-size", "13px");
+            const manageBox = await manage.boundingBox();
+            const addBox = await add.boundingBox();
+            const sectionsBox = await page
+              .getByRole("navigation", { name: "Profile sections" })
+              .boundingBox();
+            expect(Math.abs(headingBox!.y - manageBox!.y)).toBeLessThanOrEqual(
+              1
+            );
+            expect(headingBox!.x + headingBox!.width).toBeLessThanOrEqual(
+              manageBox!.x
+            );
+            expect(manageBox!.x + manageBox!.width).toBeLessThan(addBox!.x);
+            expect(
+              Math.abs(
+                addBox!.x + addBox!.width - sectionsBox!.x - sectionsBox!.width
+              )
+            ).toBeLessThanOrEqual(1);
+          }
+          await expectNoHorizontalOverflow(page);
+        }
+        if (owner) {
+          await manage.click();
+          const sheet = page.getByRole("dialog", {
+            name: "Manage",
+            exact: true,
+          });
+          await expect(
+            sheet.getByRole("heading", { name: "Manage", exact: true })
+          ).toBeVisible();
+          await page.screenshot({
+            path: testInfo.outputPath(`curation-manage-${profile}.png`),
+            scale: "css",
+          });
+          await sheet
+            .getByRole("button", { name: "Close", exact: true })
+            .click();
+          await expect(manage).toBeFocused();
+        }
+      } else {
+        await expect(
+          page.getByText("12345 source posts • 6789 joined", { exact: true })
+        ).toBeVisible();
+        if (owner) await expect(manage).toContainText("Manage");
+      }
+      await page.screenshot({
+        path: testInfo.outputPath(`curation-${profile}.png`),
+        fullPage: true,
+        scale: "css",
+      });
+      connected = false;
+      await finishHostedWalletInitialization(page, () => page.reload());
+      const emptyTitle = owner ? "Create a Curation" : "No featured wave yet";
+      const emptyHeading = page.getByRole("heading", {
+        name: emptyTitle,
+        exact: true,
+      });
+      await expect(emptyHeading).toBeVisible();
+      await expect(
+        page.getByText(
+          owner
+            ? "Create a collection of posts to feature on your profile."
+            : "This profile hasn't selected a featured wave for Curation yet.",
+          { exact: true }
+        )
+      ).toBeVisible();
+      if (mobile) {
+        await expect(emptyHeading).toHaveCSS("font-size", "17px");
+        await expect(emptyHeading).toHaveCSS("font-weight", "600");
+        await expect(
+          page
+            .getByRole("heading", { name: emptyTitle, exact: true })
+            .locator("..")
+            .getByRole("paragraph")
+        ).toHaveCSS("font-size", "14px");
+        const panel = page
+          .getByRole("heading", { name: emptyTitle, exact: true })
+          .locator("xpath=ancestor::section");
+        await expect(panel).toHaveCSS("border-radius", "12px");
+        if (owner) {
+          const create = page.getByRole("button", {
+            name: "Create Curation",
+            exact: true,
+          });
+          const advanced = page.getByRole("link", {
+            name: "Advanced Wave setup",
+            exact: true,
+          });
+          await expect(create).toHaveCount(1);
+          await expect(create).toHaveCSS("height", "44px");
+          await expect(advanced).toHaveCSS(
+            "background-color",
+            "rgba(0, 0, 0, 0)"
+          );
+          const createBox = await create.boundingBox();
+          const advancedBox = await advanced.boundingBox();
+          expect(advancedBox!.y).toBeGreaterThanOrEqual(
+            createBox!.y + createBox!.height
+          );
+        }
+      }
+      await page.screenshot({
+        path: testInfo.outputPath(`curation-empty-${profile}.png`),
         fullPage: true,
         scale: "css",
       });

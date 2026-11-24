@@ -495,7 +495,9 @@ export default function UserPageProfileWave({
       <div ref={curationHeaderRef} className="tw-relative">
         <OfficialWaveSummary
           waveName={wave.name}
+          wavePicture={wave.picture}
           metadataLabel={getOfficialWaveMetadataLabel(wave)}
+          mobileMetadataLabel={getOfficialWaveMetadataLabel(wave, locale)}
           profileCurationLabel={
             profileCuration ? getProfileCurationTitle(profileCuration) : null
           }

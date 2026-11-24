@@ -1,18 +1,12 @@
 "use client";
 
-import { LockClosedIcon, PlusIcon } from "@heroicons/react/24/outline";
-import Image from "next/image";
-import Link from "next/link";
-import WavesIcon from "@/components/common/icons/WavesIcon";
-import { ImageScale } from "@/helpers/image.helpers";
+import { PlusIcon } from "@heroicons/react/24/outline";
+import WaveChip from "@/components/waves/WaveChip";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { ProfileWaveActivityQueryState } from "@/hooks/useProfileWaveActivityWaves";
 import type { ProfileWaveActivitySidebarItem } from "@/types/profile-wave-activity.types";
 import { getUserPageBrainSidebarMessage } from "./userPageBrainSidebar.messages";
-import {
-  getSidebarWaveHref,
-  getSidebarWaveImageSrc,
-} from "./userPageBrainSidebarWave.helpers";
+import { getSidebarWaveHref } from "./userPageBrainSidebarWave.helpers";
 import UserPageBrainSidebarLoadMore from "./UserPageBrainSidebarLoadMore";
 
 const PILL_BUTTON_CLASS =
@@ -29,47 +23,13 @@ function UserPageBrainSidebarMobileWavePill({
 }: {
   readonly wave: ProfileWaveActivitySidebarItem;
 }) {
-  const locale = useBrowserLocale();
-  const href = getSidebarWaveHref(wave);
-  const imageSrc = getSidebarWaveImageSrc(wave, ImageScale.W_200_H_200);
-
   return (
-    <Link
-      href={href}
-      prefetch={false}
-      className="tw-group tw-inline-flex tw-h-9 tw-max-w-[14rem] tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-950 tw-p-1 tw-pr-3 tw-no-underline tw-shadow-sm tw-transition-all tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-white/[0.15] desktop-hover:hover:tw-bg-white/[0.05] motion-reduce:tw-transition-none"
-    >
-      <div className="tw-relative tw-flex tw-h-7 tw-w-7 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-border tw-border-solid tw-border-white/[0.04] tw-bg-iron-900 tw-shadow-sm tw-transition-colors desktop-hover:group-hover:tw-border-white/[0.1]">
-        {imageSrc ? (
-          <Image
-            src={imageSrc}
-            alt=""
-            fill
-            sizes="28px"
-            className="tw-object-cover"
-          />
-        ) : (
-          <WavesIcon className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-iron-300" />
-        )}
-      </div>
-      {wave.isPrivate && (
-        <>
-          <LockClosedIcon
-            aria-hidden="true"
-            className="tw-h-3 tw-w-3 tw-shrink-0 tw-text-white/40"
-          />
-          <span className="tw-sr-only">
-            {getUserPageBrainSidebarMessage(
-              locale,
-              "user.brain.sidebar.privateWave"
-            )}
-          </span>
-        </>
-      )}
-      <span className="tw-min-w-0 tw-truncate tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-colors desktop-hover:group-hover:tw-text-iron-100">
-        {wave.name}
-      </span>
-    </Link>
+    <WaveChip
+      name={wave.name}
+      picture={wave.picture}
+      isPrivate={wave.isPrivate}
+      href={getSidebarWaveHref(wave)}
+    />
   );
 }
 

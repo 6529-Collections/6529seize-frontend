@@ -12,6 +12,7 @@ import CompactMenuMobileBottomSheet from "@/components/compact-menu/CompactMenuM
 import { useAuth } from "@/components/auth/Auth";
 import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
 import Button from "@/components/utils/button/Button";
+import IconButton from "@/components/utils/button/IconButton";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 import type { DropCurationMembership } from "@/hooks/drops/useDropCurations";
@@ -379,7 +380,7 @@ export default function MyStreamWaveCurationTabMenu({
         <CompactMenuMobileBottomSheet
           title={triggerLabel ?? t(locale, "profileCuration.header.manage")}
           titleClassName={dialogTypography?.title}
-          ariaLabel={t(locale, "profileCuration.manage.menuAria")}
+          ariaLabel={triggerLabel ?? t(locale, "profileCuration.header.manage")}
           items={styledMenuItems}
           trigger={triggerContent}
           renderTriggerButton={({
@@ -388,17 +389,16 @@ export default function MyStreamWaveCurationTabMenu({
             disabled,
             onClick,
           }) => (
-            <Button
-              variant="tertiary"
-              size="sm"
+            <IconButton
+              layout="profile-menu"
               aria-label={ariaLabel}
               aria-haspopup="dialog"
               aria-expanded={ariaExpanded}
               disabled={disabled}
               onClick={onClick}
             >
-              {triggerContent}
-            </Button>
+              <EllipsisVerticalIcon aria-hidden="true" className="tw-size-5" />
+            </IconButton>
           )}
           disabled={isMenuDisabled}
         />

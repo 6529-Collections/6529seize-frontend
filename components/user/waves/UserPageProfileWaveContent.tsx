@@ -179,7 +179,12 @@ function ProfileCurationActionButton({
   readonly onClick: () => void;
 }) {
   return (
-    <Button variant="primary" size="md" onClick={onClick}>
+    <Button
+      variant="primary"
+      size="md"
+      onClick={onClick}
+      className="max-lg:tw-h-11"
+    >
       <PlusIcon className="-tw-ml-0.5 tw-h-5 tw-w-5 tw-flex-shrink-0" />
       <span>{label}</span>
     </Button>

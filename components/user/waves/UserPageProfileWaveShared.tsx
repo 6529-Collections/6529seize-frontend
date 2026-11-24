@@ -1,5 +1,6 @@
 import SpinnerLoader from "@/components/common/SpinnerLoader";
 import Button from "@/components/utils/button/Button";
+import WaveChip from "@/components/waves/WaveChip";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import {
@@ -62,18 +63,18 @@ export function CurationEmptyPanel({
   readonly primaryAction?: ReactNode;
 }) {
   return (
-    <section className="tw-relative tw-overflow-hidden tw-rounded-[2rem] tw-border tw-border-solid tw-border-white/10 tw-bg-black">
+    <section className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black lg:tw-rounded-[2rem]">
       <div
         aria-hidden
-        className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.06),transparent_62%)]"
+        className="tw-pointer-events-none tw-absolute tw-inset-0 tw-hidden tw-bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.06),transparent_62%)] lg:tw-block"
       />
       <div
         aria-hidden
-        className="tw-pointer-events-none tw-absolute tw-left-1/2 tw-top-1/2 tw-h-80 tw-w-80 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-white/5 tw-blur-3xl"
+        className="tw-pointer-events-none tw-absolute tw-left-1/2 tw-top-1/2 tw-hidden tw-h-80 tw-w-80 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-white/5 tw-blur-3xl lg:tw-block"
       />
 
       <div className="tw-relative tw-flex tw-min-h-[240px] tw-flex-col tw-items-center tw-justify-center tw-px-4 tw-py-10 tw-text-center sm:tw-min-h-[360px] sm:tw-px-8 sm:tw-py-16">
-        <div className="tw-flex tw-h-14 tw-w-14 tw-items-center tw-justify-center tw-rounded-2xl tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-shadow-[0_18px_60px_rgba(255,255,255,0.08)] sm:tw-h-20 sm:tw-w-20 sm:tw-rounded-[1.75rem]">
+        <div className="tw-flex tw-h-14 tw-w-14 tw-items-center tw-justify-center tw-rounded-2xl tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 sm:tw-h-20 sm:tw-w-20 sm:tw-rounded-[1.75rem] lg:tw-shadow-[0_18px_60px_rgba(255,255,255,0.08)]">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -95,10 +96,10 @@ export function CurationEmptyPanel({
         </div>
 
         <div className="tw-mt-6 tw-max-w-xl md:tw-mt-8">
-          <h2 className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-400">
+          <h2 className="tw-mb-0 tw-text-[17px] tw-font-semibold tw-text-iron-400 lg:tw-text-sm lg:tw-font-medium">
             {title}
           </h2>
-          <p className="tw-mb-0 tw-mt-2 tw-text-meta tw-font-normal tw-leading-relaxed tw-text-iron-500 md:tw-mt-3">
+          <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-500 md:tw-mt-3 lg:tw-text-meta">
             {message}
           </p>
         </div>
@@ -129,7 +130,9 @@ export function RetryButton({
 
 export function OfficialWaveSummary({
   waveName,
+  wavePicture = null,
   metadataLabel,
+  mobileMetadataLabel = metadataLabel,
   profileCurationLabel,
   canManageOwnOfficialWave,
   manageCurationControl,
@@ -137,7 +140,9 @@ export function OfficialWaveSummary({
   onAddPost,
 }: {
   readonly waveName: string;
+  readonly wavePicture?: string | null;
   readonly metadataLabel: string;
+  readonly mobileMetadataLabel?: string;
   readonly profileCurationLabel?: string | null | undefined;
   readonly canManageOwnOfficialWave: boolean;
   readonly manageCurationControl?: ReactNode | undefined;
@@ -147,14 +152,33 @@ export function OfficialWaveSummary({
   const locale = useBrowserLocale();
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-3 md:tw-flex-row md:tw-items-center md:tw-justify-between md:tw-gap-6">
-      <div className="tw-min-w-0 tw-flex-1">
-        <h2 className="tw-m-0 tw-min-w-0 tw-max-w-full tw-text-lg tw-font-semibold tw-text-iron-100 md:tw-text-xl">
+    <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-start tw-gap-x-3 tw-gap-y-3 lg:tw-flex lg:tw-items-center lg:tw-justify-between lg:tw-gap-6">
+      <div className="tw-contents lg:tw-block lg:tw-min-w-0 lg:tw-flex-1">
+        <h2 className="tw-col-start-1 tw-row-start-1 tw-m-0 tw-min-w-0 tw-max-w-full tw-text-lg tw-font-semibold tw-text-iron-100 max-lg:tw-break-words md:tw-text-xl">
           {profileCurationLabel ??
             t(locale, "profileCuration.header.fallbackTitle")}
         </h2>
 
-        <div className="tw-mt-1 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-meta tw-font-normal tw-leading-6">
+        <div className="tw-col-span-2 tw-row-start-2 tw-min-w-0 tw-space-y-2 lg:tw-hidden">
+          <div className="tw-text-xs tw-font-medium tw-text-iron-500">
+            {t(locale, "profileCuration.header.sourceLabel")}
+          </div>
+          <WaveChip
+            className="max-lg:tw-max-w-[min(14rem,100%)]"
+            name={waveName}
+            picture={wavePicture}
+            onClick={onOpenWave}
+            ariaLabel={t(locale, "profileCuration.header.openSourceAria", {
+              waveName,
+            })}
+            showChevron
+          />
+          <div className="tw-text-meta tw-font-normal tw-tabular-nums tw-text-iron-500">
+            {mobileMetadataLabel}
+          </div>
+        </div>
+
+        <div className="tw-mt-1 tw-hidden tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-meta tw-font-normal tw-leading-6 lg:tw-flex">
           <button
             type="button"
             onClick={onOpenWave}
@@ -183,10 +207,15 @@ export function OfficialWaveSummary({
       </div>
 
       {canManageOwnOfficialWave && (
-        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2 md:tw-justify-end">
+        <div className="tw-col-start-2 tw-row-start-1 tw-flex tw-flex-shrink-0 tw-items-center tw-justify-end tw-gap-2">
           {manageCurationControl}
           {onAddPost !== undefined && (
-            <Button variant="primary" size="sm" onClick={onAddPost}>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={onAddPost}
+              className="max-lg:tw-text-[13px]"
+            >
               <PlusIcon className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0" />
               <span>Add post</span>
             </Button>

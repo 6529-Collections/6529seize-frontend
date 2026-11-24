@@ -4,6 +4,7 @@ import { Spinner } from "@/components/dotLoader/DotLoader";
 import Button from "@/components/utils/button/Button";
 import ButtonLink from "@/components/utils/button/ButtonLink";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
 import { CREATE_WAVE_HREF } from "./userPageProfileWave.helpers";
@@ -23,12 +24,19 @@ const MOBILE_SHEET_VARIANT = "mobile-sheet";
 
 function CreateWaveLink({
   variant = "secondary",
+  compactOnMobile = false,
 }: {
   readonly variant?: "primary" | "secondary";
+  readonly compactOnMobile?: boolean;
 }) {
   const locale = useBrowserLocale();
+  const isMobile = useIsMobileLayoutViewport();
   return (
-    <ButtonLink href={CREATE_WAVE_HREF} variant={variant} size="sm">
+    <ButtonLink
+      href={CREATE_WAVE_HREF}
+      variant={compactOnMobile && isMobile ? "ghost" : variant}
+      size="sm"
+    >
       {t(locale, "profileCuration.entry.advancedWave")}
     </ButtonLink>
   );
@@ -36,12 +44,19 @@ function CreateWaveLink({
 
 function CreateProfileCurationButton({
   onClick,
+  largeOnMobile = false,
 }: {
   readonly onClick: () => void;
+  readonly largeOnMobile?: boolean;
 }) {
   const locale = useBrowserLocale();
+  const isMobile = useIsMobileLayoutViewport();
   return (
-    <Button onClick={onClick} variant="primary" size="sm">
+    <Button
+      onClick={onClick}
+      variant="primary"
+      size={largeOnMobile && isMobile ? "lg" : "sm"}
+    >
       {t(locale, "profileCuration.entry.create")}
     </Button>
   );
@@ -235,9 +250,12 @@ function renderNoPublicWavesState({
     ? t(locale, "profileCuration.entry.noEligibleSome")
     : t(locale, "profileCuration.entry.noEligibleNone");
   const actions = (
-    <div className="tw-flex tw-flex-wrap tw-justify-center tw-gap-3">
-      <CreateProfileCurationButton onClick={onCreateProfileCuration} />
-      <CreateWaveLink />
+    <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-3 lg:tw-flex-row lg:tw-flex-wrap">
+      <CreateProfileCurationButton
+        onClick={onCreateProfileCuration}
+        largeOnMobile
+      />
+      <CreateWaveLink compactOnMobile />
     </div>
   );
 
