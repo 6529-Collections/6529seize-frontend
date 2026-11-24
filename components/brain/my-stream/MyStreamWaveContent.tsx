@@ -731,7 +731,6 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
         <MyStreamWaveTabs
           wave={submissionWave ?? wave}
           competitionSubmissionReady={Boolean(submissionTarget.wave)}
-          competitionSubmissionPending={submissionTarget.pending}
           viewMode={viewMode}
           onToggleViewMode={toggleViewMode}
           showGalleryToggle={showGalleryToggle}

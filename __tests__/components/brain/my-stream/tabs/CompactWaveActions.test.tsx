@@ -1,5 +1,13 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
-import CompactWaveActions from "@/components/brain/my-stream/tabs/CompactWaveActions";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
+import CompactWaveActions, {
+  CompactWaveActionsProvider,
+} from "@/components/brain/my-stream/tabs/CompactWaveActions";
 import type { CompactMenuItem } from "@/components/compact-menu";
 
 const items: CompactMenuItem[] = [
@@ -69,4 +77,47 @@ it("does not add dividers for absent groups", () => {
     screen.getByRole("button", { name: "Share wave" })
   ).toBeInTheDocument();
   expect(screen.queryByRole("separator")).not.toBeInTheDocument();
+});
+
+it("keeps the phone sheet and current actions when its header is replaced", async () => {
+  const previousSearch = jest.fn();
+  const currentSearch = jest.fn();
+  const withSearch = (onSelect: () => void) =>
+    items.map((item) =>
+      item.id === "search-messages"
+        ? { ...item, onSelect, deferUntilClosed: true }
+        : item
+    );
+  function FirstHeader() {
+    return <CompactWaveActions phone items={withSearch(previousSearch)} />;
+  }
+  function FinalHeader() {
+    return <CompactWaveActions phone items={withSearch(currentSearch)} />;
+  }
+  const { rerender } = render(
+    <CompactWaveActionsProvider>
+      <FirstHeader />
+    </CompactWaveActionsProvider>
+  );
+  fireEvent.click(screen.getByRole("button", { name: "More wave actions" }));
+  const originalSheet = screen.getByRole("dialog", {
+    name: "More wave actions",
+  });
+  const originalSearch = within(originalSheet).getByRole("button", {
+    name: "Search messages",
+  });
+  rerender(
+    <CompactWaveActionsProvider>
+      <FinalHeader />
+    </CompactWaveActionsProvider>
+  );
+  expect(screen.getByRole("dialog", { name: "More wave actions" })).toBe(
+    originalSheet
+  );
+  expect(
+    within(originalSheet).getByRole("button", { name: "Search messages" })
+  ).toBe(originalSearch);
+  fireEvent.click(originalSearch);
+  await waitFor(() => expect(currentSearch).toHaveBeenCalledTimes(1));
+  expect(previousSearch).not.toHaveBeenCalled();
 });

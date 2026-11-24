@@ -32,7 +32,6 @@ import MyStreamWaveTabsHeader, {
 const useBreakpoint = createBreakpoint({ LG: 1024, MD: 768, S: 0 });
 
 interface MyStreamWaveTabsDefaultProps {
-  readonly phoneActionsPending?: boolean | undefined;
   readonly wave: ApiWave;
   readonly viewMode: WaveViewMode;
   readonly onToggleViewMode: () => void;
@@ -51,7 +50,6 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
   activeCurationId = null,
   onSelectCuration = () => {},
   chatSubmitDropAction = null,
-  phoneActionsPending = false,
 }) => {
   const { activeContentTab, setActiveContentTab } = useContentTab();
   const locale = useBrowserLocale();
@@ -205,7 +203,6 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
   return (
     <div className="tw-flex tw-w-full tw-flex-col tw-bg-iron-950">
       <MyStreamWaveTabsHeader
-        phoneActionsPending={phoneActionsPending}
         wave={wave}
         activeContentTab={activeContentTab}
         isCompact={isCompact}
