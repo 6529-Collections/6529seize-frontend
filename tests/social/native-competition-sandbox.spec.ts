@@ -7346,6 +7346,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         );
         const field = (await input.boundingBox())!;
         const action = (await explain.boundingBox())!;
+        if (width >= 1024) {
+          expect((await controls.boundingBox())!.width).toBeLessThanOrEqual(
+            368
+          );
+        }
         expect(field.height).toBeGreaterThanOrEqual(44);
         expect(action.height).toBeGreaterThanOrEqual(44);
         expect(Math.abs(field.y - action.y)).toBeLessThanOrEqual(1);
@@ -7363,6 +7368,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
             (element) => {
               const rect = element.getBoundingClientRect();
               return {
+                tag: element.tagName,
+                width: rect.width,
+                scrollWidth: element.scrollWidth,
+                clientWidth: element.clientWidth,
                 left: rect.left - bounds.left,
                 right: bounds.right - rect.right,
                 clipped: element.scrollWidth > element.clientWidth + 1,
