@@ -21,9 +21,19 @@ jest.mock("@/lib/proposal-card/thumbnail", () => ({
   createProposalCardThumbnail: jest.fn(),
 }));
 
+const mockDocumentationDropSubmitted = jest.fn();
 jest.mock(
   "@/components/waves/memes/submission/MemesSubmissionDocumentation",
-  () => () => null
+  () => {
+    const React = jest.requireActual<typeof import("react")>("react");
+    return React.forwardRef((_props, ref) => {
+      React.useImperativeHandle(ref, () => ({
+        onDropSubmitted: mockDocumentationDropSubmitted,
+        prepareClose: async () => true,
+      }));
+      return null;
+    });
+  }
 );
 
 jest.mock("@/components/auth/Auth");
@@ -800,5 +810,56 @@ describe("MemesArtSubmissionContainer", () => {
     } finally {
       jest.mocked(isChainSubmittedArtwork).mockReset();
     }
+  });
+  describe("documentation", () => {
+    const submitWith = async (artwork: unknown) => {
+      mockAuth.mockReturnValue({
+        connectedProfile: { id: "profile-a", handle: "artist" },
+        activeProfileProxy: null,
+        requestAuth: jest.fn(async () => ({ success: true })),
+        setToast: jest.fn(),
+      } as any);
+      formState.currentStep = SubmissionStep.ADDITIONAL_INFO;
+      formState.selectedFile = new File(["x"], "art.png", {
+        type: "image/png",
+      });
+      formState.artworkUploaded = true;
+      mockMutation.mockReturnValue({
+        submitArtwork: jest.fn(async () => artwork),
+        uploadProgress: 0,
+        submissionPhase: "idle",
+        submissionError: undefined,
+        isSubmitting: false,
+      } as any);
+      render(<MemesArtSubmissionContainer onClose={onClose} wave={wave} />);
+      await act(async () => {
+        await additionalInfoProps.onSubmit();
+      });
+    };
+
+    afterEach(() => {
+      jest.mocked(isChainSubmittedArtwork).mockReset();
+    });
+
+    it("links the documentation to the 6529.io drop", async () => {
+      jest
+        .mocked(isChainSubmittedArtwork)
+        .mockImplementation((artwork) => "chainEntry" in artwork);
+      await submitWith({ id: "drop-1", title: "Card", metadata: [] });
+      expect(mockDocumentationDropSubmitted).toHaveBeenCalledWith("drop-1");
+    });
+
+    it("asks no link for an entry on the 6529 Network, which 6529.io doesn't hold yet", async () => {
+      jest
+        .mocked(isChainSubmittedArtwork)
+        .mockImplementation((artwork) => "chainEntry" in artwork);
+      await submitWith({
+        chainEntry: { entryId: "0xentry" },
+        title: "Card",
+        metadata: [],
+        pending: false,
+      });
+      expect(mockDocumentationDropSubmitted).not.toHaveBeenCalled();
+    });
   });
 });

@@ -322,15 +322,17 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
     const onSubmitted = async (drop: SubmittedArtwork | null) => {
       if (
         drop &&
+        // 6529.io links documentation to a drop it holds: its source-links
+        // route looks the drop up by id and refuses one it doesn't have. An
+        // entry on the 6529 Network has no 6529.io drop until 6529.io's
+        // index lists it, so there is nothing to link it to yet.
+        !isChainSubmittedArtwork(drop) &&
         getAuthStateFingerprint({
           walletAddress: getWalletAddress(),
           jwt: getAuthJwt(),
         }) === expectedAuthStateFingerprint
       ) {
-        // An entry on the 6529 Network is named by its chain id.
-        documentationRef.current?.onDropSubmitted(
-          isChainSubmittedArtwork(drop) ? drop.chainEntry.entryId : drop.id
-        );
+        documentationRef.current?.onDropSubmitted(drop.id);
       }
       if (drop && isResubmission) {
         await handleResubmissionSubmitted(drop);
