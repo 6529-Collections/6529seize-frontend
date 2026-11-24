@@ -39,7 +39,7 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
 import type { ApiCreateCompetitionEntryRequest } from "@/generated/models/ApiCreateCompetitionEntryRequest";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
-import { ChainOperationError } from "@/lib/chain-identity/operation";
+import { chainWriteFailure } from "@/components/chain-waves/chainWavesErrorMessage";
 import {
   ChainEntryPendingError,
   type ChainEntryStage,
@@ -322,7 +322,12 @@ export default function CompetitionEntryForm({
       // The wallet's prompt was declined: nothing was sent, nothing failed.
       if (submitChainEntry && isUserRejectedSigningError(error)) return;
       if (isRejectedCompetitionCommand(error)) pending.current = null;
-      if (error instanceof ChainOperationError) setChainFailure(error.message);
+      // The 6529 Network's reason in plain words, and that a refusal from a
+      // block still paid its fee.
+      if (submitChainEntry !== null) {
+        const reason = chainWriteFailure(locale, error, "", "entry");
+        setChainFailure(reason === "" ? null : reason);
+      }
       setFailed(getEntryFailureKey(error));
       await invalidateCompetition(client, identity);
     } finally {

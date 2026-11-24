@@ -5,6 +5,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useResubmissionDelete } from "@/components/waves/memes/submission/hooks/useResubmissionDelete";
 import { deleteDrop } from "@/services/api/signed-drop-writes";
+import { ChainOperationError } from "@/lib/chain-identity/operation";
 
 const mockWithdrawEntry = jest.fn();
 const mockInvalidateChainEntryQueries = jest.fn(() => Promise.resolve());
@@ -152,7 +153,8 @@ describe("useResubmissionDelete on the 6529 Network", () => {
 
   it("keeps the original and says why when the withdrawal fails", async () => {
     mockWithdrawEntry.mockRejectedValue(
-      new Error(
+      new ChainOperationError(
+        "rejected",
         "This decision is counting its result. Try again in a few minutes."
       )
     );
@@ -166,6 +168,24 @@ describe("useResubmissionDelete on the 6529 Network", () => {
     );
     expect(onClose).not.toHaveBeenCalled();
     expect(result.current.isDeletingOriginal).toBe(false);
+  });
+
+  it("says a withdrawal refused in a block still paid its fee, in plain words", async () => {
+    mockWithdrawEntry.mockRejectedValue(
+      new ChainOperationError(
+        "failed",
+        "The 6529 Network refused this change: ENTRY_NOT_ACTIVE.",
+        "ENTRY_NOT_ACTIVE"
+      )
+    );
+    const { result } = setup();
+    act(() => result.current.handleDeleteOriginalClick());
+
+    await waitFor(() =>
+      expect(result.current.deleteOriginalError).toBe(
+        "The change didn't go through, and its fee was still charged. This entry is no longer in the running, so it can't be withdrawn."
+      )
+    );
   });
 });
 

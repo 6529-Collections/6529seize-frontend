@@ -397,6 +397,26 @@ describe("on the 6529 Network", () => {
     expect(createCompetitionEntry).not.toHaveBeenCalled();
   });
 
+  it("says a refusal from a block still paid its fee, in plain words", async () => {
+    const { ChainOperationError } = jest.requireActual(
+      "@/lib/chain-identity/operation"
+    );
+    mockChainEntrySubmit.mockRejectedValue(
+      new ChainOperationError(
+        "failed",
+        "The 6529 Network refused this change: PARTICIPATION_CLOSED.",
+        "PARTICIPATION_CLOSED"
+      )
+    );
+    render(<CompetitionEntryForm onClose={jest.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: "Submit an entry" }));
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(
+      "The change didn't go through, and its fee was still charged. This decision isn't taking entries right now."
+    );
+    expect(alert).not.toHaveTextContent("PARTICIPATION_CLOSED");
+  });
+
   describe("a decision made there", () => {
     const CHAIN_ID = `0x${"3c".repeat(32)}`;
 

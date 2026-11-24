@@ -16,6 +16,8 @@ import {
 } from "@/components/chain-waves/useChainEntryWriters";
 import { ChainEntryPendingError } from "@/lib/chain-waves/entryWriters";
 import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
+import { chainWriteFailure } from "@/components/chain-waves/chainWavesErrorMessage";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
 import {
   isChainSubmittedArtwork,
   type SubmittedArtwork,
@@ -148,7 +150,16 @@ export function useResubmissionDelete({
       let message = chainEntries
         ? "Unable to withdraw the original submission."
         : "Unable to delete the original submission.";
-      if (error instanceof Error) {
+      if (chainEntries) {
+        // The 6529 Network's reason in plain words, and that a refusal from
+        // a block still paid its fee.
+        message = chainWriteFailure(
+          DEFAULT_LOCALE,
+          error,
+          message,
+          "withdrawal"
+        );
+      } else if (error instanceof Error) {
         message = error.message;
       } else if (typeof error === "string") {
         message = error;
