@@ -2303,8 +2303,8 @@
       ],
       "facts": [
         "Profiles, handles, ratings, consolidations and delegations move from 6529.io to the 6529 Network. A notice above the profile tabs says when.",
-        "From the freeze (Tuesday 24 November 2026 00:00 UTC) you can't change them for about 24 hours. Edit profile, Add statement, statement removal, Set primary, Add wallet, Rep and NIC rating, group bulk ratings, Assign Proxy and new Allocate Rep or Allocate NIC proxy actions, and Create profile are paused or hidden, and a request sent anyway shows Paused for the move to the 6529 Network.",
-        "From the switch-on (Wednesday 25 November 2026 00:00 UTC) you change them on the 6529 Network, through this site.",
+        "From the freeze (Wednesday 25 November 2026 00:00 UTC) you can't change them for about 24 hours. Edit profile, Add statement, statement removal, Set primary, Add wallet, Rep and NIC rating, group bulk ratings, Assign Proxy and new Allocate Rep or Allocate NIC proxy actions, and Create profile are paused or hidden, and a request sent anyway shows Paused for the move to the 6529 Network.",
+        "From the switch-on (Thursday 26 November 2026 00:00 UTC) you change them on the 6529 Network, through this site.",
         "Wave and drop ratings, follows, artwork alerts and profile preferences are not affected."
       ],
       "canonical_path": "/{user}",
