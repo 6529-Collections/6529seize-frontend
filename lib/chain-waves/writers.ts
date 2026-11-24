@@ -247,13 +247,11 @@ async function ballotWallet(
         : onDay;
     if (leaf) {
       const alone = leaf.walletCount > CLUSTER_MAX;
+      const readTdh = alone ? leaf.walletTdh : leaf.identityTdh;
       return {
         wallet: candidate,
         cid: alone ? loneClusterCid(candidate) : leaf.cid,
-        tdh:
-          onDay === undefined
-            ? null
-            : asBigInt(alone ? leaf.walletTdh : leaf.identityTdh),
+        tdh: onDay === undefined ? null : asBigInt(readTdh),
       };
     }
   }
