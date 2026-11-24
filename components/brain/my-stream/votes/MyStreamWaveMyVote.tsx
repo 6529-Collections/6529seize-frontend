@@ -158,17 +158,19 @@ function MyVoteAuthor({
       data-my-vote-author
       className={
         mobile
-          ? "tw-mt-3 tw-flex tw-min-w-0 tw-items-start tw-gap-2"
+          ? "tw-mt-4 tw-flex tw-min-w-0 tw-items-start tw-gap-2"
           : "tw-mt-4 tw-flex tw-min-w-0 tw-items-center tw-gap-2"
       }
     >
-      <div className="tw-relative tw-size-6 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-white/10">
+      <div
+        className={`tw-relative tw-flex-shrink-0 tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-white/10 ${mobile ? "tw-mr-1 tw-size-5" : "tw-size-6"}`}
+      >
         {author.pfp ? (
           <Image
             src={getScaledImageUri(author.pfp, ImageScale.W_AUTO_H_50)}
             alt=""
-            width={24}
-            height={24}
+            width={mobile ? 20 : 24}
+            height={mobile ? 20 : 24}
             unoptimized
             className="tw-h-full tw-w-full tw-bg-iron-800 tw-object-contain"
           />
@@ -189,7 +191,7 @@ function MyVoteAuthor({
               );
             }}
             title={author.handle ?? author.primary_address}
-            className={`tw-block tw-truncate tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-200 tw-no-underline tw-transition-colors tw-duration-200 desktop-hover:hover:tw-underline motion-reduce:tw-transition-none ${mobile ? "tw-min-h-11 tw-pt-0.5" : ""}`}
+            className={`tw-block tw-truncate tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-200 tw-no-underline tw-transition-colors tw-duration-200 desktop-hover:hover:tw-underline motion-reduce:tw-transition-none ${mobile ? "tw-min-h-11" : ""}`}
           >
             {author.handle ?? author.primary_address}
           </Link>
@@ -546,7 +548,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
                 type="button"
                 onClick={handleOpenDrop}
                 title={dropTitle}
-                className={`tw-max-w-full tw-truncate tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100 tw-transition-colors tw-duration-200 focus-visible:tw-rounded-sm focus-visible:tw-text-primary-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-400 motion-reduce:tw-transition-none ${mobile ? "tw-min-h-11 tw-pb-1 tw-pt-4" : ""}`}
+                className={`tw-max-w-full tw-truncate tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-font-semibold tw-leading-6 tw-text-iron-100 tw-transition-colors tw-duration-200 focus-visible:tw-rounded-sm focus-visible:tw-text-primary-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-400 motion-reduce:tw-transition-none ${mobile ? "tw-min-h-11 tw-pb-1 tw-pt-4 tw-text-[15px]" : "tw-text-base"}`}
               >
                 {dropTitle}
               </button>

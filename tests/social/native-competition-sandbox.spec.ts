@@ -76,12 +76,23 @@ async function expectCompactVoteMediaLayout(row: Locator) {
     const badgeBounds = badge.getBoundingClientRect();
     const artworkBounds = artwork.getBoundingClientRect();
     const titleBounds = titleRange.getBoundingClientRect();
+    const avatarBounds = author.firstElementChild!.getBoundingClientRect();
+    const handleBounds = authorRange.getBoundingClientRect();
+    const levelBounds = author.lastElementChild!.getBoundingClientRect();
+    const handleCenter = handleBounds.top + handleBounds.height / 2;
     return {
       artworkGap: badgeBounds.left - artworkBounds.right,
       titleGap: heading.getBoundingClientRect().left - badgeBounds.right,
-      authorLeftGap:
-        author.firstElementChild!.getBoundingClientRect().left -
-        badgeBounds.left,
+      authorLeftGap: avatarBounds.left - badgeBounds.left,
+      authorTextLeftGap: handleBounds.left - titleBounds.left,
+      avatarWidth: avatarBounds.width,
+      avatarHeight: avatarBounds.height,
+      avatarBottomGap: artworkBounds.bottom - avatarBounds.bottom,
+      avatarCenterGap:
+        avatarBounds.top + avatarBounds.height / 2 - handleCenter,
+      levelCenterGap: levelBounds.top + levelBounds.height / 2 - handleCenter,
+      titleFontSize: getComputedStyle(heading.querySelector("button")!)
+        .fontSize,
       iconCenterGap:
         badgeBounds.top +
         badgeBounds.height / 2 -
@@ -95,6 +106,13 @@ async function expectCompactVoteMediaLayout(row: Locator) {
   expect(alignment.artworkGap).toBe(16);
   expect(alignment.titleGap).toBe(8);
   expect(alignment.authorLeftGap).toBe(0);
+  expect(alignment.authorTextLeftGap).toBe(0);
+  expect(alignment.avatarWidth).toBe(20);
+  expect(alignment.avatarHeight).toBe(20);
+  expect(alignment.avatarBottomGap).toBe(0);
+  expect(Math.abs(alignment.avatarCenterGap)).toBeLessThanOrEqual(1);
+  expect(Math.abs(alignment.levelCenterGap)).toBeLessThanOrEqual(1);
+  expect(alignment.titleFontSize).toBe("15px");
   expect(Math.abs(alignment.iconCenterGap)).toBeLessThanOrEqual(2);
   expect(alignment.titleHandleGap).toBeGreaterThanOrEqual(12);
   expect(alignment.titleHandleGap).toBeLessThanOrEqual(24);
