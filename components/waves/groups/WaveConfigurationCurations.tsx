@@ -99,7 +99,7 @@ function WaveConfigurationCurationRow({
       <div className="tw-flex tw-min-w-0 tw-justify-end tw-text-right">
         {group ? (
           <WaveGroupMembersScope
-            group={{ id: group.id, name: group.name, is_hidden: false }}
+            group={{ id: group.id, is_hidden: false }}
             groupDetails={group}
           />
         ) : (

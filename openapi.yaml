@@ -13174,6 +13174,10 @@ paths:
         - Identities
       summary: Get subscribed actions to identity for authenticated user.
       operationId: getIdentitySubscriptions
+      description: >-
+        Returns the authenticated viewer's subscription actions for the
+        requested identity and whether that identity follows the viewer. POST
+        and DELETE responses return the updated actions only.
       parameters:
         - name: id
           in: path
@@ -35316,6 +35320,16 @@ components:
           maxItems: 100
           items:
             $ref: "#/components/schemas/ApiE2eeKeyPackageUpload"
+        replace_one_time:
+          type: boolean
+          description: >-
+            When true, the device's own unclaimed one-time KeyPackages of the
+            uploaded KeyPackages' suites are deleted, in the same transaction,
+            before these are stored: a client that updated replaces the pool its
+            older version made. The replacement never touches claimed
+            KeyPackages, last-resort KeyPackages or other devices' KeyPackages;
+            as on every upload, expired KeyPackages are removed and an uploaded
+            last-resort KeyPackage replaces the current one.
     ApiE2eeWelcome:
       type: object
       required:
@@ -36124,6 +36138,12 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiIdentitySubscriptionTargetAction"
+        follows_viewer:
+          type: boolean
+          readOnly: true
+          description: >-
+            Returned by GET only. Indicates whether the requested identity
+            follows the authenticated viewer.
     ApiIdentitySubscriptionTargetAction:
       type: string
       enum:

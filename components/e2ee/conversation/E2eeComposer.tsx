@@ -2,7 +2,7 @@
 
 import IconButton from "@/components/utils/button/IconButton";
 
-import { PaperClipIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 import {
   type ChangeEvent,
   type Ref,
@@ -20,14 +20,7 @@ import { E2eePollComposer, E2eePollComposerButton } from "./E2eePollComposer";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useBlurOnNativeKeyboardDismiss } from "@/hooks/useBlurOnNativeKeyboardDismiss";
 import { useDismissMobileComposer } from "@/hooks/useDismissMobileComposer";
-import {
-  COMPOSER_ACTION_BUTTON_CLASS_NAME,
-  COMPOSER_ACTION_IDLE_CLASS_NAME,
-  COMPOSER_ACTION_ICON_CLASS_NAME,
-  COMPOSER_ROW_GAP_CLASS_NAME,
-  COMPOSER_ROW_PADDING_CLASS_NAME,
-  getNativeComposerStyle,
-} from "@/components/waves/composerPresentation";
+import { getNativeComposerStyle } from "@/components/waves/composerPresentation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -61,6 +54,11 @@ import {
 } from "./useE2eeComposerParts";
 import { isSafeInlineImageMime } from "@/lib/e2ee/media";
 import { E2eeGifAttachmentPicker } from "./E2eeGifAttachmentPicker";
+import {
+  E2eeComposerAttachButton,
+  E2eeComposerActionTray,
+} from "./E2eeComposerActions";
+import { useE2eeComposerActionTray } from "./useE2eeComposerActionTray";
 
 /** Thumbnails are drawn at twice their 48 px box for sharp displays. */
 const THUMBNAIL_PX = 96;
@@ -455,7 +453,6 @@ export function E2eeComposer({
   const editorRef = useRef<E2eeComposerEditorHandle>(null);
   const blurInput = useCallback(() => editorRef.current?.blur(), []);
   useBlurOnNativeKeyboardDismiss(blurInput, isCapacitor);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [text, setText] = useState("");
   const [files, setFiles] = useState<readonly File[]>([]);
   const [error, setError] = useState<ComposerError | null>(null);
@@ -464,6 +461,7 @@ export function E2eeComposer({
   const [gifPending, setGifPending] = useState(false);
   const [pollOpen, setPollOpen] = useState(false);
   const pollButtonRef = useRef<HTMLButtonElement>(null);
+  const actions = useE2eeComposerActionTray(conversation.g, editing !== null);
   const createPoll =
     isE2eePollCreationEnabled() && !editing
       ? engine.createPoll?.bind(engine, conversation.g)
@@ -652,9 +650,11 @@ export function E2eeComposer({
           onCreate={createPoll}
           onClose={() => {
             setPollOpen(false);
-            globalThis.requestAnimationFrame(() =>
-              pollButtonRef.current?.focus()
-            );
+            globalThis.requestAnimationFrame(() => {
+              (
+                actions.trayProps.toggleRef.current ?? pollButtonRef.current
+              )?.focus();
+            });
           }}
         />
       )}
@@ -675,9 +675,7 @@ export function E2eeComposer({
         {isUploading ? (
           <UploadingFiles locale={locale} files={uploading} />
         ) : null}
-        <div
-          className={`tw-relative tw-flex tw-items-end ${COMPOSER_ROW_GAP_CLASS_NAME} ${COMPOSER_ROW_PADDING_CLASS_NAME}`}
-        >
+        <div {...actions.rowProps}>
           {mentions.open ? (
             <MentionList
               id={listboxId}
@@ -687,37 +685,22 @@ export function E2eeComposer({
               label={t(locale, "e2ee.composer.mentions.label")}
             />
           ) : null}
-          {editing === null ? (
-            <>
-              {canAttach && (
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  tabIndex={-1}
-                  aria-hidden="true"
-                  className="tw-hidden"
-                  onChange={onFilesChosen}
-                />
-              )}
-              <DropActionTooltip content={t(locale, "e2ee.composer.attach")}>
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  aria-label={t(locale, "e2ee.composer.attach")}
-                  disabled={!attachmentsEnabled}
-                  className={`${COMPOSER_ACTION_BUTTON_CLASS_NAME} ${COMPOSER_ACTION_IDLE_CLASS_NAME} disabled:tw-cursor-not-allowed disabled:tw-opacity-50`}
-                >
-                  <PaperClipIcon
-                    aria-hidden="true"
-                    className={COMPOSER_ACTION_ICON_CLASS_NAME}
-                  />
-                </button>
-              </DropActionTooltip>
+          {editing === null && (
+            <E2eeComposerActionTray {...actions.trayProps}>
+              <E2eeComposerAttachButton
+                compact={actions.trayProps.compact}
+                enabled={canAttach}
+                onFilesChosen={onFilesChosen}
+                onSelect={actions.selectAction}
+              />
               {createPoll && (
                 <E2eePollComposerButton
                   buttonRef={pollButtonRef}
-                  onClick={() => setPollOpen(true)}
+                  compact={actions.trayProps.compact}
+                  onClick={() => {
+                    actions.selectAction();
+                    setPollOpen(true);
+                  }}
                 />
               )}
               {canAttach && !isUploading && (
@@ -726,10 +709,12 @@ export function E2eeComposer({
                   onAttach={(file) => addFiles([file])}
                   onError={setError}
                   onPendingChange={setGifPending}
+                  compact={actions.trayProps.compact}
+                  onAction={actions.selectAction}
                 />
               )}
-            </>
-          ) : null}
+            </E2eeComposerActionTray>
+          )}
           <div className="tw-relative tw-min-w-0 tw-flex-1">
             <label className="tw-sr-only" htmlFor={textareaId}>
               {t(locale, "e2ee.composer.label")}
@@ -738,6 +723,7 @@ export function E2eeComposer({
               ref={editorRef}
               value={text}
               onChange={(value) => {
+                if (value !== text) actions.collapse();
                 setText(value);
                 setError(null);
               }}

@@ -3,28 +3,28 @@
 import { GifIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useEffect, useRef, useState } from "react";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
-import {
-  COMPOSER_ACTION_BUTTON_CLASS_NAME,
-  COMPOSER_ACTION_ICON_CLASS_NAME,
-  COMPOSER_ACTION_IDLE_CLASS_NAME,
-} from "@/components/waves/composerPresentation";
+import { COMPOSER_ACTION_ICON_CLASS_NAME } from "@/components/waves/composerPresentation";
 import { createDropGifPickerLoader } from "@/components/waves/CreateDropGifPickerLoader";
-import DropActionTooltip from "@/components/waves/drops/DropActionTooltip";
 import LazyCreateDropGifPicker from "@/components/waves/LazyCreateDropGifPicker";
 import { publicEnv } from "@/config/env";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { downloadGiphyGif, GifDownloadError } from "@/lib/e2ee/giphy";
+import { E2eeComposerActionButton } from "./E2eeComposerActions";
 import type { ComposerError } from "./useE2eeComposerParts";
 
 export function E2eeGifAttachmentPicker({
   onAttach,
   onError,
   onPendingChange,
+  compact,
+  onAction,
 }: {
   readonly onAttach: (file: File) => void;
   readonly onError: (error: ComposerError | null) => void;
   readonly onPendingChange: (pending: boolean) => void;
+  readonly compact: boolean;
+  readonly onAction: () => void;
 }) {
   const locale = useBrowserLocale();
   const [open, setOpen] = useState(false);
@@ -93,30 +93,36 @@ export function E2eeGifAttachmentPicker({
   );
   return (
     <>
-      <DropActionTooltip content={label}>
-        <button
-          type="button"
-          aria-label={label}
-          aria-expanded={open}
-          aria-haspopup="dialog"
-          onClick={() => (pending ? cancel() : setOpen(true))}
-          onMouseEnter={createDropGifPickerLoader.preload}
-          onFocus={createDropGifPickerLoader.preload}
-          className={`${COMPOSER_ACTION_BUTTON_CLASS_NAME} ${COMPOSER_ACTION_IDLE_CLASS_NAME}`}
-        >
-          {pending ? (
-            <span className="tw-relative tw-flex tw-items-center tw-gap-0.5">
-              <CircleLoader />
-              <XMarkIcon aria-hidden="true" className="tw-size-3" />
-            </span>
-          ) : (
-            <GifIcon
-              aria-hidden="true"
-              className={COMPOSER_ACTION_ICON_CLASS_NAME}
-            />
-          )}
-        </button>
-      </DropActionTooltip>
+      <E2eeComposerActionButton
+        tooltip={label}
+        compactLabel={
+          compact ? t(locale, "waves.composer.actions.gif") : undefined
+        }
+        aria-expanded={open}
+        aria-haspopup="dialog"
+        onClick={() => {
+          onAction();
+          if (pending) {
+            cancel();
+          } else {
+            setOpen(true);
+          }
+        }}
+        onMouseEnter={createDropGifPickerLoader.preload}
+        onFocus={createDropGifPickerLoader.preload}
+      >
+        {pending ? (
+          <span className="tw-relative tw-flex tw-items-center tw-gap-0.5">
+            <CircleLoader />
+            <XMarkIcon aria-hidden="true" className="tw-size-3" />
+          </span>
+        ) : (
+          <GifIcon
+            aria-hidden="true"
+            className={COMPOSER_ACTION_ICON_CLASS_NAME}
+          />
+        )}
+      </E2eeComposerActionButton>
       <LazyCreateDropGifPicker
         giphyApiKey={publicEnv.GIPHY_API_KEY}
         show={open}

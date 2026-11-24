@@ -83,6 +83,12 @@ const DEFAULT_DEBOUNCE_MS = 30_000;
 const RETRY_MS = 5 * 60_000;
 const DEFAULT_COMPACT_AT = 1000;
 /**
+ * Read positions ride along with other changes; on their own they go up at
+ * most this often, so backup uploads do not become a second read-timing
+ * signal next to read-state sync (D175, P60 §5).
+ */
+const READS_ALONE_EVERY_MS = 6 * 60 * 60_000;
+/**
  * Runs one backupNow() makes while history keeps changing under it, before
  * it leaves the rest to the next scheduled run.
  */
@@ -146,6 +152,7 @@ export class E2eeBackupManager {
       api: deps.api,
       state: deps.state,
       withBackup: (request) => this.withBackup(request),
+      now: () => this.now(),
     };
     this.now = deps.now ?? (() => Date.now());
     this.scheduler = deps.scheduler ?? defaultScheduler;
@@ -425,7 +432,8 @@ export class E2eeBackupManager {
       return false;
     }
     const history = await this.deps.engine.backupHistory();
-    const changed = changedHistory(history, { ...local, ...uploaded });
+    // Read positions alone do not call for another run (READS_ALONE_EVERY_MS).
+    const changed = changedHistory(history, { ...local, ...uploaded }, false);
     return (
       changed.groups.length > 0 ||
       changed.messages.length > 0 ||
@@ -527,12 +535,18 @@ export class E2eeBackupManager {
     local: BackupLocalState
   ): Promise<EncodedSegment[]> {
     const history = await this.deps.engine.backupHistory();
-    const pack = () =>
-      packSegments(
-        changedHistory(history, local),
+    const pack = () => {
+      const changed = changedHistory(history, local, false);
+      const readsDue =
+        changed.groups.length > 0 ||
+        changed.messages.length > 0 ||
+        this.now() - (local.readsAt ?? 0) >= READS_ALONE_EVERY_MS;
+      return packSegments(
+        readsDue ? changedHistory(history, local, true) : changed,
         MAX_SEGMENT_BYTES,
         this.now()
       );
+    };
     const segments = pack();
     if (segments.length === 0) {
       return segments;
@@ -617,6 +631,8 @@ export class E2eeBackupManager {
               fingerprint(message),
             ])
           ),
+          readsSent: { ...history.reads },
+          readsAt: this.now(),
         };
         await this.deps.state.put(local);
         this.local = local;

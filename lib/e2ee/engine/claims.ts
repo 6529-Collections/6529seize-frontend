@@ -4,16 +4,39 @@ import type {
   ApiE2eeDevice,
   ApiE2eePolicyStatus,
 } from "../api-types";
-import { ownDeviceKey, type EngineContext } from "./context";
+import { asE2eeApiError } from "../api-errors";
+import { checkpoint, ownDeviceKey, type EngineContext } from "./context";
 
 /** KeyPackage claims (4.2) with client-side grant checks of every device. */
 
 const MAX_TARGETS_PER_CLAIM = 100;
+const CLAIMS_RATE_LIMITED = "E2EE_RATE_LIMITED";
+/** The server counts claims per profile in fixed clock hours. */
+const CLAIM_WINDOW_MS = 60 * 60_000;
+
+/**
+ * Past the server's claim limit, self groups make no claims until its
+ * window ends, leaving what is left to the user's own chats (P60 §2 rule 6).
+ * The 429 carries no Retry-After; the window is a fixed clock hour.
+ */
+async function pauseSelfGroupClaims(ctx: EngineContext): Promise<void> {
+  const stored = ctx.device;
+  if (!stored) {
+    return;
+  }
+  const now = ctx.now();
+  stored.readSync ??= { unsent: [] };
+  stored.readSync.claimsPausedUntil =
+    now - (now % CLAIM_WINDOW_MS) + CLAIM_WINDOW_MS;
+  await checkpoint(ctx, { device: stored, skipWasm: true });
+}
 
 export interface ClaimedPackage {
   /** Base64 KeyPackage. */
   keyPackage: string;
   device: ApiE2eeDevice;
+  /** The device's last-resort KeyPackage (handed out again, not used up). */
+  lastResort?: boolean;
 }
 
 interface ClaimedPackages {
@@ -53,13 +76,20 @@ async function claimBatch(
   group: string | undefined,
   out: ClaimedPackages
 ): Promise<void> {
-  const response = await ctx.api.claimKeyPackages({
-    targets,
-    claimer_device_key: ownDeviceKey(ctx),
-    // Only current-suite groups take adds; superseded ones are read-only.
-    ciphersuite: E2EE_CIPHERSUITE,
-    ...(group ? { group } : {}),
-  });
+  const response = await ctx.api
+    .claimKeyPackages({
+      targets,
+      claimer_device_key: ownDeviceKey(ctx),
+      // Only current-suite groups take adds; superseded ones are read-only.
+      ciphersuite: E2EE_CIPHERSUITE,
+      ...(group ? { group } : {}),
+    })
+    .catch(async (error: unknown) => {
+      if (asE2eeApiError(error)?.code === CLAIMS_RATE_LIMITED) {
+        await pauseSelfGroupClaims(ctx);
+      }
+      throw error;
+    });
   const own = ownDeviceKey(ctx);
   for (const result of response.results) {
     out.status.set(result.profile_id, result.status);
@@ -82,7 +112,11 @@ async function claimBatch(
         );
       ctx.directory.seed([device]);
       if (allowed && (await isUsableDevice(ctx, device))) {
-        out.packages.push({ keyPackage: claimed.key_package, device });
+        out.packages.push({
+          keyPackage: claimed.key_package,
+          device,
+          lastResort: claimed.last_resort,
+        });
       }
     }
   }

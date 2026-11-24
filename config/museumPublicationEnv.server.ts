@@ -82,3 +82,20 @@ export function getMuseumPublicationNodeEnvironment(): string | undefined {
   }
   return process.env["NODE_ENV"];
 }
+
+/**
+ * The directory of local test fixtures (`records.json` and `payloads/`) the
+ * on-chain Museum preview reads instead of Sepolia and IPFS. Only a
+ * Playwright read-only run sets it; null otherwise.
+ */
+export function getMuseumOnchainFixtureRoot(): string | null {
+  if (typeof process === "undefined" || !process.env) {
+    return null;
+  }
+  const root = process.env["MUSEUM_ONCHAIN_FIXTURE_ROOT"];
+  return root !== undefined &&
+    root !== "" &&
+    process.env["PLAYWRIGHT_READONLY"] === "1"
+    ? root
+    : null;
+}
