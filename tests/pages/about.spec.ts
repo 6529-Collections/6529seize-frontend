@@ -106,10 +106,11 @@ test.describe("About Pages @smoke @medium @large", () => {
     await waitForRouteReady(page);
     const classic = page.getByRole("button", { name: "6529 Desktop Classic" });
     await expect(classic).toHaveAttribute("aria-expanded", "false");
-    await expect(page.locator("#desktop-classic-downloads")).toHaveCSS(
-      "height",
-      "0px"
-    );
+    await expect(
+      page
+        .getByRole("region", { name: "6529 Desktop Classic" })
+        .locator("#desktop-classic-downloads")
+    ).toHaveCSS("height", "0px");
     await classic.press("Enter");
     await expect(classic).toHaveAttribute("aria-expanded", "true");
     const mac = page.getByRole("group").filter({
