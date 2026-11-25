@@ -1337,6 +1337,16 @@ export const DE_DE_MESSAGES = {
   ...DE_DE_TRANSFER_MESSAGES,
   ...DE_DE_THE_MEMES_MINT_SUCCESS_MESSAGES,
   ...DE_DE_THE_MEMES_MINT_PROGRESS_MESSAGES,
+  "e2ee.list.pinned": "Angeheftet",
+  "e2ee.list.pinnedChat": "{title}, angehefteter Chat",
+  "e2ee.info.pin": "Oben anheften",
+  "e2ee.info.unpin": "Anheftung aufheben",
+  "e2ee.info.pinSyncHelp":
+    "Angeheftete Chats werden privat mit deinen anderen vertrauenswürdigen Geräten synchronisiert.",
+  "e2ee.info.pinLocalHelp":
+    "Angeheftete Chats bleiben auf diesem Gerät, bis die verschlüsselte Synchronisierung verfügbar ist.",
+  "e2ee.info.pinFailed":
+    "Die Anheftung konnte nicht geändert werden. Versuch es erneut.",
   "e2ee.message.taskChecked": "Markierte Aufgabe",
   "e2ee.message.taskUnchecked": "Nicht markierte Aufgabe",
   "e2ee.message.imageLink": "Bildlink",
