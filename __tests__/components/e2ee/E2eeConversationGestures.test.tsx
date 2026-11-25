@@ -8,7 +8,6 @@ import {
   screen,
 } from "@testing-library/react";
 import { E2eeConversationView } from "@/components/e2ee/conversation/E2eeConversationView";
-import { rememberE2eeChatOrigin } from "@/components/e2ee/conversation/e2eeChatOrigin";
 import { getEncryptedMessagesRoute } from "@/helpers/navigation.helpers";
 import {
   contextFor,
@@ -20,9 +19,11 @@ import {
 
 const mockPush = jest.fn();
 let mockIsCapacitor = false;
+let mockSearch = new URLSearchParams();
 
 jest.mock("next/navigation", () => ({
   usePathname: () => "/messages/encrypted/0x",
+  useSearchParams: () => mockSearch,
   useRouter: () => ({
     push: mockPush,
     replace: jest.fn(),
@@ -47,9 +48,9 @@ const touch = (clientX: number, clientY = 100) => ({
   clientY,
 });
 
-function openedFrom(route: string, g = conversation().g) {
-  globalThis.history.replaceState(null, "", route);
-  rememberE2eeChatOrigin(g);
+/** The chat URL's query, as after a link, a reload or a deep link. */
+function openedWith(query: string) {
+  mockSearch = new URLSearchParams(query);
 }
 
 function renderConversation() {
@@ -101,8 +102,8 @@ describe("encrypted conversation swipe back", () => {
     mockIsCapacitor = true;
     Element.prototype.scrollTo = jest.fn();
     Element.prototype.scrollIntoView = jest.fn();
-    // No list origin unless a test opens the chat from one.
-    openedFrom("/");
+    // A deep link or a chat opened outside Messages carries no origin.
+    openedWith("");
   });
 
   afterEach(() => {
@@ -128,37 +129,31 @@ describe("encrypted conversation swipe back", () => {
     ).toHaveAttribute("href", getEncryptedMessagesRoute());
   });
 
-  it("returns Back and swipe to the Messages list the chat was opened from", () => {
-    openedFrom("/messages");
-    const surface = renderConversation();
+  it("returns Back and swipe to Messages for a chat opened there, also after a reload", () => {
+    openedWith("from=messages");
+    let surface = renderConversation();
     expect(
       screen.getByRole("link", { name: "Back to messages" })
     ).toHaveAttribute("href", "/messages");
+    cleanup();
 
+    // A reload keeps the URL, and with it the Back target.
+    surface = renderConversation();
+    expect(
+      screen.getByRole("link", { name: "Back to messages" })
+    ).toHaveAttribute("href", "/messages");
     fireEvent.touchStart(surface, { touches: [touch(80)] });
     move(surface, 200);
     release(surface, 200);
     expect(mockPush).toHaveBeenCalledWith("/messages", { scroll: false });
   });
 
-  it("returns to the encrypted list when the chat was opened there or elsewhere", () => {
-    openedFrom(getEncryptedMessagesRoute());
-    renderConversation();
-    expect(
-      screen.getByRole("link", { name: "Back to encrypted messages" })
-    ).toHaveAttribute("href", getEncryptedMessagesRoute());
-    cleanup();
-
-    // A Messages origin recorded for a different chat does not apply here.
-    openedFrom("/messages", "0xother");
-    renderConversation();
-    expect(
-      screen.getByRole("link", { name: "Back to encrypted messages" })
-    ).toHaveAttribute("href", getEncryptedMessagesRoute());
-    cleanup();
-
-    // Opening from another chat, a profile or a link is not a list origin.
-    openedFrom(`${getEncryptedMessagesRoute()}/0xother`);
+  it.each([
+    ["a deep link or a chat-to-chat jump", ""],
+    ["an unknown origin", "from=elsewhere"],
+    ["an external origin", "from=https%3A%2F%2Fexample.com"],
+  ])("returns to the encrypted list after %s", (_case, query) => {
+    openedWith(query);
     renderConversation();
     expect(
       screen.getByRole("link", { name: "Back to encrypted messages" })

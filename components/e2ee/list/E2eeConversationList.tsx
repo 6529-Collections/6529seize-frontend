@@ -2,7 +2,7 @@
 
 import { BellSlashIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { rememberE2eeChatOrigin } from "../conversation/e2eeChatOrigin";
+import { getEncryptedConversationRouteFromMessages } from "../conversation/e2eeChatOrigin";
 import type { ReactNode } from "react";
 import {
   getEncryptedConversationRoute,
@@ -202,6 +202,15 @@ interface E2eeConversationRowProps {
   readonly muted: boolean;
   /** The display time zone for the last-activity time. */
   readonly zone: DisplayTimeZone;
+  /** Rendered on Messages: opened chats return there. */
+  readonly fromMessages: boolean;
+}
+
+function getRowHref(g: string, active: boolean, fromMessages: boolean) {
+  if (active) return getEncryptedMessagesRoute();
+  return fromMessages
+    ? getEncryptedConversationRouteFromMessages(g)
+    : getEncryptedConversationRoute(g);
 }
 
 function MutedMark({ locale }: { readonly locale: SupportedLocale }) {
@@ -220,14 +229,12 @@ function E2eeConversationRow({
   collapsed,
   muted,
   zone,
+  fromMessages,
 }: E2eeConversationRowProps) {
   const locale = useBrowserLocale();
   const title = getConversationTitle(locale, conversation, selfProfileId);
   const statusKey = STATUS_KEYS[conversation.status];
-  const href = active
-    ? getEncryptedMessagesRoute()
-    : getEncryptedConversationRoute(conversation.g);
-  const rememberOrigin = () => rememberE2eeChatOrigin(conversation.g);
+  const href = getRowHref(conversation.g, active, fromMessages);
   const hasUnread =
     !muted && (conversation.unread > 0 || conversation.mentions > 0);
   const rowClass = active
@@ -239,7 +246,6 @@ function E2eeConversationRow({
       <li>
         <Link
           href={href}
-          onClick={active ? undefined : rememberOrigin}
           aria-current={active ? "page" : undefined}
           aria-label={title}
           title={title}
@@ -265,7 +271,6 @@ function E2eeConversationRow({
     <li>
       <Link
         href={href}
-        onClick={active ? undefined : rememberOrigin}
         aria-current={active ? "page" : undefined}
         className={`tw-flex tw-min-w-0 tw-items-center tw-gap-3 tw-rounded-lg tw-px-3 tw-py-2 tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${rowClass}`}
       >
@@ -325,6 +330,8 @@ interface E2eeConversationListProps {
   readonly collapsed?: boolean | undefined;
   readonly limit?: number | undefined;
   readonly label: string;
+  /** Rendered on Messages: opened chats return there. */
+  readonly fromMessages?: boolean | undefined;
 }
 
 export function E2eeConversationList({
@@ -334,6 +341,7 @@ export function E2eeConversationList({
   collapsed = false,
   limit,
   label,
+  fromMessages = false,
 }: E2eeConversationListProps) {
   const muted = useMutedE2eeChats(selfProfileId);
   const zone = useDisplayTimeZone();
@@ -377,6 +385,7 @@ export function E2eeConversationList({
               collapsed={collapsed}
               muted={unmuted.length === 0}
               zone={zone}
+              fromMessages={fromMessages}
             />
           );
         })}

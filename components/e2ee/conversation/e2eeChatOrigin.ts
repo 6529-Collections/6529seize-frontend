@@ -1,28 +1,23 @@
 import {
+  getEncryptedConversationRoute,
   getEncryptedMessagesRoute,
   getMessagesBaseRoute,
 } from "@/helpers/navigation.helpers";
 
-/** Conversation lists a chat can be opened from and returned to. */
-const LIST_ROUTES = new Set([
-  getMessagesBaseRoute(false),
-  getEncryptedMessagesRoute(),
-]);
+/** Query parameter a chat link carries when it was opened from Messages. */
+export const E2EE_CHAT_FROM_PARAM = "from";
+const FROM_MESSAGES = "messages";
 
-let origin: { readonly g: string; readonly route: string } | null = null;
-
-/** Records the list a chat row was opened from (Messages or encrypted list). */
-export function rememberE2eeChatOrigin(g: string): void {
-  const route = globalThis.location.pathname;
-  origin = LIST_ROUTES.has(route) ? { g: g.toLowerCase(), route } : null;
-}
+/** A chat link from the Messages list; its Back returns to Messages. */
+export const getEncryptedConversationRouteFromMessages = (g: string): string =>
+  `${getEncryptedConversationRoute(g)}?${E2EE_CHAT_FROM_PARAM}=${FROM_MESSAGES}`;
 
 /**
- * Where the chat's Back returns: the list it was opened from, so one tap gets
- * back there. Chats opened any other way return to the encrypted list.
+ * Where a chat's Back returns, from its own `from` parameter: Messages when it
+ * was opened there, otherwise the encrypted list. Only these two lists are
+ * possible, and the URL keeps the choice across reloads.
  */
-export function getE2eeChatReturnRoute(g: string): string {
-  return origin?.g === g.toLowerCase()
-    ? origin.route
+export const getE2eeChatReturnRoute = (from: string | null): string =>
+  from === FROM_MESSAGES
+    ? getMessagesBaseRoute(false)
     : getEncryptedMessagesRoute();
-}

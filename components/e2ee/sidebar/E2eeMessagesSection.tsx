@@ -7,6 +7,7 @@ import { useId } from "react";
 import {
   getEncryptedConversationIdFromPathname,
   getEncryptedMessagesRoute,
+  getMessagesBaseRoute,
 } from "@/helpers/navigation.helpers";
 import { useE2ee } from "@/hooks/e2ee/useE2ee";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -23,6 +24,8 @@ interface SectionData {
   readonly profileId: string | null;
   readonly activeGroup: string | null;
   readonly onEncryptedList: boolean;
+  /** On Messages itself: chats opened here return here. */
+  readonly onMessages: boolean;
   readonly hasList: boolean;
 }
 
@@ -50,6 +53,7 @@ function CollapsedSection({ data }: { readonly data: SectionData }) {
           collapsed
           limit={SIDEBAR_LIMIT}
           label={t(locale, "e2ee.list.label")}
+          fromMessages={data.onMessages}
         />
       ) : null}
     </nav>
@@ -121,6 +125,7 @@ function ExpandedSection({
               activeGroup={data.activeGroup}
               limit={SIDEBAR_LIMIT}
               label={t(locale, "e2ee.list.label")}
+              fromMessages={data.onMessages}
             />
           </div>
         ) : null}
@@ -164,6 +169,7 @@ export function E2eeMessagesSection({
     profileId,
     activeGroup: getEncryptedConversationIdFromPathname(pathname),
     onEncryptedList: pathname === getEncryptedMessagesRoute(),
+    onMessages: pathname === getMessagesBaseRoute(false),
     hasList: status === "ready" && conversations.length > 0,
   };
 

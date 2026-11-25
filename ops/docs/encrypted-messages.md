@@ -1001,7 +1001,8 @@ menu remain available. Pending, unsent, deleted and unreadable messages, notices
 and read-only conversations do not offer swipe to reply. Links, media controls and text selection keep their own interactions.
 
 In the native app, swipe right across conversation content to return to the
-Encrypted messages list, or use the existing Back control. Reverse below the
+same list as the Back control: **Messages** for a chat opened there, otherwise
+the Encrypted messages list. Reverse below the
 gesture threshold before release to cancel the return. Vertical scrolling
 and multi-touch do not trigger the shortcut. Reduced motion removes the added
 settling animation.
