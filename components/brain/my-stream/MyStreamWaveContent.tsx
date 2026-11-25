@@ -134,7 +134,8 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
   } = useMyStream();
   const { updateEligibility } = useWaveEligibility();
   // MyStreamWave runs the wave's query, above the wave's move scope.
-  const { data: wave, isError, isFetching, refetch } = useMyStreamWaveQuery();
+  const { data: wave, isError, isFetching, isFetchedAfterMount, refetch } =
+    useMyStreamWaveQuery();
   const submissionTarget = useCompetitionSubmissionWave(wave, !competitionOnly);
   const submissionWave = submissionTarget.wave ?? wave;
   const metadataWaveId = wave?.id;
@@ -622,6 +623,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
       <WaveChatWithUnread
         wave={submissionWave ?? wave}
         viewMode={showGalleryToggle ? viewMode : "chat"}
+        unreadMetadataPending={isFetching && !isFetchedAfterMount}
         onDropClick={onDropClick}
         chatSubmitDrop={activeChatSubmitDropState}
         chatSubmitDropAction={chatSubmitDropAction}
@@ -745,7 +747,6 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
           }
         >
           <WaveChatActivity
-            waveId={wave.id}
             active={activeTabContent === components[MyStreamWaveTab.CHAT]}
             chat={components[MyStreamWaveTab.CHAT]}
           >

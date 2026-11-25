@@ -31,6 +31,9 @@ short landscape iPhone chat viewports.
 Live swipe-back to the Waves list moves the channel header and content together
 while the bottom navigation stays fixed. Cancelling restores the whole page;
 the existing return destination and feed reading-position behavior are preserved.
+The Back record also covers the complete conversation slide when tapping Back
+on iPhone or phone web, its stationary list destination, interruption and
+Reduced Motion. Profile Waves Feed returns retain their own transition.
 
 The signing, encrypted-messages and connection-sharing records cover the shared
 permission consent flow, separate or combined grants, shared server device names,
@@ -1159,3 +1162,6 @@ its existing filter visibility while fetching.
 Primary navigation knowledge includes the shared Join 6529 / Validator slot: newcomers
 see Join, signed-in profiles see Validator, and unresolved sessions reserve the
 slot across desktop, mobile web, native menus, and page search.
+
+The Wave list navigation record describes paired phone conversation entry and
+Back slides, including the complete header, a stationary list and Reduced Motion.

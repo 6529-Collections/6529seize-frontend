@@ -1,12 +1,16 @@
 "use client";
 
+import { Capacitor } from "@capacitor/core";
 import {
   ArrowLeftIcon,
   InformationCircleIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
 import { getEncryptedMessagesRoute } from "@/helpers/navigation.helpers";
+import { runPhoneChevronBackTransition } from "@/helpers/waves/wave-navigation-transition";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useCapacitor from "@/hooks/useCapacitor";
 import { t } from "@/i18n/messages";
@@ -45,6 +49,7 @@ export function E2eeConversationHeader({
   backHref = getEncryptedMessagesRoute(),
 }: E2eeConversationHeaderProps) {
   const locale = useBrowserLocale();
+  const router = useRouter();
   const { isCapacitor } = useCapacitor();
   const title = getConversationTitle(locale, conversation, selfProfileId);
   const peer = getDmPeer(conversation, selfProfileId);
@@ -61,6 +66,16 @@ export function E2eeConversationHeader({
     <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-py-2.5 sm:tw-px-4">
       <Link
         href={backHref}
+        onNavigate={(event) => {
+          if (
+            (isCapacitor && Capacitor.getPlatform() !== "ios") ||
+            !window.matchMedia(PHONE_WAVES_LAYOUT_QUERY).matches
+          ) {
+            return;
+          }
+          event.preventDefault();
+          runPhoneChevronBackTransition(backHref, () => router.push(backHref));
+        }}
         aria-label={t(
           locale,
           backHref === getEncryptedMessagesRoute()

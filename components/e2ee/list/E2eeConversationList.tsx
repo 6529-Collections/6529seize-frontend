@@ -3,6 +3,10 @@
 import { BellSlashIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { getEncryptedConversationRouteFromMessages } from "../conversation/e2eeChatOrigin";
+import { useRouter } from "next/navigation";
+import useCapacitor from "@/hooks/useCapacitor";
+import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
+import { runPhoneConversationEntryTransition } from "@/helpers/waves/wave-navigation-transition";
 import type { ReactNode } from "react";
 import {
   getEncryptedConversationRoute,
@@ -232,6 +236,8 @@ function E2eeConversationRow({
   fromMessages,
 }: E2eeConversationRowProps) {
   const locale = useBrowserLocale();
+  const router = useRouter();
+  const { isCapacitor, isIos } = useCapacitor();
   const title = getConversationTitle(locale, conversation, selfProfileId);
   const statusKey = STATUS_KEYS[conversation.status];
   const href = getRowHref(conversation.g, active, fromMessages);
@@ -240,12 +246,30 @@ function E2eeConversationRow({
   const rowClass = active
     ? "tw-bg-iron-900 tw-text-iron-50"
     : "tw-text-iron-200 desktop-hover:hover:tw-bg-iron-900/60";
+  const handleNavigate = (event: { preventDefault: () => void }) => {
+    if (
+      active ||
+      (isCapacitor && !isIos) ||
+      !window.matchMedia(PHONE_WAVES_LAYOUT_QUERY).matches ||
+      !["/messages", getEncryptedMessagesRoute()].includes(
+        window.location.pathname
+      )
+    )
+      return;
+    event.preventDefault();
+    // The transition matches the committed pathname, without the query.
+    runPhoneConversationEntryTransition(
+      getEncryptedConversationRoute(conversation.g),
+      () => router.push(href, { scroll: false })
+    );
+  };
 
   if (collapsed) {
     return (
       <li>
         <Link
           href={href}
+          onNavigate={handleNavigate}
           aria-current={active ? "page" : undefined}
           aria-label={title}
           title={title}
@@ -271,6 +295,7 @@ function E2eeConversationRow({
     <li>
       <Link
         href={href}
+        onNavigate={handleNavigate}
         aria-current={active ? "page" : undefined}
         className={`tw-flex tw-min-w-0 tw-items-center tw-gap-3 tw-rounded-lg tw-px-3 tw-py-2 tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${rowClass}`}
       >

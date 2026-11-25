@@ -1,5 +1,5 @@
 import type { ApiWaveDropsFeedV2 } from "@/generated/models/ApiWaveDropsFeedV2";
-import type { Locator, Page } from "@playwright/test";
+import { devices, type Locator, type Page } from "@playwright/test";
 import {
   expect,
   expectNoHorizontalOverflow,
@@ -17,6 +17,7 @@ import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import { longPressMessage } from "../support/longPressMessage";
 
 const WAVE = "00000000-0000-4000-8000-000000000529";
+const DM = "00000000-0000-4000-8000-000000000532";
 useLocalSandboxMutationGuard(
   test,
   "PLAYWRIGHT_AUTH_SANDBOX",
@@ -302,6 +303,175 @@ for (const platform of ["ios", "android"] as const) {
           .toBeLessThanOrEqual(544);
         await dismissKeyboard();
         await editor.fill("");
+        await expectNoUnsafeSandboxMutations(baseURL);
+      });
+
+      for (const [screen, path] of [
+        ["Wave", `/waves/${WAVE}`],
+        ["DM", `/messages/${DM}`],
+      ] as const) {
+        test(`${screen} composer stays still from its first frame on list entry`, async ({
+          page,
+          baseURL,
+        }) => {
+          // Reopening a cached chat exposes stale list measurements immediately.
+          await page.goto(path, { waitUntil: "domcontentloaded" });
+          await waitForRouteReady(page);
+          await expect(
+            page.getByRole("textbox", { name: "Write a message" }).last()
+          ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+          await page.getByRole("button", { name: "Back", exact: true }).tap();
+          const listPath = screen === "Wave" ? "/waves" : "/messages";
+          await expect(page).toHaveURL(new RegExp(`${listPath}$`, "u"));
+          const row = page
+            .getByRole("link", {
+              name:
+                screen === "Wave"
+                  ? /Local Composer Sandbox Wave/u
+                  : /Sandbox Direct Message/u,
+            })
+            .first();
+          await expect(row).toBeVisible();
+
+          const entryFrames = page.evaluate(
+            () =>
+              new Promise<number[]>((resolve, reject) => {
+                const positions: number[] = [];
+                const deadline = performance.now() + 10_000;
+                const sample = () => {
+                  const editor = document.querySelector<HTMLElement>(
+                    '[data-ios-chat-composer] [role="textbox"]'
+                  );
+                  const box = editor?.getBoundingClientRect();
+                  if (box && box.height > 0) positions.push(box.top);
+                  if (positions.length >= 20) resolve(positions);
+                  else if (performance.now() > deadline)
+                    reject(new Error("Conversation composer did not paint"));
+                  else requestAnimationFrame(sample);
+                };
+                requestAnimationFrame(sample);
+              })
+          );
+          await row.tap();
+          const positions = await entryFrames;
+          expect(
+            Math.max(...positions) - Math.min(...positions)
+          ).toBeLessThanOrEqual(1);
+          await expectNoUnsafeSandboxMutations(baseURL);
+        });
+
+        test(`${screen} keyboard keeps the header in the iPhone safe area`, async ({
+          context,
+          page,
+          baseURL,
+        }) => {
+          const client = await context.newCDPSession(page);
+          await client.send("Emulation.setSafeAreaInsetsOverride", {
+            insets: { top: 59, bottom: 34 },
+          });
+          await page.goto(path, { waitUntil: "domcontentloaded" });
+          await waitForRouteReady(page);
+          const editor = page
+            .getByRole("textbox", { name: "Write a message" })
+            .last();
+          await expect(editor).toBeVisible({
+            timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+          });
+          const back = page.getByRole("button", { name: "Back", exact: true });
+          const headerTop = () =>
+            back.evaluate((element) => element.getBoundingClientRect().top);
+          const top = await headerTop();
+          expect(top).toBeGreaterThanOrEqual(59);
+          const expectPageToFit = () =>
+            expect
+              .poll(() =>
+                page.evaluate(
+                  () =>
+                    document.documentElement.scrollHeight -
+                    document.documentElement.clientHeight
+                )
+              )
+              .toBeLessThanOrEqual(1);
+          await expectPageToFit();
+
+          await editor.focus();
+          await keyboardEvent(page, "keyboardWillShow", 340);
+          await keyboardEvent(page, "keyboardDidShow", 340);
+          await expect
+            .poll(() =>
+              editor.evaluate(
+                (element) => element.getBoundingClientRect().bottom
+              )
+            )
+            .toBeLessThanOrEqual(500);
+          await expect.poll(headerTop).toBeCloseTo(top, 0);
+          await expectPageToFit();
+
+          await editor.blur();
+          await keyboardEvent(page, "keyboardWillHide");
+          await keyboardEvent(page, "keyboardDidHide");
+          await expectPageToFit();
+          await expect.poll(headerTop).toBeCloseTo(top, 0);
+          await expectNoUnsafeSandboxMutations(baseURL);
+        });
+      }
+
+      test("DM header follows the finger during swipe Back", async ({
+        page,
+        baseURL,
+      }) => {
+        const conversation = `/messages/${DM}`;
+        await page.goto(conversation, { waitUntil: "domcontentloaded" });
+        await waitForRouteReady(page);
+        await expect(
+          page.getByRole("textbox", { name: "Write a message" }).last()
+        ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+
+        const headerBack = page.getByRole("button", {
+          name: "Back",
+          exact: true,
+        });
+        const surface = page.getByTestId("wave-swipe-surface");
+        const horizontalPosition = (element: Locator) =>
+          element.evaluate((node) => node.getBoundingClientRect().x);
+        const headerStart = await horizontalPosition(headerBack);
+        const contentStart = await horizontalPosition(surface);
+        const drag = await touchDrag(page, surface, 115);
+        await expect
+          .poll(async () => (await horizontalPosition(surface)) - contentStart)
+          .toBeGreaterThan(80);
+        const contentTravel =
+          (await horizontalPosition(surface)) - contentStart;
+        expect(
+          (await horizontalPosition(headerBack)) - headerStart
+        ).toBeCloseTo(contentTravel, 0);
+
+        await drag.reverse();
+        await drag.release();
+        await expect(page).toHaveURL(new RegExp(`${conversation}$`, "u"));
+        await expect
+          .poll(() => horizontalPosition(headerBack))
+          .toBeCloseTo(headerStart, 0);
+        await expect
+          .poll(() =>
+            surface.evaluate((node) => {
+              const pageSurface = node.closest<HTMLElement>(
+                "[data-wave-swipe-page]"
+              );
+              return [
+                node.style.transform,
+                node.style.willChange,
+                pageSurface?.style.transform,
+                pageSurface?.style.willChange,
+              ];
+            })
+          )
+          .toEqual(["", "", "", ""]);
+
+        const committed = await touchDrag(page, surface, 130);
+        await committed.release();
+        await expect(page).toHaveURL(/\/messages$/u);
+        await expectNoHorizontalOverflow(page);
         await expectNoUnsafeSandboxMutations(baseURL);
       });
     }
@@ -1140,6 +1310,393 @@ test.describe("web message gesture regression", () => {
     await expect(
       page.getByRole("button", { name: "Cancel reply", exact: true })
     ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+});
+
+test.describe("phone chevron Back", () => {
+  test.use({
+    userAgent: devices["iPhone 14 Pro Max"].userAgent,
+    isMobile: true,
+    hasTouch: true,
+    viewport: { width: 412, height: 840 },
+  });
+  for (const [surface, destination] of [
+    ["ios", "/waves"],
+    ["web", "/waves"],
+    ["ios", "/messages"],
+    ["web", "/messages"],
+  ] as const) {
+    test(`phone ${surface} opens ${destination} with the complete conversation sliding over its list`, async ({
+      context,
+      page,
+      baseURL,
+    }, testInfo) => {
+      test.skip(
+        !["web-mobile-chromium", "web-desktop-webkit"].includes(
+          testInfo.project.name
+        ),
+        "Phone entry is checked in Chromium and WebKit with touch input."
+      );
+      if (surface === "ios")
+        await installSurfaceSimulation(context, "capacitor-ios-sim", baseURL);
+      await hideNextDevOverlay(context);
+      await installMessageFixture(page, baseURL);
+      const name =
+        destination === "/waves"
+          ? /Local Composer Sandbox Wave/u
+          : /Sandbox Direct Message/u;
+      const conversation = `${destination}/${destination === "/waves" ? WAVE : DM}`;
+      await page.goto(conversation, { waitUntil: "domcontentloaded" });
+      await expect(
+        page.getByRole("textbox", { name: "Write a message" }).last()
+      ).toBeVisible({
+        timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+      });
+      await page.getByRole("button", { name: /^(Back|Go back)$/u }).tap();
+      await expect(page).toHaveURL(new RegExp(`${destination}$`, "u"));
+      const row = page.getByRole("link", { name }).first();
+      await expect(row).toBeVisible();
+      await page.evaluate(() => {
+        const root = document.documentElement;
+        const start = document.startViewTransition.bind(document);
+        document.startViewTransition = (...args) => {
+          const transition = start(...args);
+          if (
+            root.dataset["waveNavigationTransition"] === "conversation-entry"
+          ) {
+            void transition.ready.then(
+              () => {
+                for (const animation of document.getAnimations()) {
+                  if (
+                    animation.effect instanceof KeyframeEffect &&
+                    animation.effect.pseudoElement?.includes("wave-navigation")
+                  ) {
+                    animation.pause();
+                    animation.currentTime = 100;
+                  }
+                }
+                const incoming = getComputedStyle(
+                  root,
+                  "::view-transition-new(wave-navigation)"
+                );
+                const list = getComputedStyle(
+                  root,
+                  "::view-transition-old(root)"
+                );
+                const captured = document.querySelector<HTMLElement>(
+                  '[style*="view-transition-name: wave-navigation"]'
+                );
+                const back = Array.from(
+                  document.querySelectorAll("button")
+                ).find(
+                  (button) =>
+                    ["Back", "Go back"].includes(
+                      button.getAttribute("aria-label") ?? ""
+                    ) && button.getBoundingClientRect().width > 0
+                );
+                root.dataset["testConversationEntry"] = JSON.stringify({
+                  x: new DOMMatrix(incoming.transform).m41,
+                  listDisplay: list.display,
+                  listOpacity: Number(list.opacity),
+                  listAnimation: list.animationName,
+                  includesHeader: Boolean(back && captured?.contains(back)),
+                });
+              },
+              () => {}
+            );
+          }
+          return transition;
+        };
+      });
+      await row.tap();
+      await expect(page).toHaveURL(new RegExp(`${conversation}$`, "u"));
+      const root = page.locator("html");
+      await expect(root).toHaveAttribute(
+        "data-test-conversation-entry",
+        /"x":/u
+      );
+      const entry = JSON.parse(
+        (await root.getAttribute("data-test-conversation-entry")) ?? "null"
+      ) as {
+        x: number;
+        listDisplay: string;
+        listOpacity: number;
+        listAnimation: string;
+        includesHeader: boolean;
+      };
+      expect(entry.x).toBeGreaterThan(0);
+      expect(entry.x).toBeLessThanOrEqual(412);
+      expect(entry).toMatchObject({
+        listDisplay: "block",
+        listOpacity: 1,
+        listAnimation: "none",
+        includesHeader: true,
+      });
+      await page.screenshot({
+        path: testInfo.outputPath("conversation-entering.png"),
+      });
+      await page.evaluate(() => {
+        for (const animation of document.getAnimations()) {
+          if (
+            animation.effect instanceof KeyframeEffect &&
+            animation.effect.pseudoElement?.includes("wave-navigation")
+          )
+            animation.finish();
+        }
+      });
+      await expect(root).not.toHaveAttribute("data-wave-navigation-transition");
+      await expectNoHorizontalOverflow(page);
+      await expectNoUnsafeSandboxMutations(baseURL);
+    });
+
+    test(`phone ${surface} chevron Back slides the whole page over ${destination}`, async ({
+      context,
+      page,
+      baseURL,
+    }, testInfo) => {
+      // This acceptance case requires phone input; other project capabilities
+      // are covered by the gesture and desktop regressions above.
+      test.skip(
+        !["web-mobile-chromium", "web-desktop-webkit"].includes(
+          testInfo.project.name
+        ),
+        "Phone viewport navigation acceptance in Chromium and WebKit."
+      );
+      if (surface === "ios") {
+        await installSurfaceSimulation(context, "capacitor-ios-sim", baseURL);
+      }
+      await hideNextDevOverlay(context);
+      await page.setViewportSize({ width: 412, height: 840 });
+      await installMessageFixture(page, baseURL);
+      const isDm = destination === "/messages";
+      const conversation = `${destination}/${isDm ? DM : WAVE}`;
+      if (isDm) {
+        const origin = getSandboxApiOrigin(baseURL);
+        const response = await page.request.get(
+          `${origin}/api/v2/waves/${DM}/drops`
+        );
+        const { wave } = (await response.json()) as ApiWaveDropsFeedV2;
+        const dmList = new URL(`${origin}/api/v2/waves`).pathname;
+        await page.route(
+          (url) =>
+            url.pathname === dmList &&
+            url.searchParams.get("direct_message") === "true",
+          (route) => route.fulfill({ json: { data: [wave], next: false } })
+        );
+      }
+      const backName = surface === "ios" ? "Back" : "Go back";
+      // Enter directly, with no preceding list history entry.
+      await page.goto(conversation, { waitUntil: "domcontentloaded" });
+      await waitForRouteReady(page);
+      await expect(
+        page.getByRole("textbox", { name: "Write a message" }).last()
+      ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+      await expect(
+        page.getByRole("button", { name: /^(Back|Go back)$/u })
+      ).toHaveCount(1);
+      const backControl = page.getByRole("button", {
+        name: backName,
+        exact: true,
+      });
+      const listControl = isDm
+        ? page.getByRole("link", { name: /Sandbox Direct Message/u }).first()
+        : page.getByRole("button", { name: "Find a wave…", exact: true });
+      // Check cold direct-entry Back, then return to that original history
+      // position. The list is only a forward entry, while its client route is
+      // now loaded for the strict motion checks below.
+      await backControl.tap();
+      await expect(page).toHaveURL(new RegExp(`${destination}$`, "u"));
+      await expect(listControl).toBeVisible();
+      await expect(page.locator("html")).not.toHaveAttribute(
+        "data-wave-navigation-transition"
+      );
+      await page.goBack();
+      await expect(page).toHaveURL(new RegExp(`${conversation}$`, "u"));
+      await expect(
+        page.getByRole("textbox", { name: "Write a message" }).last()
+      ).toBeVisible();
+      await expect(backControl).toBeVisible();
+      await page.evaluate((label) => {
+        const root = document.documentElement;
+        const start = document.startViewTransition.bind(document);
+        document.startViewTransition = (...args) => {
+          const captured = document.querySelector<HTMLElement>(
+            '[style*="view-transition-name: wave-navigation"]'
+          );
+          const back = Array.from(document.querySelectorAll("button")).find(
+            (button) =>
+              button.getAttribute("aria-label") === label &&
+              button.getBoundingClientRect().width > 0
+          );
+          root.dataset["testChevronCaptures"] = String(
+            Number(root.dataset["testChevronCaptures"] ?? 0) + 1
+          );
+          root.dataset["testChevronHeader"] = String(
+            captured?.contains(back ?? null)
+          );
+          root.dataset["testChevronTop"] = String(
+            captured?.getBoundingClientRect().top
+          );
+          const startedAt = performance.now();
+          const transition = start(async () => {
+            root.dataset["testChevronUpdate"] = "started";
+            const update = args[0];
+            if (typeof update === "function") await update();
+            root.dataset["testChevronUpdate"] = "completed";
+            root.dataset["testChevronDestinationInRoot"] = String(
+              !captured?.style.viewTransitionName
+            );
+          });
+          void transition.ready.then(
+            () => {
+              const sampleMotion = () => {
+                const old = getComputedStyle(
+                  root,
+                  "::view-transition-old(wave-navigation)"
+                );
+                const incoming = getComputedStyle(
+                  root,
+                  "::view-transition-new(root)"
+                );
+                const x = new DOMMatrix(old.transform).m41;
+                // Touch-triggered transitions can start on a later compositor frame.
+                // Wait for movement while this transition still owns the page.
+                if (
+                  x === 0 &&
+                  root.dataset["waveNavigationTransition"] === "chevron-back"
+                ) {
+                  requestAnimationFrame(sampleMotion);
+                  return;
+                }
+                root.dataset["testChevronMotion"] = JSON.stringify({
+                  x,
+                  opacity: Number(old.opacity),
+                  incomingAnimation: incoming.animationName,
+                });
+              };
+              requestAnimationFrame(sampleMotion);
+            },
+            (error: unknown) => {
+              root.dataset["testChevronReadyError"] = String(error);
+              root.dataset["testChevronReadyElapsed"] = String(
+                Math.round(performance.now() - startedAt)
+              );
+            }
+          );
+          return transition;
+        };
+      }, backName);
+      await page.getByRole("button", { name: backName, exact: true }).tap();
+      await expect(page).toHaveURL(new RegExp(`${destination}$`, "u"));
+      const root = page.locator("html");
+      await expect(root).toHaveAttribute("data-test-chevron-captures", "1");
+      await expect(root).toHaveAttribute("data-test-chevron-header", "true");
+      await expect(root).toHaveAttribute(
+        "data-test-chevron-destination-in-root",
+        "true"
+      );
+      await expect(root).toHaveAttribute("data-test-chevron-top", "0");
+      await expect(root).toHaveAttribute("data-test-chevron-motion", /"x":/);
+      const motion = JSON.parse(
+        (await root.getAttribute("data-test-chevron-motion")) ?? "null"
+      ) as {
+        x: number;
+        opacity: number;
+        incomingAnimation: string;
+      };
+      expect(motion.x).toBeGreaterThan(0);
+      expect(motion.x).toBeLessThanOrEqual(412);
+      expect(motion.opacity).toBe(1);
+      expect(motion.incomingAnimation).toBe("none");
+      await expect(listControl).toBeVisible();
+      await expect(root).not.toHaveAttribute("data-wave-navigation-transition");
+      await expectNoHorizontalOverflow(page);
+
+      await page.goBack();
+      await expect(page).toHaveURL(new RegExp(conversation, "u"));
+      await expect(
+        page.getByRole("textbox", { name: "Write a message" }).last()
+      ).toBeVisible();
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await page.getByRole("button", { name: backName, exact: true }).tap();
+      await expect(page).toHaveURL(new RegExp(`${destination}$`, "u"));
+      await expect(root).toHaveAttribute("data-test-chevron-captures", "1");
+      await expect(root).not.toHaveAttribute("data-wave-navigation-transition");
+      await expectNoUnsafeSandboxMutations(baseURL);
+    });
+  }
+
+  test("phone web Back recovers when a slow inbox skips the optional slide", async ({
+    context,
+    page,
+    baseURL,
+  }, testInfo) => {
+    test.skip(
+      !["web-mobile-chromium", "web-desktop-webkit"].includes(
+        testInfo.project.name
+      ),
+      "Slow phone navigation recovery in Chromium and WebKit."
+    );
+    await hideNextDevOverlay(context);
+    await installMessageFixture(page, baseURL);
+    const inbox = Promise.withResolvers<void>();
+    await page.route(
+      (url) => url.pathname === "/messages" && url.searchParams.has("_rsc"),
+      async (route) => {
+        await inbox.promise;
+        await route.continue();
+      }
+    );
+    await page.goto(`/messages/${DM}`, { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await expect(
+      page.getByRole("textbox", { name: "Write a message" }).last()
+    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    await page.evaluate(() => {
+      const root = document.documentElement;
+      const start = document.startViewTransition.bind(document);
+      document.startViewTransition = (...args) => {
+        const transition = start(...args);
+        root.dataset["testSlowBackCaptures"] = String(
+          Number(root.dataset["testSlowBackCaptures"] ?? 0) + 1
+        );
+        void transition.ready.catch((error: unknown) => {
+          root.dataset["testSlowBackSkipped"] = String(error);
+        });
+        return transition;
+      };
+    });
+    const root = page.locator("html");
+    const back = page.getByRole("button", { name: "Go back", exact: true });
+    try {
+      await back.tap();
+      await expect(root).toHaveAttribute(
+        "data-test-slow-back-skipped",
+        /skipTransition|skipped/iu
+      );
+      await expect(root).toHaveAttribute("data-test-slow-back-captures", "1");
+    } finally {
+      inbox.resolve();
+    }
+    await expect(page).toHaveURL(/\/messages$/u);
+    const row = page
+      .getByRole("link", { name: /Sandbox Direct Message/u })
+      .first();
+    await expect(row).toBeVisible();
+    await expect(root).not.toHaveAttribute("data-wave-navigation-transition");
+    await row.tap();
+    await expect(page).toHaveURL(new RegExp(`/messages/${DM}$`, "u"));
+    await expect(
+      page.getByRole("textbox", { name: "Write a message" }).last()
+    ).toBeVisible();
+    await expect(root).not.toHaveAttribute("data-wave-navigation-transition");
+    await back.tap();
+    await expect(page).toHaveURL(/\/messages$/u);
+    await expect(row).toBeVisible();
+    await expect(root).toHaveAttribute("data-test-slow-back-captures", "3");
+    await expect(root).not.toHaveAttribute("data-wave-navigation-transition");
     await expectNoHorizontalOverflow(page);
     await expectNoUnsafeSandboxMutations(baseURL);
   });

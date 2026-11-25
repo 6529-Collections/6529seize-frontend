@@ -12,7 +12,7 @@ export function WaveChatWithUnread(
   return (
     <MyStreamWaveChat
       {...props}
-      firstUnreadSerialNo={wave?.firstUnreadDropSerialNo ?? null}
+      firstUnreadSerialNo={wave?.firstUnreadDropSerialNo}
     />
   );
 }
