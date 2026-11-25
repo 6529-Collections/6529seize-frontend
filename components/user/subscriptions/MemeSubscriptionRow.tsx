@@ -105,7 +105,7 @@ function ReadOnlySubscriptionStatus({
   const locale = useBrowserLocale();
   return (
     <span
-      className={`tw-inline-flex tw-items-center tw-whitespace-nowrap tw-text-sm tw-font-normal tw-leading-5 max-md:[body.capacitor-native_&]:tw-text-xs max-md:[body.capacitor-native_&]:tw-leading-[17px] ${subscribed ? "tw-text-emerald-300" : "tw-text-iron-400"}`}
+      className={`tw-inline-flex tw-items-center tw-whitespace-nowrap tw-text-sm tw-font-normal tw-leading-5 max-md:tw-text-xs max-md:tw-leading-[17px] ${subscribed ? "tw-text-emerald-300" : "tw-text-iron-400"}`}
     >
       {t(
         locale,
@@ -346,7 +346,7 @@ export default function MemeSubscriptionRow(
             title: props.title,
             token: formatInteger(locale, props.subscription.token_id),
           })}
-          className="tw-inline-flex tw-shrink-0 tw-items-center tw-gap-1 tw-whitespace-nowrap tw-text-sm tw-font-normal tw-tabular-nums tw-leading-5 max-md:[body.capacitor-native_&]:tw-text-xs max-md:[body.capacitor-native_&]:tw-leading-[17px]"
+          className="tw-inline-flex tw-shrink-0 tw-items-center tw-gap-1 tw-whitespace-nowrap tw-text-sm tw-font-normal tw-tabular-nums tw-leading-5 max-md:tw-text-xs max-md:tw-leading-[17px]"
         >
           <span className="tw-font-normal tw-text-iron-100">
             {formatInteger(
@@ -492,8 +492,6 @@ export default function MemeSubscriptionRow(
       <span>Subscription Count: x{finalWithMetadata.subscribedCount}</span>
     </span>
   );
-  const alignVisitorStatusWithMore =
-    props.readonly && props.minting_today && !!allocationDetails;
   let controls: ReactElement;
   if (props.controlsLoading) {
     controls = (
@@ -536,7 +534,7 @@ export default function MemeSubscriptionRow(
         {!props.artwork && props.date && (
           <div
             aria-hidden="true"
-            className="tw-hidden tw-w-12 tw-flex-none tw-flex-col tw-items-center tw-justify-center tw-gap-px max-md:[body.capacitor-native_&]:tw-flex"
+            className="tw-flex tw-w-12 tw-flex-none tw-flex-col tw-items-center tw-justify-center tw-gap-px md:tw-hidden"
           >
             <span className="tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-3 tw-tracking-[0.06em] tw-text-iron-500">
               {formatUtcDate(locale, props.date.utcDay, { month: "short" })}
@@ -549,14 +547,14 @@ export default function MemeSubscriptionRow(
         <div className="tw-grid tw-w-full tw-min-w-0 tw-flex-1 tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-2 tw-gap-y-0.5 tw-@container/drop-row md:tw-w-auto md:tw-gap-x-5 md:tw-gap-y-1">
           {props.date && (
             <div
-              className={`tw-col-span-full tw-col-start-1 tw-row-start-1 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-base tw-font-semibold tw-tabular-nums md:tw-col-span-1 max-md:[body.capacitor-native_&]:tw-col-span-1 max-md:[body.capacitor-native_&]:tw-row-start-2 max-md:[body.capacitor-native_&]:tw-flex-nowrap max-md:[body.capacitor-native_&]:tw-whitespace-nowrap max-md:[body.capacitor-native_&]:tw-text-meta max-md:[body.capacitor-native_&]:tw-font-normal max-md:[body.capacitor-native_&]:tw-leading-[18px] max-md:[body.capacitor-native_&]:tw-text-iron-400 ${subscribed ? "tw-text-iron-100" : "tw-text-iron-300 md:tw-text-iron-400"}`}
+              className={`tw-col-start-1 tw-row-start-2 tw-flex tw-min-w-0 tw-flex-nowrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-whitespace-nowrap tw-text-meta tw-font-normal tw-tabular-nums tw-leading-[18px] tw-text-iron-400 md:tw-row-start-1 md:tw-flex-wrap md:tw-whitespace-normal md:tw-text-base md:tw-font-semibold md:tw-leading-6 ${subscribed ? "md:tw-text-iron-100" : ""}`}
             >
               {props.minting_today ? (
                 <MintingTodayLabel
                   tokenId={props.subscription.token_id}
                   locale={locale}
                   showIndicator
-                  className="tw-text-base tw-font-semibold tw-leading-6 tw-text-primary-300 max-md:[body.capacitor-native_&]:tw-text-meta max-md:[body.capacitor-native_&]:tw-font-normal max-md:[body.capacitor-native_&]:tw-leading-[18px]"
+                  className="tw-text-meta tw-font-normal tw-leading-[18px] tw-text-primary-300 md:tw-text-base md:tw-font-semibold md:tw-leading-6"
                 />
               ) : (
                 <time
@@ -582,7 +580,7 @@ export default function MemeSubscriptionRow(
             </div>
           )}
           <span
-            className={`tw-col-start-1 tw-row-start-2 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-1.5 tw-text-sm tw-font-normal tw-tabular-nums tw-text-iron-500 md:tw-text-iron-400 max-md:[body.capacitor-native_&]:tw-col-span-1 max-md:[body.capacitor-native_&]:tw-row-start-1 max-md:[body.capacitor-native_&]:tw-text-[15px] max-md:[body.capacitor-native_&]:tw-font-medium max-md:[body.capacitor-native_&]:tw-leading-5 ${subscribed ? "max-md:[body.capacitor-native_&]:tw-text-iron-100" : "max-md:[body.capacitor-native_&]:tw-text-iron-300"} ${alignVisitorStatusWithMore ? "max-md:tw-col-span-full" : ""}`}
+            className={`tw-col-start-1 tw-row-start-1 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-1.5 tw-text-[15px] tw-font-medium tw-tabular-nums tw-leading-5 md:tw-row-start-2 md:tw-text-sm md:tw-font-normal md:tw-text-iron-400 ${subscribed ? "tw-text-iron-100" : "tw-text-iron-300"}`}
           >
             <Link
               href={`/the-memes/${props.subscription.token_id}`}
@@ -594,7 +592,7 @@ export default function MemeSubscriptionRow(
             </Link>
           </span>
           <div
-            className={`tw-col-start-2 tw-flex tw-shrink-0 tw-items-center tw-justify-end tw-gap-2 tw-self-center tw-justify-self-end md:tw-row-span-2 md:tw-row-start-1 md:tw-gap-3 max-md:[body.capacitor-native_&]:tw-row-span-2 max-md:[body.capacitor-native_&]:tw-row-start-1 ${props.readonly ? "max-md:[body.capacitor-native_&]:tw-flex-col-reverse max-md:[body.capacitor-native_&]:tw-items-end max-md:[body.capacitor-native_&]:tw-gap-0 max-md:[body.capacitor-native_&]:tw-text-xs max-md:[body.capacitor-native_&]:tw-leading-[17px]" : ""} ${alignVisitorStatusWithMore ? "tw-row-start-3" : "tw-row-start-2"}`}
+            className={`tw-col-start-2 tw-row-span-2 tw-row-start-1 tw-flex tw-shrink-0 tw-items-center tw-justify-end tw-gap-2 tw-self-center tw-justify-self-end md:tw-gap-3 ${props.readonly ? "max-md:tw-flex-col-reverse max-md:tw-items-end max-md:tw-gap-0 max-md:tw-text-xs max-md:tw-leading-[17px]" : ""}`}
           >
             {!props.readonly &&
               !props.controlsLoading &&
@@ -612,7 +610,7 @@ export default function MemeSubscriptionRow(
               aria-expanded={showAllocationDetails}
               aria-controls={allocationDetailsId}
               onClick={() => setShowAllocationDetails((open) => !open)}
-              className={`tw-col-start-1 tw-row-start-3 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-justify-self-start tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-text-sm tw-font-normal tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-100 md:tw-hidden max-md:[body.capacitor-native_&]:tw-col-span-full max-md:[body.capacitor-native_&]:tw-w-full ${alignVisitorStatusWithMore ? "tw-col-span-1" : "tw-col-span-full tw-w-full"}`}
+              className="tw-col-span-full tw-col-start-1 tw-row-start-3 tw-inline-flex tw-min-h-11 tw-w-full tw-items-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-text-sm tw-font-normal tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-100 md:tw-hidden"
             >
               {t(locale, "subscriptions.upcoming.more")}
               <ChevronDownIcon

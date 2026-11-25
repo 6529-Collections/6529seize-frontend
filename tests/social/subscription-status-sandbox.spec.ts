@@ -748,14 +748,11 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
             const controlRect = controls!.getBoundingClientRect();
             const name = link.parentElement!.getBoundingClientRect();
             return {
-              dateOverflow: date.scrollWidth > date.clientWidth + 1,
               dateHeight: dateRect.height,
-              native: document.body.classList.contains("capacitor-native"),
               metadataTop: metadataRect.top,
               metadataBottom: metadataRect.bottom,
               nameTop: name.top,
               nameRight: name.right,
-              nameCenter: name.y + name.height / 2,
               controlsCenter: controlRect.y + controlRect.height / 2,
               controlsLeft: controlRect.left,
               leadingWidth:
@@ -764,31 +761,19 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
               dateFont: getComputedStyle(date).fontSize,
             };
           });
-          expect(geometry.leadingWidth).toBe(geometry.native ? 48 : 0);
-          expect(geometry.nameFont).toBe(geometry.native ? "15px" : "14px");
-          expect(geometry.dateFont).toBe(geometry.native ? "13px" : "16px");
-          expect(geometry.dateHeight).toBeLessThanOrEqual(
-            geometry.native ? 18 : 24
-          );
-          if (geometry.native) {
-            // Native keeps the requested fixed columns and known narrow-date
-            // crowding. Web dates now span the row above the controls.
-            expect(geometry.nameTop).toBeLessThan(geometry.metadataTop);
-            expect(
-              Math.abs(
-                (geometry.nameTop + geometry.metadataBottom) / 2 -
-                  geometry.controlsCenter
-              )
-            ).toBeLessThanOrEqual(1);
-          } else {
-            expect(geometry.dateOverflow).toBe(false);
-            expect(geometry.nameTop).toBeGreaterThanOrEqual(
-              geometry.metadataBottom
-            );
-            expect(
-              Math.abs(geometry.nameCenter - geometry.controlsCenter)
-            ).toBeLessThanOrEqual(1);
-          }
+          expect(geometry.leadingWidth).toBe(48);
+          expect(geometry.nameFont).toBe("15px");
+          expect(geometry.dateFont).toBe("13px");
+          expect(geometry.dateHeight).toBeLessThanOrEqual(18);
+          // Both mobile surfaces keep the requested fixed columns and known
+          // narrow-date crowding, with controls centered across both lines.
+          expect(geometry.nameTop).toBeLessThan(geometry.metadataTop);
+          expect(
+            Math.abs(
+              (geometry.nameTop + geometry.metadataBottom) / 2 -
+                geometry.controlsCenter
+            )
+          ).toBeLessThanOrEqual(1);
           expect(geometry.nameRight).toBeLessThanOrEqual(geometry.controlsLeft);
           if (owner) {
             const mintingRow = upcoming
@@ -861,9 +846,6 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
               return {
                 nameBottom: name.bottom,
                 moreTop: more.top,
-                moreCenter: more.y + more.height / 2,
-                statusCenter: controls.y + controls.height / 2,
-                native: document.body.classList.contains("capacitor-native"),
                 controlsBottom: controls.bottom,
                 moreWidth: more.width,
                 gridWidth: grid.getBoundingClientRect().width,
@@ -872,16 +854,10 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
             expect(alignment.moreTop).toBeGreaterThanOrEqual(
               alignment.nameBottom
             );
-            if (alignment.native) {
-              expect(alignment.moreTop).toBeGreaterThanOrEqual(
-                alignment.controlsBottom
-              );
-              expect(alignment.moreWidth).toBeCloseTo(alignment.gridWidth, 0);
-            } else {
-              expect(
-                Math.abs(alignment.moreCenter - alignment.statusCenter)
-              ).toBeLessThanOrEqual(1);
-            }
+            expect(alignment.moreTop).toBeGreaterThanOrEqual(
+              alignment.controlsBottom
+            );
+            expect(alignment.moreWidth).toBeCloseTo(alignment.gridWidth, 0);
           }
           await more.click();
           await expect(more).toHaveAttribute("aria-expanded", "true");

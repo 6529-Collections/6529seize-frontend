@@ -189,16 +189,13 @@ On the web and Android, the tab appears after the page loads.
    selections or quantities. From 640px, `Show More` reveals the remaining rows
    inline. On phones it opens the full list in the shared bottom sheet; Close,
    Escape or Show Less returns to the three-row preview and restores focus.
-   On mobile web below 768px, rows keep the existing date and season first, with the drop name
-   beneath them at its original size. Owner controls and visitors' inline
-   quantity and status sit in the right column beside the name. Minting Today
-   artwork sits beside the text, including below 640px; other rows have no
-   leading element. Full dates remain in the text. Show More and Show Less use
-   full-width disclosure rows at these widths.
-   The native app keeps a 48px leading column: artwork for Minting Today, or an
-   unboxed short month above the day when artwork is absent. Native rows show
+   Below 768px, mobile web and the native app share a 48px leading column:
+   artwork for Minting Today, or an unboxed short month above the day when
+   artwork is absent. Rows show
    the name first and the existing date and season beneath it, with controls
    centered beside both lines. Visitor status stacks above the quantity.
+   Full dates remain in the text. Show More and Show Less use full-width
+   disclosure rows at these widths.
    Each Meme title links to its `/the-memes/{id}` page, including before minting,
    with keyboard focus and the tab's existing link styling. Scheduled cards in
    the upcoming subscription season open the existing upcoming-card view;
@@ -207,7 +204,8 @@ On the web and Android, the tab appears after the page loads.
    uses the matching minted thumbnail or, before indexing, a Main Stage winner
    explicitly mapped to that Meme number. Winner artwork uses a small resized
    image or preview. Unmatched, unavailable or failed artwork leaves no image
-   slot on web; the native app keeps its date column. Artwork data is requested only when a Minting Today row is present,
+   slot; below 768px the date column appears instead. Artwork data is requested
+   only when a Minting Today row is present,
    reusing the shared cache; title links do not prefetch Meme pages.
    Visitors keep static quantity
    and subscription status. One amber boundary follows the last funded drop,
@@ -217,9 +215,8 @@ On the web and Android, the tab appears after the page loads.
    rows revealed by Show More. The boundary appears when its row is visible,
    including in the three-row preview. Minting Today rows stay locked;
    focus, tap, or hover the label for the explanation. Below 768px, a More button expands the supplied Phase, Subscription Position,
-   Airdrop Address and Subscription Count below the row. More sits on its own
-   line under the name on web; visitors' status aligns to its right on that same
-   line. Native More and details span the text grid below both lines.
+   Airdrop Address and Subscription Count below the row. More and details span
+   the text grid below both lines on mobile web and in the native app.
    Owners also see the existing No changes allowed on
    minting day explanation under disabled controls; the tooltip remains. Desktop keeps those
    details visible below the title; the tooltip only explains the mint-day lock.
@@ -344,12 +341,12 @@ On the web and Android, the tab appears after the page loads.
     unfunded drop instead. There are no repeated row tags or additional Top up
     links; stale coverage does not mark rows
   - shows first 3 rows by default; `Show More` expands the list
-  - web rows lead with the UTC date, retaining the abbreviated weekday and
+  - desktop rows lead with the UTC date, retaining the abbreviated weekday and
     month plus the year, or `Minting Today` with its existing tooltip
-  - below 768px, native rows show the name first and the date beneath it
+  - below 768px, web and native rows show the name first and the date beneath it
   - every row shows its season beside the date or `Minting Today`, including
     rows revealed by `Show More`; the section heading has no season label
-  - on web the Meme number remains smaller below the date
+  - on desktop the Meme number remains smaller below the date
   - first row can show phase metadata (phase, position, airdrop address,
     subscribed count)
   - a subscribed first row shows `No subscription allocation` once distribution
@@ -507,10 +504,10 @@ processed; they do not automatically recover rows stranded by earlier failures.
 
 ## Limitations / Notes
 
-- The native app's fixed columns can crowd long dates and season labels on
+- The mobile layout's fixed columns can crowd long dates and season labels on
   narrow phones, especially with an owner's quantity selector and switch.
-  Owner drop names can also crowd the controls beside artwork on narrow web
-  and native rows. The requested layouts retain these columns. Profile UI
+  Owner drop names can also crowd controls beside the leading artwork or date
+  column. The requested shared layout retains these columns. Profile UI
   maintainers can revisit the spacing in a later design pass.
 
 ### Localization fallback debt
