@@ -15,7 +15,10 @@ import {
 } from "@/components/chain-waves/chainWavesErrorMessage";
 import { preserveAuthenticatedPollVote } from "@/helpers/waves/poll-vote-reconciliation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
+import {
+  usePollClosedByMove,
+  useWavesWritesPaused,
+} from "@/hooks/useWavesMovePhase";
 import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWriters";
 import { scheduleIndexRefresh } from "@/lib/chain-waves/optimistic";
 import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
@@ -26,6 +29,7 @@ import {
   type SyntheticEvent,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -194,7 +198,17 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
   const [localPollOverride, setLocalPollOverride] =
     useState<LocalPollOverride | null>(null);
   const localPoll = getLocalPoll(localPollOverride, drop.poll);
-  const poll = localPoll ?? drop.poll;
+  const shownPoll = localPoll ?? drop.poll;
+  // A poll still open when its wave moved was closed then on the 6529
+  // Network, whatever 6529.io's copy says: it shows as closed at the freeze.
+  const closedByMoveMs = usePollClosedByMove(shownPoll, drop.created_at);
+  const poll = useMemo(
+    () =>
+      shownPoll && closedByMoveMs !== null
+        ? { ...shownPoll, is_open: false, closing_time: closedByMoveMs }
+        : shownPoll,
+    [shownPoll, closedByMoveMs]
+  );
   const [interactionState, setInteractionState] =
     useState<PollInteractionState | null>(null);
 
@@ -726,6 +740,13 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
         <div className={POLL_FOOTER_CLASS_NAME}>
           <p className="tw-m-0 tw-text-xs tw-text-iron-400">
             {t(locale, "wavesMove.paused")}
+          </p>
+        </div>
+      )}
+      {closedByMoveMs !== null && (
+        <div className={POLL_FOOTER_CLASS_NAME}>
+          <p className="tw-m-0 tw-text-xs tw-text-iron-400">
+            {t(locale, "wavesMove.pollClosed")}
           </p>
         </div>
       )}
