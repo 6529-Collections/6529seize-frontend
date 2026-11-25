@@ -34,7 +34,6 @@ import {
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { usePinnedSidebarList } from "../waves/SidebarPinnedWaves";
 import { SidebarWaveRowsSection } from "../waves/SidebarWaveRowsSection";
-import { SidebarSubwavesToggle } from "../waves/SidebarSubwavesToggle";
 import SectionHeader from "../waves/SectionHeader";
 import { SidebarWaveTreeRowTransition } from "../waves/SidebarWaveTreeRowTransition";
 import WebBrainLeftSidebarWave from "./WebBrainLeftSidebarWave";
@@ -70,8 +69,6 @@ const WAVE_ROW_HEIGHT_COLLAPSED = 44 as const;
 const DIRECT_MESSAGE_ROW_HEIGHT_COLLAPSED = 52 as const;
 const SUBWAVE_ROW_HEIGHT = 48 as const;
 const COLLAPSING_SUBWAVE_ROW_HEIGHT = 1 as const;
-const SUBWAVE_TOGGLE_ROW_HEIGHT = 38 as const;
-const COLLAPSED_SUBWAVE_TOGGLE_ROW_HEIGHT = 42 as const;
 const SIDEBAR_LOCALE = DEFAULT_LOCALE;
 
 function getVirtualizedAriaLabel({
@@ -259,14 +256,15 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     activeWaveId,
     activeParentWaveId
   );
-  const { topLevelWaves, getRows, toggleParent } = useSidebarWaveTree({
-    waves,
-    activeWaveId: activeWave.id,
-    activeParentWaveId: effectiveActiveParentWaveId,
-    loadingSubwaveParentIds: streamWaves.loadingSubwaveParentIds,
-    onParentExpand: streamWaves.loadSubwavesForParent,
-    showExpandedSubwaves: !isCollapsed,
-  });
+  const { topLevelWaves, getRows, expandParent, toggleParent } =
+    useSidebarWaveTree({
+      waves,
+      activeWaveId: activeWave.id,
+      activeParentWaveId: effectiveActiveParentWaveId,
+      loadingSubwaveParentIds: streamWaves.loadingSubwaveParentIds,
+      onParentExpand: streamWaves.loadSubwavesForParent,
+      showExpandedSubwaves: !isCollapsed,
+    });
   useLoadActiveSidebarParentSubwaves({
     activeParentWaveId: effectiveActiveParentWaveId,
     waves,
@@ -363,12 +361,6 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const isMessageBasePath = basePath === "/messages";
   const getSidebarRowHeight = useCallback(
     (row: AnimatedSidebarWaveTreeRow) => {
-      if (row.rowType === "subwaves-toggle") {
-        return row.isExpanded
-          ? SUBWAVE_TOGGLE_ROW_HEIGHT
-          : COLLAPSED_SUBWAVE_TOGGLE_ROW_HEIGHT;
-      }
-
       if (row.depth === 1 && row.animationState === "exiting") {
         return COLLAPSING_SUBWAVE_ROW_HEIGHT;
       }
@@ -425,12 +417,14 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
         handleHover: handleHighlyRatedPreviewHover,
         hasTouchScreen: isTouchDevice,
         isDirectMessage: isMessageBasePath,
+        onOpen: expandParent,
         setActiveWave,
         waves: highlyRatedPreviewWaves,
       }),
     [
       activeParentWaveId,
       activeWaveId,
+      expandParent,
       getHighlyRatedPreviewHref,
       handleHighlyRatedPreviewHover,
       highlyRatedPreviewWaves,
@@ -479,21 +473,6 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   ) => {
     const showConnectedSubwaves = parentsWithVisibleSubwaves.has(row.wave.id);
 
-    if (row.rowType === "subwaves-toggle") {
-      return (
-        <SidebarSubwavesToggle
-          isExpanded={row.isExpanded}
-          isLoading={row.isLoadingSubwaves}
-          knownSubwavesCount={row.knownSubwavesCount}
-          layoutVariant="web"
-          onClick={() => toggleParent(row.wave.id)}
-          parentWaveName={row.wave.name}
-          showConnector={showConnectedSubwaves}
-          unreadDropsCount={row.unreadSubwaveDropsCount}
-        />
-      );
-    }
-
     return (
       <WebBrainLeftSidebarWave
         scoreDetailsDisabled={navigation.searchOpen}
@@ -506,11 +485,18 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
         depth={row.depth}
         canExpand={row.canExpand && !isCollapsed}
         hasUnreadSubwaves={row.hasUnreadSubwaves && !row.isExpanded}
+        subwavesExpanded={row.isExpanded}
+        subwavesLoading={row.isLoadingSubwaves}
+        unreadSubwaveDropsCount={row.unreadSubwaveDropsCount}
         isLastSubwave={row.isLastSubwave}
         showSubwaveConnector={
           row.depth === 0 && showConnectedSubwaves && !isCollapsed
         }
+        onExpandSubwaves={row.canExpand ? expandParent : undefined}
         onPrefetchSubwaves={streamWaves.prefetchSubwavesForParent}
+        onToggleSubwaves={
+          row.canExpand && !isCollapsed ? toggleParent : undefined
+        }
       />
     );
   };

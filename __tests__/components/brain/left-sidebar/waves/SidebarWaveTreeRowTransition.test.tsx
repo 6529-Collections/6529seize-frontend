@@ -15,9 +15,7 @@ const createAnimatedRow = (
   isLastSubwave: false,
   isLoadingSubwaves: false,
   key: "parent:child",
-  knownSubwavesCount: null,
   parentWaveId: "parent",
-  rowType: "wave",
   unreadSubwaveDropsCount: 0,
   wave: createMockMinimalWave({
     id: "child",

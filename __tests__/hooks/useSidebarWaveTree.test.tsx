@@ -50,7 +50,7 @@ describe("useSidebarWaveTree", () => {
 
     expect(
       getTreeRowKeys(result.current.getRows(result.current.topLevelWaves))
-    ).toEqual(["parent", "parent:subwaves-toggle"]);
+    ).toEqual(["parent"]);
 
     act(() => {
       result.current.toggleParent("parent");
@@ -62,7 +62,6 @@ describe("useSidebarWaveTree", () => {
 
     expect(getTreeRowKeys(expandedRows)).toEqual([
       "parent",
-      "parent:subwaves-toggle",
       "parent:older-child",
       "parent:newer-child",
     ]);
@@ -71,19 +70,12 @@ describe("useSidebarWaveTree", () => {
       isExpanded: true,
     });
     expect(expandedRows[1]).toMatchObject({
-      rowType: "subwaves-toggle",
-      depth: 1,
-      isExpanded: true,
-      knownSubwavesCount: 2,
-      unreadSubwaveDropsCount: 0,
-    });
-    expect(expandedRows[2]).toMatchObject({
       depth: 1,
       canExpand: false,
       isFirstSubwave: true,
       isLastSubwave: false,
     });
-    expect(expandedRows[3]).toMatchObject({
+    expect(expandedRows[2]).toMatchObject({
       depth: 1,
       canExpand: false,
       isFirstSubwave: false,
@@ -97,7 +89,7 @@ describe("useSidebarWaveTree", () => {
     expect(onParentExpand).toHaveBeenCalledTimes(1);
     expect(
       getTreeRowKeys(result.current.getRows(result.current.topLevelWaves))
-    ).toEqual(["parent", "parent:subwaves-toggle"]);
+    ).toEqual(["parent"]);
   });
 
   it("restores manually expanded parents after a sidebar remount", () => {
@@ -120,12 +112,7 @@ describe("useSidebarWaveTree", () => {
           firstRender.result.current.topLevelWaves
         )
       )
-    ).toEqual([
-      "parent",
-      "parent:subwaves-toggle",
-      "parent:older-child",
-      "parent:newer-child",
-    ]);
+    ).toEqual(["parent", "parent:older-child", "parent:newer-child"]);
 
     firstRender.unmount();
 
@@ -144,12 +131,7 @@ describe("useSidebarWaveTree", () => {
           secondRender.result.current.topLevelWaves
         )
       )
-    ).toEqual([
-      "parent",
-      "parent:subwaves-toggle",
-      "parent:older-child",
-      "parent:newer-child",
-    ]);
+    ).toEqual(["parent", "parent:older-child", "parent:newer-child"]);
     expect(secondOnParentExpand).not.toHaveBeenCalled();
   });
 
@@ -189,7 +171,7 @@ describe("useSidebarWaveTree", () => {
 
     expect(
       getTreeRowKeys(result.current.getRows(result.current.topLevelWaves))
-    ).toEqual(["parent", "parent:subwaves-toggle", "parent:child"]);
+    ).toEqual(["parent", "parent:child"]);
 
     rerender({ showExpandedSubwaves: false });
 
@@ -206,11 +188,7 @@ describe("useSidebarWaveTree", () => {
 
     const restoredRows = result.current.getRows(result.current.topLevelWaves);
 
-    expect(getTreeRowKeys(restoredRows)).toEqual([
-      "parent",
-      "parent:subwaves-toggle",
-      "parent:child",
-    ]);
+    expect(getTreeRowKeys(restoredRows)).toEqual(["parent", "parent:child"]);
     expect(restoredRows[0]).toMatchObject({
       isExpanded: true,
     });
@@ -247,16 +225,11 @@ describe("useSidebarWaveTree", () => {
     const rows = result.current.getRows(result.current.topLevelWaves);
 
     expect(rows[0]).toMatchObject({
-      rowType: "wave",
+      hasUnreadSubwaves: true,
       unreadSubwaveDropsCount: 13,
       wave: expect.objectContaining({
         unreadDropsCount: 2,
       }),
-    });
-    expect(rows[1]).toMatchObject({
-      rowType: "subwaves-toggle",
-      hasUnreadSubwaves: true,
-      unreadSubwaveDropsCount: 13,
     });
   });
 
@@ -297,10 +270,6 @@ describe("useSidebarWaveTree", () => {
       hasUnreadSubwaves: true,
       unreadSubwaveDropsCount: 4,
     });
-    expect(rows[1]).toMatchObject({
-      rowType: "subwaves-toggle",
-      unreadSubwaveDropsCount: 4,
-    });
   });
 
   it("does not flag unread activity that only exists in unfollowed subwaves", () => {
@@ -329,11 +298,6 @@ describe("useSidebarWaveTree", () => {
     const rows = result.current.getRows(result.current.topLevelWaves);
 
     expect(rows[0]).toMatchObject({
-      hasUnreadSubwaves: false,
-      unreadSubwaveDropsCount: 0,
-    });
-    expect(rows[1]).toMatchObject({
-      rowType: "subwaves-toggle",
       hasUnreadSubwaves: false,
       unreadSubwaveDropsCount: 0,
     });
@@ -378,7 +342,6 @@ describe("useSidebarWaveTree", () => {
       getTreeRowKeys(result.current.getRows(result.current.topLevelWaves))
     ).toEqual([
       "parent",
-      "parent:subwaves-toggle",
       "parent:unmuted-newer",
       "parent:unmuted-older",
       "parent:muted-newest",
@@ -400,7 +363,6 @@ describe("useSidebarWaveTree", () => {
 
     expect(getTreeRowKeys(rows)).toEqual([
       "parent",
-      "parent:subwaves-toggle",
       "parent:older-child",
       "parent:newer-child",
     ]);
@@ -428,12 +390,7 @@ describe("useSidebarWaveTree", () => {
 
     expect(
       getTreeRowKeys(result.current.getRows(result.current.topLevelWaves))
-    ).toEqual([
-      "parent",
-      "parent:subwaves-toggle",
-      "parent:older-child",
-      "parent:newer-child",
-    ]);
+    ).toEqual(["parent", "parent:older-child", "parent:newer-child"]);
     expect(
       JSON.parse(
         globalThis.sessionStorage.getItem("sidebar-wave-tree-expansion-v1") ??
@@ -473,15 +430,10 @@ describe("useSidebarWaveTree", () => {
     expect(secondOnParentExpand).not.toHaveBeenCalled();
     expect(
       getTreeRowKeys(result.current.getRows(result.current.topLevelWaves))
-    ).toEqual([
-      "parent",
-      "parent:subwaves-toggle",
-      "parent:older-child",
-      "parent:newer-child",
-    ]);
+    ).toEqual(["parent", "parent:older-child", "parent:newer-child"]);
   });
 
-  it("keeps active subwave parent rows visible when collapse is requested", () => {
+  it("can collapse the active subwave list without leaving the subwave", () => {
     const onParentExpand = jest.fn();
     const { result } = renderHook(() =>
       useSidebarWaveTree({
@@ -493,12 +445,7 @@ describe("useSidebarWaveTree", () => {
 
     expect(
       getTreeRowKeys(result.current.getRows(result.current.topLevelWaves))
-    ).toEqual([
-      "parent",
-      "parent:subwaves-toggle",
-      "parent:older-child",
-      "parent:newer-child",
-    ]);
+    ).toEqual(["parent", "parent:older-child", "parent:newer-child"]);
     expect(onParentExpand).not.toHaveBeenCalled();
 
     act(() => {
@@ -507,16 +454,11 @@ describe("useSidebarWaveTree", () => {
 
     expect(
       getTreeRowKeys(result.current.getRows(result.current.topLevelWaves))
-    ).toEqual([
-      "parent",
-      "parent:subwaves-toggle",
-      "parent:older-child",
-      "parent:newer-child",
-    ]);
+    ).toEqual(["parent"]);
     expect(onParentExpand).not.toHaveBeenCalled();
   });
 
-  it("applies an active-parent collapse after navigation leaves the subwave", () => {
+  it("reveals an active subwave after navigating back to it", () => {
     const onParentExpand = jest.fn();
     const { result, rerender } = renderHook(
       ({ activeWaveId }: { readonly activeWaveId: string | null }) =>
@@ -538,18 +480,17 @@ describe("useSidebarWaveTree", () => {
 
     expect(
       getTreeRowKeys(result.current.getRows(result.current.topLevelWaves))
-    ).toEqual([
-      "parent",
-      "parent:subwaves-toggle",
-      "parent:older-child",
-      "parent:newer-child",
-    ]);
+    ).toEqual(["parent"]);
 
     rerender({ activeWaveId: null });
 
     expect(
       getTreeRowKeys(result.current.getRows(result.current.topLevelWaves))
-    ).toEqual(["parent", "parent:subwaves-toggle"]);
+    ).toEqual(["parent"]);
+    rerender({ activeWaveId: "newer-child" });
+    expect(
+      getTreeRowKeys(result.current.getRows(result.current.topLevelWaves))
+    ).toEqual(["parent", "parent:older-child", "parent:newer-child"]);
     expect(onParentExpand).not.toHaveBeenCalled();
   });
 
@@ -573,13 +514,9 @@ describe("useSidebarWaveTree", () => {
     const rows = result.current.getRows(result.current.topLevelWaves);
 
     expect(onParentExpand).not.toHaveBeenCalled();
-    expect(rows).toHaveLength(2);
+    expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({
       wave: expect.objectContaining({ id: "parent" }),
-      isExpanded: false,
-    });
-    expect(rows[1]).toMatchObject({
-      rowType: "subwaves-toggle",
       isExpanded: false,
     });
 
@@ -598,7 +535,6 @@ describe("useSidebarWaveTree", () => {
 
     expect(getTreeRowKeys(loadedRows)).toEqual([
       "parent",
-      "parent:subwaves-toggle",
       "parent:direct-child",
     ]);
     expect(loadedRows[0]).toMatchObject({
@@ -623,15 +559,12 @@ describe("useSidebarWaveTree", () => {
 
     let rows = result.current.getRows(result.current.topLevelWaves);
 
-    expect(rows).toHaveLength(2);
+    expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({
       canExpand: true,
       hasUnreadSubwaves: true,
-      isExpanded: false,
-    });
-    expect(rows[1]).toMatchObject({
-      rowType: "subwaves-toggle",
       unreadSubwaveDropsCount: 2,
+      isExpanded: false,
     });
 
     act(() => {
@@ -671,9 +604,6 @@ describe("useSidebarWaveTree", () => {
     expect(rows[0]).toMatchObject({
       canExpand: true,
       hasUnreadSubwaves: false,
-    });
-    expect(rows[1]).toMatchObject({
-      rowType: "subwaves-toggle",
       unreadSubwaveDropsCount: 0,
     });
   });
@@ -713,14 +643,10 @@ describe("useSidebarWaveTree", () => {
 
     const loadingRows = result.current.getRows(result.current.topLevelWaves);
 
-    expect(loadingRows).toHaveLength(2);
+    expect(loadingRows).toHaveLength(1);
     expect(loadingRows[0]).toMatchObject({
       wave: expect.objectContaining({ id: "parent" }),
       isExpanded: false,
-      isLoadingSubwaves: true,
-    });
-    expect(loadingRows[1]).toMatchObject({
-      rowType: "subwaves-toggle",
       isLoadingSubwaves: true,
     });
 
@@ -738,11 +664,7 @@ describe("useSidebarWaveTree", () => {
 
     const loadedRows = result.current.getRows(result.current.topLevelWaves);
 
-    expect(getTreeRowKeys(loadedRows)).toEqual([
-      "parent",
-      "parent:subwaves-toggle",
-      "parent:child",
-    ]);
+    expect(getTreeRowKeys(loadedRows)).toEqual(["parent", "parent:child"]);
     expect(loadedRows[0]).toMatchObject({
       isExpanded: true,
       isLoadingSubwaves: false,

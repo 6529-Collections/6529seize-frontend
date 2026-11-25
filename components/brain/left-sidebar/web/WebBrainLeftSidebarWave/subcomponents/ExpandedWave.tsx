@@ -5,6 +5,10 @@ import BrainLeftSidebarWaveDropTime from "@/components/brain/left-sidebar/waves/
 import BrainLeftSidebarWavePin from "@/components/brain/left-sidebar/waves/BrainLeftSidebarWavePin";
 import { PinnedWaveLinkContext } from "@/components/brain/left-sidebar/waves/PinnedWaveLinkContext";
 import {
+  SidebarSubwavesToggle,
+  type SidebarSubwaveRowProps,
+} from "@/components/brain/left-sidebar/waves/SidebarSubwavesToggle";
+import {
   SidebarParentSubwaveConnector,
   SidebarSubwaveConnector,
 } from "@/components/brain/left-sidebar/waves/SidebarSubwaveConnector";
@@ -25,13 +29,14 @@ import { SidebarWaveTouchActions } from "@/components/brain/left-sidebar/waves/S
 
 const SUBWAVE_PREFETCH_HOVER_INTENT_MS = 150;
 
-interface ExpandedWaveProps {
+interface ExpandedWaveProps extends SidebarSubwaveRowProps {
   readonly scoreDetailsDisabled?: boolean | undefined;
   readonly formattedWaveName: string;
   readonly haveNewDrops: boolean;
   readonly href: string;
   readonly isActive: boolean;
   readonly isAnnouncement?: boolean | undefined;
+  readonly isDirectMessage?: boolean | undefined;
   readonly isDropWave: boolean;
   readonly isPinned: boolean;
   readonly latestDropTimestamp?: number | null | undefined;
@@ -46,12 +51,6 @@ interface ExpandedWaveProps {
   readonly tooltipPlacement: WaveTooltipPlacement;
   readonly wave: MinimalWave;
   readonly waveId: string;
-  readonly depth?: 0 | 1 | undefined;
-  readonly canExpand?: boolean | undefined;
-  readonly hasUnreadSubwaves?: boolean | undefined;
-  readonly isLastSubwave?: boolean | undefined;
-  readonly showSubwaveConnector?: boolean | undefined;
-  readonly onPrefetchSubwaves?: ((waveId: string) => void) | undefined;
 }
 
 export const ExpandedWave = ({
@@ -61,6 +60,7 @@ export const ExpandedWave = ({
   href,
   isActive,
   isAnnouncement = false,
+  isDirectMessage = false,
   isDropWave,
   isPinned,
   latestDropTimestamp,
@@ -78,9 +78,13 @@ export const ExpandedWave = ({
   depth = 0,
   canExpand = false,
   hasUnreadSubwaves = false,
+  subwavesExpanded = false,
+  subwavesLoading = false,
+  unreadSubwaveDropsCount = 0,
   isLastSubwave = false,
   showSubwaveConnector = false,
   onPrefetchSubwaves,
+  onToggleSubwaves,
 }: ExpandedWaveProps) => {
   const pinnedLinkProps = useContext(PinnedWaveLinkContext);
   const tooltipAttributes = showExpandedTooltip
@@ -114,6 +118,7 @@ export const ExpandedWave = ({
   } = getSidebarWaveRowLayoutClasses({
     isChildRow,
     isAnnouncement,
+    isDirectMessage: isDirectMessage && !canExpand,
     variant: "web",
   });
   const subwavePrefetchTimerRef = useRef<ReturnType<
@@ -183,6 +188,15 @@ export const ExpandedWave = ({
             : "desktop-hover:hover:tw-bg-iron-900/80"
         }`}
       >
+        {onToggleSubwaves && (
+          <SidebarSubwavesToggle
+            isExpanded={subwavesExpanded}
+            isLoading={subwavesLoading}
+            onClick={() => onToggleSubwaves(waveId)}
+            parentWaveName={wave.name}
+            unreadDropsCount={unreadSubwaveDropsCount}
+          />
+        )}
         {!isChildRow && showSubwaveConnector && (
           <SidebarParentSubwaveConnector
             guideLineOffsetClasses={SIDEBAR_SUBWAVE_GUIDE_LINE_OFFSET_CLASSES}
