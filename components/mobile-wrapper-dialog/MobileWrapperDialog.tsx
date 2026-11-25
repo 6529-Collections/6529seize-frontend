@@ -590,7 +590,7 @@ export default function MobileWrapperDialog({
   );
 
   useEffect(() => {
-    if (!dialogOpen || !focusTitleOnOpen) {
+    if (!dialogOpen || !focusTitleOnOpen || initialFocusRef) {
       return;
     }
 
@@ -599,7 +599,7 @@ export default function MobileWrapperDialog({
     });
 
     return () => globalThis.cancelAnimationFrame(frame);
-  }, [focusTitleOnOpen, dialogOpen, title]);
+  }, [focusTitleOnOpen, initialFocusRef, dialogOpen, title]);
 
   if (shouldHideOnDesktopHover) {
     return null;
