@@ -77,23 +77,38 @@ describe("MobileWrapperDialog", () => {
   });
 
   describe("rendering", () => {
-    it("redirects container focus only for an explicit content target", async () => {
-      const initialFocusRef = createRef<HTMLInputElement>();
-      render(
-        <MobileWrapperDialog
-          isOpen
-          title="Add post"
-          onClose={jest.fn()}
-          initialFocusRef={initialFocusRef}
-        >
-          <input aria-label="Message" ref={initialFocusRef} />
-        </MobileWrapperDialog>
-      );
-      act(() => screen.getByRole("dialog", { name: "Add post" }).focus());
-      await waitFor(() =>
-        expect(screen.getByRole("textbox", { name: "Message" })).toHaveFocus()
-      );
-    });
+    it.each([false, true])(
+      "keeps the explicit content target when title focus is %s",
+      async (focusTitleOnOpen) => {
+        const initialFocusRef = createRef<HTMLInputElement>();
+        render(
+          <MobileWrapperDialog
+            isOpen
+            title="Add post"
+            onClose={jest.fn()}
+            initialFocusRef={initialFocusRef}
+            focusTitleOnOpen={focusTitleOnOpen}
+          >
+            <input aria-label="Message" ref={initialFocusRef} />
+          </MobileWrapperDialog>
+        );
+        const focusTitle = jest.spyOn(
+          screen.getByRole("heading", { name: "Add post" }),
+          "focus"
+        );
+        act(() => screen.getByRole("dialog", { name: "Add post" }).focus());
+        await act(
+          () =>
+            new Promise<void>((resolve) =>
+              requestAnimationFrame(() => resolve())
+            )
+        );
+        await waitFor(() =>
+          expect(screen.getByRole("textbox", { name: "Message" })).toHaveFocus()
+        );
+        expect(focusTitle).not.toHaveBeenCalled();
+      }
+    );
     it("supports an optional subtitle without changing the shared close control", () => {
       render(
         <MobileWrapperDialog
