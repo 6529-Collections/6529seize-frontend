@@ -1,6 +1,9 @@
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import { formatStatFloor } from "@/helpers/Helpers";
 import { XtdhProgressBar } from "@/components/xtdh/stats/subcomponents/XtdhProgressBar";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import { useId } from "react";
 
 interface UserXtdhStatsProps {
   readonly generationRate: number;
@@ -15,12 +18,18 @@ export function UserXtdhStats({
   unusedRate,
   onOutboundClick,
 }: Readonly<UserXtdhStatsProps>) {
+  const locale = useBrowserLocale();
+  const outboundDescriptionId = useId();
   const outbound = Math.max(generationRate - unusedRate, 0);
   const net = generationRate + incomingRate - outbound;
   const stats = [
-    { label: "Generating", value: generationRate },
-    { label: "Inbound", value: incomingRate },
-    { label: "Outbound", value: outbound, onClick: onOutboundClick },
+    { label: t(locale, "xtdh.stats.generating"), value: generationRate },
+    { label: t(locale, "xtdh.stats.inbound"), value: incomingRate },
+    {
+      label: t(locale, "xtdh.stats.outbound"),
+      value: outbound,
+      onClick: onOutboundClick,
+    },
   ];
   const percentage =
     generationRate > 0
@@ -35,13 +44,15 @@ export function UserXtdhStats({
       <section className="tw-flex tw-min-w-0 tw-flex-col tw-px-4 tw-pb-1 tw-pt-4 md:tw-flex-row md:tw-flex-wrap md:tw-content-start md:tw-items-baseline md:tw-gap-x-5 md:tw-gap-y-2 md:tw-p-6">
         <div className="tw-mb-2.5 md:tw-mb-3 md:tw-basis-full">
           <div className="tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
-            Net
+            {t(locale, "xtdh.stats.net")}
           </div>
           <div className="tw-mt-0.5 tw-flex tw-items-baseline tw-gap-1 md:tw-mt-2">
             <span className="tw-text-[28px] tw-font-medium tw-tabular-nums tw-leading-[34px] tw-text-iron-50 md:tw-text-3xl">
               {formatStatFloor(net, 1)}
             </span>
-            <span className="tw-text-sm tw-text-iron-500">/day</span>
+            <span className="tw-text-sm tw-text-iron-500">
+              {t(locale, "xtdh.stats.perDay")}
+            </span>
           </div>
         </div>
         {stats.map((stat, index) => (
@@ -65,7 +76,7 @@ export function UserXtdhStats({
                 {formatStatFloor(stat.value, 1)}
               </span>
               <span className="tw-text-iron-500 md:tw-font-medium md:tw-text-iron-100">
-                /day
+                {t(locale, "xtdh.stats.perDay")}
               </span>
             </span>
             {stat.onClick && (
@@ -76,11 +87,16 @@ export function UserXtdhStats({
                 />
                 <button
                   type="button"
-                  title="Action"
+                  title={t(locale, "xtdh.stats.actionTitle")}
                   aria-label={stat.label}
+                  aria-describedby={outboundDescriptionId}
                   onClick={stat.onClick}
                   className="tw-absolute tw-inset-0 tw-w-full tw-rounded tw-border-0 tw-bg-transparent focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-white/[0.04]"
-                />
+                >
+                  <span id={outboundDescriptionId} className="tw-sr-only">
+                    {t(locale, "xtdh.grant.createHeading")}
+                  </span>
+                </button>
               </>
             )}
           </div>
@@ -89,7 +105,7 @@ export function UserXtdhStats({
       <div className="tw-min-w-0 tw-px-4 tw-pb-4 md:tw-border-x-0 md:tw-border-b-0 md:tw-border-t md:tw-border-solid md:tw-border-white/[0.04] md:tw-bg-black/35 md:tw-p-6 lg:tw-border-l lg:tw-border-t-0">
         <div className="tw-flex tw-min-h-8 tw-items-center tw-justify-between tw-gap-2 md:tw-min-h-0 md:tw-flex-col md:tw-items-start">
           <span className="tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
-            Granted rate
+            {t(locale, "xtdh.stats.grantedRate")}
           </span>
           <span className="tw-text-sm tw-tabular-nums tw-text-iron-500">
             <span className="tw-font-medium tw-text-iron-100 md:tw-text-3xl">
@@ -101,7 +117,7 @@ export function UserXtdhStats({
         <div className="tw-mt-2 md:tw-mt-6 [&>div]:tw-h-1 [&>div]:tw-bg-white/[0.06]">
           <XtdhProgressBar
             percentage={percentage}
-            ariaLabel="Granted Rate"
+            ariaLabel={t(locale, "xtdh.stats.grantedRateLabel")}
             ariaValueText={`${formatStatFloor(outbound, 1)} / ${formatStatFloor(generationRate, 1)} xTDH`}
           />
         </div>

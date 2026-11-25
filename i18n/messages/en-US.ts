@@ -3070,10 +3070,23 @@ const XTDH_COLLECTION_MESSAGES = objectMessages("xtdh.collections", {
 
 const XTDH_GRANT_MESSAGES = objectMessages("xtdh.grant", {
   createAction: "Grant",
+  createHeading: "Create New Grant",
   actions: "Grant actions",
   stopAction: "Stop Grant",
   revokeAction: "Revoke Grant",
   "lastGrant.label": "Last grant",
+  statusTabsLabel: "Select tab",
+} as const);
+
+const XTDH_STATS_MESSAGES = objectMessages("xtdh.stats", {
+  generating: "Generating",
+  inbound: "Inbound",
+  outbound: "Outbound",
+  net: "Net",
+  perDay: "/day",
+  grantedRate: "Granted rate",
+  grantedRateLabel: "Granted Rate",
+  actionTitle: "Action",
 } as const);
 
 const WAVE_SLOW_MODE_NOTICE_MESSAGES = objectMessages("waves.slowMode.notice", {
@@ -3750,6 +3763,7 @@ export const EN_US_ROOT_MESSAGES = {
   ...IDENTITY_FILTER_MESSAGES,
   ...XTDH_COLLECTION_MESSAGES,
   ...XTDH_GRANT_MESSAGES,
+  ...XTDH_STATS_MESSAGES,
   ...WAVE_SLOW_MODE_NOTICE_MESSAGES,
   ...COLLECTION_DELEGATION_MESSAGES,
   ...DELEGATION_EXPIRY_MESSAGES,

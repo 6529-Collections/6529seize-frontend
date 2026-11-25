@@ -69,9 +69,9 @@ export function GrantOwnerActions({
         />
       </div>
       <div className="tw-hidden tw-items-center tw-gap-2 md:tw-flex">
-        <CustomTooltip content="Stop Grant">
+        <CustomTooltip content={t(locale, "xtdh.grant.stopAction")}>
           <button
-            aria-label="Stop Grant"
+            aria-label={t(locale, "xtdh.grant.stopAction")}
             onClick={onStop}
             disabled={isStopping || isRevoking}
             className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-p-0 tw-text-iron-300 tw-shadow-none tw-transition-colors hover:tw-bg-iron-700 hover:tw-text-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
@@ -113,9 +113,9 @@ export function GrantOwnerActions({
             )}
           </button>
         </CustomTooltip>
-        <CustomTooltip content="Revoke Grant">
+        <CustomTooltip content={t(locale, "xtdh.grant.revokeAction")}>
           <button
-            aria-label="Revoke Grant"
+            aria-label={t(locale, "xtdh.grant.revokeAction")}
             onClick={onRevoke}
             disabled={isStopping || isRevoking}
             className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-red/10 tw-p-0 tw-text-red tw-shadow-none tw-transition-colors hover:tw-bg-red/20 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"

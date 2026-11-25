@@ -86,6 +86,13 @@ Owner-only actions:
 
 - xTDH is in test/demo mode. Data can reset after the test period.
 - The `Outbound` quick action is hidden outside owner mode.
+- The owner shortcut keeps its Outbound name and uses the existing Create New
+  Grant heading as its screen-reader description.
+- Localization is partial: stats, the grant heading and owner action names use
+  message keys, with missing translations falling back to `en-US`. Remaining
+  filter/status labels, grant-form copy, confirmations and received controls
+  retain English copy. Profile UI maintainers own migrating these remaining
+  strings and their accessible names together in a later localization pass.
 
 ## Related Pages
 

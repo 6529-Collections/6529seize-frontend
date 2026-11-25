@@ -2,6 +2,8 @@ import { useRef, type KeyboardEvent } from "react";
 import FilterButton from "@/components/utils/button/FilterButton";
 import { GRANTED_TABS } from "../constants";
 import type { GrantedTab } from "../types";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 interface UserPageXtdhGrantedListTabsProps {
   readonly activeTab: GrantedTab;
@@ -14,6 +16,7 @@ export function UserPageXtdhGrantedListTabs({
   onTabChange,
   pendingCount,
 }: UserPageXtdhGrantedListTabsProps) {
+  const locale = useBrowserLocale();
   const tabsRef = useRef<HTMLDivElement>(null);
   const handleKeyDown = (
     event: KeyboardEvent<HTMLButtonElement>,
@@ -46,7 +49,7 @@ export function UserPageXtdhGrantedListTabs({
     <div
       ref={tabsRef}
       role="tablist"
-      aria-label="Select tab"
+      aria-label={t(locale, "xtdh.grant.statusTabsLabel")}
       className="tw-no-scrollbar tw-flex tw-min-w-0 tw-items-center tw-gap-1.5 tw-overflow-x-auto tw-py-1"
     >
       {GRANTED_TABS.map((tab, index) => (
