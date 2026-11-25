@@ -189,6 +189,63 @@ describe("production exact-artifact deployment contract", () => {
     );
   });
 
+  describe("the 6529 Network settings", () => {
+    const CHAIN_NAMES = [
+      "NEXT_PUBLIC_FEATURE_CHAIN_IDENTITY",
+      "NEXT_PUBLIC_FEATURE_CHAIN_WAVES",
+      "NEXT_PUBLIC_CHAIN_GATEWAY_URL",
+      "NEXT_PUBLIC_CHAIN_NETWORK_ID",
+    ] as const;
+    const TIME_NAMES = [
+      "NEXT_PUBLIC_IDENTITY_FREEZE_AT",
+      "NEXT_PUBLIC_IDENTITY_SWITCH_ON_AT",
+      "NEXT_PUBLIC_WAVES_FREEZE_AT",
+      "NEXT_PUBLIC_WAVES_SWITCH_ON_AT",
+    ] as const;
+    type Env = Record<string, unknown>;
+    // Every env block of a workflow: top level, each job and each step.
+    const envOf = (workflow: {
+      env?: Env;
+      jobs?: Record<string, { env?: Env; steps?: { env?: Env }[] }>;
+    }): Env =>
+      Object.assign(
+        {},
+        workflow.env,
+        ...Object.values(workflow.jobs ?? {}).flatMap((job) => [
+          job.env,
+          ...(job.steps ?? []).map((step) => step.env),
+        ])
+      );
+    const pick = (env: Env, names: readonly string[]) =>
+      Object.fromEntries(
+        names.filter((name) => name in env).map((name) => [name, env[name]])
+      );
+    const chainSettings = (env: Env) => pick(env, CHAIN_NAMES);
+    const stagingSource = read("deploy-staging.yml");
+    const staging = envOf(YAML.parse(stagingSource));
+
+    it("keeps staging off the live chain: no chain flag, gateway or network id in any form", () => {
+      for (const name of CHAIN_NAMES) {
+        expect(stagingSource).not.toContain(name);
+      }
+      expect(chainSettings(staging)).toEqual({});
+    });
+
+    it("gives staging the same identity and waves times as production", () => {
+      expect(pick(staging, TIME_NAMES)).toEqual(pick(envOf(build), TIME_NAMES));
+    });
+
+    it("bakes the exact chain settings into production builds", () => {
+      expect(chainSettings(envOf(build))).toEqual({
+        NEXT_PUBLIC_FEATURE_CHAIN_IDENTITY: "true",
+        NEXT_PUBLIC_FEATURE_CHAIN_WAVES: "true",
+        NEXT_PUBLIC_CHAIN_GATEWAY_URL: "https://gateway.6529.io",
+        NEXT_PUBLIC_CHAIN_NETWORK_ID:
+          "0xf2da16732d8b1807cf341522824d9942be9c3d21def66ac1ee79610191c7dedf",
+      });
+    });
+  });
+
   it("gives the help record the freeze and switch-on dates the build uses", () => {
     if (build.env.NEXT_PUBLIC_IDENTITY_FREEZE_AT === undefined) {
       return;
@@ -240,6 +297,13 @@ describe("production exact-artifact deployment contract", () => {
   it("leaves the app-socket PING off in production builds", () => {
     // Production flips need the owner; the API must answer PING first.
     expect(build.env).not.toHaveProperty("NEXT_PUBLIC_FEATURE_WS_PING");
+  });
+
+  it("bakes the waves freeze and switch-on into production builds", () => {
+    expect(build.env.NEXT_PUBLIC_WAVES_FREEZE_AT).toBe("2026-11-28T00:00:00Z");
+    expect(build.env.NEXT_PUBLIC_WAVES_SWITCH_ON_AT).toBe(
+      "2026-11-29T00:00:00Z"
+    );
   });
 
   it("generates the production sitemap under the fail-closed policy", () => {
