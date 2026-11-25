@@ -79,7 +79,7 @@ export function commitWaveNavigationTransition(
   return true;
 }
 
-/** Virtualized content acknowledges its measured visible rows, not just its shell. */
+/** The virtualized Feed reports when its rows are ready. Chevron exits only wait for the route. */
 export function commitWaveNavigationContent(screen: WaveScreen) {
   if (activeTransition?.target === screen) activeTransition.contentReady();
 }

@@ -1204,6 +1204,9 @@ test.describe("phone chevron Back", () => {
         page.getByRole("textbox", { name: "Write a message" }).last()
       ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
       const backName = surface === "ios" ? "Back" : "Go back";
+      await expect(
+        page.getByRole("button", { name: /^(Back|Go back)$/u })
+      ).toHaveCount(1);
       await page.evaluate((label) => {
         const root = document.documentElement;
         const start = document.startViewTransition.bind(document);
