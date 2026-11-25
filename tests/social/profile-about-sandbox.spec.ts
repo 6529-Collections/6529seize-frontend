@@ -1997,18 +1997,26 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       exact: true,
     });
     await input.fill("Unsaved narrow editor draft");
-    for (const width of [1024, 600]) {
+    for (const width of [1024, 600, 1024]) {
       await page.setViewportSize({ width, height: 900 });
       await expect(input).toBeVisible();
       await expect(input).toHaveValue("Unsaved narrow editor draft");
     }
+    await page.keyboard.press("Escape");
+    await expect(input).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "Edit profile", exact: true })
+    ).toBeFocused();
   });
 
   test("opens all fields on wide touch and hybrid screens", async ({
     page,
     isMobile,
     browserName,
+    hasTouch,
   }, testInfo) => {
+    const activate = (control: Locator) =>
+      hasTouch ? control.tap() : control.click();
     if (!isMobile)
       await page.addInitScript(() => {
         Object.defineProperty(navigator, "maxTouchPoints", {
@@ -2032,14 +2040,14 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       expect((await preferences.boundingBox())?.height).toBeGreaterThanOrEqual(
         44
       );
-      await edit.click();
-      await page.getByRole("button", { name: "About", exact: true }).click();
+      await activate(edit);
+      await activate(page.getByRole("button", { name: "About", exact: true }));
       const back = page.getByRole("button", { name: "Back", exact: true });
       expect((await back.boundingBox())?.height).toBeGreaterThanOrEqual(44);
-      await back.click();
+      await activate(back);
       const close = page.getByRole("button", { name: "Close", exact: true });
       expect((await close.boundingBox())?.height).toBeGreaterThanOrEqual(44);
-      await close.click();
+      await activate(close);
     }
     await page.setViewportSize({ width: 1024, height: 900 });
     if (isMobile) {
@@ -2048,7 +2056,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
         44
       );
     }
-    await edit.click();
+    await activate(edit);
     if (isMobile) {
       const close = page.getByRole("button", { name: "Close", exact: true });
       expect((await close.boundingBox())?.height).toBeGreaterThanOrEqual(44);
@@ -2085,10 +2093,12 @@ test.describe("Profile editing @auth @medium @local-only", () => {
           { once: true }
         );
       });
-      await page
+      const labelControl = page
         .getByLabel(name, { exact: true })
-        .locator("../..")
-        .click({ position: { x: 2, y: 2 } });
+        .locator("../..");
+      const position = { x: 2, y: 2 };
+      if (hasTouch) await labelControl.tap({ position });
+      else await labelControl.click({ position });
       await expect(input).toHaveAttribute("data-picker-activated", "true");
     }
     if (!isMobile) {
@@ -2157,9 +2167,9 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     await page.screenshot({
       path: testInfo.outputPath("profile-color-keyboard-focus.png"),
     });
-    await page
-      .getByRole("heading", { name: "Profile picture", exact: true })
-      .click();
+    await activate(
+      page.getByRole("heading", { name: "Profile picture", exact: true })
+    );
     await expect(
       page
         .getByRole("dialog", { name: "Edit profile", exact: true })
@@ -2171,7 +2181,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     const classification = page.getByRole("button", {
       name: /^Profile classification /,
     });
-    await classification.click();
+    await activate(classification);
     await expect(
       page
         .getByRole("dialog", { name: "Edit profile", exact: true })
@@ -2193,7 +2203,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     await page.screenshot({
       path: testInfo.outputPath("profile-classification-overlay.png"),
     });
-    await classification.click();
+    await activate(classification);
     await expect(
       page
         .getByRole("dialog", { name: "Edit profile", exact: true })
@@ -2204,12 +2214,12 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     await page
       .getByRole("textbox", { name: "About statement", exact: true })
       .fill("Unsaved touch QA draft");
-    for (const width of [800, 1024]) {
+    for (const width of [800, 1024, 800]) {
       await page.setViewportSize({ width, height: 900 });
       await expect(aboutInput).toBeVisible();
       await expect(aboutInput).toHaveValue("Unsaved touch QA draft");
     }
-    await page.getByRole("button", { name: "Cancel", exact: true }).click();
+    await activate(page.getByRole("button", { name: "Cancel", exact: true }));
     const discardDialog = page.getByRole("dialog", {
       name: "Discard your changes?",
       exact: true,
@@ -2251,7 +2261,11 @@ test.describe("Profile editing @auth @medium @local-only", () => {
         44
       );
     }
-    await discard.click();
+    await activate(discard);
+    await expect(aboutInput).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "Edit profile", exact: true })
+    ).toBeFocused();
     await expectNoHorizontalOverflow(page);
   });
 
