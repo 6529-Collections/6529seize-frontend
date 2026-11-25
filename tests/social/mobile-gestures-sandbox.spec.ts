@@ -310,6 +310,56 @@ for (const platform of ["ios", "android"] as const) {
         ["Wave", `/waves/${WAVE}`],
         ["DM", `/messages/${DM}`],
       ] as const) {
+        test(`${screen} composer stays still from its first frame on list entry`, async ({
+          page,
+          baseURL,
+        }) => {
+          // Reopening a cached chat exposes stale list measurements immediately.
+          await page.goto(path, { waitUntil: "domcontentloaded" });
+          await waitForRouteReady(page);
+          await expect(
+            page.getByRole("textbox", { name: "Write a message" }).last()
+          ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+          await page.getByRole("button", { name: "Back", exact: true }).tap();
+          const listPath = screen === "Wave" ? "/waves" : "/messages";
+          await expect(page).toHaveURL(new RegExp(`${listPath}$`, "u"));
+          const row = page
+            .getByRole("link", {
+              name:
+                screen === "Wave"
+                  ? /Local Composer Sandbox Wave/u
+                  : /Sandbox Direct Message/u,
+            })
+            .first();
+          await expect(row).toBeVisible();
+
+          const entryFrames = page.evaluate(
+            () =>
+              new Promise<number[]>((resolve, reject) => {
+                const positions: number[] = [];
+                const deadline = performance.now() + 10_000;
+                const sample = () => {
+                  const editor = document.querySelector<HTMLElement>(
+                    '[data-ios-chat-composer] [role="textbox"]'
+                  );
+                  const box = editor?.getBoundingClientRect();
+                  if (box && box.height > 0) positions.push(box.top);
+                  if (positions.length >= 20) resolve(positions);
+                  else if (performance.now() > deadline)
+                    reject(new Error("Conversation composer did not paint"));
+                  else requestAnimationFrame(sample);
+                };
+                requestAnimationFrame(sample);
+              })
+          );
+          await row.tap();
+          const positions = await entryFrames;
+          expect(
+            Math.max(...positions) - Math.min(...positions)
+          ).toBeLessThanOrEqual(1);
+          await expectNoUnsafeSandboxMutations(baseURL);
+        });
+
         test(`${screen} keyboard keeps the header in the iPhone safe area`, async ({
           context,
           page,
@@ -402,6 +452,19 @@ for (const platform of ["ios", "android"] as const) {
         await expect
           .poll(() => horizontalPosition(headerBack))
           .toBeCloseTo(headerStart, 0);
+        for (const element of [
+          surface,
+          page.locator("[data-wave-swipe-page]"),
+        ]) {
+          await expect
+            .poll(() =>
+              element.evaluate((node) => [
+                node.style.transform,
+                node.style.willChange,
+              ])
+            )
+            .toEqual(["", ""]);
+        }
 
         const committed = await touchDrag(page, surface, 130);
         await committed.release();

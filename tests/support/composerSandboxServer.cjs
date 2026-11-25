@@ -3264,6 +3264,17 @@ function handleMockApiRead(method, pathname, url, res) {
     return false;
   }
 
+  if (
+    pathname === "/api/v2/waves" &&
+    url.searchParams.get("direct_message") === "true"
+  ) {
+    return writeJsonResponse(res, {
+      data: [dmWaveOverview],
+      page: 1,
+      next: false,
+    });
+  }
+
   return (
     handleSharedPostFeedRead(pathname, url, res) ||
     handleCommunityMemberRead(pathname, url, res) ||
