@@ -155,7 +155,7 @@ describe("unread position for a Wave visit", () => {
 
   it("restores the current divider and dismissal when a same-wave entry loses its key", () => {
     const view = render(chat(501));
-    const nextEntry = `/waves/${waveId}?tab=chat`;
+    const nextEntry = `/waves/${waveId}?curation=curation-1`;
     window.history.replaceState({ otherState: true }, "", nextEntry);
     view.rerender(chat(null, "profile-1", nextEntry));
     expect(screen.getByRole("button", { name: "501" })).toBeVisible();

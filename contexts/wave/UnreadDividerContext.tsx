@@ -37,6 +37,7 @@ const HISTORY_CHANGE_EVENT = "wave-chat-unread-divider-change";
 
 // Wait for the browser's visit state before showing a divider during hydration.
 const getServerDivider = () => undefined;
+const subscribeWithoutHistory = () => () => {};
 
 function createLocalDividerStore() {
   let serialNo: number | null | undefined;
@@ -138,34 +139,24 @@ export function UnreadDividerProvider({
   const entryUrl = historyScope?.entryUrl;
   const hasHistoryScope =
     waveId !== undefined && viewerKey !== undefined && entryUrl !== undefined;
-  const subscribe = useCallback(
-    (onChange: () => void) => {
-      const unsubscribeLocal = localStore.subscribe(onChange);
-      if (!hasHistoryScope) return unsubscribeLocal;
-      const unsubscribeHistory = subscribeToDividerHistory(onChange);
-      return () => {
-        unsubscribeLocal();
-        unsubscribeHistory();
-      };
-    },
-    [hasHistoryScope, localStore]
-  );
   const getHistoryDivider = useCallback(
     () => (hasHistoryScope ? readDividerHistory(waveId, viewerKey) : undefined),
     [hasHistoryScope, viewerKey, waveId]
   );
-  const getDivider = useCallback(() => {
-    const historyDivider = getHistoryDivider();
-    // The active entry wins, including an explicit dismissal. The retained
-    // chat supplies the value if a same-wave router write dropped custom state.
-    return historyDivider === undefined ? localStore.get() : historyDivider;
-  }, [getHistoryDivider, localStore]);
-  const savedDivider = useSyncExternalStore(
-    subscribe,
-    getDivider,
+  const historyDivider = useSyncExternalStore(
+    hasHistoryScope ? subscribeToDividerHistory : subscribeWithoutHistory,
+    getHistoryDivider,
     getServerDivider
   );
-  // Undefined means no position has arrived. Null means the reader cleared it.
+  const retainedDivider = useSyncExternalStore(
+    localStore.subscribe,
+    localStore.get,
+    getServerDivider
+  );
+  // Keep the snapshots independent so deleting the history key triggers repair
+  // even when the retained value keeps the visible divider the same.
+  const savedDivider =
+    historyDivider === undefined ? retainedDivider : historyDivider;
   const unreadDividerSerialNo = savedDivider ?? null;
 
   const rememberDivider = useCallback(
@@ -187,14 +178,13 @@ export function UnreadDividerProvider({
   }, []);
 
   useLayoutEffect(() => {
-    // Check after each commit because a same-URL router write can drop the key
-    // without changing the route props or the retained divider snapshot.
-    const historyDivider = getHistoryDivider();
-    if (historyDivider !== undefined) {
-      localStore.set(historyDivider);
+    // Check the committed entry before writing. During hydration React still
+    // supplies the empty server snapshot even if the browser has a saved value.
+    const currentHistoryDivider = getHistoryDivider();
+    if (currentHistoryDivider !== undefined) {
+      localStore.set(currentHistoryDivider);
       return;
     }
-    const retainedDivider = localStore.get();
     if (retainedDivider !== undefined) {
       if (hasHistoryScope) {
         rememberDividerHistory(waveId, viewerKey, entryUrl, retainedDivider);
@@ -204,7 +194,18 @@ export function UnreadDividerProvider({
     if (initialSerialNo !== null) {
       rememberDivider(initialSerialNo);
     }
-  });
+  }, [
+    entryUrl,
+    getHistoryDivider,
+    hasHistoryScope,
+    historyDivider,
+    initialSerialNo,
+    localStore,
+    rememberDivider,
+    retainedDivider,
+    viewerKey,
+    waveId,
+  ]);
 
   const setUnreadDividerSerialNo = useCallback<SetUnreadDividerSerialNo>(
     (value) => {
@@ -214,10 +215,14 @@ export function UnreadDividerProvider({
         rememberDivider(value);
         return;
       }
-      const previous = getDivider();
+      const currentHistoryDivider = getHistoryDivider();
+      const previous =
+        currentHistoryDivider === undefined
+          ? localStore.get()
+          : currentHistoryDivider;
       rememberDivider(value(previous === undefined ? initialSerialNo : previous));
     },
-    [getDivider, initialSerialNo, rememberDivider]
+    [getHistoryDivider, initialSerialNo, localStore, rememberDivider]
   );
 
   const value = useMemo(
