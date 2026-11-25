@@ -14,6 +14,7 @@ import { getStatsPath } from "./userPageStats.helpers";
 import {
   STATS_SECTION_HEADING_CLASS,
   STATS_TABLE_CLASS,
+  STATS_TABLE_EMPTY_CLASS,
   STATS_TABLE_GROUP_START_ROW_CLASS,
   STATS_TABLE_HEADER_CELL_CLASS,
   STATS_TABLE_HEAD_CLASS,
@@ -451,7 +452,7 @@ function UserPageStatsActivityOverviewMemes({
           </table>
         </UserPageStatsTableScroll>
       ) : (
-        <p className="tw-mb-0 tw-px-4 tw-py-5 tw-text-[15px]/5 tw-font-normal tw-text-iron-300">
+        <p className={STATS_TABLE_EMPTY_CLASS}>
           {activityMessage(
             locale,
             "user.collected.stats.activityOverview.tables.memesBySeasonEmpty"

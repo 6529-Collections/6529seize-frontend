@@ -313,15 +313,10 @@ export default function UserPageCollectedCard({
       </div>
 
       {/* Content */}
-      <div className="tw-flex tw-flex-col tw-gap-1.5 tw-p-4">
-        <div className="tw-flex tw-items-center tw-justify-between">
-          <span className="tw-mr-2 tw-truncate tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-500 group-data-[typography=collected]/collected-cards:tw-text-[11px] group-data-[typography=collected]/collected-cards:tw-font-medium">
-            {collectionMeta.label}
-          </span>
-          <span className="tw-font-mono tw-text-[11px] tw-font-medium tw-text-iron-500 group-data-[typography=collected]/collected-cards:tw-text-meta group-data-[typography=collected]/collected-cards:tw-font-normal group-data-[typography=collected]/collected-cards:tw-tabular-nums">
-            #{card.token_id}
-          </span>
-        </div>
+      <div className="tw-flex tw-flex-col tw-gap-0.5 tw-p-3">
+        <span className="tw-truncate tw-text-label tw-font-medium tw-uppercase tw-text-iron-500">
+          {collectionMeta.label}
+        </span>
 
         <div
           className={`tw-flex tw-justify-between tw-gap-x-2 ${hasMediaBadge ? "tw-items-center [&>h3]:tw-min-w-0 [&>h3]:tw-flex-1" : ""}`}
@@ -354,17 +349,21 @@ export default function UserPageCollectedCard({
           )}
         </div>
 
+        <span className="tw-text-meta tw-font-normal tw-leading-[18px] tw-text-iron-500">
+          #{card.token_id}
+        </span>
+
         {showDataRow && (
-          <div className="tw-mt-2 tw-flex tw-items-center tw-justify-between tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-2.5 group-data-[typography=collected]/collected-cards:tw-flex-wrap group-data-[typography=collected]/collected-cards:tw-gap-x-2 group-data-[typography=collected]/collected-cards:tw-gap-y-1">
+          <div className="tw-mt-1.5 tw-flex tw-items-center tw-justify-between tw-gap-x-2 group-data-[typography=collected]/collected-cards:tw-flex-wrap group-data-[typography=collected]/collected-cards:tw-gap-y-1">
             <div className="tw-flex tw-items-baseline tw-gap-1.5">
-              <span className="tw-text-[13px] tw-font-semibold tw-text-iron-300 group-data-[typography=collected]/collected-cards:tw-font-medium group-data-[typography=collected]/collected-cards:tw-tabular-nums group-data-[typography=collected]/collected-cards:tw-text-iron-100">
+              <span className="tw-text-[13px] tw-font-medium tw-leading-[18px] tw-text-iron-100">
                 {getTdhDisplay()}
               </span>
-              <span className="tw-text-[13px] tw-font-semibold tw-text-iron-600 group-data-[typography=collected]/collected-cards:tw-font-normal group-data-[typography=collected]/collected-cards:tw-text-iron-500">
+              <span className="tw-text-[13px] tw-font-normal tw-text-iron-500">
                 {translate(locale, "transfer.card.tdh")}
               </span>
             </div>
-            <span className="tw-rounded-md tw-bg-white/[0.05] tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-medium tw-text-iron-400">
+            <span className="tw-text-[13px] tw-font-normal tw-leading-[18px] tw-text-iron-500">
               {translate(locale, "transfer.card.rank", {
                 rank: getRankDisplay(),
               })}

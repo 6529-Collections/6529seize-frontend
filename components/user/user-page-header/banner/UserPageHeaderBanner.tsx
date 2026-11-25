@@ -38,7 +38,10 @@ export default function UserPageHeaderBanner({
   const banner2Color = getBannerColorValue(profile.banner2) ?? defaultBanner2;
 
   return (
-    <div className="tw-group tw-relative tw-z-10 tw-h-28 tw-w-full tw-overflow-hidden after:tw-pointer-events-none after:tw-absolute after:tw-inset-x-0 after:tw-bottom-0 after:tw-z-20 after:tw-h-px after:tw-bg-white/[0.08] after:tw-content-[''] sm:tw-h-40 md:tw-h-52">
+    <div
+      data-profile-banner
+      className="tw-group tw-relative tw-z-10 tw-h-28 tw-w-full tw-overflow-hidden after:tw-pointer-events-none after:tw-absolute after:tw-inset-x-0 after:tw-bottom-0 after:tw-z-20 after:tw-h-px after:tw-bg-white/[0.08] after:tw-content-[''] sm:tw-h-40 md:tw-h-52"
+    >
       {scaledBannerUrl ? (
         <FallbackImage
           primarySrc={scaledBannerUrl}

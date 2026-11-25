@@ -3,7 +3,8 @@
 import dynamic from "next/dynamic";
 import type { CSSProperties, ReactNode } from "react";
 import { Suspense, useCallback, useMemo, useRef } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useParams, usePathname, useSearchParams } from "next/navigation";
+import { isUserProfilePage } from "../user/layout/userTabs.config";
 import BottomNavigation from "../navigation/BottomNavigation";
 import { getActiveViewFromUrl } from "../navigation/ViewContext";
 import BrainMobileWaves from "../brain/mobile/BrainMobileWaves";
@@ -124,10 +125,12 @@ function AppLayoutContent({ children }: Props) {
   const headerRef = useRef<HTMLDivElement | null>(null);
   const pullContentRef = useRef<HTMLDivElement | null>(null);
   const pathname = usePathname();
+  const params = useParams();
+  const hasProfileShell = isUserProfilePage(pathname, params["user"]);
   // This content-height wrapper is not a scrollport on collection pages.
   // Clip horizontally without trapping sticky descendants or document scrolling.
   const overflowClassName =
-    pathname === "/the-memes"
+    pathname === "/the-memes" || hasProfileShell
       ? "tw-overflow-x-clip"
       : "tw-overflow-y-auto tw-overflow-x-hidden";
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense

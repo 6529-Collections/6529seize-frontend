@@ -393,7 +393,7 @@ function RatingsList({
           }}
         />
         {query.isSuccess && items.length === 0 && (
-          <output className="tw-block tw-py-4 tw-text-sm tw-text-iron-400">
+          <output className="tw-block tw-py-4 tw-text-sm tw-italic tw-text-iron-400">
             {t(locale, "user.rate.empty")}
           </output>
         )}

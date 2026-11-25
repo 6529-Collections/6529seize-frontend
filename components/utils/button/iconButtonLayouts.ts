@@ -5,6 +5,7 @@ import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "./compactActionButtonStyles";
 // Responsive presets own both the hit target and its visible surface so callers
 // can share a layout without overriding its dimensions locally.
 export type IconButtonLayout =
+  | "profile-menu"
   | "toolbar"
   | "toolbar-compact"
   | "toolbar-filled"
@@ -85,6 +86,9 @@ function getNotificationStateClasses(
 }
 
 const ROOT_CLASSES: Record<IconButtonLayout, string> = {
+  "profile-menu":
+    "tw-flex tw-size-9 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-p-0 tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-transition tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-default disabled:tw-opacity-60 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100 " +
+    COMPACT_ACTION_TOUCH_TARGET_CLASS,
   toolbar: TOOLBAR_TARGET,
   "toolbar-filled": TOOLBAR_TARGET,
   "toolbar-compact":
@@ -188,6 +192,7 @@ export function getIconButtonLayoutClasses({
     disabled &&
     !notification &&
     layout !== "drop-inline" &&
+    layout !== "profile-menu" &&
     layout !== "edit-group"
   ) {
     disabledClasses = drop

@@ -134,6 +134,7 @@ jest.mock("@/components/user/utils/UserFollowBtn", () => ({
     showFollowButton = true,
     showMuteButton = true,
     beforeFollowAction,
+    afterFollowAction,
   }: {
     readonly onDirectMessage?: (() => void) | undefined;
     readonly blocked?: boolean | undefined;
@@ -141,6 +142,7 @@ jest.mock("@/components/user/utils/UserFollowBtn", () => ({
     readonly showFollowButton?: boolean | undefined;
     readonly showMuteButton?: boolean | undefined;
     readonly beforeFollowAction?: React.ReactNode | undefined;
+    readonly afterFollowAction?: React.ReactNode | undefined;
   }) => (
     <div data-testid="profile-actions">
       {onDirectMessage ? (
@@ -159,6 +161,7 @@ jest.mock("@/components/user/utils/UserFollowBtn", () => ({
           {blocked ? "Unblock" : "Follow"}
         </button>
       ) : null}
+      {afterFollowAction}
     </div>
   ),
 }));
@@ -660,17 +663,13 @@ describe("UserPageHeader", () => {
     const preferencesButtons = screen.getAllByRole("link", {
       name: "Preferences",
     });
-    expect(preferencesButtons).toHaveLength(3);
-    preferencesButtons.forEach((preferencesButton) => {
-      expect(preferencesButton).toHaveAttribute(
-        "href",
-        "/preferences?from=profile"
-      );
-    });
+    expect(preferencesButtons).toHaveLength(2);
     expect(preferencesButtons[0]).toHaveClass(
       "tw-size-11",
-      "!tw-bg-transparent",
-      "min-[840px]:tw-hidden"
+      "!tw-bg-transparent"
+    );
+    expect(screen.getByTestId("banner").parentElement).toContainElement(
+      preferencesButtons[0]
     );
     preferencesButtons.slice(1).forEach((preferencesButton) => {
       expect(preferencesButton).toHaveClass(
@@ -833,9 +832,13 @@ describe("UserPageHeader", () => {
       </AuthContext.Provider>
     );
 
-    expect(
-      screen.getByRole("link", { name: "Open bob website" })
-    ).toHaveAttribute("href", "/bob/index.html");
+    const websiteLinks = screen.getAllByRole("link", {
+      name: "Open bob website",
+    });
+    expect(websiteLinks).toHaveLength(2);
+    for (const websiteLink of websiteLinks) {
+      expect(websiteLink).toHaveAttribute("href", "/bob/index.html");
+    }
   });
 
   it("does not render profile website link without a primary CMS site", () => {

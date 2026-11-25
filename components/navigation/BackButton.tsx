@@ -25,8 +25,10 @@ import { isProfileWavesFeed } from "@/helpers/waves/profile-feed-navigation";
 
 export default function BackButton({
   returnTo,
+  className,
 }: {
   readonly returnTo?: string | null | undefined;
+  readonly className?: string | undefined;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -148,7 +150,7 @@ export default function BackButton({
       aria-busy={loading}
       disabled={loading}
       onClick={handleClick}
-      className="tw-relative tw-flex tw-size-11 tw-touch-manipulation tw-items-center tw-justify-center tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-transition-colors tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 active:tw-bg-white/[0.08] disabled:tw-cursor-default disabled:tw-opacity-70 desktop-hover:hover:tw-bg-white/[0.06]"
+      className={`tw-relative tw-flex tw-size-11 tw-touch-manipulation tw-items-center tw-justify-center tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-transition-colors tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 active:tw-bg-white/[0.08] disabled:tw-cursor-default disabled:tw-opacity-70 desktop-hover:hover:tw-bg-white/[0.06] ${className ?? ""}`}
     >
       <ChevronLeftIcon
         strokeWidth={2}

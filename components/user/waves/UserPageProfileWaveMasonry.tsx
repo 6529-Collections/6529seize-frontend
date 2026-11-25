@@ -28,7 +28,12 @@ import { useDropCurationMembershipMutation } from "@/hooks/drops/useDropCuration
 import { useNavigateToDropWave } from "@/hooks/useNavigateToDropWave";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { t } from "@/i18n/messages";
-import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
+import {
+  ChatBubbleOvalLeftIcon,
+  EllipsisVerticalIcon,
+  MinusCircleIcon,
+  PencilSquareIcon,
+} from "@heroicons/react/24/outline";
 import {
   MasonryScroller,
   useContainerPosition,
@@ -210,6 +215,9 @@ function CurationMasonryActions({
   const menuItems: CompactMenuItem[] = [
     {
       id: "open",
+      icon: isMobileLayoutViewport ? (
+        <ChatBubbleOvalLeftIcon aria-hidden="true" className="tw-size-5" />
+      ) : undefined,
       label: t(locale, "profileCuration.actions.openOriginal"),
       onSelect: () => navigateToDropWave(drop),
     },
@@ -217,6 +225,9 @@ function CurationMasonryActions({
       ? [
           {
             id: "edit",
+            icon: isMobileLayoutViewport ? (
+              <PencilSquareIcon aria-hidden="true" className="tw-size-5" />
+            ) : undefined,
             label: t(locale, "profileCuration.actions.editPost"),
             onSelect: () => navigateToDropWave(drop, { edit: true }),
           },
@@ -224,6 +235,11 @@ function CurationMasonryActions({
       : []),
     {
       id: "remove",
+      separatorBefore: true,
+      icon: isMobileLayoutViewport ? (
+        <MinusCircleIcon aria-hidden="true" className="tw-size-5" />
+      ) : undefined,
+      iconClassName: "tw-size-5 tw-flex-none tw-text-red",
       label: t(locale, "profileCuration.actions.remove"),
       onSelect: () => setIsRemoveOpen(true),
       className: "tw-text-red desktop-hover:hover:tw-text-red",

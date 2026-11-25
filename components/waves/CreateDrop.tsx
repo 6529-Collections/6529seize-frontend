@@ -87,6 +87,8 @@ export default function CreateDrop({
   identityPickerPlacement = "modal",
   forceStandardDropComposer = false,
   focusOnInitialActiveDrop = false,
+  autoFocus = false,
+  onAutoFocusRoot,
   initialMarkdown = null,
   initialMarkdownKey = null,
 }: CreateDropProps) {
@@ -776,6 +778,8 @@ export default function CreateDrop({
         wave={wave}
         submissionExperience={submissionExperience}
         focusOnInitialActiveDrop={focusOnInitialActiveDrop}
+        autoFocus={autoFocus}
+        onAutoFocusRoot={onAutoFocusRoot}
       />
     );
   }

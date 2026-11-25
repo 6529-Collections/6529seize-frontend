@@ -23,6 +23,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { Tooltip } from "react-tooltip";
 import Button from "@/components/utils/button/Button";
+import IconButton from "@/components/utils/button/IconButton";
+import type { IconButtonLayout } from "@/components/utils/button/iconButtonLayouts";
 import type { ButtonSize } from "@/components/utils/button/buttonStyles";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -172,10 +174,13 @@ export default function UserFollowBtn({
   unblockPending = false,
   onUnblock,
   beforeFollowAction,
+  afterFollowAction,
   insideHoverCard = false,
   followLabel,
   followingLabel,
   initialFollowing = false,
+  buttonClassName: customButtonClassName,
+  directMessageButtonLayout,
 }: {
   readonly handle: string;
   readonly size?: UserFollowBtnSize | undefined;
@@ -188,10 +193,13 @@ export default function UserFollowBtn({
   readonly unblockPending?: boolean | undefined;
   readonly onUnblock?: (() => void) | undefined;
   readonly beforeFollowAction?: ReactNode | undefined;
+  readonly afterFollowAction?: ReactNode | undefined;
   readonly insideHoverCard?: boolean | undefined;
   readonly followLabel?: string | undefined;
   readonly followingLabel?: string | undefined;
   readonly initialFollowing?: boolean | undefined;
+  readonly buttonClassName?: string | undefined;
+  readonly directMessageButtonLayout?: IconButtonLayout | undefined;
 }) {
   const locale = useBrowserLocale();
   const queryClient = useQueryClient();
@@ -357,8 +365,7 @@ export default function UserFollowBtn({
 
   const directMessageTooltipId = `dm-${handle}`;
   const actionLoading = mutating || isInitialStatusLoading;
-  const buttonClassName =
-    size === UserFollowBtnSize.MEDIUM ? "!tw-text-[13px]" : undefined;
+  const buttonClassName = `${size === UserFollowBtnSize.MEDIUM ? "!tw-text-[13px]" : ""} ${customButtonClassName ?? ""}`;
   const actionContent = (
     <>
       <FollowStateIcon
@@ -376,12 +383,18 @@ export default function UserFollowBtn({
     <div className="tw-flex tw-items-center tw-gap-x-2">
       {onDirectMessage && (
         <>
-          <button
+          <IconButton
+            layout={directMessageButtonLayout}
+            variant="secondary"
+            size={size === UserFollowBtnSize.SMALL ? 32 : 36}
             onClick={onDirectMessageClick}
             disabled={isDirectMessagePending}
-            type="button"
-            aria-label="Send direct message"
-            className={`${DIRECT_MESSAGE_BUTTON_CLASSES[size]} tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-font-semibold tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out enabled:tw-cursor-pointer enabled:hover:tw-bg-iron-700 enabled:hover:tw-ring-iron-600 disabled:tw-cursor-default disabled:tw-opacity-70`}
+            aria-label={t(locale, "profile.follow.sendDirectMessage")}
+            className={
+              directMessageButtonLayout
+                ? undefined
+                : "!tw-shadow-none tw-duration-300 enabled:hover:tw-ring-iron-600 disabled:tw-cursor-default disabled:tw-opacity-70"
+            }
             data-tooltip-id={directMessageTooltipId}
           >
             {isDirectMessagePending ? (
@@ -392,7 +405,7 @@ export default function UserFollowBtn({
                 className={DIRECT_MESSAGE_ICON_CLASSES[size]}
               />
             )}
-          </button>
+          </IconButton>
           <Tooltip
             id={directMessageTooltipId}
             place="top"
@@ -444,6 +457,7 @@ export default function UserFollowBtn({
           {actionContent}
         </Button>
       )}
+      {afterFollowAction}
     </div>
   );
 }
