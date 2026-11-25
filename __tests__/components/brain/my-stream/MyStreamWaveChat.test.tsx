@@ -4,6 +4,8 @@ import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/React
 import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import { EditingDropProvider } from "@/contexts/EditingDropContext";
+import { useUnreadDivider } from "@/contexts/wave/UnreadDividerContext";
+import { WaveChatReadContext } from "@/contexts/wave/WaveChatReadContext";
 import { WsMessageType, type WsDropDeleteMessage } from "@/helpers/Types";
 import { REPLY_TARGET_UNAVAILABLE_TOAST_ID } from "@/components/waves/create-drop-content/reply-target-unavailable";
 import {
@@ -20,7 +22,6 @@ const replaceMock = jest
   .mockImplementation(() => {});
 const mockRouterReplace = jest.fn();
 const searchParamsMock = { get: jest.fn(), toString: jest.fn() };
-const mockSetUnreadDividerSerialNo = jest.fn();
 const mockRemoveWaveDeliveredNotifications = jest
   .fn()
   .mockResolvedValue(undefined);
@@ -126,9 +127,10 @@ jest.mock("@/components/waves/drops/wave-drops-all", () => ({
     capturedPropsHolder.current = props;
     return <div data-testid="drops" />;
   },
-  WaveDropsAllWithoutProvider: (props: any) => {
+  WaveDropsAllWithoutProvider: function MockWaveDrops(props: any) {
+    const { unreadDividerSerialNo } = useUnreadDivider();
     capturedPropsHolder.current = props;
-    return <div data-testid="drops" />;
+    return <div data-testid="drops" data-divider={unreadDividerSerialNo} />;
   },
 }));
 
@@ -183,13 +185,6 @@ let mockIsApp = false;
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
   default: () => ({ isApp: mockIsApp }),
-}));
-
-jest.mock("@/contexts/wave/UnreadDividerContext", () => ({
-  UnreadDividerProvider: ({ children }: any) => <>{children}</>,
-  useUnreadDivider: () => ({
-    setUnreadDividerSerialNo: mockSetUnreadDividerSerialNo,
-  }),
 }));
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
@@ -269,7 +264,6 @@ describe("MyStreamWaveChat", () => {
     mockIsApp = false;
     mockDmUnreadConversation = null;
     mockOnDropClick.mockClear();
-    mockSetUnreadDividerSerialNo.mockClear();
     mockRemoveWaveDeliveredNotifications.mockClear();
     mockRemoveAllDeliveredNotifications.mockClear();
     invalidateNotificationsMock.mockClear();
@@ -300,6 +294,64 @@ describe("MyStreamWaveChat", () => {
   const renderWithProvider = (component: React.ReactElement) => {
     return render(wrapWithProvider(component));
   };
+
+  it("captures a late unread position before registering the chat for reads", () => {
+    const registerRead = jest.fn();
+    const unreadWave = {
+      ...wave,
+      metrics: { ...wave.metrics, your_unread_drops_count: 135 },
+    };
+    const chat = (firstUnreadSerialNo: number | undefined) =>
+      wrapWithProvider(
+        <WaveChatReadContext.Provider value={registerRead}>
+          <MyStreamWaveChat
+            wave={unreadWave}
+            firstUnreadSerialNo={firstUnreadSerialNo}
+            unreadMetadataPending={firstUnreadSerialNo === undefined}
+            viewMode="chat"
+            onDropClick={mockOnDropClick}
+          />
+        </WaveChatReadContext.Provider>
+      );
+
+    const { rerender } = render(chat(undefined));
+    expect(screen.getByTestId("drops")).not.toHaveAttribute("data-divider");
+    expect(capturedPropsHolder.current.markReadEnabled).toBe(false);
+    expect(registerRead).not.toHaveBeenCalled();
+
+    rerender(chat(501));
+
+    expect(screen.getByTestId("drops")).toHaveAttribute("data-divider", "501");
+    expect(capturedPropsHolder.current.markReadEnabled).toBe(true);
+    expect(registerRead).toHaveBeenCalledWith(wave.id);
+  });
+
+  it.each<[string, string | null]>([
+    ["501", "501"],
+    ["501x", null],
+    ["9007199254740992", null],
+  ])(
+    "validates divider-only navigation for %s without a serial jump",
+    (divider, expected) => {
+      const params = new URLSearchParams({ divider });
+      searchParamsMock.get.mockImplementation((key: string) => params.get(key));
+      searchParamsMock.toString.mockReturnValue(params.toString());
+
+      renderWithProvider(
+        <MyStreamWaveChat
+          wave={wave}
+          firstUnreadSerialNo={null}
+          viewMode="chat"
+          onDropClick={mockOnDropClick}
+        />
+      );
+
+      expect(screen.getByTestId("drops").getAttribute("data-divider")).toBe(
+        expected
+      );
+      expect(mockFetchAroundSerialNo).not.toHaveBeenCalled();
+    }
+  );
 
   it("uses the canonical DM unread count in the open chat", () => {
     mockDmUnreadConversation = { unread_count: 6 };
@@ -1128,7 +1180,6 @@ describe("MyStreamWaveChat", () => {
       await Promise.resolve();
     });
 
-    expect(mockSetUnreadDividerSerialNo).toHaveBeenCalledWith(null);
     expect(mockRemoveWaveDeliveredNotifications).not.toHaveBeenCalled();
     expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
     expect(invalidateNotificationsMock).not.toHaveBeenCalled();

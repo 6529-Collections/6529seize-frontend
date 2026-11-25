@@ -3,7 +3,13 @@ import {
   useUnreadDivider,
   useUnreadDividerOptional,
 } from "@/contexts/wave/UnreadDividerContext";
-import { act, renderHook } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  renderHook,
+  screen,
+} from "@testing-library/react";
 import type { ReactNode } from "react";
 
 function createWrapper(initialSerialNo: number | null) {
@@ -88,5 +94,70 @@ describe("UnreadDividerContext", () => {
 
       expect(result.current?.unreadDividerSerialNo).toBe(42);
     });
+  });
+});
+
+describe("unread position for a Wave visit", () => {
+  const locationBeforeTest = window.location.href;
+  const historyBeforeTest: unknown = window.history.state;
+  const waveId = "wave-1";
+
+  function Divider() {
+    const { unreadDividerSerialNo, setUnreadDividerSerialNo } =
+      useUnreadDivider();
+    return (
+      <button type="button" onClick={() => setUnreadDividerSerialNo(null)}>
+        {unreadDividerSerialNo ?? "No divider"}
+      </button>
+    );
+  }
+
+  const chat = (initialSerialNo: number | null, viewerKey = "profile-1") => (
+    <UnreadDividerProvider
+      initialSerialNo={initialSerialNo}
+      historyScope={{ waveId, viewerKey }}
+    >
+      <Divider />
+    </UnreadDividerProvider>
+  );
+
+  beforeEach(() => {
+    window.history.replaceState({ otherState: true }, "", `/waves/${waveId}`);
+  });
+
+  afterEach(() => {
+    window.history.replaceState(historyBeforeTest, "", locationBeforeTest);
+  });
+
+  it("keeps the first available position across remounts until the reader dismisses it", () => {
+    const original = render(chat(null));
+    expect(screen.getByRole("button", { name: "No divider" })).toBeVisible();
+    original.rerender(chat(501));
+    expect(screen.getByRole("button", { name: "501" })).toBeVisible();
+    original.rerender(chat(520));
+    expect(screen.getByRole("button", { name: "501" })).toBeVisible();
+    expect(window.history.state).toMatchObject({ otherState: true });
+    original.unmount();
+
+    const reloaded = render(chat(null));
+    fireEvent.click(screen.getByRole("button", { name: "501" }));
+    reloaded.rerender(chat(520));
+    expect(screen.getByRole("button", { name: "No divider" })).toBeVisible();
+    reloaded.unmount();
+
+    render(chat(520));
+    expect(screen.getByRole("button", { name: "No divider" })).toBeVisible();
+  });
+
+  it("starts fresh for a different viewer or a new history entry", () => {
+    render(chat(501)).unmount();
+
+    const otherViewer = render(chat(null, "profile-2"));
+    expect(screen.getByRole("button", { name: "No divider" })).toBeVisible();
+    otherViewer.unmount();
+
+    window.history.replaceState(null, "", `/waves/${waveId}`);
+    render(chat(520));
+    expect(screen.getByRole("button", { name: "520" })).toBeVisible();
   });
 });
