@@ -9,6 +9,7 @@ import {
 import { expectAxeClean } from "../support/a11yAssertions";
 import { gateSidebarHydration } from "../support/sidebarHydration";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
+import { expectUrlState } from "../support/urlState";
 
 const SOURCE = "00000000-0000-4000-8000-000000000529";
 const TARGET = "00000000-0000-4000-8000-000000000533";
@@ -488,6 +489,7 @@ for (const app of [false, true]) {
     ? "shows a centered unread subwave chevron in the app"
     : "keeps the subwave title in place when parent navigation arrives";
   test(title, async ({ page, baseURL }, testInfo) => {
+    // Capacitor simulation runs in the phone project. The web case covers desktop.
     test.skip(
       app && testInfo.project.name !== "web-mobile-chromium",
       "Native simulation uses the mobile viewport."
@@ -599,12 +601,12 @@ for (const app of [false, true]) {
           linkBounds!.x
         );
         await parentLink.click();
-        const parentRoute = new RegExp(`/waves/${SOURCE}(?:\\?|$)`);
-        await expect(page).toHaveURL(parentRoute);
+        const isParentRoute = (url: URL) => url.pathname === `/waves/${SOURCE}`;
+        await expectUrlState(page, isParentRoute);
         await expect(childLink).toBeVisible();
         await collapse.press("Space");
         await expect(childLink).toBeHidden();
-        await expect(page).toHaveURL(parentRoute);
+        await expectUrlState(page, isParentRoute);
       }
       if (testInfo.project.name === "web-mobile-chromium") {
         await expect(expand).toHaveCSS("width", "44px");
