@@ -170,6 +170,26 @@ describe("unread position for a Wave visit", () => {
     });
   });
 
+  it("repairs dropped history state after a commit with the same Wave URL", () => {
+    const view = render(chat(501));
+    window.history.replaceState({ otherState: true }, "");
+    view.rerender(chat(501));
+
+    expect(window.history.state).toMatchObject({
+      otherState: true,
+      waveChatUnreadDivider: { serialNo: 501 },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "501" }));
+    window.history.replaceState({ otherState: true }, "");
+    view.rerender(chat(501));
+
+    expect(screen.getByRole("button", { name: "No divider" })).toBeVisible();
+    expect(window.history.state).toMatchObject({
+      otherState: true,
+      waveChatUnreadDivider: { serialNo: null },
+    });
+  });
+
   it("starts fresh for a different viewer or a new history entry", () => {
     render(chat(501)).unmount();
 

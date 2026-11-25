@@ -99,13 +99,17 @@ function rememberDividerHistory(
   entryUrl: string,
   serialNo: number | null
 ) {
-  if (typeof window === "undefined") return;
+  if (
+    typeof window === "undefined" ||
+    readDividerHistory(waveId, viewerKey) === serialNo
+  ) {
+    return;
+  }
   const { pathname, search } = window.location;
   const searchParams = new URLSearchParams(search);
   if (
     `${pathname}?${searchParams.toString()}` !== entryUrl ||
-    getActiveWaveIdFromUrl({ pathname, searchParams }) !== waveId ||
-    readDividerHistory(waveId, viewerKey) === serialNo
+    getActiveWaveIdFromUrl({ pathname, searchParams }) !== waveId
   ) {
     return;
   }
@@ -150,7 +154,8 @@ export function UnreadDividerProvider({
     const historyDivider = hasHistoryScope
       ? readDividerHistory(waveId, viewerKey)
       : undefined;
-    // Undefined means no position has arrived. Null means the reader cleared it.
+    // The active entry wins, including an explicit dismissal. The retained
+    // chat supplies the value if a same-wave router write dropped custom state.
     return historyDivider === undefined ? localStore.get() : historyDivider;
   }, [hasHistoryScope, localStore, viewerKey, waveId]);
   const savedDivider = useSyncExternalStore(
@@ -158,6 +163,7 @@ export function UnreadDividerProvider({
     getDivider,
     getServerDivider
   );
+  // Undefined means no position has arrived. Null means the reader cleared it.
   const unreadDividerSerialNo = savedDivider ?? null;
 
   const rememberDivider = useCallback(
@@ -179,15 +185,15 @@ export function UnreadDividerProvider({
   }, []);
 
   useLayoutEffect(() => {
-    // A same-wave router navigation can write a new entry without custom state.
-    // Restore the captured value, including dismissal, from the retained chat.
+    // Check after each commit. A same-URL router write can drop the key
+    // without changing the route props or the retained divider snapshot.
     const current = getDivider();
     if (current !== undefined) {
       rememberDivider(current);
     } else if (initialSerialNo !== null) {
       rememberDivider(initialSerialNo);
     }
-  }, [getDivider, initialSerialNo, rememberDivider, savedDivider]);
+  });
 
   const setUnreadDividerSerialNo = useCallback<SetUnreadDividerSerialNo>(
     (value) => {
