@@ -98,6 +98,8 @@ export function useCreateDropContentController({
   termsSignatureFlowEnabled = true,
   identityPickerPlacement = "modal",
   focusOnInitialActiveDrop = false,
+  autoFocus = false,
+  onAutoFocusRoot,
   initialMarkdown = null,
   initialMarkdownKey = null,
 }: CreateDropContentProps): CreateDropLayoutProps {
@@ -702,6 +704,8 @@ export function useCreateDropContentController({
 
   return {
     activeDrop,
+    autoFocus,
+    onAutoFocusRoot,
     onCancelReplyQuote,
     dropId,
     submitting,

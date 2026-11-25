@@ -164,6 +164,8 @@ export const PROFILE_CURATION_MESSAGES = {
   "profileCuration.actions.removeConfirm": "Remove",
   "profileCuration.actions.authorOnly":
     "Only the post author can edit this post.",
+  "profileCuration.quickPost.title": "Add post",
+  "profileCuration.quickPost.subtitle": "to {curationName}",
   "profileCuration.quickPost.retrySuccess": "Post added to Curation.",
   "profileCuration.quickPost.retryError":
     "The post still could not be added. Try again.",

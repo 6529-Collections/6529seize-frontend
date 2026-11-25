@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import { useLayoutViewportLock } from "@/components/brain/my-stream/layout/LayoutContext";
 import {
   QueryKey,
   ReactQueryWrapperContext,
@@ -16,6 +17,8 @@ import { addDropToCuration } from "@/hooks/drops/useDropCurationMembershipMutati
 import { COMMUNITY_CURATIONS_DROPS_QUERY_KEY } from "@/hooks/useCommunityCurationsDrops";
 import { useWave } from "@/hooks/useWave";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import useCapacitor from "@/hooks/useCapacitor";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { t } from "@/i18n/messages";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
@@ -36,10 +39,19 @@ export default function UserPageProfileWaveQuickPostDialog({
 }) {
   const queryClient = useQueryClient();
   const locale = useBrowserLocale();
+  const { isCapacitor, isIos } = useCapacitor();
+  const isMobileViewport = useIsMobileLayoutViewport();
+  const isMobile = isCapacitor || isMobileViewport;
+  const followsIosKeyboard = isCapacitor && isIos;
+  useLayoutViewportLock(isOpen && followsIosKeyboard);
   const { setToast } = useAuth();
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
   const { isCurationWave } = useWave(wave);
   const hasCurationAddErrorRef = useRef(false);
+  const composerFocusRef = useRef<HTMLElement | null>(null);
+  const handleComposerRoot = useCallback((root: HTMLElement | null) => {
+    composerFocusRef.current = root;
+  }, []);
   const successfulCurationAddsRef = useRef(0);
   const [failedPostId, setFailedPostId] = useState<string | null>(null);
   const [isRetryingAdd, setIsRetryingAdd] = useState(false);
@@ -156,19 +168,53 @@ export default function UserPageProfileWaveQuickPostDialog({
 
   return (
     <MobileWrapperDialog
-      title={`Add post to ${curation.name}`}
-      titleClassName="!tw-text-lg tw-font-semibold !tw-text-iron-100 md:!tw-text-xl"
+      title={
+        isMobile
+          ? t(locale, "profileCuration.quickPost.title")
+          : `Add post to ${curation.name}`
+      }
+      subtitle={
+        isMobile
+          ? t(locale, "profileCuration.quickPost.subtitle", {
+              curationName: curation.name,
+            })
+          : undefined
+      }
+      titleClassName={
+        isMobile
+          ? "tw-text-lg tw-font-semibold tw-text-iron-50"
+          : "!tw-text-lg tw-font-semibold !tw-text-iron-100 md:!tw-text-xl"
+      }
       isOpen={isOpen}
       onClose={onClose}
       noPadding
       tabletModal={true}
       tall={true}
       maxWidthClass="md:tw-max-w-2xl"
-      headerClassName="tw-mb-0 tw-border-b tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-white/[0.06] tw-py-4"
+      headerClassName={
+        isMobile
+          ? "tw-mb-0"
+          : "tw-mb-0 tw-border-b tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-white/[0.06] tw-py-4"
+      }
+      focusTitleOnOpen={false}
+      initialFocusRef={isMobile ? composerFocusRef : undefined}
+      keyboardTransitionEasing={
+        followsIosKeyboard
+          ? "var(--native-keyboard-layout-transition-easing, ease-out)"
+          : undefined
+      }
     >
       <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
-        <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-px-4 tw-py-5 sm:tw-px-6">
+        <div
+          className={
+            isMobile
+              ? "tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-px-4 tw-pb-4 tw-pt-4"
+              : "tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-px-4 tw-py-5 sm:tw-px-6"
+          }
+        >
           <WaveDropCreate
+            autoFocus={isMobile}
+            onAutoFocusRoot={isMobile ? handleComposerRoot : undefined}
             wave={wave}
             onCancel={onClose}
             onSuccess={handleAllDropsAdded}

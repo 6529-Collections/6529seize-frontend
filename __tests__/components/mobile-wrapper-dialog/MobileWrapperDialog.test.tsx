@@ -11,7 +11,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useRef, useState } from "react";
+import { createRef, useRef, useState } from "react";
 
 jest.mock("@/hooks/useIsMobileLayoutViewport");
 jest.mock("@/hooks/useIsTouchDevice");
@@ -77,6 +77,38 @@ describe("MobileWrapperDialog", () => {
   });
 
   describe("rendering", () => {
+    it("redirects container focus only for an explicit content target", async () => {
+      const initialFocusRef = createRef<HTMLInputElement>();
+      render(
+        <MobileWrapperDialog
+          isOpen
+          title="Add post"
+          onClose={jest.fn()}
+          initialFocusRef={initialFocusRef}
+        >
+          <input aria-label="Message" ref={initialFocusRef} />
+        </MobileWrapperDialog>
+      );
+      act(() => screen.getByRole("dialog", { name: "Add post" }).focus());
+      await waitFor(() =>
+        expect(screen.getByRole("textbox", { name: "Message" })).toHaveFocus()
+      );
+    });
+    it("supports an optional subtitle without changing the shared close control", () => {
+      render(
+        <MobileWrapperDialog
+          {...defaultProps}
+          isOpen
+          title="Add post"
+          subtitle="to My Curation"
+        />
+      );
+      const dialog = screen.getByRole("dialog", { name: "Add post" });
+      expect(dialog).toHaveAccessibleDescription("to My Curation");
+      expect(
+        screen.getAllByRole("button", { name: "Close", exact: true })
+      ).toHaveLength(1);
+    });
     it("does not render children when closed", () => {
       render(<MobileWrapperDialog {...defaultProps} isOpen={false} />);
 

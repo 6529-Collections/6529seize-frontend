@@ -1,5 +1,6 @@
 import type { Page } from "@playwright/test";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
 import {
   CollectedCollectionType,
   type CollectedCard,
@@ -291,6 +292,316 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     );
   });
 
+  test("profile Curation menus group actions without changing permissions or desktop styling", async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    await hideNextDevOverlay(page.context());
+    await seedSession(page);
+    await installHostedWalletReads(page);
+    const api = getSandboxApiOrigin(baseURL);
+    const waveId = "00000000-0000-4000-8000-000000000529";
+    const curationId = "profile-curation-sheet";
+    const curationName =
+      "Sheet review Curation with a very long name that must stay on one subtitle line without squeezing its close button";
+    await page.route("**/api/drops?**", (route) => route.fulfill({ json: [] }));
+    await page.route("**/api//drops?**", (route) =>
+      route.fulfill({ json: [] })
+    );
+    const feedResponse = await page.request.get(
+      `${api}/api/v2/waves/${waveId}/drops`
+    );
+    const feed = (await feedResponse.json()) as { drops: ApiDropV2[] };
+    const sample = feed.drops[0]!;
+    expect(sample).toBeTruthy();
+    const posts = [
+      {
+        ...sample,
+        id: "00000000-0000-4000-8000-000000000541",
+        content: "Owner Curation sample post",
+      },
+      {
+        ...sample,
+        id: "00000000-0000-4000-8000-000000000542",
+        content: "Other Curation sample post",
+        author: {
+          ...sample.author,
+          id: "other-curation-author",
+          handle: "following-artist-0",
+          primary_address: "0x0000000000000000000000000000000000000530",
+        },
+      },
+    ];
+    await page.route("**/api/profiles/*/wave", (route) =>
+      route.fulfill({
+        json: { profile_wave_id: waveId, profile_curation_id: curationId },
+      })
+    );
+    await page.route(`${api}/api/waves/${waveId}/curations`, (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: curationId,
+            name: curationName,
+            wave_id: waveId,
+            group_id: null,
+            created_at: 1,
+            updated_at: 1,
+            priority_order: 1,
+          },
+        ],
+      })
+    );
+    await page.route(`**/v2/waves/${waveId}/curations/*/drops?**`, (route) =>
+      route.fulfill({ json: { data: posts, page: 1, next: false } })
+    );
+    await page.route("**/drops/*/curations", (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: curationId,
+            drop_included: true,
+            authenticated_user_can_curate: true,
+            drop_priority_order: 1,
+          },
+        ],
+      })
+    );
+    await finishHostedWalletInitialization(page, () =>
+      page.goto("/playwright/curations")
+    );
+    const mobile = testInfo.project.name !== "web-desktop-chromium";
+    const manage = page.getByRole("button", {
+      name: mobile ? "Manage" : "Curation options",
+      exact: true,
+    });
+    await expect(
+      page.getByText("Owner Curation sample post", { exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByText("Other Curation sample post", { exact: true })
+    ).toBeVisible();
+    await manage.click();
+    const menu = page.getByRole(mobile ? "dialog" : "menu", {
+      name: mobile ? "Manage" : "Curation options",
+      exact: true,
+    });
+    const manageLabels = [
+      "Edit Curation",
+      "Organize posts",
+      "Choose another Curation",
+      "Use another source Wave",
+      "Hide from profile",
+      "Delete Curation",
+    ];
+    await expect(
+      menu.getByRole(mobile ? "button" : "menuitem", {
+        name: "Organize posts",
+        exact: true,
+      })
+    ).toBeVisible();
+    const labels = (
+      await menu.getByRole(mobile ? "button" : "menuitem").allTextContents()
+    )
+      .map((text) => text.trim())
+      .filter((text) => text && text !== "Close");
+    expect(labels).toEqual(manageLabels);
+    const sections = menu.getByText(/^(This Curation|Shown on profile)$/);
+    await expect(sections).toHaveText(["This Curation", "Shown on profile"]);
+    await expect(menu.getByRole("separator")).toHaveCount(1);
+    for (const name of manageLabels) {
+      const action = menu.getByRole(mobile ? "button" : "menuitem", {
+        name,
+        exact: true,
+      });
+      await expect(action).toBeEnabled();
+      await expect(action).toHaveCSS("font-size", mobile ? "15px" : "16px");
+      await expect(action.locator("svg")).toHaveCount(mobile ? 1 : 0);
+      if (mobile) {
+        await expect(action).toHaveCSS("min-height", "48px");
+        await expect(action).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+        await expect(action).toHaveCSS("border-radius", "12px");
+        await expect(action.locator("svg")).toHaveCSS("width", "20px");
+      }
+    }
+    if (mobile) {
+      await expect(sections.first()).toHaveCSS("font-size", "11px");
+      const editIcon = await menu
+        .getByRole("button", { name: "Edit Curation", exact: true })
+        .locator("svg")
+        .boundingBox();
+      const sectionBox = await sections.first().boundingBox();
+      expect(Math.abs(sectionBox!.x - editIcon!.x)).toBeLessThanOrEqual(1);
+      const remove = menu.getByRole("button", {
+        name: "Delete Curation",
+        exact: true,
+      });
+      expect(
+        await remove
+          .locator("svg")
+          .evaluate((node) => getComputedStyle(node).color)
+      ).toBe(await remove.evaluate((node) => getComputedStyle(node).color));
+      await page.screenshot({
+        path: testInfo.outputPath("profile-curation-manage-sheet.png"),
+        animations: "disabled",
+        scale: "css",
+      });
+      await menu.getByRole("button", { name: "Close", exact: true }).click();
+    } else await page.keyboard.press("Escape");
+    await expect(manage).toBeFocused();
+
+    for (const [content, author] of [
+      ["Owner Curation sample post", true],
+      ["Other Curation sample post", false],
+    ] as const) {
+      const card = page
+        .getByRole("article")
+        .filter({ has: page.getByText(content, { exact: true }) });
+      const trigger = card.getByRole("button", {
+        name: "Post actions",
+        exact: true,
+      });
+      await trigger.click();
+      const actions = page.getByRole(mobile ? "dialog" : "menu", {
+        name: "Post actions",
+        exact: true,
+      });
+      const expected = [
+        "Open original Wave",
+        ...(author ? ["Edit post"] : []),
+        "Remove from Curation",
+      ];
+      expect(
+        (
+          await actions
+            .getByRole(mobile ? "button" : "menuitem")
+            .allTextContents()
+        )
+          .map((text) => text.trim())
+          .filter((text) => text && text !== "Close")
+      ).toEqual(expected);
+      await expect(actions.getByRole("separator")).toHaveCount(1);
+      for (const name of expected) {
+        const action = actions.getByRole(mobile ? "button" : "menuitem", {
+          name,
+          exact: true,
+        });
+        await expect(action).toHaveCSS("font-size", mobile ? "15px" : "16px");
+        await expect(action.locator("svg")).toHaveCount(mobile ? 1 : 0);
+      }
+      if (mobile) {
+        await page.screenshot({
+          path: testInfo.outputPath(
+            `profile-curation-post-${author ? "author" : "visitor"}-sheet.png`
+          ),
+          animations: "disabled",
+          scale: "css",
+        });
+        await actions
+          .getByRole("button", { name: "Close", exact: true })
+          .click();
+      } else await page.keyboard.press("Escape");
+      await expect(trigger).toBeFocused();
+    }
+    await expectNoHorizontalOverflow(page);
+    const addPost = page.getByRole("button", { name: "Add post", exact: true });
+    await addPost.click();
+    const composer = page.getByRole("dialog", {
+      name: mobile ? "Add post" : `Add post to ${curationName}`,
+      exact: true,
+    });
+    await expect(
+      composer.getByRole("heading", {
+        name: mobile ? "Add post" : `Add post to ${curationName}`,
+        exact: true,
+      })
+    ).toBeVisible();
+    if (mobile) {
+      await expect(
+        composer.getByText(`to ${curationName}`, { exact: true })
+      ).toBeVisible();
+      await expect(
+        composer.getByText(`to ${curationName}`, { exact: true })
+      ).toHaveCSS("text-overflow", "ellipsis");
+      await expect(
+        composer.getByText(`to ${curationName}`, { exact: true })
+      ).toHaveCSS("white-space", "nowrap");
+      await expect(composer.getByRole("textbox")).toBeFocused();
+      const header = await composer.evaluate((dialog) => {
+        const title = dialog.querySelector("h2")!;
+        const block = title.parentElement!.getBoundingClientRect();
+        const close = dialog
+          .querySelector('button[aria-label="Close"]')!
+          .getBoundingClientRect();
+        return { block: block.toJSON(), close: close.toJSON() };
+      });
+      expect(
+        Math.abs(
+          header.block.y +
+            header.block.height / 2 -
+            (header.close.y + header.close.height / 2)
+        )
+      ).toBeLessThan(1);
+      expect(header.close.x).toBeGreaterThan(
+        header.block.x + header.block.width
+      );
+      await page.screenshot({
+        path: testInfo.outputPath("profile-curation-add-post-sheet.png"),
+        animations: "disabled",
+        scale: "css",
+      });
+      if (isCapacitorSimulationProject(testInfo.project.name)) {
+        await expect
+          .poll(() =>
+            page.evaluate(() =>
+              (
+                globalThis as typeof globalThis & {
+                  __playwrightKeyboardListeners?: string[];
+                }
+              ).__playwrightKeyboardListeners?.includes("keyboardDidShow")
+            )
+          )
+          .toBe(true);
+        for (const eventName of ["keyboardWillShow", "keyboardDidShow"]) {
+          await page.evaluate(
+            (eventName) =>
+              globalThis.dispatchEvent(
+                new CustomEvent(`playwright:${eventName}`, {
+                  detail: { keyboardHeight: 300 },
+                })
+              ),
+            eventName
+          );
+        }
+        await expect
+          .poll(async () =>
+            Math.abs(
+              (await composer.locator(".mobile-wrapper-dialog").boundingBox())!
+                .y +
+                (await composer
+                  .locator(".mobile-wrapper-dialog")
+                  .boundingBox())!.height -
+                ((page.viewportSize()?.height ?? 0) - 300)
+            )
+          )
+          .toBeLessThanOrEqual(2);
+        for (const eventName of ["keyboardWillHide", "keyboardDidHide"]) {
+          await page.evaluate(
+            (eventName) =>
+              globalThis.dispatchEvent(
+                new CustomEvent(`playwright:${eventName}`, {
+                  detail: { keyboardHeight: 0 },
+                })
+              ),
+            eventName
+          );
+        }
+      }
+    }
+    await composer.getByRole("button", { name: "Close", exact: true }).click();
+    await expect(addPost).toBeFocused();
+  });
+
   for (const profile of ["playwright", "following-artist-0"]) {
     test(`native profile controls clear the avatar with iPhone safe areas for ${profile}`, async ({
       page,
@@ -405,6 +716,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
         await page.screenshot({
           path: testInfo.outputPath(`brain-wave-rows-${profile}.png`),
           fullPage: true,
+          animations: "disabled",
           scale: "css",
         });
         return;
@@ -459,6 +771,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       await page.screenshot({
         path: testInfo.outputPath(`brain-wave-rows-${profile}.png`),
         fullPage: true,
+        animations: "disabled",
         scale: "css",
       });
     });
@@ -632,6 +945,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
           ).toBeVisible();
           await page.screenshot({
             path: testInfo.outputPath(`curation-manage-${profile}.png`),
+            animations: "disabled",
             scale: "css",
           });
           await sheet
@@ -648,6 +962,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       await page.screenshot({
         path: testInfo.outputPath(`curation-${profile}.png`),
         fullPage: true,
+        animations: "disabled",
         scale: "css",
       });
       await page
@@ -655,6 +970,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
         .locator("..")
         .screenshot({
           path: testInfo.outputPath(`curation-header-${profile}.png`),
+          animations: "disabled",
           scale: "css",
         });
       if (owner && mobile) {
@@ -685,6 +1001,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
           .locator("..")
           .screenshot({
             path: testInfo.outputPath(`curation-short-header-${profile}.png`),
+            animations: "disabled",
             scale: "css",
           });
       }
@@ -742,6 +1059,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       await page.screenshot({
         path: testInfo.outputPath(`curation-empty-${profile}.png`),
         fullPage: true,
+        animations: "disabled",
         scale: "css",
       });
     });

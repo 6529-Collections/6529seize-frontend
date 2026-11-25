@@ -7,6 +7,7 @@ export interface CompactMenuActionItem {
   readonly label: ReactNode;
   readonly icon?: ReactNode | undefined;
   readonly iconClassName?: string | undefined;
+  readonly separatorBefore?: boolean | undefined;
   readonly href?: string | undefined;
   readonly onSelect?: (() => void) | undefined;
   /** Mobile sheets defer dialog-opening actions until the sheet has closed. */

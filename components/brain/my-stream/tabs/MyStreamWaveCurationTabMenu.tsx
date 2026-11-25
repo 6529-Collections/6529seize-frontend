@@ -7,8 +7,15 @@ import {
 } from "@/components/brain/mobile/WaveInformationPanelContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
+  ArrowsUpDownIcon,
+  ChatBubbleOvalLeftIcon,
   Cog6ToothIcon,
   EllipsisVerticalIcon,
+  EyeIcon,
+  EyeSlashIcon,
+  PencilSquareIcon,
+  Squares2X2Icon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
 import CompactMenuMobileBottomSheet from "@/components/compact-menu/CompactMenuMobileBottomSheet";
@@ -51,6 +58,15 @@ interface MyStreamWaveCurationTabMenuProps {
 }
 
 const EMPTY_MENU_ITEMS: readonly CompactMenuItem[] = [];
+const PROFILE_MENU_ICONS = new Map<string, typeof PencilSquareIcon>([
+  ["edit", PencilSquareIcon],
+  ["reorder-posts", ArrowsUpDownIcon],
+  ["set-profile-curation", EyeIcon],
+  ["choose-curation", Squares2X2Icon],
+  ["choose-source-wave", ChatBubbleOvalLeftIcon],
+  ["hide-from-profile", EyeSlashIcon],
+  ["delete", TrashIcon],
+]);
 const CONFIGURATION_TRIGGER_CLASS_NAME =
   "tw-flex tw-size-11 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition-all tw-duration-300 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-40 sm:tw-size-7";
 const DEFAULT_TRIGGER_CLASS_NAME =
@@ -74,6 +90,7 @@ const getErrorMessage = (error: unknown, fallback: string): string =>
   error instanceof Error ? error.message : fallback;
 
 const getCurationMenuItems = ({
+  isProfileMenu,
   leadingItems,
   locale,
   hasProfileActions,
@@ -89,6 +106,7 @@ const getCurationMenuItems = ({
   onSetAsProfileCuration,
   onDelete,
 }: {
+  readonly isProfileMenu: boolean;
   readonly leadingItems: readonly CompactMenuItem[];
   readonly locale: SupportedLocale;
   readonly hasProfileActions: boolean;
@@ -105,16 +123,17 @@ const getCurationMenuItems = ({
   readonly onDelete: () => void;
 }): CompactMenuItem[] => {
   const items: CompactMenuItem[] = [...leadingItems];
+  const profileItems: CompactMenuItem[] = [];
 
   if (hasProfileActions) {
-    items.push({
+    profileItems.push({
       id: "profile-actions",
       kind: "section",
       label: t(locale, "profileCuration.manage.profileSection"),
     });
 
     if (canChooseAnotherCuration && onChooseAnotherCuration) {
-      items.push({
+      profileItems.push({
         id: "choose-curation",
         label: t(locale, "profileCuration.manage.chooseCuration"),
         onSelect: onChooseAnotherCuration,
@@ -123,7 +142,7 @@ const getCurationMenuItems = ({
     }
 
     if (onChooseAnotherSourceWave) {
-      items.push({
+      profileItems.push({
         id: "choose-source-wave",
         label: t(locale, "profileCuration.manage.chooseSourceWave"),
         onSelect: onChooseAnotherSourceWave,
@@ -132,7 +151,7 @@ const getCurationMenuItems = ({
     }
 
     if (onHideFromProfile) {
-      items.push({
+      profileItems.push({
         id: "hide-from-profile",
         label: t(locale, "profileCuration.manage.hideFromProfile"),
         onSelect: onHideFromProfile,
@@ -140,6 +159,7 @@ const getCurationMenuItems = ({
       });
     }
 
+    if (!isProfileMenu) items.push(...profileItems);
     items.push({
       id: "curation-actions",
       kind: "section",
@@ -170,8 +190,10 @@ const getCurationMenuItems = ({
     });
   }
 
+  if (isProfileMenu) items.push(...profileItems);
   items.push({
     id: "delete",
+    separatorBefore: isProfileMenu,
     label: t(locale, "profileCuration.manage.delete"),
     onSelect: onDelete,
     className: "tw-text-red desktop-hover:hover:tw-text-red",
@@ -313,6 +335,7 @@ export default function MyStreamWaveCurationTabMenu({
     onChooseAnotherSourceWave !== undefined ||
     onHideFromProfile !== undefined;
   const menuItems = getCurationMenuItems({
+    isProfileMenu: permissionMode === "profile",
     leadingItems,
     locale,
     hasProfileActions,
@@ -349,6 +372,22 @@ export default function MyStreamWaveCurationTabMenu({
       : menuItems;
   const shouldUseMobileBottomSheet =
     hasProfileActions && isMobileLayoutViewport;
+  const mobileMenuItems =
+    permissionMode === "profile"
+      ? menuItems.map((item) => {
+          if (item.kind === "section") return item;
+          const Icon = PROFILE_MENU_ICONS.get(item.id);
+          if (!Icon) return item;
+          return {
+            ...item,
+            icon: <Icon aria-hidden="true" className="tw-size-5" />,
+            iconClassName:
+              item.id === "delete"
+                ? "tw-size-5 tw-flex-none tw-text-red"
+                : item.iconClassName,
+          };
+        })
+      : styledMenuItems;
   const isMenuDisabled =
     deleteMutation.isPending ||
     isSettingProfileCuration ||
@@ -392,10 +431,13 @@ export default function MyStreamWaveCurationTabMenu({
     <>
       {shouldUseMobileBottomSheet ? (
         <CompactMenuMobileBottomSheet
+          variant={
+            permissionMode === "profile" ? "profile-curation" : undefined
+          }
           title={triggerLabel ?? t(locale, "profileCuration.header.manage")}
           titleClassName={dialogTypography?.title}
           ariaLabel={triggerLabel ?? t(locale, "profileCuration.header.manage")}
-          items={styledMenuItems}
+          items={mobileMenuItems}
           trigger={triggerContent}
           renderTriggerButton={({
             ariaLabel,

@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { Fragment, useCallback } from "react";
 import { MenuHeading, MenuSection } from "@headlessui/react";
 import clsx from "clsx";
 import type { CompactMenuActionItem, CompactMenuProps } from "../types";
@@ -84,20 +84,27 @@ export function CompactMenuItemsPanel({
         const isActive = item.active ?? activeItemId === item.id;
 
         return (
-          <CompactMenuItemButton
-            key={item.id}
-            item={item}
-            isActive={isActive}
-            isSelectionItem={
-              activeItemId !== undefined || item.active !== undefined
-            }
-            onClick={() => handleItemClick(item)}
-            itemClassName={itemClassName}
-            activeItemClassName={activeItemClassName}
-            inactiveItemClassName={inactiveItemClassName}
-            focusItemClassName={focusItemClassName}
-            unstyledItems={unstyledItems}
-          />
+          <Fragment key={item.id}>
+            {item.separatorBefore && (
+              <div
+                role="separator"
+                className="tw-my-1 tw-border-0 tw-border-t tw-border-solid tw-border-white/10"
+              />
+            )}
+            <CompactMenuItemButton
+              item={item}
+              isActive={isActive}
+              isSelectionItem={
+                activeItemId !== undefined || item.active !== undefined
+              }
+              onClick={() => handleItemClick(item)}
+              itemClassName={itemClassName}
+              activeItemClassName={activeItemClassName}
+              inactiveItemClassName={inactiveItemClassName}
+              focusItemClassName={focusItemClassName}
+              unstyledItems={unstyledItems}
+            />
+          </Fragment>
         );
       })}
     </div>

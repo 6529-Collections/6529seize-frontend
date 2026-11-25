@@ -3,7 +3,7 @@
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import clsx from "clsx";
 import type { ReactNode } from "react";
-import { useRef, useState } from "react";
+import { Fragment, useRef, useState } from "react";
 import type { CompactMenuItem } from "./types";
 import { DEFAULT_ACTIVE_ITEM_CLASSES } from "./constants";
 
@@ -15,6 +15,7 @@ interface MobileBottomSheetTriggerProps {
 }
 
 interface CompactMenuMobileBottomSheetProps {
+  readonly variant?: "default" | "profile-curation" | undefined;
   readonly title: string;
   readonly titleClassName?: string | undefined;
   readonly ariaLabel: string;
@@ -31,6 +32,7 @@ interface CompactMenuMobileBottomSheetProps {
 }
 
 export default function CompactMenuMobileBottomSheet({
+  variant = "default",
   title,
   titleClassName = "tw-text-lg tw-font-semibold",
   ariaLabel,
@@ -43,6 +45,10 @@ export default function CompactMenuMobileBottomSheet({
   onOpenChange,
   zIndexClassName = "tw-z-[1020]",
 }: CompactMenuMobileBottomSheetProps) {
+  const isProfileCuration = variant === "profile-curation";
+  const defaultRowClassName = isProfileCuration
+    ? "tw-flex tw-min-h-12 tw-w-full tw-items-center tw-gap-3 tw-rounded-xl tw-border-0 tw-bg-transparent tw-px-3 tw-py-3 tw-text-left tw-text-md tw-font-medium tw-text-iron-200 tw-transition-colors tw-duration-200 active:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+    : "tw-flex tw-min-h-12 tw-w-full tw-items-center tw-gap-3 tw-rounded-xl tw-border-0 tw-px-3 tw-py-3 tw-text-left tw-text-base tw-font-medium tw-transition-colors tw-duration-200 active:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-50";
   const [isOpen, setIsOpen] = useState(false);
   const pendingActionRef = useRef<(() => void) | null>(null);
   const setOpen = (open: boolean) => {
@@ -101,51 +107,72 @@ export default function CompactMenuMobileBottomSheet({
         zIndexClassName={zIndexClassName}
       >
         <div className="tw-flex tw-flex-col tw-gap-0.5 tw-px-4 sm:tw-px-6">
-          {items.map((item) =>
-            item.kind === "section" ? (
-              <div
-                key={item.id}
-                className="tw-mt-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-pb-2 tw-pt-5 first:tw-mt-0 first:tw-border-t-0 first:tw-pt-1"
-              >
-                <span className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
-                  {item.label}
-                </span>
-              </div>
-            ) : (
-              <button
-                key={item.id}
-                type="button"
-                disabled={item.disabled}
-                onClick={() =>
-                  selectAction(item.onSelect, item.deferUntilClosed)
-                }
-                className={clsx(
-                  itemClassName ??
-                    clsx(
-                      "tw-flex tw-min-h-12 tw-w-full tw-items-center tw-gap-3 tw-rounded-xl tw-border-0 tw-px-3 tw-py-3 tw-text-left tw-text-base tw-font-medium tw-transition-colors tw-duration-200 active:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-50",
-                      item.active
-                        ? DEFAULT_ACTIVE_ITEM_CLASSES
-                        : "tw-bg-transparent tw-text-iron-200"
-                    ),
-                  item.className
-                )}
-              >
-                {item.icon !== undefined &&
-                item.icon !== null &&
-                item.icon !== false ? (
+          {items.map((item) => {
+            if (item.kind === "section")
+              return (
+                <div
+                  key={item.id}
+                  className={clsx(
+                    "tw-mt-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-pb-2 tw-pt-5 first:tw-mt-0 first:tw-border-t-0 first:tw-pt-1",
+                    isProfileCuration && "tw-pl-3"
+                  )}
+                >
                   <span
                     className={
-                      item.iconClassName ??
-                      "tw-flex tw-size-5 tw-flex-none tw-items-center tw-justify-center"
+                      isProfileCuration
+                        ? "tw-text-label tw-font-medium tw-uppercase tw-text-iron-500"
+                        : "tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500"
                     }
                   >
-                    {item.icon}
+                    {item.label}
                   </span>
-                ) : null}
-                <span className="tw-min-w-0 tw-flex-1">{item.label}</span>
-              </button>
-            )
-          )}
+                </div>
+              );
+            return (
+              <Fragment key={item.id}>
+                {item.separatorBefore && (
+                  <div
+                    role="separator"
+                    className="tw-mt-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-2"
+                  />
+                )}
+                <button
+                  type="button"
+                  disabled={item.disabled}
+                  onClick={() =>
+                    selectAction(item.onSelect, item.deferUntilClosed)
+                  }
+                  className={clsx(
+                    itemClassName ??
+                      clsx(
+                        defaultRowClassName,
+                        !isProfileCuration &&
+                          (item.active
+                            ? DEFAULT_ACTIVE_ITEM_CLASSES
+                            : "tw-bg-transparent tw-text-iron-200")
+                      ),
+                    item.className
+                  )}
+                >
+                  {item.icon !== undefined &&
+                  item.icon !== null &&
+                  item.icon !== false ? (
+                    <span
+                      className={
+                        item.iconClassName ??
+                        (isProfileCuration
+                          ? "tw-size-5 tw-flex-none tw-text-iron-400"
+                          : "tw-flex tw-size-5 tw-flex-none tw-items-center tw-justify-center")
+                      }
+                    >
+                      {item.icon}
+                    </span>
+                  ) : null}
+                  <span className="tw-min-w-0 tw-flex-1">{item.label}</span>
+                </button>
+              </Fragment>
+            );
+          })}
         </div>
       </MobileWrapperDialog>
     </>
