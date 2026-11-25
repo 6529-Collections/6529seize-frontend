@@ -29,6 +29,7 @@ import { useProfileBlockState } from "@/hooks/content-moderation/useProfileBlock
 import { usePublicProfileModerationStatus } from "@/hooks/content-moderation/usePublicProfileModerationStatus";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
+import { useIdentityEditingPaused } from "@/hooks/useIdentityMovePhase";
 import { useIdentity } from "@/hooks/useIdentity";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -468,6 +469,7 @@ export default function UserPageHeaderClient({
   const { connectedProfile, activeProfileProxy, isDirectProfileSession } =
     useContext(AuthContext);
   const hasHydrated = useHasHydrated();
+  const identityEditingPaused = useIdentityEditingPaused();
 
   const { profile: hydratedProfile } = useIdentity({
     handleOrWallet: normalizedHandleOrWallet,
@@ -512,7 +514,8 @@ export default function UserPageHeaderClient({
     isDirectProfileSession === true &&
     profile.handle &&
     isMyProfile &&
-    !activeProfileProxy
+    !activeProfileProxy &&
+    !identityEditingPaused
   );
 
   const { statements, profileEnabledAt, cmsWebsiteHref, followersCount } =

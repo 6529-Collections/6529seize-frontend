@@ -1,6 +1,7 @@
 import { formatAddress } from "@/helpers/Helpers";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import { isRatingPaused } from "@/lib/chain-identity/active";
 
 // Management belongs to the connected owner. Existing proxy allocation flows
 // keep their own permission checks and are not changed by this surface.
@@ -14,7 +15,8 @@ export function canManageGivenRatings(
     profile.id.length > 0 &&
     !activeProfileProxy &&
     !!connectedProfile?.handle &&
-    profile.id === connectedProfile.id
+    profile.id === connectedProfile.id &&
+    !isRatingPaused()
   );
 }
 

@@ -214,18 +214,20 @@ function AppLayoutContent({ children }: Props) {
           ref={pullContentRef}
           {...{ [PULL_TO_REFRESH_TRANSFORM_ROOT_ATTRIBUTE]: "true" }}
         >
-          <div ref={headerWrapperRef}>
-            {hasProfileBar ? null : <TouchDeviceHeader />}
-          </div>
-          <div
-            ref={waveNavigationRef}
-            data-testid="wave-navigation-content"
-            data-wave-navigation-screen={waveNavigationScreen ?? undefined}
-          >
-            {activeContent}
-            {isNavVisible && !shouldUseContentBottomClearance && (
-              <div className="tw-h-[104px] tw-w-full" />
-            )}
+          <div data-wave-swipe-page>
+            <div ref={headerWrapperRef}>
+              {hasProfileBar ? null : <TouchDeviceHeader />}
+            </div>
+            <div
+              ref={waveNavigationRef}
+              data-testid="wave-navigation-content"
+              data-wave-navigation-screen={waveNavigationScreen ?? undefined}
+            >
+              {activeContent}
+              {isNavVisible && !shouldUseContentBottomClearance && (
+                <div className="tw-h-[104px] tw-w-full" />
+              )}
+            </div>
           </div>
         </div>
       </div>

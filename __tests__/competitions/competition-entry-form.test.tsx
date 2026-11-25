@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import CompetitionEntryForm from "@/components/competitions/CompetitionEntryForm";
 import { getCreateWaveDropRequest } from "@/components/waves/create-wave/services/createWaveDropRequest";
 import { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
@@ -8,6 +14,8 @@ let mockRequiredMetadata: Array<{ name: string; type: string }> = [];
 let mockTerms: string | null = null;
 let mockAnonymousSubmissions = false;
 let mockSignatureRequired = false;
+let mockSubmitPermission = true;
+let mockCompetitionOrigin: Record<string, unknown> = {};
 const mockSign = jest.fn();
 const mockSnapshot = {
   title: null,
@@ -69,9 +77,21 @@ jest.mock("@/contexts/CompetitionContext", () => ({
         signature_required: mockSignatureRequired,
         terms: mockTerms,
       },
-      permissions: { submit: true },
+      permissions: { submit: mockSubmitPermission },
+      ...mockCompetitionOrigin,
     },
   }),
+}));
+const mockChainEntrySubmit = jest.fn();
+let mockChainEntriesActive = false;
+jest.mock("@/components/chain-waves/useChainEntryWriters", () => ({
+  useChainEntrySubmit: () =>
+    mockChainEntriesActive ? mockChainEntrySubmit : null,
+  invalidateChainEntryQueries: jest.fn().mockResolvedValue(undefined),
+}));
+jest.mock("@/lib/chain-identity/active", () => ({
+  ...jest.requireActual("@/lib/chain-identity/active"),
+  isChainIdentityActive: jest.fn(() => false),
 }));
 jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
   useCompetitionViewer: () => "author:self",
@@ -271,4 +291,224 @@ it("keeps submission terms separate from the checkbox accessible name", () => {
   expect(screen.getByText(mockTerms).closest("label")).toBeNull();
   fireEvent.click(checkbox);
   expect(checkbox).toBeChecked();
+});
+
+describe("on the 6529 Network", () => {
+  beforeEach(() => {
+    mockChainEntriesActive = true;
+    mockChainEntrySubmit.mockReset().mockResolvedValue({ entryId: "0xentry" });
+    jest.mocked(createCompetitionEntry).mockClear();
+  });
+
+  afterEach(() => {
+    mockChainEntriesActive = false;
+  });
+
+  it("sends the entry there, not to 6529.io's competition route", async () => {
+    const onClose = jest.fn();
+    render(<CompetitionEntryForm onClose={onClose} />);
+    fireEvent.click(screen.getByRole("button", { name: "Submit an entry" }));
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+    expect(mockChainEntrySubmit).toHaveBeenCalledWith({
+      request: expect.objectContaining({
+        wave_id: "wave",
+        drop_type: "PARTICIPATORY",
+        mentioned_groups: ["ADMINS"],
+        signature: null,
+      }),
+      terms: null,
+      onStage: expect.any(Function),
+    });
+    expect(createCompetitionEntry).not.toHaveBeenCalled();
+  });
+
+  it("says where the entry stands, and says it is sending only once it is", async () => {
+    let finish!: () => void;
+    mockChainEntrySubmit.mockImplementation(
+      ({ onStage }: { onStage: (stage: string) => void }) =>
+        new Promise((resolve) => {
+          onStage("preparing");
+          finish = () => resolve({ entryId: "0xentry" });
+        })
+    );
+    const onClose = jest.fn();
+    render(<CompetitionEntryForm onClose={onClose} />);
+    fireEvent.click(screen.getByRole("button", { name: "Submit an entry" }));
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Getting your entry ready."
+    );
+    expect(screen.getByRole("status")).not.toHaveTextContent("Sending");
+    const { onStage } = mockChainEntrySubmit.mock.calls[0][0];
+    act(() => onStage("wallet"));
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Waiting for your wallet."
+    );
+    act(() => onStage("sending"));
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Sending to the 6529 Network."
+    );
+    act(() => finish());
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+  });
+
+  it("says an entry that isn't final yet was sent and offers no second send", async () => {
+    const { ChainEntryPendingError } = jest.requireActual(
+      "@/lib/chain-waves/entryWriters"
+    );
+    mockChainEntrySubmit.mockRejectedValue(
+      new ChainEntryPendingError(
+        "Your entry was sent to the 6529 Network but isn't final yet.",
+        null
+      )
+    );
+    render(<CompetitionEntryForm onClose={jest.fn()} />);
+    const button = screen.getByRole("button", { name: "Submit an entry" });
+    fireEvent.click(button);
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Your entry was sent to the 6529 Network but isn't final yet."
+    );
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    await waitFor(() => expect(button).toBeDisabled());
+  });
+
+  it("shows no failure when the wallet prompt is declined", async () => {
+    mockChainEntrySubmit.mockRejectedValue(
+      Object.assign(new Error("User rejected"), { code: 4001 })
+    );
+    render(<CompetitionEntryForm onClose={jest.fn()} />);
+    const button = screen.getByRole("button", { name: "Submit an entry" });
+    fireEvent.click(button);
+    await waitFor(() => expect(mockChainEntrySubmit).toHaveBeenCalled());
+    await waitFor(() => expect(button).toBeEnabled());
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  describe("from a wallet with no identity on the 6529 Network", () => {
+    /** The entry stops where the chain writer looks up the wallet. */
+    const entryWithoutIdentity = () => {
+      const { chainGateway } = jest.requireActual(
+        "@/lib/chain-identity/gateway"
+      );
+      const { identityOfWallet } = jest.requireActual(
+        "@/lib/chain-waves/signing"
+      );
+      jest.spyOn(chainGateway, "getIdentityByWallet").mockResolvedValue(null);
+      return identityOfWallet(`0x${"12".repeat(20)}`);
+    };
+    const { isChainIdentityActive } = jest.requireMock(
+      "@/lib/chain-identity/active"
+    );
+
+    beforeEach(() => {
+      mockChainEntrySubmit.mockImplementation(entryWithoutIdentity);
+    });
+    afterEach(() => {
+      isChainIdentityActive.mockReturnValue(false);
+      jest.restoreAllMocks();
+    });
+
+    it("points to the identity page once it takes changes", async () => {
+      isChainIdentityActive.mockReturnValue(true);
+      render(<CompetitionEntryForm onClose={jest.fn()} />);
+      fireEvent.click(screen.getByRole("button", { name: "Submit an entry" }));
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "This wallet has no identity on the 6529 Network yet. Set one up on your identity page."
+      );
+      expect(
+        screen.getByRole("link", { name: "your identity page" })
+      ).toHaveAttribute("href", "/network/identity");
+      expect(createCompetitionEntry).not.toHaveBeenCalled();
+    });
+
+    it("keeps the plain line while the identity page can't help", async () => {
+      render(<CompetitionEntryForm onClose={jest.fn()} />);
+      fireEvent.click(screen.getByRole("button", { name: "Submit an entry" }));
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "This wallet has no identity on the 6529 Network yet."
+      );
+      expect(
+        screen.queryByRole("link", { name: "your identity page" })
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it("says what the 6529 Network refused", async () => {
+    const { ChainOperationError } = jest.requireActual(
+      "@/lib/chain-identity/operation"
+    );
+    mockChainEntrySubmit.mockRejectedValue(
+      new ChainOperationError(
+        "rejected",
+        "This decision isn't taking entries right now."
+      )
+    );
+    render(<CompetitionEntryForm onClose={jest.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: "Submit an entry" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "This decision isn't taking entries right now."
+    );
+    expect(createCompetitionEntry).not.toHaveBeenCalled();
+  });
+
+  it("says a refusal from a block still paid its fee, in plain words", async () => {
+    const { ChainOperationError } = jest.requireActual(
+      "@/lib/chain-identity/operation"
+    );
+    mockChainEntrySubmit.mockRejectedValue(
+      new ChainOperationError(
+        "failed",
+        "The 6529 Network refused this change: PARTICIPATION_CLOSED.",
+        "PARTICIPATION_CLOSED"
+      )
+    );
+    render(<CompetitionEntryForm onClose={jest.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: "Submit an entry" }));
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(
+      "The change didn't go through, and its fee was still charged. This decision isn't taking entries right now."
+    );
+    expect(alert).not.toHaveTextContent("PARTICIPATION_CLOSED");
+  });
+
+  describe("a decision made there", () => {
+    const CHAIN_ID = `0x${"3c".repeat(32)}`;
+
+    afterEach(() => {
+      mockSubmitPermission = true;
+      mockCompetitionOrigin = {};
+    });
+
+    it("says what the network refused when the viewer can't enter", async () => {
+      const { ChainOperationError } = jest.requireActual(
+        "@/lib/chain-identity/operation"
+      );
+      mockCompetitionOrigin = { chain_id: CHAIN_ID };
+      mockChainEntrySubmit.mockRejectedValue(
+        new ChainOperationError(
+          "rejected",
+          "You aren't in the group that can enter this decision."
+        )
+      );
+      render(<CompetitionEntryForm onClose={jest.fn()} />);
+      fireEvent.click(screen.getByRole("button", { name: "Submit an entry" }));
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "You aren't in the group that can enter this decision."
+      );
+    });
+
+    it("keeps 6529.io's closed submissions, as for an imported decision", () => {
+      mockSubmitPermission = false;
+      mockCompetitionOrigin = { chain_id: CHAIN_ID };
+      render(<CompetitionEntryForm onClose={jest.fn()} />);
+      expect(
+        screen.getByText(
+          "Entries are currently closed or you are not eligible to submit."
+        )
+      ).toBeInTheDocument();
+      const button = screen.getByRole("button", { name: "Submit an entry" });
+      expect(button).toBeDisabled();
+      fireEvent.click(button);
+      expect(mockChainEntrySubmit).not.toHaveBeenCalled();
+    });
+  });
 });

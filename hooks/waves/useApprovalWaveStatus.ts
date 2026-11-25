@@ -1,6 +1,7 @@
 "use client";
 
 import { presentationCompetition } from "@/helpers/competition-presentation.helpers";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveDecision } from "@/generated/models/ApiWaveDecision";
@@ -73,6 +74,8 @@ export function useApprovalWaveStatus({
   const [, setStatusClockTick] = useState(0);
   const currentMillis = Time.currentMillis();
   const hasCallerOwnedDecisionPoints = decisionPoints !== undefined;
+  // Votes move to the 6529 Network: the controls lock without closing.
+  const wavesWritesPaused = useWavesWritesPaused("votes");
 
   const winningThreshold = useMemo(
     () =>
@@ -201,7 +204,10 @@ export function useApprovalWaveStatus({
     isApprovalStatusUnknown && !isApprovalStatusError;
   const isVotingClosed = closeStatus !== null;
   const isVotingControlsLocked =
-    isVotingClosed || isApprovalStatusLoading || isApprovalStatusError;
+    isVotingClosed ||
+    isApprovalStatusLoading ||
+    isApprovalStatusError ||
+    wavesWritesPaused;
 
   const retryInternalApprovalStatus = useCallback(() => {
     if (hasInternalNextDecisionPointsPage) {
@@ -265,7 +271,8 @@ export function useApprovalWaveStatus({
       isApprovalStatusLoading: false,
       isApprovalStatusError: false,
       isVotingClosed: !nativeCompetition.permissions.vote,
-      isVotingControlsLocked: !nativeCompetition.permissions.vote,
+      isVotingControlsLocked:
+        !nativeCompetition.permissions.vote || wavesWritesPaused,
       retryApprovalStatus: null,
     };
 

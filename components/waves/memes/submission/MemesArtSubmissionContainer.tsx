@@ -3,7 +3,6 @@
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import useKeyboardFocusScroll from "@/components/waves/create-wave/hooks/useKeyboardFocusScroll";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -15,7 +14,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MemesArtSubmissionShell } from "./MemesArtSubmissionShell";
 import { MemesArtSubmissionStepContent } from "./MemesArtSubmissionStepContent";
 import { ResubmitAcknowledgement } from "./ResubmitAcknowledgement";
-import { ResubmitDeleteConfirmation } from "./ResubmitDeleteConfirmation";
+import {
+  ResubmitDeleteConfirmation,
+  type ResubmitOriginalAction,
+} from "./ResubmitDeleteConfirmation";
 import MemesSubmissionDocumentation, {
   type MemesSubmissionDocumentationHandle,
 } from "./MemesSubmissionDocumentation";
@@ -23,7 +25,11 @@ import { SubmissionStep } from "./types/Steps";
 import { useArtworkSubmissionForm } from "./hooks/useArtworkSubmissionForm";
 import { applyMainStagePreviewDefaults } from "./utils/mainStageTraits";
 import { presentationCompetition } from "@/helpers/competition-presentation.helpers";
-import { useArtworkSubmissionMutation } from "./hooks/useArtworkSubmissionMutation";
+import {
+  isChainSubmittedArtwork,
+  useArtworkSubmissionMutation,
+  type SubmittedArtwork,
+} from "./hooks/useArtworkSubmissionMutation";
 import { useMemesSubmissionIdentity } from "./hooks/useMemesSubmissionIdentity";
 import { useResubmissionDelete } from "./hooks/useResubmissionDelete";
 import type { SubmissionPhase } from "./ui/SubmissionProgress";
@@ -123,6 +129,8 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
   } = useArtworkSubmissionMutation(presentationCompetition(wave));
   const {
     replacementDrop,
+    replacementPending,
+    withdrawsOriginal,
     isDeletingOriginal,
     deleteOriginalError,
     handleResubmissionSuccess,
@@ -263,7 +271,7 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
   }, [handleBackToArtwork, resetPreviewState]);
 
   const handleResubmissionSubmitted = useCallback(
-    async (drop: ApiDrop) => {
+    async (drop: SubmittedArtwork) => {
       await handleResubmissionSuccess(drop);
       resetPreviewState();
     },
@@ -311,15 +319,28 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
       return null;
     }
     const media = form.getMediaSelection();
-    const onSubmitted = async (drop: ApiDrop | null) => {
+    const onSubmitted = async (drop: SubmittedArtwork | null) => {
       if (
         drop &&
+        // 6529.io links documentation to a drop it holds: its source-links
+        // route looks the drop up by id and refuses one it doesn't have. An
+        // entry on the 6529 Network has no 6529.io drop until 6529.io's
+        // index lists it, so there is nothing to link it to yet.
+        !isChainSubmittedArtwork(drop) &&
         getAuthStateFingerprint({
           walletAddress: getWalletAddress(),
           jwt: getAuthJwt(),
         }) === expectedAuthStateFingerprint
       ) {
         documentationRef.current?.onDropSubmitted(drop.id);
+      }
+      if (drop && isChainSubmittedArtwork(drop) && hasDocumentation) {
+        // Longer than an info toast's 3 seconds: it says where the notes are.
+        setToast({
+          message: t(locale, "memes.submission.documentation.notLinked"),
+          type: "info",
+          autoClose: 10_000,
+        });
       }
       if (drop && isResubmission) {
         await handleResubmissionSubmitted(drop);
@@ -397,6 +418,7 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
     form,
     handlePhaseChange,
     handleResubmissionSubmitted,
+    hasDocumentation,
     isResubmission,
     identity.address,
     identity.canSubmit,
@@ -433,10 +455,17 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
       />
     );
   } else if (sourceDrop && replacementDrop) {
+    let originalAction: ResubmitOriginalAction = "delete";
+    if (replacementPending) {
+      originalAction = "pending";
+    } else if (withdrawsOriginal) {
+      originalAction = "withdraw";
+    }
     submissionContent = (
       <ResubmitDeleteConfirmation
         originalDrop={sourceDrop}
         replacementDrop={replacementDrop}
+        action={originalAction}
         isDeleting={isDeletingOriginal}
         error={deleteOriginalError}
         onDeleteOriginal={handleDeleteOriginalClick}

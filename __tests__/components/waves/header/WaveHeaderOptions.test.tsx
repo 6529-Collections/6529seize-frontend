@@ -43,6 +43,10 @@ jest.mock("@/hooks/useIsMobileLayoutViewport", () => ({
   default: jest.fn(),
 }));
 
+jest.mock("@/hooks/useWavesMovePhase", () => ({
+  useWavesWritesPaused: jest.fn(() => false),
+}));
+
 jest.mock(
   "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper",
   () => ({
@@ -328,3 +332,39 @@ test.each([true, false])(
     await waitFor(() => expect(trigger).toHaveFocus());
   }
 );
+
+describe("while waves move to the 6529 Network", () => {
+  const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
+
+  beforeEach(() => {
+    useIsMobileLayoutViewportMock.mockReturnValue(false);
+    wavesMove.useWavesWritesPaused.mockReturnValue(true);
+  });
+
+  afterEach(() => {
+    wavesMove.useWavesWritesPaused.mockReturnValue(false);
+  });
+
+  test("hides deleting a wave", async () => {
+    const user = userEvent.setup();
+    render(<WaveHeaderOptions wave={wave} showOwnerActions={true} />, {
+      wrapper: createWrapper(),
+    });
+    await user.click(screen.getByRole("button", { name: "Open options" }));
+    expect(screen.queryByTestId("delete")).toBeNull();
+    expect(screen.getByTestId("profile-wave")).toBeInTheDocument();
+  });
+
+  test("keeps deleting a direct message", async () => {
+    const user = userEvent.setup();
+    const directMessage = {
+      ...wave,
+      chat: { scope: { group: { is_direct_message: true } } },
+    } as unknown as ApiWave;
+    render(<WaveHeaderOptions wave={directMessage} showOwnerActions={true} />, {
+      wrapper: createWrapper(),
+    });
+    await user.click(screen.getByRole("button", { name: "Open options" }));
+    expect(screen.getByTestId("delete")).toBeInTheDocument();
+  });
+});

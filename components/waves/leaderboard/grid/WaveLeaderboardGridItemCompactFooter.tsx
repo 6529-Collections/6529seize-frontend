@@ -185,11 +185,11 @@ export const WaveLeaderboardGridItemCompactFooter: React.FC<
           </span>
         )}
         {canShowVotingAction && (
-          <div className="tw-ml-auto tw-flex tw-min-w-0 tw-flex-none tw-items-center tw-justify-end tw-self-center">
+          <div className="tw-ml-auto tw-flex tw-min-w-0 tw-flex-none tw-items-center tw-justify-end tw-self-center max-md:tw-basis-full">
             <VotingModalButton
               drop={drop}
               onClick={onVoteButtonClick}
-              className="tw-box-border tw-min-w-0 tw-max-w-full tw-self-center"
+              className="max-md:[&>span]:tw-[overflow-wrap:anywhere] tw-box-border tw-min-w-0 tw-max-w-full tw-self-center max-md:tw-h-auto max-md:tw-min-h-11 max-md:tw-w-full max-md:[&>span]:tw-whitespace-normal"
             />
           </div>
         )}

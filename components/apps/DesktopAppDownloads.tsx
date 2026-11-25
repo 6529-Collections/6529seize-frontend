@@ -40,7 +40,11 @@ function observeDisclosureContent(content: HTMLDivElement | null) {
   return () => observer.disconnect();
 }
 
-export function DesktopAppDownloads() {
+export function DesktopAppDownloads({
+  platformResetKey = 0,
+}: {
+  readonly platformResetKey?: number;
+}) {
   const platform = useSyncExternalStore(
     subscribeToPlatform,
     getClientPlatform,
@@ -79,7 +83,7 @@ export function DesktopAppDownloads() {
       {isError && <DownloadError partial onRetry={() => void refetch()} />}
       {data.map((app) => (
         <PlatformDownloads
-          key={app.name}
+          key={`${app.name}-${platformResetKey}`}
           app={app}
           initiallyOpen={app.name === platform}
           onRetry={() => void refetch()}

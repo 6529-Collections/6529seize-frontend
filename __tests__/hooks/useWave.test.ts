@@ -10,6 +10,9 @@ jest.mock("@/contexts/SeizeSettingsContext", () => ({
     isQuorumWave: (id: string) => id === "quorum",
   }),
 }));
+jest.mock("@/hooks/useWavesMovePhase", () => ({
+  useWavesWritesPaused: jest.fn(() => false),
+}));
 jest.mock("@/helpers/time", () => ({
   Time: { currentMillis: jest.fn(() => 2000) },
 }));
@@ -44,6 +47,19 @@ describe("useWave", () => {
     time.Time.currentMillis.mockReturnValue(4000);
     const { result: ended } = renderHook(() => useWave(baseWave));
     expect(ended.current.participation.status).toBe(SubmissionStatus.ENDED);
+  });
+
+  it("closes entries while they move to the 6529 Network", () => {
+    const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
+    wavesMove.useWavesWritesPaused.mockReturnValue(true);
+    try {
+      const { result } = renderHook(() => useWave(baseWave));
+      expect(result.current.participation.status).toBe(SubmissionStatus.ACTIVE);
+      expect(result.current.participation.isPausedForMove).toBe(true);
+      expect(result.current.participation.canSubmitNow).toBe(false);
+    } finally {
+      wavesMove.useWavesWritesPaused.mockReturnValue(false);
+    }
   });
 
   it("flags memes wave", () => {

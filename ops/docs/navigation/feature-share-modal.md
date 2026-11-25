@@ -99,14 +99,14 @@ the `More` menu.
 
 1. Open the desktop-web account menu, then **Connect Device**.
 2. Confirm the avatar, handle and full wallet address. Under **Which app are you
-   connecting?**, select **6529 Mobile** or **6529 Desktop Classic**.
+   connecting?**, select **Mobile**, **Desktop**, or **Desktop Classic**.
 3. Choose **Connect only**, or **Connect with Post Signing & DM Encryption**.
-   The modal title changes to **Connect 6529 Mobile** or **Connect 6529 Desktop Classic**.
-   Secure Desktop setup shows the v0.4.1 minimum under the secure action, during
+   The modal title names the selected app.
+   Secure Classic setup shows the v0.4.1 minimum under the secure action, during
    wallet signing, and below **Open in 6529 Desktop Classic**. **Connect only** signs in
    the receiving app with a short-lived, one-time code.
-4. Mobile shows a full-width QR. Desktop shows the 6529 logo and **Open in 6529
-   Desktop Classic** launch control, rather than a QR. The heading reads **Connect as
+4. Mobile shows a full-width QR. Both desktop targets show the selected app's
+   icon and a launch control naming it. The heading reads **Connect as
    {handle}**, with **with Post Signing & DM Encryption** for secure setup.
 5. Copy with the icon inside the link field. The adjacent refresh icon generates
    a new Connect-only code directly. For secure setup, refresh clears the displayed
@@ -117,7 +117,8 @@ the `More` menu.
 6. **Back** returns to the app and connection choices. The same row reminds you:
    **Use only on a device you own. This code works once.**
 
-The muted **Download apps** link beside the title opens the Apps page, where the
+The **Download apps** link beside the title opens the Apps page. The
+**6529 Desktop** test-release card links to its download page, and the
 **6529 Desktop Classic** card provides the Classic installers. Copy and
 refresh are disabled during preparation; a failed preparation can be retried.
 The modal transitions smoothly between screen heights and scrolls on short
@@ -137,7 +138,10 @@ link to Home. The source session remains connected. See
 [Encrypted messages setup](../encrypted-messages.md#setup-through-connection-sharing)
 for history, backup and capability limits.
 
-No page-copy, social, or current-page Share actions appear in this dialog.
+Staging and 6529.io both open **Accept connection** in **6529 Desktop** using
+`core6529://`. The installed app uses the production API, so accepting a
+staging-issued link fails. Start **Connect Device** on 6529.io to sign in.
+The operating system selects the registered handler for the link.
 
 ## Common Scenarios
 
@@ -166,10 +170,10 @@ No page-copy, social, or current-page Share actions appear in this dialog.
 - The desktop sidebar Share row and account-menu `Connect Device` action are
   hidden in Capacitor/native and mobile-device web contexts; supported mobile
   contexts share directly from the header instead.
-- Desktop is hidden as a connection target when already running in Electron.
+- Both desktop choices are hidden when already in a desktop app.
 - Connection links open `Accept Connection Sharing`. Mobile connection links
-  are accepted only in 6529 Mobile, and Desktop connection links only in 6529
-  Desktop Classic. Opened anywhere else, the page shows a message and a home link
+  are accepted in 6529 Mobile, and desktop connection links in 6529 Desktop or
+  6529 Desktop Classic. Opened in a browser, the page shows a message and a home link
   instead of `Accept connection`. The page removes the link's one-time
   credential from the address bar as soon as it loads, so reloading it does not
   reopen the connection; open the original link or QR code again instead. The

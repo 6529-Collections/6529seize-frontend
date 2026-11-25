@@ -125,23 +125,6 @@ describe("WaveTrustSignals", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("renders nothing in summary mode without a combined score", () => {
-    const { container } = render(
-      <WaveTrustSignals
-        waveScore={
-          {
-            hotness_score: 92,
-            rep_sort_score: 41,
-          } as ApiWaveScore
-        }
-        variant="sidebar"
-        mode="summary"
-      />
-    );
-
-    expect(container).toBeEmptyDOMElement();
-  });
-
   it("closes and disables score details while preserving the visible score", () => {
     const props = {
       waveRep,
@@ -164,6 +147,59 @@ describe("WaveTrustSignals", () => {
     rerender(<WaveTrustSignals {...props} />);
     expect(trigger).toBeEnabled();
     fireEvent.click(trigger);
+    expect(
+      screen.getByRole("dialog", { name: "Wave score details" })
+    ).toBeInTheDocument();
+  });
+
+  it("renders nothing in summary mode without a combined score", () => {
+    const { container } = render(
+      <WaveTrustSignals
+        waveScore={
+          {
+            hotness_score: 92,
+            rep_sort_score: 41,
+          } as ApiWaveScore
+        }
+        variant="sidebar"
+        mode="summary"
+      />
+    );
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it("keeps the phone header score non-interactive when details are disabled", () => {
+    const props = {
+      waveRep,
+      waveScore,
+      variant: "header-avatar",
+      mode: "summary",
+      learnMoreHref: "/network/wave-score",
+    } as const;
+    const { rerender } = render(<WaveTrustSignals {...props} />);
+    const trigger = screen.getByRole("button", { name: /^Wave score 83\./ });
+    fireEvent.click(trigger);
+    expect(
+      screen.getByRole("dialog", { name: "Wave score details" })
+    ).toBeInTheDocument();
+    rerender(<WaveTrustSignals {...props} scoreDetailsDisabled />);
+    const label = screen.getByLabelText(/^Wave score 83\./);
+    expect(label.tagName).toBe("SPAN");
+    expect(label).toHaveTextContent("83");
+    expect(label).not.toHaveAttribute("title");
+    expect(
+      screen.queryByRole("button", { name: /^Wave score 83\./ })
+    ).toBeNull();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    fireEvent.click(label);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    rerender(<WaveTrustSignals {...props} />);
+    const enabledTrigger = screen.getByRole("button", {
+      name: /^Wave score 83\./,
+    });
+    expect(enabledTrigger).toBeEnabled();
+    fireEvent.click(enabledTrigger);
     expect(
       screen.getByRole("dialog", { name: "Wave score details" })
     ).toBeInTheDocument();

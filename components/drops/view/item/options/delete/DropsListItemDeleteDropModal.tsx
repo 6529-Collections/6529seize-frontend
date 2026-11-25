@@ -6,7 +6,6 @@ import Button from "@/components/utils/button/Button";
 import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { deleteDrop } from "@/services/api/signed-drop-writes";
 import { isSignedWriteCancelled } from "@/lib/device-signing/signing-decision";
 import {
@@ -18,10 +17,22 @@ import {
   Transition,
   TransitionChild,
 } from "@headlessui/react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Fragment, useContext, useRef, useState } from "react";
 import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import { createPortal } from "react-dom";
+import {
+  chainWriteDetails,
+  chainWriteFailure,
+} from "@/components/chain-waves/chainWavesErrorMessage";
+import { chainIdentityPointer } from "@/components/chain-waves/chainIdentityPointer";
+import {
+  invalidateChainEntryQueries,
+  useChainEntryWriters,
+} from "@/components/chain-waves/useChainEntryWriters";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { ChainEntryPendingError } from "@/lib/chain-waves/entryWriters";
+import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
 
 export default function DropsListItemDeleteDropModal({
   drop,
@@ -37,6 +48,13 @@ export default function DropsListItemDeleteDropModal({
   const { requestAuth, setToast } = useContext(AuthContext);
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
   const { processDropRemoved } = useMyStreamActions();
+  const queryClient = useQueryClient();
+  const locale = useBrowserLocale();
+  // On the 6529 Network an entry's delete is its author's withdrawal; the
+  // delete controls offer it to the author only.
+  const chainEntries = useChainEntryWriters();
+  const chainWithdrawal =
+    drop.drop_type === ApiDropType.Chat ? null : chainEntries;
 
   const contentType =
     drop.drop_type === ApiDropType.Participatory ? "Drop" : "Post";
@@ -44,13 +62,22 @@ export default function DropsListItemDeleteDropModal({
   const [mutating, setMutating] = useState(false);
   const deleteDropMutation = useMutation({
     mutationFn: async () =>
-      await deleteDrop({ dropId: drop.id, waveId: drop.wave.id }),
+      chainWithdrawal
+        ? await chainWithdrawal.withdrawEntry({ dropId: drop.id })
+        : await deleteDrop({ dropId: drop.id, waveId: drop.wave.id }),
     onSuccess: () => {
       setToast({
-        message: `${contentType} deleted.`,
+        message: chainWithdrawal
+          ? "Entry withdrawn."
+          : `${contentType} deleted.`,
         type: "warning",
       });
       invalidateDrops();
+      if (chainWithdrawal) {
+        void invalidateChainEntryQueries(queryClient, drop.wave.id).catch(
+          () => undefined
+        );
+      }
       processDropRemoved(drop.wave.id, drop.id);
       if (onDropDeleted) {
         onDropDeleted();
@@ -60,14 +87,25 @@ export default function DropsListItemDeleteDropModal({
     },
     onError: (error) => {
       // Cancelled at the signing prompt: nothing was sent.
-      if (isSignedWriteCancelled(error)) {
+      if (isSignedWriteCancelled(error) || isUserRejectedSigningError(error)) {
         return;
       }
+      // Sent, not final yet: it may still land.
+      if (error instanceof ChainEntryPendingError) {
+        setToast({ message: error.message, type: "warning" });
+        return;
+      }
+      // The 6529 Network's reason in plain words, with no second line;
+      // 6529.io's own wording for its delete.
       setToast({
         type: "error",
-        title: `Couldn't delete this ${contentType.toLowerCase()}.`,
-        description: "Please try again.",
-        details: getToastErrorDetails(error),
+        title: chainWithdrawal
+          ? "Couldn't withdraw this entry."
+          : `Couldn't delete this ${contentType.toLowerCase()}.`,
+        description:
+          chainIdentityPointer(locale, error) ??
+          chainWriteFailure(locale, error, "Please try again.", "withdrawal"),
+        details: chainWriteDetails(error),
       });
     },
     onSettled: () => {
@@ -80,7 +118,10 @@ export default function DropsListItemDeleteDropModal({
       return;
     }
     setMutating(true);
-    const { success } = await requestAuth();
+    // On the 6529 Network the withdrawal carries its own signature.
+    const { success } = chainWithdrawal
+      ? { success: true }
+      : await requestAuth();
     if (!success) {
       setMutating(false);
       return;
@@ -148,11 +189,14 @@ export default function DropsListItemDeleteDropModal({
                   </span>
                   <div className="tw-min-w-0 tw-flex-1">
                     <DialogTitle className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-50">
-                      Delete {contentType}
+                      {chainWithdrawal
+                        ? "Withdraw Entry"
+                        : `Delete ${contentType}`}
                     </DialogTitle>
                     <Description className="tw-mb-0 tw-mt-1 tw-text-pretty tw-text-sm tw-leading-5 tw-text-iron-400">
-                      Are you sure you want to delete this{" "}
-                      {contentType.toLowerCase()}?
+                      {chainWithdrawal
+                        ? "Withdraw this entry from the decision? You can't undo this."
+                        : `Are you sure you want to delete this ${contentType.toLowerCase()}?`}
                     </Description>
                   </div>
                   <div className="tw-absolute tw-right-5 tw-top-5 sm:tw-right-6 sm:tw-top-6">
@@ -192,7 +236,7 @@ export default function DropsListItemDeleteDropModal({
                       hideChildrenWhenLoading
                       className="sm:tw-w-auto"
                     >
-                      Delete
+                      {chainWithdrawal ? "Withdraw" : "Delete"}
                     </Button>
                     <Button
                       data-autofocus

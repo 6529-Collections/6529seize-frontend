@@ -1,3 +1,5 @@
+import { useContext } from "react";
+import { MobilePageContext } from "@/components/mobile-navigation/MobilePageContext";
 import type { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import type {
   CreateWaveDisplayConfig,
@@ -30,6 +32,7 @@ export default function CreateWaveOverview({
     | undefined;
   readonly onOngoingRankingChange?: (ongoingRanking: boolean) => void;
 }) {
+  const phoneHeader = useContext(MobilePageContext) !== null;
   const locale = useBrowserLocale();
   const onChange = <K extends keyof WaveOverviewConfig>({
     key,
@@ -45,13 +48,15 @@ export default function CreateWaveOverview({
 
   return (
     <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-y-6 tw-break-words">
-      <CreateWaveStepHeader
-        title={
-          isSubwave
-            ? getCreateSubwaveTitle(locale, parentWaveName)
-            : t(locale, "waves.create.overview.title")
-        }
-      />
+      {!(phoneHeader && isSubwave) && (
+        <CreateWaveStepHeader
+          title={
+            isSubwave
+              ? getCreateSubwaveTitle(locale, parentWaveName)
+              : t(locale, "waves.create.overview.title")
+          }
+        />
+      )}
       <CreateWaveNameInput
         onChange={onChange}
         name={overview.name}

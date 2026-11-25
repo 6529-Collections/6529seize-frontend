@@ -3,6 +3,9 @@
 import { useEffect, useMemo } from "react";
 import { useParams, usePathname } from "next/navigation";
 import { isUserProfilePage } from "../user/layout/userTabs.config";
+import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
+import { getWaveIdFromPathname } from "@/helpers/navigation.helpers";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
 import { useSidebarController } from "../../hooks/useSidebarController";
 import { SidebarProvider, useSidebarState } from "../../hooks/useSidebarState";
@@ -32,6 +35,9 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
   const { isRightSidebarOpen } = useSidebarState();
   const pathname = usePathname();
   const params = useParams();
+  const isPhoneWidth = useMediaQuery(PHONE_WAVES_LAYOUT_QUERY);
+  const showSiteHeader =
+    isSmall && !(isPhoneWidth && getWaveIdFromPathname(pathname));
   const smallWebOverflow =
     pathname === "/the-memes" ||
     /^\/the-memes\/\d+\/?$/.test(pathname) ||
@@ -81,7 +87,7 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
       data-sidebar-ready={isSidebarReady}
     >
       <SmallScreenLayoutHeader
-        active={isSmall}
+        active={showSiteHeader}
         onMenuToggle={toggleCollapsed}
         isMenuOpen={isOffcanvasOpen}
       />

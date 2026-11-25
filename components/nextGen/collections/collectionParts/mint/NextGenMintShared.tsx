@@ -4,6 +4,9 @@ import { Tooltip } from "react-tooltip";
 import { useEnsName } from "wagmi";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useIdentityMovePhase } from "@/hooks/useIdentityMovePhase";
+import { t } from "@/i18n/messages";
 
 export const MINT_INPUT_CLASSNAME =
   "tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/20 tw-px-3 tw-py-2 tw-text-base tw-text-white tw-[color-scheme:dark] placeholder:tw-text-iron-500 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-bg-black/10 disabled:tw-text-iron-500";
@@ -97,7 +100,25 @@ export function NextGenMintingFor(
           />
         ))}
       </select>
+      <NextGenMintDelegationSource />
     </div>
+  );
+}
+
+/**
+ * The NextGen Minter contract reads NFTDelegation. Delegations moved to the
+ * 6529 Network do not change who can mint for whom here.
+ */
+function NextGenMintDelegationSource() {
+  const locale = useBrowserLocale();
+  const phase = useIdentityMovePhase();
+  if (phase === "none") {
+    return null;
+  }
+  return (
+    <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+      {t(locale, "identityMove.nextGenMint")}
+    </p>
   );
 }
 

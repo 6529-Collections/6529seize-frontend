@@ -22,6 +22,7 @@ import {
 } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
+import { usePublicProfileModerationStatus } from "@/hooks/content-moderation/usePublicProfileModerationStatus";
 import { isAuthSessionForProfile } from "@/components/auth/auth-session-scope";
 import { getWalletAddress } from "@/services/auth/auth.utils";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
@@ -52,10 +53,15 @@ import { CompetitionState, COMPETITION_BUTTON } from "./CompetitionState";
 import { CompetitionMyVotesSort } from "./CompetitionMyVotesSort";
 import { CompetitionLoadMore } from "./CompetitionLoadMore";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
+import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWriters";
+import { scheduleIndexRefresh } from "@/lib/chain-waves/optimistic";
 import { t } from "@/i18n/messages";
 import { useInView } from "@/hooks/useInView";
 import { formatInteger } from "@/i18n/format";
 import type { ApiCompetitionMyVote } from "@/generated/models/ApiCompetitionMyVote";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 
 function VisibleVoteInput(props: ComponentProps<typeof CompetitionVoteForm>) {
   const [ref, visible] = useInView<HTMLDivElement>({ rootMargin: "200px 0px" });
@@ -73,11 +79,13 @@ function UnavailableVote({
   retry,
   disabled,
   onSubmittingChange,
+  mobile,
 }: {
   readonly vote: ApiCompetitionMyVote;
   readonly onSubmittingChange: (submitting: boolean) => void;
   readonly retry: () => void;
   readonly disabled: boolean;
+  readonly mobile: boolean;
 }) {
   const { competition } = useCompetition();
   const locale = useBrowserLocale();
@@ -109,6 +117,9 @@ function UnavailableVote({
         disabled={disabled}
         budgetEnabled={visible}
         onSubmittingChange={onSubmittingChange}
+        compact
+        myVotes
+        mobile={mobile}
       />
     </article>
   );
@@ -179,7 +190,16 @@ function ScopedCompetitionMyVotes({
   readonly viewer: string | null;
 }) {
   const { competition, wave } = useCompetition();
+  const { isApp } = useDeviceInfo();
+  const isMobileViewport = useIsMobileLayoutViewport();
+  const mobile = isApp || isMobileViewport;
+  const [selectionMode, setSelectionMode] = useState(false);
+  const isSelecting = selectionMode;
   const locale = useBrowserLocale();
+  // Votes move to the 6529 Network: shown, but not changeable here.
+  const votesPaused = useWavesWritesPaused("votes");
+  const canVoteNow = competition.permissions.vote && !votesPaused;
+  const chainWriters = useChainWavesWriters();
   const [sort, setSort] = useLocalPreference<ApiCompetitionMyVotesSort>(
     `competitionMyVotesSort_${competition.wave_id}_${competition.id}_${viewer ?? "anonymous"}`,
     ApiCompetitionMyVotesSort.VoteAmount,
@@ -222,12 +242,18 @@ function ScopedCompetitionMyVotes({
     { include: "cards", sort },
     !!viewer
   );
+  // Votes reset on the 6529 Network, hidden until 6529.io's index reads them.
+  const [chainResets, setChainResets] = useState<ReadonlySet<string>>(
+    () => new Set()
+  );
   const votes = useMemo(
     () =>
       (query.data?.pages.flatMap((page) => page.data) ?? []).filter(
-        (vote) => vote.entry_status === ApiCompetitionEntryStatus.Active
+        (vote) =>
+          vote.entry_status === ApiCompetitionEntryStatus.Active &&
+          !chainResets.has(vote.drop_id)
       ),
-    [query.data]
+    [query.data, chainResets]
   );
   const cards = useMemo(
     () => ({
@@ -265,6 +291,8 @@ function ScopedCompetitionMyVotes({
   }, []);
   const client = useQueryClient();
   const { requestAuth, connectedProfile, activeProfileProxy } = useAuth();
+  // Warm the existing posting check before the first Explain vote gesture.
+  usePublicProfileModerationStatus(connectedProfile?.id);
   const sign = useCompetitionSignatureFor(competition);
   const pendingResets = useRef(new Map<string, ApiSetCompetitionVoteRequest>());
   const activeScope = useRef(true);
@@ -281,11 +309,29 @@ function ScopedCompetitionMyVotes({
     votes.length > 0 && votes.every((vote) => selected.has(vote.drop_id));
   const resetVote = async (dropId: string) => {
     const vote = votes.find((item) => item.drop_id === dropId);
-    if (
-      vote?.entry_status !== ApiCompetitionEntryStatus.Active ||
-      !competition.permissions.vote
-    )
+    if (vote?.entry_status !== ApiCompetitionEntryStatus.Active || !canVoteNow)
       throw new Error("Vote cannot be reset");
+    if (chainWriters) {
+      // On the 6529 Network the reset carries its own signature.
+      assertActiveScope();
+      await chainWriters.vote({ dropId, amount: 0 });
+      // The list drops the vote at once. 6529.io's index shows the reset
+      // once it has read the block; a refetch now would bring the old vote
+      // back.
+      setChainResets((current) => new Set(current).add(dropId));
+      scheduleIndexRefresh(async () => {
+        try {
+          await invalidateCompetition(client, identity);
+        } finally {
+          setChainResets((current) => {
+            const next = new Set(current);
+            next.delete(dropId);
+            return next;
+          });
+        }
+      });
+      return;
+    }
     const address = getWalletAddress();
     const assertCurrentActor = () => {
       assertActiveScope();
@@ -339,6 +385,12 @@ function ScopedCompetitionMyVotes({
     );
   const toolbar = (
     <MyStreamWaveMyVotesReset
+      mobile={mobile}
+      isSelecting={isSelecting}
+      onToggleSelection={() => {
+        setSelectionMode(mobile && !selectionMode);
+        setSelected(new Set());
+      }}
       toolbarContent={
         <CompetitionMyVotesSort
           sort={sort}
@@ -359,14 +411,15 @@ function ScopedCompetitionMyVotes({
           ? (credits.data?.remaining ?? null)
           : null
       }
-      isVotingClosed={!competition.permissions.vote}
+      isVotingClosed={!canVoteNow}
       resetVote={resetVote}
       onResettingChange={setResetting}
-      onToggleSelectAll={() =>
+      onToggleSelectAll={() => {
+        setSelectionMode(true);
         setSelected(
           allSelected ? new Set() : new Set(votes.map((vote) => vote.drop_id))
-        )
-      }
+        );
+      }}
       removeSelected={(dropId) =>
         setSelected((current) => {
           const next = new Set(current);
@@ -416,7 +469,8 @@ function ScopedCompetitionMyVotes({
             <UnavailableVote
               key={vote.entry_id}
               vote={vote}
-              disabled={!competition.permissions.vote || resetting}
+              mobile={mobile}
+              disabled={!canVoteNow || resetting}
               onSubmittingChange={onSubmittingChange}
               retry={() => {
                 void result.refetch();
@@ -426,7 +480,7 @@ function ScopedCompetitionMyVotes({
           );
         const entryDrop = result.data.drop;
         const isClosed =
-          !competition.permissions.vote ||
+          !canVoteNow ||
           result.data.entry.status !== ApiCompetitionEntryStatus.Active;
         return (
           <div
@@ -434,6 +488,12 @@ function ScopedCompetitionMyVotes({
             className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800"
           >
             <MyStreamWaveMyVote
+              mobile={mobile}
+              isSelecting={isSelecting}
+              onEnterSelection={() => {
+                setSelectionMode(true);
+                setSelected((current) => new Set(current).add(vote.drop_id));
+              }}
               drop={result.data.drop}
               isResetting={resetting}
               isChecked={selected.has(vote.drop_id)}
@@ -459,6 +519,8 @@ function ScopedCompetitionMyVotes({
                   dropId={vote.drop_id}
                   disabled={isClosed || resetting}
                   compact
+                  myVotes
+                  mobile={mobile}
                   onSubmittingChange={onSubmittingChange}
                   onExplainVote={
                     entryDrop.wave.authenticated_user_eligible_to_chat !==

@@ -281,6 +281,11 @@ describe("effective App PR CI plan", () => {
   });
   it.each([
     "components/waves/leaderboard/WaveMySubmissions.tsx",
+    "components/brain/my-stream/votes/MyVotesInput.tsx",
+    "components/brain/my-stream/votes/MyStreamWaveMyVote.tsx",
+    "components/brain/my-stream/votes/useMyVoteLongPress.ts",
+    "__tests__/components/brain/my-stream/votes/MyVotesInput.test.tsx",
+    "helpers/vote-haptics.ts",
     "components/waves/leaderboard/MySubmissionsButton.tsx",
     "components/waves/leaderboard/MySubmissionsDialog.tsx",
     "components/waves/leaderboard/SubmissionConfirmation.tsx",
@@ -319,6 +324,12 @@ describe("effective App PR CI plan", () => {
     "tests/social/wave-notification-settings-sandbox.spec.ts",
     "components/header/AppHeader.tsx",
     "components/brain/mobile/WaveInformationSheet.tsx",
+    "components/brain/my-stream/tabs/PhoneWaveTabs.tsx",
+    "components/mobile-navigation/MobileNavigationView.tsx",
+    "components/mobile-navigation/SpringNavigationSurface.tsx",
+    "components/mobile-navigation/MobilePageContext.tsx",
+    "components/mobile-navigation/useMobileFormHistory.ts",
+    "components/waves/specs/WaveSettingSwitch.tsx",
     "components/brain/left-sidebar/waves/BrainLeftSidebarWavePin.tsx",
     "components\\waves\\leaderboard\\MySubmissionsDialog.tsx",
   ])(
@@ -743,7 +754,9 @@ describe("Composer control browser selection", () => {
     ["components/waves/CreateDrop.tsx", true],
     ["README.md", false],
   ] as const)("selects composer checks for %s: %s", (file, selected) => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "composer-control-plan-"));
+    const root = fs.mkdtempSync(
+      path.join(os.tmpdir(), "composer-control-plan-")
+    );
     const planDir = path.join(root, "test-results/app-pr-ci");
     try {
       fs.mkdirSync(planDir, { recursive: true });

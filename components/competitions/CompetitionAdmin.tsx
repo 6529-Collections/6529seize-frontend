@@ -18,6 +18,7 @@ import {
 } from "@/helpers/competition.helpers";
 import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { t } from "@/i18n/messages";
 import CompetitionAppearance from "./CompetitionAppearance";
 import CompetitionPauseHistory from "./CompetitionPauseHistory";
@@ -81,7 +82,10 @@ export default function CompetitionAdmin({
     version: number;
     key: string;
   } | null>(null);
-  const canAdminister = competition.permissions.administer;
+  // Decision actions move to the 6529 Network.
+  const wavesWritesPaused = useWavesWritesPaused();
+  const canAdminister =
+    competition.permissions.administer && !wavesWritesPaused;
   const canEditRules =
     competition.permissions.edit_rules_after_activity === true;
   const actions = getLifecycleActions(competition.lifecycle).filter(

@@ -31,6 +31,7 @@ export type MemesSubmissionIdentityStatus =
   | "limit-reached"
   | "not-started"
   | "ended"
+  | "paused"
   | "eligible";
 
 export interface MemesSubmissionIdentity {
@@ -88,6 +89,7 @@ const getProfileStatus = ({
   hasReachedLimit,
   submissionStatus,
   canSubmitNow,
+  isPausedForMove = false,
 }: {
   readonly fetchingProfile: boolean;
   readonly hasProfile: boolean;
@@ -101,6 +103,8 @@ const getProfileStatus = ({
   readonly hasReachedLimit: boolean;
   readonly submissionStatus: SubmissionStatus;
   readonly canSubmitNow: boolean;
+  /** Entries are paused for the move to the 6529 Network. */
+  readonly isPausedForMove?: boolean | undefined;
 }): MemesSubmissionIdentityStatus => {
   if (fetchingProfile) return "loading-profile";
   if (!hasProfile) return "needs-profile";
@@ -113,6 +117,13 @@ const getProfileStatus = ({
   });
   if (eligibilityRequestStatus) return eligibilityRequestStatus;
   if (!hasEligibilityWave) return "checking-eligibility";
+  // Entries move to the 6529 Network: a closed or unopened window still says
+  // so, then the pause comes before eligibility and limits.
+  if (isPausedForMove) {
+    if (submissionStatus === SubmissionStatus.NOT_STARTED) return "not-started";
+    if (submissionStatus === SubmissionStatus.ENDED) return "ended";
+    return "paused";
+  }
   if (!isEligible) return "ineligible";
   if (hasReachedLimit) return "limit-reached";
   if (submissionStatus === SubmissionStatus.NOT_STARTED) return "not-started";
@@ -259,6 +270,7 @@ export function useMemesSubmissionIdentity(
     hasReachedLimit: participation.hasReachedLimit,
     submissionStatus: participation.status,
     canSubmitNow: participation.canSubmitNow,
+    isPausedForMove: participation.isPausedForMove,
   });
   const status = (() => {
     if (

@@ -383,6 +383,34 @@ describe("CreateDropContent submission focus", () => {
     }
   );
 
+  it("holds the draft until the send is answered, and keeps it when refused", async () => {
+    let answer: ((accepted: boolean) => void) | undefined;
+    const submitDrop = jest.fn(
+      () =>
+        new Promise<boolean>((resolve) => {
+          answer = resolve;
+        })
+    );
+    renderSubject({ submitDrop });
+    const button = screen.getByRole("button", { name: "submit" });
+
+    await userEvent.click(button);
+
+    await waitFor(() => expect(submitDrop).toHaveBeenCalledTimes(1));
+    expect(submitDrop).toHaveBeenCalledWith(
+      expect.objectContaining({ keepsDraftWhenRefused: true })
+    );
+    // An entry for the 6529 Network waits here while the wallet prompt is open.
+    expect(button).toBeDisabled();
+    expect(mockInputClear).not.toHaveBeenCalled();
+
+    await act(async () => answer?.(false));
+
+    await waitFor(() => expect(button).toBeEnabled());
+    expect(mockInputClear).not.toHaveBeenCalled();
+    expect(mockSetDrop).not.toHaveBeenCalledWith(null);
+  });
+
   it("prevents a second submit while authentication is pending", async () => {
     mockIsApp = true;
     let finishAuth: ((result: { success: boolean }) => void) | undefined;

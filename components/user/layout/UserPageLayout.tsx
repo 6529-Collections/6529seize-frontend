@@ -1,3 +1,4 @@
+import IdentityMoveNotice from "@/components/identity-move/IdentityMoveNotice";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { Suspense, type ReactNode } from "react";
 import UserPageHeader from "../user-page-header/UserPageHeader";
@@ -49,6 +50,7 @@ export default function UserPageLayout({
             />
           </Suspense>
           <div className="tw-mx-auto tw-px-4 sm:tw-px-6 md:tw-px-8">
+            <IdentityMoveNotice className="tw-mb-4" />
             <Suspense fallback={<UserPageTabsFallback />}>
               <UserPageTabs initialProfile={initialProfile} />
             </Suspense>

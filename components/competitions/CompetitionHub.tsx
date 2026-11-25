@@ -1,6 +1,12 @@
 "use client";
-import { WAVE_HEADER_TEXT_ACTION_SURFACE_CLASSES } from "@/components/brain/left-sidebar/waves/WaveHeaderActions";
-import { COMPACT_ACTION_BUTTON_CLASS } from "@/components/utils/button/compactActionButtonStyles";
+import {
+  WAVE_HEADER_MOBILE_TEXT_ACTION_SURFACE_CLASSES,
+  WAVE_HEADER_TEXT_ACTION_SURFACE_CLASSES,
+} from "@/components/brain/left-sidebar/waves/WaveHeaderActions";
+import {
+  COMPACT_ACTION_BUTTON_CLASS,
+  COMPACT_ACTION_TOUCH_TARGET_CLASS,
+} from "@/components/utils/button/compactActionButtonStyles";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -10,9 +16,9 @@ import {
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import { TabToggleWithOverflow } from "@/components/common/TabToggleWithOverflow";
-import MobileTabsScrollControls from "@/components/brain/my-stream/MobileTabsScrollControls";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
+import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import type { ApiCompetition } from "@/generated/models/ApiCompetition";
 import type { ApiWaveV3 } from "@/generated/models/ApiWaveV3";
 import {
@@ -22,6 +28,7 @@ import {
 import { getCompetitionRoute } from "@/helpers/competition.helpers";
 import { getWavePathRoute } from "@/helpers/navigation.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { t } from "@/i18n/messages";
 import { formatDate } from "@/i18n/format";
 import { Time } from "@/helpers/time";
@@ -126,10 +133,19 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
   const locale = useBrowserLocale();
   const { isApp } = useDeviceInfo();
   const isMobileViewport = useIsMobileLayoutViewport();
-  const canCreateCompetition = hub.permissions.create_competition;
-  const createClassName = `${COMPACT_ACTION_BUTTON_CLASS} tw-no-underline hover:tw-no-underline ${isApp || isMobileViewport ? "tw-min-h-11" : "tw-h-8"}`;
+  // New decisions move to the 6529 Network.
+  const wavesWritesPaused = useWavesWritesPaused();
+  const canCreateCompetition =
+    hub.permissions.create_competition && !wavesWritesPaused;
+  const createClassName = `${COMPACT_ACTION_BUTTON_CLASS} ${isMobileViewport ? COMPACT_ACTION_TOUCH_TARGET_CLASS : ""} tw-h-8 tw-no-underline hover:tw-no-underline`;
   const createContent = (
-    <span className={WAVE_HEADER_TEXT_ACTION_SURFACE_CLASSES}>
+    <span
+      className={
+        isMobileViewport
+          ? WAVE_HEADER_MOBILE_TEXT_ACTION_SURFACE_CLASSES
+          : WAVE_HEADER_TEXT_ACTION_SURFACE_CLASSES
+      }
+    >
       <PlusIcon className="-tw-ml-1 tw-size-4 tw-shrink-0" aria-hidden="true" />
       <span>{t(locale, "competitions.createAction")}</span>
     </span>
@@ -180,9 +196,11 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
         ))}
       </ul>
     ) : (
-      <output className="tw-block tw-text-sm tw-text-iron-400">
-        {t(locale, "competitions.empty")}
-      </output>
+      <div className="tw-space-y-3">
+        <output className="tw-block tw-text-sm tw-text-iron-400">
+          {t(locale, "competitions.empty")}
+        </output>
+      </div>
     );
   const filters: CompetitionCollectionFilter[] = ["active", "history"];
   if (hub.permissions.administer) filters.push("drafts");
@@ -206,7 +224,7 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
             data-competition-filters-scroll
             className={`tw-scroll-px-10 tw-overflow-x-auto ${isApp ? "tw-no-scrollbar tw-overscroll-x-contain" : "tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500"}`}
           >
-            <div className="tw-w-max tw-pr-px [&_[role=tab][aria-selected=true]]:!tw-font-medium">
+            <div className="tw-w-max tw-pr-px [&_button]:tw-text-meta [&_button]:tw-font-medium">
               <TabToggleWithOverflow
                 variant="compactPills"
                 maxVisibleTabs={isApp ? 1 : tabOptions.length}
@@ -216,15 +234,14 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
               />
             </div>
           </div>
-          <MobileTabsScrollControls
-            scrollerRef={filtersScrollerRef}
-            showButtons={false}
-          />
         </div>
         {canCreateCompetition && (
           <Link
             href={getCompetitionRoute(hub.id, "new")}
             className={createClassName}
+            aria-label={
+              isMobileViewport ? t(locale, "competitions.new") : undefined
+            }
           >
             {createContent}
           </Link>
@@ -263,6 +280,8 @@ export default function CompetitionHub({
   readonly embedded?: boolean;
 }) {
   const locale = useBrowserLocale();
+  const { isApp } = useDeviceInfo();
+  const { waveViewStyle } = useLayout();
   const hub = useCompetitionHub(waveId);
   let content = <CompetitionState />;
   if (hub.isError)
@@ -277,7 +296,8 @@ export default function CompetitionHub({
   else if (hub.data) content = <CompetitionCollection hub={hub.data} />;
   return (
     <section
-      className="tw-flex tw-h-full tw-min-h-0 tw-flex-col"
+      style={embedded && isApp ? waveViewStyle : undefined}
+      className="tw-flex tw-h-full tw-min-h-0 tw-flex-col max-lg:tw-bg-iron-950 [.capacitor-native_&]:tw-bg-iron-950"
       aria-labelledby={embedded ? undefined : "competition-hub-heading"}
       aria-label={embedded ? t(locale, "competitions.title") : undefined}
     >

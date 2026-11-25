@@ -7,7 +7,7 @@ wave sections such as `Chat`, `Leaderboard`, `Sales`, `Winners`, and other
 wave-dependent views. Named curations also appear here: each opens a selected
 collection of posts from the wave. The selected decision shares this row with Chat and renders directly below
 it. Published decisions use the same row whether selected by default or an
-explicit link. The order is **Chat**, decision views, **Settings**, then
+explicit link. On wider layouts, the order is **Chat**, decision views, **Settings**, then
 **Decisions** when available, then named curations. **Settings** is the last
 decision tab. **Votes** contains **My Votes**, **All votes**, and **Activity**,
 all tied to the selected decision. See [Decisions](../competitions/feature-competitions.md)
@@ -171,17 +171,23 @@ A divider separates the wave identity and header actions from the main tab row.
 - Eligible readers can use `View results` on an open unanswered poll to inspect
   counts and percentages before voting, then return to `Vote` while the poll is
   still open.
-- On mobile, `Create` stays outside the horizontally scrolling tab list so
-  creation actions remain reachable on narrow screens. Selecting an action
-  closes the sheet before opening its form; dismissing the sheet leaves the
-  current view unchanged.
-- On narrow web layouts, an edge fade and chevron appear when additional tabs
-  are available off-screen. The cue follows the current scroll position and can
-  be tapped to move through the tab row.
-- When many curations overflow the row, scroll horizontally to reach them.
-  Touch layouts support swiping the tab row, and the active tab scrolls into
-  view when it is hidden. In the app, selecting an already visible tab keeps
-  the row in place instead of centering it again.
+- Phones show all available sections when there are five or fewer, with `Chat`
+  first and no `More` button. Tabs stay compact and left-aligned, whether there
+  is one section or several. The blue underline matches the selected label's
+  width. Long rows scroll horizontally rather than stretching or wrapping labels;
+  the active tab scrolls into view. For larger waves, the row shows `Chat` and up to
+  three other everyday sections, including Leaderboard, Winners, Votes, Polls,
+  Sales and named curations as available. Reference and setup sections such as
+  FAQ, Settings and Decisions stay in `More`. Everyday sections that do not fit
+  appear first in that sheet, before reference and setup sections.
+  When a section in the sheet is active, its name and available count appear
+  in the active More slot. Visible web curation tabs retain their management
+  controls. Eligible creation actions are in `More wave actions` in the header.
+- On wider layouts, swipe or scroll horizontally through overflowing tabs.
+  The edge cue follows the scroll position, and the active tab scrolls into
+  view when it is hidden.
+- On phones, filters and sub-tabs scroll with Leaderboard, Winners and Votes
+  content while the top bar and main tab row stay in place.
 - A shared wave URL with a valid `?curation={curationId}` opens that curation
   directly.
 

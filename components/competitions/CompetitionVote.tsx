@@ -34,6 +34,15 @@ import {
   isCompetitionAccessError,
 } from "@/helpers/competition.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
+import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWriters";
+import { chainWavesErrorMessage } from "@/components/chain-waves/chainWavesErrorMessage";
+import { chainIdentityPointer } from "@/components/chain-waves/chainIdentityPointer";
+import {
+  budgetAfterVote,
+  scheduleIndexRefresh,
+} from "@/lib/chain-waves/optimistic";
+import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
 import { t, type MessageKey } from "@/i18n/messages";
 import { formatInteger } from "@/i18n/format";
 import { getCompetitionConfigLabel } from "@/helpers/competition-labels.helpers";
@@ -52,6 +61,12 @@ import {
 import SingleWaveDropVoteSlider from "@/components/waves/drop/SingleWaveDropVoteSlider";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import { updateCompetitionVoteInCache } from "@/components/react-query-wrapper/utils/updateCompetitionVoteInCache";
+import {
+  MyVotesInput,
+  MY_VOTES_INPUT_LAYOUT,
+  MY_VOTES_MOBILE_INPUT_LAYOUT,
+} from "@/components/brain/my-stream/votes/MyVotesInput";
+import { triggerVoteSuccessHaptic } from "@/helpers/vote-haptics";
 
 const COMPACT_VOTE_LAYOUT =
   "tw-col-span-3 tw-row-start-3 tw-w-full tw-min-w-0 tw-@container/vote-controls @[32rem]/my-vote:tw-col-span-2 @[32rem]/my-vote:tw-col-start-2 @[46rem]/my-vote:tw-col-span-1 @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-span-2 @[46rem]/my-vote:tw-row-start-1";
@@ -91,6 +106,8 @@ export function CompetitionVoteForm({
   budgetEnabled = true,
   budgetVisibilityRef,
   compact = false,
+  myVotes = false,
+  mobile = false,
   modeControl,
   hidden,
   voteMode = "numeric",
@@ -121,6 +138,8 @@ export function CompetitionVoteForm({
       }
     | undefined;
   readonly compact?: boolean;
+  readonly myVotes?: boolean;
+  readonly mobile?: boolean;
   readonly modeControl?: ReactNode;
   readonly hidden?: boolean | undefined;
   readonly voteMode?: SingleWaveDropVoteMode | undefined;
@@ -148,6 +167,10 @@ export function CompetitionVoteForm({
     };
   }, [viewer]);
   const locale = useBrowserLocale();
+  // Votes move to the 6529 Network: shown, but not changeable here.
+  const votesPaused = useWavesWritesPaused("votes");
+  const canVoteNow = competition.permissions.vote && !votesPaused;
+  const voteValueLabel = t(locale, "competitions.voteValue");
   const explainTooltipId = useId();
   const creditType = competition.voting.credit_type;
   const creditLabel = Object.hasOwn(WAVE_VOTING_LABELS, creditType)
@@ -156,11 +179,13 @@ export function CompetitionVoteForm({
   const client = useQueryClient();
   const sign = useCompetitionSignatureFor(competition);
   const credit = useCompetitionVoteBudget(competition, entryId, budgetEnabled);
+  const chainWriters = useChainWavesWriters();
   const [draft, setDraft] = useState<{ source: string; value: string } | null>(
     null
   );
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState<MessageKey | null>(null);
+  const [chainFailure, setChainFailure] = useState<ReactNode>(null);
   const [saved, setSaved] = useState(false);
   const [lastVote, setLastVote] = useState<{
     source: string;
@@ -186,6 +211,7 @@ export function CompetitionVoteForm({
     ? `competition-vote-error-${entryId}`
     : undefined;
   const rangeDescriptionId = `competition-vote-range-${entryId}`;
+  const voteInputId = `competition-vote-${entryId}`;
   const min = credit.data?.min_vote;
   const max = credit.data?.max_vote;
   const updateNumericDraft = (next: string) => {
@@ -202,13 +228,7 @@ export function CompetitionVoteForm({
     numeric >= min &&
     numeric <= max;
   const submit = async () => {
-    if (
-      busy ||
-      !valid ||
-      reply?.isValid === false ||
-      disabled ||
-      !competition.permissions.vote
-    )
+    if (busy || !valid || reply?.isValid === false || disabled || !canVoteNow)
       return;
     const address = getWalletAddress();
     const isCurrentActor = () =>
@@ -223,6 +243,36 @@ export function CompetitionVoteForm({
     setFailed(null);
     setSaved(false);
     try {
+      if (chainWriters) {
+        // On the 6529 Network the vote carries its own signature. The caches
+        // show it until 6529.io's index has read the block.
+        await chainWriters.vote({ dropId, amount: numeric });
+        pending.current = null;
+        if (credit.data) {
+          await updateCompetitionVoteInCache(client, {
+            ...identity,
+            viewer,
+            entryId,
+            dropId,
+            budget: budgetAfterVote(credit.data, numeric),
+            isCurrentViewer: isCurrentActor,
+          });
+        }
+        if (isCurrentActor()) {
+          setDraft(null);
+          controlledDraft?.onChange(null);
+          setSaved(true);
+          setLastVote({
+            source,
+            total: numeric,
+            change: numeric - (credit.data?.current_vote ?? 0),
+          });
+          void reply?.onVoteApplied();
+          onVoteSuccess?.();
+        }
+        scheduleIndexRefresh(() => invalidateCompetition(client, identity));
+        return;
+      }
       if (!(await requestAuth()).success || !isCurrentActor()) return;
       let body =
         pending.current?.actor === viewer ? pending.current.body : null;
@@ -268,10 +318,19 @@ export function CompetitionVoteForm({
         });
         void reply?.onVoteApplied();
         onVoteSuccess?.();
+        if (myVotes) triggerVoteSuccessHaptic();
       }
       void invalidateCompetition(client, identity).catch(() => undefined);
     } catch (error) {
       if (isRejectedCompetitionCommand(error)) pending.current = null;
+      // Cancelled at the wallet prompt: nothing was sent.
+      if (chainWriters && isUserRejectedSigningError(error)) return;
+      setChainFailure(
+        chainWriters
+          ? (chainIdentityPointer(locale, error) ??
+              chainWavesErrorMessage(locale, error))
+          : null
+      );
       setFailed(
         getCompetitionSignatureFailureKey(error) ?? "competitions.failure"
       );
@@ -299,6 +358,22 @@ export function CompetitionVoteForm({
       <p className="tw-text-sm tw-text-iron-400">
         {t(locale, "competitions.signIn")}
       </p>
+    );
+  if (credit.isPending && compact && myVotes)
+    return (
+      <div
+        ref={budgetVisibilityRef}
+        role="status"
+        aria-label={t(locale, "competitions.loading")}
+        className={`tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-2 ${mobile ? MY_VOTES_MOBILE_INPUT_LAYOUT : MY_VOTES_INPUT_LAYOUT}`}
+        aria-busy="true"
+        aria-live="off"
+      >
+        <div className="tw-h-[46px] tw-animate-pulse tw-rounded-lg tw-bg-iron-900 motion-reduce:tw-animate-none" />
+        {onExplainVote && (
+          <div className="tw-h-11 tw-w-20 tw-animate-pulse tw-rounded-lg tw-bg-iron-900 motion-reduce:tw-animate-none" />
+        )}
+      </div>
     );
   if (credit.isPending)
     return compact ? (
@@ -336,6 +411,64 @@ export function CompetitionVoteForm({
         }}
       />
     );
+  if (compact && myVotes)
+    return (
+      <div
+        ref={budgetVisibilityRef}
+        className={
+          mobile ? MY_VOTES_MOBILE_INPUT_LAYOUT : MY_VOTES_INPUT_LAYOUT
+        }
+      >
+        <MyVotesInput
+          mobile={mobile}
+          className=""
+          alwaysShowHelper={!mobile}
+          id={voteInputId}
+          label={voteValueLabel}
+          value={value}
+          currentVote={credit.data.current_vote ?? 0}
+          unit={creditLabel}
+          min={min ?? 0}
+          valid={valid}
+          disabled={disabled || !canVoteNow}
+          busy={busy}
+          helperText={t(locale, "competitions.voteRange", {
+            min: formatInteger(locale, min ?? 0),
+            max: formatInteger(locale, max ?? 0),
+          })}
+          error={failed ? (chainFailure ?? t(locale, failed)) : null}
+          saveLabel={t(
+            locale,
+            busy ? "competitions.saving" : "competitions.vote"
+          )}
+          explainLabel={t(locale, "waves.voteRationale.explainAriaLabel")}
+          explainDescription={t(locale, "waves.voteRationale.savedDescription")}
+          canExplain={
+            credit.data.current_vote !== null && credit.data.current_vote !== 0
+          }
+          onChange={updateNumericDraft}
+          onBlur={() => {
+            if (value === "" || value === "-") {
+              setVoteDraft(String(credit.data.current_vote ?? 0));
+            }
+          }}
+          onSubmit={() => void submit()}
+          onExplain={
+            onExplainVote
+              ? () => {
+                  const total = credit.data.current_vote ?? 0;
+                  onExplainVote(
+                    total,
+                    lastVote?.source === source && lastVote.total === total
+                      ? lastVote.change
+                      : 0
+                  );
+                }
+              : undefined
+          }
+        />
+      </div>
+    );
   if (compact)
     return (
       <form
@@ -346,8 +479,8 @@ export function CompetitionVoteForm({
         }}
         className={`${COMPACT_VOTE_LAYOUT} tw-cursor-default`}
       >
-        <label className="tw-sr-only" htmlFor={`competition-vote-${entryId}`}>
-          {t(locale, "competitions.voteValue")}
+        <label className="tw-sr-only" htmlFor={voteInputId}>
+          {voteValueLabel}
         </label>
         <div
           ref={budgetVisibilityRef}
@@ -357,14 +490,14 @@ export function CompetitionVoteForm({
             className={`tw-col-span-2 tw-flex tw-min-w-0 tw-items-center tw-gap-x-1 tw-rounded-lg tw-bg-iron-900 tw-pr-1 tw-ring-1 tw-ring-inset tw-ring-iron-700 focus-within:tw-ring-2 focus-within:tw-ring-primary-400 @[24rem]/vote-controls:tw-col-span-1 @[46rem]/my-vote:tw-gap-x-2 ${onExplainVote ? "" : "@[24rem]/vote-controls:!tw-col-span-2"}`}
           >
             <input
-              id={`competition-vote-${entryId}`}
+              id={voteInputId}
               type="number"
               step="1"
               min={min ?? undefined}
               max={max ?? undefined}
               value={value}
               onChange={(event) => setVoteDraft(event.target.value)}
-              disabled={busy || disabled || !competition.permissions.vote}
+              disabled={busy || disabled || !canVoteNow}
               aria-invalid={!valid}
               aria-describedby={[rangeDescriptionId, errorDescriptionId]
                 .filter(Boolean)
@@ -380,7 +513,7 @@ export function CompetitionVoteForm({
               disabled={
                 busy ||
                 disabled ||
-                !competition.permissions.vote ||
+                !canVoteNow ||
                 !valid ||
                 numeric === credit.data.current_vote
               }
@@ -414,7 +547,7 @@ export function CompetitionVoteForm({
                 disabled={
                   busy ||
                   disabled ||
-                  !competition.permissions.vote ||
+                  !canVoteNow ||
                   credit.data.current_vote === null ||
                   credit.data.current_vote === 0
                 }
@@ -453,7 +586,7 @@ export function CompetitionVoteForm({
             role="alert"
             className="tw-mb-0 tw-mt-1 tw-text-xs tw-text-red"
           >
-            {t(locale, failed)}
+            {chainFailure ?? t(locale, failed)}
           </p>
         )}
       </form>
@@ -468,11 +601,7 @@ export function CompetitionVoteForm({
         unit={creditLabel}
         variant={controlVariant}
         disabled={
-          busy ||
-          disabled ||
-          !competition.permissions.vote ||
-          !valid ||
-          reply?.isValid === false
+          busy || disabled || !canVoteNow || !valid || reply?.isValid === false
         }
       >
         {busy ? t(locale, "competitions.saving") : undefined}
@@ -494,11 +623,9 @@ export function CompetitionVoteForm({
         {voteMode === "slider" ? (
           <fieldset
             className={`tw-m-0 tw-min-w-0 tw-border-0 tw-px-2 ${controlVariant === "compact" ? "tw-pb-0 tw-pt-8" : "tw-pb-2 tw-pt-0"}`}
-            disabled={busy || disabled || !competition.permissions.vote}
+            disabled={busy || disabled || !canVoteNow}
           >
-            <legend className="tw-sr-only">
-              {t(locale, "competitions.voteValue")}
-            </legend>
+            <legend className="tw-sr-only">{voteValueLabel}</legend>
             <SingleWaveDropVoteSlider
               voteValue={Number.isFinite(numeric) ? numeric : 0}
               minValue={min ?? 0}
@@ -515,14 +642,11 @@ export function CompetitionVoteForm({
           </fieldset>
         ) : (
           <div className="tw-relative">
-            <label
-              htmlFor={`competition-vote-${entryId}`}
-              className="tw-sr-only"
-            >
-              {t(locale, "competitions.voteValue")}
+            <label htmlFor={voteInputId} className="tw-sr-only">
+              {voteValueLabel}
             </label>
             <VoteNumericInput
-              id={`competition-vote-${entryId}`}
+              id={voteInputId}
               unit={creditLabel}
               variant={controlVariant}
               type="number"
@@ -530,7 +654,7 @@ export function CompetitionVoteForm({
               min={min ?? undefined}
               max={max ?? undefined}
               value={value}
-              disabled={busy || disabled || !competition.permissions.vote}
+              disabled={busy || disabled || !canVoteNow}
               aria-invalid={!valid}
               aria-describedby={errorDescriptionId}
               onChange={(event) => updateNumericDraft(event.target.value)}
@@ -550,9 +674,14 @@ export function CompetitionVoteForm({
       </div>
       <CompetitionCredits budget={credit.data} />
       {reply ? reply.renderContent(voteAction) : voteAction}
-      {(disabled || !competition.permissions.vote) && (
+      {(disabled || !canVoteNow) && (
         <p className="tw-text-sm tw-text-iron-400">
-          {t(locale, "competitions.voteClosed")}
+          {t(
+            locale,
+            disabled || !competition.permissions.vote
+              ? "competitions.voteClosed"
+              : "wavesMove.paused"
+          )}
         </p>
       )}
       {failed && (
@@ -561,7 +690,7 @@ export function CompetitionVoteForm({
           role="alert"
           className="tw-text-sm tw-text-red"
         >
-          {t(locale, failed)}
+          {chainFailure ?? t(locale, failed)}
         </p>
       )}
       {saved && (

@@ -1,7 +1,9 @@
 "use client";
 
+import { WaveInformationPanelContext } from "@/components/brain/mobile/WaveInformationPanelContext";
+import WaveSettingSwitch from "./WaveSettingSwitch";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { useCallback, useState } from "react";
+import { useCallback, useContext, useState } from "react";
 import WaveAdminDropDeletionEditorForm from "./WaveAdminDropDeletionEditorForm";
 import WaveSettingRow from "./WaveSettingRow";
 import { useWaveSettingUpdater } from "./useWaveSettingUpdater";
@@ -15,6 +17,8 @@ interface WaveAdminDropDeletionProps {
 export default function WaveAdminDropDeletion({
   wave,
 }: WaveAdminDropDeletionProps) {
+  const phoneDetails =
+    useContext(WaveInformationPanelContext)?.isPhone === true;
   const { canEdit, mutating, saveAdminDropDeletion } =
     useWaveSettingUpdater(wave);
   const enabled = wave.wave.admin_drop_deletion_enabled === true;
@@ -37,6 +41,18 @@ export default function WaveAdminDropDeletion({
       onSave={() => saveAdminDropDeletion(closeEditor, draftEnabled)}
     />
   );
+
+  if (phoneDetails)
+    return (
+      <WaveSettingSwitch
+        label={waveRightPanelText(
+          "waves.sidebar.rightPanel.configuration.adminDropDeletion.label"
+        )}
+        checked={enabled}
+        disabled={mutating || !canEdit}
+        onChange={(next) => saveAdminDropDeletion(() => {}, next)}
+      />
+    );
 
   return (
     <WaveSettingRow
