@@ -397,7 +397,7 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
       await expect(retry).toHaveCount(0);
       await expect(
         phone.page.getByRole("link", { name: "Check device setup" })
-      ).toHaveAttribute("href", "/messages/encrypted/devices");
+      ).toHaveAttribute("href", "/preferences?tab=security");
       const checked = phone.page.waitForResponse(
         (response) =>
           response.ok() &&

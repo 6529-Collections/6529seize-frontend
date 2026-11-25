@@ -104,6 +104,7 @@ interface World {
   /** Created on demand: user C, B's second device. */
   readonly extra: StagingE2eeSession[];
   dm: string | null;
+  group: string | null;
 }
 
 let world: World | null = null;
@@ -238,7 +239,7 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
         "B",
         { signedPostsFirst: true }
       );
-      world = { runId, a, b, extra: [], dm: null };
+      world = { runId, a, b, extra: [], dm: null, group: null };
     } catch (error) {
       await a.close();
       throw error;
@@ -837,6 +838,7 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     const group = await startEncryptedChat(a, [b.user.handle, c.user.handle], {
       group: { name: groupName },
     });
+    current.group = group;
     await expect(a.page.getByRole("heading", { level: 1 })).toHaveText(
       groupName,
       { timeout: UI_TIMEOUT_MS }
@@ -878,9 +880,13 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     const beforeRevoke = qaMessage(runId, "before revoke");
     const afterRevoke = qaMessage(runId, "after revoke");
 
-    // Hold the real DM's invitations until the new device has checked its
-    // inbox. Its successful first lookup must show progress during that gap.
-    const entries = `**/api/e2ee/groups/${dm}/entries`;
+    // Hold invitations from both existing chats so the second device can
+    // finish its first inbox lookup before any chat arrives.
+    const heldPaths = [dm, current.group]
+      .filter((conversation) => conversation !== null)
+      .map((conversation) => `/api/e2ee/groups/${conversation}/entries`);
+    const entries = (url: URL) => heldPaths.includes(url.pathname);
+    const existingDevices = [a, b, ...current.extra];
     const allowAddition = Promise.withResolvers<void>();
     const holdAddition = async (route: Route) => {
       await allowAddition.promise;
@@ -888,8 +894,11 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     };
     let b2: StagingE2eeSession;
     try {
-      await a.context.route(entries, holdAddition);
-      await b.context.route(entries, holdAddition);
+      await Promise.all(
+        existingDevices.map(({ context }) =>
+          context.route(entries, holdAddition)
+        )
+      );
       b2 = await addSession(browser, testInfo, b.user, "B (second device)");
       await expect(
         b2.page.getByRole("status").filter({
@@ -906,13 +915,14 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       ).toBeVisible({ timeout: UI_TIMEOUT_MS });
       await expect(
         b2.page.getByRole("link", { name: "Check device setup" })
-      ).toHaveAttribute("href", "/messages/encrypted/devices");
+      ).toHaveAttribute("href", "/preferences?tab=security");
     } finally {
       allowAddition.resolve();
-      await Promise.all([
-        a.context.unroute(entries, holdAddition),
-        b.context.unroute(entries, holdAddition),
-      ]);
+      await Promise.all(
+        existingDevices.map(({ context }) =>
+          context.unroute(entries, holdAddition)
+        )
+      );
     }
     await openChat(a, dm);
     await openChat(b, dm);
