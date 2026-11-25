@@ -1,3 +1,4 @@
+import { Capacitor } from "@capacitor/core";
 import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
 
 // The app shell acknowledges the committed screen before the browser captures it.
@@ -18,6 +19,11 @@ export function isForwardWaveNavigation(
 ) {
   return screen === "wave" || (screen === "feed" && previous === "list");
 }
+
+export function usesFadeOnlyWaveEntry(screen: WaveScreen) {
+  return screen === "wave" && Capacitor.getPlatform() === "ios";
+}
+
 let activeTransition: {
   readonly target: TransitionTarget;
   readonly committed: () => void;
@@ -102,6 +108,7 @@ function getTransitionPresentation(
   previous: string | undefined
 ) {
   if (typeof target !== "string") return "chevron-back";
+  if (usesFadeOnlyWaveEntry(target)) return "wave-entry";
   return isForwardWaveNavigation(target, previous) ? "forward" : "back";
 }
 

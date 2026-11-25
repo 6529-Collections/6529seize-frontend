@@ -553,9 +553,9 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       const waveLink = waveList.getByRole("link").first();
       await expect(waveLink).toBeVisible();
 
-      const waitForMotion = (snapshots = false) =>
-        page.waitForFunction((useSnapshots) => {
-          const animations = useSnapshots
+      const waitForMotion = (snapshot: "old" | "new" | null = null) =>
+        page.waitForFunction((snapshotSide) => {
+          const animations = snapshotSide
             ? document
                 .getAnimations()
                 .filter(
@@ -566,12 +566,12 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
             : (document
                 .querySelector("[data-wave-navigation-screen]")
                 ?.getAnimations() ?? []);
-          const animation = useSnapshots
+          const animation = snapshotSide
             ? animations.find(
                 (item) =>
                   item.effect instanceof KeyframeEffect &&
                   item.effect.pseudoElement ===
-                    "::view-transition-new(wave-navigation)"
+                    `::view-transition-${snapshotSide}(wave-navigation)`
               )
             : animations[0];
           if (!animation || animation.playState !== "running") return null;
@@ -584,6 +584,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
           }
           return {
             transform: frames[0]?.["transform"],
+            endTransform: frames.at(-1)?.["transform"],
             duration: effect.getTiming().duration,
             outgoingVisible: animations.some(
               (item) =>
@@ -592,7 +593,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
                   "::view-transition-old(wave-navigation)"
             ),
           };
-        }, snapshots);
+        }, snapshot);
       const finishMotion = () =>
         page.evaluate(() => {
           for (const animation of document.getAnimations()) {
@@ -625,7 +626,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
           };
         });
       const headerGeometry = await readHeaderGeometry();
-      const opening = reducedMotion ? null : waitForMotion(true);
+      const opening = reducedMotion ? null : waitForMotion("new");
       // Read the clicked destination at activation: live activity can reorder rows.
       const clickedDestination = page.evaluate(
         () =>
@@ -654,7 +655,8 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       );
       if (opening) {
         expect(await (await opening).jsonValue()).toEqual({
-          transform: "scale(0.98)",
+          transform: "scale(1)",
+          endTransform: "scale(1)",
           duration: 260,
           outgoingVisible: true,
         });
@@ -695,6 +697,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       if (returning) {
         expect(await (await returning).jsonValue()).toEqual({
           transform: "scale(1.02)",
+          endTransform: "none",
           duration: 240,
           outgoingVisible: false,
         });
@@ -708,17 +711,17 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
         page.getByRole("button", { name: "Find a wave…", exact: true })
       ).toBeVisible();
       if (!reducedMotion) {
-        const reopened = waitForMotion(true);
+        const reopened = waitForMotion("new");
         await waveLink.click();
         await reopened;
         await finishMotion();
         await expect(page.locator("html")).not.toHaveAttribute(
           "data-wave-navigation-transition"
         );
-        const closing = waitForMotion(true);
+        const closing = waitForMotion("old");
         await page.getByRole("button", { name: "Back", exact: true }).click();
-        expect(await (await closing).jsonValue()).toEqual({
-          transform: "scale(1)",
+        expect(await (await closing).jsonValue()).toMatchObject({
+          endTransform: "translateX(100%)",
           duration: 260,
           outgoingVisible: true,
         });

@@ -6,6 +6,7 @@ import {
   skipWaveNavigationTransition,
   consumeWaveSwipeHandoff,
   isForwardWaveNavigation,
+  usesFadeOnlyWaveEntry,
   type WaveScreen,
 } from "@/helpers/waves/wave-navigation-transition";
 
@@ -51,16 +52,19 @@ export function useWaveNavigationTransition(
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (reducedMotion.matches) return;
 
-    const animation = container.animate(
-      [
-        {
-          opacity: 0.75,
-          transform: `scale(${isForwardWaveNavigation(screen, previousScreen) ? 0.98 : 1.02})`,
-        },
-        { opacity: 1, transform: "none" },
-      ],
-      { duration: 240, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" }
-    );
+    const keyframes = usesFadeOnlyWaveEntry(screen)
+      ? [{ opacity: 0.75 }, { opacity: 1 }]
+      : [
+          {
+            opacity: 0.75,
+            transform: `scale(${isForwardWaveNavigation(screen, previousScreen) ? 0.98 : 1.02})`,
+          },
+          { opacity: 1, transform: "none" },
+        ];
+    const animation = container.animate(keyframes, {
+      duration: 240,
+      easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
+    });
     const stopForReducedMotion = () => {
       if (reducedMotion.matches) animation.cancel();
     };

@@ -5,8 +5,9 @@
 Wave and DM rows in the left list control which thread is open.
 
 - Click the body of an inactive row to open that thread.
-- In the native app, opening a wave from the Waves list uses a brief fade and
-  slight scale into the content. The header and bottom navigation do not move.
+- In the native app, opening a wave from the Waves list briefly fades in the
+  content. On iOS it appears at full size. The header and bottom navigation
+  stay in place.
   Supported app browsers briefly preserve the outgoing list as the wave appears;
   the app Back button reverses this handoff. Reduced Motion disables the animation.
   Older app browsers use a simpler entry transition. Navigation does not wait for

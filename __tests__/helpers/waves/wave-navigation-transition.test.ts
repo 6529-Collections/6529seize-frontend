@@ -8,6 +8,15 @@ import {
   skipWaveNavigationTransition,
 } from "@/helpers/waves/wave-navigation-transition";
 
+jest.mock("@capacitor/core", () => {
+  const actual =
+    jest.requireActual<typeof import("@capacitor/core")>("@capacitor/core");
+  return {
+    ...actual,
+    Capacitor: { ...actual.Capacitor, getPlatform: () => "ios" },
+  };
+});
+
 const originalStart = document.startViewTransition;
 const originalMatchMedia = window.matchMedia;
 const originalWidth = window.innerWidth;
@@ -63,7 +72,7 @@ it("captures the old screen before navigating and releases after the new screen 
   runWaveNavigationTransition("wave", navigate);
   expect(navigate).not.toHaveBeenCalled();
   expect(document.documentElement.dataset["waveNavigationTransition"]).toBe(
-    "forward"
+    "wave-entry"
   );
   await Promise.resolve();
   expect(navigate).toHaveBeenCalledTimes(1);

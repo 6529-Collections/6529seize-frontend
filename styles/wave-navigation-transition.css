@@ -33,6 +33,11 @@ html[data-wave-navigation-transition="forward"] {
   --wave-exit-scale: 1;
 }
 
+html[data-wave-navigation-transition="wave-entry"] {
+  --wave-enter-scale: 1;
+  --wave-exit-scale: 1;
+}
+
 html[data-wave-navigation-transition="back"] {
   --wave-enter-scale: 1;
   --wave-exit-scale: 0.98;
