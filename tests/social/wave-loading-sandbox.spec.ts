@@ -555,6 +555,88 @@ function discoveryRegion(page: Page) {
     .filter({ visible: true });
 }
 
+test("recommendation taps navigate without score cards while desktop hover stays anchored", async ({
+  page,
+  baseURL,
+  isMobile,
+}) => {
+  if (isMobile)
+    await installSurfaceSimulation(
+      page.context(),
+      "capacitor-ios-sim",
+      baseURL
+    );
+  await page.route("**/api/open-graph**", (route) =>
+    route.fulfill({ json: {} })
+  );
+  const wave = await waveFixture(page, baseURL);
+  const waves = {
+    data: [
+      {
+        ...wave,
+        wave_score: {
+          visibility_score: 93,
+          quality_score: 91,
+          hotness_score: 97,
+          rep_sort_score: 73,
+        },
+      },
+    ],
+    page: 1,
+    next: false,
+    next_cursor: null,
+    snapshot_expires_at: Date.now() + 900000,
+  };
+  // Both collections refer to the same wave; keep its score consistent when
+  // the shared wave cache merges recommendation and directory responses.
+  await page.route("**/api/v2/waves?**", (route) =>
+    route.fulfill({ json: waves })
+  );
+  await page.route(/\/api\/v2\/waves\/(?:all|joined)(?:\?|$)/, (route) =>
+    route.fulfill({ json: waves })
+  );
+  await page.goto("/waves", { waitUntil: "domcontentloaded" });
+  const discovery = discoveryRegion(page);
+  const toggle = discovery.getByRole("button", {
+    name: /(?:Expand|Collapse) Worth Checking Out/,
+  });
+  await expect(toggle).toBeVisible();
+  if ((await toggle.getAttribute("aria-expanded")) === "false")
+    await toggle.click();
+  const link = discovery.getByRole("link", {
+    name: `Open ${wave.name}, score 93`,
+    exact: true,
+  });
+  await expect(link).toBeVisible();
+  const details = page.getByRole("dialog", {
+    name: "Wave score details",
+    exact: true,
+  });
+  if (isMobile) {
+    await page.clock.install();
+    await link.tap();
+    await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}`));
+    await page.clock.runFor(1000);
+    await expect(details).toHaveCount(0);
+  } else {
+    await link.hover();
+    await expect(details).toBeVisible();
+    const trigger = await link.boundingBox();
+    expect(trigger).not.toBeNull();
+    await expect
+      .poll(async () => (await details.boundingBox())?.y ?? 0)
+      .toBeGreaterThan(trigger!.y);
+    const card = await details.boundingBox();
+    expect(card).not.toBeNull();
+    expect(card!.y).toBeGreaterThan(trigger!.y);
+    expect(card!.x).toBeLessThan(trigger!.x + trigger!.width);
+    expect(card!.x + card!.width).toBeGreaterThan(trigger!.x);
+    await page.keyboard.press("Escape");
+    await expect(details).toHaveCount(0);
+  }
+  await expectNoUnsafeSandboxMutations(baseURL);
+});
+
 test("saved discovery sections stay closed before hydration on reload", async ({
   page,
 }, testInfo) => {

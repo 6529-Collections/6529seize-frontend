@@ -5,6 +5,12 @@ import { useContext, useEffect, useId, useRef, useState } from "react";
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { AuthContext } from "@/components/auth/Auth";
+import {
+  chainRatingBlockedText,
+  chainRatingFailureText,
+} from "@/components/chain-identity/chainErrorMessage";
+import ChainRatingNote from "@/components/chain-identity/ChainRatingNote";
+import { useChainRatingWriter } from "@/components/chain-identity/useChainRatingWriter";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -60,10 +66,21 @@ function UserPageIdentityHeaderCICRateForm({
   const profileIdentity = profile.query ?? profile.handle ?? profile.display;
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
+  const chainWrite = useChainRatingWriter();
 
   const { onProfileCICModify } = useContext(ReactQueryWrapperContext);
 
-  const { data: currentCICState, isError, isFetching, refetch } = ratingState;
+  const {
+    data: currentCICState,
+    error: stateError,
+    isError,
+    isFetching,
+    refetch,
+  } = ratingState;
+  // Only the 6529 Network's reads carry a reason a retry can't fix.
+  const blocked = chainWrite
+    ? chainRatingBlockedText(locale, stateError)
+    : null;
 
   const [mutating, setMutating] = useState<boolean>(false);
   const setBusy = (busy: boolean) => {
@@ -74,6 +91,10 @@ function UserPageIdentityHeaderCICRateForm({
   const updateCICMutation = useMutation({
     mutationFn: async (amount: number) => {
       setBusy(true);
+      if (chainWrite) {
+        await chainWrite({ matter: "NIC", profile, category: null, amount });
+        return;
+      }
       return await commonApiPost({
         endpoint: `profiles/${encodeURIComponent(profileIdentity)}/cic/rating`,
         body: {
@@ -202,7 +223,8 @@ function UserPageIdentityHeaderCICRateForm({
     if (mutating || isSaveDisabled) return;
     setBusy(true);
     try {
-      const { success } = await requestAuth();
+      // On the 6529 Network the rating carries its own signature.
+      const { success } = chainWrite ? { success: true } : await requestAuth();
       if (!mounted.current) return;
       if (!success) {
         setToast({
@@ -216,8 +238,12 @@ function UserPageIdentityHeaderCICRateForm({
       setToast({
         type: "error",
         title: t(locale, "user.rate.updateError"),
-        description: t(locale, "user.rate.tryAgain"),
-        details: getToastErrorDetails(error),
+        ...(chainWrite
+          ? { description: chainRatingFailureText(locale, error) }
+          : {
+              description: t(locale, "user.rate.tryAgain"),
+              details: getToastErrorDetails(error),
+            }),
       });
     } finally {
       setBusy(false);
@@ -266,19 +292,22 @@ function UserPageIdentityHeaderCICRateForm({
           currentCICState?.cic_ratings_left_to_give_by_rater ?? 0
         }
       />
+      <ChainRatingNote />
       {isError && (
         <div role="alert" className="tw-mt-3 tw-text-sm tw-text-iron-300">
-          <p>{t(locale, "user.rate.loadError")}</p>
-          <Button
-            variant="secondary"
-            size="sm"
-            loading={isFetching}
-            onClick={() => {
-              void refetch();
-            }}
-          >
-            {t(locale, "user.rate.retry")}
-          </Button>
+          <p>{blocked ?? t(locale, "user.rate.loadError")}</p>
+          {blocked === null && (
+            <Button
+              variant="secondary"
+              size="sm"
+              loading={isFetching}
+              onClick={() => {
+                void refetch();
+              }}
+            >
+              {t(locale, "user.rate.retry")}
+            </Button>
+          )}
         </div>
       )}
       {!currentCICState && !isError && (
@@ -366,7 +395,7 @@ function UserPageIdentityHeaderCICRateForm({
 export default function UserPageIdentityHeaderCICRate(props: NicRateProps) {
   const identity =
     props.profile.query ?? props.profile.handle ?? props.profile.display;
-  const ratingState = useNicRatingState(identity);
+  const ratingState = useNicRatingState(identity, true, props.profile);
   return (
     <UserPageIdentityHeaderCICRateForm {...props} ratingState={ratingState} />
   );

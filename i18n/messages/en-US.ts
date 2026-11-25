@@ -44,10 +44,12 @@ import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.en-US
 import pageMetadataMessages from "@/i18n/messages/pageMetadata.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
 import utcScheduleMessages from "@/i18n/messages/utcSchedule.en-US.json";
+import identityMoveMessages from "@/i18n/messages/identityMove.en-US.json";
 import displayTimeZoneMessages from "@/i18n/messages/displayTimeZone.en-US.json";
 import shareDropsImageMessages from "@/i18n/messages/shareDropsImage.en-US.json";
 import worldTimeZonesMessages from "@/i18n/messages/worldTimeZones.en-US.json";
 import wavesRightPanelMessages from "@/i18n/messages/wavesRightPanel.en-US.json";
+import wavesMoveMessages from "@/i18n/messages/wavesMove.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-connect";
 import { DEVICES_SECURITY_MESSAGES } from "@/i18n/messages/devices-security";
@@ -535,6 +537,7 @@ const WAVE_NAVIGATION_MESSAGES = objectMessages("wave.navigation", {
   loadingSection: "Loading section…",
   about: "About",
   waveSections: "Wave sections",
+  more: "More",
   appSections: "App sections",
   loadingSections: "Loading wave sections",
   fallbackCuration: "Curation",
@@ -673,6 +676,8 @@ const MEMES_SUBMISSION_MESSAGES = objectMessages("memes.submission", {
     "Read-only preview of how your submission may appear in different views.",
   "additionalInfo.description":
     "Complete the following details for distribution and storytelling purposes.",
+  "documentation.notLinked":
+    "Your notes aren't linked to this entry. Find them under My artwork documentation.",
 } as const);
 
 const MEMES_WAVE_FOOTER_MESSAGES = objectMessages("memes.waveFooter", {
@@ -1684,6 +1689,25 @@ const WAVE_JOIN_MESSAGES = objectMessages("waves.join", {
 } as const);
 
 const WAVE_DROP_ELIGIBILITY_MESSAGES = objectMessages("waves.dropEligibility", {
+  howToSubmit: "How to Submit",
+  closed: "Submissions Closed",
+  openSoon: "Submissions Open Soon",
+  limitReached: "Submission Limit Reached",
+  unavailable: "Submission Unavailable",
+  closedAt: "Submissions closed on {date}",
+  closedReason: "Submissions are closed",
+  opensAt: "Submissions open on {date}",
+  opensSoonReason: "Submissions will open soon",
+  limitOneReason:
+    "You have already submitted the maximum allowed (1 submission)",
+  limitManyReason:
+    "You have already submitted the maximum allowed ({count} submissions)",
+  unavailableReason: "You cannot submit at this time",
+  submitMeme: "Submit Meme",
+  submitMemeClosingSoon: "Submit Meme (Closes Soon!)",
+  submitWorkToMemes: "Submit Work to The Memes",
+  submitWork: "Submit Work",
+  approvalLocked: "Approval controls are locked",
   loginRequired: "Please log in to make submissions",
   ended: "Submission period has ended",
 } as const);
@@ -2117,6 +2141,7 @@ const WAVE_CREATE_ACTIONS_MESSAGES = objectMessages("waves.create.actions", {
   complete: "Complete",
   create: "Create",
   createMenuHeader: "Create",
+  curation: "Curation",
   curationDescription: "Collect drops in a custom view",
   subwaveDescription: "Start a separate space within this wave",
   next: "Next",
@@ -3015,6 +3040,8 @@ const COMMON_MESSAGES = objectMessages("common", {
   back: "Back",
   close: "Close",
   expandEditor: "Expand editor",
+  expandSheet: "Expand sheet",
+  collapseSheet: "Collapse sheet",
 } as const);
 
 const IDENTITY_FILTER_MESSAGES = objectMessages("identityFilter", {
@@ -3547,6 +3574,16 @@ export const EN_US_ROOT_MESSAGES = {
   // any page; the rest of its copy is @/i18n/namespaces/artwork-documentation.
   "artworkDocumentation.title": "Artwork documentation",
   "artworkDocumentation.myWorks": "My artwork documentation",
+  "waves.information.avatarLabel": "Open wave details",
+  "waves.information.members": "Members",
+  "waves.information.discardMessage": "Your unsaved changes will be lost.",
+  "waves.information.discardTitle": "Discard changes?",
+  "waves.information.turnOffChat": "Turn off chat?",
+  "waves.information.turnOffChatMessage":
+    "Members will no longer be able to send chat messages. You can turn chat back on here.",
+  "waves.information.turnOffChatAction": "Turn off chat",
+  "waves.information.choosePicture": "Choose photo",
+  "waves.information.picturePreview": "Wave picture preview",
   "waves.information.open": "About {name}",
   ...EN_SUBMISSION_DISCOVERY_MESSAGES,
   ...additionalActionMessages,
@@ -5754,6 +5791,7 @@ export const EN_US_ROOT_MESSAGES = {
   ...PROFILE_FOLLOW_MESSAGES,
   ...WAVES_SIDEBAR_MESSAGES,
   ...wavesRightPanelMessages,
+  ...wavesMoveMessages,
   ...QUICK_DM_MESSAGES,
   ...NOTIFICATIONS_FOLLOW_BUTTON_MESSAGES,
   ...NOTIFICATIONS_WAVE_CREATED_MESSAGES,
@@ -5821,6 +5859,7 @@ export const EN_US_ROOT_MESSAGES = {
   ...pageMetadataMessages,
   ...toolsMessages,
   ...utcScheduleMessages,
+  ...identityMoveMessages,
   ...displayTimeZoneMessages,
   ...shareDropsImageMessages,
   ...worldTimeZonesMessages,

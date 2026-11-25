@@ -8,6 +8,7 @@ import { useCompetition } from "@/contexts/CompetitionContext";
 import type { ApiCompetitionDraftInput } from "@/generated/models/ApiCompetitionDraftInput";
 import type { ApiUpdateCompetitionRequest } from "@/generated/models/ApiUpdateCompetitionRequest";
 import { newCompetitionRequestKey } from "@/helpers/competition.helpers";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import {
   commonApiFetch,
   getStructuredApiErrorStatus,
@@ -20,8 +21,11 @@ import {
 
 export function useCompetitionConfigEditable() {
   const { competition } = useCompetition();
+  // Decision settings move to the 6529 Network.
+  const wavesWritesPaused = useWavesWritesPaused();
   return (
     competition.permissions.administer &&
+    !wavesWritesPaused &&
     (competition.lifecycle === ApiCompetitionLifecycle.Draft ||
       competition.lifecycle === ApiCompetitionLifecycle.Published)
   );

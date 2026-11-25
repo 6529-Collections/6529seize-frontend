@@ -330,16 +330,12 @@ describe("MyStreamWaveTabsDefault", () => {
       name: "More wave actions",
     });
     expect(moreActionsButton).toHaveAttribute("aria-haspopup", "dialog");
-    expect(
-      screen.getByRole("button", { name: "Search messages in this wave" })
-        .nextElementSibling
-    ).toBe(moreActionsButton);
     fireEvent.click(moreActionsButton);
     expect(
       within(
         screen.getByRole("dialog", { name: "More wave actions" })
-      ).queryByRole("button", { name: "Search messages in this wave" })
-    ).toBeNull();
+      ).getByRole("button", { name: "Search messages" })
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("dialog", { name: "More wave actions" })
     ).toBeInTheDocument();
@@ -440,7 +436,7 @@ describe("MyStreamWaveTabsDefault", () => {
     expect(mockOpenInformation).toHaveBeenCalledWith("w1");
     fireEvent.click(screen.getByRole("button", { name: "More wave actions" }));
     expect(
-      screen.getByRole("button", { name: "Search messages in this wave" })
+      screen.getByRole("button", { name: "Search messages" })
     ).toBeInTheDocument();
   });
 

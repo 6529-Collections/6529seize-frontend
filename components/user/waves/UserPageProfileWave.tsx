@@ -13,6 +13,7 @@ import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 import { isOwnProfileRoute } from "@/helpers/ProfileHelpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useWaveCreationPaused } from "@/hooks/useWavesMovePhase";
 import { useProfileWave } from "@/hooks/useProfileWave";
 import { useProfileWaveMutation } from "@/hooks/useProfileWaveMutation";
 import { useWaveById } from "@/hooks/useWaveById";
@@ -247,7 +248,10 @@ export default function UserPageProfileWave({
   const locale = useBrowserLocale();
   const handleOrWallet = params["user"]?.toString() ?? "";
   const { containerRef, containerWidth } = useProfileMasonryContainerWidth();
-  const { connectedProfile, activeProfileProxy } = useAuth();
+  const { connectedProfile, activeProfileProxy, setToast } = useAuth();
+  // Setting up a profile curation creates a wave, which moves to the 6529
+  // Network with the other waves.
+  const wavesWritesPaused = useWaveCreationPaused();
   const { profile } = useIdentity({
     handleOrWallet,
     initialProfile,
@@ -257,6 +261,13 @@ export default function UserPageProfileWave({
   const [isCreateCurationOpen, setIsCreateCurationOpen] = useState(false);
   const [isQuickPostOpen, setIsQuickPostOpen] = useState(false);
   const [isSetupOpen, setIsSetupOpen] = useState(false);
+  const openProfileCurationSetup = () => {
+    if (wavesWritesPaused) {
+      setToast({ message: t(locale, "wavesMove.paused"), type: "error" });
+      return;
+    }
+    setIsSetupOpen(true);
+  };
   const [isDisconnectOpen, setIsDisconnectOpen] = useState(false);
   const curationHeaderRef = useRef<HTMLDivElement | null>(null);
   const [organizingCurationId, setOrganizingCurationId] = useState<
@@ -416,7 +427,7 @@ export default function UserPageProfileWave({
           selectedWaveId={null}
           submittingWaveId={submittingWaveId}
           profileHref={profileHref}
-          onCreateProfileCuration={() => setIsSetupOpen(true)}
+          onCreateProfileCuration={openProfileCurationSetup}
           onSelectWave={selectOfficialWave}
         />
         {isSetupOpen && canManageOwnOfficialWave && (
@@ -549,7 +560,7 @@ export default function UserPageProfileWave({
             selectedWaveId={profileWaveId}
             submittingWaveId={submittingWaveId}
             profileHref={profileHref}
-            onCreateProfileCuration={() => setIsSetupOpen(true)}
+            onCreateProfileCuration={openProfileCurationSetup}
             onSelectWave={selectOfficialWave}
             variant="mobile-sheet"
           />

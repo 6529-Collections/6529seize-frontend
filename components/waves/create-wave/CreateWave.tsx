@@ -13,6 +13,8 @@ import {
 import isEqual from "lodash/isEqual";
 import { usePathname } from "next/navigation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useWaveCreationPaused } from "@/hooks/useWavesMovePhase";
+import WavesMoveNotice from "@/components/waves-move/WavesMoveNotice";
 import { t } from "@/i18n/messages";
 import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
 import { getCreateSubwaveTitle } from "@/helpers/waves/create-subwave-title.helpers";
@@ -74,6 +76,9 @@ export default function CreateWave({
   readonly parentViewGroupId?: string | null | undefined;
 }) {
   const locale = useBrowserLocale();
+  // New waves move to the 6529 Network; while paused the form does not go
+  // past its first step.
+  const wavesWritesPaused = useWaveCreationPaused();
   const isSubwave = !!parentWaveId;
   const waveConfig = useSubwaveWaveConfig({
     parentAdminGroupId,
@@ -373,6 +378,7 @@ export default function CreateWave({
         nativeBoundedStyle={nativeBoundedStyle}
         scrollResetKey={step}
       >
+        <WavesMoveNotice className="tw-mb-4" siteWide />
         <CreateWaveLayout
           quickChat={quickChat}
           config={config}
@@ -380,7 +386,9 @@ export default function CreateWave({
           showActions={selectedOutcomeType === null}
           submitting={actionInProgress}
           nextDisabled={
-            hasPendingCriteriaReplacement || hasUnresolvedSelectedGroup
+            wavesWritesPaused ||
+            hasPendingCriteriaReplacement ||
+            hasUnresolvedSelectedGroup
           }
           setStep={setStep}
           onComplete={onComplete}

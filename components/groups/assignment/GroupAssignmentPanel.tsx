@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import Button from "@/components/utils/button/Button";
 import GroupCriteriaRulePanel from "@/components/groups/assignment/GroupCriteriaRulePanel";
+import { useMobilePageDraft } from "@/components/mobile-navigation/MobilePageContext";
 import { useState } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { ActionButton } from "@/components/waves/create-wave/groups/CreateWaveInlineGroupButtons";
@@ -559,6 +560,11 @@ export default function GroupAssignmentPanel(props: GroupAssignmentPanelProps) {
     ...(props.criteriaDraft ? { startMode: "criteria" } : {}),
   });
   const { displayedBuilder, draftSummary, isDraftValid } = panelState;
+  const [initialDraft] = useState(() => JSON.stringify(displayedBuilder.draft));
+  useMobilePageDraft(
+    JSON.stringify(displayedBuilder.draft) !== initialDraft,
+    panelState.isCreating
+  );
 
   const currentMembersTarget: GroupMembersPreviewTarget | null = selectedGroup
     ? { kind: "saved", group: selectedGroup }

@@ -238,13 +238,32 @@ jest.mock("@/hooks/useWaveViewMode", () => ({
   }),
 }));
 
+let mockFrozen = false;
 jest.mock("@/hooks/useWave", () => ({
   SubmissionStatus: {
     ACTIVE: "ACTIVE",
     ENDED: "ENDED",
     NOT_STARTED: "NOT_STARTED",
   },
-  useWave: () => mockWaveInfo,
+  useWave: () => {
+    // As useWave reads the move: once frozen, paused unless the scope
+    // around it is a wave that stays.
+    const { useWavesMoveScope } = jest.requireActual<
+      typeof import("@/components/waves-move/WavesMoveScope")
+    >("@/components/waves-move/WavesMoveScope");
+    const scope = useWavesMoveScope();
+    if (!mockFrozen || scope === "stays") {
+      return mockWaveInfo;
+    }
+    return {
+      ...mockWaveInfo,
+      participation: {
+        ...mockWaveInfo.participation,
+        isPausedForMove: true,
+        canSubmitNow: false,
+      },
+    };
+  },
 }));
 
 jest.mock("@/hooks/waves/useApprovalWaveStatus", () => ({
@@ -367,6 +386,7 @@ describe("MyStreamWave registration", () => {
     mockActiveContentTab = "CHAT";
     mockWaveInfo = getDefaultMockWaveInfo();
     mockResolvedWave = mockWave;
+    mockFrozen = false;
     mockSearchParams = new URLSearchParams();
     mockAvailableTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.CONFIGURATION];
     mockPathname = "/waves/wave-1";
@@ -508,6 +528,22 @@ describe("MyStreamWave registration", () => {
     expect(screen.getByTestId("competition-tabs")).toBeVisible();
     expect(useCompetitionEvents).toHaveBeenCalledWith("wave-1", false);
     expect(screen.queryByTestId("tabs")).not.toBeInTheDocument();
+  });
+
+  it("keeps a staying wave's submit action open after the freeze, and pauses a moving wave's", () => {
+    mockFrozen = true;
+    mockResolvedWave = { ...mockWave, stays_on_site: true };
+    const staying = renderWave();
+    expect(
+      mockWaveTabs.mock.calls.at(-1)?.[0].chatSubmitDropAction.canOpen
+    ).toBe(true);
+    staying.unmount();
+
+    mockResolvedWave = { ...mockWave, stays_on_site: false };
+    renderWave();
+    expect(
+      mockWaveTabs.mock.calls.at(-1)?.[0].chatSubmitDropAction.canOpen
+    ).toBe(false);
   });
 
   it("keeps native rules navigation when Configuration is not registered", () => {

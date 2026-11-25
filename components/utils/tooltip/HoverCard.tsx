@@ -217,7 +217,9 @@ export default function HoverCard({
         return;
       }
 
-      if (event.key === "Escape") {
+      if (event.key === "Escape" && isVisible) {
+        event.preventDefault();
+        event.stopPropagation();
         closeCardImmediately();
         return;
       }
@@ -437,13 +439,12 @@ export default function HoverCard({
   useEffect(() => {
     if (!isVisible) return;
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        closeCardImmediately();
-        return;
-      }
-
-      handleCardKeyDown(event);
+    const handleKeyDown = (event: KeyboardEvent) => handleCardKeyDown(event);
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      event.stopPropagation();
+      closeCardImmediately();
     };
 
     const handlePointerDown = (event: MouseEvent | TouchEvent) => {
@@ -463,6 +464,7 @@ export default function HoverCard({
     };
 
     document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keydown", handleEscape, true);
     document.addEventListener("mousedown", handlePointerDown);
     document.addEventListener("touchstart", handlePointerDown, {
       passive: true,
@@ -470,6 +472,7 @@ export default function HoverCard({
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keydown", handleEscape, true);
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("touchstart", handlePointerDown);
     };

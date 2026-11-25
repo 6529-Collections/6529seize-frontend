@@ -17,14 +17,24 @@ interface HorizontalSwipeOptions {
   readonly threshold: number;
   readonly intentRatio?: number;
   readonly flick?: boolean;
+  /** Catch a running animation at touch-down, before axis intent is known. */
+  readonly captureOnPress?: boolean;
+  readonly allowReverse?: boolean;
+  /** Rightward navigation from this left-edge zone outranks content gestures. */
+  readonly priorityLeftEdgeWidth?: number;
   readonly onStart?: () => void;
   readonly onMove: (distance: number, ready: boolean) => void;
-  readonly onEnd: (committed: boolean, distance: number) => void;
+  readonly onEnd: (
+    committed: boolean,
+    distance: number,
+    velocity: number
+  ) => void;
 }
 
 interface Candidate {
   readonly element: HTMLElement;
   readonly options: { current: HorizontalSwipeOptions };
+  readonly priorityEdge: boolean;
 }
 
 interface Gesture {
@@ -32,6 +42,7 @@ interface Gesture {
   readonly x: number;
   readonly y: number;
   readonly candidates: Candidate[];
+  readonly capture: boolean;
   owner: Candidate | null;
   distance: number;
   velocityDistance: number;
@@ -49,8 +60,7 @@ let gesture: Gesture | null = null;
 let releaseClickSuppression: (() => void) | null = null;
 let clickExpiry: ReturnType<typeof setTimeout> | null = null;
 
-function ignoreTarget(element: HTMLElement, target: EventTarget | null) {
-  if (!(target instanceof Element) || !element.contains(target)) return true;
+function ignoreTarget(element: HTMLElement, target: Element) {
   if (
     target.closest(
       "a, button, input, textarea, select, summary, iframe, video, audio, canvas, [contenteditable]:not([contenteditable='false']), [role='slider'], [role='button']:not([data-horizontal-swipe-content='true']), [data-wave-swipe-back-ignore='true'], [data-horizontal-swipe-ignore], .swiper"
@@ -71,6 +81,11 @@ function ignoreTarget(element: HTMLElement, target: EventTarget | null) {
     if (overflow === "auto" || overflow === "scroll") return true;
   }
   return false;
+}
+
+function isPriorityEdge(options: HorizontalSwipeOptions, x: number) {
+  const width = options.priorityLeftEdgeWidth ?? 0;
+  return options.direction === 1 && width > 0 && x >= 0 && x <= width;
 }
 
 function suppressClick(element: HTMLElement) {
@@ -102,13 +117,18 @@ function paint(current: Gesture) {
 function finish(commit: boolean) {
   const current = gesture;
   gesture = null;
-  document.removeEventListener("touchmove", move);
-  document.removeEventListener("touchend", end);
-  document.removeEventListener("touchcancel", cancel);
+  const capture = current?.capture ?? false;
+  document.removeEventListener("touchmove", move, capture);
+  document.removeEventListener("touchend", end, capture);
+  document.removeEventListener("touchcancel", cancel, capture);
   document.removeEventListener("touchstart", additionalTouch);
   globalThis.removeEventListener("blur", cancel);
   if (!current) return;
   if (current.frame !== null) globalThis.cancelAnimationFrame(current.frame);
+  for (const candidate of current.candidates) {
+    if (candidate !== current.owner && candidate.options.current.captureOnPress)
+      candidate.options.current.onEnd(false, 0, 0);
+  }
   const options = current.owner?.options.current;
   if (!options) return;
   clickExpiry = globalThis.setTimeout(() => releaseClickSuppression?.(), 400);
@@ -123,7 +143,7 @@ function finish(commit: boolean) {
       (options.flick === true &&
         current.distance >= FLICK_DISTANCE &&
         velocity >= FLICK_VELOCITY));
-  options.onEnd(committed, current.distance);
+  options.onEnd(committed, current.distance, velocity * 1000);
 }
 
 function cancel() {
@@ -160,44 +180,68 @@ function trackVelocity(current: Gesture, distance: number) {
   }
 }
 
+function claimGesture(current: Gesture, deltaX: number, deltaY: number) {
+  const absoluteDeltaX = Math.abs(deltaX);
+  const candidate =
+    current.candidates.find(
+      ({ priorityEdge, options }) =>
+        priorityEdge && options.current.enabled && deltaX > 0
+    ) ??
+    current.candidates.find(
+      ({ options }) =>
+        options.current.enabled &&
+        (deltaX * options.current.direction > 0 ||
+          options.current.allowReverse === true)
+    );
+  if (
+    !candidate?.priorityEdge &&
+    globalThis.getSelection()?.isCollapsed === false
+  ) {
+    cancel();
+    return;
+  }
+  if (deltaY >= VERTICAL_SLOP && deltaY >= absoluteDeltaX) {
+    cancel();
+    return;
+  }
+  if (absoluteDeltaX < AXIS_SLOP) return;
+  if (!candidate) {
+    if (absoluteDeltaX >= deltaY * AXIS_RATIO) cancel();
+    return;
+  }
+  const intentRatio = candidate.options.current.intentRatio ?? AXIS_RATIO;
+  if (absoluteDeltaX < deltaY * intentRatio) return;
+  current.owner = candidate;
+  suppressClick(current.owner.element);
+  if (!current.owner.options.current.captureOnPress)
+    current.owner.options.current.onStart?.();
+}
+
 function track(current: Gesture, touch: Touch) {
   const deltaX = touch.clientX - current.x;
-  const absoluteDeltaX = Math.abs(deltaX);
   const deltaY = Math.abs(touch.clientY - current.y);
-  if (!current.owner) {
-    if (globalThis.getSelection()?.isCollapsed === false) {
-      cancel();
-      return;
-    }
-    if (deltaY >= VERTICAL_SLOP && deltaY >= absoluteDeltaX) {
-      cancel();
-      return;
-    }
-    if (absoluteDeltaX < AXIS_SLOP) return;
-    const candidate = current.candidates.find(
-      ({ options }) =>
-        options.current.enabled && deltaX * options.current.direction > 0
-    );
-    if (!candidate) {
-      if (absoluteDeltaX >= deltaY * AXIS_RATIO) cancel();
-      return;
-    }
-    const intentRatio = candidate.options.current.intentRatio ?? AXIS_RATIO;
-    if (absoluteDeltaX < deltaY * intentRatio) return;
-    current.owner = candidate;
-    suppressClick(current.owner.element);
-    current.owner.options.current.onStart?.();
-  }
-  const distance = Math.max(
-    0,
-    deltaX * current.owner.options.current.direction
-  );
+  if (!current.owner) claimGesture(current, deltaX, deltaY);
+  if (!current.owner) return;
+  const delta = deltaX * current.owner.options.current.direction;
+  const distance = current.owner.options.current.allowReverse
+    ? delta
+    : Math.max(0, delta);
   trackVelocity(current, distance);
 }
 
 /** A long press/menu owns the remainder of its original touch sequence. */
 export function cancelHorizontalSwipe() {
   cancel();
+}
+
+function isEdgeMovement(current: Gesture, touch: Touch) {
+  if (current.owner) return current.owner.priorityEdge;
+  return (
+    touch.clientX > current.x &&
+    current.candidates.some(
+      ({ priorityEdge, options }) => priorityEdge && options.current.enabled
+    )
+  );
 }
 
 function move(event: TouchEvent) {
@@ -207,15 +251,20 @@ function move(event: TouchEvent) {
     !current ||
     !touch ||
     event.touches.length !== 1 ||
-    touch.identifier !== current.id ||
-    !event.cancelable
+    touch.identifier !== current.id
   ) {
+    cancel();
+    return;
+  }
+  // A coasting horizontal row can make the next touch non-cancelable. An edge
+  // Back still tracks that finger; ordinary content continues to yield.
+  if (!event.cancelable && !isEdgeMovement(current, touch)) {
     cancel();
     return;
   }
   track(current, touch);
   if (gesture !== current || !current.owner) return;
-  event.preventDefault();
+  if (event.cancelable) event.preventDefault();
   current.frame ??= globalThis.requestAnimationFrame(() => paint(current));
 }
 
@@ -242,7 +291,11 @@ function removeCandidate(candidate: Candidate | null) {
     return;
   }
   const index = gesture.candidates.indexOf(candidate);
-  if (index >= 0) gesture.candidates.splice(index, 1);
+  if (index >= 0) {
+    gesture.candidates.splice(index, 1);
+    if (candidate.options.current.captureOnPress)
+      candidate.options.current.onEnd(false, 0, 0);
+  }
   if (gesture.candidates.length === 0) cancel();
 }
 
@@ -262,13 +315,21 @@ export function useHorizontalSwipe(
     releaseClickSuppression?.();
     const touch = event.touches[0];
     if (!latest.current.enabled || !touch || event.touches.length !== 1) return;
-    // Leave OS/browser edge navigation available on both platforms.
+    const priorityEdge = isPriorityEdge(latest.current, touch.clientX);
+    // Portalled dialogs keep their own Back/draft guards, even at the edge.
     if (
-      touch.clientX < EDGE_RESERVE ||
-      touch.clientX > globalThis.innerWidth - EDGE_RESERVE
+      !(event.target instanceof Element) ||
+      !event.currentTarget.contains(event.target)
     )
       return;
-    if (ignoreTarget(event.currentTarget, event.target)) return;
+    // Other consumers retain the OS/browser reserve and all content exclusions.
+    if (
+      !priorityEdge &&
+      (touch.clientX < EDGE_RESERVE ||
+        touch.clientX > globalThis.innerWidth - EDGE_RESERVE ||
+        ignoreTarget(event.currentTarget, event.target))
+    )
+      return;
     if (gesture?.id !== touch.identifier) {
       cancel();
       gesture = {
@@ -276,25 +337,41 @@ export function useHorizontalSwipe(
         x: touch.clientX,
         y: touch.clientY,
         candidates: [],
+        capture: priorityEdge,
         owner: null,
         distance: 0,
         velocityDistance: 0,
         velocityPeak: 0,
-        velocityPeakAt: 0,
+        velocityPeakAt: performance.now(),
         velocity: 0,
         movedAt: performance.now(),
         frame: null,
       };
-      document.addEventListener("touchmove", move, { passive: false });
-      document.addEventListener("touchend", end, { passive: true });
-      document.addEventListener("touchcancel", cancel, { passive: true });
+      // Edge navigation sees movement before nested controls can stop bubbling.
+      document.addEventListener("touchmove", move, {
+        passive: false,
+        capture: priorityEdge,
+      });
+      document.addEventListener("touchend", end, {
+        passive: true,
+        capture: priorityEdge,
+      });
+      document.addEventListener("touchcancel", cancel, {
+        passive: true,
+        capture: priorityEdge,
+      });
       document.addEventListener("touchstart", additionalTouch, {
         passive: true,
       });
       globalThis.addEventListener("blur", cancel);
     }
-    const next = { element: event.currentTarget, options: latest };
+    const next = {
+      element: event.currentTarget,
+      options: latest,
+      priorityEdge,
+    };
     candidate.current = next;
     gesture.candidates.push(next);
+    if (latest.current.captureOnPress) latest.current.onStart?.();
   }, []);
 }

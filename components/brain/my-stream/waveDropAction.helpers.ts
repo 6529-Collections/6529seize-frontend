@@ -2,12 +2,16 @@ import type { HeaderWaveDropAction } from "@/contexts/HeaderContext";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { MEMES_NOMINEE_REQUIRED_REP } from "@/helpers/waves/memes-nomination";
 import { SubmissionStatus } from "@/hooks/useWave";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import type { getWaveDropEligibility } from "@/components/waves/leaderboard/dropEligibility";
 import {
   LOCAL_DISPLAY_TIME_ZONE,
   withDisplayTimeZone,
   type DisplayTimeZone,
 } from "@/lib/display-time-zone/displayTimeZone";
+
+const SUBMIT_TO_THE_MEMES = "Submit Work to The Memes";
 
 // The fields `Date#toLocaleString()` prints by default, spelled out so the
 // display time zone can be added without changing the device-zone output.
@@ -69,6 +73,8 @@ interface MemesHeaderParticipationState {
   readonly maxSubmissions: number | null;
   readonly startTime: number;
   readonly status: SubmissionStatus;
+  /** Entries are paused for the move to the 6529 Network. */
+  readonly isPausedForMove?: boolean | undefined;
 }
 
 const getMemesSubmissionPeriodHeaderDropActionState = (
@@ -122,10 +128,26 @@ export const getMemesHeaderDropActionState = ({
   /** The zone for submission window times; defaults to the device zone. */
   readonly zone?: DisplayTimeZone | undefined;
 }): MemesHeaderDropActionState => {
+  // Entries move to the 6529 Network. A closed or unopened window still says
+  // so; otherwise the pause is the reason, ahead of the approval lock it sets.
+  if (participationState.isPausedForMove) {
+    return (
+      getMemesSubmissionPeriodHeaderDropActionState(
+        participationState,
+        zone
+      ) ?? {
+        canOpen: false,
+        label: SUBMIT_TO_THE_MEMES,
+        compactLabel: "Submit",
+        restrictionMessage: t(DEFAULT_LOCALE, "wavesMove.paused"),
+      }
+    );
+  }
+
   if (isApprovalVotingControlsLocked) {
     return {
       canOpen: false,
-      label: "Submit Work to The Memes",
+      label: SUBMIT_TO_THE_MEMES,
       compactLabel: "Submit",
       restrictionMessage: "Approval controls are locked",
     };
@@ -165,7 +187,7 @@ export const getMemesHeaderDropActionState = ({
   if (!participationState.canSubmitNow) {
     return {
       canOpen: false,
-      label: "Submit Work to The Memes",
+      label: SUBMIT_TO_THE_MEMES,
       compactLabel: "Submit",
       restrictionMessage: "You cannot submit at this time",
     };
@@ -173,7 +195,7 @@ export const getMemesHeaderDropActionState = ({
 
   return {
     canOpen: true,
-    label: "Submit Work to The Memes",
+    label: SUBMIT_TO_THE_MEMES,
     compactLabel: "Submit",
     restrictionMessage: null,
   };

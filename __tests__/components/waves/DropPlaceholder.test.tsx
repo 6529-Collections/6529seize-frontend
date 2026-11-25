@@ -209,9 +209,7 @@ describe("DropPlaceholder", () => {
         />
       );
 
-      expect(
-        screen.getByText(PROXY_SESSION_MESSAGE)
-      ).toBeInTheDocument();
+      expect(screen.getByText(PROXY_SESSION_MESSAGE)).toBeInTheDocument();
     });
 
     it("renders no permission message for chat", () => {
@@ -301,9 +299,7 @@ describe("DropPlaceholder", () => {
         />
       );
 
-      expect(
-        screen.getByText(PROXY_SESSION_MESSAGE)
-      ).toBeInTheDocument();
+      expect(screen.getByText(PROXY_SESSION_MESSAGE)).toBeInTheDocument();
     });
 
     it("renders no permission message for submission", () => {
@@ -342,6 +338,19 @@ describe("DropPlaceholder", () => {
 
       expect(
         screen.getByText("Submission period has ended")
+      ).toBeInTheDocument();
+    });
+
+    it("says submissions are paused for the move to the 6529 Network", () => {
+      render(
+        <DropPlaceholder
+          type="submission"
+          submissionRestriction={SubmissionRestriction.PAUSED_FOR_MOVE}
+        />
+      );
+
+      expect(
+        screen.getByText("Paused for the move to the 6529 Network.")
       ).toBeInTheDocument();
     });
 

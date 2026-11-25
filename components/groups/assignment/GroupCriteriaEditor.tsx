@@ -1,5 +1,6 @@
 "use client";
 
+import { useMobilePageNavigation } from "@/components/mobile-navigation/MobilePageContext";
 import { useId, useLayoutEffect, useRef, type ReactNode } from "react";
 import clsx from "clsx";
 import { scrollCriteriaWithinParent } from "./scrollCriteriaWithinParent";
@@ -91,6 +92,14 @@ export default function GroupCriteriaEditor({
       ? "[&_[data-group-criteria-card]]:tw-bg-iron-800"
       : "";
   const locale = useBrowserLocale();
+  let pageTitle = "";
+  if (view === "identities")
+    pageTitle = t(locale, "waves.create.groups.identities");
+  else if (view !== null) pageTitle = t(locale, RULE_LABELS[view]);
+  const sharedHeader = useMobilePageNavigation(
+    pageTitle,
+    mobileNavigation && view !== null ? onBack : undefined
+  );
   const editorId = useId();
   const editorRef = useRef<HTMLElement>(null);
   const navigationRef = useRef<HTMLFieldSetElement>(null);
@@ -144,16 +153,19 @@ export default function GroupCriteriaEditor({
 
   return (
     <div className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col">
-      {onClose && view !== null && (
+      {onClose && !sharedHeader && view !== null && (
         <div className="tw-flex tw-justify-end">
           <Button variant="secondary" size="xs" onClick={onClose}>
             {t(locale, "common.close")}
           </Button>
         </div>
       )}
-      {mobileNavigation && view === null && Boolean(mobileActions) && (
-        <div className="tw-mb-3 tw-flex tw-justify-end">{mobileActions}</div>
-      )}
+      {mobileNavigation &&
+        !sharedHeader &&
+        view === null &&
+        Boolean(mobileActions) && (
+          <div className="tw-mb-3 tw-flex tw-justify-end">{mobileActions}</div>
+        )}
       <fieldset
         disabled={disabled}
         className={`tw-m-0 tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-border-0 tw-p-0 ${mobileNavigation ? "[&_[data-grant-filter-panel]_input.tw-form-input:focus~label]:tw-bg-iron-900 [&_[data-grant-filter-panel]_input.tw-form-input:not(:placeholder-shown)~label]:tw-bg-iron-900 [&_[data-grant-filter-panel]_input.tw-form-input]:tw-bg-iron-900 [&_[data-group-criteria-tabs-row]]:tw-flex-col [&_[data-group-criteria-tabs-row]]:tw-items-stretch [&_[data-group-criteria-tabs]]:tw-w-full [&_[role=tab]]:tw-flex-1 [&_[role=tablist]>div>div]:tw-flex-1 [&_[role=tablist]>div]:tw-min-w-full" : "lg:tw-flex-row"} ${FILTER_INPUT_PRESENTATION_CLASS_NAME} ${inputBackgroundClassName} ${nestedCardClassName}`}
@@ -250,7 +262,7 @@ export default function GroupCriteriaEditor({
           tabIndex={-1}
           className={`tw-min-h-0 tw-min-w-0 tw-py-4 ${onBack ? "tw-scroll-mt-16" : ""} ${mobileNavigation ? "" : "lg:tw-flex-1 lg:tw-border-y-0 lg:tw-border-l lg:tw-border-r-0 lg:tw-border-solid lg:tw-border-white/5"} ${scrollWithin ? "tw-flex-1 tw-overflow-y-auto tw-overscroll-contain tw-px-4 sm:tw-px-6 lg:tw-py-5" : "lg:tw-py-0 lg:tw-pl-6"}`}
         >
-          {onBack && (
+          {onBack && !sharedHeader && (
             <div className="tw-mb-3 tw-flex tw-items-center tw-justify-between tw-gap-3">
               <MobileWrapperDialogBackButton
                 onClick={onBack}

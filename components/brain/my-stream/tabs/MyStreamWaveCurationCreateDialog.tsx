@@ -1,6 +1,10 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
+import MobileNavigationView from "@/components/mobile-navigation/MobileNavigationView";
+import { MobilePageDraft } from "@/components/mobile-navigation/MobilePageContext";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import Button from "@/components/utils/button/Button";
 import useKeyboardFocusScroll from "@/components/waves/create-wave/hooks/useKeyboardFocusScroll";
@@ -38,6 +42,7 @@ const CURATION_NAME_PRESETS = [
 ] as const;
 
 interface MyStreamWaveCurationCreateDialogProps {
+  readonly mobileSheet?: boolean | undefined;
   /** The Wave information panel owns the header, focus trap and dismissal. */
   readonly panelContainer?: HTMLDivElement | null | undefined;
   readonly wave:
@@ -220,13 +225,21 @@ function CurationNameField({
 export default function MyStreamWaveCurationCreateDialog({
   wave,
   isOpen,
-  onClose,
+  onClose: closeDialog,
   onSaved,
   showSuccessToast = true,
   curation,
   permissionMode = "standard",
   panelContainer,
+  mobileSheet = false,
 }: MyStreamWaveCurationCreateDialogProps) {
+  const isPhone = useMediaQuery(PHONE_WAVES_LAYOUT_QUERY);
+  const showPhoneSheet = isPhone && mobileSheet;
+  const [phoneOpen, setPhoneOpen] = useState(true);
+  const onClose = () => {
+    if (showPhoneSheet) setPhoneOpen(false);
+    else closeDialog();
+  };
   const isEmbedded = panelContainer !== undefined;
   const queryClient = useQueryClient();
   const locale = useBrowserLocale();
@@ -467,6 +480,31 @@ export default function MyStreamWaveCurationCreateDialog({
       </div>
     </div>
   );
+
+  if (showPhoneSheet)
+    return (
+      <MobileNavigationView
+        isOpen={isOpen && phoneOpen}
+        onAfterLeave={() => {
+          setPhoneOpen(true);
+          closeDialog();
+        }}
+        title={
+          isEditingCriteria
+            ? t(locale, "profileCuration.editor.editCriteria")
+            : dialogTitle
+        }
+        onBack={onClose}
+        presentation="form"
+      >
+        <MobilePageDraft
+          dirty={name !== initialName || criteriaDraft !== null}
+          busy={saveMutation.isPending}
+        >
+          {content}
+        </MobilePageDraft>
+      </MobileNavigationView>
+    );
 
   if (isEmbedded) {
     return isOpen && panelContainer

@@ -91,7 +91,11 @@ export const WaveDropsReverseContainer = forwardRef<
           )}
           {children}
         </div>
-        <div ref={topSentinelRef} style={{ height: "1px" }} />
+        <div
+          ref={topSentinelRef}
+          data-wave-drops-top-sentinel=""
+          style={{ height: "1px" }}
+        />
       </div>
     );
 

@@ -13,13 +13,24 @@ import type { DropRateChangeRequest } from "@/entities/IDrop";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AuthContext } from "@/components/auth/Auth";
-import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import {
+  chainWriteDetails,
+  chainWriteFailure,
+} from "@/components/chain-waves/chainWavesErrorMessage";
+import { chainIdentityPointer } from "@/components/chain-waves/chainIdentityPointer";
 import {
   applyWaveDropVoteUpdate,
   invalidateWaveApprovalSummaryQueries,
 } from "@/hooks/waves/invalidateWaveApprovalStatusQueries";
 import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWriters";
+import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
+import {
+  scheduleIndexRefresh,
+  withViewerVote,
+} from "@/lib/chain-waves/optimistic";
+import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 
@@ -38,6 +49,8 @@ interface MyStreamWaveMyVotesResetProps {
   readonly onToggleSelectAll: () => void;
   readonly removeSelected: (dropId: string) => void;
   readonly onResettingChange: (isResetting: boolean) => void;
+  /** The listed drop, for showing a reset on the 6529 Network at once. */
+  readonly findDrop?: ((dropId: string) => ApiDrop | undefined) | undefined;
 }
 
 const DEFAULT_DROP_RATE_CATEGORY = "Rep";
@@ -57,6 +70,7 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
   onToggleSelectAll,
   removeSelected,
   onResettingChange,
+  findDrop,
 }) => {
   const locale = useBrowserLocale();
   const { isApp } = useDeviceInfo();
@@ -66,6 +80,7 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
   const buttonClassName = `${COMPACT_ACTION_BUTTON_CLASS} ${buttonHeightClassName}`;
   const { setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
+  const chainWriters = useChainWavesWriters();
   const queryClient = useQueryClient();
   // State for reset progress
   const [isResetting, setIsResetting] = useState(false);
@@ -79,6 +94,13 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
       if (resetVote) {
         await resetVote(param.dropId);
         return null;
+      }
+      if (chainWriters) {
+        // No drop comes back from the chain: the listed drop shows the reset
+        // until 6529.io's index reads it.
+        await chainWriters.vote({ dropId: param.dropId, amount: 0 });
+        const drop = findDrop?.(param.dropId);
+        return drop ? withViewerVote(drop, 0) : null;
       }
       return await commonApiPost<DropRateChangeRequest, ApiDrop>({
         endpoint: `drops/${param.dropId}/ratings`,
@@ -95,15 +117,23 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
             ? undefined
             : connectedProfile?.handle,
           invalidateWaveSummary: false,
+          fromChain: chainWriters !== null,
         });
       removeSelected(dropId);
     },
     onError: (error) => {
+      // Cancelled at the wallet prompt: nothing more is sent, and that is not
+      // an error.
+      if (isUserRejectedSigningError(error)) {
+        throw error;
+      }
       setToast({
         type: "error",
         title: t(locale, "waves.myVotes.resetError"),
-        description: t(locale, "waves.myVotes.tryAgain"),
-        details: getToastErrorDetails(error),
+        description:
+          chainIdentityPointer(locale, error) ??
+          chainWriteFailure(locale, error, t(locale, "waves.myVotes.tryAgain")),
+        details: chainWriteDetails(error),
       });
       throw error;
     },
@@ -137,7 +167,16 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
       setTotalCount(0);
     }
 
-    if (didResetAnyDrop && !resetVote) {
+    if (didResetAnyDrop && !resetVote && chainWriters) {
+      // 6529.io's index shows the resets once it has read their blocks; a
+      // refetch now would bring the old votes back.
+      scheduleIndexRefresh(async () => {
+        invalidateWaveApprovalSummaryQueries(queryClient, waveId);
+        await queryClient.invalidateQueries({
+          queryKey: [QueryKey.DROPS_LEADERBOARD, { waveId }],
+        });
+      });
+    } else if (didResetAnyDrop && !resetVote) {
       invalidateWaveApprovalSummaryQueries(queryClient, waveId);
     }
   };

@@ -6,10 +6,31 @@ import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { useMutation } from "@tanstack/react-query";
+import { AppToastContent } from "@/components/utils/toast/AppToast";
+import { ChainOperationError } from "@/lib/chain-identity/operation";
+import { isChainIdentityActive } from "@/lib/chain-identity/active";
+import { chainGateway } from "@/lib/chain-identity/gateway";
+import { identityOfWallet } from "@/lib/chain-waves/signing";
 
 jest.mock("@tanstack/react-query");
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStreamActions: () => ({ processDropRemoved: jest.fn() }),
+}));
+const mockWithdrawEntry = jest.fn();
+const mockInvalidateChainEntryQueries = jest.fn(() => Promise.resolve());
+let mockChainEntriesActive = false;
+jest.mock("@/components/chain-waves/useChainEntryWriters", () => ({
+  useChainEntryWriters: () =>
+    mockChainEntriesActive ? { withdrawEntry: mockWithdrawEntry } : null,
+  invalidateChainEntryQueries: (...args: unknown[]) =>
+    mockInvalidateChainEntryQueries(...(args as [])),
+}));
+jest.mock("@/lib/chain-identity/active", () => ({
+  ...jest.requireActual("@/lib/chain-identity/active"),
+  isChainIdentityActive: jest.fn(() => false),
+}));
+jest.mock("@/services/api/signed-drop-writes", () => ({
+  deleteDrop: jest.fn().mockResolvedValue(undefined),
 }));
 
 // Mock fetch
@@ -152,5 +173,149 @@ describe("DropsListItemDeleteDropModal", () => {
       )
     );
     expect(screen.getByRole("button", { name: "Delete" })).toBeEnabled();
+  });
+
+  describe("on the 6529 Network", () => {
+    const { deleteDrop } = jest.requireMock(
+      "@/services/api/signed-drop-writes"
+    );
+
+    beforeEach(() => {
+      mockChainEntriesActive = true;
+      mockWithdrawEntry.mockResolvedValue(undefined);
+    });
+
+    afterEach(() => {
+      mockChainEntriesActive = false;
+    });
+
+    it("withdraws the author's entry there, with no 6529.io sign-in or delete", async () => {
+      const onDropDeleted = jest.fn();
+      const user = userEvent.setup();
+      renderModal({ onDropDeleted });
+
+      expect(
+        screen.getByRole("dialog", { name: "Withdraw Entry" })
+      ).toHaveAccessibleDescription(
+        "Withdraw this entry from the decision? You can't undo this."
+      );
+      await user.click(screen.getByRole("button", { name: "Withdraw" }));
+
+      await waitFor(() => expect(onDropDeleted).toHaveBeenCalled());
+      expect(mockWithdrawEntry).toHaveBeenCalledWith({ dropId: "d1" });
+      expect(deleteDrop).not.toHaveBeenCalled();
+      expect(auth.requestAuth).not.toHaveBeenCalled();
+      expect(auth.setToast).toHaveBeenCalledWith({
+        message: "Entry withdrawn.",
+        type: "warning",
+      });
+      expect(mockInvalidateChainEntryQueries).toHaveBeenCalledWith(
+        undefined,
+        "w"
+      );
+    });
+
+    it("says the network's reason for a refused withdrawal, with no second line", async () => {
+      const refusal = new ChainOperationError(
+        "failed",
+        "The 6529 Network refused this change: ENTRY_NOT_ACTIVE.",
+        "ENTRY_NOT_ACTIVE"
+      );
+      useMutationMock.mockImplementation((opts) => ({
+        mutateAsync: async () => {
+          opts.onError?.(refusal);
+          opts.onSettled?.();
+          throw refusal;
+        },
+      }));
+      const user = userEvent.setup();
+      renderModal();
+
+      await user.click(screen.getByRole("button", { name: "Withdraw" }));
+
+      await waitFor(() => expect(auth.setToast).toHaveBeenCalled());
+      const toast = auth.setToast.mock.calls[0][0];
+      expect(toast.details).toBeUndefined();
+      // As 6529.io shows it, through its own toast helpers.
+      const shown = render(<AppToastContent toast={toast} />).container;
+      expect(shown).toHaveTextContent("Couldn't withdraw this entry.");
+      expect(shown).toHaveTextContent(
+        "The change didn't go through, and its fee was still charged. This entry is no longer in the running, so it can't be withdrawn."
+      );
+      expect(shown).not.toHaveTextContent(
+        /Network error|Wallet error|Please try again/
+      );
+    });
+
+    describe("from a wallet with no identity on the 6529 Network", () => {
+      /** The withdrawal stops where the chain writer looks up the wallet. */
+      const refusedWithdrawal = async () => {
+        jest.spyOn(chainGateway, "getIdentityByWallet").mockResolvedValue(null);
+        const refusal = await identityOfWallet(`0x${"12".repeat(20)}`).then(
+          () => new Error("expected no identity"),
+          (error: unknown) => error
+        );
+        useMutationMock.mockImplementation((opts) => ({
+          mutateAsync: async () => {
+            opts.onError?.(refusal);
+            opts.onSettled?.();
+            throw refusal;
+          },
+        }));
+        const user = userEvent.setup();
+        renderModal();
+        await user.click(screen.getByRole("button", { name: "Withdraw" }));
+        await waitFor(() => expect(auth.setToast).toHaveBeenCalled());
+        return render(
+          <AppToastContent toast={auth.setToast.mock.calls[0][0]} />
+        ).container;
+      };
+
+      afterEach(() => {
+        jest.mocked(isChainIdentityActive).mockReturnValue(false);
+        jest.restoreAllMocks();
+      });
+
+      it("points to the identity page once it takes changes", async () => {
+        jest.mocked(isChainIdentityActive).mockReturnValue(true);
+        const shown = await refusedWithdrawal();
+        expect(shown).toHaveTextContent(
+          "This wallet has no identity on the 6529 Network yet. Set one up on your identity page."
+        );
+        expect(
+          screen.getByRole("link", { name: "your identity page" })
+        ).toHaveAttribute("href", "/network/identity");
+      });
+
+      it("keeps the plain line while the identity page can't help", async () => {
+        const shown = await refusedWithdrawal();
+        expect(shown).toHaveTextContent(
+          "This wallet has no identity on the 6529 Network yet."
+        );
+        expect(
+          screen.queryByRole("link", { name: "your identity page" })
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    it("keeps deleting chat drops on 6529.io", async () => {
+      const user = userEvent.setup();
+      render(
+        <AuthContext.Provider value={auth}>
+          <ReactQueryWrapperContext.Provider value={rq}>
+            <DropsListItemDeleteDropModal
+              drop={{ ...drop, drop_type: ApiDropType.Chat }}
+              closeModal={jest.fn()}
+            />
+          </ReactQueryWrapperContext.Provider>
+        </AuthContext.Provider>
+      );
+
+      await user.click(screen.getByRole("button", { name: "Delete" }));
+
+      await waitFor(() => expect(deleteDrop).toHaveBeenCalled());
+      expect(auth.requestAuth).toHaveBeenCalled();
+      expect(mockWithdrawEntry).not.toHaveBeenCalled();
+    });
   });
 });

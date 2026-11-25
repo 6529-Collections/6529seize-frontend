@@ -11,15 +11,25 @@ import {
 } from "@/hooks/memesQuickVote.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
+import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWriters";
+import { withViewerVote } from "@/lib/chain-waves/optimistic";
+import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
+import { chainWriteFailure } from "@/components/chain-waves/chainWavesErrorMessage";
+import { chainIdentityPointer } from "@/components/chain-waves/chainIdentityPointer";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
 import type { UseMutationResult } from "@tanstack/react-query";
 import type { Dispatch, ReactNode, SetStateAction } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { TypeOptions } from "react-toastify";
 
 const DEFAULT_DROP_RATE_CATEGORY = "Rep";
+// Shown where a vote the wallet prompt declined was queued.
+const NOTHING_SENT = "Nothing was sent.";
 
 type SetToast = (options: {
-  readonly message: string | ReactNode;
+  readonly message?: string | ReactNode;
+  readonly title?: ReactNode;
+  readonly description?: ReactNode;
   readonly type: TypeOptions;
 }) => void;
 
@@ -88,6 +98,28 @@ const getQueuedRatingAppliedAmount = ({
   return Math.abs(queuedRating.amount);
 };
 
+/**
+ * The toast for a quick vote that didn't go in. A vote the 6529 Network
+ * refused shows its reason under a title, so 6529.io's wording for its own
+ * connection errors never replaces it; a wallet with no identity gets the
+ * link to the identity page when that page takes changes.
+ */
+const getQueuedRatingFailureToast = (
+  error: unknown,
+  message: string
+): Parameters<SetToast>[0] => {
+  const chainReason =
+    chainIdentityPointer(DEFAULT_LOCALE, error) ??
+    chainWriteFailure(DEFAULT_LOCALE, error, "");
+  return chainReason === ""
+    ? { message, type: "error" }
+    : {
+        type: "error",
+        title: "Couldn't submit your vote.",
+        description: chainReason,
+      };
+};
+
 const getQueuedRatingErrorMessage = ({
   error,
   type,
@@ -95,6 +127,11 @@ const getQueuedRatingErrorMessage = ({
   readonly error: unknown;
   readonly type: QueuedRating["type"];
 }): string => {
+  // The 6529 Network's reason in plain words, for a quick vote sent there.
+  const chainReason = chainWriteFailure(DEFAULT_LOCALE, error, "");
+  if (chainReason !== "") {
+    return chainReason;
+  }
   if (error instanceof Error) {
     return error.message;
   }
@@ -131,7 +168,7 @@ const flushMemesQuickVoteRatings = async ({
     Error,
     {
       readonly amount: number;
-      readonly dropId: string;
+      readonly drop: ExtendedDrop;
     }
   >;
   readonly ratingQueueRef: RefValue<QueuedRating[]>;
@@ -166,7 +203,7 @@ const flushMemesQuickVoteRatings = async ({
 
         const response = await ratingMutation.mutateAsync({
           amount: queuedRating.amount,
-          dropId: queuedRating.drop.id,
+          drop: queuedRating.drop,
         });
         // An already-sent vote must still reconcile its original profile cache,
         // even if that runtime has since unmounted. Callbacks belong to it.
@@ -186,11 +223,18 @@ const flushMemesQuickVoteRatings = async ({
           queuedRating.type
         );
       } catch (error) {
-        const message = getQueuedRatingErrorMessage({
-          error,
-          type: queuedRating.type,
-        });
-        if (isRuntimeActive()) setToast({ message, type: "error" });
+        // Cancelled at the wallet prompt: nothing was sent, and that is not
+        // an error to show.
+        const declined = isUserRejectedSigningError(error);
+        const message = declined
+          ? NOTHING_SENT
+          : getQueuedRatingErrorMessage({
+              error,
+              type: queuedRating.type,
+            });
+        if (isRuntimeActive() && !declined) {
+          setToast(getQueuedRatingFailureToast(error, message));
+        }
         onRatingFailure(
           queuedRating.drop,
           queuedRating.amount,
@@ -287,21 +331,33 @@ export const useMemesQuickVoteSubmit = ({
   const [pendingDropIds, setPendingDropIds] = useState<string[]>([]);
   const [pendingRatingCount, setPendingRatingCount] = useState(0);
 
+  const chainWriters = useChainWavesWriters();
+  // On the 6529 Network each vote carries its own signature.
+  const authenticate = useCallback(
+    () => (chainWriters ? Promise.resolve({ success: true }) : requestAuth()),
+    [chainWriters, requestAuth]
+  );
+
   const ratingMutation = useMutation({
-    mutationFn: ({
-      dropId,
+    mutationFn: async ({
+      drop,
       amount,
     }: {
-      readonly dropId: string;
+      readonly drop: ExtendedDrop;
       readonly amount: number;
-    }) =>
-      commonApiPost<DropRateChangeRequest, ApiDrop>({
-        endpoint: `drops/${dropId}/ratings`,
+    }): Promise<ApiDrop> => {
+      if (chainWriters) {
+        await chainWriters.vote({ dropId: drop.id, amount });
+        return withViewerVote(drop, amount);
+      }
+      return commonApiPost<DropRateChangeRequest, ApiDrop>({
+        endpoint: `drops/${drop.id}/ratings`,
         body: {
           rating: amount,
           category: DEFAULT_DROP_RATE_CATEGORY,
         },
-      }),
+      });
+    },
   });
 
   const flushQueuedRatings = useCallback(() => {
@@ -313,19 +369,19 @@ export const useMemesQuickVoteSubmit = ({
       queuedDropIdsRef,
       ratingMutation,
       ratingQueueRef,
-      requestAuth,
+      requestAuth: authenticate,
       setPendingDropIds,
       setPendingRatingCount,
       setToast,
     });
   }, [
+    authenticate,
     isFlushingRef,
     onRatingFailure,
     onRatingSuccess,
     queuedDropIdsRef,
     ratingMutation,
     ratingQueueRef,
-    requestAuth,
     setPendingDropIds,
     setPendingRatingCount,
     setToast,

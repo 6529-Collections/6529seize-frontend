@@ -26,6 +26,14 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
 }));
 
+jest.mock("@/hooks/useWavesMovePhase", () => ({
+  useWavesWritesPaused: jest.fn(() => false),
+  useChainWavesActive: jest.fn(() => false),
+}));
+jest.mock("@/components/chain-waves/useChainWavesWriters", () => ({
+  useChainWavesWriters: jest.fn(() => null),
+}));
+
 const useWaveRepAllocationMock = useWaveRepAllocation as jest.Mock;
 const commonApiPostMock = commonApiPost as jest.Mock;
 
@@ -200,6 +208,28 @@ describe("WaveRepRatingModal", () => {
     expect(commonApiPostMock).not.toHaveBeenCalled();
   });
 
+  it("does not post while wave REP moves to the 6529 Network", async () => {
+    const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
+    wavesMove.useWavesWritesPaused.mockReturnValue(true);
+    try {
+      const requestAuth = jest.fn().mockResolvedValue({ success: true });
+      renderModal({ requestAuth });
+      await changeAmount("15");
+
+      const saveButton = screen.getByRole("button", { name: "Save Wave REP" });
+      expect(saveButton).toBeDisabled();
+      expect(
+        screen.getByText("Paused for the move to the 6529 Network.")
+      ).toBeInTheDocument();
+      fireEvent.click(saveButton);
+
+      expect(requestAuth).not.toHaveBeenCalled();
+      expect(commonApiPostMock).not.toHaveBeenCalled();
+    } finally {
+      wavesMove.useWavesWritesPaused.mockReturnValue(false);
+    }
+  });
+
   it("explains when the user has no available Wave REP credit", async () => {
     useWaveRepAllocationMock.mockReturnValue({
       currentRating: 0,
@@ -271,6 +301,53 @@ describe("WaveRepRatingModal", () => {
     expect(invalidateQueriesSpy).toHaveBeenCalledWith({
       queryKey: [QueryKey.WAVE_REP_LOGS],
     });
+  });
+
+  it("sends wave REP to the 6529 Network once waves have moved there", async () => {
+    const writers = jest.requireMock(
+      "@/components/chain-waves/useChainWavesWriters"
+    );
+    const waveRating = jest.fn().mockResolvedValue(undefined);
+    writers.useChainWavesWriters.mockReturnValue({ waveRating });
+    try {
+      const requestAuth = jest.fn().mockResolvedValue({ success: true });
+      const { onClose } = renderModal({ requestAuth });
+      await changeAmount("15");
+
+      fireEvent.click(screen.getByRole("button", { name: "Save Wave REP" }));
+
+      await waitFor(() => expect(onClose).toHaveBeenCalled());
+      expect(waveRating).toHaveBeenCalledWith({
+        waveId: "wave-1",
+        category: "quality",
+        amount: 15,
+      });
+      expect(requestAuth).not.toHaveBeenCalled();
+      expect(commonApiPostMock).not.toHaveBeenCalled();
+    } finally {
+      writers.useChainWavesWriters.mockReturnValue(null);
+    }
+  });
+
+  it("holds a category to the 6529 Network's rule once wave REP goes there", async () => {
+    const phase = jest.requireMock("@/hooks/useWavesMovePhase");
+    phase.useChainWavesActive.mockReturnValue(true);
+    try {
+      renderModal();
+      fireEvent.change(screen.getByLabelText("Category"), {
+        target: { value: "Art, design" },
+      });
+      expect(
+        await screen.findByText(
+          "On the 6529 Network a category uses only letters A-Z, numbers, single spaces and & ' . - _, and starts with a letter or number."
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Save Wave REP" })
+      ).toBeDisabled();
+    } finally {
+      phase.useChainWavesActive.mockReturnValue(false);
+    }
   });
 
   it("can remove an existing category rating by saving zero", async () => {
