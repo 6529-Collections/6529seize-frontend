@@ -131,14 +131,14 @@ describe("encrypted conversation swipe back", () => {
 
   it("returns Back and swipe to Messages for a chat opened there, also after a reload", () => {
     openedWith("from=messages");
-    let surface = renderConversation();
+    renderConversation();
     expect(
       screen.getByRole("link", { name: "Back to messages" })
     ).toHaveAttribute("href", "/messages");
     cleanup();
 
     // A reload keeps the URL, and with it the Back target.
-    surface = renderConversation();
+    const surface = renderConversation();
     expect(
       screen.getByRole("link", { name: "Back to messages" })
     ).toHaveAttribute("href", "/messages");
