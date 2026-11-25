@@ -600,6 +600,44 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     }
     await composer.getByRole("button", { name: "Close", exact: true }).click();
     await expect(addPost).toBeFocused();
+    if (!mobile) {
+      // A narrow desktop browser has no touch drag handle to supply top space.
+      for (const width of [390, 768]) {
+        await page.setViewportSize({ width, height: 844 });
+        await addPost.click();
+        const compactComposer = page.getByRole("dialog", {
+          name: "Add post",
+          exact: true,
+        });
+        await expect(compactComposer.getByRole("textbox")).toBeFocused();
+        const gaps = await compactComposer.evaluate((dialog) => {
+          const top = dialog
+            .querySelector(".mobile-wrapper-dialog")!
+            .getBoundingClientRect().top;
+          return {
+            title:
+              dialog.querySelector("h2")!.getBoundingClientRect().top - top,
+            close:
+              dialog
+                .querySelector('button[aria-label="Close"]')!
+                .getBoundingClientRect().top - top,
+          };
+        });
+        expect(gaps.title).toBeGreaterThanOrEqual(16);
+        expect(gaps.close).toBeGreaterThanOrEqual(16);
+        await page.screenshot({
+          path: testInfo.outputPath(
+            `profile-curation-add-post-no-touch-${width}.png`
+          ),
+          animations: "disabled",
+          scale: "css",
+        });
+        await compactComposer
+          .getByRole("button", { name: "Close", exact: true })
+          .click();
+        await expect(addPost).toBeFocused();
+      }
+    }
   });
 
   for (const profile of ["playwright", "following-artist-0"]) {

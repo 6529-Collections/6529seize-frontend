@@ -193,7 +193,7 @@ export default function UserPageProfileWaveQuickPostDialog({
       maxWidthClass="md:tw-max-w-2xl"
       headerClassName={
         isMobile
-          ? "tw-mb-0"
+          ? "tw-mb-0 first:tw-pt-4 md:tw-pt-4"
           : "tw-mb-0 tw-border-b tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-white/[0.06] tw-py-4"
       }
       focusTitleOnOpen={false}
