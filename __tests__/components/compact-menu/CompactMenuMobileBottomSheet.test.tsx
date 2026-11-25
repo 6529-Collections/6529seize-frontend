@@ -40,11 +40,19 @@ describe("CompactMenuMobileBottomSheet", () => {
         title="Actions"
         ariaLabel="Actions"
         trigger="Open"
-        items={[{ id: "dialog", label: "Open dialog", onSelect: openDialog }]}
+        items={[
+          {
+            id: "dialog",
+            label: "Open dialog",
+            onSelect: openDialog,
+            separatorBefore: true,
+          },
+        ]}
       />
     );
 
     await user.click(screen.getByRole("button", { name: "Actions" }));
+    expect(screen.getByRole("separator")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Open dialog" }));
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(openDialog).not.toHaveBeenCalled();

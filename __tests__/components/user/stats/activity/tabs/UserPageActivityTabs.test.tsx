@@ -1,8 +1,13 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import UserPageActivityTabs from "@/components/user/stats/activity/tabs/UserPageActivityTabs";
 import { USER_PAGE_ACTIVITY_TAB } from "@/components/user/stats/activity/activity.types";
 import { t } from "@/i18n/messages";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+
+jest.mock("@/hooks/useMediaQuery", () => ({
+  useMediaQuery: jest.fn(() => false),
+}));
 
 jest.mock("@/i18n/messages", () => {
   const actual =
@@ -18,64 +23,112 @@ const translateMock = t as jest.MockedFunction<typeof t>;
 describe("UserPageActivityTabs", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useMediaQuery).mockReturnValue(false);
   });
 
-  it("renders all tabs and handles click", async () => {
-    const user = userEvent.setup();
-    const setActive = jest.fn();
-    render(
-      <UserPageActivityTabs
-        activeTab={USER_PAGE_ACTIVITY_TAB.DISTRIBUTIONS}
-        setActiveTab={setActive}
-        locale="fr-FR"
-      />
-    );
-    expect(
-      screen.getByRole("tablist", {
-        name: "Activity details sections",
-      })
-    ).toBeInTheDocument();
-    const walletBtn = screen.getByRole("tab", {
-      name: "Wallet Activity",
-    });
-    expect(walletBtn).toBeInTheDocument();
-    expect(translateMock).toHaveBeenCalledWith(
-      "fr-FR",
-      "user.collected.stats.activityTabs.listLabel"
-    );
-    expect(translateMock).toHaveBeenCalledWith(
-      "fr-FR",
-      "user.collected.stats.activityTabs.walletActivity"
-    );
-    await user.click(walletBtn);
-    expect(setActive).toHaveBeenCalledWith(
-      USER_PAGE_ACTIVITY_TAB.WALLET_ACTIVITY
-    );
-  });
+  it.each([false, true])(
+    "renders all tabs and handles click (compact=%s)",
+    async (compact) => {
+      jest.mocked(useMediaQuery).mockReturnValue(compact);
+      const user = userEvent.setup();
+      const setActive = jest.fn();
+      render(
+        <UserPageActivityTabs
+          activeTab={USER_PAGE_ACTIVITY_TAB.DISTRIBUTIONS}
+          setActiveTab={setActive}
+          locale="fr-FR"
+        />
+      );
+      expect(
+        screen.getByRole("tablist", {
+          name: "Activity details sections",
+        })
+      ).toBeInTheDocument();
+      const walletBtn = screen.getByRole("tab", {
+        name: "Wallet Activity",
+      });
+      expect(walletBtn).toBeInTheDocument();
+      expect(translateMock).toHaveBeenCalledWith(
+        "fr-FR",
+        "user.collected.stats.activityTabs.listLabel"
+      );
+      expect(translateMock).toHaveBeenCalledWith(
+        "fr-FR",
+        "user.collected.stats.activityTabs.walletActivity"
+      );
+      await user.click(walletBtn);
+      expect(setActive).toHaveBeenCalledWith(
+        USER_PAGE_ACTIVITY_TAB.WALLET_ACTIVITY
+      );
+    }
+  );
 
-  it("supports arrow-key tab switching", async () => {
-    const user = userEvent.setup();
-    const setActive = jest.fn();
-    render(
-      <UserPageActivityTabs
-        activeTab={USER_PAGE_ACTIVITY_TAB.DISTRIBUTIONS}
-        setActiveTab={setActive}
-        locale="de-DE"
-      />
-    );
-    screen
-      .getByRole("tab", {
-        name: "Distributions",
-      })
-      .focus();
-    expect(translateMock).toHaveBeenCalledWith(
-      "de-DE",
-      "user.collected.stats.activityTabs.distributions"
-    );
+  it.each([false, true])(
+    "supports arrow-key tab switching (compact=%s)",
+    async (compact) => {
+      jest.mocked(useMediaQuery).mockReturnValue(compact);
+      const user = userEvent.setup();
+      const setActive = jest.fn();
+      render(
+        <UserPageActivityTabs
+          activeTab={USER_PAGE_ACTIVITY_TAB.DISTRIBUTIONS}
+          setActiveTab={setActive}
+          locale="de-DE"
+        />
+      );
+      screen
+        .getByRole("tab", {
+          name: "Distributions",
+        })
+        .focus();
+      expect(translateMock).toHaveBeenCalledWith(
+        "de-DE",
+        "user.collected.stats.activityTabs.distributions"
+      );
 
-    await user.keyboard("{ArrowRight}");
+      await user.keyboard("{ArrowRight}");
 
-    expect(setActive).toHaveBeenCalledWith(USER_PAGE_ACTIVITY_TAB.TDH_HISTORY);
+      expect(setActive).toHaveBeenCalledWith(
+        USER_PAGE_ACTIVITY_TAB.TDH_HISTORY
+      );
+    }
+  );
+
+  it("does not move focus into a replacement tablist after unmount", () => {
+    let frame: FrameRequestCallback | undefined;
+    const requestFrame = jest
+      .spyOn(globalThis, "requestAnimationFrame")
+      .mockImplementation((callback) => {
+        frame = callback;
+        return 1;
+      });
+    try {
+      const view = render(
+        <UserPageActivityTabs
+          activeTab={USER_PAGE_ACTIVITY_TAB.WALLET_ACTIVITY}
+          setActiveTab={jest.fn()}
+          locale="en-US"
+        />
+      );
+      fireEvent.keyDown(screen.getByRole("tab", { name: "Wallet Activity" }), {
+        key: "ArrowRight",
+      });
+      expect(frame).toBeDefined();
+      view.unmount();
+      render(
+        <UserPageActivityTabs
+          activeTab={USER_PAGE_ACTIVITY_TAB.WALLET_ACTIVITY}
+          setActiveTab={jest.fn()}
+          locale="en-US"
+        />
+      );
+      const wallet = screen.getByRole("tab", { name: "Wallet Activity" });
+      wallet.focus();
+      frame!(0);
+      expect(wallet).toHaveFocus();
+    } finally {
+      requestFrame.mockRestore();
+    }
   });
 
   it("reveals the selected tab after late content sizing and stops observing on unmount", () => {
@@ -112,11 +165,11 @@ describe("UserPageActivityTabs", () => {
       expect(observe).toHaveBeenCalledWith(list.firstElementChild);
       expect(resize).toBeDefined();
       resize!([], observer);
-      expect(scrollTo).toHaveBeenCalledWith({ left: 120 });
+      expect(scrollTo).toHaveBeenCalledWith({ left: 121 });
       // A narrower panel must reveal the tab again without a window resize.
       Object.defineProperty(list, "clientWidth", { value: 150 });
       resize!([], observer);
-      expect(scrollTo).toHaveBeenLastCalledWith({ left: 170 });
+      expect(scrollTo).toHaveBeenLastCalledWith({ left: 171 });
       view.unmount();
       expect(disconnect).toHaveBeenCalledTimes(1);
     } finally {

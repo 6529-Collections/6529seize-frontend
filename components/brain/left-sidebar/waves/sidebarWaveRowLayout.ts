@@ -1,9 +1,10 @@
-type SidebarWaveRowLayoutVariant = "app" | "web";
+type SidebarWaveRowLayoutVariant = "app" | "web" | "native";
 
 interface SidebarWaveRowLayoutInput {
   readonly isChildRow: boolean;
   readonly isAnnouncement?: boolean;
   readonly isDirectMessage?: boolean;
+  readonly hasSubwaveToggle?: boolean;
   readonly variant: SidebarWaveRowLayoutVariant;
 }
 
@@ -17,7 +18,10 @@ interface SidebarWaveRowLayoutClasses {
 
 const DEFAULT_LINK_GAP_CLASSES = "tw-space-x-3";
 const ROOT_WAVE_PADDING_CLASSES = "tw-pl-8 tw-pr-5 touch-only:tw-pl-12";
+const NATIVE_PARENT_WAVE_PADDING_CLASSES =
+  "tw-pl-8 tw-pr-2 touch-only:tw-pl-12 sm:tw-pr-5";
 const SUBWAVE_PADDING_CLASSES = "tw-pl-[86px] tw-pr-5 touch-only:tw-pl-[102px]";
+const APP_SUBWAVE_PADDING_CLASSES = `${SUBWAVE_PADDING_CLASSES} md:tw-pl-[82px] md:touch-only:tw-pl-[98px]`;
 const DEFAULT_ROW_HEIGHT_CLASSES = "tw-h-full tw-min-h-[62px]";
 const CHILD_ROW_HEIGHT_CLASSES = "tw-h-full tw-min-h-[48px]";
 export const SIDEBAR_SUBWAVE_GUIDE_LINE_OFFSET_CLASSES =
@@ -49,9 +53,25 @@ export const getSidebarWaveRowTextClasses = ({
 };
 
 const rowLayoutByVariant = {
+  native: {
+    child: {
+      rowPaddingClasses: `${APP_SUBWAVE_PADDING_CLASSES} max-sm:tw-pr-2`,
+      rowGapClasses: "tw-gap-x-2",
+      linkGapClasses: "tw-space-x-2",
+      rowHeightClasses: CHILD_ROW_HEIGHT_CLASSES,
+      guideLineOffsetClasses: SIDEBAR_SUBWAVE_GUIDE_LINE_OFFSET_CLASSES,
+    },
+    default: {
+      rowPaddingClasses: "tw-px-2 sm:tw-px-5",
+      rowGapClasses: "tw-gap-x-4",
+      linkGapClasses: DEFAULT_LINK_GAP_CLASSES,
+      rowHeightClasses: DEFAULT_ROW_HEIGHT_CLASSES,
+      guideLineOffsetClasses: "",
+    },
+  },
   app: {
     child: {
-      rowPaddingClasses: `${SUBWAVE_PADDING_CLASSES} md:tw-pl-[82px] md:touch-only:tw-pl-[98px]`,
+      rowPaddingClasses: APP_SUBWAVE_PADDING_CLASSES,
       rowGapClasses: "tw-gap-x-2",
       linkGapClasses: "tw-space-x-2",
       rowHeightClasses: CHILD_ROW_HEIGHT_CLASSES,
@@ -90,6 +110,7 @@ export const getSidebarWaveRowLayoutClasses = ({
   isChildRow,
   isAnnouncement = false,
   isDirectMessage = false,
+  hasSubwaveToggle = false,
   variant,
 }: SidebarWaveRowLayoutInput): SidebarWaveRowLayoutClasses => {
   const variantLayout = rowLayoutByVariant[variant];
@@ -98,11 +119,17 @@ export const getSidebarWaveRowLayoutClasses = ({
     return variantLayout.child;
   }
 
+  const isNative = variant === "native";
+  const useDefaultPadding = isDirectMessage || (isNative && !hasSubwaveToggle);
+  const rootPadding = isNative
+    ? NATIVE_PARENT_WAVE_PADDING_CLASSES
+    : ROOT_WAVE_PADDING_CLASSES;
+
   return {
     ...variantLayout.default,
-    rowPaddingClasses: isDirectMessage
+    rowPaddingClasses: useDefaultPadding
       ? variantLayout.default.rowPaddingClasses
-      : ROOT_WAVE_PADDING_CLASSES,
+      : rootPadding,
     rowHeightClasses: isAnnouncement
       ? "tw-h-full tw-min-h-12"
       : variantLayout.default.rowHeightClasses,

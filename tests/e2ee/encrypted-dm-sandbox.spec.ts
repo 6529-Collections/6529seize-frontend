@@ -101,6 +101,46 @@ async function dragEncryptedMessage(
   };
 }
 
+async function tapEncryptedBackAndExpectSlide(page: Page) {
+  const back = page.getByRole("link", { name: "Back to encrypted messages" });
+  await expect(back).toHaveCount(1);
+  await expect(
+    page.getByRole("button", { name: /^(Back|Go back)$/u })
+  ).toHaveCount(0);
+  await page.evaluate(() => {
+    const root = document.documentElement;
+    const start = document.startViewTransition.bind(document);
+    document.startViewTransition = (update) => {
+      const transition = start(update);
+      const entering =
+        root.dataset["waveNavigationTransition"] === "conversation-entry";
+      if (
+        root.dataset["waveNavigationTransition"] === "chevron-back" ||
+        entering
+      ) {
+        const marker = entering
+          ? "testEncryptedEntrySlide"
+          : "testEncryptedBackSlide";
+        void transition.ready.then(
+          () => {
+            root.dataset[marker] = "ready";
+          },
+          () => {
+            root.dataset[marker] = "skipped";
+          }
+        );
+      }
+      return transition;
+    };
+  });
+  await back.tap();
+  await expect(page).toHaveURL(new RegExp(`${ENCRYPTED_ROUTE}$`, "u"));
+  await expect(page.locator("html")).toHaveAttribute(
+    "data-test-encrypted-back-slide",
+    "ready"
+  );
+}
+
 /**
  * Encrypted 1:1 chat in two real browsers (D109 stories 1, 4, 8, 9, 10, 11).
  * Engine rules are covered in Jest (__tests__/lib/e2ee); this proves the
@@ -535,10 +575,22 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     await expect(bobRow).toBeVisible();
     await bobRow.click();
     await expectMessage(alice.page, incoming);
-    await alice.page
-      .getByRole("link", { name: "Back to encrypted messages" })
-      .click();
+    await tapEncryptedBackAndExpectSlide(alice.page);
     await expect(bobRow).toBeVisible();
+    await tapEncryptedBackAndExpectSlide(bob.page);
+    await expect(conversationListRow(bob.page, "alice")).toBeVisible();
+    await bobRow.tap();
+    await expect(alice.page.locator("html")).toHaveAttribute(
+      "data-test-encrypted-entry-slide",
+      "ready"
+    );
+    await expectMessage(alice.page, incoming);
+    await conversationListRow(bob.page, "alice").tap();
+    await expect(bob.page.locator("html")).toHaveAttribute(
+      "data-test-encrypted-entry-slide",
+      "ready"
+    );
+    await expectMessage(bob.page, incoming);
     expect(
       await alice.page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth

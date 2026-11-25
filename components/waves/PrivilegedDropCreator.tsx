@@ -32,6 +32,8 @@ import {
 export { DropMode } from "./dropComposer.types";
 
 interface PrivilegedDropCreatorProps {
+  readonly autoFocus?: boolean | undefined;
+  readonly onAutoFocusRoot?: ((root: HTMLElement | null) => void) | undefined;
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
   readonly onReplyTargetUnavailable?: (() => void) | undefined;
@@ -123,6 +125,8 @@ export default function PrivilegedDropCreator({
   identityPickerPlacement = "modal",
   forceStandardDropComposer = false,
   focusOnInitialActiveDrop = false,
+  autoFocus = false,
+  onAutoFocusRoot,
   initialMarkdown = null,
   initialMarkdownKey = null,
 }: PrivilegedDropCreatorProps) {
@@ -277,6 +281,8 @@ export default function PrivilegedDropCreator({
       identityPickerPlacement={identityPickerPlacement}
       forceStandardDropComposer={forceStandardDropComposer}
       focusOnInitialActiveDrop={focusOnInitialActiveDrop}
+      autoFocus={autoFocus}
+      onAutoFocusRoot={onAutoFocusRoot}
       initialMarkdown={initialMarkdown}
       initialMarkdownKey={initialMarkdownKey}
     />

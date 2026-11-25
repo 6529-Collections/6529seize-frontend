@@ -726,7 +726,7 @@ export default function UserPageCollected({
             ref={scrollContainer}
             data-profile-section="Filters"
             data-profile-section-anchor="Filters"
-            className="tw-mt-6"
+            className="tw-mt-6 max-md:tw-sticky max-md:tw-top-[var(--profile-tabs-bottom,0px)] max-md:tw-z-20 max-md:tw-bg-black max-md:tw-py-2"
           >
             <UserPageCollectedFilters
               profile={profile}
