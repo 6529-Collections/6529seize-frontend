@@ -25,9 +25,14 @@ interface WebBrainLeftSidebarWaveProps {
   readonly depth?: 0 | 1 | undefined;
   readonly canExpand?: boolean | undefined;
   readonly hasUnreadSubwaves?: boolean | undefined;
+  readonly subwavesExpanded?: boolean | undefined;
+  readonly subwavesLoading?: boolean | undefined;
+  readonly unreadSubwaveDropsCount?: number | undefined;
   readonly isLastSubwave?: boolean | undefined;
   readonly showSubwaveConnector?: boolean | undefined;
+  readonly onExpandSubwaves?: ((waveId: string) => void) | undefined;
   readonly onPrefetchSubwaves?: ((waveId: string) => void) | undefined;
+  readonly onToggleSubwaves?: ((waveId: string) => void) | undefined;
 }
 
 const TOOLTIP_PLACEMENT = "right" as const;
@@ -43,9 +48,14 @@ const WebBrainLeftSidebarWave = ({
   depth = 0,
   canExpand = false,
   hasUnreadSubwaves = false,
+  subwavesExpanded,
+  subwavesLoading,
+  unreadSubwaveDropsCount,
   isLastSubwave = false,
   showSubwaveConnector = false,
+  onExpandSubwaves,
   onPrefetchSubwaves,
+  onToggleSubwaves,
 }: WebBrainLeftSidebarWaveProps) => {
   const { activeWave } = useMyStream();
   const pathname = usePathname();
@@ -65,6 +75,7 @@ const WebBrainLeftSidebarWave = ({
       waveId: wave.id,
       hasTouchScreen,
       firstUnreadDropSerialNo: wave.firstUnreadDropSerialNo,
+      onOpen: onExpandSubwaves,
     });
 
   const formattedWaveName = useMemo(
@@ -117,6 +128,7 @@ const WebBrainLeftSidebarWave = ({
       href={href}
       isActive={isActive}
       isAnnouncement={isAnnouncement}
+      isDirectMessage={basePath === "/messages"}
       isDropWave={isDropWave}
       latestDropTimestamp={wave.newDropsCount.latestDropTimestamp}
       nameRef={nameRef}
@@ -134,9 +146,13 @@ const WebBrainLeftSidebarWave = ({
       depth={depth}
       canExpand={canExpand}
       hasUnreadSubwaves={hasUnreadSubwaves}
+      subwavesExpanded={subwavesExpanded}
+      subwavesLoading={subwavesLoading}
+      unreadSubwaveDropsCount={unreadSubwaveDropsCount}
       isLastSubwave={isLastSubwave}
       showSubwaveConnector={showSubwaveConnector}
       onPrefetchSubwaves={hasTouchScreen ? undefined : onPrefetchSubwaves}
+      onToggleSubwaves={onToggleSubwaves}
     />
   );
 };

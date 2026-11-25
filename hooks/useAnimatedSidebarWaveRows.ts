@@ -89,7 +89,6 @@ const getAnimatedRowsForNextTree = ({
   const exitingRowsByParent = keepExitingRows
     ? groupExitingRowsByParent(previousRows, nextKeys)
     : new Map<string, AnimatedSidebarWaveTreeRow[]>();
-  const nextToggleParentIds = getNextToggleParentIds(rows);
   const nextRows: AnimatedSidebarWaveTreeRow[] = [];
 
   for (const row of rows) {
@@ -105,13 +104,7 @@ const getAnimatedRowsForNextTree = ({
       animationState,
     });
 
-    if (row.rowType === "subwaves-toggle" && row.parentWaveId !== null) {
-      nextRows.push(...(exitingRowsByParent.get(row.parentWaveId) ?? []));
-      exitingRowsByParent.delete(row.parentWaveId);
-      continue;
-    }
-
-    if (row.depth === 0 && !nextToggleParentIds.has(row.wave.id)) {
+    if (row.depth === 0) {
       nextRows.push(...(exitingRowsByParent.get(row.wave.id) ?? []));
       exitingRowsByParent.delete(row.wave.id);
     }
@@ -142,29 +135,13 @@ const groupExitingRowsByParent = (
   return map;
 };
 
-const getNextToggleParentIds = (rows: readonly SidebarWaveTreeRow[]) => {
-  const parentIds = new Set<string>();
-
-  for (const row of rows) {
-    if (row.rowType === "subwaves-toggle" && row.parentWaveId !== null) {
-      parentIds.add(row.parentWaveId);
-    }
-  }
-
-  return parentIds;
-};
-
 export const getParentIdsWithVisibleSubwaveRows = (
   rows: readonly AnimatedSidebarWaveTreeRow[]
 ) => {
   const parentIds = new Set<string>();
 
   for (const row of rows) {
-    if (
-      row.rowType === "wave" &&
-      row.depth === 1 &&
-      row.parentWaveId !== null
-    ) {
+    if (row.parentWaveId !== null) {
       parentIds.add(row.parentWaveId);
     }
   }

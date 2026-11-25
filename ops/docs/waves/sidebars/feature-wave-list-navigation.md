@@ -13,7 +13,8 @@ Wave and DM rows in the left list control which thread is open.
   the animation to finish.
 - Click the body of the active row to clear selection and return to section
   home.
-- Row pin and subwave expand/collapse buttons remain separate controls.
+- Opening a parent wave also expands its subwaves. Select the chevron before
+  the wave picture to expand or collapse the list without leaving the open wave.
 - On expanded rows, pin/unpin sits in the trailing metadata cluster before the
   wave score instead of beside the wave name, keeping the score at the far
   right.
@@ -155,9 +156,8 @@ on hover and show a dark hover surface; their resting header surface is transpar
   Create Wave, Search 6529 and a vertical More icon beside it. Search stays
   directly visible; More contains Profile Waves Feed and, when page sharing is
   enabled, Share page.
-  Find a wave stays beside the collection controls. Subwave
-  toggles use an indented text control; Pin remains directly available on
-  eligible rows.
+  Find a wave stays beside the collection controls. Subwave chevrons appear
+  before parent wave pictures. Pin stays available on eligible rows.
 - Each heading has a separate `View all` link aligned to the right, available
   even when collapsed. Active Votes opens `/discover?view=active-votes`;
   Worth Checking Out opens `/discover?view=recommendations&sort=QUALITY`.

@@ -485,7 +485,7 @@ for (const name of ["Sandbox Direct Message", "sandboxfriend"]) {
 test("keeps the subwave title in place when parent navigation arrives", async ({
   page,
   baseURL,
-}) => {
+}, testInfo) => {
   const apiOrigin = getSandboxApiOrigin(baseURL);
   const overviewResponse = await page.request.get(`${apiOrigin}/api/v2/waves`);
   const parent = (await overviewResponse.json()).data[0];
@@ -534,16 +534,46 @@ test("keeps the subwave title in place when parent navigation arrives", async ({
   });
   try {
     await page.goto("/waves");
-    await page
-      .getByRole("button", { name: /View.*subwave/ })
+    const parentLink = page
+      .getByRole("link", { name: parent.name, exact: true })
       .filter({ visible: true })
-      .first()
-      .click();
-    await page
+      .first();
+    const expand = page
+      .getByRole("button", {
+        name: `Expand ${parent.name} subwaves`,
+        expanded: false,
+      })
+      .filter({ visible: true })
+      .first();
+    const collapse = page
+      .getByRole("button", {
+        name: `Collapse ${parent.name} subwaves`,
+        expanded: true,
+      })
+      .filter({ visible: true })
+      .first();
+    const childLink = page
       .getByRole("link", { name: NAME, exact: true })
       .filter({ visible: true })
-      .first()
-      .click();
+      .first();
+    await expect(expand).toBeVisible();
+    await expect(childLink).toBeHidden();
+    if (testInfo.project.name === "web-desktop-chromium") {
+      const chevronBounds = await expand.boundingBox();
+      const linkBounds = await parentLink.boundingBox();
+      expect(chevronBounds!.x + chevronBounds!.width).toBeLessThan(
+        linkBounds!.x
+      );
+      await parentLink.click();
+      const parentRoute = new RegExp(`/waves/${SOURCE}(?:\\?|$)`);
+      await expect(page).toHaveURL(parentRoute);
+      await expect(childLink).toBeVisible();
+      await collapse.press("Space");
+      await expect(childLink).toBeHidden();
+      await expect(page).toHaveURL(parentRoute);
+    }
+    await expand.click();
+    await childLink.click();
     const pending = page.getByTestId("wave-pending");
     await expect(pending.getByRole("heading")).toHaveText(NAME);
     const pendingHeader = await pending

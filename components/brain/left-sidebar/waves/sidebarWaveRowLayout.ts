@@ -3,6 +3,7 @@ export type SidebarWaveRowLayoutVariant = "app" | "web";
 interface SidebarWaveRowLayoutInput {
   readonly isChildRow: boolean;
   readonly isAnnouncement?: boolean;
+  readonly isDirectMessage?: boolean;
   readonly variant: SidebarWaveRowLayoutVariant;
 }
 
@@ -15,9 +16,12 @@ interface SidebarWaveRowLayoutClasses {
 }
 
 const DEFAULT_LINK_GAP_CLASSES = "tw-space-x-3";
+const ROOT_WAVE_PADDING_CLASSES = "tw-pl-8 tw-pr-5 touch-only:tw-pl-12";
+const SUBWAVE_PADDING_CLASSES = "tw-pl-[86px] tw-pr-5 touch-only:tw-pl-[102px]";
 const DEFAULT_ROW_HEIGHT_CLASSES = "tw-h-full tw-min-h-[62px]";
 const CHILD_ROW_HEIGHT_CLASSES = "tw-h-full tw-min-h-[48px]";
-export const SIDEBAR_SUBWAVE_GUIDE_LINE_OFFSET_CLASSES = "tw-left-9";
+export const SIDEBAR_SUBWAVE_GUIDE_LINE_OFFSET_CLASSES =
+  "tw-left-12 touch-only:tw-left-16";
 
 export const getSidebarWaveRowTextClasses = ({
   isActive,
@@ -47,7 +51,7 @@ export const getSidebarWaveRowTextClasses = ({
 const rowLayoutByVariant = {
   app: {
     child: {
-      rowPaddingClasses: "tw-pl-[74px] tw-pr-5 md:tw-pl-[70px]",
+      rowPaddingClasses: `${SUBWAVE_PADDING_CLASSES} md:tw-pl-[82px] md:touch-only:tw-pl-[98px]`,
       rowGapClasses: "tw-gap-x-2",
       linkGapClasses: "tw-space-x-2",
       rowHeightClasses: CHILD_ROW_HEIGHT_CLASSES,
@@ -63,7 +67,7 @@ const rowLayoutByVariant = {
   },
   web: {
     child: {
-      rowPaddingClasses: "tw-pl-[74px] tw-pr-5 md:tw-pl-[66px]",
+      rowPaddingClasses: `${SUBWAVE_PADDING_CLASSES} md:tw-pl-[78px] md:touch-only:tw-pl-[94px]`,
       rowGapClasses: "tw-gap-x-2",
       linkGapClasses: "tw-space-x-2",
       rowHeightClasses: CHILD_ROW_HEIGHT_CLASSES,
@@ -85,6 +89,7 @@ const rowLayoutByVariant = {
 export const getSidebarWaveRowLayoutClasses = ({
   isChildRow,
   isAnnouncement = false,
+  isDirectMessage = false,
   variant,
 }: SidebarWaveRowLayoutInput): SidebarWaveRowLayoutClasses => {
   const variantLayout = rowLayoutByVariant[variant];
@@ -93,7 +98,13 @@ export const getSidebarWaveRowLayoutClasses = ({
     return variantLayout.child;
   }
 
-  return isAnnouncement
-    ? { ...variantLayout.default, rowHeightClasses: "tw-h-full tw-min-h-12" }
-    : variantLayout.default;
+  return {
+    ...variantLayout.default,
+    rowPaddingClasses: isDirectMessage
+      ? variantLayout.default.rowPaddingClasses
+      : ROOT_WAVE_PADDING_CLASSES,
+    rowHeightClasses: isAnnouncement
+      ? "tw-h-full tw-min-h-12"
+      : variantLayout.default.rowHeightClasses,
+  };
 };

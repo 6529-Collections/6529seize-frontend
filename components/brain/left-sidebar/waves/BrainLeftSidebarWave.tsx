@@ -23,6 +23,7 @@ import BrainLeftSidebarWaveDropTime from "./BrainLeftSidebarWaveDropTime";
 import BrainLeftSidebarWavePin from "./BrainLeftSidebarWavePin";
 import { PinnedWaveLinkContext } from "./PinnedWaveLinkContext";
 import { AnnouncementWaveIcon } from "./SidebarIconTile";
+import { SidebarSubwavesToggle } from "./SidebarSubwavesToggle";
 import {
   SidebarParentSubwaveConnector,
   SidebarSubwaveConnector,
@@ -45,9 +46,14 @@ interface BrainLeftSidebarWaveProps {
   readonly depth?: 0 | 1 | undefined;
   readonly canExpand?: boolean | undefined;
   readonly hasUnreadSubwaves?: boolean | undefined;
+  readonly subwavesExpanded?: boolean | undefined;
+  readonly subwavesLoading?: boolean | undefined;
+  readonly unreadSubwaveDropsCount?: number | undefined;
   readonly isLastSubwave?: boolean | undefined;
   readonly showSubwaveConnector?: boolean | undefined;
+  readonly onExpandSubwaves?: ((waveId: string) => void) | undefined;
   readonly onPrefetchSubwaves?: ((waveId: string) => void) | undefined;
+  readonly onToggleSubwaves?: ((waveId: string) => void) | undefined;
 }
 
 const getPresentNumber = (value: number | null): number | null => {
@@ -113,9 +119,14 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   depth = 0,
   canExpand = false,
   hasUnreadSubwaves = false,
+  subwavesExpanded = false,
+  subwavesLoading = false,
+  unreadSubwaveDropsCount = 0,
   isLastSubwave = false,
   showSubwaveConnector = false,
+  onExpandSubwaves,
   onPrefetchSubwaves,
+  onToggleSubwaves,
 }) => {
   const pinnedLinkProps = useContext(PinnedWaveLinkContext);
   const { activeWave } = useMyStream();
@@ -194,6 +205,9 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
       cancelHoverIntent();
       onWaveHover();
       const nextWaveId = wave.id === activeWaveId ? null : wave.id;
+      if (nextWaveId !== null) {
+        onExpandSubwaves?.(nextWaveId);
+      }
       setActiveWave(nextWaveId, {
         isDirectMessage,
         divider: nextWaveId !== null ? firstUnreadDropSerialNo : null,
@@ -204,6 +218,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
       activeWaveId,
       cancelHoverIntent,
       isDirectMessage,
+      onExpandSubwaves,
       onWaveHover,
       wave.id,
       firstUnreadDropSerialNo,
@@ -226,6 +241,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   } = getSidebarWaveRowLayoutClasses({
     isChildRow,
     isAnnouncement,
+    isDirectMessage: isDirectMessage && !canExpand,
     variant: "app",
   });
   const {
@@ -256,6 +272,15 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           : "desktop-hover:hover:tw-bg-iron-900/80"
       }`}
     >
+      {onToggleSubwaves && (
+        <SidebarSubwavesToggle
+          isExpanded={subwavesExpanded}
+          isLoading={subwavesLoading}
+          onClick={() => onToggleSubwaves(wave.id)}
+          parentWaveName={wave.name}
+          unreadDropsCount={unreadSubwaveDropsCount}
+        />
+      )}
       {!isChildRow && showSubwaveConnector && (
         <SidebarParentSubwaveConnector
           guideLineOffsetClasses={SIDEBAR_SUBWAVE_GUIDE_LINE_OFFSET_CLASSES}

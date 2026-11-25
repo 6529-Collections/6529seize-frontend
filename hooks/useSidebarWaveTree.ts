@@ -5,7 +5,6 @@ import { compareSubwavesForDisplay } from "@/helpers/waves/subwave-activity.help
 import { useCallback, useMemo, useState } from "react";
 
 type SidebarWaveDepth = 0 | 1;
-export type SidebarWaveTreeRowType = "wave" | "subwaves-toggle";
 
 const SIDEBAR_WAVE_TREE_EXPANSION_STORAGE_KEY =
   "sidebar-wave-tree-expansion-v1";
@@ -22,7 +21,6 @@ const EMPTY_EXPANSION_STATE: SidebarWaveTreeExpansionState = {
 
 export interface SidebarWaveTreeRow {
   readonly key: string;
-  readonly rowType: SidebarWaveTreeRowType;
   readonly wave: MinimalWave;
   readonly depth: SidebarWaveDepth;
   readonly parentWaveId: string | null;
@@ -30,7 +28,6 @@ export interface SidebarWaveTreeRow {
   readonly isLoadingSubwaves: boolean;
   readonly canExpand: boolean;
   readonly hasUnreadSubwaves: boolean;
-  readonly knownSubwavesCount: number | null;
   readonly unreadSubwaveDropsCount: number;
   readonly isFirstSubwave: boolean;
   readonly isLastSubwave: boolean;
@@ -188,14 +185,12 @@ const buildSidebarWaveRows = ({
       loadingParentWaveIds.has(wave.id) &&
       getIsExpanded(wave.id);
     const hasUnreadSubwaves = canExpand && getHasUnreadSubwaves(wave);
-    const knownSubwavesCount = subwaves.length > 0 ? subwaves.length : null;
     const unreadSubwaveDropsCount = canExpand
       ? getUnreadSubwaveDropsCount(wave, subwaves)
       : 0;
 
     rows.push({
       key: wave.id,
-      rowType: "wave",
       wave,
       depth: 0,
       parentWaveId: null,
@@ -203,29 +198,10 @@ const buildSidebarWaveRows = ({
       isLoadingSubwaves,
       canExpand,
       hasUnreadSubwaves,
-      knownSubwavesCount,
       unreadSubwaveDropsCount,
       isFirstSubwave: false,
       isLastSubwave: false,
     });
-
-    if (showExpandedSubwaves && canExpand) {
-      rows.push({
-        key: `${wave.id}:subwaves-toggle`,
-        rowType: "subwaves-toggle",
-        wave,
-        depth: 1,
-        parentWaveId: wave.id,
-        isExpanded,
-        isLoadingSubwaves,
-        canExpand: true,
-        hasUnreadSubwaves,
-        knownSubwavesCount,
-        unreadSubwaveDropsCount,
-        isFirstSubwave: false,
-        isLastSubwave: false,
-      });
-    }
 
     if (!isExpanded) {
       continue;
@@ -234,7 +210,6 @@ const buildSidebarWaveRows = ({
     subwaves.forEach((subwave, index) => {
       rows.push({
         key: `${wave.id}:${subwave.id}`,
-        rowType: "wave",
         wave: subwave,
         depth: 1,
         parentWaveId: wave.id,
@@ -242,7 +217,6 @@ const buildSidebarWaveRows = ({
         isLoadingSubwaves: false,
         canExpand: false,
         hasUnreadSubwaves: false,
-        knownSubwavesCount: null,
         unreadSubwaveDropsCount: 0,
         isFirstSubwave: index === 0,
         isLastSubwave: index === subwaves.length - 1,
@@ -273,12 +247,14 @@ export function useSidebarWaveTree({
   const [initialExpansionState] =
     useState<SidebarWaveTreeExpansionState>(readExpansionState);
   const [expansionState, setExpansionState] = useState(initialExpansionState);
-  const requestParentExpand = useCallback(
-    (parentWaveId: string) => {
-      onParentExpand?.(parentWaveId);
-    },
-    [onParentExpand]
-  );
+  const [activeSubwaveCollapse, setActiveSubwaveCollapse] = useState({
+    activeWaveId,
+    parentId: null as string | null,
+  });
+  // Each navigation reveals its active subwave before manual collapse applies.
+  if (activeSubwaveCollapse.activeWaveId !== activeWaveId) {
+    setActiveSubwaveCollapse({ activeWaveId, parentId: null });
+  }
 
   const topLevelWaves = useMemo(
     () => waves.filter((wave) => wave.parentWaveId === null),
@@ -313,7 +289,10 @@ export function useSidebarWaveTree({
 
   const getIsExpanded = useCallback(
     (waveId: string) => {
-      if (resolvedActiveParentWaveId === waveId) {
+      if (
+        resolvedActiveParentWaveId === waveId &&
+        activeSubwaveCollapse.parentId !== waveId
+      ) {
         return true;
       }
 
@@ -323,7 +302,12 @@ export function useSidebarWaveTree({
 
       return expandedParentIds.has(waveId);
     },
-    [collapsedParentIds, resolvedActiveParentWaveId, expandedParentIds]
+    [
+      activeSubwaveCollapse.parentId,
+      collapsedParentIds,
+      resolvedActiveParentWaveId,
+      expandedParentIds,
+    ]
   );
 
   const getHasUnreadSubwaves = useCallback(
@@ -344,38 +328,59 @@ export function useSidebarWaveTree({
     [getIsExpanded, showExpandedSubwaves, subwavesByParentId]
   );
 
-  const toggleParent = useCallback(
-    (waveId: string) => {
-      const isExpanded = getIsVisiblyExpanded(waveId);
-      if (!isExpanded) {
-        requestParentExpand(waveId);
+  const setParentExpanded = useCallback((waveId: string, expanded: boolean) => {
+    setExpansionState((previousState) => {
+      const nextCollapsedParentIds = new Set(previousState.collapsedParentIds);
+      const nextExpandedParentIds = new Set(previousState.expandedParentIds);
+
+      if (expanded) {
+        nextCollapsedParentIds.delete(waveId);
+        nextExpandedParentIds.add(waveId);
+      } else {
+        nextExpandedParentIds.delete(waveId);
+        nextCollapsedParentIds.add(waveId);
       }
 
-      setExpansionState((previousState) => {
-        const nextCollapsedParentIds = new Set(
-          previousState.collapsedParentIds
-        );
-        const nextExpandedParentIds = new Set(previousState.expandedParentIds);
+      const nextState = {
+        expandedParentIds: Array.from(nextExpandedParentIds),
+        collapsedParentIds: Array.from(nextCollapsedParentIds),
+      };
 
-        if (isExpanded) {
-          nextCollapsedParentIds.add(waveId);
-          nextExpandedParentIds.delete(waveId);
-        } else {
-          nextCollapsedParentIds.delete(waveId);
-          nextExpandedParentIds.add(waveId);
-        }
+      writeExpansionState(nextState);
 
-        const nextState = {
-          expandedParentIds: Array.from(nextExpandedParentIds),
-          collapsedParentIds: Array.from(nextCollapsedParentIds),
-        };
+      return nextState;
+    });
+  }, []);
 
-        writeExpansionState(nextState);
-
-        return nextState;
-      });
+  const expandParent = useCallback(
+    (waveId: string) => {
+      if (!getIsVisiblyExpanded(waveId)) {
+        onParentExpand?.(waveId);
+      }
+      setParentExpanded(waveId, true);
     },
-    [getIsVisiblyExpanded, requestParentExpand]
+    [getIsVisiblyExpanded, onParentExpand, setParentExpanded]
+  );
+
+  const toggleParent = useCallback(
+    (waveId: string) => {
+      if (!getIsVisiblyExpanded(waveId)) {
+        expandParent(waveId);
+        return;
+      }
+
+      if (waveId === resolvedActiveParentWaveId) {
+        setActiveSubwaveCollapse({ activeWaveId, parentId: waveId });
+      }
+      setParentExpanded(waveId, false);
+    },
+    [
+      activeWaveId,
+      expandParent,
+      getIsVisiblyExpanded,
+      resolvedActiveParentWaveId,
+      setParentExpanded,
+    ]
   );
 
   const getRows = useCallback(
@@ -401,8 +406,9 @@ export function useSidebarWaveTree({
     () => ({
       topLevelWaves,
       getRows,
+      expandParent,
       toggleParent,
     }),
-    [getRows, toggleParent, topLevelWaves]
+    [expandParent, getRows, toggleParent, topLevelWaves]
   );
 }
