@@ -28,7 +28,10 @@ interface PinSyncDeps {
 
 /** Per-profile inbox preferences persisted with this encryption device. */
 export class ConversationPins {
-  private exchangedGroup: string | null = null;
+  private lastExchange: {
+    readonly group: string;
+    readonly deviceKeys: ReadonlySet<string>;
+  } | null = null;
 
   constructor(
     private readonly ctx: EngineContext,
@@ -192,23 +195,32 @@ export class ConversationPins {
     }
   }
 
-  /** An upgraded client may already have passed pin updates in this log. */
+  /** Only current devices can read a snapshot. Share again when one joins. */
   exchange(runtime: GroupRuntime): void {
-    const g = runtime.record.g;
+    const { g, members } = runtime.record;
+    const previous = this.lastExchange;
+    const sameRoster =
+      previous?.group === g &&
+      members.length === previous.deviceKeys.size &&
+      members.every(({ deviceKey }) => previous.deviceKeys.has(deviceKey));
     if (
       this.ctx.options.readSync !== true ||
-      this.exchangedGroup === g ||
+      sameRoster ||
       !this.hasSibling(runtime) ||
       !this.deps.targets().includes(runtime)
     ) {
       return;
     }
-    this.exchangedGroup = g;
+    const exchange = {
+      group: g,
+      deviceKeys: new Set(members.map(({ deviceKey }) => deviceKey)),
+    };
+    this.lastExchange = exchange;
     this.run(async () => {
       try {
         await this.send(runtime, this.snapshot(), true);
       } catch (error) {
-        if (this.exchangedGroup === g) this.exchangedGroup = null;
+        if (this.lastExchange === exchange) this.lastExchange = null;
         throw error;
       }
     });

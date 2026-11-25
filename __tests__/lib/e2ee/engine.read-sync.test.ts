@@ -150,19 +150,15 @@ describe("E2EE engine: read-state sync (D175, P60)", () => {
     expect(phone.engine.getConversation(g)?.pinned).toBeUndefined();
   });
 
-  it("shares an existing pin with a newly trusted device", async () => {
+  it("shares an existing pin when a receive-only sibling joins an established self group", async () => {
     const world = await createWorld();
-    const alice = await syncUser(world, "alice");
-    const bob = await addUser(world, "bob");
-    const g = await alice.primary.engine.createConversation({
-      profileIds: [bob.profileId],
-      kind: "dm",
-    });
-    await settle(world);
-    await alice.primary.engine.setConversationPinned(g, true);
-    const phone = await addSyncDevice(world, alice);
+    const { alice, laptop, phone, g } = await aliceWithTwoDevices(world);
+    await laptop.engine.setConversationPinned(g, true);
     await settle(world);
     expect(phone.engine.getConversation(g)?.pinned).toBe(true);
+    const newcomer = await addSyncDevice(world, alice, { readSync: false });
+    await settle(world);
+    expect(newcomer.engine.getConversation(g)?.pinned).toBe(true);
   });
 
   it("schedules another send after a pin changes during an in-flight flush", async () => {
