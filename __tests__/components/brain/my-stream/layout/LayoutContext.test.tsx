@@ -181,6 +181,7 @@ describe("LayoutProvider", () => {
       expect(style.maxHeight).toBe(style.height);
     }
   );
+
   it("updates changed registrations before animation frames without warnings in StrictMode", () => {
     const originalRequestAnimationFrame = global.requestAnimationFrame;
     global.requestAnimationFrame = jest.fn(() => 1);
