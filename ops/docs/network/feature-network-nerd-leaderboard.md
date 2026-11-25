@@ -52,6 +52,11 @@ It has two focus modes:
 
 - Header stats show:
   - latest TDH block (linked to Etherscan)
+  - TDH day, only when the newest TDH day came from the 6529 Network:
+    `25 Nov 2026, from the 6529 Network`. Hovering it names the Ethereum
+    block the holdings were counted at and says validators agreed on the
+    day's TDH on the 6529 Network. Days 6529.io computed itself show no TDH
+    day.
   - network TDH
   - daily network change
 - `Cards Collected` columns: level, cards collected, unique memes, sets, TDH,

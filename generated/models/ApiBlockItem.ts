@@ -17,6 +17,18 @@ export class ApiBlockItem {
     'block_number': number;
     'created_at': Date;
     'timestamp': Date;
+    /**
+    * Where the TDH of this block comes from. CHAIN is a TDH day of the 6529 chain; SITE is a computation by 6529.io.
+    */
+    'source': string;
+    /**
+    * The TDH day number on the 6529 chain (UTC days since 1970-01-01 to the midnight that closes the day), when the day came from the chain.
+    */
+    'cycle_day'?: number;
+    /**
+    * The root of the wallet list of the day on the chain, when the day came from the chain.
+    */
+    'wallet_root'?: string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -40,6 +52,24 @@ export class ApiBlockItem {
             "baseName": "timestamp",
             "type": "Date",
             "format": "date-time"
+        },
+        {
+            "name": "source",
+            "baseName": "source",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "cycle_day",
+            "baseName": "cycle_day",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "wallet_root",
+            "baseName": "wallet_root",
+            "type": "string",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {

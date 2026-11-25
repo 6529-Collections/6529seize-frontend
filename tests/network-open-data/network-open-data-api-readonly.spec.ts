@@ -8,6 +8,7 @@ import {
   waitForApiResponse,
 } from "../support/routeReadiness";
 import { isDesktopWebProject } from "../support/surfaceSimulation";
+import { readXtdhRetirement } from "../support/xtdhRetirement";
 
 async function expectNoStoreJsonError(
   request: APIRequestContext,
@@ -55,6 +56,7 @@ test.describe("Network, Open Data, and public API read-only coverage @surface @m
   });
 
   test("Network health loads public metric cards", async ({ page }) => {
+    const xtdhRetired = (await readXtdhRetirement(page)) === "retired";
     const dayResponse = waitForApiResponse(
       page,
       (url) =>
@@ -81,13 +83,19 @@ test.describe("Network, Open Data, and public API read-only coverage @surface @m
     ).toBeVisible();
     for (const card of [
       "Network TDH",
-      "xTDH Granted",
+      ...(xtdhRetired ? [] : ["xTDH Granted"]),
       "Active Identities",
       "Consolidations Formed",
     ]) {
       await expect(page.getByText(card, { exact: true })).toBeVisible({
         timeout: RESPONSE_TIMEOUT_MS,
       });
+    }
+    if (xtdhRetired) {
+      // From the identity switch-on xTDH is retired and its card is gone.
+      await expect(page.getByText("xTDH Granted", { exact: true })).toHaveCount(
+        0
+      );
     }
   });
 

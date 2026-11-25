@@ -45,7 +45,9 @@ The profile header appears on profile routes under `/{user}` and shows:
    - stats row (`TDH`, `xTDH`, `NIC`, `Rep`, `Followers`)
 4. Use quick stats:
    - `TDH` -> `/{user}/collected`
-   - `xTDH` -> `/{user}/xtdh`
+   - `xTDH` -> `/{user}/xtdh` (from the identity switch-on xTDH is retired
+     and the stats row has no `xTDH`; the same goes for profile hover cards
+     and the participation cards in waves)
    - `NIC` and `Rep` -> `/{user}`
    - `Followers` -> opens the followers modal (no route change)
    - `Following` -> opens the identities you follow, on your own signed-in profile

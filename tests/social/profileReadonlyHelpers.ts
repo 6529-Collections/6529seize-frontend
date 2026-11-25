@@ -6,6 +6,7 @@ import {
   waitForRouteReady,
 } from "../testHelpers";
 import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
+import { readXtdhRetirement } from "../support/xtdhRetirement";
 
 export const PROFILE_HANDLE = "punk6529";
 
@@ -45,9 +46,16 @@ export async function expectProfileTabLinks(page: Page) {
   await expect(
     profileSections.getByRole("link", { name: "Collected" })
   ).toHaveAttribute("href", `/${PROFILE_HANDLE}/collected`);
-  await expect(
-    profileSections.getByRole("link", { name: /xTDH/ })
-  ).toHaveAttribute("href", `/${PROFILE_HANDLE}/xtdh?tab=granted`);
+  const xtdhTab = profileSections.getByRole("link", { name: /xTDH/ });
+  if ((await readXtdhRetirement(page)) === "retired") {
+    // From the identity switch-on xTDH is retired and its tab is gone.
+    await expect(xtdhTab).toHaveCount(0);
+  } else {
+    await expect(xtdhTab).toHaveAttribute(
+      "href",
+      `/${PROFILE_HANDLE}/xtdh?tab=granted`
+    );
+  }
 }
 
 export async function expectPersonalCollectedActionsAbsent(page: Page) {

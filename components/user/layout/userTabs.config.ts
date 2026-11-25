@@ -5,6 +5,8 @@ export type UserPageVisibilityContext = {
   readonly hasProfileWave: boolean;
   readonly hideSubscriptions: boolean;
   readonly isOwnProfile: boolean;
+  /** From the identity switch-on xTDH is retired and its tab is hidden. */
+  readonly xtdhRetired: boolean;
 };
 
 type UserPageTabDefinition = {
@@ -45,6 +47,7 @@ const TAB_DEFINITIONS = [
     titleKey: "user.profile.tabs.xtdh",
     route: "xtdh",
     badgeKey: "user.profile.tabs.badges.beta",
+    isVisible: ({ xtdhRetired }: UserPageVisibilityContext) => !xtdhRetired,
   },
   {
     id: "subscriptions",

@@ -14,6 +14,9 @@ import { LeaderboardFocus } from "@/types/enums";
 import clsx from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import type { ApiBlockItem } from "@/generated/models/ApiBlockItem";
+import { chainTdhDayText } from "@/lib/tdh-chain/tdhDay";
 import { useEffect, useState } from "react";
 import DotLoader, { Spinner } from "../dotLoader/DotLoader";
 import type { CommonSelectItem } from "../utils/select/CommonSelect";
@@ -106,6 +109,9 @@ export default function Leaderboard(
   const [selectedSeason, setSelectedSeason] = useState<number>(0);
 
   const [lastTDH, setLastTDH] = useState<TDHCalc>();
+  const [latestBlock, setLatestBlock] = useState<ApiBlockItem | null>(null);
+  const locale = useBrowserLocale();
+  const chainDay = latestBlock ? chainTdhDayText(locale, latestBlock) : null;
 
   const pathname = usePathname();
   const isNetworkPage = pathname.startsWith("/network");
@@ -159,11 +165,13 @@ export default function Leaderboard(
             date: new Date(response.data[0]?.timestamp!),
           };
           setLastTDH(latestTDH);
+          setLatestBlock(response.data[0] ?? null);
         }
       })
       .catch((error) => {
         console.error("Failed to fetch latest TDH block", error);
         setLastTDH(undefined);
+        setLatestBlock(null);
       });
 
     commonApiFetch<MemeSeason[]>({
@@ -361,6 +369,20 @@ export default function Leaderboard(
                 )}
               </span>
             </div>
+            {chainDay && (
+              <div className={styles["networkStat"]}>
+                <span className={NETWORK_META_LABEL_CLASS_NAME}>
+                  {chainDay.label}
+                </span>
+                <span
+                  className={styles["networkStatValue"]}
+                  title={chainDay.detail}
+                  data-testid="leaderboard-chain-tdh-day"
+                >
+                  {chainDay.value}
+                </span>
+              </div>
+            )}
             <div className={styles["networkStat"]}>
               <span className={NETWORK_META_LABEL_CLASS_NAME}>Network TDH</span>
               <span className={styles["networkStatValue"]}>

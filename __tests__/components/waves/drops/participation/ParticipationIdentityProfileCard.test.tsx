@@ -3,6 +3,11 @@ import { render, screen } from "@testing-library/react";
 
 import ParticipationIdentityProfileCard from "@/components/waves/drops/participation/ParticipationIdentityProfileCard";
 
+const mockXtdhRetired = jest.fn(() => false);
+jest.mock("@/hooks/useXtdhRetirement", () => ({
+  useXtdhRetired: () => mockXtdhRetired(),
+}));
+
 jest.mock("next/link", () => ({
   __esModule: true,
   default: ({
@@ -161,5 +166,17 @@ describe("ParticipationIdentityProfileCard", () => {
       "href",
       "/simo"
     );
+  });
+
+  it("drops the xTDH stat once xTDH is retired", () => {
+    mockXtdhRetired.mockReturnValue(true);
+    render(
+      <ParticipationIdentityProfileCard profile={buildProfile() as any} />
+    );
+    mockXtdhRetired.mockReturnValue(false);
+
+    const texts = screen.getAllByRole("link").map((l) => l.textContent ?? "");
+    expect(texts.some((text) => text.includes("xTDH"))).toBe(false);
+    expect(texts.some((text) => text.includes("NIC"))).toBe(true);
   });
 });

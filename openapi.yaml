@@ -25955,6 +25955,7 @@ components:
         - block_number
         - created_at
         - timestamp
+        - source
       properties:
         block_number:
           type: integer
@@ -25965,6 +25966,16 @@ components:
         timestamp:
           type: string
           format: date-time
+        source:
+          type: string
+          description: Where the TDH of this block comes from. CHAIN is a TDH day of the 6529 chain; SITE is a computation by 6529.io.
+        cycle_day:
+          type: integer
+          format: int64
+          description: The TDH day number on the 6529 chain (UTC days since 1970-01-01 to the midnight that closes the day), when the day came from the chain.
+        wallet_root:
+          type: string
+          description: The root of the wallet list of the day on the chain, when the day came from the chain.
     ApiBlocksPage:
       type: object
       required:

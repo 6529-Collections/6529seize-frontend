@@ -20,6 +20,11 @@ jest.mock("@/components/nft-transfer/TransferToggle", () => {
   };
 });
 
+const mockXtdhRetired = jest.fn(() => false);
+jest.mock("@/hooks/useXtdhRetirement", () => ({
+  useXtdhRetired: () => mockXtdhRetired(),
+}));
+
 jest.mock("@/components/utils/select/CommonSelect", () => {
   return {
     __esModule: true,
@@ -253,6 +258,7 @@ describe("UserPageCollectedFilters", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockXtdhRetired.mockReturnValue(false);
     mockContainerRef = {
       current: document.createElement("div"),
     };
@@ -276,6 +282,31 @@ describe("UserPageCollectedFilters", () => {
 
     expect(screen.getByTestId("sort-by-filter")).toBeInTheDocument();
     expect(screen.getByTestId("address-select")).toBeInTheDocument();
+  });
+
+  it("offers the Network view only while xTDH is live", () => {
+    const { unmount } = render(
+      <UserPageCollectedFilters
+        profile={mockProfile}
+        filters={mockFilters}
+        containerRef={mockContainerRef}
+        {...mockSetters}
+      />
+    );
+    expect(screen.getByText(/^View:/)).toBeInTheDocument();
+    unmount();
+
+    mockXtdhRetired.mockReturnValue(true);
+    render(
+      <UserPageCollectedFilters
+        profile={mockProfile}
+        filters={mockFilters}
+        containerRef={mockContainerRef}
+        {...mockSetters}
+      />
+    );
+    expect(screen.queryByText(/^View:/)).toBeNull();
+    expect(screen.getByTestId("collection-filter")).toBeInTheDocument();
   });
 
   it("shows seized filter when collection supports it", () => {

@@ -22,6 +22,7 @@ import { areEqualAddresses } from "@/helpers/Helpers";
 import { buildProfileCollectedReturnPath } from "@/helpers/profile-collected-navigation";
 import type { Page } from "@/helpers/Types";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
+import { useXtdhRetired } from "@/hooks/useXtdhRetirement";
 import { normalizeLocale } from "@/i18n/locales";
 import { fetchAllPages } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -67,6 +68,14 @@ export type { ProfileCollectedFilters } from "./userPageCollectedQueryState";
 
 type CollectedHistoryMode = "push" | "replace";
 
+const XTDH_SORTS: ReadonlySet<string> = new Set([
+  CollectionSort.XTDH,
+  CollectionSort.XTDH_DAY,
+]);
+
+const isXtdhSortParam = (sortBy: string | null): boolean =>
+  sortBy !== null && XTDH_SORTS.has(sortBy.toUpperCase());
+
 export default function UserPageCollected({
   profile,
   initialStatsData = EMPTY_USER_PAGE_STATS_INITIAL_DATA,
@@ -88,6 +97,10 @@ export default function UserPageCollected({
     pathname,
     searchParams: searchParams.toString(),
   });
+  // From the identity switch-on xTDH is retired: the Network view, which
+  // lists tokens by the xTDH they receive, and the xTDH sorts read as the
+  // defaults.
+  const xtdhRetired = useXtdhRetired();
 
   const getFilters = useCallback((): ProfileCollectedFilters => {
     const addressParam = searchParams.get(SEARCH_PARAMS_FIELDS.address);
@@ -104,7 +117,13 @@ export default function UserPageCollected({
     );
 
     const convertedAddress = convertAddressToLowerCase(addressParam);
-    const convertedCollection = convertCollection(collectionParam ?? null);
+    const parsedCollection = convertCollection(collectionParam ?? null);
+    const convertedCollection =
+      xtdhRetired && parsedCollection === CollectedCollectionType.NETWORK
+        ? null
+        : parsedCollection;
+    const usableSortByParam =
+      xtdhRetired && isXtdhSortParam(sortByParam) ? null : sortByParam;
     return {
       handleOrWallet: convertedAddress ?? profile.handle ?? user,
       accountForConsolidations: !convertedAddress,
@@ -125,12 +144,12 @@ export default function UserPageCollected({
       page: normalizePageNumber(pageParam ? Number.parseInt(pageParam, 10) : 1),
       pageSize: PAGE_SIZE,
       sortBy: convertSortedBy({
-        sortBy: sortByParam ?? null,
+        sortBy: usableSortByParam ?? null,
         collection: convertedCollection,
       }),
       sortDirection: convertSortDirection(sortDirectionParam ?? null),
     };
-  }, [searchParams, profile.handle, user]);
+  }, [searchParams, profile.handle, user, xtdhRetired]);
 
   const [filters, setFilters] = useState<ProfileCollectedFilters>(getFilters());
   const artworkRef = useRef<HTMLDivElement>(null);

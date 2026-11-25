@@ -5,6 +5,7 @@ import CommunityMembersMobileCard from "./CommunityMembersMobileCard";
 import CommunityMembersTableHeader from "./CommunityMembersTableHeader";
 import CommunityMembersTableRow from "./CommunityMembersTableRow";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useXtdhRetired } from "@/hooks/useXtdhRetirement";
 
 export default function CommunityMembersTable({
   members,
@@ -24,6 +25,8 @@ export default function CommunityMembersTable({
   readonly onSort: (sort: ApiCommunityMembersSortOption) => void;
 }) {
   const isTableViewport = useMediaQuery("(min-width: 640px)");
+  // From the identity switch-on xTDH is retired: no xTDH column.
+  const showXtdh = !useXtdhRetired();
   return (
     <>
       {isTableViewport ? (
@@ -34,6 +37,7 @@ export default function CommunityMembersTable({
               sortDirection={sortDirection}
               isLoading={isLoading}
               onSort={onSort}
+              showXtdh={showXtdh}
             />
             <tbody>
               {members.map((member, index) => (
@@ -41,6 +45,7 @@ export default function CommunityMembersTable({
                   key={member.detail_view_key}
                   member={member}
                   rank={index + 1 + (page - 1) * pageSize}
+                  showXtdh={showXtdh}
                 />
               ))}
             </tbody>
@@ -54,6 +59,7 @@ export default function CommunityMembersTable({
                 key={member.detail_view_key}
                 member={member}
                 rank={index + 1 + (page - 1) * pageSize}
+                showXtdh={showXtdh}
               />
             ))}
           </div>

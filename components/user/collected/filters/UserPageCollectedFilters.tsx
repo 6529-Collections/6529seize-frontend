@@ -7,6 +7,7 @@ import UserAddressesSelectDropdown from "@/components/user/utils/addresses-selec
 import DropdownToolbar from "@/components/utils/select/dropdown/DropdownToolbar";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import CommonSelect from "@/components/utils/select/CommonSelect";
+import { useXtdhRetired } from "@/hooks/useXtdhRetirement";
 import type { CollectionSeized, CollectionSort } from "@/entities/IProfile";
 import { CollectedCollectionType } from "@/entities/IProfile";
 import type { MemeSeason } from "@/entities/ISeason";
@@ -124,6 +125,10 @@ export default function UserPageCollectedFilters({
   const getShowSzn = (collection: CollectedCollectionType | null): boolean =>
     collection ? COLLECTED_COLLECTIONS_META[collection].filters.szn : false;
 
+  // From the identity switch-on xTDH is retired, and with it the Network
+  // view: only the native collections are left to choose.
+  const xtdhRetired = useXtdhRetired();
+
   const activeMainTab =
     filters.collection === CollectedCollectionType.NETWORK
       ? MainTab.NETWORK
@@ -165,19 +170,21 @@ export default function UserPageCollectedFilters({
           <div className="tw-nowrap tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2 lg:tw-gap-x-3">
             {showTransfer && <TransferToggle />}
 
-            <CommonSelect
-              items={mainTabItems}
-              activeItem={activeMainTab}
-              setSelected={handleMainTabChange}
-              filterLabel={getCollectedFilterMessage(
-                "user.collected.filters.view"
-              )}
-              size="sm"
-              variant="filter"
-              tabsVariant="connected"
-              connectedSize="sm"
-              fill={false}
-            />
+            {!xtdhRetired && (
+              <CommonSelect
+                items={mainTabItems}
+                activeItem={activeMainTab}
+                setSelected={handleMainTabChange}
+                filterLabel={getCollectedFilterMessage(
+                  "user.collected.filters.view"
+                )}
+                size="sm"
+                variant="filter"
+                tabsVariant="connected"
+                connectedSize="sm"
+                fill={false}
+              />
+            )}
 
             {activeMainTab === MainTab.NATIVE && (
               <UserPageCollectedFiltersNativeDropdown

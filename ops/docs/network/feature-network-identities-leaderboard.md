@@ -111,6 +111,9 @@ pagination, and profile links.
 - Table/card rank is continuous across pages.
 - Profile links use `detail_view_key` and can point to handle routes or address routes.
 - `TDH` and `xTDH` show compact values; desktop cells include hover tooltips with value and rate.
+- From the identity switch-on xTDH is retired: the `xTDH` column, the `xTDH`
+  sort and the cards' `xTDH` figure are gone, and `sort-by=xtdh` reads as
+  `level`.
 - `Last Seen` is shown only when activity timestamp is available.
 
 ## Edge Cases

@@ -35,12 +35,21 @@ jest.mock("@/components/user/collected/useCollectedTracking", () => ({
   }),
 }));
 
+const mockXtdhRetired = jest.fn(() => false);
+jest.mock("@/hooks/useXtdhRetirement", () => ({
+  useXtdhRetired: () => mockXtdhRetired(),
+}));
+
 jest.mock(
   "@/components/user/collected/filters/UserPageCollectedFilters",
   () =>
     function MockFilters(props: any) {
       return (
-        <div data-testid="filters" data-collection={props.filters.collection}>
+        <div
+          data-testid="filters"
+          data-collection={props.filters.collection}
+          data-sort={props.filters.sortBy}
+        >
           <button
             data-testid="filters-set-szn"
             onClick={() => props.setSzn?.({ id: 2 })}
@@ -185,6 +194,7 @@ describe("UserPageCollected", () => {
       .find((options) => options.queryKey?.[0] === "PROFILE_COLLECTED");
 
   beforeEach(() => {
+    mockXtdhRetired.mockReturnValue(false);
     useParamsMock.mockReturnValue({ user: "testuser" });
     usePathnameMock.mockReturnValue("/testuser/collected");
     useSearchParamsMock.mockReturnValue(mockSearchParams);
@@ -474,6 +484,27 @@ describe("UserPageCollected", () => {
       "MEMES"
     );
   });
+
+  it.each([
+    [false, "NETWORK", "XTDH"],
+    [true, "", "TOKEN_ID"],
+  ])(
+    "reads the Network view and an xTDH sort (retired=%s)",
+    (retired, collection, sortBy) => {
+      mockXtdhRetired.mockReturnValue(retired);
+      mockSearchParams.get.mockImplementation((key: string) => {
+        if (key === "collection") return "network";
+        if (key === "sort-by") return "xtdh";
+        return null;
+      });
+
+      renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+
+      const filters = screen.getByTestId("filters");
+      expect(filters.getAttribute("data-collection") ?? "").toBe(collection);
+      expect(filters).toHaveAttribute("data-sort", sortBy);
+    }
+  );
 
   it("handles seized filter from search params", () => {
     mockSearchParams.get.mockImplementation((key: string) => {

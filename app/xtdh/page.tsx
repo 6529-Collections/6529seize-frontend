@@ -12,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata({
     title: "xTDH Allocations",
     description:
-      "Explore xTDH allocations across the entire ecosystem, discover active grantors, and manage your own grants.",
+      "xTDH allocations and grants on 6529.io, and where xTDH stands.",
   });
 }
 

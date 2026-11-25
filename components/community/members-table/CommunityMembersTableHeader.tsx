@@ -79,12 +79,19 @@ export default function CommunityMembersTableHeader({
   sortDirection,
   isLoading,
   onSort,
+  showXtdh = true,
 }: {
   readonly activeSort: ApiCommunityMembersSortOption;
   readonly sortDirection: SortDirection;
   readonly isLoading: boolean;
   readonly onSort: (sort: ApiCommunityMembersSortOption) => void;
+  readonly showXtdh?: boolean;
 }) {
+  const columns = showXtdh
+    ? SORTABLE_COLUMNS
+    : SORTABLE_COLUMNS.filter(
+        ({ sort }) => sort !== ApiCommunityMembersSortOption.Xtdh
+      );
   return (
     <thead>
       <tr>
@@ -94,7 +101,7 @@ export default function CommunityMembersTableHeader({
         <th scope="col" className={`${HEADER_CELL_CLASS_NAME} tw-text-left`}>
           Profile
         </th>
-        {SORTABLE_COLUMNS.map(({ sort, centered }) => (
+        {columns.map(({ sort, centered }) => (
           <SortableHeaderCell
             key={sort}
             sort={sort}

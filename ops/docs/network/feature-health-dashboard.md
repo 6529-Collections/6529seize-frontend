@@ -31,7 +31,8 @@ Parent: [Network Index](README.md)
 4. Compare event cards: `Posters`, `Posts`, `Submissions`, `Voters`,
    `Vote Volume`, `Active Identities`, and `Consolidations Formed`.
 5. Compare cumulative cards: `Active Votes`, `Network TDH`,
-   `TDH Utilization %`, `xTDH Granted`, and `Identities`.
+   `TDH Utilization %`, `xTDH Granted`, and `Identities`. From the identity
+   switch-on xTDH is retired and `xTDH Granted` is no longer shown.
 6. Hover key values for full comma-formatted numbers.
 7. Hover trend bars for compact values and date labels when available.
 8. Open the `Network TDH` card to go to [Network Stats](feature-network-stats.md).

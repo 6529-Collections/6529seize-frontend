@@ -6,7 +6,9 @@ import {
   NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES,
   NETWORK_REFERENCE_SECTION_HEADING_CLASSES,
 } from "@/components/network/networkPageLayoutClasses";
+import XtdhRetiredNotice from "@/components/xtdh/XtdhRetiredNotice";
 import { useSetTitle } from "@/contexts/TitleContext";
+import { useXtdhRetired } from "@/hooks/useXtdhRetirement";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -24,6 +26,38 @@ const ORDERED_LIST_CLASSES =
 
 export default function XTDHMainPage() {
   useSetTitle("xTDH Overview | Network");
+  const retired = useXtdhRetired();
+
+  if (retired) {
+    // From the identity switch-on xTDH is retired: the page says so and no
+    // longer explains how xTDH grows.
+    return (
+      <main className={NETWORK_REFERENCE_BLACK_PAGE_CLASSES}>
+        <div className="tw-w-full">
+          <AboutContentsDropdown
+            className={NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES}
+            currentHref="/network/xtdh"
+            desktopFlush
+            withDivider
+          />
+          <article className="tw-pb-12 tw-pt-4 max-sm:tw-px-1 sm:tw-pt-8">
+            <section
+              aria-labelledby="xtdh-overview-heading"
+              className={`${EDITORIAL_GRID_CLASSES} tw-pb-8 sm:tw-pb-12`}
+            >
+              <h1
+                id="xtdh-overview-heading"
+                className={NETWORK_REFERENCE_SECTION_HEADING_CLASSES}
+              >
+                xTDH Overview
+              </h1>
+              <XtdhRetiredNotice />
+            </section>
+          </article>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className={NETWORK_REFERENCE_BLACK_PAGE_CLASSES}>
@@ -36,6 +70,7 @@ export default function XTDHMainPage() {
         />
 
         <article className="tw-pb-12 tw-pt-4 max-sm:tw-px-1 sm:tw-pt-8">
+          <XtdhRetiredNotice className="tw-mb-6" />
           <section
             aria-labelledby="xtdh-overview-heading"
             className={`${EDITORIAL_GRID_CLASSES} tw-pb-8 sm:tw-pb-12`}

@@ -9,6 +9,7 @@ import { isOwnProfileRoute } from "@/helpers/ProfileHelpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
+import { useXtdhRetired } from "@/hooks/useXtdhRetirement";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import {
   faChevronLeft,
@@ -76,6 +77,7 @@ export default function UserPageTabs({
   }, [connectedProfile, handleOrWallet, isClientHydrated]);
 
   const hasProfileWave = Boolean(resolvedViewedProfile.profile_wave_id);
+  const xtdhRetired = useXtdhRetired();
 
   const visibilityContext = useMemo<UserPageVisibilityContext>(
     () => ({
@@ -83,6 +85,7 @@ export default function UserPageTabs({
       hasProfileWave,
       hideSubscriptions: hideNftPurchasing,
       isOwnProfile,
+      xtdhRetired,
     }),
     [
       hasProfileWave,
@@ -90,6 +93,7 @@ export default function UserPageTabs({
       isClientHydrated,
       isOwnProfile,
       showWaves,
+      xtdhRetired,
     ]
   );
 
@@ -133,6 +137,10 @@ export default function UserPageTabs({
     resolvedTabFromPath === USER_PAGE_TAB_IDS.SUBSCRIPTIONS &&
     hideNftPurchasing &&
     !mayRedirectFromHiddenTab;
+  // A link to the xTDH tab after the identity switch-on stays put: the tab
+  // is hidden, and its page says xTDH was retired.
+  const shouldSuppressXtdhRedirect =
+    resolvedTabFromPath === USER_PAGE_TAB_IDS.XTDH && xtdhRetired;
 
   const visibleTabs = useMemo(
     () =>
@@ -169,7 +177,11 @@ export default function UserPageTabs({
   const resolvedActiveTab = useMemo<UserPageTabKey>(() => {
     // While the redirect is deferred the URL stays on the hidden tab, so no
     // other tab is highlighted as current.
-    if (resolvedTabIsVisible || shouldSuppressSubscriptionsRedirect) {
+    if (
+      resolvedTabIsVisible ||
+      shouldSuppressSubscriptionsRedirect ||
+      shouldSuppressXtdhRedirect
+    ) {
       return resolvedTabFromPath;
     }
 
@@ -181,6 +193,7 @@ export default function UserPageTabs({
     resolvedTabFromPath,
     resolvedTabIsVisible,
     shouldSuppressSubscriptionsRedirect,
+    shouldSuppressXtdhRedirect,
     visibleTabs,
   ]);
   const activeTab = navigation?.pendingTab ?? resolvedActiveTab;
@@ -190,7 +203,8 @@ export default function UserPageTabs({
     isRedirectSuppressed:
       shouldSuppressBrainRedirect ||
       shouldSuppressOwnerTabRedirect ||
-      shouldSuppressSubscriptionsRedirect,
+      shouldSuppressSubscriptionsRedirect ||
+      shouldSuppressXtdhRedirect,
     pathname,
     resolvedTabIsVisible,
     searchString,

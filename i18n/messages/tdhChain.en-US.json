@@ -1,0 +1,9 @@
+{
+  "tdh.day.label": "TDH day",
+  "tdh.day.date": "{day} {month} {year}",
+  "tdh.day.chain": "{date}, from the 6529 Network",
+  "tdh.day.chainDetail": "Holdings at Ethereum block {block}, the last block before {date} 00:00 UTC. Validators agreed on this day's TDH on the 6529 Network.",
+  "xtdh.retired.label": "xTDH",
+  "xtdh.retired.closing": "xTDH is being retired as identities move to the 6529 Network. Grants can't be created or changed.",
+  "xtdh.retired.body": "xTDH was retired when identities moved to the 6529 Network."
+}

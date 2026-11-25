@@ -10,6 +10,10 @@ It has two top-level views:
 - `Native`: profile card holdings for The Memes, Gradients, NextGen, and Meme Lab.
 - `Network`: xTDH token holdings by contract.
 
+From the identity switch-on xTDH is retired: the `View` switch and the
+`Network` view are gone, and `collection=network` or an `xtdh` or
+`xtdh_day` sort in a link reads as the native defaults.
+
 The top stats block stays on this route in both views.
 `Details` expands holdings totals, activity overview, wallet activity,
 distributions, TDH history, and boost breakdown.

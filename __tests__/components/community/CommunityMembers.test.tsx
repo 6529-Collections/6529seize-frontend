@@ -28,9 +28,18 @@ jest.mock("@tanstack/react-query", () => ({
 
 jest.mock("react-use", () => ({ useDebounce: () => {} }));
 
+const mockXtdhRetired = jest.fn(() => false);
+jest.mock("@/hooks/useXtdhRetirement", () => ({
+  useXtdhRetired: () => mockXtdhRetired(),
+}));
+
 jest.mock(
   "@/components/community/members-table/CommunityMembersTable",
-  () => (props: any) => <div data-testid="table">{props.members.length}</div>
+  () => (props: any) => (
+    <div data-testid="table" data-sort={props.activeSort}>
+      {props.members.length}
+    </div>
+  )
 );
 
 jest.mock(
@@ -153,7 +162,29 @@ describe("CommunityMembers", () => {
       connectedProfile: null,
       isAuthenticated: false,
     });
+    mockXtdhRetired.mockReturnValue(false);
   });
+
+  it.each([
+    [false, "xtdh"],
+    [true, "level"],
+  ])(
+    "reads a sort by xTDH in the URL (retired=%s) as %s",
+    (retired, expectedSort) => {
+      mockXtdhRetired.mockReturnValue(retired);
+      searchParamsMock.set("sort-by", "xtdh");
+      (useQuery as jest.Mock).mockReturnValue({
+        isLoading: false,
+        isFetching: false,
+        data: { page: 1, count: 1, data: [{}] },
+      });
+      renderComponent();
+      expect(screen.getByTestId("table")).toHaveAttribute(
+        "data-sort",
+        expectedSort
+      );
+    }
+  );
 
   it("shows skeleton while no members", () => {
     (useQuery as jest.Mock).mockReturnValue({

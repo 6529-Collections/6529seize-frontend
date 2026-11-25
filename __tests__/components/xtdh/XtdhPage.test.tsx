@@ -2,7 +2,13 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import XtdhPage from "@/components/xtdh/XtdhPage";
 import { useGlobalTdhStats } from "@/hooks/useGlobalTdhStats";
 
+const mockXtdhRetirement = jest.fn(() => "live");
+
 jest.mock("@/hooks/useGlobalTdhStats");
+jest.mock("@/hooks/useXtdhRetirement", () => ({
+  useXtdhRetirement: () => mockXtdhRetirement(),
+  useXtdhRetired: () => mockXtdhRetirement() === "retired",
+}));
 jest.mock("@/components/xtdh/received", () => ({
   __esModule: true,
   default: () => <div data-testid="xtdh-received-section" />,
@@ -15,6 +21,39 @@ const mockUseGlobalTdhStats = useGlobalTdhStats as jest.MockedFunction<
 describe("XtdhPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockXtdhRetirement.mockReturnValue("live");
+  });
+
+  it("shows only the retirement notice once xTDH is retired", () => {
+    mockXtdhRetirement.mockReturnValue("retired");
+
+    render(<XtdhPage />);
+
+    expect(screen.getByTestId("xtdh-retired-notice")).toHaveTextContent(
+      "xTDH was retired when identities moved to the 6529 Network."
+    );
+    expect(screen.queryByText("xTDH Network Overview")).toBeNull();
+    expect(screen.queryByTestId("xtdh-received-section")).toBeNull();
+    expect(mockUseGlobalTdhStats).not.toHaveBeenCalled();
+  });
+
+  it("keeps the figures on the freeze day, with the notice", () => {
+    mockXtdhRetirement.mockReturnValue("closing");
+    mockUseGlobalTdhStats.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isError: false,
+      error: null,
+      refetch: jest.fn(),
+    } as any);
+
+    render(<XtdhPage />);
+
+    expect(screen.getByTestId("xtdh-retired-notice")).toHaveTextContent(
+      "Grants can't be created or changed."
+    );
+    expect(screen.getByText("xTDH Network Overview")).toBeInTheDocument();
+    expect(screen.getByTestId("xtdh-received-section")).toBeInTheDocument();
   });
 
   it("shows a skeleton while stats are loading", () => {

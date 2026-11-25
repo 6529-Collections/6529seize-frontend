@@ -59,6 +59,18 @@ received from grants, granted out, and added to your total.
 - No wallet gating; same content for signed-in and signed-out users.
 - No route-specific loading, empty, or retry states.
 
+## xTDH Retired
+
+xTDH is retired when identities move to the 6529 Network
+(`NEXT_PUBLIC_IDENTITY_FREEZE_AT`); the network takes no xTDH and no grants
+over. On the freeze day the page shows a notice above its content: xTDH is
+being retired as identities move to the 6529 Network, and grants can't be
+created or changed; the explanation stays below it. From the identity
+switch-on, a day later, the page shows only the title `xTDH Overview` and
+the notice that xTDH was retired when identities moved to the 6529
+Network: the explanation and formulas are gone. Before the freeze, or with
+no freeze set, nothing changes.
+
 ## Failure and Recovery
 
 - If `/network/xtdh` fails, reopen the URL directly.

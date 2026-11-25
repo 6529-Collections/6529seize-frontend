@@ -8,6 +8,7 @@ import { formatStatFloor } from "@/helpers/Helpers";
 import { shortenAddress } from "@/helpers/address.helpers";
 import { ProfileBadgeSize } from "@/components/common/profile/ProfileAvatar";
 import { useCompactMode } from "@/contexts/CompactModeContext";
+import { useXtdhRetired } from "@/hooks/useXtdhRetirement";
 import Link from "next/link";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
@@ -85,6 +86,8 @@ export default function ParticipationIdentityProfileCard({
 }: ParticipationIdentityProfileCardProps) {
   const compact = useCompactMode();
   const isChat = variant === "chat";
+  // From the identity switch-on xTDH is retired: no xTDH stat.
+  const xtdhRetired = useXtdhRetired();
   const avatarSize =
     isChat && compact ? ProfileBadgeSize.COMPACT : ProfileBadgeSize.MEDIUM;
   const profileLabel = profile.handle ?? profile.primary_address;
@@ -210,13 +213,15 @@ export default function ParticipationIdentityProfileCard({
             rate={profile.tdh_rate}
             compact={isChat}
           />
-          <IdentityStatLink
-            href={`${rootHref}/xtdh`}
-            label="xTDH"
-            value={profile.xtdh}
-            rate={profile.xtdh_rate}
-            compact={isChat}
-          />
+          {!xtdhRetired && (
+            <IdentityStatLink
+              href={`${rootHref}/xtdh`}
+              label="xTDH"
+              value={profile.xtdh}
+              rate={profile.xtdh_rate}
+              compact={isChat}
+            />
+          )}
           <IdentityStatLink
             href={rootHref}
             label="NIC"
