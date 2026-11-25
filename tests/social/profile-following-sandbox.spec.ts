@@ -286,7 +286,11 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
         name: "Block profile",
         exact: true,
       });
-      await expect(block.locator("svg")).toHaveCSS(
+      await expect(
+        page
+          .getByRole("button", { name: "Block profile", exact: true })
+          .locator("svg")
+      ).toHaveCSS(
         "color",
         await block.evaluate((element) => getComputedStyle(element).color)
       );

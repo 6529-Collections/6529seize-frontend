@@ -7,7 +7,7 @@ import {
 } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 
 import { PROFILE_ACTIVITY_TYPE_TO_TEXT } from "@/entities/IProfile";
-import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
+import dynamic from "next/dynamic";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -17,6 +17,11 @@ import { useId, useMemo, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import ProfileActivityLogsFilterList from "./ProfileActivityLogsFilterList";
 import ProfileActivityLogsFilterListItem from "./ProfileActivityLogsFilterListItem";
+
+const CommonDropdownItemsMobileWrapper = dynamic(
+  () =>
+    import("@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper")
+);
 
 export default function ProfileActivityLogsFilter({
   user: _user,

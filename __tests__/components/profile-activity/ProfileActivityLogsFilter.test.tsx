@@ -142,6 +142,7 @@ test("mobile sheet stays open for multiple selections and deselections", async (
   });
   expect(trigger).toHaveAttribute("aria-haspopup", "dialog");
   await user.click(trigger);
+  await screen.findByRole("dialog", { name: "Activity types" });
   for (const type of options) {
     const option = screen.getByRole("button", {
       name: PROFILE_ACTIVITY_TYPE_TO_TEXT[type],

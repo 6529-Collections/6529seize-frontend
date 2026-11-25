@@ -416,12 +416,15 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       });
       await expect(action).toBeEnabled();
       await expect(action).toHaveCSS("font-size", mobile ? "15px" : "16px");
-      await expect(action.locator("svg")).toHaveCount(mobile ? 1 : 0);
+      const icon = menu
+        .getByRole(mobile ? "button" : "menuitem", { name, exact: true })
+        .locator("svg");
+      await expect(icon).toHaveCount(mobile ? 1 : 0);
       if (mobile) {
         await expect(action).toHaveCSS("min-height", "48px");
         await expect(action).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
         await expect(action).toHaveCSS("border-radius", "12px");
-        await expect(action.locator("svg")).toHaveCSS("width", "20px");
+        await expect(icon).toHaveCSS("width", "20px");
       }
     }
     if (mobile) {
@@ -437,7 +440,8 @@ test.describe("Profile editing @auth @medium @local-only", () => {
         exact: true,
       });
       expect(
-        await remove
+        await menu
+          .getByRole("button", { name: "Delete Curation", exact: true })
           .locator("svg")
           .evaluate((node) => getComputedStyle(node).color)
       ).toBe(await remove.evaluate((node) => getComputedStyle(node).color));
@@ -487,7 +491,11 @@ test.describe("Profile editing @auth @medium @local-only", () => {
           exact: true,
         });
         await expect(action).toHaveCSS("font-size", mobile ? "15px" : "16px");
-        await expect(action.locator("svg")).toHaveCount(mobile ? 1 : 0);
+        await expect(
+          actions
+            .getByRole(mobile ? "button" : "menuitem", { name, exact: true })
+            .locator("svg")
+        ).toHaveCount(mobile ? 1 : 0);
       }
       if (mobile) {
         await page.screenshot({
@@ -576,9 +584,12 @@ test.describe("Profile editing @auth @medium @local-only", () => {
         await expect
           .poll(async () =>
             Math.abs(
-              (await composer.locator(".mobile-wrapper-dialog").boundingBox())!
-                .y +
-                (await composer
+              (await page
+                .getByRole("dialog", { name: "Add post", exact: true })
+                .locator(".mobile-wrapper-dialog")
+                .boundingBox())!.y +
+                (await page
+                  .getByRole("dialog", { name: "Add post", exact: true })
                   .locator(".mobile-wrapper-dialog")
                   .boundingBox())!.height -
                 ((page.viewportSize()?.height ?? 0) - 300)
@@ -649,7 +660,10 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     await finishHostedWalletInitialization(page, () =>
       page.goto("/following-artist-0")
     );
-    const header = page.locator('section[aria-labelledby="profile-heading"]');
+    const header = page
+      .getByRole("main")
+      .last()
+      .locator('section[aria-labelledby="profile-heading"]');
     const follow = header.getByRole("button", {
       name: /^Follow(?: back|ing)?$/,
     });
@@ -668,7 +682,11 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     expect(dmBox!.x + dmBox!.width).toBeLessThanOrEqual(followBox!.x);
     expect(moreBox!.x).toBeGreaterThanOrEqual(followBox!.x + followBox!.width);
     expect(Math.abs(moreBox!.y - followBox!.y)).toBeLessThanOrEqual(1);
-    await expect(page.locator("[data-profile-top-bar]")).toHaveCount(0);
+    expect(
+      await page.evaluate(
+        () => document.querySelectorAll("[data-profile-top-bar]").length
+      )
+    ).toBe(0);
     if (isCapacitorSimulationProject(testInfo.project.name)) {
       await expect(
         page.getByRole("button", { name: "Search 6529", exact: true })
@@ -726,7 +744,11 @@ test.describe("Profile editing @auth @medium @local-only", () => {
         insets: { top: 59 },
       });
       await page.goto(`/${profile}`);
-      await expect(page.locator("[data-profile-top-bar]")).toHaveCount(0);
+      expect(
+        await page.evaluate(
+          () => document.querySelectorAll("[data-profile-top-bar]").length
+        )
+      ).toBe(0);
       await expect(
         page.getByRole("button", { name: /^Open menu/ })
       ).toBeVisible();
@@ -1172,7 +1194,9 @@ test.describe("Profile editing @auth @medium @local-only", () => {
         const noCurations = page
           .getByRole("heading", { name: "No Curations yet", exact: true })
           .locator("xpath=ancestor::section");
-        const gradient = noCurations
+        const gradient = page
+          .getByRole("heading", { name: "No Curations yet", exact: true })
+          .locator("xpath=ancestor::section")
           .locator(':scope > [aria-hidden="true"]')
           .first();
         await expect(gradient).toBeVisible();
@@ -1194,7 +1218,8 @@ test.describe("Profile editing @auth @medium @local-only", () => {
         exact: true,
       });
       await expect(emptyHeading).toBeVisible();
-      const emptyGradient = emptyHeading
+      const emptyGradient = page
+        .getByRole("heading", { name: emptyTitle, exact: true })
         .locator("xpath=ancestor::section")
         .locator(':scope > [aria-hidden="true"]')
         .first();
@@ -2791,16 +2816,32 @@ test.describe("Collected personal actions @auth @medium @local-only", () => {
       (await request.post(`${api}/__composer-sandbox/collected-stats`)).ok()
     ).toBe(true);
     const mobile = (page.viewportSize()?.width ?? 0) < 768;
-    const summary = page.locator('[data-profile-section="Collection summary"]');
-    const filters = page.locator('[data-profile-section="Filters"]');
+    const summary = page
+      .getByRole("main")
+      .last()
+      .locator('[data-profile-section="Collection summary"]');
+    const filters = page
+      .getByRole("main")
+      .last()
+      .locator('[data-profile-section="Filters"]');
     try {
       await finishHostedWalletInitialization(page, () =>
         page.goto("/playwright/collected?details=closed")
       );
-      const metricRow = summary
+      const metricRow = page
+        .getByRole("main")
+        .last()
+        .locator('[data-profile-section="Collection summary"]')
         .locator('[data-profile-section-anchor="Collection summary"]')
         .locator(":scope > div");
-      await expect(metricRow.locator(":scope > *")).toHaveText([
+      await expect(
+        page
+          .getByRole("main")
+          .last()
+          .locator('[data-profile-section="Collection summary"]')
+          .locator('[data-profile-section-anchor="Collection summary"]')
+          .locator(":scope > div > *")
+      ).toHaveText([
         "x5,764Memes·unique x578",
         "x1Meme Sets",
         "x62NextGen",
@@ -2808,7 +2849,9 @@ test.describe("Collected personal actions @auth @medium @local-only", () => {
         "x1.76Boost",
       ]);
       const memes = summary.getByRole("button", { name: /Memes.*unique/ });
-      await expect(memes.locator("span").first()).toHaveText("x5,764");
+      await expect(memes.getByText("x5,764", { exact: true })).toHaveText(
+        "x5,764"
+      );
       await expect(memes.getByText("Memes", { exact: true })).toHaveCSS(
         "text-transform",
         "none"
@@ -2847,7 +2890,10 @@ test.describe("Collected personal actions @auth @medium @local-only", () => {
       });
       await expect(hide).toHaveAttribute("aria-expanded", "true");
       await expect(
-        page.locator(`[id="${await hide.getAttribute("aria-controls")}"]`)
+        page
+          .getByRole("main")
+          .last()
+          .locator(`[id="${await hide.getAttribute("aria-controls")}"]`)
       ).toBeVisible();
       await hide.click();
       await expect(details).toHaveAttribute("aria-expanded", "false");
@@ -2875,10 +2921,12 @@ test.describe("Collected personal actions @auth @medium @local-only", () => {
         .locator("li")
         .first();
       await expect(firstCard).toBeVisible();
-      const cardOrder = await firstCard.locator("h3").evaluate((name) => {
-        const content = name.parentElement!.parentElement!;
-        return Array.from(content.children).map((child) => child.textContent);
-      });
+      const cardOrder = await firstCard
+        .getByRole("heading", { level: 3 })
+        .evaluate((name) => {
+          const content = name.parentElement!.parentElement!;
+          return Array.from(content.children).map((child) => child.textContent);
+        });
       expect(cardOrder[0]).toBe("The Memes");
       expect(cardOrder[1]).toContain("Season 1 artwork 1");
       expect(cardOrder[2]).toBe("#1");
@@ -2892,9 +2940,17 @@ test.describe("Collected personal actions @auth @medium @local-only", () => {
         "rgba(0, 0, 0, 0)"
       );
       if (mobile) {
-        const scrollRow = filters.locator('[class*="tw-overflow-x-auto"]');
+        const scrollRow = page
+          .getByRole("main")
+          .last()
+          .locator('[data-profile-section="Filters"]')
+          .locator('[class*="tw-overflow-x-auto"]');
         const bounds = await scrollRow.boundingBox();
-        const shell = await page.locator("[data-profile-shell]").boundingBox();
+        const shell = await page
+          .getByRole("main")
+          .last()
+          .locator("[data-profile-shell]")
+          .boundingBox();
         expect(Math.abs(bounds!.x - shell!.x)).toBeLessThanOrEqual(1);
         expect(
           Math.abs(bounds!.x + bounds!.width - shell!.x - shell!.width)

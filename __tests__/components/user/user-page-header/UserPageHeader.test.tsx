@@ -832,9 +832,13 @@ describe("UserPageHeader", () => {
       </AuthContext.Provider>
     );
 
-    expect(
-      screen.getByRole("link", { name: "Open bob website" })
-    ).toHaveAttribute("href", "/bob/index.html");
+    const websiteLinks = screen.getAllByRole("link", {
+      name: "Open bob website",
+    });
+    expect(websiteLinks).toHaveLength(2);
+    for (const websiteLink of websiteLinks) {
+      expect(websiteLink).toHaveAttribute("href", "/bob/index.html");
+    }
   });
 
   it("does not render profile website link without a primary CMS site", () => {

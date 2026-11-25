@@ -152,14 +152,15 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
 
     const details = page.getByRole("button", { name: "Details", exact: true });
     const metrics = page
-      .getByRole("button", { name: "Details", exact: true })
-      .locator("..")
-      .locator("[class~='tw-overflow-x-auto']");
-    const fade = page
-      .getByRole("button", { name: "Details", exact: true })
-      .locator("..")
-      .locator("[class~='tw-overflow-x-auto']")
-      .locator("..")
+      .getByRole("main")
+      .locator('[data-profile-section-anchor="Collection summary"]')
+      .locator(":scope > div");
+    const summary = page
+      .getByRole("main")
+      .locator('[data-profile-section="Collection summary"]');
+    const summaryFade = page
+      .getByRole("main")
+      .locator('[data-profile-section-anchor="Collection summary"]')
       .locator(":scope > div[aria-hidden='true']");
 
     await expect(details).toBeVisible();
@@ -168,79 +169,55 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     await expect(metrics.getByRole("button").first()).toBeVisible({
       timeout: RESPONSE_TIMEOUT_MS,
     });
-    await expect(fade).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
-    for (const width of [430, 520, 640, 767, 390]) {
+    for (const width of [430, 520, 640, 767, 390, 1280, 390]) {
       await page.setViewportSize({ width, height: 844 });
-      await expect
-        .poll(async () => {
-          const hasMore = await metrics.evaluate(
-            (node) => node.scrollLeft + node.clientWidth < node.scrollWidth - 1
-          );
-          return (await fade.isVisible()) === hasMore;
-        })
-        .toBe(true);
-    }
-    const detailsBefore = await details.boundingBox();
-    const metricsBox = await metrics.boundingBox();
-    expect(detailsBefore).not.toBeNull();
-    expect(metricsBox).not.toBeNull();
-    if (!detailsBefore || !metricsBox) {
-      throw new Error(
-        "Expected the Collected statistics header to be rendered"
+      await expect(metrics).toHaveCSS("flex-wrap", "wrap");
+      await expect(summaryFade).toHaveCount(0);
+      const dimensions = await metrics.evaluate((node) => ({
+        available: node.clientWidth,
+        content: node.scrollWidth,
+      }));
+      expect(dimensions.content).toBeLessThanOrEqual(dimensions.available + 1);
+      const detailsBounds = await details.boundingBox();
+      const metricsBounds = await metrics.boundingBox();
+      const summaryBounds = await summary.boundingBox();
+      expect(detailsBounds).not.toBeNull();
+      expect(metricsBounds).not.toBeNull();
+      expect(summaryBounds).not.toBeNull();
+      expect(detailsBounds!.height).toBe(44);
+      expect(detailsBounds!.y).toBeGreaterThanOrEqual(
+        metricsBounds!.y + metricsBounds!.height
       );
+      expect(Math.abs(detailsBounds!.x - summaryBounds!.x)).toBeLessThanOrEqual(
+        1
+      );
+      expect(
+        Math.abs(detailsBounds!.width - summaryBounds!.width)
+      ).toBeLessThanOrEqual(2);
+      expect(
+        Math.abs(
+          detailsBounds!.y +
+            detailsBounds!.height -
+            summaryBounds!.y -
+            summaryBounds!.height
+        )
+      ).toBeLessThanOrEqual(1);
     }
-    expect(detailsBefore.height).toBeLessThanOrEqual(40);
-    expect(
-      Math.abs(
-        detailsBefore.y +
-          detailsBefore.height / 2 -
-          (metricsBox.y + metricsBox.height / 2)
-      )
-    ).toBeLessThanOrEqual(1);
-    expect(
-      detailsBefore.x - (metricsBox.x + metricsBox.width)
-    ).toBeGreaterThanOrEqual(16);
-
     const lastMetricShortcut = metrics.getByRole("button").last();
     await lastMetricShortcut.focus();
-    for (let press = 0; press < 10; press += 1) {
-      await lastMetricShortcut.press("ArrowRight");
-    }
-    await expect
-      .poll(() =>
-        metrics.evaluate(
-          (node) => node.scrollLeft + node.clientWidth >= node.scrollWidth - 1
-        )
-      )
-      .toBe(true);
     await expect(lastMetricShortcut).toBeFocused();
-    await expect(fade).toHaveCount(0);
-
-    await metrics.hover();
-    await page.mouse.wheel(1000, 0);
-    await expect
-      .poll(() =>
-        metrics.evaluate(
-          (node) => node.scrollLeft + node.clientWidth >= node.scrollWidth - 1
-        )
-      )
-      .toBe(true);
-    await expect(fade).toHaveCount(0);
-    expect(await details.boundingBox()).toEqual(detailsBefore);
     const boostMetric = metrics
       .getByText("Boost", { exact: true })
       .locator("..");
     await expect(boostMetric).toBeVisible();
-    const boostMetricBounds = await boostMetric.boundingBox();
-    expect(boostMetricBounds).not.toBeNull();
-    if (!boostMetricBounds) {
-      throw new Error("Expected the Boost statistic at the end of the row");
-    }
-    expect(
-      detailsBefore.x - (boostMetricBounds.x + boostMetricBounds.width)
-    ).toBeGreaterThanOrEqual(16);
-    await expect(page.getByText("Seasons", { exact: true })).toBeVisible();
+    const seasons = page.getByText("Seasons", { exact: true });
+    await expect(seasons).toBeVisible();
     await expect(page.getByRole("button", { name: /^SZN1 / })).toBeVisible();
+    const seasonsBounds = await seasons.boundingBox();
+    const detailsBounds = await details.boundingBox();
+    expect(detailsBounds!.y).toBeGreaterThanOrEqual(
+      seasonsBounds!.y + seasonsBounds!.height
+    );
 
     await details.click();
     await expectUrlState(
