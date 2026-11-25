@@ -1,5 +1,6 @@
 "use client";
 
+import { WavesMoveScope } from "@/components/waves-move/WavesMoveScope";
 import HighlightDropWrapper from "@/components/drops/view/HighlightDropWrapper";
 import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -88,7 +89,17 @@ function CompetitionDrop(props: DropProps) {
 }
 
 export default function Drop(props: DropProps) {
-  return <CompetitionDrop {...props} />;
+  // A drop's controls follow its wave's part in the move to the 6529
+  // Network, wherever the drop shows.
+  return (
+    <WavesMoveScope
+      wave={props.drop.wave}
+      waveId={props.drop.wave.id}
+      dropId={props.drop.id}
+    >
+      <CompetitionDrop {...props} />
+    </WavesMoveScope>
+  );
 }
 
 function DropContent({

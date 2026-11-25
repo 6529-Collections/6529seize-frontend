@@ -53,6 +53,9 @@ import { CompetitionState, COMPETITION_BUTTON } from "./CompetitionState";
 import { CompetitionMyVotesSort } from "./CompetitionMyVotesSort";
 import { CompetitionLoadMore } from "./CompetitionLoadMore";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
+import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWriters";
+import { scheduleIndexRefresh } from "@/lib/chain-waves/optimistic";
 import { t } from "@/i18n/messages";
 import { useInView } from "@/hooks/useInView";
 import { formatInteger } from "@/i18n/format";
@@ -193,6 +196,10 @@ function ScopedCompetitionMyVotes({
   const [selectionMode, setSelectionMode] = useState(false);
   const isSelecting = selectionMode;
   const locale = useBrowserLocale();
+  // Votes move to the 6529 Network: shown, but not changeable here.
+  const votesPaused = useWavesWritesPaused("votes");
+  const canVoteNow = competition.permissions.vote && !votesPaused;
+  const chainWriters = useChainWavesWriters();
   const [sort, setSort] = useLocalPreference<ApiCompetitionMyVotesSort>(
     `competitionMyVotesSort_${competition.wave_id}_${competition.id}_${viewer ?? "anonymous"}`,
     ApiCompetitionMyVotesSort.VoteAmount,
@@ -235,12 +242,18 @@ function ScopedCompetitionMyVotes({
     { include: "cards", sort },
     !!viewer
   );
+  // Votes reset on the 6529 Network, hidden until 6529.io's index reads them.
+  const [chainResets, setChainResets] = useState<ReadonlySet<string>>(
+    () => new Set()
+  );
   const votes = useMemo(
     () =>
       (query.data?.pages.flatMap((page) => page.data) ?? []).filter(
-        (vote) => vote.entry_status === ApiCompetitionEntryStatus.Active
+        (vote) =>
+          vote.entry_status === ApiCompetitionEntryStatus.Active &&
+          !chainResets.has(vote.drop_id)
       ),
-    [query.data]
+    [query.data, chainResets]
   );
   const cards = useMemo(
     () => ({
@@ -296,11 +309,29 @@ function ScopedCompetitionMyVotes({
     votes.length > 0 && votes.every((vote) => selected.has(vote.drop_id));
   const resetVote = async (dropId: string) => {
     const vote = votes.find((item) => item.drop_id === dropId);
-    if (
-      vote?.entry_status !== ApiCompetitionEntryStatus.Active ||
-      !competition.permissions.vote
-    )
+    if (vote?.entry_status !== ApiCompetitionEntryStatus.Active || !canVoteNow)
       throw new Error("Vote cannot be reset");
+    if (chainWriters) {
+      // On the 6529 Network the reset carries its own signature.
+      assertActiveScope();
+      await chainWriters.vote({ dropId, amount: 0 });
+      // The list drops the vote at once. 6529.io's index shows the reset
+      // once it has read the block; a refetch now would bring the old vote
+      // back.
+      setChainResets((current) => new Set(current).add(dropId));
+      scheduleIndexRefresh(async () => {
+        try {
+          await invalidateCompetition(client, identity);
+        } finally {
+          setChainResets((current) => {
+            const next = new Set(current);
+            next.delete(dropId);
+            return next;
+          });
+        }
+      });
+      return;
+    }
     const address = getWalletAddress();
     const assertCurrentActor = () => {
       assertActiveScope();
@@ -380,7 +411,7 @@ function ScopedCompetitionMyVotes({
           ? (credits.data?.remaining ?? null)
           : null
       }
-      isVotingClosed={!competition.permissions.vote}
+      isVotingClosed={!canVoteNow}
       resetVote={resetVote}
       onResettingChange={setResetting}
       onToggleSelectAll={() => {
@@ -439,7 +470,7 @@ function ScopedCompetitionMyVotes({
               key={vote.entry_id}
               vote={vote}
               mobile={mobile}
-              disabled={!competition.permissions.vote || resetting}
+              disabled={!canVoteNow || resetting}
               onSubmittingChange={onSubmittingChange}
               retry={() => {
                 void result.refetch();
@@ -449,7 +480,7 @@ function ScopedCompetitionMyVotes({
           );
         const entryDrop = result.data.drop;
         const isClosed =
-          !competition.permissions.vote ||
+          !canVoteNow ||
           result.data.entry.status !== ApiCompetitionEntryStatus.Active;
         return (
           <div

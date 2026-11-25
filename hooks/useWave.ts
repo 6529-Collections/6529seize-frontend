@@ -9,6 +9,7 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { Time } from "@/helpers/time";
 import { calculateLastDecisionTime } from "@/helpers/waves/time.utils";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import type { ApiWaveDecisionPause } from "@/generated/models/ApiWaveDecisionPause";
 import type { ApiWaveDecision } from "@/generated/models/ApiWaveDecision";
 
@@ -43,6 +44,8 @@ interface WaveInfo {
     maxSubmissions: number | null;
     currentSubmissions: number | null;
     canSubmitNow: boolean;
+    /** Entries are paused for the move to the 6529 Network. */
+    isPausedForMove: boolean;
   };
   chat: {
     isEligible: boolean;
@@ -131,6 +134,8 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
   // Stable fallback timestamp for unset boundaries and pause calculations.
   const now = useMemo(() => Time.currentMillis(), []);
   const { isMemesWave, isCurationWave, isQuorumWave } = useSeizeSettings();
+  // Entries open again on the 6529 Network at the switch-on.
+  const isPausedForMove = useWavesWritesPaused("entries");
 
   // Calculate pause information
   const currentPause = useMemo(() => {
@@ -352,13 +357,15 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
       wave.participation.authenticated_user_eligible && // User is eligible
       isWithinSubmissionPeriod && // Within time window
       projectedCount !== null && // Required native count is available
-      !hasReachedSubmissionLimit // Has not reached limit
+      !hasReachedSubmissionLimit && // Has not reached limit
+      !isPausedForMove // Entries are not paused for the move
     );
   }, [
     wave,
     isWithinSubmissionPeriod,
     projectedCount,
     hasReachedSubmissionLimit,
+    isPausedForMove,
   ]);
 
   return {
@@ -384,6 +391,7 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
 
       // Convenience aggregated property
       canSubmitNow,
+      isPausedForMove,
     },
     chat: {
       isEligible: wave?.chat.authenticated_user_eligible ?? false,

@@ -19,6 +19,7 @@ import BrainRightSidebarConfiguration from "./BrainRightSidebarConfiguration";
 import { Mode, SidebarTab } from "./BrainRightSidebarTypes";
 import WaveRepDetails from "./WaveRepDetails";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
+import { WavesMoveScope } from "@/components/waves-move/WavesMoveScope";
 
 interface WaveContentProps {
   readonly scrollRef?: React.Ref<HTMLDivElement> | undefined;
@@ -159,7 +160,9 @@ export const WaveContent: React.FC<WaveContentProps> = ({
         ref={scrollRef}
         className="tw-min-h-0 tw-min-w-0 tw-flex-1 tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-x-none tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300"
       >
-        {activeSidebarComponent}
+        <WavesMoveScope wave={wave} waveId={wave.id}>
+          {activeSidebarComponent}
+        </WavesMoveScope>
       </div>
     </div>
   );

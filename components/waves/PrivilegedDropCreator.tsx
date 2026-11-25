@@ -4,6 +4,7 @@ import {
   isProxyRoleAuthSession,
 } from "@/components/auth/auth-session-scope";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import {
   ActiveDropAction,
@@ -162,6 +163,9 @@ export default function PrivilegedDropCreator({
     wave.chat,
     activeDrop
   );
+  // Entries move to the 6529 Network: from the freeze the composer says so
+  // instead of opening for an entry, until entries open there.
+  const entriesPausedForMove = useWavesWritesPaused("entries");
   const competition = presentationCompetition(wave);
   const { submissionRestriction, chatRestriction } = useDropPrivileges({
     isLoggedIn: hasProfile || isProfileLoadingForWallet,
@@ -185,6 +189,7 @@ export default function PrivilegedDropCreator({
     identityDropsCount: competition
       ? (competition.your_active_entries_count ?? null)
       : wave.metrics.your_participation_drops_count,
+    submissionsPaused: entriesPausedForMove,
     onSlowModeCooldownExpired: refreshWaveAfterSlowModeExpires,
   });
   const blockingChatRestriction =

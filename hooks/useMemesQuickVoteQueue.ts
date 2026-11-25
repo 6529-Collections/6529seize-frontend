@@ -1,5 +1,7 @@
 "use client";
 
+import { useChainWavesActive } from "@/hooks/useWavesMovePhase";
+import { scheduleIndexRefresh } from "@/lib/chain-waves/optimistic";
 import { AuthContext } from "@/components/auth/Auth";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { convertApiDropToExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -146,8 +148,12 @@ const useMemesQuickVoteQueueSubmission = ({
     } | null>
   >;
   readonly stateKey: string;
-}) =>
-  useMemesQuickVoteSubmit({
+}) => {
+  // A quick vote on the 6529 Network reaches 6529.io's index only once its
+  // block is in; refetching the undiscovered drops sooner would show the
+  // voted drop again.
+  const fromChain = useChainWavesActive();
+  return useMemesQuickVoteSubmit({
     onRatingFailure: (drop, amount, type, message) => {
       setSubmissionError({ key: stateKey, message });
       updatePendingDropIds(drop.id, false);
@@ -204,6 +210,13 @@ const useMemesQuickVoteQueueSubmission = ({
         );
       }
 
+      if (fromChain) {
+        scheduleIndexRefresh(() => {
+          invalidateQuickVoteUndiscoveredDrop();
+          runBestEffortSync(session.syncUndiscoveredWindow);
+        });
+        return;
+      }
       invalidateQuickVoteUndiscoveredDrop();
       runBestEffortSync(session.syncUndiscoveredWindow);
     },
@@ -211,6 +224,7 @@ const useMemesQuickVoteQueueSubmission = ({
     setAndPersistRecentAmounts,
     setToast,
   });
+};
 
 export const useMemesQuickVoteQueue = ({
   enabled = true,

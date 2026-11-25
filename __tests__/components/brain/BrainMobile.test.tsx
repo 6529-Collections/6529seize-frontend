@@ -10,6 +10,7 @@ import { BrainView } from "@/components/brain/mobile/brainMobileViews";
 import { useBrainMobileSubmissionRules } from "@/components/brain/mobile/BrainMobileSubmissionRulesContext";
 import { SidebarTab } from "@/components/brain/right-sidebar/BrainRightSidebarTypes";
 import { useWaveData } from "@/hooks/useWaveData";
+import { useWavesMoveScope } from "@/components/waves-move/WavesMoveScope";
 import {
   getHistoryWaveTab,
   WAVE_TAB_STORAGE_KEY,
@@ -274,10 +275,15 @@ jest.mock(
   })
 );
 
-jest.mock("@/components/brain/notifications/NotificationsContainer", () => ({
-  __esModule: true,
-  default: () => <div data-testid="notifications" />,
-}));
+jest.mock("@/components/brain/notifications/NotificationsContainer", () => {
+  const {
+    useWavesMoveScope,
+  } = require("@/components/waves-move/WavesMoveScope");
+  return {
+    __esModule: true,
+    default: () => <div data-testid="notifications">{useWavesMoveScope()}</div>,
+  };
+});
 
 const mockCreateWaveModal = jest.fn(
   ({
@@ -621,6 +627,57 @@ describe("BrainMobile", () => {
       expect(mockDialogMountCount).toBe(0);
     }
   );
+
+  it("gives the mobile wave views the active wave's part in the move", async () => {
+    const ScopeProbe = () => (
+      <span data-testid="move-scope">{useWavesMoveScope()}</span>
+    );
+    mockSearchParams.set("wave", "1");
+    waveData = { ...createWave(false), stays_on_site: true };
+    const { unmount } = render(
+      <BrainMobile>
+        <ScopeProbe />
+      </BrainMobile>
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("move-scope")).toHaveTextContent("stays")
+    );
+    unmount();
+
+    waveData = { ...createWave(false), stays_on_site: false };
+    render(
+      <BrainMobile>
+        <ScopeProbe />
+      </BrainMobile>
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("move-scope")).toHaveTextContent("moves")
+    );
+  });
+
+  it("leaves notifications outside the open wave's part in the move", async () => {
+    mockPathname = "/notifications";
+    // The shell still holds a wave's data, which doesn't own this view.
+    waveData = { ...createWave(false), stays_on_site: true };
+    render(<BrainMobile>child</BrainMobile>);
+    await waitFor(() =>
+      expect(screen.getByTestId("notifications")).toHaveTextContent("none")
+    );
+  });
+
+  it("leaves the move's site-wide scope where no wave is open", async () => {
+    const ScopeProbe = () => (
+      <span data-testid="move-scope">{useWavesMoveScope()}</span>
+    );
+    render(
+      <BrainMobile>
+        <ScopeProbe />
+      </BrainMobile>
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("move-scope")).toHaveTextContent("none")
+    );
+  });
 
   it("keeps quick vote out of the default wave chat view in app", async () => {
     mockSearchParams.set("wave", "1");

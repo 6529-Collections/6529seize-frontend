@@ -27,6 +27,7 @@ const STATUS_MESSAGE_KEYS: Partial<
   "limit-reached": "memes.submission.identity.limitReached",
   "not-started": "memes.submission.identity.notStarted",
   ended: "memes.submission.identity.ended",
+  paused: "wavesMove.paused",
 };
 
 export function SubmissionIdentityPanel({
@@ -50,6 +51,7 @@ export function SubmissionIdentityPanel({
     "limit-reached",
     "not-started",
     "ended",
+    "paused",
   ].includes(status);
   const statusColor = isWarning ? "tw-text-amber-300" : "tw-text-iron-300";
 

@@ -19,7 +19,9 @@ export function useWaveGuidelinesSubmission({
   requestGuidelinesAgreement,
   setToast,
 }: {
-  readonly enqueueDrop: (dropRequest: DropMutationBody) => boolean;
+  readonly enqueueDrop: (
+    dropRequest: DropMutationBody
+  ) => boolean | Promise<boolean>;
   readonly requestGuidelinesAgreement: (
     dropType: ApiDropType | undefined
   ) => Promise<WaveGuidelinesAgreementResult>;

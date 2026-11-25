@@ -5,6 +5,10 @@ import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import ButtonLink from "@/components/utils/button/ButtonLink";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import {
+  useChainIdentityActive,
+  useIdentityEditingPaused,
+} from "@/hooks/useIdentityMovePhase";
 import { t } from "@/i18n/messages";
 
 interface UserSetUpProfileCtaProps {
@@ -38,6 +42,8 @@ export default function UserSetUpProfileCta({
   const { connectedProfile, fetchingProfile } = useContext(AuthContext);
   const { address, hasValidWalletAuth } = useSeizeConnectContext();
   const locale = useBrowserLocale();
+  const identityEditingPaused = useIdentityEditingPaused();
+  const chainIdentityActive = useChainIdentityActive();
 
   const show = shouldShowUserSetUpProfileCta({
     address,
@@ -46,7 +52,8 @@ export default function UserSetUpProfileCta({
     hasValidWalletAuth,
   });
 
-  if (!show || !address) return null;
+  if (!show || !address || (identityEditingPaused && !chainIdentityActive))
+    return null;
 
   const wrapperClassName =
     className === undefined
@@ -55,7 +62,13 @@ export default function UserSetUpProfileCta({
 
   return (
     <div className={wrapperClassName}>
-      <ButtonLink href={`/${address.toLowerCase()}`} variant="action" size="md">
+      <ButtonLink
+        href={
+          chainIdentityActive ? "/network/identity" : `/${address.toLowerCase()}`
+        }
+        variant="action"
+        size="md"
+      >
         {t(locale, "profileSetup.createAction")}
       </ButtonLink>
     </div>

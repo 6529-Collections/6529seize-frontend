@@ -143,6 +143,26 @@ describe("MyStreamWaveTabsMemeSubmit", () => {
     }
   );
 
+  it("says submissions are paused for the move, ahead of eligibility", () => {
+    renderComponent({
+      ...baseInfo,
+      participation: {
+        status: SubmissionStatus.ACTIVE,
+        isEligible: false,
+        isPausedForMove: true,
+        canSubmitNow: false,
+        startTime: 0,
+        endTime: 0,
+      },
+    });
+    expect(screen.getByTestId("paused")).toHaveAccessibleName(
+      "Submissions Paused"
+    );
+    expect(screen.getByTestId("paused")).toHaveAccessibleDescription(
+      "Paused for the move to the 6529 Network."
+    );
+  });
+
   it("renders limit reached state", () => {
     renderComponent({
       ...baseInfo,

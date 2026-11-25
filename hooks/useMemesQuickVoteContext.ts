@@ -2,11 +2,15 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { useMemo } from "react";
 
 export const useMemesQuickVoteContext = () => {
   const { connectedProfile, activeProfileProxy } = useAuth();
   const { seizeSettings, isLoaded } = useSeizeSettings();
+  // Quick vote only casts votes, which are paused for the move to the 6529
+  // Network.
+  const wavesWritesPaused = useWavesWritesPaused("votes");
 
   const contextProfile = useMemo(() => {
     const normalizedHandle = connectedProfile?.handle?.trim();
@@ -20,7 +24,8 @@ export const useMemesQuickVoteContext = () => {
     memesWaveId.length > 0 &&
     typeof contextProfile === "string" &&
     contextProfile.length > 0 &&
-    activeProfileProxy === null;
+    activeProfileProxy === null &&
+    !wavesWritesPaused;
 
   return {
     contextProfile,

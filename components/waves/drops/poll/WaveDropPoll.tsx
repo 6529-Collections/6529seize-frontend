@@ -9,9 +9,20 @@ import { useMyStreamActionsOptional } from "@/contexts/wave/MyStreamContext";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropPoll } from "@/generated/models/ApiDropPoll";
-import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import {
+  chainWriteDetails,
+  chainWriteFailure,
+} from "@/components/chain-waves/chainWavesErrorMessage";
+import { chainIdentityPointer } from "@/components/chain-waves/chainIdentityPointer";
 import { preserveAuthenticatedPollVote } from "@/helpers/waves/poll-vote-reconciliation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import {
+  usePollClosedByMove,
+  useWavesWritesPaused,
+} from "@/hooks/useWavesMovePhase";
+import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWriters";
+import { scheduleIndexRefresh } from "@/lib/chain-waves/optimistic";
+import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
 import { t } from "@/i18n/messages";
 import { voteDropPollV2 } from "@/services/api/wave-drops-v2-api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -19,6 +30,7 @@ import {
   type SyntheticEvent,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -187,7 +199,17 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
   const [localPollOverride, setLocalPollOverride] =
     useState<LocalPollOverride | null>(null);
   const localPoll = getLocalPoll(localPollOverride, drop.poll);
-  const poll = localPoll ?? drop.poll;
+  const shownPoll = localPoll ?? drop.poll;
+  // A poll still open when its wave moved was closed then on the 6529
+  // Network, whatever 6529.io's copy says: it shows as closed at the freeze.
+  const closedByMoveMs = usePollClosedByMove(shownPoll, drop.created_at);
+  const poll = useMemo(
+    () =>
+      shownPoll && closedByMoveMs !== null
+        ? { ...shownPoll, is_open: false, closing_time: closedByMoveMs }
+        : shownPoll,
+    [shownPoll, closedByMoveMs]
+  );
   const [interactionState, setInteractionState] =
     useState<PollInteractionState | null>(null);
 
@@ -195,17 +217,33 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
   const isViewerChatEligible =
     waveEligibility?.authenticated_user_eligible_to_chat ??
     drop.wave.authenticated_user_eligible_to_chat;
-  const canRespondToPoll = getCanRespondToPoll({
-    isViewerChatEligible,
-    poll,
-  });
+  // Poll ballots move to the 6529 Network: the results stay readable. A
+  // poll in a wave that stays on 6529.io (direct messages too) keeps working.
+  const pollBallotsPaused = useWavesWritesPaused("polls");
+  const canRespondToPoll =
+    !pollBallotsPaused &&
+    getCanRespondToPoll({
+      isViewerChatEligible,
+      poll,
+    });
 
+  const chainWriters = useChainWavesWriters();
   const voteMutation = useMutation({
-    mutationFn: async (options: readonly number[]) =>
-      await voteDropPollV2({
+    mutationFn: async (options: readonly number[]): Promise<ApiDrop> => {
+      if (chainWriters && poll) {
+        // On the 6529 Network the ballot carries its own signature; the poll
+        // shows it until 6529.io's index reads it from the chain.
+        await chainWriters.pollBallot({
+          pollId: poll.id,
+          optionNumbers: options,
+        });
+        return { ...drop, poll: getOptimisticPoll(poll, options) };
+      }
+      return await voteDropPollV2({
         drop,
         options,
-      }),
+      });
+    },
     onSuccess: (updatedDrop) => {
       if (updatedDrop.poll) {
         setLocalPollOverride({
@@ -222,24 +260,36 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
         updatedDrop,
         ProcessIncomingDropType.DROP_INSERT
       );
-      queryClient
-        .invalidateQueries({
-          queryKey: [QueryKey.DROP_POLL_VOTERS],
-        })
-        .catch(() => undefined);
-      queryClient
-        .invalidateQueries({
-          queryKey: [QueryKey.WAVE_POLLS],
-        })
-        .catch(() => undefined);
+      const refresh = () =>
+        Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: [QueryKey.DROP_POLL_VOTERS],
+          }),
+          queryClient.invalidateQueries({
+            queryKey: [QueryKey.WAVE_POLLS],
+          }),
+        ]);
+      // On the 6529 Network, 6529.io's index shows the ballot once it has
+      // read the block; a refetch now would show the old counts.
+      if (chainWriters) {
+        scheduleIndexRefresh(refresh);
+      } else {
+        refresh().catch(() => undefined);
+      }
     },
     onError: (error) => {
       clearUpdatedVoteStatus();
+      // Cancelled at the wallet prompt: nothing was sent.
+      if (isUserRejectedSigningError(error)) {
+        return;
+      }
       setToast({
         type: "error",
         title: "Couldn't submit your poll vote.",
-        description: "Please try again.",
-        details: getToastErrorDetails(error),
+        description:
+          chainIdentityPointer(locale, error) ??
+          chainWriteFailure(locale, error, "Please try again.", "ballot"),
+        details: chainWriteDetails(error),
       });
     },
   });
@@ -261,7 +311,10 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
         return false;
       }
 
-      const { success } = await requestAuth();
+      // On the 6529 Network each ballot carries its own signature.
+      const { success } = chainWriters
+        ? { success: true }
+        : await requestAuth();
       if (!success) {
         return false;
       }
@@ -294,6 +347,7 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
       return true;
     },
     [
+      chainWriters,
       drop.poll,
       flashUpdatedVoteStatus,
       interactionState,
@@ -677,6 +731,21 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
               <PollVotedStatus label={voteStatusLabel} updated={showUpdated} />
             )}
           </div>
+        </div>
+      )}
+
+      {pollBallotsPaused && poll.is_open && (
+        <div className={POLL_FOOTER_CLASS_NAME}>
+          <p className="tw-m-0 tw-text-xs tw-text-iron-400">
+            {t(locale, "wavesMove.paused")}
+          </p>
+        </div>
+      )}
+      {closedByMoveMs !== null && (
+        <div className={POLL_FOOTER_CLASS_NAME}>
+          <p className="tw-m-0 tw-text-xs tw-text-iron-400">
+            {t(locale, "wavesMove.pollClosed")}
+          </p>
         </div>
       )}
     </div>

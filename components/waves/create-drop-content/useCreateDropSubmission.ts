@@ -634,9 +634,13 @@ export const useCreateDropSubmission = ({
         handleDuplicateIdentitySubmissionError,
       });
 
+      // The composer clears only once the send is accepted; an entry for the
+      // 6529 Network is accepted once it is on its way, so a declined wallet
+      // prompt leaves the draft here.
       const submitResult = submitDrop({
         drop: updatedDropRequest,
         dropId: optimisticDrop?.id ?? null,
+        keepsDraftWhenRefused: true,
         onSuccess: dropModeSubmitCallbacks.onSuccess,
         onError: (error) => {
           if (handleReplyTargetUnavailableError(error)) {

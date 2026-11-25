@@ -61,10 +61,12 @@ import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.en-US
 import pageMetadataMessages from "@/i18n/messages/pageMetadata.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
 import utcScheduleMessages from "@/i18n/messages/utcSchedule.en-US.json";
+import identityMoveMessages from "@/i18n/messages/identityMove.en-US.json";
 import displayTimeZoneMessages from "@/i18n/messages/displayTimeZone.en-US.json";
 import shareDropsImageMessages from "@/i18n/messages/shareDropsImage.en-US.json";
 import worldTimeZonesMessages from "@/i18n/messages/worldTimeZones.en-US.json";
 import wavesRightPanelMessages from "@/i18n/messages/wavesRightPanel.en-US.json";
+import wavesMoveMessages from "@/i18n/messages/wavesMove.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-connect";
 import { DEVICES_SECURITY_MESSAGES } from "@/i18n/messages/devices-security";
@@ -691,6 +693,8 @@ const MEMES_SUBMISSION_MESSAGES = objectMessages("memes.submission", {
     "Read-only preview of how your submission may appear in different views.",
   "additionalInfo.description":
     "Complete the following details for distribution and storytelling purposes.",
+  "documentation.notLinked":
+    "Your notes aren't linked to this entry. Find them under My artwork documentation.",
 } as const);
 
 const MEMES_WAVE_FOOTER_MESSAGES = objectMessages("memes.waveFooter", {
@@ -5804,6 +5808,7 @@ export const EN_US_ROOT_MESSAGES = {
   ...PROFILE_FOLLOW_MESSAGES,
   ...WAVES_SIDEBAR_MESSAGES,
   ...wavesRightPanelMessages,
+  ...wavesMoveMessages,
   ...QUICK_DM_MESSAGES,
   ...NOTIFICATIONS_FOLLOW_BUTTON_MESSAGES,
   ...NOTIFICATIONS_WAVE_CREATED_MESSAGES,
@@ -5888,6 +5893,7 @@ export const EN_US_ROOT_MESSAGES = {
   ...pageMetadataMessages,
   ...toolsMessages,
   ...utcScheduleMessages,
+  ...identityMoveMessages,
   ...displayTimeZoneMessages,
   ...shareDropsImageMessages,
   ...worldTimeZonesMessages,

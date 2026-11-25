@@ -32,6 +32,13 @@ export function getMemesSubmissionHelp(
         : t(locale, "waves.dropEligibility.opensSoonReason"),
     };
   }
+  // Entries move to the 6529 Network: paused, whoever may submit.
+  if (participation.isPausedForMove) {
+    return {
+      label: t(locale, "wavesMove.submissionsPaused"),
+      restrictionMessage: t(locale, "wavesMove.paused"),
+    };
+  }
   if (participation.isEligible === false) {
     return {
       label: t(locale, "waves.dropEligibility.howToSubmit"),

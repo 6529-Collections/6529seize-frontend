@@ -17,6 +17,7 @@ import WaveDropContent from "@/components/waves/drops/WaveDropContent";
 import WaveDropAuthorPfp from "@/components/waves/drops/WaveDropAuthorPfp";
 import WaveDropMetadata from "@/components/waves/drops/WaveDropMetadata";
 import WaveDropReply from "@/components/waves/drops/WaveDropReply";
+import { WavesMoveScope } from "@/components/waves-move/WavesMoveScope";
 import { ImageScale } from "@/helpers/image.helpers";
 import { areSameProfileIdentity } from "@/helpers/ProfileHelpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -312,18 +313,21 @@ function UserPageProfileWaveMasonryCard({
   const actions = canManageActiveCuration ? (
     <CurationMasonryActions drop={drop} curationId={curationId} />
   ) : null;
+  // The drop's own wave scopes the move's pause and lines inside it.
   const dropContent = (
-    <WaveDropContent
-      drop={drop}
-      activePartIndex={activePartIndex}
-      setActivePartIndex={setActivePartIndex}
-      onQuoteClick={navigateToDropWave}
-      onLongPress={() => {}}
-      setLongPressTriggered={(_triggered: boolean) => {}}
-      onDropContentClick={navigateToDropWave}
-      mediaImageScale={ImageScale.AUTOx1080}
-      fullWidthMedia={true}
-    />
+    <WavesMoveScope wave={drop.wave} waveId={drop.wave.id} dropId={drop.id}>
+      <WaveDropContent
+        drop={drop}
+        activePartIndex={activePartIndex}
+        setActivePartIndex={setActivePartIndex}
+        onQuoteClick={navigateToDropWave}
+        onLongPress={() => {}}
+        setLongPressTriggered={(_triggered: boolean) => {}}
+        onDropContentClick={navigateToDropWave}
+        mediaImageScale={ImageScale.AUTOx1080}
+        fullWidthMedia={true}
+      />
+    </WavesMoveScope>
   );
 
   if (layout.usesDefaultDropRenderer) {

@@ -1,6 +1,7 @@
 import { EN_US_ROOT_MESSAGES } from "@/i18n/messages/en-US";
 import { AI_DOWNLOAD_MESSAGES } from "@/i18n/namespaces/ai-download";
 import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/namespaces/artwork-documentation";
+import { CHAIN_IDENTITY_MESSAGES } from "@/i18n/namespaces/chain-identity";
 import { DESKTOP_DOWNLOAD_MESSAGES } from "@/i18n/namespaces/desktop-download";
 import { MUSEUM_MESSAGES } from "@/i18n/namespaces/museum";
 import { STREAM_NAMESPACE_MESSAGES } from "@/i18n/namespaces/stream";
@@ -27,6 +28,7 @@ export const EN_US_MESSAGES = {
   ...STREAM_NAMESPACE_MESSAGES,
   ...AI_DOWNLOAD_MESSAGES,
   ...ARTWORK_DOCUMENTATION_MESSAGES,
+  ...CHAIN_IDENTITY_MESSAGES,
   ...DESKTOP_DOWNLOAD_MESSAGES,
   ...MUSEUM_MESSAGES,
   ...MUSEUM_ONCHAIN_MESSAGES,

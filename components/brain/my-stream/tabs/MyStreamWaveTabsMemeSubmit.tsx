@@ -209,8 +209,9 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
     }
     let testId: string | undefined;
     if (isClosed) testId = "closed";
-    else if (isComingSoon || waveInfo.participation.hasReachedLimit)
-      testId = "info";
+    else if (isComingSoon) testId = "info";
+    else if (waveInfo.participation.isPausedForMove) testId = "paused";
+    else if (waveInfo.participation.hasReachedLimit) testId = "info";
     return renderRestriction(restriction, testId);
   }
 

@@ -1,3 +1,4 @@
+import { withStaysOnSite } from "@/lib/waves-move/scope";
 import { ApiVotingCreditReleaseReason } from "@/generated/models/ApiVotingCreditReleaseReason";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
@@ -75,10 +76,15 @@ const isNotificationPollVoteOption = (
 
 const mapWaveOverviewToNotificationWaveMin = (
   wave: ApiWaveOverview
-): NotificationWaveMin => ({
-  ...mapApiWaveOverviewToApiWaveMin(wave),
-  is_direct_message: wave.is_dm_wave,
-});
+): NotificationWaveMin =>
+  // Keeps the API's word on whether the wave stays on 6529.io, when sent.
+  withStaysOnSite(
+    {
+      ...mapApiWaveOverviewToApiWaveMin(wave),
+      is_direct_message: wave.is_dm_wave,
+    },
+    wave
+  );
 
 const mapWaveOverviewToNotificationRelatedWave = (
   wave: ApiWaveOverview

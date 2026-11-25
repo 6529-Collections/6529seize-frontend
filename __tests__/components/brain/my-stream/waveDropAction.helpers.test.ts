@@ -108,3 +108,42 @@ describe("getMemesHeaderDropActionState submission window times", () => {
     expect(state.restrictionMessage).toMatch(/GMT\+4$/);
   });
 });
+
+describe("getMemesHeaderDropActionState during the move to the 6529 Network", () => {
+  it.each([true, false])(
+    "says submissions are paused before other reasons (approval locked: %s)",
+    (isApprovalVotingControlsLocked) => {
+      expect(
+        getMemesHeaderDropActionState({
+          participationState: {
+            ...participation(SubmissionStatus.ACTIVE),
+            isPausedForMove: true,
+          },
+          isApprovalVotingControlsLocked,
+        })
+      ).toEqual({
+        canOpen: false,
+        label: "Submit Work to The Memes",
+        compactLabel: "Submit",
+        restrictionMessage: "Paused for the move to the 6529 Network.",
+      });
+    }
+  );
+});
+
+describe("getMemesHeaderDropActionState: a closed window during the move", () => {
+  it("still says submissions closed", () => {
+    expect(
+      getMemesHeaderDropActionState({
+        participationState: {
+          ...participation(SubmissionStatus.ENDED),
+          isPausedForMove: true,
+        },
+        isApprovalVotingControlsLocked: true,
+      })
+    ).toMatchObject({
+      canOpen: false,
+      label: "Submissions Closed",
+    });
+  });
+});

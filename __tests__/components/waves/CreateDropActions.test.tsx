@@ -134,6 +134,9 @@ jest.mock("@/hooks/isMobileScreen", () => ({
   __esModule: true,
   default: jest.fn(() => false),
 }));
+jest.mock("@/hooks/useWavesMovePhase", () => ({
+  useWavesWritesPaused: jest.fn(() => false),
+}));
 
 describe("CreateDropActions", () => {
   const motionValue = (value: unknown) => JSON.stringify(value);
@@ -310,6 +313,17 @@ describe("CreateDropActions", () => {
     await userEvent.click(pollButton);
 
     expect(defaultProps.onTogglePoll).toHaveBeenCalled();
+  });
+
+  it("offers no new poll while polls move to the 6529 Network", () => {
+    const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
+    wavesMove.useWavesWritesPaused.mockReturnValue(true);
+    try {
+      render(<CreateDropActions {...defaultProps} canCreatePoll={true} />);
+      expect(screen.queryByLabelText("Add poll")).not.toBeInTheDocument();
+    } finally {
+      wavesMove.useWavesWritesPaused.mockReturnValue(false);
+    }
   });
 
   it("renders poll action before the storm button", () => {
