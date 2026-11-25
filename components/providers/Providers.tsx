@@ -13,6 +13,7 @@ import { AppWalletsProvider } from "@/components/app-wallets/AppWalletsContext";
 import Auth from "@/components/auth/Auth";
 import DesktopProfileStorageGate from "@/components/desktop/DesktopProfileStorageGate";
 import AuthLaunchTimingReporter from "@/components/auth/AuthLaunchTimingReporter";
+import ChainProfileDocWriterHost from "@/components/chain-identity/ChainProfileDocWriterHost";
 import MarketActivityTracker from "@/components/collect/MarketActivityTracker";
 import DeviceSetupHost from "@/components/device-signing/DeviceSetupHost";
 import SignedWriteDecisionHost from "@/components/device-signing/SignedWriteDecisionHost";
@@ -134,6 +135,10 @@ export default function Providers({
                           isSignedMessagesEnabled() && (
                             <SignedWriteDecisionHost />
                           )}
+                        {/* Profile sites on the 6529 Network: inert until identities move. */}
+                        {enableWalletAuthentication && (
+                          <ChainProfileDocWriterHost />
+                        )}
                         <WaveEligibilityProvider>
                           <NotificationsProvider>
                             <CookieConsentProvider

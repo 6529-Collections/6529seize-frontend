@@ -202,6 +202,7 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
               onToggleSelectAll={handleToggleSelectAll}
               removeSelected={removeSelected}
               onResettingChange={setIsResettingVotes}
+              findDrop={(dropId) => drops.find((drop) => drop.id === dropId)}
             />
           )}
           <div>

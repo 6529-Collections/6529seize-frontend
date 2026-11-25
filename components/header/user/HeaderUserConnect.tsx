@@ -1,18 +1,21 @@
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import Button from "@/components/utils/button/Button";
+import type { ButtonSize } from "@/components/utils/button/buttonStyles";
 import { useState, type ReactNode } from "react";
 
 interface HeaderUserConnectProps {
   readonly className?: string | undefined;
   readonly icon?: ReactNode;
   readonly label?: string | undefined;
+  readonly size?: ButtonSize | undefined;
 }
 
 export default function HeaderUserConnect({
   className,
   icon,
   label = "Connect",
+  size = "lg",
 }: HeaderUserConnectProps) {
   const { seizeConnectFresh } = useSeizeConnectContext();
   const { setToast } = useAuth();
@@ -39,7 +42,7 @@ export default function HeaderUserConnect({
       }}
       type="button"
       variant="primary"
-      size="lg"
+      size={size}
       loading={isOpening}
       className={className}
     >

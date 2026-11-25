@@ -111,6 +111,9 @@ Use this area for wave and direct-message tasks:
   preview/submit states, and single-drop additional-info rendering.
 - [Outcome Lists](feature-outcome-lists.md): the Settings Outcomes block plus ranked-drop
   reward summaries in leaderboard and winners surfaces.
+- [Waves Move to the 6529 Network](feature-waves-move-to-6529-network.md): the
+  notice before the freeze and the votes, entries and wave settings that pause
+  from it.
 
 ## Flows
 

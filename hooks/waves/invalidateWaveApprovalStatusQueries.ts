@@ -4,6 +4,7 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { updateDropInCachedDrops } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import { updateMemesQuickVoteCachedDrop } from "@/hooks/memesQuickVote.query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { scheduleIndexRefresh } from "@/lib/chain-waves/optimistic";
 
 export function invalidateWaveApprovalSummaryQueries(
   queryClient: QueryClient,
@@ -51,6 +52,12 @@ export function applyWaveDropVoteUpdate(
   options: {
     readonly invalidateWaveSummary?: boolean;
     readonly contextProfile?: string | null | undefined;
+    /**
+     * The vote went to the 6529 Network: 6529.io's index reads it only once
+     * the block is in, so the refetches wait for that instead of bringing the
+     * old vote back.
+     */
+    readonly fromChain?: boolean;
   } = {}
 ): void {
   // The API contract returns a complete ApiDrop. Merge defensively so a
@@ -66,6 +73,21 @@ export function applyWaveDropVoteUpdate(
     options.contextProfile
   );
 
+  if (options.fromChain === true) {
+    scheduleIndexRefresh(() => {
+      refreshAfterVote(queryClient, updatedDrop, waveId, options);
+    });
+    return;
+  }
+  refreshAfterVote(queryClient, updatedDrop, waveId, options);
+}
+
+function refreshAfterVote(
+  queryClient: QueryClient,
+  updatedDrop: ApiDrop,
+  waveId: string,
+  options: { readonly invalidateWaveSummary?: boolean }
+): void {
   void queryClient.invalidateQueries({
     queryKey: [
       QueryKey.DROP,

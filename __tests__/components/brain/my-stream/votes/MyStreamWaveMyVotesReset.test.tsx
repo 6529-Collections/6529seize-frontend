@@ -38,6 +38,10 @@ jest.mock("@/components/utils/button/SecondaryButton", () => (p: any) => (
 jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(async () => ({})),
 }));
+const mockChainWriters: { current: unknown } = { current: null };
+jest.mock("@/components/chain-waves/useChainWavesWriters", () => ({
+  useChainWavesWriters: () => mockChainWriters.current,
+}));
 
 const useMutationMock = useMutation as jest.Mock;
 const useQueryClientMock = useQueryClient as jest.Mock;
@@ -469,4 +473,51 @@ test("keeps reset progress visible until completion when the last selection disa
     screen.getByRole("button", { name: "Your vote amount" })
   ).toBeEnabled();
   expect(props.onResettingChange).toHaveBeenLastCalledWith(false);
+});
+
+test("on the 6529 Network a reset shows on the listed drop at once", async () => {
+  const vote = jest.fn().mockResolvedValue(undefined);
+  mockChainWriters.current = { vote };
+  let mutationConfig: any = null;
+  useMutationMock.mockImplementation((config: any) => {
+    mutationConfig = config;
+    return { mutateAsync: jest.fn() };
+  });
+  const listed = {
+    id: "a",
+    wave: { id: "wave-1" },
+    rating: 30,
+    realtime_rating: 30,
+    raters_count: 2,
+    context_profile_context: { rating: 10 },
+  };
+  try {
+    render(
+      <AuthContext.Provider value={auth}>
+        <ReactQueryWrapperContext.Provider value={rqContext}>
+          <MyStreamWaveMyVotesReset
+            waveId="wave-1"
+            haveDrops
+            selected={new Set(["a"])}
+            allItemsSelected={false}
+            onToggleSelectAll={jest.fn()}
+            removeSelected={jest.fn()}
+            onResettingChange={jest.fn()}
+            findDrop={(id) => (id === "a" ? (listed as any) : undefined)}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+    const shown = await mutationConfig.mutationFn({ dropId: "a" });
+    expect(vote).toHaveBeenCalledWith({ dropId: "a", amount: 0 });
+    expect(shown).toMatchObject({
+      id: "a",
+      rating: 20,
+      raters_count: 1,
+      context_profile_context: { rating: 0 },
+    });
+    expect(await mutationConfig.mutationFn({ dropId: "gone" })).toBeNull();
+  } finally {
+    mockChainWriters.current = null;
+  }
 });

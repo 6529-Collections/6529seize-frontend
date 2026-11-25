@@ -328,7 +328,7 @@ function HighlyRatedWavePreviewLink({
 
   return (
     <WaveScoreSummaryHoverCard
-      disabled={scoreDetailsDisabled}
+      disabled={scoreDetailsDisabled || isTouchPreview}
       closeOnContentClick
       stopClickPropagation
       summaryHeader={{

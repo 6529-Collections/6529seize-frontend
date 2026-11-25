@@ -7,7 +7,7 @@ import {
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
 import CompactMenuMobileBottomSheet from "@/components/compact-menu/CompactMenuMobileBottomSheet";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useKey } from "react-use";
 import IconButton from "@/components/utils/button/IconButton";
 
@@ -28,10 +28,18 @@ import LazyHeaderSearchModal, {
   useHeaderSearchModalEarlyPreload,
 } from "./LazyHeaderSearchModal";
 
+interface HeaderSearchTrigger {
+  readonly label: string;
+  readonly open: () => void;
+}
+
 interface HeaderSearchButtonProps {
   readonly wave: ApiWave | null;
   readonly additionalMenuItems?: readonly CompactMenuItem[] | undefined;
   readonly morePresentation?: "dropdown" | "sheet";
+  readonly renderTrigger?:
+    | ((trigger: HeaderSearchTrigger) => ReactNode)
+    | undefined;
 }
 
 type OpenSearch = "site" | "wave" | null;
@@ -40,9 +48,10 @@ export default function HeaderSearchButton({
   wave,
   additionalMenuItems,
   morePresentation = "dropdown",
+  renderTrigger,
 }: HeaderSearchButtonProps) {
   const [openSearch, setOpenSearch] = useState<OpenSearch>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
   const wasOpenRef = useRef(false);
   const router = useRouter();
   const pathname = usePathname();
@@ -56,7 +65,9 @@ export default function HeaderSearchButton({
     const isOpen = openSearch !== null;
     if (wasOpenRef.current && !isOpen) {
       rafId = window.requestAnimationFrame(() => {
-        buttonRef.current?.focus({ preventScroll: true });
+        rootRef.current
+          ?.querySelector("button")
+          ?.focus({ preventScroll: true });
       });
     }
     wasOpenRef.current = isOpen;
@@ -122,24 +133,33 @@ export default function HeaderSearchButton({
     }
   );
   return (
-    <div className="tailwind-scope tw-flex tw-items-center tw-gap-0.5 tw-self-center">
-      <IconButton
-        ref={buttonRef}
-        type="button"
-        size={40}
-        variant={isApp ? "contrast" : "secondary"}
-        disabled={!hasHydrated}
-        aria-label={buttonLabel}
-        title={buttonLabel}
-        onClick={openContextSearch}
-        onPointerEnter={preloadContextSearch}
-        onFocus={preloadContextSearch}
-      >
-        <MagnifyingGlassIcon
-          className="tw-size-5 tw-flex-shrink-0"
-          strokeWidth={isApp ? 2 : 1.5}
-        />
-      </IconButton>
+    <div
+      ref={rootRef}
+      className="tailwind-scope tw-flex tw-items-center tw-gap-0.5 tw-self-center"
+    >
+      {renderTrigger ? (
+        renderTrigger({
+          label: buttonLabel,
+          open: openContextSearch,
+        })
+      ) : (
+        <IconButton
+          type="button"
+          size={40}
+          variant={isApp ? "contrast" : "secondary"}
+          disabled={!hasHydrated}
+          aria-label={buttonLabel}
+          title={buttonLabel}
+          onClick={openContextSearch}
+          onPointerEnter={preloadContextSearch}
+          onFocus={preloadContextSearch}
+        >
+          <MagnifyingGlassIcon
+            className="tw-size-5 tw-flex-shrink-0"
+            strokeWidth={isApp ? 2 : 1.5}
+          />
+        </IconButton>
+      )}
       {additionalMenuItems && morePresentation === "sheet" && (
         <CompactMenuMobileBottomSheet
           title={moreLabel}

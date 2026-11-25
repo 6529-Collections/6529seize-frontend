@@ -1,7 +1,14 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { useEffect, useId, useRef, useState, type Ref } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type ReactNode,
+  type Ref,
+} from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
@@ -33,7 +40,7 @@ interface MyVotesInputProps {
   readonly disabled: boolean;
   readonly busy: boolean;
   readonly helperText: string;
-  readonly error?: string | null | undefined;
+  readonly error?: ReactNode;
   readonly saveLabel: string;
   readonly saveAriaLabel?: string | undefined;
   readonly explainLabel: string;

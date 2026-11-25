@@ -45,17 +45,20 @@ export default function GrantRepSubmissionGuidance({
   id,
   selectedCategory,
   categoriesToDisplay,
+  search = "",
 }: {
   readonly id: string;
   readonly selectedCategory: string | null;
   readonly categoriesToDisplay: readonly string[];
+  readonly search?: string;
 }) {
   const locale = useBrowserLocale();
   const hasSelectedSubmissionCategory =
     selectedCategory === MEMES_NOMINEE_CATEGORY;
+  const guidanceCategory = selectedCategory ?? search;
   const selectedNonQualifyingLookalike =
-    selectedCategory && isMemesNomineeLookalike(selectedCategory)
-      ? selectedCategory
+    guidanceCategory && isMemesNomineeLookalike(guidanceCategory)
+      ? guidanceCategory
       : null;
   const showSubmissionSearchHint =
     !selectedCategory && categoriesToDisplay.includes(MEMES_NOMINEE_CATEGORY);

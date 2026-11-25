@@ -51,6 +51,10 @@ jest.mock("@/hooks/useDropPriviledges", () => ({
   useDropPrivileges: jest.fn(),
   ChatRestriction: { SLOW_MODE: "SLOW_MODE" },
 }));
+const mockWritesPaused = jest.fn((_kind?: string) => false);
+jest.mock("@/hooks/useWavesMovePhase", () => ({
+  useWavesWritesPaused: (kind?: string) => mockWritesPaused(kind),
+}));
 const mockUsePublicProfileModerationStatus = jest.fn(
   (_profileId?: string | null) => ({
     isError: false,
@@ -232,6 +236,27 @@ describe("PrivilegedDropCreator", () => {
       "data-type",
       "submission"
     );
+  });
+
+  it("pauses submissions until entries open on the 6529 Network", () => {
+    mockPriv.mockReturnValue({
+      submissionRestriction: null,
+      chatRestriction: null,
+    });
+    // After the switch-on, entries open there while other writes stay closed.
+    mockWritesPaused.mockImplementation((kind) => kind === undefined);
+    renderPrivilegedDropCreator({ fixedDropMode: DropMode.BOTH });
+    expect(mockPriv).toHaveBeenLastCalledWith(
+      expect.objectContaining({ submissionsPaused: false })
+    );
+
+    // From the freeze until then, they are paused.
+    mockWritesPaused.mockImplementation(() => true);
+    renderPrivilegedDropCreator({ fixedDropMode: DropMode.BOTH });
+    expect(mockPriv).toHaveBeenLastCalledWith(
+      expect.objectContaining({ submissionsPaused: true })
+    );
+    mockWritesPaused.mockImplementation(() => false);
   });
 
   it("renders CreateDrop when allowed", () => {

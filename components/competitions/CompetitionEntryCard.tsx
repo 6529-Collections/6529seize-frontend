@@ -3,6 +3,7 @@ import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
 
 import { isCompetitionAccessError } from "@/helpers/competition.helpers";
 import { useCompetition } from "@/contexts/CompetitionContext";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { useCompetitionEntryDrops } from "@/hooks/competitions/useCompetitionEntryDrops";
 import { useCompetitionDropNavigation } from "@/hooks/competitions/useCompetitionDropNavigation";
 import { useWaveLeaderboardRendererSet } from "@/components/waves/leaderboard/leaderboardRendererRegistry";
@@ -28,6 +29,8 @@ export default function CompetitionEntryCard({
   );
   const [query] = useCompetitionEntryDrops([{ entryId, dropId }]);
   const onDropClick = useCompetitionDropNavigation();
+  // Votes move to the 6529 Network: the vote action locks with the rest.
+  const votesPaused = useWavesWritesPaused("votes");
   if (!query || query.isPending) return <CompetitionState />;
   if (query.isError && (!query.data || isCompetitionAccessError(query.error)))
     return <CompetitionState error retry={() => void query.refetch()} />;
@@ -53,7 +56,7 @@ export default function CompetitionEntryCard({
           competition.winners.winning_threshold_min_duration_ms
         }
         isVotingClosed={disabled}
-        isVotingControlsLocked={!competition.permissions.vote}
+        isVotingControlsLocked={!competition.permissions.vote || votesPaused}
       />
     </div>
   );

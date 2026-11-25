@@ -42,6 +42,13 @@ jest.mock("@tanstack/react-query", () => ({
   useQueryClient: jest.fn(),
 }));
 
+const mockChainVote = jest.fn();
+let mockChainActive = false;
+jest.mock("@/components/chain-waves/useChainWavesWriters", () => ({
+  useChainWavesWriters: () =>
+    mockChainActive ? { vote: mockChainVote } : null,
+}));
+
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStreamActions: jest.fn(() => ({
     applyOptimisticDropUpdate: jest.fn(() => ({ rollback: jest.fn() })),
@@ -135,6 +142,47 @@ describe("DropListItemRateGiveSubmit", () => {
     expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: [QueryKey.DROP_VOTE_LOGS, { dropId: "1" }],
     });
+  });
+
+  it("votes on the 6529 Network, without a 6529.io sign-in, and refetches only once the index has the block", async () => {
+    mockChainActive = true;
+    mockChainVote.mockResolvedValue(undefined);
+    useMutationMock.mockImplementation((config: any) => ({
+      mutateAsync: async (variables: any) => {
+        const updated = await config.mutationFn(variables);
+        config.onSuccess?.(updated, variables);
+        config.onSettled?.();
+        return updated;
+      },
+    }));
+    try {
+      render(
+        <DropListItemRateGiveSubmit
+          rate={2}
+          drop={drop}
+          canVote
+          onSuccessfulRateChange={() => {}}
+        />,
+        { wrapper }
+      );
+      fireEvent.click(screen.getByTestId("clap"));
+      await act(async () => {
+        jest.advanceTimersByTime(400);
+      });
+      expect(mockChainVote).toHaveBeenCalledWith({ dropId: "1", amount: 2 });
+      expect(auth.requestAuth).not.toHaveBeenCalled();
+      expect(invalidateQueries).not.toHaveBeenCalledWith({
+        queryKey: [QueryKey.DROP_VOTERS, { dropId: "1" }],
+      });
+      await act(async () => {
+        jest.advanceTimersByTime(15_000);
+      });
+      expect(invalidateQueries).toHaveBeenCalledWith({
+        queryKey: [QueryKey.DROP_VOTERS, { dropId: "1" }],
+      });
+    } finally {
+      mockChainActive = false;
+    }
   });
 
   it("does not invalidate approval status when auth fails", async () => {

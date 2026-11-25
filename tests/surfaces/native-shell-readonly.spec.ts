@@ -612,12 +612,12 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
           const header = element.previousElementSibling;
           if (!header)
             throw new Error("Expected header outside the animated content");
-          const { x, y, width, height } = header.getBoundingClientRect();
+          // List and channel headers can have different heights without moving.
+          const { x, y, width } = header.getBoundingClientRect();
           return {
             x,
             y,
             width,
-            height,
             transform: getComputedStyle(header).transform,
           };
         });

@@ -133,12 +133,43 @@ export const publicEnvSchema = z.object({
   // App-socket PING keepalive and liveness checks (API #2354). On only when
   // exactly "true"; staging builds set it, production builds leave it unset.
   NEXT_PUBLIC_FEATURE_WS_PING: z.string().optional(),
+  // The freeze before identities move to the 6529 Network, as a UTC instant
+  // such as "2026-01-01T00:00:00Z" (lib/identity-move/schedule.ts). Unset,
+  // nothing changes.
+  NEXT_PUBLIC_IDENTITY_FREEZE_AT: z.string().optional(),
+  // A later switch-on for that move, as a UTC instant. Unset, malformed, or
+  // less than 24 hours after the freeze, the switch-on is the freeze plus
+  // 24 hours (lib/identity-move/schedule.ts).
+  NEXT_PUBLIC_IDENTITY_SWITCH_ON_AT: z.string().optional(),
+  // Identity, profile, handle, REP, NIC, wallet and delegation changes on
+  // the 6529 Network, through this site (lib/chain-identity). On only when
+  // exactly "true" and NEXT_PUBLIC_CHAIN_GATEWAY_URL is set.
+  NEXT_PUBLIC_FEATURE_CHAIN_IDENTITY: z.string().optional(),
+  // The public chain gateway's base URL (drafts, submits, reads, the
+  // profile document store and the drip).
+  // The 6529 Network's NETWORK_ID (the EIP-712 domain salt). When set, a
+  // draft for another network is refused before anything is signed.
+  NEXT_PUBLIC_CHAIN_NETWORK_ID: z.string().optional(),
+  NEXT_PUBLIC_CHAIN_GATEWAY_URL: z
+    .string()
+    .url("NEXT_PUBLIC_CHAIN_GATEWAY_URL must be a valid URL")
+    .optional(),
   // End-to-end encrypted chats and poll creation. On only when exactly "true".
   NEXT_PUBLIC_E2EE_DM_ENABLED: z.string().optional(),
   NEXT_PUBLIC_E2EE_POLLS_ENABLED: z.string().optional(),
   // Encrypted read-state sync between a user's own devices (D175, P60). On
   // only when exactly "true"; off by default in every build.
   NEXT_PUBLIC_E2EE_READ_SYNC: z.string().optional(),
+  // The waves freeze and switch-on as UTC instants, such as
+  // "2026-11-25T00:00:00Z" and "2026-11-26T00:00:00Z"
+  // (lib/waves-move/schedule.ts). Unless both are set and the switch-on comes
+  // after the freeze, nothing changes.
+  NEXT_PUBLIC_WAVES_FREEZE_AT: z.string().optional(),
+  NEXT_PUBLIC_WAVES_SWITCH_ON_AT: z.string().optional(),
+  // Votes, poll ballots and wave REP go to the 6529 Network through the
+  // chain gateway after the waves switch-on (lib/chain-waves/config.ts). On
+  // only when exactly "true" and NEXT_PUBLIC_CHAIN_GATEWAY_URL is set.
+  NEXT_PUBLIC_FEATURE_CHAIN_WAVES: z.string().optional(),
   NEXT_PUBLIC_PROFILE_CMS_BUILDER_API_ENABLED: z.string().optional(),
   NEXT_PUBLIC_PROFILE_CMS_BUILDER_ENABLED: z.string().optional(),
   NEXT_PUBLIC_CLOUDFRONT_DOMAIN: z.string().optional(),

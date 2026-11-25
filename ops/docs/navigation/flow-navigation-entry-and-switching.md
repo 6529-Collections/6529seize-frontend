@@ -86,6 +86,11 @@ context-aware `Back`).
   content to return to its list. The view follows your finger. Reverse below the
   gesture threshold before releasing to cancel. A slow, short drag also stays
   in the conversation; a longer drag or quick flick completes the return.
+- In a wave channel, a rightward swipe starting within 32px of the left edge
+  takes Back priority on every tab, including over buttons, links, inputs,
+  voting sliders and horizontally scrolling rows. It returns to the same
+  destination as the visible Back control. Sheets and editors keep their own
+  Back and unfinished-draft guards.
 - A brief diagonal start can turn into a horizontal swipe. Once vertical
   scrolling has started, that touch stays with scrolling; lift your finger
   before starting a swipe back.
@@ -95,10 +100,11 @@ context-aware `Back`).
   enter its chat; a right swipe or the visible Back button then returns to the
   feed at the same reading position. A chat opened directly still returns to
   Waves.
-- Inputs, links, buttons, voting sliders, media controls, selected text and
-  horizontal carousels keep their own interactions. Vertical scrolling and
-  multi-touch do not trigger conversation navigation. Screen edges remain
-  available to the system or browser.
+- Away from the channel's left-edge zone, inputs, links, buttons, voting
+  sliders, media controls, selected text and horizontal carousels keep their
+  own interactions. Vertical scrolling and multi-touch do not trigger channel
+  navigation. Direct messages and browser navigation retain their existing
+  edge behavior.
 - Android system Back first dismisses an open keyboard, then the topmost
   dismissible sheet, menu or dialog. A reaction picker returns to its action
   sheet before the sheet closes. Single-drop details close before the wave;

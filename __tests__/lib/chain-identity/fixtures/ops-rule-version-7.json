@@ -1,0 +1,871 @@
+{
+  "ruleVersion": 7,
+  "ops": [
+    {
+      "name": "BALANCE_TRANSFER",
+      "opType": 2305,
+      "primaryType": "BalanceTransfer",
+      "body": [
+        {
+          "name": "assetId",
+          "type": "bytes32"
+        },
+        {
+          "name": "amount",
+          "type": "uint128"
+        },
+        {
+          "name": "recipientKind",
+          "type": "uint8"
+        },
+        {
+          "name": "recipient",
+          "type": "bytes32"
+        },
+        {
+          "name": "memo",
+          "type": "bytes32"
+        }
+      ]
+    },
+    {
+      "name": "IDENTITY_CREATE",
+      "opType": 257,
+      "primaryType": "IdentityCreate",
+      "body": [
+        {
+          "name": "legacyId",
+          "type": "bytes16"
+        },
+        {
+          "name": "handle",
+          "type": "string"
+        },
+        {
+          "name": "profileDocCid",
+          "type": "bytes"
+        }
+      ]
+    },
+    {
+      "name": "PROFILE_REPLACE",
+      "opType": 258,
+      "primaryType": "ProfileReplace",
+      "body": [
+        {
+          "name": "expectedVersion",
+          "type": "uint32"
+        },
+        {
+          "name": "docCid",
+          "type": "bytes"
+        }
+      ]
+    },
+    {
+      "name": "HANDLE_CLAIM",
+      "opType": 259,
+      "primaryType": "HandleClaim",
+      "body": [
+        {
+          "name": "handle",
+          "type": "string"
+        },
+        {
+          "name": "expectedCurrent",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "NONCE_SKIP",
+      "opType": 513,
+      "primaryType": "NonceSkip",
+      "body": [
+        {
+          "name": "keyId",
+          "type": "bytes32"
+        },
+        {
+          "name": "lane",
+          "type": "uint32"
+        },
+        {
+          "name": "newNext",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
+      "name": "CAPABILITY_GRANT",
+      "opType": 769,
+      "primaryType": "CapabilityGrant",
+      "body": [
+        {
+          "name": "granteeKind",
+          "type": "uint8"
+        },
+        {
+          "name": "grantee",
+          "type": "bytes32"
+        },
+        {
+          "name": "granteeKeyType",
+          "type": "uint8"
+        },
+        {
+          "name": "granteePublicKey",
+          "type": "bytes"
+        },
+        {
+          "name": "ops",
+          "type": "uint16[]"
+        },
+        {
+          "name": "flags",
+          "type": "uint16"
+        },
+        {
+          "name": "scopes",
+          "type": "Scope[]"
+        },
+        {
+          "name": "budgets",
+          "type": "BudgetLimit[]"
+        },
+        {
+          "name": "notBefore",
+          "type": "uint64"
+        },
+        {
+          "name": "expiresAt",
+          "type": "uint64"
+        },
+        {
+          "name": "acceptMode",
+          "type": "uint8"
+        }
+      ]
+    },
+    {
+      "name": "CAPABILITY_REVOKE",
+      "opType": 771,
+      "primaryType": "CapabilityRevoke",
+      "body": [
+        {
+          "name": "grantId",
+          "type": "bytes32"
+        },
+        {
+          "name": "expectedVersion",
+          "type": "uint32"
+        },
+        {
+          "name": "p2pSeqCutoff",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
+      "name": "RATING_SET",
+      "opType": 1793,
+      "primaryType": "RatingSet",
+      "body": [
+        {
+          "name": "matter",
+          "type": "uint8"
+        },
+        {
+          "name": "targetKind",
+          "type": "uint8"
+        },
+        {
+          "name": "target",
+          "type": "bytes32"
+        },
+        {
+          "name": "category",
+          "type": "bytes32"
+        },
+        {
+          "name": "categoryName",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "type": "int64"
+        },
+        {
+          "name": "priorVersion",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
+      "name": "IDENTITY_JOIN",
+      "opType": 271,
+      "primaryType": "IdentityJoin",
+      "body": [
+        {
+          "name": "wallet",
+          "type": "address"
+        }
+      ]
+    },
+    {
+      "name": "IDENTITY_REMOVE",
+      "opType": 272,
+      "primaryType": "IdentityRemove",
+      "body": [
+        {
+          "name": "wallet",
+          "type": "address"
+        }
+      ]
+    },
+    {
+      "name": "DELEGATION_SET",
+      "opType": 288,
+      "primaryType": "DelegationSet",
+      "body": [
+        {
+          "name": "collection",
+          "type": "address"
+        },
+        {
+          "name": "delegate",
+          "type": "address"
+        },
+        {
+          "name": "useCase",
+          "type": "uint16"
+        },
+        {
+          "name": "allTokens",
+          "type": "uint8"
+        },
+        {
+          "name": "tokenId",
+          "type": "bytes32"
+        },
+        {
+          "name": "expiry",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
+      "name": "DELEGATION_REVOKE",
+      "opType": 289,
+      "primaryType": "DelegationRevoke",
+      "body": [
+        {
+          "name": "scope",
+          "type": "uint8"
+        },
+        {
+          "name": "holder",
+          "type": "bytes32"
+        },
+        {
+          "name": "collection",
+          "type": "address"
+        },
+        {
+          "name": "delegate",
+          "type": "address"
+        },
+        {
+          "name": "useCase",
+          "type": "uint16"
+        },
+        {
+          "name": "allTokens",
+          "type": "uint8"
+        },
+        {
+          "name": "tokenId",
+          "type": "bytes32"
+        }
+      ]
+    },
+    {
+      "name": "AWARD_DELIVERY_SET",
+      "opType": 2308,
+      "primaryType": "AwardDeliverySet",
+      "body": [
+        {
+          "name": "mode",
+          "type": "uint8"
+        }
+      ]
+    },
+    {
+      "name": "AWARD_CLAIM",
+      "opType": 2309,
+      "primaryType": "AwardClaim",
+      "body": [
+        {
+          "name": "amount",
+          "type": "uint128"
+        },
+        {
+          "name": "maxCredits",
+          "type": "uint16"
+        }
+      ]
+    },
+    {
+      "name": "GROUP_CREATE",
+      "opType": 1025,
+      "primaryType": "GroupCreate",
+      "body": [
+        {
+          "name": "controller",
+          "type": "bytes32"
+        },
+        {
+          "name": "visibility",
+          "type": "uint8"
+        },
+        {
+          "name": "defHash",
+          "type": "bytes32"
+        },
+        {
+          "name": "predicateMode",
+          "type": "uint8"
+        },
+        {
+          "name": "clauses",
+          "type": "Clause[]"
+        },
+        {
+          "name": "includes",
+          "type": "Member[]"
+        },
+        {
+          "name": "excludes",
+          "type": "Member[]"
+        }
+      ]
+    },
+    {
+      "name": "GROUP_REPLACE",
+      "opType": 1026,
+      "primaryType": "GroupReplace",
+      "body": [
+        {
+          "name": "groupId",
+          "type": "bytes32"
+        },
+        {
+          "name": "expectedVersion",
+          "type": "uint32"
+        },
+        {
+          "name": "newController",
+          "type": "bytes32"
+        },
+        {
+          "name": "defHash",
+          "type": "bytes32"
+        },
+        {
+          "name": "predicateMode",
+          "type": "uint8"
+        },
+        {
+          "name": "clauses",
+          "type": "Clause[]"
+        },
+        {
+          "name": "includes",
+          "type": "Member[]"
+        },
+        {
+          "name": "excludes",
+          "type": "Member[]"
+        }
+      ]
+    },
+    {
+      "name": "ROLE_GRANT",
+      "opType": 1027,
+      "primaryType": "RoleGrant",
+      "body": [
+        {
+          "name": "scopeId",
+          "type": "bytes32"
+        },
+        {
+          "name": "role",
+          "type": "uint8"
+        },
+        {
+          "name": "member",
+          "type": "bytes32"
+        },
+        {
+          "name": "expiresAt",
+          "type": "uint64"
+        },
+        {
+          "name": "expectedVersion",
+          "type": "uint32"
+        }
+      ]
+    },
+    {
+      "name": "ROLE_REVOKE",
+      "opType": 1028,
+      "primaryType": "RoleRevoke",
+      "body": [
+        {
+          "name": "scopeId",
+          "type": "bytes32"
+        },
+        {
+          "name": "role",
+          "type": "uint8"
+        },
+        {
+          "name": "member",
+          "type": "bytes32"
+        },
+        {
+          "name": "expectedVersion",
+          "type": "uint32"
+        }
+      ]
+    },
+    {
+      "name": "WAVE_CREATE",
+      "opType": 1281,
+      "primaryType": "WaveCreate",
+      "body": [
+        {
+          "name": "waveType",
+          "type": "uint8"
+        },
+        {
+          "name": "controller",
+          "type": "bytes32"
+        },
+        {
+          "name": "readGroup",
+          "type": "GroupRef"
+        },
+        {
+          "name": "postGroup",
+          "type": "GroupRef"
+        },
+        {
+          "name": "adminGroup",
+          "type": "GroupRef"
+        },
+        {
+          "name": "metadataCid",
+          "type": "bytes"
+        }
+      ]
+    },
+    {
+      "name": "WAVE_POLICY_REPLACE",
+      "opType": 1282,
+      "primaryType": "WavePolicyReplace",
+      "body": [
+        {
+          "name": "waveId",
+          "type": "bytes32"
+        },
+        {
+          "name": "expectedVersion",
+          "type": "uint32"
+        },
+        {
+          "name": "decisionId",
+          "type": "bytes32"
+        },
+        {
+          "name": "expectedConfigVersion",
+          "type": "uint32"
+        },
+        {
+          "name": "newController",
+          "type": "bytes32"
+        },
+        {
+          "name": "readGroup",
+          "type": "GroupRef"
+        },
+        {
+          "name": "postGroup",
+          "type": "GroupRef"
+        },
+        {
+          "name": "adminGroup",
+          "type": "GroupRef"
+        },
+        {
+          "name": "submitGroup",
+          "type": "GroupRef"
+        },
+        {
+          "name": "voteGroup",
+          "type": "GroupRef"
+        },
+        {
+          "name": "metadataCid",
+          "type": "bytes"
+        },
+        {
+          "name": "decision",
+          "type": "DecisionConfig"
+        }
+      ]
+    },
+    {
+      "name": "WAVE_CLOSE",
+      "opType": 1283,
+      "primaryType": "WaveClose",
+      "body": [
+        {
+          "name": "waveId",
+          "type": "bytes32"
+        },
+        {
+          "name": "expectedVersion",
+          "type": "uint32"
+        },
+        {
+          "name": "disposition",
+          "type": "uint8"
+        }
+      ]
+    },
+    {
+      "name": "MODERATION_DECIDE",
+      "opType": 1284,
+      "primaryType": "ModerationDecide",
+      "body": [
+        {
+          "name": "waveId",
+          "type": "bytes32"
+        },
+        {
+          "name": "policyVersion",
+          "type": "uint32"
+        },
+        {
+          "name": "action",
+          "type": "uint8"
+        },
+        {
+          "name": "subjects",
+          "type": "SubjectRef[]"
+        },
+        {
+          "name": "reasonHash",
+          "type": "bytes32"
+        },
+        {
+          "name": "until",
+          "type": "uint64"
+        }
+      ]
+    },
+    {
+      "name": "WAVE_PAUSE_SET",
+      "opType": 1537,
+      "primaryType": "WavePauseSet",
+      "body": [
+        {
+          "name": "decisionId",
+          "type": "bytes32"
+        },
+        {
+          "name": "expectedConfigVersion",
+          "type": "uint32"
+        },
+        {
+          "name": "pauseId",
+          "type": "uint32"
+        },
+        {
+          "name": "expectedPauseVersion",
+          "type": "uint32"
+        },
+        {
+          "name": "start",
+          "type": "uint64"
+        },
+        {
+          "name": "end",
+          "type": "uint64"
+        },
+        {
+          "name": "reason",
+          "type": "uint16"
+        }
+      ]
+    },
+    {
+      "name": "WAVE_PAUSE_REMOVE",
+      "opType": 1538,
+      "primaryType": "WavePauseRemove",
+      "body": [
+        {
+          "name": "decisionId",
+          "type": "bytes32"
+        },
+        {
+          "name": "pauseId",
+          "type": "uint32"
+        },
+        {
+          "name": "expectedPauseVersion",
+          "type": "uint32"
+        }
+      ]
+    },
+    {
+      "name": "DECISION_OPEN",
+      "opType": 1539,
+      "primaryType": "DecisionOpen",
+      "body": [
+        {
+          "name": "decisionId",
+          "type": "bytes32"
+        },
+        {
+          "name": "expectedConfigVersion",
+          "type": "uint32"
+        },
+        {
+          "name": "workCreditAU",
+          "type": "uint128"
+        },
+        {
+          "name": "workFundTokens",
+          "type": "uint128"
+        }
+      ]
+    },
+    {
+      "name": "SUBMISSION_CREATE",
+      "opType": 1540,
+      "primaryType": "SubmissionCreate",
+      "body": [
+        {
+          "name": "decisionId",
+          "type": "bytes32"
+        },
+        {
+          "name": "expectedConfigVersion",
+          "type": "uint32"
+        },
+        {
+          "name": "manifestHash",
+          "type": "bytes32"
+        },
+        {
+          "name": "contentCid",
+          "type": "bytes"
+        }
+      ]
+    },
+    {
+      "name": "SUBMISSION_WITHDRAW",
+      "opType": 1541,
+      "primaryType": "SubmissionWithdraw",
+      "body": [
+        {
+          "name": "entryId",
+          "type": "bytes32"
+        },
+        {
+          "name": "expectedVersion",
+          "type": "uint32"
+        }
+      ]
+    },
+    {
+      "name": "VOTE_SET",
+      "opType": 1542,
+      "primaryType": "VoteSet",
+      "body": [
+        {
+          "name": "decisionId",
+          "type": "bytes32"
+        },
+        {
+          "name": "expectedConfigVersion",
+          "type": "uint32"
+        },
+        {
+          "name": "entryId",
+          "type": "bytes32"
+        },
+        {
+          "name": "amount",
+          "type": "int64"
+        },
+        {
+          "name": "priorVoteVersion",
+          "type": "uint64"
+        },
+        {
+          "name": "budgetScope",
+          "type": "uint8"
+        }
+      ]
+    },
+    {
+      "name": "POLL_CREATE",
+      "opType": 1543,
+      "primaryType": "PollCreate",
+      "body": [
+        {
+          "name": "waveId",
+          "type": "bytes32"
+        },
+        {
+          "name": "optionsHash",
+          "type": "bytes32"
+        },
+        {
+          "name": "optionCount",
+          "type": "uint8"
+        },
+        {
+          "name": "maxChoices",
+          "type": "uint8"
+        },
+        {
+          "name": "closeTime",
+          "type": "uint64"
+        },
+        {
+          "name": "minTdh",
+          "type": "uint64"
+        },
+        {
+          "name": "onlyPosters",
+          "type": "bool"
+        },
+        {
+          "name": "snapshotDay",
+          "type": "uint32"
+        }
+      ]
+    },
+    {
+      "name": "POLL_BALLOT_SET",
+      "opType": 1544,
+      "primaryType": "PollBallotSet",
+      "body": [
+        {
+          "name": "pollId",
+          "type": "bytes32"
+        },
+        {
+          "name": "selection",
+          "type": "uint32"
+        },
+        {
+          "name": "priorVersion",
+          "type": "uint32"
+        },
+        {
+          "name": "wallet",
+          "type": "address"
+        }
+      ]
+    },
+    {
+      "name": "SETTLEMENT_REQUEST",
+      "opType": 1545,
+      "primaryType": "SettlementRequest",
+      "body": [
+        {
+          "name": "decisionId",
+          "type": "bytes32"
+        },
+        {
+          "name": "occurrence",
+          "type": "uint32"
+        },
+        {
+          "name": "maxEntries",
+          "type": "uint16"
+        }
+      ]
+    },
+    {
+      "name": "VOTE_RELEASE",
+      "opType": 1546,
+      "primaryType": "VoteRelease",
+      "body": [
+        {
+          "name": "decisionId",
+          "type": "bytes32"
+        },
+        {
+          "name": "voter",
+          "type": "bytes32"
+        }
+      ]
+    },
+    {
+      "name": "DECISION_CREATE",
+      "opType": 1552,
+      "primaryType": "DecisionCreate",
+      "body": [
+        {
+          "name": "waveId",
+          "type": "bytes32"
+        },
+        {
+          "name": "expectedVersion",
+          "type": "uint32"
+        },
+        {
+          "name": "submitGroup",
+          "type": "GroupRef"
+        },
+        {
+          "name": "voteGroup",
+          "type": "GroupRef"
+        },
+        {
+          "name": "metadataCid",
+          "type": "bytes"
+        },
+        {
+          "name": "decision",
+          "type": "DecisionConfig"
+        }
+      ]
+    },
+    {
+      "name": "DECISION_ARCHIVE",
+      "opType": 1553,
+      "primaryType": "DecisionArchive",
+      "body": [
+        {
+          "name": "decisionId",
+          "type": "bytes32"
+        },
+        {
+          "name": "expectedConfigVersion",
+          "type": "uint32"
+        },
+        {
+          "name": "disposition",
+          "type": "uint8"
+        }
+      ]
+    }
+  ]
+}

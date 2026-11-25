@@ -14,6 +14,8 @@ export interface CompactMenuActionItem {
   readonly disabled?: boolean | undefined;
   readonly className?: string | undefined;
   readonly active?: boolean | undefined;
+  /** Optional toggle state, rendered as a checkmark in phone wave actions. */
+  readonly checked?: boolean | undefined;
   readonly "data-testid"?: string | undefined;
   readonly role?: string | undefined;
   readonly ariaSelected?: boolean | undefined;

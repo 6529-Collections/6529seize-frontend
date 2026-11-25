@@ -2,14 +2,26 @@
 
 import React, { useContext, useState } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropType } from "@/generated/models/ApiDropType";
 import { motion, AnimatePresence } from "framer-motion";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteDrop } from "@/services/api/signed-drop-writes";
 import { isSignedWriteCancelled } from "@/lib/device-signing/signing-decision";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { AuthContext } from "@/components/auth/Auth";
 import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
-import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
+import {
+  chainWriteDetails,
+  chainWriteFailure,
+} from "@/components/chain-waves/chainWavesErrorMessage";
+import { chainIdentityPointer } from "@/components/chain-waves/chainIdentityPointer";
+import {
+  invalidateChainEntryQueries,
+  useChainEntryWriters,
+} from "@/components/chain-waves/useChainEntryWriters";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { ChainEntryPendingError } from "@/lib/chain-waves/entryWriters";
 import Button from "@/components/utils/button/Button";
 
 interface WaveDropMobileMenuDeleteProps {
@@ -25,29 +37,54 @@ const WaveDropMobileMenuDelete: React.FC<WaveDropMobileMenuDeleteProps> = ({
   const { requestAuth, setToast } = useContext(AuthContext);
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
   const { processDropRemoved } = useMyStreamActions();
+  const queryClient = useQueryClient();
+  const locale = useBrowserLocale();
+  // On the 6529 Network an entry's delete is its author's withdrawal; the
+  // delete controls offer it to the author only.
+  const chainEntries = useChainEntryWriters();
+  const chainWithdrawal =
+    drop.drop_type === ApiDropType.Chat ? null : chainEntries;
   const [mutating, setMutating] = useState<boolean>(false);
   const deleteDropMutation = useMutation({
     mutationFn: async () =>
-      await deleteDrop({ dropId: drop.id, waveId: drop.wave.id }),
+      chainWithdrawal
+        ? await chainWithdrawal.withdrawEntry({ dropId: drop.id })
+        : await deleteDrop({ dropId: drop.id, waveId: drop.wave.id }),
     onSuccess: () => {
       setToast({
-        message: "Drop deleted.",
+        message: chainWithdrawal ? "Entry withdrawn." : "Drop deleted.",
         type: "warning",
       });
       invalidateDrops();
+      if (chainWithdrawal) {
+        void invalidateChainEntryQueries(queryClient, drop.wave.id).catch(
+          () => undefined
+        );
+      }
       processDropRemoved(drop.wave.id, drop.id);
       onDropDeleted();
     },
     onError: (error) => {
       // Cancelled at the signing prompt: nothing was sent.
-      if (isSignedWriteCancelled(error)) {
+      if (isSignedWriteCancelled(error) || isUserRejectedSigningError(error)) {
         return;
       }
+      // Sent, not final yet: it may still land.
+      if (error instanceof ChainEntryPendingError) {
+        setToast({ message: error.message, type: "warning" });
+        return;
+      }
+      // The 6529 Network's reason in plain words, with no second line;
+      // 6529.io's own wording for its delete.
       setToast({
         type: "error",
-        title: "Couldn't delete this drop.",
-        description: "Please try again.",
-        details: getToastErrorDetails(error),
+        title: chainWithdrawal
+          ? "Couldn't withdraw this entry."
+          : "Couldn't delete this drop.",
+        description:
+          chainIdentityPointer(locale, error) ??
+          chainWriteFailure(locale, error, "Please try again.", "withdrawal"),
+        details: chainWriteDetails(error),
       });
     },
     onSettled: () => {
@@ -59,13 +96,25 @@ const WaveDropMobileMenuDelete: React.FC<WaveDropMobileMenuDeleteProps> = ({
       return;
     }
     setMutating(true);
-    const { success } = await requestAuth();
+    // On the 6529 Network the withdrawal carries its own signature.
+    const { success } = chainWithdrawal
+      ? { success: true }
+      : await requestAuth();
     if (!success) {
       setMutating(false);
       return;
     }
-    await deleteDropMutation.mutateAsync();
+    try {
+      await deleteDropMutation.mutateAsync();
+    } catch {
+      // The mutation callbacks own the visible error state and reset loading.
+    }
   };
+  const deleteLabel = chainWithdrawal ? "Withdraw" : "Delete";
+  let confirmLabel = "Are you sure?";
+  if (mutating) {
+    confirmLabel = chainWithdrawal ? "Withdrawing..." : "Deleting...";
+  }
 
   return (
     <div className="tw-w-full tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800">
@@ -96,7 +145,7 @@ const WaveDropMobileMenuDelete: React.FC<WaveDropMobileMenuDeleteProps> = ({
               />
             </svg>
             <span className="tw-text-base tw-font-semibold tw-text-red">
-              Delete
+              {deleteLabel}
             </span>
           </motion.button>
         ) : (
@@ -115,7 +164,7 @@ const WaveDropMobileMenuDelete: React.FC<WaveDropMobileMenuDeleteProps> = ({
               size="lg"
               fullWidth
             >
-              {mutating ? "Deleting..." : "Are you sure?"}
+              {confirmLabel}
             </Button>
             <Button
               onClick={() => setIsDeleteMode(false)}

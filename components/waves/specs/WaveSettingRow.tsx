@@ -19,10 +19,13 @@ import { createPortal } from "react-dom";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { useWaveInformationPanel } from "@/components/brain/mobile/WaveInformationPanelContext";
 import { WaveSettingEditorContext } from "./WaveSettingEditorContext";
+import { useMobilePageDraft } from "@/components/mobile-navigation/MobilePageContext";
 import IconButton from "@/components/utils/button/IconButton";
 
 interface WaveSettingRowProps {
   readonly canEdit: boolean;
+  readonly dirty?: boolean;
+  readonly busy?: boolean;
   readonly editIcon?: "gear" | "pencil" | undefined;
   readonly editLabel: string;
   readonly label: string;
@@ -65,6 +68,8 @@ const isInsideElement = (
 
 export default function WaveSettingRow({
   canEdit,
+  dirty = false,
+  busy = false,
   editIcon = "pencil",
   editLabel,
   label,
@@ -77,6 +82,7 @@ export default function WaveSettingRow({
   const editorId = useId();
   const panel = useWaveInformationPanel(editLabel);
   const { isOpen: isEditorOpen, close: closeEditor, open: openPanel } = panel;
+  useMobilePageDraft(panel.isOpen && dirty, panel.isOpen && busy);
   const [useBottomSheet, setUseBottomSheet] = useState(() =>
     shouldUseBottomSheet()
   );
@@ -306,6 +312,11 @@ export default function WaveSettingRow({
       ref={editButtonRef}
       type="button"
       layout="edit-setting"
+      className={
+        panel.isPhone && variant === "content"
+          ? "after:tw-absolute after:tw-inset-0 after:tw-content-['']"
+          : undefined
+      }
       aria-label={editLabel}
       aria-controls={panel.isInSheet ? panel.contentId : editorId}
       aria-expanded={isEditorOpen}
@@ -317,9 +328,33 @@ export default function WaveSettingRow({
     </IconButton>
   ) : null;
 
+  if (panel.isPhone && canEdit && variant === "row")
+    return (
+      <>
+        <button
+          ref={editButtonRef}
+          type="button"
+          onClick={openEditor}
+          aria-label={editLabel}
+          aria-controls={panel.contentId}
+          aria-expanded={isEditorOpen}
+          className="tw-flex tw-min-h-12 tw-w-full tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-py-2 tw-text-left tw-text-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+        >
+          <span className="tw-min-w-0 tw-flex-1 tw-text-iron-300">{label}</span>
+          <span className="tw-min-w-0 tw-break-words tw-text-right tw-font-medium tw-text-iron-50">
+            {valueLabel}
+          </span>
+          <span className="tw-flex tw-shrink-0 tw-text-iron-500">
+            {editIconContent}
+          </span>
+        </button>
+        {editorSurface}
+      </>
+    );
+
   if (variant === "content") {
     return (
-      <section className="tw-px-4 tw-py-4">
+      <section className="tw-relative tw-px-4 tw-py-4 [&_a]:tw-relative [&_a]:tw-z-10">
         <div className="tw-flex tw-min-h-7 tw-items-center tw-justify-between tw-gap-x-4">
           <h2 className="tw-mb-0 !tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.06em] !tw-text-iron-400 sm:tw-tracking-[0.1em]">
             {label}
