@@ -18,6 +18,7 @@ import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
 import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { t } from "@/i18n/messages";
 import {
   ArrowsUpDownIcon,
@@ -162,6 +163,7 @@ export function DiscoverWaveControls({
   readonly onSortChange: (sort: DiscoverSort) => void;
 }) {
   const locale = useBrowserLocale();
+  const hasHydrated = useHasHydrated();
   const [sortOpen, setSortOpen] = useState(false);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const sortLabel = t(locale, "waves.discovery.sort.label");
@@ -264,7 +266,9 @@ export function DiscoverWaveControls({
           }}
         />
       </div>
+      {/* Retain after hydration so exit cleanup cannot reclaim filter focus. */}
       <MobileWrapperDialog
+        keepMounted={hasHydrated}
         isOpen={sortOpen}
         onClose={() => setSortOpen(false)}
         title={sortLabel}
