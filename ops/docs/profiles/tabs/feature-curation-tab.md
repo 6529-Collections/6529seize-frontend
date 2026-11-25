@@ -83,7 +83,9 @@ leave without submitting. Their desktop dialogs also offer Cancel.
   name>` on a second, single-line subtitle. The header uses the same close
   button as the other profile sheets. The chat composer requests input focus
   when it opens, and the sheet follows the available keyboard viewport.
-- **Mobile empty states:** owner and visitor panels use the same compact frame.
+- **Mobile empty states:** owner and visitor panels use the same compact frame
+  and subtle gradient background, including `No featured wave yet` and
+  `No Curations yet`.
   The owner's `Create Curation` action is a single primary button, with
   `Advanced Wave setup` as a text action below it. Existing setup and empty-state
   copy stays the same.

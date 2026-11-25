@@ -1043,6 +1043,29 @@ test.describe("Profile editing @auth @medium @local-only", () => {
             scale: "css",
           });
       }
+      let curationGradient: string | undefined;
+      if (!owner) {
+        await page.route(`${api}/api/waves/${waveId}/curations`, (route) =>
+          route.fulfill({ json: [] })
+        );
+        await finishHostedWalletInitialization(page, () => page.reload());
+        const noCurations = page
+          .getByRole("heading", { name: "No Curations yet", exact: true })
+          .locator("xpath=ancestor::section");
+        const gradient = noCurations
+          .locator(':scope > [aria-hidden="true"]')
+          .first();
+        await expect(gradient).toBeVisible();
+        curationGradient = await gradient.evaluate(
+          (element) => getComputedStyle(element).backgroundImage
+        );
+        expect(curationGradient).toContain("radial-gradient");
+        await noCurations.screenshot({
+          path: testInfo.outputPath("curation-no-curations.png"),
+          animations: "disabled",
+          scale: "css",
+        });
+      }
       connected = false;
       await finishHostedWalletInitialization(page, () => page.reload());
       const emptyTitle = owner ? "Create a Curation" : "No featured wave yet";
@@ -1051,6 +1074,20 @@ test.describe("Profile editing @auth @medium @local-only", () => {
         exact: true,
       });
       await expect(emptyHeading).toBeVisible();
+      const emptyGradient = emptyHeading
+        .locator("xpath=ancestor::section")
+        .locator(':scope > [aria-hidden="true"]')
+        .first();
+      await expect(emptyGradient).toBeVisible();
+      await expect(emptyGradient).toHaveCSS(
+        "background-image",
+        /radial-gradient/
+      );
+      if (curationGradient)
+        await expect(emptyGradient).toHaveCSS(
+          "background-image",
+          curationGradient
+        );
       await expect(
         page.getByText(
           owner

@@ -65,11 +65,11 @@ export function CurationEmptyPanel({
     <section className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black lg:tw-rounded-[2rem]">
       <div
         aria-hidden
-        className="tw-pointer-events-none tw-absolute tw-inset-0 tw-hidden tw-bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.06),transparent_62%)] lg:tw-block"
+        className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.06),transparent_62%)]"
       />
       <div
         aria-hidden
-        className="tw-pointer-events-none tw-absolute tw-left-1/2 tw-top-1/2 tw-hidden tw-h-80 tw-w-80 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-white/5 tw-blur-3xl lg:tw-block"
+        className="tw-pointer-events-none tw-absolute tw-left-1/2 tw-top-1/2 tw-h-80 tw-w-80 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-white/5 tw-blur-3xl"
       />
 
       <div className="tw-relative tw-flex tw-min-h-[240px] tw-flex-col tw-items-center tw-justify-center tw-px-4 tw-py-10 tw-text-center sm:tw-min-h-[360px] sm:tw-px-8 sm:tw-py-16">
