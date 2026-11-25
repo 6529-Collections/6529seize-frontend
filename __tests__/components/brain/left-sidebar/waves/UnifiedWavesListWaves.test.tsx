@@ -529,6 +529,35 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
   expect(ref.current?.sentinelRef.current).toBeInstanceOf(HTMLElement);
 });
 
+it("reveals the subwaves of a parent opened from recommendations", async () => {
+  render(
+    <UnifiedWavesListWaves
+      waves={[
+        createMockMinimalWave({
+          id: "recommended-parent",
+          name: "Recommended parent",
+          sidebarSection: "highly-rated",
+        }),
+        createMockMinimalWave({
+          id: "recommended-child",
+          parentWaveId: "recommended-parent",
+        }),
+      ]}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+    />
+  );
+
+  expect(screen.queryByTestId("wave-recommended-child")).toBeNull();
+  fireEvent.click(
+    screen.getByRole("link", { name: "Open Recommended parent" })
+  );
+  expect(loadSubwavesForParent).toHaveBeenCalledWith("recommended-parent");
+  expect(
+    await screen.findByTestId("wave-recommended-child")
+  ).toBeInTheDocument();
+});
+
 it("uses darker section dividers in the app without changing the web tone", () => {
   const { container, rerender } = render(
     <UnifiedWavesListWaves

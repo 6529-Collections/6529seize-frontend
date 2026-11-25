@@ -147,6 +147,10 @@ const getActiveParentWaveIdFromWaves = (
   return waves.find((wave) => wave.id === activeWaveId)?.parentWaveId ?? null;
 };
 
+const canExpandSidebarParent = (wave: MinimalWave, subwavesCount: number) =>
+  wave.parentWaveId === null &&
+  (wave.hasSubwaves || wave.followedSubwavesCount > 0 || subwavesCount > 0);
+
 const buildSidebarWaveRows = ({
   getHasUnreadSubwaves,
   getIsExpanded,
@@ -168,11 +172,7 @@ const buildSidebarWaveRows = ({
     const subwaves = subwavesByParentId.get(wave.id) ?? [];
     // Muted parents can still be expanded for inspection; unread indicators
     // stay suppressed by getHasUnreadSubwaves.
-    const canExpand =
-      wave.parentWaveId === null &&
-      (wave.hasSubwaves ||
-        wave.followedSubwavesCount > 0 ||
-        subwaves.length > 0);
+    const canExpand = canExpandSidebarParent(wave, subwaves.length);
     const isExpanded =
       showExpandedSubwaves &&
       canExpand &&
@@ -354,12 +354,29 @@ export function useSidebarWaveTree({
 
   const expandParent = useCallback(
     (waveId: string) => {
+      const wave = topLevelWaves.find((candidate) => candidate.id === waveId);
+      if (
+        !wave ||
+        !canExpandSidebarParent(
+          wave,
+          subwavesByParentId.get(waveId)?.length ?? 0
+        )
+      ) {
+        return;
+      }
+
       if (!getIsVisiblyExpanded(waveId)) {
         onParentExpand?.(waveId);
       }
       setParentExpanded(waveId, true);
     },
-    [getIsVisiblyExpanded, onParentExpand, setParentExpanded]
+    [
+      getIsVisiblyExpanded,
+      onParentExpand,
+      setParentExpanded,
+      subwavesByParentId,
+      topLevelWaves,
+    ]
   );
 
   const toggleParent = useCallback(

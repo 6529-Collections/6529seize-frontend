@@ -4,7 +4,10 @@ import Link from "next/link";
 import BrainLeftSidebarWaveDropTime from "@/components/brain/left-sidebar/waves/BrainLeftSidebarWaveDropTime";
 import BrainLeftSidebarWavePin from "@/components/brain/left-sidebar/waves/BrainLeftSidebarWavePin";
 import { PinnedWaveLinkContext } from "@/components/brain/left-sidebar/waves/PinnedWaveLinkContext";
-import { SidebarSubwavesToggle } from "@/components/brain/left-sidebar/waves/SidebarSubwavesToggle";
+import {
+  SidebarSubwavesToggle,
+  type SidebarSubwaveRowProps,
+} from "@/components/brain/left-sidebar/waves/SidebarSubwavesToggle";
 import {
   SidebarParentSubwaveConnector,
   SidebarSubwaveConnector,
@@ -25,7 +28,7 @@ import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore
 
 const SUBWAVE_PREFETCH_HOVER_INTENT_MS = 150;
 
-interface ExpandedWaveProps {
+interface ExpandedWaveProps extends SidebarSubwaveRowProps {
   readonly scoreDetailsDisabled?: boolean | undefined;
   readonly formattedWaveName: string;
   readonly haveNewDrops: boolean;
@@ -47,16 +50,6 @@ interface ExpandedWaveProps {
   readonly tooltipPlacement: WaveTooltipPlacement;
   readonly wave: MinimalWave;
   readonly waveId: string;
-  readonly depth?: 0 | 1 | undefined;
-  readonly canExpand?: boolean | undefined;
-  readonly hasUnreadSubwaves?: boolean | undefined;
-  readonly subwavesExpanded?: boolean | undefined;
-  readonly subwavesLoading?: boolean | undefined;
-  readonly unreadSubwaveDropsCount?: number | undefined;
-  readonly isLastSubwave?: boolean | undefined;
-  readonly showSubwaveConnector?: boolean | undefined;
-  readonly onPrefetchSubwaves?: ((waveId: string) => void) | undefined;
-  readonly onToggleSubwaves?: ((waveId: string) => void) | undefined;
 }
 
 export const ExpandedWave = ({

@@ -5,6 +5,19 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t, type MessageKey } from "@/i18n/messages";
 
+export interface SidebarSubwaveRowProps {
+  readonly depth?: 0 | 1 | undefined;
+  readonly canExpand?: boolean | undefined;
+  readonly hasUnreadSubwaves?: boolean | undefined;
+  readonly subwavesExpanded?: boolean | undefined;
+  readonly subwavesLoading?: boolean | undefined;
+  readonly unreadSubwaveDropsCount?: number | undefined;
+  readonly isLastSubwave?: boolean | undefined;
+  readonly showSubwaveConnector?: boolean | undefined;
+  readonly onPrefetchSubwaves?: ((waveId: string) => void) | undefined;
+  readonly onToggleSubwaves?: ((waveId: string) => void) | undefined;
+}
+
 interface SidebarSubwavesToggleProps {
   readonly isExpanded: boolean;
   readonly isLoading: boolean;

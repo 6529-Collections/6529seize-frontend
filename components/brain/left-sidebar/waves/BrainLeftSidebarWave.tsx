@@ -23,7 +23,10 @@ import BrainLeftSidebarWaveDropTime from "./BrainLeftSidebarWaveDropTime";
 import BrainLeftSidebarWavePin from "./BrainLeftSidebarWavePin";
 import { PinnedWaveLinkContext } from "./PinnedWaveLinkContext";
 import { AnnouncementWaveIcon } from "./SidebarIconTile";
-import { SidebarSubwavesToggle } from "./SidebarSubwavesToggle";
+import {
+  SidebarSubwavesToggle,
+  type SidebarSubwaveRowProps,
+} from "./SidebarSubwavesToggle";
 import {
   SidebarParentSubwaveConnector,
   SidebarSubwaveConnector,
@@ -36,24 +39,14 @@ import {
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 import { hasUnreadWaveDrops } from "./sidebarWaveListUtils";
 
-interface BrainLeftSidebarWaveProps {
+interface BrainLeftSidebarWaveProps extends SidebarSubwaveRowProps {
   readonly scoreDetailsDisabled?: boolean | undefined;
   readonly isAnnouncement?: boolean | undefined;
   readonly wave: MinimalWave;
   readonly onHover: (waveId: string) => void;
   readonly showPin?: boolean | undefined;
   readonly isDirectMessage?: boolean | undefined;
-  readonly depth?: 0 | 1 | undefined;
-  readonly canExpand?: boolean | undefined;
-  readonly hasUnreadSubwaves?: boolean | undefined;
-  readonly subwavesExpanded?: boolean | undefined;
-  readonly subwavesLoading?: boolean | undefined;
-  readonly unreadSubwaveDropsCount?: number | undefined;
-  readonly isLastSubwave?: boolean | undefined;
-  readonly showSubwaveConnector?: boolean | undefined;
   readonly onExpandSubwaves?: ((waveId: string) => void) | undefined;
-  readonly onPrefetchSubwaves?: ((waveId: string) => void) | undefined;
-  readonly onToggleSubwaves?: ((waveId: string) => void) | undefined;
 }
 
 const getPresentNumber = (value: number | null): number | null => {
