@@ -223,6 +223,8 @@
   "chainIdentity.error.WRONG_WALLET": "Switch your wallet app to {wallet} and try again.",
   "chainIdentity.error.refused": "The 6529 Network refused this change. Its reason code is {name}. Reload the page and try again.",
   "chainIdentity.error.generic": "Something went wrong. Try again.",
+  "chainIdentity.error.noIdentity": "This wallet has no identity on the 6529 Network yet. Set one up on {link}.",
+  "chainIdentity.error.noIdentityLink": "your identity page",
   "chainIdentity.error.noGateway": "The 6529 Network didn't answer. Try again in a minute.",
   "chainIdentity.error.rateLimited": "Too many requests. Wait a minute and try again.",
   "chainIdentity.error.tooLarge": "That is too large to save. Make it shorter.",

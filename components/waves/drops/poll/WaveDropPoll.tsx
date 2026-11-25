@@ -13,6 +13,7 @@ import {
   chainWriteDetails,
   chainWriteFailure,
 } from "@/components/chain-waves/chainWavesErrorMessage";
+import { chainIdentityPointer } from "@/components/chain-waves/chainIdentityPointer";
 import { preserveAuthenticatedPollVote } from "@/helpers/waves/poll-vote-reconciliation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import {
@@ -285,12 +286,9 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
       setToast({
         type: "error",
         title: "Couldn't submit your poll vote.",
-        description: chainWriteFailure(
-          locale,
-          error,
-          "Please try again.",
-          "ballot"
-        ),
+        description:
+          chainIdentityPointer(locale, error) ??
+          chainWriteFailure(locale, error, "Please try again.", "ballot"),
         details: chainWriteDetails(error),
       });
     },

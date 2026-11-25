@@ -8,6 +8,7 @@ import {
   chainWriteDetails,
   chainWriteFailure,
 } from "@/components/chain-waves/chainWavesErrorMessage";
+import { chainIdentityPointer } from "@/components/chain-waves/chainIdentityPointer";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { commonApiPost } from "@/services/api/common-api";
@@ -258,11 +259,9 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
       setToast({
         type: "error",
         title: t(locale, "waves.myVotes.voteUpdateError"),
-        description: chainWriteFailure(
-          locale,
-          error,
-          t(locale, "waves.myVotes.tryAgain")
-        ),
+        description:
+          chainIdentityPointer(locale, error) ??
+          chainWriteFailure(locale, error, t(locale, "waves.myVotes.tryAgain")),
         details: chainWriteDetails(error),
       });
     },

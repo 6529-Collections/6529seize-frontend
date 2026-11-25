@@ -19,6 +19,7 @@ import {
   chainWriteDetails,
   chainWriteFailure,
 } from "@/components/chain-waves/chainWavesErrorMessage";
+import { chainIdentityPointer } from "@/components/chain-waves/chainIdentityPointer";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useWaveRepAllocation } from "@/hooks/useWaveRepAllocation";
 import {
@@ -185,12 +186,14 @@ export default function WaveRepRatingModal({
       setToast({
         type: "error",
         title: "Couldn't update Wave REP.",
-        description: chainWriteFailure(
-          DEFAULT_LOCALE,
-          error,
-          "Please try again.",
-          "rating"
-        ),
+        description:
+          chainIdentityPointer(DEFAULT_LOCALE, error) ??
+          chainWriteFailure(
+            DEFAULT_LOCALE,
+            error,
+            "Please try again.",
+            "rating"
+          ),
         details: chainWriteDetails(error),
       });
     },

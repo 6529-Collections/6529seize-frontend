@@ -29,6 +29,13 @@ export interface ChainSigning {
   readonly walletInstead?: ChainSigning | undefined;
 }
 
+/** A wallet bound to no identity on the 6529 Network: nothing was signed. */
+class NoChainIdentityError extends ChainOperationError {
+  constructor() {
+    super("rejected", "This wallet has no identity on the 6529 Network yet.");
+  }
+}
+
 /** The identity a wallet is bound to, or a message saying it has none. */
 export async function identityOfWallet(
   wallet: Hex,
@@ -36,13 +43,14 @@ export async function identityOfWallet(
 ): Promise<ChainIdentity> {
   const identity = await chainGateway.getIdentityByWallet(wallet, signal);
   if (!identity) {
-    throw new ChainOperationError(
-      "rejected",
-      "This wallet has no identity on the 6529 Network yet."
-    );
+    throw new NoChainIdentityError();
   }
   return identity;
 }
+
+/** Whether a write stopped because the wallet has no identity yet. */
+export const isNoChainIdentity = (error: unknown): boolean =>
+  error instanceof NoChainIdentityError;
 
 /**
  * The connected wallet signs (every rule version 7 write but votes, ballots

@@ -17,6 +17,7 @@ import {
   chainWriteDetails,
   chainWriteFailure,
 } from "@/components/chain-waves/chainWavesErrorMessage";
+import { chainIdentityPointer } from "@/components/chain-waves/chainIdentityPointer";
 import {
   applyWaveDropVoteUpdate,
   invalidateWaveApprovalSummaryQueries,
@@ -129,11 +130,9 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
       setToast({
         type: "error",
         title: t(locale, "waves.myVotes.resetError"),
-        description: chainWriteFailure(
-          locale,
-          error,
-          t(locale, "waves.myVotes.tryAgain")
-        ),
+        description:
+          chainIdentityPointer(locale, error) ??
+          chainWriteFailure(locale, error, t(locale, "waves.myVotes.tryAgain")),
         details: chainWriteDetails(error),
       });
       throw error;
