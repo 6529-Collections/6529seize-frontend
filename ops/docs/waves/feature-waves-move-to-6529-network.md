@@ -8,11 +8,11 @@ them at the freeze, and the 6529 Network takes them at the switch-on. Chat
 keeps working throughout: posts, replies, edits and deletions of chat posts
 without a poll, reactions and direct messages are not affected.
 
-Two build settings name the instants in UTC:
-`NEXT_PUBLIC_WAVES_FREEZE_AT` (for example `2026-11-25T00:00:00Z`) and
-`NEXT_PUBLIC_WAVES_SWITCH_ON_AT` (for example `2026-11-26T00:00:00Z`). Unless
-both are set and the switch-on comes after the freeze, nothing below applies:
-the site shows no notice and pauses nothing.
+Two build settings name the instants: `NEXT_PUBLIC_WAVES_FREEZE_AT` (the
+freeze) and `NEXT_PUBLIC_WAVES_SWITCH_ON_AT` (the switch-on), each a UTC
+instant ending in `Z`, such as `YYYY-MM-DDT00:00:00Z`. Unless both are set and
+the switch-on comes after the freeze, nothing below applies: the site shows no
+notice and pauses nothing.
 
 ### Waves That Stay
 
@@ -44,14 +44,14 @@ for a wave a page has read as moving, and a new wave.
 
 ## The Notice
 
-With the freeze at Wednesday 25 November 00:00 UTC and the switch-on at
-Thursday 26 November 00:00 UTC, the notice says:
+The notice takes its weekdays, days and times from the two settings, in UTC.
+It says:
 
-| When                             | What it says                                                                                                                                            |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Before the freeze                | Votes, entries and wave settings move to the 6529 Network. From Wednesday 00:00 UTC you can't change them until Thursday 00:00 UTC. Chat keeps working. |
-| From the freeze to the switch-on | Votes, entries and wave settings are moving to the 6529 Network. You can't change them until Thursday 00:00 UTC. Chat keeps working.                    |
-| After the switch-on              | Votes, entries and wave settings moved to the 6529 Network on Thursday 26 November. You can't change them on this site yet. Chat keeps working.         |
+| When                             | What it says                                                                                                                                                                                                                                                                     |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Before the freeze                | Votes, entries and wave settings move to the 6529 Network. From [freeze weekday] [freeze time] UTC you can't change them until [switch-on weekday] [switch-on time] UTC. Chat keeps working.                                                                                     |
+| From the freeze to the switch-on | Votes, entries and wave settings are moving to the 6529 Network. You can't change them until [switch-on weekday] [switch-on time] UTC. Chat keeps working.                                                                                                                       |
+| After the switch-on              | Votes, entries and wave settings moved to the 6529 Network on [switch-on weekday] [switch-on day] [switch-on month]. You can't change them on this site yet. Chat keeps working. Waves and decisions made outside 6529.io show here once their documents reach the 6529 Network. |
 
 Times are shown in UTC. The notice changes at the freeze and at the switch-on
 while the page stays open. Hiding it is remembered in the browser until the
@@ -59,9 +59,10 @@ notice changes.
 
 6529.io settles no result while waves are frozen. In a wave whose result falls
 due then (the Main Stage's, for one), the notice adds, from the time it is due:
-"The result due Wednesday 16:00 UTC is counted on the 6529 Network after
-Thursday 00:00 UTC." Until the switch-on the wave's leaderboard keeps its
-standings and its countdown moves on to the next result.
+"The result due [result weekday] [result time] UTC is counted on the 6529
+Network after [switch-on weekday] [switch-on time] UTC." Until the switch-on
+the wave's leaderboard keeps its standings and its countdown moves on to the
+next result.
 
 ## What Is Paused From the Freeze
 
