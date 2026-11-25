@@ -146,7 +146,6 @@ test("mobile sheet stays open for multiple selections and deselections", async (
   for (const type of options) {
     const option = screen.getByRole("button", {
       name: PROFILE_ACTIVITY_TYPE_TO_TEXT[type],
-      exact: true,
     });
     await user.click(option);
     expect(option).toHaveAttribute("aria-pressed", "false");
@@ -154,18 +153,21 @@ test("mobile sheet stays open for multiple selections and deselections", async (
       screen.getByRole("dialog", { name: "Activity types" })
     ).toBeVisible();
   }
-  await user.click(screen.getByRole("button", { name: "Rating", exact: true }));
-  expect(
-    screen.getByRole("button", { name: "Rating", exact: true })
-  ).toHaveAttribute("aria-pressed", "true");
+  await user.click(screen.getByRole("button", { name: "Rating" }));
+  expect(screen.getByRole("button", { name: "Rating" })).toHaveAttribute(
+    "aria-pressed",
+    "true"
+  );
   expect(screen.getByRole("dialog", { name: "Activity types" })).toBeVisible();
   await user.click(screen.getByRole("button", { name: "Close panel" }));
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   await user.click(trigger);
-  expect(
-    screen.getByRole("button", { name: "Rating", exact: true })
-  ).toHaveAttribute("aria-pressed", "true");
-  expect(
-    screen.getByRole("button", { name: "Handle", exact: true })
-  ).toHaveAttribute("aria-pressed", "false");
+  expect(screen.getByRole("button", { name: "Rating" })).toHaveAttribute(
+    "aria-pressed",
+    "true"
+  );
+  expect(screen.getByRole("button", { name: "Handle" })).toHaveAttribute(
+    "aria-pressed",
+    "false"
+  );
 });
