@@ -21,9 +21,7 @@ import { WaveAvatar } from "./WaveAvatar";
 import type { WaveTooltipPlacement } from "./WaveTooltip";
 import { WaveTooltip } from "./WaveTooltip";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
-import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { SidebarWaveTouchActions } from "@/components/brain/left-sidebar/waves/SidebarWaveTouchActions";
-import { SidebarWavePinStatus } from "@/components/brain/left-sidebar/waves/SidebarWavePinStatus";
 
 const SUBWAVE_PREFETCH_HOVER_INTENT_MS = 150;
 
@@ -43,7 +41,6 @@ interface ExpandedWaveProps {
   readonly onClick: (e: React.MouseEvent<HTMLAnchorElement>) => void;
   readonly showExpandedTooltip: boolean;
   readonly showPin: boolean;
-  readonly showPinnedStatus?: boolean | undefined;
   readonly tooltipContent: string;
   readonly tooltipId: string;
   readonly tooltipPlacement: WaveTooltipPlacement;
@@ -73,7 +70,6 @@ export const ExpandedWave = ({
   onClick,
   showExpandedTooltip,
   showPin,
-  showPinnedStatus = false,
   tooltipContent,
   tooltipId,
   tooltipPlacement,
@@ -86,7 +82,6 @@ export const ExpandedWave = ({
   showSubwaveConnector = false,
   onPrefetchSubwaves,
 }: ExpandedWaveProps) => {
-  const isTouchDevice = useIsTouchDevice();
   const pinnedLinkProps = useContext(PinnedWaveLinkContext);
   const tooltipAttributes = showExpandedTooltip
     ? {
@@ -260,11 +255,7 @@ export const ExpandedWave = ({
               </div>
               {(hasSummaryScore || shouldShowPinButton) && (
                 <div className="tw-relative tw-z-10 tw-ml-auto tw-flex tw-shrink-0 tw-items-center tw-gap-0.5">
-                  {isTouchDevice &&
-                    showPinnedStatus &&
-                    depth === 0 &&
-                    isPinned && <SidebarWavePinStatus />}
-                  {shouldShowPinButton && !isTouchDevice && (
+                  {shouldShowPinButton && (
                     <BrainLeftSidebarWavePin
                       waveId={waveId}
                       isPinned={isPinned}

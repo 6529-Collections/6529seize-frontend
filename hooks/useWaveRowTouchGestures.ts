@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, type RefObject } from "react";
 
 export const WAVE_PIN_SWIPE_THRESHOLD = 64;
-export const WAVE_ROW_LONG_PRESS_MS = 450;
+const WAVE_ROW_LONG_PRESS_MS = 450;
 const INTENT_DISTANCE = 8;
 
 interface Options {
@@ -134,6 +134,10 @@ export function useWaveRowTouchGestures(options: Options) {
       gesture = current;
       timer = globalThis.setTimeout(() => {
         if (gesture !== current) return;
+        if (!latest.current.enabled) {
+          cancel();
+          return;
+        }
         current.held = true;
         suppressNavigation();
         latest.current.onLongPress();
@@ -146,6 +150,10 @@ export function useWaveRowTouchGestures(options: Options) {
     }
 
     function move(event: PointerEvent) {
+      if (!latest.current.enabled) {
+        cancel();
+        return;
+      }
       const current = gesture;
       if (current?.id !== event.pointerId || current.held) return;
       const dx = event.clientX - current.x;
@@ -167,6 +175,10 @@ export function useWaveRowTouchGestures(options: Options) {
     }
 
     function end(event: PointerEvent) {
+      if (!latest.current.enabled) {
+        cancel();
+        return;
+      }
       const current = gesture;
       if (current?.id !== event.pointerId) return;
       if (current.swiping) {

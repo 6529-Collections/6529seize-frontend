@@ -15953,6 +15953,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         hotness_score: 98,
         rep_sort_score: 85,
       };
+      wave.wave_rep = {
+        total_rep: 494061,
+        authenticated_user_contribution: null,
+      };
       let writes = 0;
       await page.route(`**/api/waves/${WAVE}`, (route) =>
         route.fulfill({ json: wave })
@@ -15994,7 +15998,48 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       ).toHaveCount(0);
       await avatar.click();
       const details = page.getByRole("dialog");
-      await details.getByRole("button", { name: "Score", exact: true }).click();
+      const stats = details.getByLabel("Wave trust stats", { exact: true });
+      await expect(stats).toBeVisible();
+      const alignment = await stats.evaluate((element) =>
+        [...element.children].map((stat) => {
+          const label = stat.querySelector("dt");
+          const value = stat.querySelector("dd");
+          if (!label || !value) throw new Error("Missing wave statistic");
+          return {
+            label: label.textContent?.trim(),
+            labelY: label.getBoundingClientRect().y,
+            valueY: value.getBoundingClientRect().y,
+          };
+        })
+      );
+      expect(alignment.map((stat) => stat.label)).toEqual([
+        "Score",
+        "Quality",
+        "Hot",
+        "Wave REP",
+      ]);
+      for (const stat of alignment) expect(stat.labelY).toBe(stat.valueY);
+      expect(alignment[0]?.labelY).toBe(alignment[1]?.labelY);
+      expect(alignment[2]?.labelY).toBe(alignment[3]?.labelY);
+      const score = details.getByRole("button", { name: "Score", exact: true });
+      await expect(score).toHaveCSS("text-decoration-line", "underline");
+      expect(
+        await score.evaluate((button) => {
+          const r = button.getBoundingClientRect();
+          const x = r.x + r.width / 2;
+          const y = r.y + r.height / 2;
+          const points = [
+            [x - 21, y],
+            [x + 21, y],
+            [x, y - 21],
+            [x, y + 21],
+          ] as const;
+          return points.every(([px, py]) =>
+            button.contains(document.elementFromPoint(px, py))
+          );
+        })
+      ).toBe(true);
+      await score.click();
       await expect(
         page.getByRole("link", { name: "Learn more", exact: true })
       ).toBeVisible();

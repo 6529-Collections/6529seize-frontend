@@ -13,6 +13,7 @@ import {
   getSandboxApiOrigin,
   installLocalSandboxBrowserMutationGuard,
   dismissNextDevTools,
+  hideNextDevOverlay,
   expectNoUnsafeSandboxMutations,
   LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
   useLocalSandboxMutationGuard,
@@ -202,6 +203,7 @@ for (const pinSurface of [
     if (pinSurface !== "mobile web") {
       await installSurfaceSimulation(page.context(), pinSurface, baseURL);
     }
+    await hideNextDevOverlay(page.context());
     const fixture = await installWaveListScrollFixture(page, baseURL);
     await page.goto("/waves", { waitUntil: "domcontentloaded" });
     await dismissNextDevTools(page);
@@ -210,27 +212,86 @@ for (const pinSurface of [
     const row = page.getByTestId("wave-list-touch-row").filter({
       has: page.getByRole("link", { name: "Scroll wave 0", exact: true }),
     });
-    await expect(row.getByTestId("wave-pin-status")).toBeVisible();
+    const rowPin = row.getByRole("button", { name: /^(Pin|Unpin) wave$/ });
+    await expect(rowPin).toBeVisible();
+    await expect(rowPin).toHaveAccessibleName("Unpin wave");
+    await expect(rowPin).toHaveAttribute("aria-pressed", "true");
+    const pinBounds = await rowPin.boundingBox();
+    expect(pinBounds && pinBounds.width >= 44 && pinBounds.height >= 44).toBe(
+      true
+    );
+    if (pinSurface !== "mobile web") {
+      await expect
+        .poll(async () => {
+          const avatar = await page
+            .getByRole("button", { name: "Open menu", exact: true })
+            .boundingBox();
+          const more = await page
+            .getByRole("button", { name: "More", exact: true })
+            .boundingBox();
+          const pin = await rowPin.boundingBox();
+          const scoreControl = row.getByRole("button", {
+            name: /^Wave score /,
+          });
+          const score = (await scoreControl.count())
+            ? await scoreControl.boundingBox()
+            : null;
+          const rowAvatar = await row
+            .getByTestId("sidebar-wave-avatar")
+            .boundingBox();
+          const collection = await filters.boundingBox();
+          if (!avatar || !more || !pin || !rowAvatar || !collection)
+            return null;
+          return {
+            avatarAlignment: Math.round(rowAvatar.x - avatar.x),
+            filterAlignment: Math.round(collection.x - avatar.x),
+            actionAlignment: Math.round(
+              score
+                ? score.x + score.width - (more.x + more.width)
+                : pin.x + pin.width / 2 - (more.x + more.width / 2)
+            ),
+            pinBeforeScore: score ? pin.x + pin.width <= score.x : true,
+          };
+        })
+        .toEqual({
+          avatarAlignment: 0,
+          filterAlignment: 0,
+          actionAlignment: 0,
+          pinBeforeScore: true,
+        });
+    }
+    await expect(page.getByTestId("wave-pin-status")).toHaveCount(0);
+    await rowPin.tap();
+    await expect.poll(() => fixture.pinRequests).toEqual(["DELETE"]);
+    await expect(rowPin).toHaveAccessibleName("Pin wave");
+    await expect(rowPin).toHaveAttribute("aria-pressed", "false");
+    await expect(page).toHaveURL(/\/waves$/);
+    await rowPin.tap();
+    await expect.poll(() => fixture.pinRequests).toEqual(["DELETE", "POST"]);
+    await expect(rowPin).toHaveAccessibleName("Unpin wave");
     await expect(
-      row.getByRole("button", { name: /^(Pin|Unpin) wave$/ })
+      page.getByRole("dialog", { name: /^(Pin|Unpin) wave$/ })
     ).toHaveCount(0);
+    await expect(page).toHaveURL(/\/waves$/);
     let touch = await startWaveRowTouch(page, row);
     await touch.move(25);
     await touch.move(85);
     await expect(row).toHaveAttribute("data-pin-armed", "true");
-    expect(fixture.pinRequests).toEqual([]);
+    expect(fixture.pinRequests).toEqual(["DELETE", "POST"]);
     await page.screenshot({ path: testInfo.outputPath("touch-pin-armed.png") });
     await touch.move(30);
     await expect(row).toHaveAttribute("data-pin-armed", "false");
     await touch.release();
-    expect(fixture.pinRequests).toEqual([]);
+    expect(fixture.pinRequests).toEqual(["DELETE", "POST"]);
     await expect(page).toHaveURL(/\/waves$/);
     touch = await startWaveRowTouch(page, row);
     await touch.move(25);
     await touch.move(85);
     await touch.release();
-    await expect.poll(() => fixture.pinRequests).toEqual(["DELETE"]);
-    await expect(row.getByTestId("wave-pin-status")).toHaveCount(0);
+    await expect
+      .poll(() => fixture.pinRequests)
+      .toEqual(["DELETE", "POST", "DELETE"]);
+    await expect(rowPin).toHaveAccessibleName("Pin wave");
     await expect(page).toHaveURL(/\/waves$/);
 
     touch = await startWaveRowTouch(page, row);
@@ -243,12 +304,17 @@ for (const pinSurface of [
     await expect(menu.getByText(/mute/i)).toHaveCount(0);
     await page.screenshot({ path: testInfo.outputPath("touch-pin-menu.png") });
     await menu.getByRole("button", { name: "Pin wave", exact: true }).click();
-    await expect.poll(() => fixture.pinRequests).toEqual(["DELETE", "POST"]);
-    await expect(row.getByTestId("wave-pin-status")).toBeVisible();
+    await expect
+      .poll(() => fixture.pinRequests)
+      .toEqual(["DELETE", "POST", "DELETE", "POST"]);
+    await expect(rowPin).toHaveAccessibleName("Unpin wave");
     await filters.getByRole("button", { name: "Joined", exact: true }).click();
-    await expect(row.getByTestId("wave-pin-status")).toBeVisible();
+    await expect(rowPin).toBeVisible();
+    await expect(rowPin).toHaveAccessibleName("Unpin wave");
     await filters.getByRole("button", { name: "Pinned", exact: true }).click();
     await expect(page.getByTestId("wave-pin-status")).toHaveCount(0);
+    await expect(rowPin).toBeVisible();
+    await expect(rowPin).toHaveAccessibleName("Unpin wave");
     await filters.getByRole("button", { name: "All", exact: true }).click();
     const before = await sidebarScrollMetrics(row);
     touch = await startWaveRowTouch(page, row);
@@ -267,7 +333,7 @@ for (const pinSurface of [
     await expect(
       page.getByRole("dialog", { name: /^(Pin|Unpin) wave$/ })
     ).toHaveCount(0);
-    expect(fixture.pinRequests).toEqual(["DELETE", "POST"]);
+    expect(fixture.pinRequests).toEqual(["DELETE", "POST", "DELETE", "POST"]);
     const last = page.getByRole("link", {
       name: "Scroll wave 59",
       exact: true,
@@ -810,6 +876,18 @@ test("recommendation taps navigate without score cards while desktop hover stays
   await page.route(/\/api\/v2\/waves\/(?:all|joined)(?:\?|$)/, (route) =>
     route.fulfill({ json: waves })
   );
+  await page.route("**/api/v2/waves/active-votes**", (route) =>
+    route.fulfill({
+      json: {
+        data: [
+          { wave: waves.data[0], voting_ends_at: null, next_decision_at: null },
+        ],
+        count: 1,
+        page: 1,
+        next: false,
+      },
+    })
+  );
   await page.goto("/waves", { waitUntil: "domcontentloaded" });
   const discovery = discoveryRegion(page);
   const toggle = discovery.getByRole("button", {
@@ -828,6 +906,42 @@ test("recommendation taps navigate without score cards while desktop hover stays
     exact: true,
   });
   if (isMobile) {
+    const activeVotes = discovery.getByRole("region", {
+      name: "Active Votes",
+      exact: true,
+    });
+    const votesToggle = activeVotes.getByRole("button", {
+      name: /(?:Expand|Collapse) Active Votes/,
+    });
+    if ((await votesToggle.getAttribute("aria-expanded")) === "false")
+      await votesToggle.click();
+    const activeScore = activeVotes.getByRole("button", {
+      name: /^Wave score 93/,
+    });
+    const waveScore = page
+      .getByTestId("wave-list-touch-row")
+      .filter({
+        has: page.getByRole("link", { name: wave.name, exact: true }),
+      })
+      .getByRole("button", { name: /^Wave score 93/ });
+    const viewport = page.viewportSize();
+    if (!viewport) throw new Error("Missing phone viewport");
+    for (const width of [320, 430, 640]) {
+      await page.setViewportSize({ width, height: 900 });
+      await expect(activeScore).toBeVisible();
+      await expect(waveScore).toBeVisible();
+      await expect
+        .poll(async () => {
+          const active = await activeScore.boundingBox();
+          const list = await waveScore.boundingBox();
+          return active && list
+            ? Math.round(active.x + active.width - (list.x + list.width))
+            : null;
+        })
+        .toBe(0);
+      await expectNoHorizontalOverflow(page);
+    }
+    await page.setViewportSize(viewport);
     await page.clock.install();
     await link.tap();
     await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}`));

@@ -3,8 +3,9 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import {
   resistedWavePinDistance,
   useWaveRowTouchGestures,
-  WAVE_ROW_LONG_PRESS_MS,
 } from "@/hooks/useWaveRowTouchGestures";
+
+const WAVE_ROW_LONG_PRESS_MS = 450;
 
 const onLongPress = jest.fn();
 const onTogglePin = jest.fn();
@@ -125,6 +126,23 @@ it("toggles only once when crossing the threshold repeatedly", () => {
   pointer(wave, "pointerup", 200);
   expect(onTogglePin).toHaveBeenCalledTimes(1);
 });
+
+it.each(["hold", "move", "release"])(
+  "cancels when disabled before %s",
+  (phase) => {
+    const view = render(<Harness />);
+    const wave = screen.getByRole("link");
+    pointer(wave, "pointerdown");
+    if (phase !== "hold") pointer(wave, "pointermove", 180);
+    view.rerender(<Harness enabled={false} />);
+    if (phase === "move") pointer(wave, "pointermove", 190);
+    act(() => { jest.advanceTimersByTime(600); });
+    pointer(wave, "pointerup", 190);
+    expect(onLongPress).not.toHaveBeenCalled();
+    expect(onTogglePin).not.toHaveBeenCalled();
+    if (phase !== "hold") expect(onSwipe).toHaveBeenLastCalledWith(0, true);
+  }
+);
 
 it("keeps vertical scrolling out of both gestures for the entire touch", () => {
   render(<Harness />);

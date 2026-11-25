@@ -140,6 +140,8 @@ describe("HeaderSearchButton", () => {
     );
     const search = screen.getByRole("button", { name: "Search 6529" });
     expect(search).toBeVisible();
+    expect(search).toHaveClass("tw-size-11");
+    expect(search.querySelector("svg")).toHaveAttribute("stroke-width", "1.5");
     const more = screen.getByRole("button", { name: "More" });
     fireEvent.click(more);
     const sheet = await screen.findByRole("dialog");

@@ -20,7 +20,6 @@ interface WebBrainLeftSidebarWaveProps {
   readonly wave: MinimalWave;
   readonly onHover: (waveId: string) => void;
   readonly showPin?: boolean | undefined;
-  readonly showPinnedStatus?: boolean | undefined;
   readonly basePath?: string | undefined;
   readonly collapsed?: boolean | undefined;
   readonly depth?: 0 | 1 | undefined;
@@ -39,7 +38,6 @@ const WebBrainLeftSidebarWave = ({
   wave,
   onHover,
   showPin = true,
-  showPinnedStatus = false,
   basePath = "/waves",
   collapsed = false,
   depth = 0,
@@ -127,7 +125,6 @@ const WebBrainLeftSidebarWave = ({
       onClick={onClick}
       showExpandedTooltip={showExpandedTooltip}
       showPin={showPin}
-      showPinnedStatus={showPinnedStatus}
       tooltipContent={formattedWaveName}
       tooltipId={expandedTooltipId}
       tooltipPlacement={TOOLTIP_PLACEMENT}

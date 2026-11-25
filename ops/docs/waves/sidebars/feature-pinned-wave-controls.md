@@ -20,7 +20,8 @@ independent and do not sync.
   - `/messages/{waveId}` (DM route)
 - Left sidebar wave rows in the Waves list (`/waves*` only; DM rows do not show
   row pin controls). In expanded rows, the control sits beside the wave score
-  in the trailing metadata cluster, with the score at the far right.
+  in the trailing metadata cluster, before the score. The score stays at the
+  far right on desktop and touch screens.
 - Native app small-screen (`<1024px`) shortcuts rail above Waves or Messages
   content.
 - Legacy `/waves?wave={waveId}` links redirect to `/waves/{waveId}`.
@@ -29,8 +30,11 @@ independent and do not sync.
 
 - Use the thread-header thumbtack (`Pin wave` / `Unpin wave`).
 - On desktop, use the thumbtack on a non-DM row in the left Waves list.
-- On touch screens in the native app and mobile web, swipe a top-level wave row
-  right to pin or unpin it, or hold it still for the `Pin wave` / `Unpin wave` menu.
+- On touch screens in the native app and mobile web, tap the visible pin button
+  before the score on a top-level wave row. A filled pin means pinned; a muted outline
+  means unpinned. The button has a 44px tap area and does not open the wave.
+  You can also swipe the row right, or hold it still for the
+  `Pin wave` / `Unpin wave` menu.
 - In native app small-screen mode, opening a wave or DM thread adds or refreshes
   that thread in the shortcuts rail. Use `x` to remove a chip.
 
@@ -43,7 +47,7 @@ independent and do not sync.
    pin/unpin menu instead. With a keyboard, focus the wave and press
    Space, use the arrow keys to move it, then press Space again to save. The
    order syncs across devices. New pins and re-pins go to the bottom.
-4. Unpin from the header, desktop row control, touch swipe, or touch menu to
+4. Unpin from the header, row control, touch swipe, or touch menu to
    remove it from the `Pinned` collection.
 5. If 100 ordinary waves are already pinned, pinning is blocked until you unpin one.
 6. In native app small-screen mode, opened threads are added to local shortcuts
@@ -70,8 +74,8 @@ independent and do not sync.
   opens one `Pin wave` or `Unpin wave` action. The menu appears below the row,
   or above it when needed to clear the bottom navigation. Tap outside to close.
   Neither gesture opens the wave. An ordinary tap still opens it.
-- On touch, pinned rows in `All` and `Joined` show a muted pin beside the score.
-  This is a status mark. `Pinned` omits it because every row is already pinned.
+- The touch pin button stays visible in `All`, `Joined`, and `Pinned`. Its fill
+  shows the saved state, so rows do not need a second pin status mark.
 - Touch gestures require a connected profile handle without an active proxy.
   They do not apply to subwave rows, DMs, or the collapsed desktop rail.
   The thread-header pin remains available without gestures.

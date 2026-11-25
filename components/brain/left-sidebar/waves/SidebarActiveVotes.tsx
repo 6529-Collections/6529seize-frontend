@@ -4,6 +4,7 @@ import { useCallback, useRef, useSyncExternalStore } from "react";
 import type { useActiveWaveVotes } from "@/hooks/useActiveWaveVotes";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { ActiveWaveVoteRow } from "@/components/waves/discovery/ActiveWaveVoteRow";
 import { t } from "@/i18n/messages";
@@ -22,6 +23,7 @@ export function SidebarActiveVotes({
   readonly scoreDetailsDisabled?: boolean;
 }) {
   const locale = useBrowserLocale();
+  const { isApp } = useDeviceInfo();
   const { activeWave } = useMyStream();
   const scrollRef = useRef<HTMLElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -95,12 +97,13 @@ export function SidebarActiveVotes({
         </p>
       )}
       <div className="tw-relative">
+        {/* Keep the score's padded target inside the section gutter. */}
         <section
           ref={scrollRef}
           aria-label={t(locale, "waves.discovery.voteList")}
           data-wave-feature-list="active-votes"
           tabIndex={items.length > 3 && !collapsed ? 0 : -1}
-          className="tw-max-h-36 tw-overflow-y-auto tw-overscroll-y-contain tw-rounded-lg [scrollbar-color:theme(colors.iron.700)_transparent] [scrollbar-width:thin] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          className={`${isApp ? "-tw-mr-2 sm:-tw-mr-1" : ""} tw-max-h-36 tw-overflow-y-auto tw-overscroll-y-contain tw-rounded-lg [scrollbar-color:theme(colors.iron.700)_transparent] [scrollbar-width:thin] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400`}
         >
           <div ref={contentRef}>
             {items.map((vote) => (

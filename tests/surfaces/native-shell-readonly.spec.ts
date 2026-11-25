@@ -268,6 +268,33 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     ).toHaveCount(0);
     for (const width of [320, 430]) {
       await page.setViewportSize({ width, height: 900 });
+      const iconGeometry = await Promise.all(
+        [createWave, searchButton, more].map((button) =>
+          button.evaluate((element) => {
+            const icon = element.querySelector("svg");
+            const target = element.getBoundingClientRect();
+            const bounds = icon?.getBoundingClientRect();
+            return {
+              targetWidth: target.width,
+              targetHeight: target.height,
+              iconWidth: bounds?.width,
+              iconHeight: bounds?.height,
+              strokeWidth: icon?.getAttribute("stroke-width"),
+              centerY: target.y + target.height / 2,
+            };
+          })
+        )
+      );
+      for (const geometry of iconGeometry) {
+        expect(geometry).toMatchObject({
+          targetWidth: 44,
+          targetHeight: 44,
+          iconWidth: 20,
+          iconHeight: 20,
+          strokeWidth: "1.5",
+        });
+        expect(geometry.centerY).toBe(iconGeometry[0]?.centerY);
+      }
       const titleBounds = await page
         .getByText("Waves", { exact: true })
         .boundingBox();

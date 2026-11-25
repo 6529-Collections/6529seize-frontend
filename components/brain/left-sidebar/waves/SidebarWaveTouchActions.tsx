@@ -188,7 +188,7 @@ function TouchActions({ waveId, isPinned, children }: Omit<Props, "enabled">) {
           className={
             menu
               ? "tw-relative tw-rounded-xl tw-bg-iron-900 tw-shadow-lg [&>div]:tw-rounded-xl"
-              : "tw-relative tw-bg-iron-950"
+              : "tw-relative tw-bg-[var(--wave-sidebar-background,#000)]"
           }
         >
           {children}

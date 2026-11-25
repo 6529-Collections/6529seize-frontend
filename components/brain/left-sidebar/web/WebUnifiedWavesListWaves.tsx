@@ -501,7 +501,6 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
         wave={row.wave}
         onHover={onHover}
         showPin={showPin && row.depth === 0}
-        showPinnedStatus={!isDirectMessage && !isPinnedCollection}
         basePath={basePath}
         collapsed={isCollapsed}
         depth={row.depth}

@@ -56,7 +56,7 @@ describe("HeaderActionButtons", () => {
     (useRt as jest.Mock).mockReturnValue({ push, replace, prefetch });
     const pushState = jest.spyOn(globalThis.history, "pushState");
     render(<HeaderActionButtons />);
-    await userEvent.click(screen.getByRole("button", { name: "Create Wave" }));
+    await userEvent.click(screen.getByRole("button", { name: "Create wave" }));
     expect(pushState).toHaveBeenCalledWith(null, "", "/waves?create=wave");
     expect(replace).not.toHaveBeenCalled();
     expect(prefetch).not.toHaveBeenCalled();
@@ -68,7 +68,9 @@ describe("HeaderActionButtons", () => {
     const push = jest.fn();
     (useRt as jest.Mock).mockReturnValue({ push, replace: jest.fn() });
     render(<HeaderActionButtons />);
-    await userEvent.click(screen.getByRole("button", { name: "Create wave" }));
+    const createWave = screen.getByRole("button", { name: "Create wave" });
+    expect(createWave).toHaveClass("tw-size-11");
+    await userEvent.click(createWave);
     expect(push).toHaveBeenCalledWith("/waves/create");
   });
 
@@ -177,7 +179,7 @@ describe("HeaderActionButtons", () => {
     });
     render(<HeaderActionButtons />);
     expect(
-      screen.queryByRole("button", { name: "Create Wave" })
+      screen.queryByRole("button", { name: "Create wave" })
     ).not.toBeInTheDocument();
   });
 

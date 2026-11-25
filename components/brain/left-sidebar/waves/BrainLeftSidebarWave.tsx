@@ -35,7 +35,6 @@ import {
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 import { hasUnreadWaveDrops } from "./sidebarWaveListUtils";
 import { SidebarWaveTouchActions } from "./SidebarWaveTouchActions";
-import { SidebarWavePinStatus } from "./SidebarWavePinStatus";
 
 interface BrainLeftSidebarWaveProps {
   readonly scoreDetailsDisabled?: boolean | undefined;
@@ -43,7 +42,6 @@ interface BrainLeftSidebarWaveProps {
   readonly wave: MinimalWave;
   readonly onHover: (waveId: string) => void;
   readonly showPin?: boolean | undefined;
-  readonly showPinnedStatus?: boolean | undefined;
   readonly isDirectMessage?: boolean | undefined;
   readonly depth?: 0 | 1 | undefined;
   readonly canExpand?: boolean | undefined;
@@ -112,7 +110,6 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   wave,
   onHover,
   showPin = true,
-  showPinnedStatus = false,
   isDirectMessage = false,
   depth = 0,
   canExpand = false,
@@ -230,7 +227,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   } = getSidebarWaveRowLayoutClasses({
     isChildRow,
     isAnnouncement,
-    variant: "app",
+    variant: isApp ? "native" : "app",
   });
   const {
     avatarSizeClasses,
@@ -267,7 +264,11 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
       >
         {!isChildRow && showSubwaveConnector && (
           <SidebarParentSubwaveConnector
-            guideLineOffsetClasses={SIDEBAR_SUBWAVE_GUIDE_LINE_OFFSET_CLASSES}
+            guideLineOffsetClasses={
+              isApp
+                ? "tw-left-6 sm:tw-left-9"
+                : SIDEBAR_SUBWAVE_GUIDE_LINE_OFFSET_CLASSES
+            }
           />
         )}
         {isChildRow && (
@@ -374,11 +375,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
               </div>
               {(hasSummaryScore || shouldShowPinButton) && (
                 <div className="tw-relative tw-z-10 tw-ml-auto tw-flex tw-shrink-0 tw-items-center tw-gap-0.5">
-                  {hasTouchScreen &&
-                    showPinnedStatus &&
-                    depth === 0 &&
-                    wave.isPinned && <SidebarWavePinStatus />}
-                  {shouldShowPinButton && !hasTouchScreen && (
+                  {shouldShowPinButton && (
                     <BrainLeftSidebarWavePin
                       waveId={wave.id}
                       isPinned={!!wave.isPinned}

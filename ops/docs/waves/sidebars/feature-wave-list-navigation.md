@@ -13,12 +13,17 @@ Wave and DM rows in the left list control which thread is open.
   the animation to finish.
 - Click the body of the active row to clear selection and return to section
   home.
-- Desktop row pin and subwave expand/collapse buttons remain separate controls.
-  Touch rows use [swipe or hold to pin/unpin](feature-pinned-wave-controls.md);
-  those gestures do not open the wave.
-- On expanded rows, pin/unpin sits in the trailing metadata cluster before the
-  wave score instead of beside the wave name, keeping the score at the far
-  right.
+- Row pin and subwave expand/collapse buttons remain separate controls.
+  In the phone app, row avatars, section headings, and filters share the header
+  avatar's left edge. Row metadata and list-search targets share the header's
+  right inset. Touch scrolling uses the phone's native scrollbar.
+  On touch screens, the visible pin button has a 44px tap area before the score.
+  A filled pin means pinned; a muted outline means unpinned.
+  [Swipe and hold shortcuts](feature-pinned-wave-controls.md) remain available.
+  Pin buttons and gestures do not open the wave.
+- On expanded rows, pin/unpin sits in the trailing metadata cluster
+  before the wave score, keeping the score at the far right.
+  In the native app, Active Votes scores share that same right edge.
 - In `Worth Checking Out`, each avatar and its overlaid score shield form one
   wave navigation link. Hovering or focusing the combined link shows score
   details without creating a competing click target.

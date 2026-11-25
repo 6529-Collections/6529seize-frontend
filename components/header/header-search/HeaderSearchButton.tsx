@@ -59,6 +59,8 @@ export default function HeaderSearchButton({
   const locale = useBrowserLocale();
   const hasHydrated = useHasHydrated();
   const { isApp } = useDeviceInfo();
+  const isNativeWavesDirectory =
+    isApp && wave === null && morePresentation === "sheet";
 
   useEffect(() => {
     let rafId: number | null = null;
@@ -145,7 +147,7 @@ export default function HeaderSearchButton({
       ) : (
         <IconButton
           type="button"
-          size={40}
+          size={isNativeWavesDirectory ? 44 : 40}
           variant={isApp ? "contrast" : "secondary"}
           disabled={!hasHydrated}
           aria-label={buttonLabel}
@@ -156,7 +158,7 @@ export default function HeaderSearchButton({
         >
           <MagnifyingGlassIcon
             className="tw-size-5 tw-flex-shrink-0"
-            strokeWidth={isApp ? 2 : 1.5}
+            strokeWidth={isApp && !isNativeWavesDirectory ? 2 : 1.5}
           />
         </IconButton>
       )}

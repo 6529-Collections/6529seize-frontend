@@ -120,22 +120,25 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
     );
   };
 
-  const positionClasses = compact ? "" : "-tw-mr-2 tw-mt-0.5";
-  const getPinLayout = (): IconButtonLayout => {
-    if (!compact) return "pin";
-    return isTouchDevice ? "pin-compact" : "pin-reveal";
+  const positionClasses = compact || isTouchDevice ? "" : "-tw-mr-2 tw-mt-0.5";
+  const getPinLayout = (): IconButtonLayout | undefined => {
+    if (isTouchDevice) return undefined;
+    return compact ? "pin-reveal" : "pin";
   };
   const iconSizeClasses = compact ? "tw-size-3.5" : "tw-size-4";
 
   return (
     <>
       <IconButton
-        type="submit"
+        type="button"
         onClick={handleClick}
         disabled={isCurrentlyProcessing}
         layout={getPinLayout()}
+        size={44}
+        variant={isTouchDevice && !isPinned ? "muted" : "ghost"}
         className={`${positionClasses} ${opacityClass} ${className ?? ""}`}
         aria-label={getAriaLabel()}
+        aria-pressed={isPinned}
         data-tooltip-id={`wave-pin-${waveId}`}
         data-tooltip-content={tooltipContent}
       >
