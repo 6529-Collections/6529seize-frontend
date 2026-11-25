@@ -452,19 +452,21 @@ for (const platform of ["ios", "android"] as const) {
         await expect
           .poll(() => horizontalPosition(headerBack))
           .toBeCloseTo(headerStart, 0);
-        for (const element of [
-          surface,
-          page.locator("[data-wave-swipe-page]"),
-        ]) {
-          await expect
-            .poll(() =>
-              element.evaluate((node) => [
+        await expect
+          .poll(() =>
+            surface.evaluate((node) => {
+              const pageSurface = node.closest<HTMLElement>(
+                "[data-wave-swipe-page]"
+              );
+              return [
                 node.style.transform,
                 node.style.willChange,
-              ])
-            )
-            .toEqual(["", ""]);
-        }
+                pageSurface?.style.transform,
+                pageSurface?.style.willChange,
+              ];
+            })
+          )
+          .toEqual(["", "", "", ""]);
 
         const committed = await touchDrag(page, surface, 130);
         await committed.release();
