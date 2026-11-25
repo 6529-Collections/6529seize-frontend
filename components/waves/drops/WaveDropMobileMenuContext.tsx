@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { WavesMoveScope } from "@/components/waves-move/WavesMoveScope";
 import {
   type ComponentType,
   createContext,
@@ -119,24 +120,32 @@ const WaveDropMobileMenuProviderRoot: React.FC<{
     <WaveDropMobileMenuContext.Provider value={value}>
       {children}
       {activeMenu && (
-        <LazyWaveDropMobileMenu
-          drop={activeMenu.drop}
-          isOpen={activeMenu.isOpen}
-          longPressTriggered={activeMenu.longPressTriggered}
-          showReplyAndQuote={activeMenu.showReplyAndQuote}
-          setOpen={setOpen}
-          onReply={activeMenu.onReply}
-          onAddReaction={activeMenu.onAddReaction}
-          onEdit={activeMenu.onEdit}
-          onBoostAnimation={activeMenu.onBoostAnimation}
-          showOpenOption={activeMenu.showOpenOption}
-          showCopyOption={activeMenu.showCopyOption}
-          showVoting={activeMenu.showVoting}
-          showOnlyQuickRemove={activeMenu.showOnlyQuickRemove}
-          standaloneQuickRemoveCuration={
-            activeMenu.standaloneQuickRemoveCuration
-          }
-        />
+        // The menu shows outside the drop's own tree: give it the drop's
+        // wave, so the move's pause and lines follow that wave.
+        <WavesMoveScope
+          wave={activeMenu.drop.wave}
+          waveId={activeMenu.drop.wave.id}
+          dropId={activeMenu.drop.id}
+        >
+          <LazyWaveDropMobileMenu
+            drop={activeMenu.drop}
+            isOpen={activeMenu.isOpen}
+            longPressTriggered={activeMenu.longPressTriggered}
+            showReplyAndQuote={activeMenu.showReplyAndQuote}
+            setOpen={setOpen}
+            onReply={activeMenu.onReply}
+            onAddReaction={activeMenu.onAddReaction}
+            onEdit={activeMenu.onEdit}
+            onBoostAnimation={activeMenu.onBoostAnimation}
+            showOpenOption={activeMenu.showOpenOption}
+            showCopyOption={activeMenu.showCopyOption}
+            showVoting={activeMenu.showVoting}
+            showOnlyQuickRemove={activeMenu.showOnlyQuickRemove}
+            standaloneQuickRemoveCuration={
+              activeMenu.standaloneQuickRemoveCuration
+            }
+          />
+        </WavesMoveScope>
       )}
     </WaveDropMobileMenuContext.Provider>
   );

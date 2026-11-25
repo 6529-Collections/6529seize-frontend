@@ -100,6 +100,35 @@ describe("useDropInteractionRules during the move to the 6529 Network", () => {
     expect(chatRules.result.current.canDelete).toBe(true);
   });
 
+  it("closes deleting a post with a poll while paused, and keeps it otherwise", () => {
+    const pollPost = { ...chat, id: "d3", poll: { options: [] } };
+    expect(
+      renderHook(() => useDropInteractionRules(pollPost), { wrapper: me })
+        .result.current.canDelete
+    ).toBe(true);
+    paused.mockReturnValue(true);
+    expect(
+      renderHook(() => useDropInteractionRules(pollPost), { wrapper: me })
+        .result.current.canDelete
+    ).toBe(false);
+  });
+
+  it("closes setting the pinned drop with the other wave settings", () => {
+    const adminChat = {
+      ...chat,
+      wave: { ...chat.wave, authenticated_user_admin: true },
+    };
+    expect(
+      renderHook(() => useDropInteractionRules(adminChat), { wrapper: me })
+        .result.current.canSetPinnedDrop
+    ).toBe(true);
+    paused.mockReturnValue(true);
+    expect(
+      renderHook(() => useDropInteractionRules(adminChat), { wrapper: me })
+        .result.current.canSetPinnedDrop
+    ).toBe(false);
+  });
+
   describe("once entries move to the 6529 Network", () => {
     // Entries open there; deleting another's entry (moderation) does not.
     beforeEach(() => {

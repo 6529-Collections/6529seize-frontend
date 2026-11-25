@@ -44,6 +44,9 @@ import { useCurationMasonryPositioner } from "@/hooks/useCurationMasonryPosition
 import { useCurationOrderReveal } from "@/hooks/useCurationOrderReveal";
 import { useCurationPagination } from "@/hooks/useCurationPagination";
 import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
+import { useWavesMovePhase } from "@/hooks/useWavesMovePhase";
+import { isWavesWritePausedPhase } from "@/lib/waves-move/schedule";
+import { waveMoveSignal } from "@/lib/waves-move/scope";
 
 interface UserPageProfileWaveMasonryProps {
   readonly order: CurationOrder;
@@ -203,8 +206,15 @@ function CurationMasonryActions({
       dropId: drop.id,
       waveId: drop.wave.id,
     });
+  // A post with a poll can't be edited while its own wave moves to the
+  // 6529 Network, so the menu doesn't offer it.
+  const pollEditLocked =
+    isWavesWritePausedPhase(useWavesMovePhase()) &&
+    waveMoveSignal(drop.wave) === true &&
+    !!drop.poll;
   const canEdit =
     !activeProfileProxy &&
+    !pollEditLocked &&
     drop.drop_type !== ApiDropType.Participatory &&
     areSameProfileIdentity({ left: drop.author, right: connectedProfile });
   const menuItems: CompactMenuItem[] = [

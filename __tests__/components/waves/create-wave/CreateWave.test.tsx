@@ -21,6 +21,11 @@ import { upsertCreateWaveDraft } from "@/helpers/waves/create-wave-draft.helpers
 import { CreateWaveStep, type CreateWaveConfig } from "@/types/waves.types";
 import { hasSubwaveMembersOutsideParent } from "@/services/api/subwave-access-api";
 
+let mockWaveCreationPaused = false;
+jest.mock("@/hooks/useWavesMovePhase", () => ({
+  ...jest.requireActual("@/hooks/useWavesMovePhase"),
+  useWaveCreationPaused: () => mockWaveCreationPaused,
+}));
 jest.mock("@/services/api/subwave-access-api", () => ({
   hasSubwaveMembersOutsideParent: jest.fn().mockResolvedValue(false),
 }));
@@ -630,6 +635,21 @@ describe("CreateWave", () => {
     renderCreateWave();
 
     expect(screen.getByTestId("create-wave-groups")).toBeInTheDocument();
+  });
+
+  it("says new waves aren't open yet while waves move, and keeps Next disabled", () => {
+    mockWaveCreationPaused = true;
+    try {
+      renderCreateWave();
+      expect(
+        screen.getByText(
+          "New waves aren't open yet while waves move to the 6529 Network."
+        )
+      ).toBeInTheDocument();
+      expect(screen.getByTestId("mock-next")).toBeDisabled();
+    } finally {
+      mockWaveCreationPaused = false;
+    }
   });
 
   it("keeps Next disabled until an open criteria replacement is discarded", () => {

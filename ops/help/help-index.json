@@ -3774,8 +3774,9 @@
       "facts": [
         "Votes, entries, polls, wave REP, and wave and decision settings move from 6529.io to the 6529 Network. A notice in each wave and on the waves list says when.",
         "From the freeze until the switch-on, at the times the notice gives, you can't change them. Vote buttons are disabled, submissions show Submissions Paused, poll ballots show results only, the Wave REP dialog can't save, wave and decision settings have no edit controls, and new waves and decisions can't be created. A request sent anyway shows Paused for the move to the 6529 Network.",
-        "Chat keeps working: posts, replies, edits of chat posts, deletions of chat posts, reactions and direct messages are not affected. Curations, pins, boosts, bookmarks and notification settings are not affected either. Changing a group that a wave, a decision or a curation uses, and editing an entry post, are refused from the freeze; after the switch-on they stay closed on this site, like the rest.",
-        "After the switch-on these changes are made on the 6529 Network; each one opens again on this site as it moves there."
+        "Chat keeps working: posts, replies, edits and deletions of chat posts without a poll, reactions and direct messages are not affected. Curations, pins, boosts, bookmarks and notification settings are not affected either. Changing a group that a wave, a decision or a curation uses, and editing an entry post, are refused from the freeze; after the switch-on they stay closed on this site, like the rest.",
+        "After the switch-on these changes are made on the 6529 Network; each one opens again on this site as it moves there.",
+        "After the switch-on, in a wave that moved, the site says at each control what it can't do yet: new polls aren't open and polls made on the 6529 Network don't show yet; new waves aren't open; chat history is deleted one post at a time; curations stay on 6529.io; and waves, decisions and group names made outside 6529.io show once 6529.io reads them from the 6529 Network."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves", "/waves/create"],

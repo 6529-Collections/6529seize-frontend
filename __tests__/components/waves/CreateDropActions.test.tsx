@@ -1,6 +1,12 @@
 import { DROP_UPLOAD_ACCEPT } from "@/services/uploads/mediaUploadMimeType";
 import CreateDropActions from "@/components/waves/CreateDropActions";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 // Mock ResizeObserver
@@ -134,8 +140,13 @@ jest.mock("@/hooks/isMobileScreen", () => ({
   __esModule: true,
   default: jest.fn(() => false),
 }));
+const mockSetToast = jest.fn();
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: () => ({ setToast: mockSetToast }),
+}));
 jest.mock("@/hooks/useWavesMovePhase", () => ({
   useWavesWritesPaused: jest.fn(() => false),
+  useWaveMovedToChain: jest.fn(() => false),
 }));
 
 describe("CreateDropActions", () => {
@@ -323,6 +334,62 @@ describe("CreateDropActions", () => {
       expect(screen.queryByLabelText("Add poll")).not.toBeInTheDocument();
     } finally {
       wavesMove.useWavesWritesPaused.mockReturnValue(false);
+    }
+  });
+
+  it("keeps the poll button in a wave that moved and says why polls aren't open", async () => {
+    const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
+    wavesMove.useWavesWritesPaused.mockReturnValue(true);
+    wavesMove.useWaveMovedToChain.mockReturnValue(true);
+    try {
+      render(<CreateDropActions {...defaultProps} canCreatePoll={true} />);
+      const pollButton = screen.getByLabelText("Add poll");
+      expect(pollButton).toHaveAttribute("aria-disabled", "true");
+      expect(pollButton).toHaveAccessibleDescription(
+        "New polls aren't open yet. Polls made on the 6529 Network don't show on 6529.io yet."
+      );
+      await userEvent.click(pollButton);
+      expect(defaultProps.onTogglePoll).not.toHaveBeenCalled();
+      expect(mockSetToast).toHaveBeenCalledWith({
+        message:
+          "New polls aren't open yet. Polls made on the 6529 Network don't show on 6529.io yet.",
+        type: "warning",
+      });
+    } finally {
+      wavesMove.useWavesWritesPaused.mockReturnValue(false);
+      wavesMove.useWaveMovedToChain.mockReturnValue(false);
+    }
+  });
+
+  it("keeps the compact tray's poll button in a wave that moved, muted, saying why", async () => {
+    const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
+    wavesMove.useWavesWritesPaused.mockReturnValue(true);
+    wavesMove.useWaveMovedToChain.mockReturnValue(true);
+    try {
+      render(
+        <CreateDropActions
+          {...defaultProps}
+          canCreatePoll={true}
+          isCompactLayout={true}
+          showOptions={true}
+        />
+      );
+      const tray = screen.getByTestId("drop-actions-compact-tray");
+      const pollButton = within(tray).getByRole("button", { name: "Poll" });
+      expect(pollButton).toHaveAttribute("aria-disabled", "true");
+      expect(pollButton).not.toBeDisabled();
+      expect(pollButton).toHaveClass("tw-text-iron-600");
+      expect(pollButton).toHaveAccessibleDescription(
+        "New polls aren't open yet. Polls made on the 6529 Network don't show on 6529.io yet."
+      );
+      await userEvent.click(pollButton);
+      expect(defaultProps.onTogglePoll).not.toHaveBeenCalled();
+      expect(mockSetToast).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "warning" })
+      );
+    } finally {
+      wavesMove.useWavesWritesPaused.mockReturnValue(false);
+      wavesMove.useWaveMovedToChain.mockReturnValue(false);
     }
   });
 
