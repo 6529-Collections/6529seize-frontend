@@ -1,7 +1,11 @@
 import type { Locator, Page } from "@playwright/test";
 import { expect } from "../testHelpers";
 
-export async function longPressMessage(page: Page, target: Locator) {
+export async function longPressMessage(
+  page: Page,
+  target: Locator,
+  expectedAction = "Reply"
+) {
   await target.click({ trial: true });
   const bounds = await target.boundingBox();
   if (!bounds) throw new Error("Message must be visible for a long press");
@@ -16,7 +20,7 @@ export async function longPressMessage(page: Page, target: Locator) {
     await expect(
       page
         .getByRole("dialog", { name: "Drop actions", exact: true })
-        .getByRole("button", { name: "Reply", exact: true })
+        .getByRole("button", { name: expectedAction, exact: true })
     ).toBeVisible();
   } finally {
     await touch.send("Input.dispatchTouchEvent", {

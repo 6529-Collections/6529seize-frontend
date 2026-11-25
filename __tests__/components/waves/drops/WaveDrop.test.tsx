@@ -29,6 +29,16 @@ let mockEditMentionedGroups: ApiDropGroupMention[] = [];
 const mockUseDropSealStates = jest.fn(
   (drops: readonly unknown[], _active: boolean) => drops.map(() => "verified")
 );
+// This suite exercises a confirmed own-profile session; access transitions are
+// covered with the real hook in useDropReplyAccess.test.tsx.
+jest.mock("@/hooks/drops/useDropReplyAccess", () => ({
+  useDropReplyAccess: () => ({
+    canReply: true,
+    canReplyToDrop: () => true,
+    identityKey: "own-profile",
+  }),
+}));
+
 jest.mock("@/components/waves/drops/signature/dropSignatureVerdicts", () => ({
   useDropSealStates: (drops: readonly unknown[], active: boolean) =>
     mockUseDropSealStates(drops, active),

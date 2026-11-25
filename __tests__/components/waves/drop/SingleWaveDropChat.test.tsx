@@ -5,6 +5,16 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { WsMessageType, type WsDropDeleteMessage } from "@/helpers/Types";
 import { act, fireEvent, render } from "@testing-library/react";
 
+// This suite exercises a confirmed own-profile session; access transitions are
+// covered with the real hook in useDropReplyAccess.test.tsx.
+jest.mock("@/hooks/drops/useDropReplyAccess", () => ({
+  useDropReplyAccess: () => ({
+    canReply: true,
+    canReplyToDrop: () => true,
+    identityKey: "own-profile",
+  }),
+}));
+
 jest.mock("@/hooks/useDeviceInfo", () => () => ({
   isMobileDevice: true,
   hasTouchScreen: true,
@@ -90,7 +100,8 @@ Object.defineProperty(globalThis, "matchMedia", {
 });
 
 describe("SingleWaveDropChat", () => {
-  const createDrop = (id = "d1"): ApiDrop => ({ id }) as ApiDrop;
+  const createDrop = (id = "d1"): ApiDrop =>
+    ({ id, wave: { id: "w1" } }) as ApiDrop;
 
   const createWave = (overrides: Record<string, unknown> = {}) => {
     const waveDefaults = {
@@ -136,7 +147,7 @@ describe("SingleWaveDropChat", () => {
 
   it("handles reply and reset actions", () => {
     const wave = createWave();
-    const drop: any = { id: "d1" };
+    const drop: any = { id: "d1", wave: { id: "w1" } };
     render(<SingleWaveDropChat wave={wave} drop={drop} />);
 
     expect(capturedProps.waveId).toBe("w1");
@@ -194,7 +205,7 @@ describe("SingleWaveDropChat", () => {
 
   it("clears the root reply when the root drop is deleted", () => {
     const wave = createWave();
-    const drop: any = { id: "d1" };
+    const drop: any = { id: "d1", wave: { id: "w1" } };
     render(<SingleWaveDropChat wave={wave} drop={drop} />);
 
     expect(capturedCreatorProps.activeDrop?.drop.id).toBe("d1");
@@ -221,8 +232,8 @@ describe("SingleWaveDropChat", () => {
 
   it("keeps a nested reply active when only the root drop is deleted", () => {
     const wave = createWave();
-    const drop: any = { id: "d1" };
-    const nestedDrop: any = { id: "nested-drop" };
+    const drop: any = { id: "d1", wave: { id: "w1" } };
+    const nestedDrop: any = { id: "nested-drop", wave: { id: "w1" } };
     render(<SingleWaveDropChat wave={wave} drop={drop} />);
 
     act(() => {
@@ -245,8 +256,8 @@ describe("SingleWaveDropChat", () => {
 
   it("falls back to the root reply when a nested reply target is unavailable", () => {
     const wave = createWave();
-    const drop: any = { id: "d1" };
-    const nestedDrop: any = { id: "nested-drop" };
+    const drop: any = { id: "d1", wave: { id: "w1" } };
+    const nestedDrop: any = { id: "nested-drop", wave: { id: "w1" } };
     render(<SingleWaveDropChat wave={wave} drop={drop} />);
 
     act(() => {
@@ -267,7 +278,7 @@ describe("SingleWaveDropChat", () => {
     mockKeyboardVisible = false;
 
     const wave = createWave();
-    const drop: any = { id: "d1" };
+    const drop: any = { id: "d1", wave: { id: "w1" } };
     render(<SingleWaveDropChat wave={wave} drop={drop} />);
 
     const wrapper = document.querySelector(
@@ -284,7 +295,7 @@ describe("SingleWaveDropChat", () => {
     mockKeyboardVisible = true;
 
     const wave = createWave();
-    const drop: any = { id: "d1" };
+    const drop: any = { id: "d1", wave: { id: "w1" } };
     render(<SingleWaveDropChat wave={wave} drop={drop} />);
 
     const wrapper = document.querySelector(
@@ -322,7 +333,7 @@ describe("SingleWaveDropChat", () => {
         no_of_decisions_done: 1,
       },
     });
-    const drop: any = { id: "d1" };
+    const drop: any = { id: "d1", wave: { id: "w1" } };
     render(
       <SingleWaveDropChat
         wave={wave}
@@ -343,7 +354,7 @@ describe("SingleWaveDropChat", () => {
 
   it("keeps chat composer mode for unlocked waves", () => {
     const wave = createWave();
-    const drop: any = { id: "d1" };
+    const drop: any = { id: "d1", wave: { id: "w1" } };
 
     render(<SingleWaveDropChat wave={wave} drop={drop} />);
 
@@ -352,7 +363,7 @@ describe("SingleWaveDropChat", () => {
 
   it("locks the composer when voting is closed", () => {
     const wave = createWave();
-    const drop: any = { id: "d1" };
+    const drop: any = { id: "d1", wave: { id: "w1" } };
 
     render(
       <SingleWaveDropChat

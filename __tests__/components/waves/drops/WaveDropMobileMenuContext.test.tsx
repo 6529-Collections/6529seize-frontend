@@ -38,9 +38,11 @@ const createDrop = (id: string) =>
 
 function OpenMenuButton({
   dropId,
+  ownerId,
   onOpenChange,
 }: {
   readonly dropId: string;
+  readonly ownerId?: string;
   readonly onOpenChange?: ((open: boolean) => void) | undefined;
 }) {
   const mobileMenu = useWaveDropMobileMenu();
@@ -48,10 +50,11 @@ function OpenMenuButton({
   return (
     <button
       type="button"
-      data-testid={`open-${dropId}`}
+      data-testid={`open-${dropId}${ownerId ? `-${ownerId}` : ""}`}
       onClick={() =>
         mobileMenu?.open({
           drop: createDrop(dropId),
+          ownerId,
           longPressTriggered: false,
           showReplyAndQuote: true,
           onOpenChange,
@@ -67,15 +70,18 @@ function ControlledMenuOwner({
   dropId,
   onOpenChange,
   standaloneQuickRemoveCuration,
+  isOpen = true,
 }: {
   readonly dropId: string;
+  readonly isOpen?: boolean;
   readonly onOpenChange?: ((open: boolean) => void) | undefined;
   readonly standaloneQuickRemoveCuration?: QuickCurationAction | undefined;
 }) {
   useWaveDropMobileMenuController({
     drop: createDrop(dropId),
     enabled: true,
-    isOpen: true,
+    isOpen,
+    interactionScopeKey: "own-profile",
     longPressTriggered: false,
     showReplyAndQuote: true,
     onOpenChange,
@@ -185,4 +191,54 @@ describe("WaveDropMobileMenuProvider", () => {
     expect(screen.queryByTestId("shared-menu")).not.toBeInTheDocument();
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
+});
+
+it("does not let an inactive duplicate controller close another instance's sheet", async () => {
+  const view = render(
+    <WaveDropMobileMenuProvider>
+      <ControlledMenuOwner dropId="same-drop" />
+      <ControlledMenuOwner dropId="same-drop" isOpen={false} />
+    </WaveDropMobileMenuProvider>
+  );
+  expect(await screen.findByTestId("shared-menu")).toHaveAttribute(
+    "data-open",
+    "true"
+  );
+  view.rerender(
+    <WaveDropMobileMenuProvider>
+      <ControlledMenuOwner dropId="same-drop" />
+      <ControlledMenuOwner dropId="same-drop" isOpen={false} />
+    </WaveDropMobileMenuProvider>
+  );
+  expect(screen.getByTestId("shared-menu")).toHaveAttribute(
+    "data-open",
+    "true"
+  );
+});
+
+it("retires the previous opener when another instance opens the same drop", async () => {
+  const onFirstOpenChange = jest.fn();
+  const onSecondOpenChange = jest.fn();
+  render(
+    <WaveDropMobileMenuProvider>
+      <OpenMenuButton
+        dropId="same-drop"
+        ownerId="first"
+        onOpenChange={onFirstOpenChange}
+      />
+      <OpenMenuButton
+        dropId="same-drop"
+        ownerId="second"
+        onOpenChange={onSecondOpenChange}
+      />
+    </WaveDropMobileMenuProvider>
+  );
+  fireEvent.click(screen.getByTestId("open-same-drop-first"));
+  await screen.findByTestId("shared-menu");
+  fireEvent.click(screen.getByTestId("open-same-drop-second"));
+  expect(onFirstOpenChange).toHaveBeenCalledTimes(1);
+  expect(onFirstOpenChange).toHaveBeenCalledWith(false);
+  expect(onSecondOpenChange).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByTestId("close-menu"));
+  expect(onSecondOpenChange).toHaveBeenCalledWith(false);
 });

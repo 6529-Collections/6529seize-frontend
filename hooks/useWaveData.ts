@@ -8,17 +8,19 @@ import { getWaveQueryKey } from "@/services/api/wave-query";
 
 interface UseWaveDataProps {
   waveId: string | null;
+  viewerKey?: string;
   refetchInterval?: number | undefined;
   onWaveNotFound?: (() => void) | undefined;
 }
 
 export const useWaveData = ({
   waveId,
+  viewerKey,
   refetchInterval = Infinity,
   onWaveNotFound = () => {},
 }: UseWaveDataProps) => {
   return useQuery<ApiWave>({
-    queryKey: getWaveQueryKey(waveId),
+    queryKey: getWaveQueryKey(waveId, viewerKey),
     queryFn: async () => {
       if (!waveId) {
         return Promise.reject(new Error("Attempted fetch with null waveId")); // Prevent API call

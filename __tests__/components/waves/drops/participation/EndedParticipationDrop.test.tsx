@@ -6,6 +6,14 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { DropLocation } from "@/components/waves/drops/drop.types";
 
+jest.mock("@/hooks/drops/useDropReplyAccess", () => ({
+  useDropReplyAccess: () => ({
+    canReply: true,
+    canReplyToDrop: () => true,
+    identityKey: "own-profile",
+  }),
+}));
+
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(() => ({ push: jest.fn() })),
 }));

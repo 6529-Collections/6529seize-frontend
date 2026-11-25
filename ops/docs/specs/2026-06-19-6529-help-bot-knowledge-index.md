@@ -28,6 +28,12 @@ from Profile Waves Feed to Waves. The mobile
 bottom-navigation record covers temporary section-tab hiding while composing in
 short landscape iPhone chat viewports.
 
+The touch-menu and composer records explain that Reply and swipe-to-reply need
+a signed-in, non-proxy profile and current posting access. Copy actions remain
+available while posting is blocked. Open replies and slow-mode drafting retain
+their existing access, and account or access changes clear invalid reply targets
+without discarding saved draft text.
+
 Live swipe-back to the Waves list moves the channel header and content together
 while the bottom navigation stays fixed. Cancelling restores the whole page;
 the existing return destination and feed reading-position behavior are preserved.

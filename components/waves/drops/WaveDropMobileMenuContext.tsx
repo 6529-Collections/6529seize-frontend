@@ -18,12 +18,14 @@ export type WaveDropMobileMenuRequest = Omit<
   "isOpen" | "setOpen"
 > & {
   readonly onOpenChange?: ((open: boolean) => void) | undefined;
+  readonly ownerId?: string | undefined;
 };
 
 interface WaveDropMobileMenuContextValue {
   readonly open: (request: WaveDropMobileMenuRequest) => void;
   readonly close: () => void;
-  readonly clearDrop: (dropId: string) => void;
+  readonly closeDrop: (dropId: string, ownerId: string) => void;
+  readonly clearDrop: (dropId: string, ownerId?: string) => void;
 }
 
 const WaveDropMobileMenuContext =
@@ -77,7 +79,11 @@ const WaveDropMobileMenuProviderRoot: React.FC<{
 
   const open = useCallback((request: WaveDropMobileMenuRequest) => {
     const current = activeMenuRef.current;
-    if (current?.isOpen && current.drop.id !== request.drop.id) {
+    if (
+      current?.isOpen &&
+      (current.drop.id !== request.drop.id ||
+        current.ownerId !== request.ownerId)
+    ) {
       current.onOpenChange?.(false);
     }
 
@@ -99,9 +105,25 @@ const WaveDropMobileMenuProviderRoot: React.FC<{
     setOpen(false);
   }, [setOpen]);
 
-  const clearDrop = useCallback((dropId: string) => {
+  const closeDrop = useCallback(
+    (dropId: string, ownerId: string) => {
+      const current = activeMenuRef.current;
+      if (
+        current?.drop.id === dropId &&
+        current.ownerId === ownerId &&
+        current.isOpen
+      )
+        setOpen(false);
+    },
+    [setOpen]
+  );
+
+  const clearDrop = useCallback((dropId: string, ownerId?: string) => {
     const current = activeMenuRef.current;
-    if (current?.drop.id !== dropId) {
+    if (
+      current?.drop.id !== dropId ||
+      (ownerId !== undefined && current.ownerId !== ownerId)
+    ) {
       return;
     }
 
@@ -111,8 +133,8 @@ const WaveDropMobileMenuProviderRoot: React.FC<{
   }, []);
 
   const value = useMemo<WaveDropMobileMenuContextValue>(
-    () => ({ open, close, clearDrop }),
-    [clearDrop, close, open]
+    () => ({ open, close, closeDrop, clearDrop }),
+    [clearDrop, close, closeDrop, open]
   );
 
   return (

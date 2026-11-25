@@ -1092,8 +1092,26 @@ it.each([
   "components/header/AppSidebar.tsx",
   "components/header/AppSidebarMenuItems.tsx",
   "tests/auth/session-recovery-sandbox.spec.ts",
+  "tests/support/longPressMessage.ts",
+  "hooks/drops/useDropReplyAccess.ts",
+  "hooks/drops/useWaveReplyTarget.ts",
+  "hooks/useAuthSessionRole.ts",
+  "hooks/useWaveData.ts",
+  "services/api/wave-query.ts",
+  "components/auth/AuthProvider.tsx",
+  "helpers/waves/drop-reply-eligibility.ts",
+  "components/waves/drops/WaveDrop.tsx",
+  "components/waves/drops/WaveDropActionsReply.tsx",
+  "components/waves/drops/WaveDropMobileMenu.tsx",
+  "components/waves/drops/WaveDropMobileMenuContext.tsx",
+  "components/waves/drops/useWaveDropMobileMenuController.ts",
+  "components/waves/drops/DropMobileMenuHandler.tsx",
+  "components/waves/PrivilegedDropCreator.tsx",
+  "components/brain/my-stream/MyStreamWaveChat.tsx",
+  "components/brain/notifications/NotificationsContainer.tsx",
+  "components/waves/drop/SingleWaveDropChat.tsx",
 ])(
-  "selects session recovery and membership navigation browser coverage for %s",
+  "selects session, reply access and membership navigation browser coverage for %s",
   (file) => {
     const input = plan([file]);
     input.checks.playwright_critical_shell.required = false;

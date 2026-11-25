@@ -1,12 +1,6 @@
 "use client";
 
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -15,7 +9,7 @@ import {
   CreateDropWaveWrapper,
   CreateDropWaveWrapperContext,
 } from "../CreateDropWaveWrapper";
-import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import { useWaveReplyTarget } from "@/hooks/drops/useWaveReplyTarget";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import PrivilegedDropCreator from "../PrivilegedDropCreator";
 import { useNativeKeyboard } from "@/hooks/useNativeKeyboard";
@@ -69,11 +63,7 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
     };
   }, [isKeyboardOccupyingViewport]);
 
-  const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>({
-    action: ActiveDropAction.REPLY,
-    drop: drop,
-    partId: 1,
-  });
+  const { activeDrop, setActiveDrop } = useWaveReplyTarget(wave, drop);
   const activeDropRef = useRef(activeDrop);
 
   useEffect(() => {
@@ -96,7 +86,7 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
     }) => {
       setActiveDrop({ action, drop: targetDrop, partId });
     },
-    []
+    [setActiveDrop]
   );
 
   const resetActiveDrop = useCallback(() => {
@@ -110,7 +100,7 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
       drop: drop,
       partId: 1,
     });
-  }, [drop]);
+  }, [drop, setActiveDrop]);
 
   const clearUnavailableReplyTarget = useCallback(() => {
     resetActiveDrop();
@@ -147,7 +137,7 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
           toastId: REPLY_TARGET_UNAVAILABLE_TOAST_ID,
         });
       },
-      [drop.id, locale, setToast, wave.id]
+      [drop.id, locale, setToast, wave.id, setActiveDrop]
     )
   );
 

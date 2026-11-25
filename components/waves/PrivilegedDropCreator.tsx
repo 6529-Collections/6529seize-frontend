@@ -1,8 +1,6 @@
+import { useAuthSessionRole } from "@/hooks/useAuthSessionRole";
 import { isAuthResolving } from "@/components/auth/authResolution";
-import {
-  getAuthSessionRole,
-  isProxyRoleAuthSession,
-} from "@/components/auth/auth-session-scope";
+import { isProxyRoleAuthSession } from "@/components/auth/auth-session-scope";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -131,6 +129,7 @@ export default function PrivilegedDropCreator({
   const { address, hasValidWalletAuth, connectionState } =
     useSeizeConnectContext();
   const { updateEligibility } = useWaveEligibility();
+  const authRole = useAuthSessionRole();
   const moderationProfileId = connectedProfile?.id;
   const profileModerationStatus =
     usePublicProfileModerationStatus(moderationProfileId);
@@ -174,7 +173,7 @@ export default function PrivilegedDropCreator({
     isProxy:
       !!activeProfileProxy ||
       isProxyRoleAuthSession({
-        authRole: getAuthSessionRole(),
+        authRole,
         profileId: connectedProfile?.id,
       }),
     canChat,

@@ -356,7 +356,7 @@ function applyEffectiveAppPrCiPlan(plan) {
       ].includes(file)
   );
 
-  const membershipNavigationBrowser = files.some((file) =>
+  const sessionRecoveryBrowser = files.some((file) =>
     [
       "hooks/useMembershipNavigation.ts",
       "components/layout/sidebar/WebSidebarNav.tsx",
@@ -364,6 +364,24 @@ function applyEffectiveAppPrCiPlan(plan) {
       "components/header/AppSidebar.tsx",
       "components/header/AppSidebarMenuItems.tsx",
       "tests/auth/session-recovery-sandbox.spec.ts",
+      "tests/support/longPressMessage.ts",
+      "hooks/drops/useDropReplyAccess.ts",
+      "hooks/drops/useWaveReplyTarget.ts",
+      "hooks/useAuthSessionRole.ts",
+      "hooks/useWaveData.ts",
+      "services/api/wave-query.ts",
+      "components/auth/AuthProvider.tsx",
+      "helpers/waves/drop-reply-eligibility.ts",
+      "components/waves/drops/WaveDrop.tsx",
+      "components/waves/drops/WaveDropActionsReply.tsx",
+      "components/waves/drops/WaveDropMobileMenu.tsx",
+      "components/waves/drops/WaveDropMobileMenuContext.tsx",
+      "components/waves/drops/useWaveDropMobileMenuController.ts",
+      "components/waves/drops/DropMobileMenuHandler.tsx",
+      "components/waves/PrivilegedDropCreator.tsx",
+      "components/brain/my-stream/MyStreamWaveChat.tsx",
+      "components/brain/notifications/NotificationsContainer.tsx",
+      "components/waves/drop/SingleWaveDropChat.tsx",
     ].includes(file)
   );
 
@@ -382,11 +400,11 @@ function applyEffectiveAppPrCiPlan(plan) {
     ...plan.checks,
     playwright_critical_shell:
       playwrightProfileDialogs ||
-      membershipNavigationBrowser ||
+      sessionRecoveryBrowser ||
       backNavigationBrowser
         ? check(
             true,
-            "Profile editing, membership and Back navigation changes require their browser regression packs."
+            "Profile editing, session and reply access, membership and Back navigation changes require their browser regression packs."
           )
         : baseChecks.playwright_critical_shell,
     playwright_profile_nic: check(

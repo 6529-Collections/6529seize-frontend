@@ -4,6 +4,7 @@ import { useTimeAgoShort } from "@/hooks/useDisplayTimeZone";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
+import { useDropReplyAccess } from "@/hooks/drops/useDropReplyAccess";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { WithDropAuthorSignedMarker } from "@/components/waves/drops/signature/DropAuthorSignedMarker";
@@ -157,11 +158,24 @@ function EndedParticipationDropInner({
     mobileMenu?.close();
   }, [canUseTouchActionSheet, mobileMenu]);
 
+  const { canReplyToDrop, identityKey } = useDropReplyAccess(
+    drop.wave.id,
+    undefined,
+    showReplyAndQuote && showInteractions
+  );
   const handleOnReply = useCallback(() => {
+    if (!showReplyAndQuote || !canReplyToDrop(drop)) return;
     mobileMenu?.close();
     setIsSlideUp(false);
     onReply({ drop, partId: drop.parts[activePartIndex]?.part_id! });
-  }, [onReply, drop, activePartIndex, mobileMenu]);
+  }, [
+    onReply,
+    drop,
+    activePartIndex,
+    mobileMenu,
+    showReplyAndQuote,
+    canReplyToDrop,
+  ]);
 
   const handleOnAddReaction = useCallback(() => {
     mobileMenu?.close();
@@ -293,6 +307,7 @@ function EndedParticipationDropInner({
 
   useWaveDropMobileMenuController({
     drop,
+    interactionScopeKey: identityKey,
     enabled: showInteractions,
     isOpen: effectiveIsSlideUp,
     longPressTriggered,
