@@ -769,6 +769,8 @@ async function expectWaveSectionOffered(
     else await expect(option).toHaveCount(0);
     await page.keyboard.press("Escape");
     await expect(sheet).toBeHidden();
+    // The dialog role hides before its exit layer finishes retiring.
+    await more.click({ trial: true });
   } else if (available) {
     await expect(direct).toBeVisible();
   } else {

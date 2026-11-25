@@ -21,6 +21,7 @@ interface UseWaveListSwipeBackArgs {
   readonly onSwipeBack: () => void;
   readonly targetScreen?: WaveScreen | undefined;
   readonly edgeSwipeBack?: boolean;
+  readonly includeHeader?: boolean;
 }
 
 export function useWaveListSwipeBack<T extends HTMLElement = HTMLDivElement>({
@@ -30,6 +31,7 @@ export function useWaveListSwipeBack<T extends HTMLElement = HTMLDivElement>({
   onSwipeBack,
   targetScreen,
   edgeSwipeBack = false,
+  includeHeader = false,
 }: UseWaveListSwipeBackArgs) {
   const ref = useRef<T>(null);
   const surface = useRef<HTMLElement | null>(null);
@@ -41,6 +43,7 @@ export function useWaveListSwipeBack<T extends HTMLElement = HTMLDivElement>({
   const generation = useRef(0);
   const navigate = useRef(onSwipeBack);
   const useSpring = edgeSwipeBack && targetScreen === "list";
+  const movesWholePage = targetScreen === "list" || includeHeader;
   useLayoutEffect(() => {
     navigate.current = onSwipeBack;
   });
@@ -61,13 +64,11 @@ export function useWaveListSwipeBack<T extends HTMLElement = HTMLDivElement>({
           previousAnimation.stop();
         else previousAnimation?.cancel();
         origin.current = useSpring ? position.current : 0;
-        // Live returns to Waves move the header with the conversation. Keep
-        // Feed's existing snapshot handoff on its original content surface.
-        surface.current =
-          targetScreen === "list"
-            ? (ref.current?.closest<HTMLElement>("[data-wave-swipe-page]") ??
-              ref.current)
-            : ref.current;
+        // Feed's snapshot handoff still uses its original content surface.
+        surface.current = movesWholePage
+          ? (ref.current?.closest<HTMLElement>("[data-wave-swipe-page]") ??
+            ref.current)
+          : ref.current;
         const measuredWidth =
           surface.current?.getBoundingClientRect().width ?? 0;
         width.current =
@@ -208,7 +209,7 @@ export function useWaveListSwipeBack<T extends HTMLElement = HTMLDivElement>({
       element?.style.removeProperty("transform");
       element?.style.removeProperty("will-change");
     };
-  }, [enabled, scope, targetScreen]);
+  }, [enabled, movesWholePage, scope, targetScreen]);
 
   const onTouchStart = useCallback(
     (event: TouchEvent<HTMLElement>) => {

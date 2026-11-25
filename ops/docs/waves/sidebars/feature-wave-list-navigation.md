@@ -5,12 +5,11 @@
 Wave and DM rows in the left list control which thread is open.
 
 - Click the body of an inactive row to open that thread.
-- In the native app, opening a wave from the Waves list uses a brief fade and
-  slight scale into the content. The header and bottom navigation do not move.
-  Supported app browsers briefly preserve the outgoing list as the wave appears;
-  the app Back button reverses this handoff. Reduced Motion disables the animation.
-  Older app browsers use a simpler entry transition. Navigation does not wait for
-  the animation to finish.
+- On iPhone and phone web, opening a Wave or direct message from its list slides
+  the complete conversation, including its header, in from the right at full size.
+  The list stays visible underneath. Back slides the conversation out to the right.
+  Reduced Motion and browsers without snapshot support navigate directly.
+  Navigation stays interactive during the transition.
 - Click the body of the active row to clear selection and return to section
   home.
 - Row pin and subwave expand/collapse buttons remain separate controls.
