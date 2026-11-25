@@ -1,4 +1,4 @@
-export type SidebarWaveRowLayoutVariant = "app" | "web";
+type SidebarWaveRowLayoutVariant = "app" | "web";
 
 interface SidebarWaveRowLayoutInput {
   readonly isChildRow: boolean;

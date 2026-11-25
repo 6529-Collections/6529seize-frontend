@@ -1550,6 +1550,7 @@ const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   expandControlExpandAriaLabel: "Expand {waveName} subwaves",
   expandControlCollapseAriaLabel: "Collapse {waveName} subwaves",
   expandControlLoadingAriaLabel: "Loading {waveName} subwaves",
+  subwavesToggleLoading: "Loading subwaves",
   subwavesToggleUnreadDescription: "{count} new in subwaves",
 } as const);
 

@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, createEvent, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import BrainLeftSidebarWave from "@/components/brain/left-sidebar/waves/BrainLeftSidebarWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
@@ -251,6 +251,32 @@ describe("BrainLeftSidebarWave", () => {
       divider: null,
     });
     expect(onToggleSubwaves).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    { metaKey: true },
+    { ctrlKey: true },
+    { shiftKey: true },
+    { altKey: true },
+    { button: 1 },
+  ])("preserves modified parent link clicks (%j)", (clickOptions) => {
+    const onExpandSubwaves = jest.fn();
+    render(
+      <BrainLeftSidebarWave
+        wave={baseWave}
+        onHover={onHover}
+        canExpand
+        onExpandSubwaves={onExpandSubwaves}
+      />
+    );
+
+    const link = screen.getByRole("link", { name: "Chat Wave" });
+    const click = createEvent.click(link, clickOptions);
+    fireEvent(link, click);
+
+    expect(click.defaultPrevented).toBe(false);
+    expect(onExpandSubwaves).not.toHaveBeenCalled();
+    expect(setActiveWave).not.toHaveBeenCalled();
   });
 
   it("shows drop indicators for non-chat waves", () => {
