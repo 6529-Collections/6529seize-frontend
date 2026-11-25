@@ -53,7 +53,6 @@ export function SidebarSubwavesToggle({
     <IconButton
       variant="ghost"
       size={24}
-      surfaceSize={24}
       shape="compact"
       aria-label={t(locale, labelKey, { waveName: parentWaveName })}
       aria-describedby={unreadDescription ? unreadId : undefined}
@@ -64,7 +63,7 @@ export function SidebarSubwavesToggle({
       onClick={(event) => {
         if (!event.defaultPrevented && !isLoading) onClick();
       }}
-      className="tw-absolute tw-inset-y-0 tw-left-1 tw-z-10 tw-my-auto touch-only:tw-size-11 touch-only:[&>span]:tw-ring-1 touch-only:[&>span]:tw-ring-inset touch-only:[&>span]:tw-ring-iron-800"
+      className="tw-absolute tw-inset-y-0 tw-left-1 tw-z-10 tw-my-auto touch-only:tw-size-11"
     >
       {isLoading ? (
         <ArrowPathIcon
@@ -80,6 +79,7 @@ export function SidebarSubwavesToggle({
           {hasUnreadSubwaves && !isExpanded && (
             <span
               aria-hidden="true"
+              data-testid="sidebar-subwave-unread-dot"
               className="tw-pointer-events-none tw-absolute -tw-right-0.5 -tw-top-0.5 tw-size-1.5 tw-rounded-full tw-bg-primary-400"
             />
           )}
