@@ -1,4 +1,4 @@
-export type SidebarWaveRowLayoutVariant = "app" | "web";
+export type SidebarWaveRowLayoutVariant = "app" | "web" | "native";
 
 interface SidebarWaveRowLayoutInput {
   readonly isChildRow: boolean;
@@ -45,6 +45,23 @@ export const getSidebarWaveRowTextClasses = ({
 };
 
 const rowLayoutByVariant = {
+  native: {
+    child: {
+      rowPaddingClasses:
+        "tw-pl-[62px] tw-pr-2 sm:tw-pl-[74px] sm:tw-pr-5 md:tw-pl-[70px]",
+      rowGapClasses: "tw-gap-x-2",
+      linkGapClasses: "tw-space-x-2",
+      rowHeightClasses: CHILD_ROW_HEIGHT_CLASSES,
+      guideLineOffsetClasses: "tw-left-6 sm:tw-left-9",
+    },
+    default: {
+      rowPaddingClasses: "tw-px-2 sm:tw-px-5",
+      rowGapClasses: "tw-gap-x-4",
+      linkGapClasses: DEFAULT_LINK_GAP_CLASSES,
+      rowHeightClasses: DEFAULT_ROW_HEIGHT_CLASSES,
+      guideLineOffsetClasses: "",
+    },
+  },
   app: {
     child: {
       rowPaddingClasses: "tw-pl-[74px] tw-pr-5 md:tw-pl-[70px]",

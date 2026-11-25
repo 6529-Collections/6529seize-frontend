@@ -14,9 +14,16 @@ Wave and DM rows in the left list control which thread is open.
 - Click the body of the active row to clear selection and return to section
   home.
 - Row pin and subwave expand/collapse buttons remain separate controls.
-- On expanded rows, pin/unpin sits in the trailing metadata cluster before the
-  wave score instead of beside the wave name, keeping the score at the far
-  right.
+  In the phone app, row avatars, section headings, and filters share the header
+  avatar's left edge. Row metadata and list-search targets share the header's
+  right inset. Touch scrolling uses the phone's native scrollbar.
+  On touch screens, the visible pin button has a 44px tap area before the score.
+  A filled pin means pinned; a muted outline means unpinned.
+  [Swipe and hold shortcuts](feature-pinned-wave-controls.md) remain available.
+  Pin buttons and gestures do not open the wave.
+- On expanded rows, pin/unpin sits in the trailing metadata cluster
+  before the wave score, keeping the score at the far right.
+  In the native app, Active Votes scores share that same right edge.
 - In `Worth Checking Out`, each avatar and its overlaid score shield form one
   wave navigation link. Hovering or focusing the combined link shows score
   details without creating a competing click target.
@@ -53,7 +60,9 @@ Wave and DM rows in the left list control which thread is open.
   left and the same search icon on the right, without personal collection controls.
 - The `Waves` heading is plain text. Header actions sit at the far right:
   feed, then create on desktop and mobile web. The native app keeps its heading,
-  Create Wave, Search 6529 and More in the top bar.
+  the `Create wave` plus button, `Search 6529` and `More` in the top bar.
+  `More` opens a sheet containing `Profile Waves Feed` and `Share page`.
+  `Share page` opens the existing native share sheet.
 - Select the feed icon to open Profile Waves Feed. On desktop, it clears the
   selected wave; on mobile web, it opens `/waves?view=profile-feed`.
   In the native app, select `More` then `Profile Waves Feed` to open that feed.
@@ -77,7 +86,8 @@ Wave and DM rows in the left list control which thread is open.
   `Retry`. Expired lists refresh automatically; newly created or newly accessible
   waves appear on refresh. Access permissions are checked for every batch.
 - `Pinned` uses the profile's saved order. Drag the wave row, or touch and hold
-  the row briefly before dragging on a touch screen. With a keyboard, focus the
+  briefly then move vertically on a touch screen. A stationary hold opens the
+  pin/unpin menu. With a keyboard, focus the
   wave, press Space, use the arrow keys, and press Space again to save. A wave's
   subwaves move with it.
 - Joined waves load in batches without skipping a wave when new activity moves
@@ -152,12 +162,12 @@ on hover and show a dark hover surface; their resting header surface is transpar
   Desktop sidebar buttons keep a compact visible surface on touch screens,
   with a larger invisible tap area.
 - In the native app, the Waves directory has one heading in the top bar, with
-  Create Wave, Search 6529 and a vertical More icon beside it. Search stays
+  Create wave, Search 6529 and a vertical More icon beside it. Search stays
   directly visible; More contains Profile Waves Feed and, when page sharing is
   enabled, Share page.
   Find a wave stays beside the collection controls. Subwave
-  toggles use an indented text control; Pin remains directly available on
-  eligible rows.
+  toggles use an indented, bordered button with rounded corners; Pin remains
+  directly available on eligible rows.
 - Each heading has a separate `View all` link aligned to the right, available
   even when collapsed. Active Votes opens `/discover?view=active-votes`;
   Worth Checking Out opens `/discover?view=recommendations&sort=QUALITY`.

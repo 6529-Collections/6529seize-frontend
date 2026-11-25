@@ -14,6 +14,7 @@ import { formatInteger } from "@/i18n/format";
 import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
 import Button from "@/components/utils/button/Button";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
+import useKeyboardFocusScroll from "@/components/waves/create-wave/hooks/useKeyboardFocusScroll";
 import {
   MY_VOTES_EFFECT_TRANSITION,
   MY_VOTES_FADE_TRANSITION,
@@ -178,7 +179,9 @@ export function MyVotesInput({
 }: MyVotesInputProps) {
   const locale = useBrowserLocale();
   const [focused, setFocused] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  useKeyboardFocusScroll(formRef, "reveal", { appOnly: true });
   const saveRef = useRef<HTMLButtonElement>(null);
   const numeric = Number(value);
   const hasNumber = /^-?\d+$/.test(value) && Number.isSafeInteger(numeric);
@@ -209,6 +212,7 @@ export function MyVotesInput({
   return (
     <>
       <form
+        ref={formRef}
         data-vote-controls
         className={`tw-grid tw-w-full tw-min-w-0 tw-cursor-default tw-items-center tw-gap-x-2 tw-gap-y-1 ${onExplain ? "tw-grid-cols-[minmax(0,1fr)_auto]" : "tw-grid-cols-1"} ${className}`}
         onSubmit={(event) => {

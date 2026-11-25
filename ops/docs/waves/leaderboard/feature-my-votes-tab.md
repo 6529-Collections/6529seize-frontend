@@ -93,7 +93,11 @@ while each profile loads. The placeholders stay still when reduced motion is ena
    keep their own actions; selecting text does not toggle the row.
 5. Edit a vote, then submit with `Save vote` or `Enter`. The save action appears
    only when the number differs from the saved vote and disappears after saving
-   or restoring the saved number.
+   or restoring the saved number. In the app, a focused amount still covered
+   after the keyboard opens scrolls just enough into view; visible amounts stay
+   in place. Mobile web keeps the browser's normal focus scrolling.
+   Voter avatars stay together in a compact
+   group, with separate 24px-wide, 44px-high profile links on mobile.
 6. Optional: select `Explain vote` to open an inline reply composer prefilled as
    `Vote rationale (...)`.
 7. With selection active, select rows by clicking outside their controls, using

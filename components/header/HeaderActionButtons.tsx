@@ -25,9 +25,6 @@ function HeaderActionButtonsContent() {
   const locale = useBrowserLocale();
   const unifiedCompose = isE2eeEnabled();
 
-  const baseButtonClasses =
-    "tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-black tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 active:tw-bg-iron-800";
-
   const waveParam = getActiveWaveIdFromUrl({ pathname, searchParams });
   const activeView = getActiveViewFromUrl({
     activeWaveId: waveParam,
@@ -37,6 +34,14 @@ function HeaderActionButtonsContent() {
   const isMessagesContext = activeView === "messages";
   const isOnWaveCreateRoute = pathname === "/waves/create";
   const isOnWavesRoute = pathname === "/waves" && !waveParam;
+  const isNativeWavesDirectory =
+    isApp &&
+    isOnWavesRoute &&
+    activeView !== "messages" &&
+    searchParams.get("view") !== "notifications" &&
+    searchParams.get("view") !== "profile-feed";
+  const buttonSize = isNativeWavesDirectory ? "tw-size-11" : "tw-size-10";
+  const baseButtonClasses = `tw-flex ${buttonSize} tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-black tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 active:tw-bg-iron-800`;
   const isOnMessagesRoute = pathname === "/messages" && !waveParam;
   const showWaveButton =
     !isOnWaveCreateRoute && (isOnWavesRoute || isWaveContext);
@@ -47,12 +52,13 @@ function HeaderActionButtonsContent() {
 
   if (showWaveButton) {
     const onCreateWave = openWave;
+    const label = t(locale, "waves.sidebar.createWave");
 
     return (
       <button
         type="button"
-        aria-label="Create Wave"
-        title="Create Wave"
+        aria-label={label}
+        title={label}
         onClick={onCreateWave}
         className={baseButtonClasses}
       >
