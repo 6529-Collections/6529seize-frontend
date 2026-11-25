@@ -20,6 +20,9 @@ import {
   SELF_ID,
 } from "./fakeE2eeEngine";
 
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ push: jest.fn() }),
+}));
 jest.mock("@/hooks/useDisplayTimeZone", () => ({
   useDisplayTimeZone: jest.fn(),
 }));
