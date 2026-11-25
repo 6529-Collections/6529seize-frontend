@@ -90,6 +90,8 @@ availability. Submission availability is exposed through the Chat tab
   and remains focused for the next message.
 - In the native app, the chat composer's bottom spacing moves with the chat area
   when the keyboard opens or closes, without snapping to its final padding.
+- On iPhone, the Wave or direct-message header stays below the status bar while
+  the chat composer moves above the keyboard.
 - If submission is available, users enter it from `Submit drop` in the Chat tab
   header or app composer area.
 - The standard `Submit drop` dialog follows the app keyboard as it opens and

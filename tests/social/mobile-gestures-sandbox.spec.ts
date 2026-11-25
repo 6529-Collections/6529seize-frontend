@@ -306,6 +306,66 @@ for (const platform of ["ios", "android"] as const) {
         await expectNoUnsafeSandboxMutations(baseURL);
       });
 
+      for (const [screen, path] of [
+        ["Wave", `/waves/${WAVE}`],
+        ["DM", `/messages/${DM}`],
+      ] as const) {
+        test(`${screen} keyboard keeps the header in the iPhone safe area`, async ({
+          context,
+          page,
+          baseURL,
+        }) => {
+          const client = await context.newCDPSession(page);
+          await client.send("Emulation.setSafeAreaInsetsOverride", {
+            insets: { top: 59, bottom: 34 },
+          });
+          await page.goto(path, { waitUntil: "domcontentloaded" });
+          await waitForRouteReady(page);
+          const editor = page
+            .getByRole("textbox", { name: "Write a message" })
+            .last();
+          await expect(editor).toBeVisible({
+            timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+          });
+          const back = page.getByRole("button", { name: "Back", exact: true });
+          const headerTop = () =>
+            back.evaluate((element) => element.getBoundingClientRect().top);
+          const top = await headerTop();
+          expect(top).toBeGreaterThanOrEqual(59);
+          const expectPageToFit = () =>
+            expect
+              .poll(() =>
+                page.evaluate(
+                  () =>
+                    document.documentElement.scrollHeight -
+                    document.documentElement.clientHeight
+                )
+              )
+              .toBeLessThanOrEqual(1);
+          await expectPageToFit();
+
+          await editor.focus();
+          await keyboardEvent(page, "keyboardWillShow", 340);
+          await keyboardEvent(page, "keyboardDidShow", 340);
+          await expect
+            .poll(() =>
+              editor.evaluate(
+                (element) => element.getBoundingClientRect().bottom
+              )
+            )
+            .toBeLessThanOrEqual(500);
+          await expect.poll(headerTop).toBeCloseTo(top, 0);
+          await expectPageToFit();
+
+          await editor.blur();
+          await keyboardEvent(page, "keyboardWillHide");
+          await keyboardEvent(page, "keyboardDidHide");
+          await expectPageToFit();
+          await expect.poll(headerTop).toBeCloseTo(top, 0);
+          await expectNoUnsafeSandboxMutations(baseURL);
+        });
+      }
+
       test("DM header follows the finger during swipe Back", async ({
         page,
         baseURL,
