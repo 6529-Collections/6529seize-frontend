@@ -1,6 +1,10 @@
 "use client";
 
-import { runWaveNavigationTransition } from "@/helpers/waves/wave-navigation-transition";
+import {
+  runPhoneConversationEntryTransition,
+  runWaveNavigationTransition,
+} from "@/helpers/waves/wave-navigation-transition";
+import { Capacitor } from "@capacitor/core";
 import {
   getCompetitionRoute,
   isCompetitionPathname,
@@ -160,6 +164,21 @@ export function useActiveWaveManager() {
   const setActiveWave = useCallback<typeof navigate>(
     (waveId, options) => {
       const navigateToWave = () => navigate(waveId, options);
+      const current = new URL(globalThis.location.href);
+      const opensPhoneConversation =
+        waveId !== null &&
+        getWaveFromWindow() === null &&
+        (current.pathname === "/waves" || current.pathname === "/messages") &&
+        current.searchParams.get("view") !== "profile-feed" &&
+        (!isApp || Capacitor.getPlatform() === "ios");
+      if (opensPhoneConversation) {
+        const destination = new URL(buildUrl(waveId, options), current);
+        runPhoneConversationEntryTransition(
+          destination.pathname,
+          navigateToWave
+        );
+        return;
+      }
       if (
         isApp &&
         !options?.isDirectMessage &&
