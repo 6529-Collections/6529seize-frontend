@@ -25,6 +25,7 @@ import {
   chainWriteDetails,
   chainWriteFailure,
 } from "@/components/chain-waves/chainWavesErrorMessage";
+import { chainIdentityPointer } from "@/components/chain-waves/chainIdentityPointer";
 import {
   invalidateChainEntryQueries,
   useChainEntryWriters,
@@ -101,12 +102,9 @@ export default function DropsListItemDeleteDropModal({
         title: chainWithdrawal
           ? "Couldn't withdraw this entry."
           : `Couldn't delete this ${contentType.toLowerCase()}.`,
-        description: chainWriteFailure(
-          locale,
-          error,
-          "Please try again.",
-          "withdrawal"
-        ),
+        description:
+          chainIdentityPointer(locale, error) ??
+          chainWriteFailure(locale, error, "Please try again.", "withdrawal"),
         details: chainWriteDetails(error),
       });
     },

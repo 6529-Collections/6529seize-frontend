@@ -1,12 +1,21 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import {
+  createElement,
+  Fragment,
+  useCallback,
+  useRef,
+  useState,
+  type ReactElement,
+  type ReactNode,
+} from "react";
 import { useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
 import {
   chainWriteDetails,
   chainWriteFailure,
 } from "@/components/chain-waves/chainWavesErrorMessage";
+import { chainIdentityPointer } from "@/components/chain-waves/chainIdentityPointer";
 import {
   invalidateChainEntryQueries,
   useChainEntrySubmit,
@@ -78,6 +87,10 @@ const nextTask = () =>
     setTimeout(resolve, 0);
   });
 
+/** The no-identity line with its link, then whether the entry is kept. */
+const withKept = (pointer: ReactElement, kept: string): ReactNode =>
+  kept === "" ? pointer : createElement(Fragment, null, pointer, ` ${kept}`);
+
 /**
  * The toast for an entry the 6529 Network didn't take, or null when the
  * wallet prompt was declined and the entry is still in the composer. The
@@ -93,11 +106,15 @@ function failureToast(
   if (isUserRejectedSigningError(error)) {
     return keepsDraft ? null : { message: CHAIN_ENTRY_LOST, type: "warning" };
   }
-  const reason = chainWriteFailure(locale, error, "", "entry");
   const kept = keepsDraft ? CHAIN_ENTRY_KEPT : CHAIN_ENTRY_LOST;
-  const description = [reason, sent ? "" : kept]
-    .filter((line) => line !== "")
-    .join(" ");
+  const keptLine = sent ? "" : kept;
+  const pointer = chainIdentityPointer(locale, error);
+  const description =
+    pointer === null
+      ? [chainWriteFailure(locale, error, "", "entry"), keptLine]
+          .filter((line) => line !== "")
+          .join(" ")
+      : withKept(pointer, keptLine);
   return {
     type: "error",
     title: CHAIN_ENTRY_FAILED,

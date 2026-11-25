@@ -16,7 +16,11 @@ import {
 } from "@/components/chain-waves/useChainEntryWriters";
 import { ChainEntryPendingError } from "@/lib/chain-waves/entryWriters";
 import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
-import { chainWriteFailure } from "@/components/chain-waves/chainWavesErrorMessage";
+import {
+  chainWriteDetails,
+  chainWriteFailure,
+} from "@/components/chain-waves/chainWavesErrorMessage";
+import { chainIdentityPointer } from "@/components/chain-waves/chainIdentityPointer";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import {
   isChainSubmittedArtwork,
@@ -165,10 +169,25 @@ export function useResubmissionDelete({
         message = error;
       }
       setDeleteOriginalError(message);
-      setToast({
-        message,
-        type: "error",
-      });
+      // A withdrawal the 6529 Network refused gives its reason under a
+      // title, so 6529.io's wording for connection errors never replaces it.
+      setToast(
+        chainEntries
+          ? {
+              type: "error",
+              title: "Couldn't withdraw the original submission.",
+              description:
+                chainIdentityPointer(DEFAULT_LOCALE, error) ??
+                chainWriteFailure(
+                  DEFAULT_LOCALE,
+                  error,
+                  "Please try again.",
+                  "withdrawal"
+                ),
+              details: chainWriteDetails(error),
+            }
+          : { message, type: "error" }
+      );
       setIsDeletingOriginal(false);
     }
   }, [

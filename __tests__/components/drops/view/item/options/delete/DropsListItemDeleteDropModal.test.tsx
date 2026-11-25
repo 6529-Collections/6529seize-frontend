@@ -8,6 +8,9 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import { useMutation } from "@tanstack/react-query";
 import { AppToastContent } from "@/components/utils/toast/AppToast";
 import { ChainOperationError } from "@/lib/chain-identity/operation";
+import { isChainIdentityActive } from "@/lib/chain-identity/active";
+import { chainGateway } from "@/lib/chain-identity/gateway";
+import { identityOfWallet } from "@/lib/chain-waves/signing";
 
 jest.mock("@tanstack/react-query");
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
@@ -21,6 +24,10 @@ jest.mock("@/components/chain-waves/useChainEntryWriters", () => ({
     mockChainEntriesActive ? { withdrawEntry: mockWithdrawEntry } : null,
   invalidateChainEntryQueries: (...args: unknown[]) =>
     mockInvalidateChainEntryQueries(...(args as [])),
+}));
+jest.mock("@/lib/chain-identity/active", () => ({
+  ...jest.requireActual("@/lib/chain-identity/active"),
+  isChainIdentityActive: jest.fn(() => false),
 }));
 jest.mock("@/services/api/signed-drop-writes", () => ({
   deleteDrop: jest.fn().mockResolvedValue(undefined),
@@ -238,6 +245,57 @@ describe("DropsListItemDeleteDropModal", () => {
       expect(shown).not.toHaveTextContent(
         /Network error|Wallet error|Please try again/
       );
+    });
+
+    describe("from a wallet with no identity on the 6529 Network", () => {
+      /** The withdrawal stops where the chain writer looks up the wallet. */
+      const refusedWithdrawal = async () => {
+        jest.spyOn(chainGateway, "getIdentityByWallet").mockResolvedValue(null);
+        const refusal = await identityOfWallet(`0x${"12".repeat(20)}`).then(
+          () => new Error("expected no identity"),
+          (error: unknown) => error
+        );
+        useMutationMock.mockImplementation((opts) => ({
+          mutateAsync: async () => {
+            opts.onError?.(refusal);
+            opts.onSettled?.();
+            throw refusal;
+          },
+        }));
+        const user = userEvent.setup();
+        renderModal();
+        await user.click(screen.getByRole("button", { name: "Withdraw" }));
+        await waitFor(() => expect(auth.setToast).toHaveBeenCalled());
+        return render(
+          <AppToastContent toast={auth.setToast.mock.calls[0][0]} />
+        ).container;
+      };
+
+      afterEach(() => {
+        jest.mocked(isChainIdentityActive).mockReturnValue(false);
+        jest.restoreAllMocks();
+      });
+
+      it("points to the identity page once it takes changes", async () => {
+        jest.mocked(isChainIdentityActive).mockReturnValue(true);
+        const shown = await refusedWithdrawal();
+        expect(shown).toHaveTextContent(
+          "This wallet has no identity on the 6529 Network yet. Set one up on your identity page."
+        );
+        expect(
+          screen.getByRole("link", { name: "your identity page" })
+        ).toHaveAttribute("href", "/network/identity");
+      });
+
+      it("keeps the plain line while the identity page can't help", async () => {
+        const shown = await refusedWithdrawal();
+        expect(shown).toHaveTextContent(
+          "This wallet has no identity on the 6529 Network yet."
+        );
+        expect(
+          screen.queryByRole("link", { name: "your identity page" })
+        ).not.toBeInTheDocument();
+      });
     });
 
     it("keeps deleting chat drops on 6529.io", async () => {

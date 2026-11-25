@@ -14,7 +14,7 @@ import {
 } from "@/helpers/waves/identity-submission-metadata";
 import { ApiCompetitionLifecycle } from "@/generated/models/ApiCompetitionLifecycle";
 import { getMentionedGroupsFromText } from "@/helpers/waves/drop-group-mentions";
-import { useId, useRef, useState } from "react";
+import { useId, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
@@ -40,6 +40,7 @@ import { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose"
 import type { ApiCreateCompetitionEntryRequest } from "@/generated/models/ApiCreateCompetitionEntryRequest";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import { chainWriteFailure } from "@/components/chain-waves/chainWavesErrorMessage";
+import { chainIdentityPointer } from "@/components/chain-waves/chainIdentityPointer";
 import {
   ChainEntryPendingError,
   type ChainEntryStage,
@@ -144,7 +145,7 @@ export default function CompetitionEntryForm({
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState<MessageKey | null>(null);
   // What the 6529 Network said when it didn't take the entry.
-  const [chainFailure, setChainFailure] = useState<string | null>(null);
+  const [chainFailure, setChainFailure] = useState<ReactNode>(null);
   // An entry sent to the 6529 Network that wasn't final when the wait
   // ended: it may still land, so the form offers no second send.
   const [chainPending, setChainPending] = useState<string | null>(null);
@@ -325,7 +326,9 @@ export default function CompetitionEntryForm({
       // The 6529 Network's reason in plain words, and that a refusal from a
       // block still paid its fee.
       if (submitChainEntry !== null) {
-        const reason = chainWriteFailure(locale, error, "", "entry");
+        const reason =
+          chainIdentityPointer(locale, error) ??
+          chainWriteFailure(locale, error, "", "entry");
         setChainFailure(reason === "" ? null : reason);
       }
       setFailed(getEntryFailureKey(error));
@@ -485,7 +488,7 @@ export default function CompetitionEntryForm({
       {failed && (
         <p id={errorId} role="alert" className="tw-text-sm tw-text-red">
           {t(locale, failed)}
-          {chainFailure && ` ${chainFailure}`}
+          {chainFailure !== null && <> {chainFailure}</>}
         </p>
       )}
       {chainStage !== null && (

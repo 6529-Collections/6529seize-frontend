@@ -89,6 +89,10 @@ jest.mock("@/components/chain-waves/useChainEntryWriters", () => ({
     mockChainEntriesActive ? mockChainEntrySubmit : null,
   invalidateChainEntryQueries: jest.fn().mockResolvedValue(undefined),
 }));
+jest.mock("@/lib/chain-identity/active", () => ({
+  ...jest.requireActual("@/lib/chain-identity/active"),
+  isChainIdentityActive: jest.fn(() => false),
+}));
 jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
   useCompetitionViewer: () => "author:self",
 }));
@@ -377,6 +381,55 @@ describe("on the 6529 Network", () => {
     await waitFor(() => expect(mockChainEntrySubmit).toHaveBeenCalled());
     await waitFor(() => expect(button).toBeEnabled());
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  describe("from a wallet with no identity on the 6529 Network", () => {
+    /** The entry stops where the chain writer looks up the wallet. */
+    const entryWithoutIdentity = () => {
+      const { chainGateway } = jest.requireActual(
+        "@/lib/chain-identity/gateway"
+      );
+      const { identityOfWallet } = jest.requireActual(
+        "@/lib/chain-waves/signing"
+      );
+      jest.spyOn(chainGateway, "getIdentityByWallet").mockResolvedValue(null);
+      return identityOfWallet(`0x${"12".repeat(20)}`);
+    };
+    const { isChainIdentityActive } = jest.requireMock(
+      "@/lib/chain-identity/active"
+    );
+
+    beforeEach(() => {
+      mockChainEntrySubmit.mockImplementation(entryWithoutIdentity);
+    });
+    afterEach(() => {
+      isChainIdentityActive.mockReturnValue(false);
+      jest.restoreAllMocks();
+    });
+
+    it("points to the identity page once it takes changes", async () => {
+      isChainIdentityActive.mockReturnValue(true);
+      render(<CompetitionEntryForm onClose={jest.fn()} />);
+      fireEvent.click(screen.getByRole("button", { name: "Submit an entry" }));
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "This wallet has no identity on the 6529 Network yet. Set one up on your identity page."
+      );
+      expect(
+        screen.getByRole("link", { name: "your identity page" })
+      ).toHaveAttribute("href", "/network/identity");
+      expect(createCompetitionEntry).not.toHaveBeenCalled();
+    });
+
+    it("keeps the plain line while the identity page can't help", async () => {
+      render(<CompetitionEntryForm onClose={jest.fn()} />);
+      fireEvent.click(screen.getByRole("button", { name: "Submit an entry" }));
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "This wallet has no identity on the 6529 Network yet."
+      );
+      expect(
+        screen.queryByRole("link", { name: "your identity page" })
+      ).not.toBeInTheDocument();
+    });
   });
 
   it("says what the 6529 Network refused", async () => {

@@ -122,7 +122,8 @@ Votes, poll ballots and wave REP:
 - The control waits until a block holds the change, then shows it. Totals on
   the page follow once 6529.io's index reads the block.
 - A wallet with no identity on the 6529 Network, or an entry, wave or poll the
-  network doesn't hold, gets a message saying so; nothing is sent.
+  network doesn't hold, gets a message saying so; nothing is sent. Once the
+  identity page takes changes, the no-identity message links to it.
 
 Entries, signed by the connected wallet (never by the browser key) and shown
 once 6529.io's index lists them:
@@ -144,6 +145,9 @@ once 6529.io's index lists them:
   catches up.
 - An author's delete of their own entry withdraws it (`SUBMISSION_WITHDRAW`),
   from the drop menu and the mobile menu alike.
+- A wallet with no identity on the 6529 Network gets a message saying so, and
+  nothing is sent. Once the identity page takes changes, the message links to
+  it.
 
 The notice then gives the switch-on day as the day the move happened, and
 goes on: Your votes, poll ballots, wave REP and entries go there from this

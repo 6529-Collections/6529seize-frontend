@@ -9,9 +9,18 @@ import type { TraitsData } from "@/components/waves/memes/submission/types/Trait
 import { commonApiPost } from "@/services/api/common-api";
 import { getAuthStateFingerprint } from "@/services/auth/auth-token-fingerprint";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, render, renderHook, waitFor } from "@testing-library/react";
+import {
+  act,
+  render,
+  renderHook,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { AppToastContent } from "@/components/utils/toast/AppToast";
 import { ChainOperationError } from "@/lib/chain-identity/operation";
+import { isChainIdentityActive } from "@/lib/chain-identity/active";
+import { chainGateway } from "@/lib/chain-identity/gateway";
+import { identityOfWallet } from "@/lib/chain-waves/signing";
 import type { ReactNode } from "react";
 import { prepareProposalCard } from "@/components/waves/memes/submission/utils/prepareProposalCard";
 import { createInitialState } from "@/components/waves/memes/submission/hooks/artworkSubmissionFormState";
@@ -27,6 +36,10 @@ jest.mock("@/components/waves/create-wave/services/multiPartUpload", () => ({
   multiPartUpload: jest.fn(),
 }));
 
+jest.mock("@/lib/chain-identity/active", () => ({
+  ...jest.requireActual("@/lib/chain-identity/active"),
+  isChainIdentityActive: jest.fn(() => false),
+}));
 jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
 }));
@@ -484,4 +497,40 @@ describe("useArtworkSubmissionMutation on the 6529 Network", () => {
       );
     }
   );
+
+  it("points a wallet with no identity to the identity page once it takes changes", async () => {
+    jest.mocked(isChainIdentityActive).mockReturnValue(true);
+    const lookup = jest
+      .spyOn(chainGateway, "getIdentityByWallet")
+      .mockResolvedValue(null);
+    mockChainEntrySubmit.mockImplementation(() =>
+      identityOfWallet(`0x${"12".repeat(20)}`)
+    );
+    try {
+      const { result, setToast } = setupHook();
+      await act(async () => {
+        await result.current.submitArtwork(
+          submissionData,
+          "0xabc",
+          false,
+          submitOptions
+        );
+      });
+      expect(result.current.submissionError).toBe(
+        "This wallet has no identity on the 6529 Network yet."
+      );
+      const toast = render(
+        <AppToastContent toast={setToast.mock.calls[0][0]} />
+      ).container;
+      expect(toast).toHaveTextContent(
+        "This wallet has no identity on the 6529 Network yet. Set one up on your identity page."
+      );
+      expect(
+        within(toast).getByRole("link", { name: "your identity page" })
+      ).toHaveAttribute("href", "/network/identity");
+    } finally {
+      jest.mocked(isChainIdentityActive).mockReturnValue(false);
+      lookup.mockRestore();
+    }
+  });
 });

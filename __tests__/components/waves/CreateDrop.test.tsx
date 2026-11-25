@@ -5,6 +5,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useKeyPressEvent } from "react-use";
@@ -103,6 +104,10 @@ jest.mock("@/components/chain-waves/useChainEntryWriters", () => ({
     mockInvalidateChainEntryQueries(...(args as [])),
 }));
 jest.mock("@/hooks/useWave", () => ({ useWave: jest.fn() }));
+jest.mock("@/lib/chain-identity/active", () => ({
+  ...jest.requireActual("@/lib/chain-identity/active"),
+  isChainIdentityActive: jest.fn(() => false),
+}));
 jest.mock("@/hooks/useWavesMovePhase", () => ({
   useWavesWritesPaused: jest.fn(() => false),
 }));
@@ -1777,14 +1782,18 @@ describe("CreateDrop", () => {
 
     it("keeps the draft and says nothing was sent when the network refuses before sending", async () => {
       const setToast = jest.fn();
-      const { ChainOperationError } = jest.requireActual(
-        "@/lib/chain-identity/operation"
+      const { chainGateway } = jest.requireActual(
+        "@/lib/chain-identity/gateway"
       );
-      mockChainEntrySubmit.mockRejectedValue(
-        new ChainOperationError(
-          "rejected",
-          "This wallet has no identity on the 6529 Network yet."
-        )
+      const { identityOfWallet } = jest.requireActual(
+        "@/lib/chain-waves/signing"
+      );
+      // No identity, and no identity page to send the wallet to yet.
+      const lookup = jest
+        .spyOn(chainGateway, "getIdentityByWallet")
+        .mockResolvedValue(null);
+      mockChainEntrySubmit.mockImplementation(() =>
+        identityOfWallet(`0x${"12".repeat(20)}`)
       );
       renderComposer(DropMode.PARTICIPATION, setToast);
 
@@ -1804,6 +1813,48 @@ describe("CreateDrop", () => {
         "This wallet has no identity on the 6529 Network yet. Nothing was sent. Your entry is still here."
       );
       expect(toast).not.toHaveTextContent(SANITIZED);
+      expect(
+        within(toast).queryByRole("link", { name: "your identity page" })
+      ).not.toBeInTheDocument();
+      lookup.mockRestore();
+    });
+
+    it("points a wallet with no identity to the identity page once it takes changes", async () => {
+      const setToast = jest.fn();
+      const { isChainIdentityActive } = jest.requireMock(
+        "@/lib/chain-identity/active"
+      );
+      const { chainGateway } = jest.requireActual(
+        "@/lib/chain-identity/gateway"
+      );
+      const { identityOfWallet } = jest.requireActual(
+        "@/lib/chain-waves/signing"
+      );
+      isChainIdentityActive.mockReturnValue(true);
+      const lookup = jest
+        .spyOn(chainGateway, "getIdentityByWallet")
+        .mockResolvedValue(null);
+      mockChainEntrySubmit.mockImplementation(() =>
+        identityOfWallet(`0x${"12".repeat(20)}`)
+      );
+      try {
+        renderComposer(DropMode.PARTICIPATION, setToast);
+
+        fireEvent.click(screen.getByText("submit optimistic drop"));
+
+        await expect(mockComposerAnswers[0]).resolves.toBe(false);
+        await waitFor(() => expect(setToast).toHaveBeenCalled());
+        const toast = shownToast(setToast.mock.calls[0][0]);
+        expect(toast).toHaveTextContent(
+          "This wallet has no identity on the 6529 Network yet. Set one up on your identity page. Nothing was sent. Your entry is still here."
+        );
+        expect(
+          within(toast).getByRole("link", { name: "your identity page" })
+        ).toHaveAttribute("href", "/network/identity");
+      } finally {
+        isChainIdentityActive.mockReturnValue(false);
+        lookup.mockRestore();
+      }
     });
 
     it("says a block's refusal charged the fee, without claiming nothing was sent", async () => {

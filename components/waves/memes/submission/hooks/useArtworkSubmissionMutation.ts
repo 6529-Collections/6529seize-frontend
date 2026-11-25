@@ -31,6 +31,7 @@ import {
 } from "@/lib/proposal-card/metadata";
 import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
 import { chainWriteFailure } from "@/components/chain-waves/chainWavesErrorMessage";
+import { chainIdentityPointer } from "@/components/chain-waves/chainIdentityPointer";
 import {
   invalidateChainEntryQueries,
   useChainEntrySubmit,
@@ -332,7 +333,7 @@ function useArtworkSubmissionPost(
         setToast({
           type: "error",
           title: "Couldn't submit this artwork.",
-          description: chainReason,
+          description: chainIdentityPointer(locale, error) ?? chainReason,
         });
         return;
       }

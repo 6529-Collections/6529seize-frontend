@@ -1,4 +1,10 @@
-import { act, renderHook, waitFor } from "@testing-library/react";
+import {
+  act,
+  render,
+  renderHook,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { AuthContext } from "@/components/auth/Auth";
@@ -6,6 +12,9 @@ import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/React
 import { useResubmissionDelete } from "@/components/waves/memes/submission/hooks/useResubmissionDelete";
 import { deleteDrop } from "@/services/api/signed-drop-writes";
 import { ChainOperationError } from "@/lib/chain-identity/operation";
+import { isChainIdentityActive } from "@/lib/chain-identity/active";
+import { chainGateway } from "@/lib/chain-identity/gateway";
+import { identityOfWallet } from "@/lib/chain-waves/signing";
 
 const mockWithdrawEntry = jest.fn();
 const mockInvalidateChainEntryQueries = jest.fn(() => Promise.resolve());
@@ -15,6 +24,10 @@ jest.mock("@/components/chain-waves/useChainEntryWriters", () => ({
     mockChainEntriesActive ? { withdrawEntry: mockWithdrawEntry } : null,
   invalidateChainEntryQueries: (...args: unknown[]) =>
     mockInvalidateChainEntryQueries(...(args as [])),
+}));
+jest.mock("@/lib/chain-identity/active", () => ({
+  ...jest.requireActual("@/lib/chain-identity/active"),
+  isChainIdentityActive: jest.fn(() => false),
 }));
 jest.mock("@/services/api/signed-drop-writes", () => ({
   deleteDrop: jest.fn().mockResolvedValue(undefined),
@@ -168,6 +181,72 @@ describe("useResubmissionDelete on the 6529 Network", () => {
     );
     expect(onClose).not.toHaveBeenCalled();
     expect(result.current.isDeletingOriginal).toBe(false);
+  });
+
+  it("gives the network's reason under a title, not as a connection error", async () => {
+    mockWithdrawEntry.mockRejectedValue(
+      new ChainOperationError(
+        "rejected",
+        "This entry isn't on the 6529 Network."
+      )
+    );
+    const { result, setToast } = setup();
+    act(() => result.current.handleDeleteOriginalClick());
+
+    await waitFor(() =>
+      expect(setToast).toHaveBeenCalledWith({
+        type: "error",
+        title: "Couldn't withdraw the original submission.",
+        description: "This entry isn't on the 6529 Network.",
+        details: undefined,
+      })
+    );
+  });
+
+  describe("from a wallet with no identity on the 6529 Network", () => {
+    /** The withdrawal stops where the chain writer looks up the wallet. */
+    const withdrawWithoutIdentity = () => {
+      jest.spyOn(chainGateway, "getIdentityByWallet").mockResolvedValue(null);
+      return identityOfWallet(`0x${"12".repeat(20)}`);
+    };
+
+    afterEach(() => {
+      jest.mocked(isChainIdentityActive).mockReturnValue(false);
+      jest.restoreAllMocks();
+    });
+
+    it("points to the identity page once it takes changes", async () => {
+      jest.mocked(isChainIdentityActive).mockReturnValue(true);
+      mockWithdrawEntry.mockImplementation(withdrawWithoutIdentity);
+      const { result, setToast } = setup();
+      act(() => result.current.handleDeleteOriginalClick());
+
+      await waitFor(() => expect(setToast).toHaveBeenCalled());
+      const toast = setToast.mock.calls[0][0] as {
+        readonly description: ReactNode;
+      };
+      render(<p data-testid="description">{toast.description}</p>);
+      expect(screen.getByTestId("description")).toHaveTextContent(
+        "This wallet has no identity on the 6529 Network yet. Set one up on your identity page."
+      );
+      expect(
+        screen.getByRole("link", { name: "your identity page" })
+      ).toHaveAttribute("href", "/network/identity");
+    });
+
+    it("keeps the plain line while the identity page can't help", async () => {
+      mockWithdrawEntry.mockImplementation(withdrawWithoutIdentity);
+      const { result, setToast } = setup();
+      act(() => result.current.handleDeleteOriginalClick());
+
+      await waitFor(() =>
+        expect(setToast).toHaveBeenCalledWith(
+          expect.objectContaining({
+            description: "This wallet has no identity on the 6529 Network yet.",
+          })
+        )
+      );
+    });
   });
 
   it("says a withdrawal refused in a block still paid its fee, in plain words", async () => {
