@@ -13,6 +13,7 @@ import { requestForgeRecovery } from "@/services/api/drop-forge-api";
 import { useAuth } from "@/components/auth/Auth";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/drop-forge";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 const explorers: Partial<Record<number, string>> = {
   1: "https://etherscan.io",

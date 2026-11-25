@@ -7,6 +7,7 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useAuth } from "@/components/auth/Auth";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/drop-forge";
 import { saveForgeSettings } from "@/services/api/drop-forge-settings";
 import type { ApiDropForgeSettingsRequest } from "@/generated/models/ApiDropForgeSettingsRequest";
 import { forgeSettingsKey } from "@/hooks/drop-forge-query-keys";

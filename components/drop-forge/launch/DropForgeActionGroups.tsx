@@ -9,6 +9,7 @@ import {
 } from "@/generated/models/ApiDropForgeAction";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/drop-forge";
 import DropForgeTransactionRecovery from "./DropForgeTransactionRecovery";
 import DropForgeSupplyEvidence from "./DropForgeSupplyEvidence";
 

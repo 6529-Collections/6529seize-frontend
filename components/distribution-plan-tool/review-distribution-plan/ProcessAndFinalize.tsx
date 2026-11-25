@@ -16,6 +16,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger, formatList } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/drop-forge";
 import {
   forgeProcessInputsMatch,
   isForgeProcessTargetValid,

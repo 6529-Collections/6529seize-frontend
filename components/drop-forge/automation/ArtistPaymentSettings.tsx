@@ -5,6 +5,7 @@ import type { ApiDropForgeSettings } from "@/generated/models/ApiDropForgeSettin
 import type { ApiDropForgeSettingsRequest } from "@/generated/models/ApiDropForgeSettingsRequest";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/drop-forge";
 
 type PaymentUpdate = Pick<
   ApiDropForgeSettingsRequest,

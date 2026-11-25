@@ -10,6 +10,7 @@ import Button from "@/components/utils/button/Button";
 import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/drop-forge";
 import { dropForgeIconButtonClassName } from "../drop-forge-section-styles";
 
 const topics = [

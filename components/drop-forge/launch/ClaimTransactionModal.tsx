@@ -6,6 +6,7 @@ import type { ClaimTxModalState } from "@/components/drop-forge/launch/launch-cl
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDecimalString, formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/drop-forge";
 
 export default function ClaimTransactionModal({
   state,

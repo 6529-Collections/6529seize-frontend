@@ -17,6 +17,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { forgeLaunchKey } from "@/hooks/drop-forge-query-keys";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/drop-forge";
 type PendingManual = {
   attempt_id?: string;
   lease?: string | null;

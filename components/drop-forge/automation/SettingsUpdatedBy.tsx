@@ -4,6 +4,7 @@ import { formatAddress, isValidEthAddress } from "@/helpers/Helpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { tRich } from "@/i18n/messages";
+import "@/i18n/namespaces/drop-forge";
 
 export default function SettingsUpdatedBy({
   address,

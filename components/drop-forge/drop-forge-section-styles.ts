@@ -1,3 +1,9 @@
+export const dropForgePanelClassName =
+  "tw-rounded-xl tw-bg-iron-950 tw-p-4 tw-ring-1 tw-ring-inset tw-ring-iron-800 sm:tw-p-5";
+
+export const dropForgePanelTitleClassName =
+  "tw-min-w-0 tw-whitespace-normal tw-break-words tw-text-base tw-font-semibold tw-leading-tight";
+
 export const dropForgeSectionClassName =
   "tailwind-scope tw-mt-6 tw-rounded-xl tw-bg-iron-950 tw-p-4 tw-ring-1 tw-ring-inset tw-ring-iron-800 sm:tw-p-6";
 

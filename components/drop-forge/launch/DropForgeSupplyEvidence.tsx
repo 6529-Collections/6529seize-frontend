@@ -6,6 +6,7 @@ import {
 } from "@/generated/models/ApiDropForgeSupplyEvidence";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/drop-forge";
 
 export default function DropForgeSupplyEvidence({
   evidence,

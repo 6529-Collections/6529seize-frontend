@@ -7,6 +7,7 @@ import Button from "@/components/utils/button/Button";
 import OnchainTransactionModal from "@/components/common/OnchainTransactionModal";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/drop-forge";
 import { useWalletFunding } from "./useWalletFunding";
 import { isFundingAmountDraft, validFundingAmount } from "./funding-amount";
 

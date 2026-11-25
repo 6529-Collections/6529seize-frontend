@@ -7,6 +7,7 @@ import {
 } from "viem";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/drop-forge";
 
 export function getCreatorAdminRows(
   owner: Address,

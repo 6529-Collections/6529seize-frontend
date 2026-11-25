@@ -15,6 +15,7 @@ import {
 import type { ApiDropForgeLaunch } from "@/generated/models/ApiDropForgeLaunch";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/drop-forge";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 export default function DropForgeAutomationStatus({
   claimId,

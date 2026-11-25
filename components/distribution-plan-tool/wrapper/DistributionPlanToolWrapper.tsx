@@ -3,6 +3,7 @@
 import { useSetTitle } from "@/contexts/TitleContext";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/emma";
 
 export default function DistributionPlanToolWrapper({
   children,
