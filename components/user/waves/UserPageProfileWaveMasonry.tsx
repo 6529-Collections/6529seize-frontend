@@ -260,7 +260,6 @@ function CurationMasonryActions({
       >
         {isMobileLayoutViewport ? (
           <CompactMenuMobileBottomSheet
-            variant="profile-curation"
             title={menuLabel}
             ariaLabel={menuLabel}
             items={menuItems}

@@ -431,9 +431,6 @@ export default function MyStreamWaveCurationTabMenu({
     <>
       {shouldUseMobileBottomSheet ? (
         <CompactMenuMobileBottomSheet
-          variant={
-            permissionMode === "profile" ? "profile-curation" : undefined
-          }
           title={triggerLabel ?? t(locale, "profileCuration.header.manage")}
           titleClassName={dialogTypography?.title}
           ariaLabel={triggerLabel ?? t(locale, "profileCuration.header.manage")}

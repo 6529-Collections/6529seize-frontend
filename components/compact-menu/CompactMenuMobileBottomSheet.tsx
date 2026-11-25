@@ -15,7 +15,6 @@ interface MobileBottomSheetTriggerProps {
 }
 
 interface CompactMenuMobileBottomSheetProps {
-  readonly variant?: "default" | "profile-curation" | undefined;
   readonly title: string;
   readonly titleClassName?: string | undefined;
   readonly ariaLabel: string;
@@ -32,7 +31,6 @@ interface CompactMenuMobileBottomSheetProps {
 }
 
 export default function CompactMenuMobileBottomSheet({
-  variant = "default",
   title,
   titleClassName = "tw-text-lg tw-font-semibold",
   ariaLabel,
@@ -45,10 +43,6 @@ export default function CompactMenuMobileBottomSheet({
   onOpenChange,
   zIndexClassName = "tw-z-[1020]",
 }: CompactMenuMobileBottomSheetProps) {
-  const isProfileCuration = variant === "profile-curation";
-  const defaultRowClassName = isProfileCuration
-    ? "tw-flex tw-min-h-12 tw-w-full tw-items-center tw-gap-3 tw-rounded-xl tw-border-0 tw-bg-transparent tw-px-3 tw-py-3 tw-text-left tw-text-md tw-font-medium tw-text-iron-200 tw-transition-colors tw-duration-200 active:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
-    : "tw-flex tw-min-h-12 tw-w-full tw-items-center tw-gap-3 tw-rounded-xl tw-border-0 tw-px-3 tw-py-3 tw-text-left tw-text-base tw-font-medium tw-transition-colors tw-duration-200 active:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-50";
   const [isOpen, setIsOpen] = useState(false);
   const pendingActionRef = useRef<(() => void) | null>(null);
   const setOpen = (open: boolean) => {
@@ -112,18 +106,9 @@ export default function CompactMenuMobileBottomSheet({
               return (
                 <div
                   key={item.id}
-                  className={clsx(
-                    "tw-mt-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-pb-2 tw-pt-5 first:tw-mt-0 first:tw-border-t-0 first:tw-pt-1",
-                    isProfileCuration && "tw-pl-3"
-                  )}
+                  className="tw-mt-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-pb-2 tw-pl-3 tw-pt-5 first:tw-mt-0 first:tw-border-t-0 first:tw-pt-1"
                 >
-                  <span
-                    className={
-                      isProfileCuration
-                        ? "tw-text-label tw-font-medium tw-uppercase tw-text-iron-500"
-                        : "tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500"
-                    }
-                  >
+                  <span className="tw-text-label tw-font-medium tw-uppercase tw-text-iron-500">
                     {item.label}
                   </span>
                 </div>
@@ -145,11 +130,10 @@ export default function CompactMenuMobileBottomSheet({
                   className={clsx(
                     itemClassName ??
                       clsx(
-                        defaultRowClassName,
-                        !isProfileCuration &&
-                          (item.active
-                            ? DEFAULT_ACTIVE_ITEM_CLASSES
-                            : "tw-bg-transparent tw-text-iron-200")
+                        "tw-flex tw-min-h-12 tw-w-full tw-items-center tw-gap-3 tw-rounded-xl tw-border-0 tw-px-3 tw-py-3 tw-text-left tw-text-md tw-font-medium tw-transition-colors tw-duration-200 active:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-50",
+                        item.active
+                          ? DEFAULT_ACTIVE_ITEM_CLASSES
+                          : "tw-bg-transparent tw-text-iron-200"
                       ),
                     item.className
                   )}
@@ -160,9 +144,7 @@ export default function CompactMenuMobileBottomSheet({
                     <span
                       className={
                         item.iconClassName ??
-                        (isProfileCuration
-                          ? "tw-size-5 tw-flex-none tw-text-iron-400"
-                          : "tw-flex tw-size-5 tw-flex-none tw-items-center tw-justify-center")
+                        "tw-flex tw-size-5 tw-flex-none tw-items-center tw-justify-center tw-text-iron-400"
                       }
                     >
                       {item.icon}

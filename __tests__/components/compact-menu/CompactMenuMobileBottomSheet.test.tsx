@@ -32,40 +32,36 @@ jest.mock(
 );
 
 describe("CompactMenuMobileBottomSheet", () => {
-  it.each([undefined, "profile-curation"] as const)(
-    "runs a deferred action once after the %s sheet finishes closing",
-    async (variant) => {
-      const user = userEvent.setup();
-      const openDialog = jest.fn();
-      render(
-        <CompactMenuMobileBottomSheet
-          variant={variant}
-          title="Actions"
-          ariaLabel="Actions"
-          trigger="Open"
-          items={[
-            {
-              id: "dialog",
-              label: "Open dialog",
-              onSelect: openDialog,
-              separatorBefore: true,
-            },
-          ]}
-        />
-      );
+  it("runs a deferred action once after the sheet finishes closing", async () => {
+    const user = userEvent.setup();
+    const openDialog = jest.fn();
+    render(
+      <CompactMenuMobileBottomSheet
+        title="Actions"
+        ariaLabel="Actions"
+        trigger="Open"
+        items={[
+          {
+            id: "dialog",
+            label: "Open dialog",
+            onSelect: openDialog,
+            separatorBefore: true,
+          },
+        ]}
+      />
+    );
 
-      await user.click(screen.getByRole("button", { name: "Actions" }));
-      expect(screen.getByRole("separator")).toBeInTheDocument();
-      await user.click(screen.getByRole("button", { name: "Open dialog" }));
-      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-      expect(openDialog).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Actions" }));
+    expect(screen.getByRole("separator")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Open dialog" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(openDialog).not.toHaveBeenCalled();
 
-      await user.click(screen.getByRole("button", { name: "Finish closing" }));
-      expect(openDialog).toHaveBeenCalledTimes(1);
-      await user.click(screen.getByRole("button", { name: "Finish closing" }));
-      expect(openDialog).toHaveBeenCalledTimes(1);
-    }
-  );
+    await user.click(screen.getByRole("button", { name: "Finish closing" }));
+    expect(openDialog).toHaveBeenCalledTimes(1);
+    await user.click(screen.getByRole("button", { name: "Finish closing" }));
+    expect(openDialog).toHaveBeenCalledTimes(1);
+  });
 
   it("runs immediate saves even if a quick close skips the exit animation callback", async () => {
     const save = jest.fn();

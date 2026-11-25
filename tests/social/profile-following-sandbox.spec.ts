@@ -280,6 +280,17 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
     ).toBe(true);
     await loadProfile(true);
     const alert = await openAlerts("Off");
+    if (mobile) {
+      await expect(alert).toHaveCSS("font-size", "15px");
+      const block = page.getByRole("button", {
+        name: "Block profile",
+        exact: true,
+      });
+      await expect(block.locator("svg")).toHaveCSS(
+        "color",
+        await block.evaluate((element) => getComputedStyle(element).color)
+      );
+    }
     if (!mobile) {
       await alert.hover();
       await expect(alert).toHaveCSS("box-shadow", "none");

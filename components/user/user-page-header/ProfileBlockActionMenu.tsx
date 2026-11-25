@@ -97,6 +97,9 @@ function ProfileActionsMenu({
             id: "block-profile",
             label: t(locale, "contentModeration.actions.blockProfile"),
             icon: <NoSymbolIcon aria-hidden="true" className="tw-size-4" />,
+            iconClassName: isMobileLayoutViewport
+              ? "tw-size-5 tw-flex-none tw-text-current"
+              : undefined,
             onSelect: onBlock,
             className: "tw-text-red desktop-hover:hover:tw-text-red",
           },
@@ -114,6 +117,9 @@ function ProfileActionsMenu({
                 <ArrowPathIcon aria-hidden="true" className="tw-size-4" />
               ),
             onSelect: moderationAction.onSelect,
+            iconClassName: isMobileLayoutViewport
+              ? "tw-size-5 tw-flex-none tw-text-current"
+              : undefined,
             className:
               moderationAction.kind === "suspend"
                 ? "tw-text-amber-300 desktop-hover:hover:tw-text-amber-200"
