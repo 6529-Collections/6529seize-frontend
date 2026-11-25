@@ -2,10 +2,6 @@
 
 import { useEffect, useEffectEvent, useLayoutEffect, useRef } from "react";
 
-type SetUnreadDividerSerialNo = (
-  serialNo: number | null | ((current: number | null) => number | null)
-) => void;
-
 interface MarkWaveNotificationsReadOptions {
   readonly shouldSend?: () => boolean;
   readonly queueIfBlocked?: boolean;
@@ -18,7 +14,6 @@ interface UseWaveChatLeaveCleanupParams {
   readonly isDirectMessage?: boolean | undefined;
   readonly readThroughSerialNo?: number | undefined;
   readonly waveId: string;
-  readonly setUnreadDividerSerialNo: SetUnreadDividerSerialNo;
   readonly removeWaveDeliveredNotifications: (
     waveId: string
   ) => Promise<unknown> | void;
@@ -33,7 +28,6 @@ export function useWaveChatLeaveCleanup({
   isDirectMessage = false,
   readThroughSerialNo,
   waveId,
-  setUnreadDividerSerialNo,
   removeWaveDeliveredNotifications,
   markWaveNotificationsRead,
 }: UseWaveChatLeaveCleanupParams) {
@@ -57,7 +51,6 @@ export function useWaveChatLeaveCleanup({
   const cleanupLeftWave = useEffectEvent((leftWaveId: string) => {
     const readBoundary = readBoundaryByWaveRef.current.get(leftWaveId);
     readBoundaryByWaveRef.current.delete(leftWaveId);
-    setUnreadDividerSerialNo(null);
     void (async () => {
       if (document.visibilityState !== "visible") {
         return;
