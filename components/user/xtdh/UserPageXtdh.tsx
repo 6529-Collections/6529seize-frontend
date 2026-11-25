@@ -1,5 +1,13 @@
 "use client";
 
+import PillTab from "@/components/common/PillTab";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import {
+  COMPACT_ACTION_BUTTON_CLASS,
+  COMPACT_ACTION_CONTENT_CLASS,
+  COMPACT_ACTION_TOUCH_TARGET_CLASS,
+} from "@/components/utils/button/compactActionButtonStyles";
 import { useCallback, useContext, useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -11,6 +19,7 @@ import { UserXtdhTestModeBanner } from "./UserXtdhTestModeBanner";
 import {
   ArrowUpRightIcon,
   ArrowDownLeftIcon,
+  PlusIcon,
 } from "@heroicons/react/24/outline";
 
 type XtdhViewFilter = "granted" | "received";
@@ -45,6 +54,7 @@ type UserPageXtdhProps = {
 };
 
 export default function UserPageXtdh({ profile }: UserPageXtdhProps) {
+  const locale = useBrowserLocale();
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -129,27 +139,40 @@ export default function UserPageXtdh({ profile }: UserPageXtdhProps) {
       />
 
       <div className="tw-mt-2">
-        <div className="tw-mb-3 tw-flex tw-items-center">
-          <div className="tw-flex tw-flex-wrap tw-gap-x-6 tw-gap-y-2">
-            {XTDH_TAB_CONFIG.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeFilter === tab.key;
-              return (
-                <button
-                  key={tab.key}
-                  onClick={() => handleFilterChange(tab.key)}
-                  className={`tw-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-text-xl tw-tracking-tight tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black ${
-                    isActive
-                      ? "tw-font-semibold tw-text-iron-100"
-                      : "tw-font-medium tw-text-iron-500 desktop-hover:hover:tw-text-iron-400"
-                  }`}
-                >
-                  <Icon className="tw-size-4 tw-shrink-0 tw-opacity-50" />
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
+        <div className="tw-mb-3 tw-flex tw-items-center tw-gap-2">
+          {XTDH_TAB_CONFIG.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeFilter === tab.key;
+            return (
+              <PillTab
+                key={tab.key}
+                active={isActive}
+                aria-pressed={isActive}
+                onClick={() => handleFilterChange(tab.key)}
+                className={`!tw-gap-1.5 !tw-text-[13px] !tw-font-medium focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${isActive ? "!tw-bg-iron-800 !tw-text-white" : "!tw-text-iron-400 desktop-hover:hover:!tw-text-iron-200"}`}
+              >
+                <Icon
+                  aria-hidden="true"
+                  className="tw-size-3.5 tw-shrink-0 tw-opacity-70"
+                />
+                {tab.label}
+              </PillTab>
+            );
+          })}
+          {canGrant && (
+            <button
+              type="button"
+              onClick={handleOutboundClick}
+              className={`${COMPACT_ACTION_BUTTON_CLASS} ${COMPACT_ACTION_TOUCH_TARGET_CLASS} tw-ml-auto`}
+            >
+              <span
+                className={`${COMPACT_ACTION_CONTENT_CLASS} max-md:tw-text-[13px]`}
+              >
+                <PlusIcon aria-hidden="true" className="tw-size-3.5" />
+                {t(locale, "xtdh.grant.createAction")}
+              </span>
+            </button>
+          )}
         </div>
 
         {activeFilter === "granted" ? (

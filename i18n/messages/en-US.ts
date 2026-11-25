@@ -3069,6 +3069,10 @@ const XTDH_COLLECTION_MESSAGES = objectMessages("xtdh.collections", {
 } as const);
 
 const XTDH_GRANT_MESSAGES = objectMessages("xtdh.grant", {
+  createAction: "Grant",
+  actions: "Grant actions",
+  stopAction: "Stop Grant",
+  revokeAction: "Revoke Grant",
   "lastGrant.label": "Last grant",
 } as const);
 

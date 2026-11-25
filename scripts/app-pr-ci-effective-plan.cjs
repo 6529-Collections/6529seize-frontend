@@ -110,6 +110,8 @@ function applyEffectiveAppPrCiPlan(plan) {
         "components/brain/my-stream/tabs/MainStageNominationPopover.tsx" ||
       file === "i18n/messages/identityGettingStarted.en-US.json" ||
       file.startsWith("components/user/rep/") ||
+      file.startsWith("components/user/xtdh/") ||
+      file.startsWith("components/xtdh/") ||
       file.startsWith("components/user/user-page-header/about/") ||
       file === "components/user/user-page-header/UserPageHeaderClient.tsx" ||
       file.startsWith(
@@ -123,7 +125,8 @@ function applyEffectiveAppPrCiPlan(plan) {
       file === "components/react-query-wrapper/ReactQueryWrapper.tsx" ||
       file === "hooks/useRepAllocation.ts" ||
       file === "tests/social/profile-rep-edit-sandbox.spec.ts" ||
-      file === "tests/social/profile-about-sandbox.spec.ts"
+      file === "tests/social/profile-about-sandbox.spec.ts" ||
+      file === "tests/social/profile-xtdh-sandbox.spec.ts"
   );
 
   const playwrightDropReactions = files.some(

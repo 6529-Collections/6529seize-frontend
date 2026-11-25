@@ -2355,7 +2355,12 @@
         "NextGen mints still read delegations from NFTDelegation, not from the 6529 Network."
       ],
       "canonical_path": "/{user}",
-      "related_paths": ["/{user}", "/{user}/proxy", "/network", "/safe-collecting"],
+      "related_paths": [
+        "/{user}",
+        "/{user}/proxy",
+        "/network",
+        "/safe-collecting"
+      ],
       "tags": ["profiles", "rep", "proxy"],
       "source_refs": [
         "ops/docs/profiles/feature-identity-move-to-6529-network.md",
@@ -7115,7 +7120,8 @@
       "facts": [
         "Profile xTDH lives at /{user}/xtdh.",
         "The tab has received and granted views where available.",
-        "Owner mode affects which xTDH grant actions are visible."
+        "Owner mode affects which xTDH grant actions are visible.",
+        "Granted and Received use pill buttons. Owners can use + Grant beside them or the Outbound stat to switch to Granted, scroll to Create New Grant and focus its first input."
       ],
       "canonical_path": "/{user}/xtdh",
       "related_paths": ["/network/xtdh"],
@@ -7147,7 +7153,8 @@
         "The xTDH received view has documented collection, token, contributor, and grant detail steps.",
         "While collections first load, full-width placeholder rows appear and the search and sort controls remain visible but disabled.",
         "State can persist across the received-view step flow.",
-        "Use /{user}/xtdh for profile-specific xTDH received information."
+        "Use /{user}/xtdh for profile-specific xTDH received information.",
+        "Profile collections are separate cards; below medium widths search and sort share a row, details use two columns, and a chevron indicates a card opens its tokens. The global xTDH page keeps its layout."
       ],
       "canonical_path": "/{user}/xtdh",
       "related_paths": ["/network/xtdh"],
@@ -7170,7 +7177,8 @@
         "Open a grant's Show tokens disclosure to view its token artwork. If indexed artwork is missing, the grid can recover artwork and placeholder names from original Arweave or IPFS metadata. Unavailable artwork shows the token ID; a failed thumbnail shows Load Error while the token details remain visible. Close and reopen the disclosure to retry the image.",
         "A create-new-grant flow is available where owner permissions allow it.",
         "A grant with an end shows Last grant: the final daily xTDH run that can add xTDH for it, at 00:00 UTC on the UTC date of the grant's end. It is shown in UTC, so every viewer sees the same run.",
-        "Use profile xTDH for profile-specific grants and Network xTDH for global context."
+        "Use profile xTDH for profile-specific grants and Network xTDH for global context.",
+        "Grants appear as separate cards with swipeable status filter chips. Below medium widths, eligible owner Stop Grant and Revoke Grant actions are in the three-dot Grant actions bottom sheet; desktop keeps individual buttons. The same confirmation dialogs are required."
       ],
       "canonical_path": "/{user}/xtdh",
       "related_paths": ["/network/xtdh"],
