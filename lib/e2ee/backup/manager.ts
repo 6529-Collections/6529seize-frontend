@@ -35,7 +35,7 @@ import {
 } from "./format";
 import { generateRecoveryCode, parseRecoveryCode } from "./recovery-code";
 import type { BackupLocalState } from "./state";
-import { changedHistory, startNewChain } from "./local-chain";
+import { backupPinIds, changedHistory, startNewChain } from "./local-chain";
 import type {
   BackupScheduler,
   E2eeBackupManagerDeps,
@@ -425,7 +425,7 @@ export class E2eeBackupManager {
   private async changedSince(
     seen: number,
     local: BackupLocalState,
-    uploaded: Pick<BackupLocalState, "groupPrints" | "messagePrints">
+    uploaded: Pick<BackupLocalState, "groupPrints" | "messagePrints" | "pinIds">
   ): Promise<boolean> {
     const checked = this.engineChanges;
     if (checked === seen) {
@@ -437,6 +437,7 @@ export class E2eeBackupManager {
     return (
       changed.groups.length > 0 ||
       changed.messages.length > 0 ||
+      (changed.pins?.length ?? 0) > 0 ||
       this.engineChanges !== checked
     );
   }
@@ -487,6 +488,7 @@ export class E2eeBackupManager {
       const uploaded = {
         groupPrints: local.groupPrints,
         messagePrints: local.messagePrints,
+        ...(local.pinIds ? { pinIds: local.pinIds } : {}),
       };
       backup ??=
         segments.length > 0
@@ -633,6 +635,7 @@ export class E2eeBackupManager {
           ),
           readsSent: { ...history.reads },
           readsAt: this.now(),
+          pinIds: backupPinIds(history.pins ?? []),
         };
         await this.deps.state.put(local);
         this.local = local;

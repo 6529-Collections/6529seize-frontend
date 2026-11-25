@@ -17,6 +17,7 @@ import {
   resetE2eeSandbox,
 } from "../support/e2ee/e2eeSandboxSession";
 import {
+  closeChatInfo,
   composer,
   conversationListRow,
   enroll,
@@ -26,6 +27,7 @@ import {
   expectMessage,
   gotoPath,
   messageRow,
+  openChatInfo,
   openComposerActions,
   openConversationFromList,
   openMessageActions,
@@ -1197,11 +1199,13 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     await sendMessage(alice.page, "An earlier encrypted message");
     await openConversationFromList(bob.page, "alice");
     await expectMessage(bob.page, "An earlier encrypted message");
-    await alice.page
-      .getByRole("button", { name: "Chat info", exact: true })
-      .click();
-    await alice.page
-      .getByRole("dialog", { name: "Chat info", exact: true })
+    const settings = await openChatInfo(alice.page);
+    await settings.getByRole("button", { name: "Pin to top" }).click();
+    await expect(
+      settings.getByRole("button", { name: "Unpin chat" })
+    ).toBeVisible();
+    await closeChatInfo(alice.page);
+    await (await openChatInfo(alice.page))
       .getByRole("button", { name: "Leave chat", exact: true })
       .click();
     await alice.page
@@ -1222,6 +1226,7 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     await gotoPath(alice.page, ENCRYPTED_ROUTE);
     const row = conversationListRow(alice.page, "bob");
     await expect(row).toHaveCount(1);
+    await expect(row.getByText("Pinned", { exact: true })).toHaveCount(1);
     await row.click();
     await expect(alice.page).toHaveURL(freshUrl);
     const history = alice.page.getByRole("combobox", {
