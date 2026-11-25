@@ -5,6 +5,7 @@ import {
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
+import CompactMenuMobileBottomSheet from "@/components/compact-menu/CompactMenuMobileBottomSheet";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useKey } from "react-use";
@@ -35,6 +36,7 @@ interface HeaderSearchTrigger {
 interface HeaderSearchButtonProps {
   readonly wave: ApiWave | null;
   readonly additionalMenuItems?: readonly CompactMenuItem[] | undefined;
+  readonly morePresentation?: "dropdown" | "sheet";
   readonly renderTrigger?:
     | ((trigger: HeaderSearchTrigger) => ReactNode)
     | undefined;
@@ -45,6 +47,7 @@ type OpenSearch = "site" | "wave" | null;
 export default function HeaderSearchButton({
   wave,
   additionalMenuItems,
+  morePresentation = "dropdown",
   renderTrigger,
 }: HeaderSearchButtonProps) {
   const [openSearch, setOpenSearch] = useState<OpenSearch>(null);
@@ -56,6 +59,8 @@ export default function HeaderSearchButton({
   const locale = useBrowserLocale();
   const hasHydrated = useHasHydrated();
   const { isApp } = useDeviceInfo();
+  const isNativeWavesDirectory =
+    isApp && wave === null && morePresentation === "sheet";
 
   useEffect(() => {
     let rafId: number | null = null;
@@ -115,6 +120,20 @@ export default function HeaderSearchButton({
   const buttonLabel = wave
     ? t(locale, "waves.drops.searchModal.inputLabel", { waveName: wave.name })
     : t(locale, "headerSearch.inputLabel");
+  const moreLabel = t(locale, "headerShare.social.more");
+  const sheetItems: CompactMenuItem[] = (additionalMenuItems ?? []).map(
+    (item) => {
+      if (item.kind === "section" || !item.href) return item;
+      const href = item.href;
+      return {
+        ...item,
+        onSelect: () => {
+          item.onSelect?.();
+          router.push(href);
+        },
+      };
+    }
+  );
   return (
     <div
       ref={rootRef}
@@ -128,7 +147,7 @@ export default function HeaderSearchButton({
       ) : (
         <IconButton
           type="button"
-          size={40}
+          size={isNativeWavesDirectory ? 44 : 40}
           variant={isApp ? "contrast" : "secondary"}
           disabled={!hasHydrated}
           aria-label={buttonLabel}
@@ -139,11 +158,23 @@ export default function HeaderSearchButton({
         >
           <MagnifyingGlassIcon
             className="tw-size-5 tw-flex-shrink-0"
-            strokeWidth={isApp ? 2 : 1.5}
+            strokeWidth={isApp && !isNativeWavesDirectory ? 2 : 1.5}
           />
         </IconButton>
       )}
-      {additionalMenuItems && (
+      {additionalMenuItems && morePresentation === "sheet" && (
+        <CompactMenuMobileBottomSheet
+          title={moreLabel}
+          ariaLabel={moreLabel}
+          disabled={!hasHydrated}
+          items={sheetItems}
+          trigger={
+            <EllipsisVerticalIcon aria-hidden="true" className="tw-size-5" />
+          }
+          triggerClassName="tw-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-black tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+        />
+      )}
+      {additionalMenuItems && morePresentation === "dropdown" && (
         <CompactMenu
           aria-label={t(locale, "headerShare.social.more")}
           disabled={!hasHydrated}

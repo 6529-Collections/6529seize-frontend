@@ -133,12 +133,14 @@ function MobileWavesTestComponent() {
 }
 
 function FallbackStyleComponent() {
-  const { contentContainerStyle, waveViewStyle } = useLayout();
+  const { contentContainerStyle, waveViewStyle, myVotesViewStyle } =
+    useLayout();
 
   return (
     <>
       <div data-testid="content-container" style={contentContainerStyle} />
       <div data-testid="wave-view" style={waveViewStyle} />
+      <div data-testid="my-votes-view" style={myVotesViewStyle} />
     </>
   );
 }
@@ -163,6 +165,23 @@ function ViewportLockTestComponent({ isOpen }: { readonly isOpen: boolean }) {
 }
 
 describe("LayoutProvider", () => {
+  it.each([true, false])(
+    "gives the final vote keyboard clearance only in the app (%s)",
+    (isCapacitor) => {
+      mockCapacitorValues = { isCapacitor, isAndroid: isCapacitor };
+      render(
+        <LayoutProvider>
+          <FallbackStyleComponent />
+        </LayoutProvider>
+      );
+      const { style } = screen.getByTestId("my-votes-view");
+      expect(style.height.includes("--native-keyboard-inset-bottom")).toBe(
+        isCapacitor
+      );
+      expect(style.maxHeight).toBe(style.height);
+    }
+  );
+
   it("updates changed registrations before animation frames without warnings in StrictMode", () => {
     const originalRequestAnimationFrame = global.requestAnimationFrame;
     global.requestAnimationFrame = jest.fn(() => 1);

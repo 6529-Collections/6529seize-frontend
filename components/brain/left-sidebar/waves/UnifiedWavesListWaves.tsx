@@ -419,7 +419,7 @@ const UnifiedWavesListWaves = forwardRef<
             isExpanded={row.isExpanded}
             isLoading={row.isLoadingSubwaves}
             knownSubwavesCount={row.knownSubwavesCount}
-            layoutVariant="app"
+            layoutVariant={isApp ? "native" : "app"}
             onClick={() => toggleParent(row.wave.id)}
             parentWaveName={row.wave.name}
             showConnector={showConnectedSubwaves}

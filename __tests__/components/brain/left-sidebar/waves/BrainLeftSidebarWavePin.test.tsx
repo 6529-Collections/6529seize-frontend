@@ -203,17 +203,28 @@ describe("BrainLeftSidebarWavePin", () => {
     expect(button).not.toHaveClass("focus:tw-opacity-100");
   });
 
-  it("keeps pinned touch controls visible", () => {
-    Object.defineProperty(navigator, "maxTouchPoints", {
-      configurable: true,
-      value: 1,
-    });
-    setup(true, ["1"]);
-    const button = screen.getByRole("button", { name: /unpin wave/i });
+  it.each([true, false])(
+    "keeps touch pin controls visible with a large target (pinned: %s)",
+    (isPinned) => {
+      Object.defineProperty(navigator, "maxTouchPoints", {
+        configurable: true,
+        value: 1,
+      });
+      setup(isPinned, isPinned ? ["1"] : [], undefined, connectedAuth, true);
+      const button = screen.getByRole("button", {
+        name: isPinned ? "Unpin wave" : "Pin wave",
+      });
 
-    expect(button).toHaveClass("tw-opacity-100");
-    expect(button).toHaveClass("tw-size-7");
-  });
+      expect(button).toHaveClass("tw-opacity-100");
+      expect(button).toHaveClass("tw-size-11");
+      expect(button.querySelector("svg")).toHaveClass("tw-size-3.5");
+      expect(button).toHaveAttribute("aria-pressed", String(isPinned));
+      expect(button.querySelector("svg")).toHaveAttribute(
+        "fill",
+        isPinned ? "currentColor" : "none"
+      );
+    }
+  );
 
   it("renders the pin tooltip outside the sidebar list so sticky filters cannot cover it", () => {
     const { container } = setup();

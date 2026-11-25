@@ -24,9 +24,9 @@ function HeaderActionButtonsContent() {
   const { openWave, openDirectMessage, isApp } = useCreateModalState();
   const locale = useBrowserLocale();
   const unifiedCompose = isE2eeEnabled();
-
-  const baseButtonClasses =
-    "tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-black tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 active:tw-bg-iron-800";
+  const messageCreateHref = unifiedCompose
+    ? NEW_MESSAGE_ROUTE
+    : "/messages/create";
 
   const waveParam = getActiveWaveIdFromUrl({ pathname, searchParams });
   const activeView = getActiveViewFromUrl({
@@ -37,6 +37,14 @@ function HeaderActionButtonsContent() {
   const isMessagesContext = activeView === "messages";
   const isOnWaveCreateRoute = pathname === "/waves/create";
   const isOnWavesRoute = pathname === "/waves" && !waveParam;
+  const isNativeWavesDirectory =
+    isApp &&
+    isOnWavesRoute &&
+    !["messages", "notifications", "profile-feed"].includes(
+      searchParams.get("view") ?? ""
+    );
+  const buttonSize = isNativeWavesDirectory ? "tw-size-11" : "tw-size-10";
+  const baseButtonClasses = `tw-flex ${buttonSize} tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-black tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 active:tw-bg-iron-800`;
   const isOnMessagesRoute = pathname === "/messages" && !waveParam;
   const showWaveButton =
     !isOnWaveCreateRoute && (isOnWavesRoute || isWaveContext);
@@ -47,12 +55,13 @@ function HeaderActionButtonsContent() {
 
   if (showWaveButton) {
     const onCreateWave = openWave;
+    const label = t(locale, "waves.sidebar.createWave");
 
     return (
       <button
         type="button"
-        aria-label="Create Wave"
-        title="Create Wave"
+        aria-label={label}
+        title={label}
         onClick={onCreateWave}
         className={baseButtonClasses}
       >
@@ -79,7 +88,7 @@ function HeaderActionButtonsContent() {
       // Full prefetch includes the composer beyond the messages loading boundary.
       return (
         <Link
-          href={unifiedCompose ? NEW_MESSAGE_ROUTE : "/messages/create"}
+          href={messageCreateHref}
           prefetch={true}
           aria-label={label}
           title={label}
