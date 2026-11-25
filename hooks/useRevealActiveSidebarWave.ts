@@ -27,9 +27,7 @@ const EMPTY_ROWS: readonly SidebarWaveTreeRow[] = [];
 const hasWaveRow = (
   rows: readonly SidebarWaveTreeRow[],
   waveId: string | null
-) =>
-  waveId !== null &&
-  rows.some((row) => row.rowType === "wave" && row.wave.id === waveId);
+) => waveId !== null && rows.some((row) => row.wave.id === waveId);
 
 const findWaveRowElement = (
   container: HTMLElement,
@@ -85,7 +83,7 @@ export function useRevealActiveSidebarWave({
     () =>
       new Set(
         [...staticRows, fixedRows].flatMap((rows) =>
-          rows.filter((row) => row.rowType === "wave").map((row) => row.wave.id)
+          rows.map((row) => row.wave.id)
         )
       ),
     [fixedRows, staticRows]
@@ -113,9 +111,7 @@ export function useRevealActiveSidebarWave({
     () =>
       revealWaveId === null
         ? -1
-        : virtualRows.findIndex(
-            (row) => row.rowType === "wave" && row.wave.id === revealWaveId
-          ),
+        : virtualRows.findIndex((row) => row.wave.id === revealWaveId),
     [revealWaveId, virtualRows]
   );
 

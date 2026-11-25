@@ -1,5 +1,6 @@
 "use client";
 
+import "@/i18n/namespaces/wave-sidebar";
 import React, { useEffect, useState } from "react";
 import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
 import IconButton from "@/components/utils/button/IconButton";

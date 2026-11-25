@@ -24,6 +24,10 @@ import BrainLeftSidebarWavePin from "./BrainLeftSidebarWavePin";
 import { PinnedWaveLinkContext } from "./PinnedWaveLinkContext";
 import { AnnouncementWaveIcon } from "./SidebarIconTile";
 import {
+  SidebarSubwavesToggle,
+  type SidebarSubwaveRowProps,
+} from "./SidebarSubwavesToggle";
+import {
   SidebarParentSubwaveConnector,
   SidebarSubwaveConnector,
 } from "./SidebarSubwaveConnector";
@@ -36,19 +40,14 @@ import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore
 import { hasUnreadWaveDrops } from "./sidebarWaveListUtils";
 import { SidebarWaveTouchActions } from "./SidebarWaveTouchActions";
 
-interface BrainLeftSidebarWaveProps {
+interface BrainLeftSidebarWaveProps extends SidebarSubwaveRowProps {
   readonly scoreDetailsDisabled?: boolean | undefined;
   readonly isAnnouncement?: boolean | undefined;
   readonly wave: MinimalWave;
   readonly onHover: (waveId: string) => void;
   readonly showPin?: boolean | undefined;
   readonly isDirectMessage?: boolean | undefined;
-  readonly depth?: 0 | 1 | undefined;
-  readonly canExpand?: boolean | undefined;
-  readonly hasUnreadSubwaves?: boolean | undefined;
-  readonly isLastSubwave?: boolean | undefined;
-  readonly showSubwaveConnector?: boolean | undefined;
-  readonly onPrefetchSubwaves?: ((waveId: string) => void) | undefined;
+  readonly onExpandSubwaves?: ((waveId: string) => void) | undefined;
 }
 
 const getPresentNumber = (value: number | null): number | null => {
@@ -114,9 +113,14 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   depth = 0,
   canExpand = false,
   hasUnreadSubwaves = false,
+  subwavesExpanded = false,
+  subwavesLoading = false,
+  unreadSubwaveDropsCount = 0,
   isLastSubwave = false,
   showSubwaveConnector = false,
+  onExpandSubwaves,
   onPrefetchSubwaves,
+  onToggleSubwaves,
 }) => {
   const pinnedLinkProps = useContext(PinnedWaveLinkContext);
   const { activeWave } = useMyStream();
@@ -195,6 +199,9 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
       cancelHoverIntent();
       onWaveHover();
       const nextWaveId = wave.id === activeWaveId ? null : wave.id;
+      if (nextWaveId !== null) {
+        onExpandSubwaves?.(nextWaveId);
+      }
       setActiveWave(nextWaveId, {
         isDirectMessage,
         divider: nextWaveId !== null ? firstUnreadDropSerialNo : null,
@@ -205,6 +212,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
       activeWaveId,
       cancelHoverIntent,
       isDirectMessage,
+      onExpandSubwaves,
       onWaveHover,
       wave.id,
       firstUnreadDropSerialNo,
@@ -227,6 +235,8 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   } = getSidebarWaveRowLayoutClasses({
     isChildRow,
     isAnnouncement,
+    isDirectMessage: isDirectMessage && !canExpand,
+    hasSubwaveToggle: onToggleSubwaves !== undefined,
     variant: isApp ? "native" : "app",
   });
   const {
@@ -262,13 +272,18 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
             : "desktop-hover:hover:tw-bg-iron-900/80"
         }`}
       >
+        {onToggleSubwaves && (
+          <SidebarSubwavesToggle
+            isExpanded={subwavesExpanded}
+            isLoading={subwavesLoading}
+            onClick={() => onToggleSubwaves(wave.id)}
+            parentWaveName={wave.name}
+            unreadDropsCount={unreadSubwaveDropsCount}
+          />
+        )}
         {!isChildRow && showSubwaveConnector && (
           <SidebarParentSubwaveConnector
-            guideLineOffsetClasses={
-              isApp
-                ? "tw-left-6 sm:tw-left-9"
-                : SIDEBAR_SUBWAVE_GUIDE_LINE_OFFSET_CLASSES
-            }
+            guideLineOffsetClasses={SIDEBAR_SUBWAVE_GUIDE_LINE_OFFSET_CLASSES}
           />
         )}
         {isChildRow && (
@@ -283,7 +298,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           <div
             aria-hidden="true"
             data-testid="sidebar-wave-avatar"
-            className="tw-relative tw-flex-shrink-0"
+            className={`tw-relative tw-flex-shrink-0 ${onToggleSubwaves ? "touch-only:tw-self-center" : ""}`}
           >
             <div
               className={`tw-relative ${avatarSizeClasses} ${

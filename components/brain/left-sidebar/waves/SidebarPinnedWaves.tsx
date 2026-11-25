@@ -1,5 +1,6 @@
 "use client";
 
+import "@/i18n/namespaces/wave-sidebar";
 import {
   DndContext,
   KeyboardCode,
@@ -55,7 +56,7 @@ function groupPinnedRows(
 ): PinnedWaveGroup[] {
   const groups: PinnedWaveGroup[] = [];
   for (const row of rows) {
-    if (row.depth === 0 && row.rowType === "wave") {
+    if (row.depth === 0) {
       groups.push({
         id: row.wave.id,
         parent: row,

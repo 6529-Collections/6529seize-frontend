@@ -1,3 +1,4 @@
+import type BrainLeftSidebarWave from "@/components/brain/left-sidebar/waves/BrainLeftSidebarWave";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import {
@@ -30,9 +31,11 @@ import { getWaveFeatureDescriptor } from "@/services/analytics/waveFeatureUsage"
 
 let mockDeviceInfo = { isApp: false, hasTouchScreen: false };
 
-jest.mock(
-  "@/components/brain/left-sidebar/waves/BrainLeftSidebarWave",
-  () => (props: any) => (
+jest.mock("@/components/brain/left-sidebar/waves/BrainLeftSidebarWave", () => {
+  const { SidebarSubwavesToggle } = jest.requireActual<
+    typeof import("@/components/brain/left-sidebar/waves/SidebarSubwavesToggle")
+  >("@/components/brain/left-sidebar/waves/SidebarSubwavesToggle");
+  return (props: React.ComponentProps<typeof BrainLeftSidebarWave>) => (
     <div
       data-testid={`wave-${props.wave.id}`}
       data-pin={String(props.showPin)}
@@ -40,9 +43,19 @@ jest.mock(
       data-can-expand={String(props.canExpand)}
       data-unread-subwaves={String(props.hasUnreadSubwaves)}
       data-score-details-disabled={String(props.scoreDetailsDisabled)}
-    ></div>
-  )
-);
+    >
+      {props.onToggleSubwaves && (
+        <SidebarSubwavesToggle
+          isExpanded={props.subwavesExpanded ?? false}
+          isLoading={props.subwavesLoading ?? false}
+          onClick={() => props.onToggleSubwaves?.(props.wave.id)}
+          parentWaveName={props.wave.name}
+          unreadDropsCount={props.unreadSubwaveDropsCount ?? 0}
+        />
+      )}
+    </div>
+  );
+});
 jest.mock(
   "@/components/brain/left-sidebar/web/WebBrainLeftSidebarWave/subcomponents/WaveAvatar",
   () => ({
@@ -514,6 +527,35 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
   ).toEqual(["wave-a1", "wave-h1", "wave-p1", "wave-f1", "wave-r1"]);
   expect(ref.current?.containerRef.current).toBe(container);
   expect(ref.current?.sentinelRef.current).toBeInstanceOf(HTMLElement);
+});
+
+it("reveals the subwaves of a parent opened from recommendations", async () => {
+  render(
+    <UnifiedWavesListWaves
+      waves={[
+        createMockMinimalWave({
+          id: "recommended-parent",
+          name: "Recommended parent",
+          sidebarSection: "highly-rated",
+        }),
+        createMockMinimalWave({
+          id: "recommended-child",
+          parentWaveId: "recommended-parent",
+        }),
+      ]}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+    />
+  );
+
+  expect(screen.queryByTestId("wave-recommended-child")).toBeNull();
+  fireEvent.click(
+    screen.getByRole("link", { name: "Open Recommended parent" })
+  );
+  expect(loadSubwavesForParent).toHaveBeenCalledWith("recommended-parent");
+  expect(
+    await screen.findByTestId("wave-recommended-child")
+  ).toBeInTheDocument();
 });
 
 it("uses darker section dividers in the app without changing the web tone", () => {
@@ -1119,15 +1161,11 @@ it("expands regular subwaves and keeps child rows unpinned", async () => {
         collapsedVirtualizerOptions.items[0]
       )
     ).toBe(62);
-    expect(
-      collapsedVirtualizerOptions.rowHeight(
-        collapsedVirtualizerOptions.items[1]
-      )
-    ).toBe(42);
+    expect(collapsedVirtualizerOptions.items).toHaveLength(1);
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: "View 1 subwave for Mock Wave",
+        name: "Expand Mock Wave subwaves",
       })
     );
     await flushAnimatedSidebarRows();
@@ -1135,7 +1173,7 @@ it("expands regular subwaves and keeps child rows unpinned", async () => {
     expect(loadSubwavesForParent).toHaveBeenCalledWith("parent");
     expect(
       screen.getByRole("button", {
-        name: "Hide Mock Wave subwaves",
+        name: "Collapse Mock Wave subwaves",
       })
     ).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByTestId("wave-parent")).toHaveAttribute(
@@ -1153,10 +1191,10 @@ it("expands regular subwaves and keeps child rows unpinned", async () => {
     );
     const expandedVirtualizerOptions =
       mockUseVirtualizedWaves.mock.calls.at(-1)?.[0];
-    const expandedToggleRow = expandedVirtualizerOptions.items.find(
-      (row: { readonly key: string }) => row.key === "parent:subwaves-toggle"
+    const expandedChildRow = expandedVirtualizerOptions.items.find(
+      (row: { readonly key: string }) => row.key === "parent:child"
     );
-    expect(expandedVirtualizerOptions.rowHeight(expandedToggleRow)).toBe(38);
+    expect(expandedVirtualizerOptions.rowHeight(expandedChildRow)).toBe(48);
     expect(screen.getByTestId("wave-child")).toHaveAttribute(
       "data-pin",
       "false"
@@ -1197,7 +1235,7 @@ it("keeps child rows mounted while collapse animation runs", async () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: "View 1 subwave for Mock Wave",
+        name: "Expand Mock Wave subwaves",
       })
     );
     await flushAnimatedSidebarRows();
@@ -1206,7 +1244,7 @@ it("keeps child rows mounted while collapse animation runs", async () => {
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: "Hide Mock Wave subwaves",
+        name: "Collapse Mock Wave subwaves",
       })
     );
     await flushAnimatedSidebarRows();
@@ -1257,7 +1295,7 @@ it("auto-expands the parent for the active subwave", () => {
 
   expect(
     screen.getByRole("button", {
-      name: "Hide Mock Wave subwaves",
+      name: "Collapse Mock Wave subwaves",
     })
   ).toHaveAttribute("aria-expanded", "true");
   expect(screen.getByTestId("wave-child")).toBeInTheDocument();
@@ -1302,9 +1340,9 @@ it("keeps the active parent tree ahead of newly paginated roots", async () => {
   expect(
     mockUseVirtualizedWaves.mock.calls
       .at(-1)?.[0]
-      .items.slice(0, 3)
+      .items.slice(0, 2)
       .map((row: any) => row.key)
-  ).toEqual(["parent", "parent:subwaves-toggle", "parent:child"]);
+  ).toEqual(["parent", "parent:child"]);
 
   rerender(
     <UnifiedWavesListWaves
@@ -1318,9 +1356,9 @@ it("keeps the active parent tree ahead of newly paginated roots", async () => {
   expect(
     mockUseVirtualizedWaves.mock.calls
       .at(-1)?.[0]
-      .items.slice(0, 3)
+      .items.slice(0, 2)
       .map((row: any) => row.key)
-  ).toEqual(["parent", "parent:subwaves-toggle", "parent:child"]);
+  ).toEqual(["parent", "parent:child"]);
 });
 
 it("keeps active root waves in normal activity order", () => {

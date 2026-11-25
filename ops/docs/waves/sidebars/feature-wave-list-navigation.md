@@ -12,10 +12,11 @@ Wave and DM rows in the left list control which thread is open.
   Navigation stays interactive during the transition.
 - Click the body of the active row to clear selection and return to section
   home.
-- Row pin and subwave expand/collapse buttons remain separate controls.
-  In the phone app, row avatars, section headings, and filters share the header
-  avatar's left edge. Row metadata and list-search targets share the header's
-  right inset. Touch scrolling uses the phone's native scrollbar.
+- Opening a parent wave also expands its subwaves. Select the chevron before
+  the wave picture to expand or collapse the list without leaving the open wave.
+- In the phone app, section headings, filters, and rows without subwave chevrons
+  align with the header avatar. Row metadata and list-search targets share the
+  header's right inset. Touch scrolling uses the phone's native scrollbar.
   On touch screens, the visible pin button has a 44px tap area before the score.
   A filled pin means pinned; a muted outline means unpinned.
   [Swipe and hold shortcuts](feature-pinned-wave-controls.md) remain available.
@@ -164,9 +165,8 @@ on hover and show a dark hover surface; their resting header surface is transpar
   Create wave, Search 6529 and a vertical More icon beside it. Search stays
   directly visible; More contains Profile Waves Feed and, when page sharing is
   enabled, Share page.
-  Find a wave stays beside the collection controls. Subwave
-  toggles use an indented, bordered button with rounded corners; Pin remains
-  directly available on eligible rows.
+  Find a wave stays beside the collection controls. Subwave chevrons appear
+  before parent wave pictures. Pin stays available on eligible rows.
 - Each heading has a separate `View all` link aligned to the right, available
   even when collapsed. Active Votes opens `/discover?view=active-votes`;
   Worth Checking Out opens `/discover?view=recommendations&sort=QUALITY`.
