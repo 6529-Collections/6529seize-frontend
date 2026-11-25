@@ -191,13 +191,17 @@ async function finishHostedWalletInitialization(
 
 async function openOwnProfile(page: Page, expectOwnerAction = true) {
   // Exercise account-menu navigation; the direct-load test covers cold hydration.
+  const activate = (control: Locator) =>
+    test.info().project.use.hasTouch ? control.tap() : control.click();
   const profileLoaded = page.waitForResponse((response) =>
     new URL(response.url()).pathname.endsWith(`/identities/${WALLET}`)
   );
   await page.goto("/about");
   await profileLoaded;
   if ((page.viewportSize()?.width ?? 0) < 1024) {
-    await page.getByRole("button", { name: "Open menu", exact: true }).click();
+    await activate(
+      page.getByRole("button", { name: "Open menu", exact: true })
+    );
   }
   const nativeProfile = page.getByRole("link", {
     name: /^Open .+ profile$/,
@@ -207,10 +211,10 @@ async function openOwnProfile(page: Page, expectOwnerAction = true) {
     exact: true,
   });
   await expect(nativeProfile.or(accountMenu)).toBeVisible();
-  if (await nativeProfile.isVisible()) await nativeProfile.click();
+  if (await nativeProfile.isVisible()) await activate(nativeProfile);
   else {
     await accountMenu.press("Enter");
-    await page.getByRole("link", { name: "Profile", exact: true }).click();
+    await activate(page.getByRole("link", { name: "Profile", exact: true }));
   }
   await page.waitForURL(/\/playwright$/, {
     timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
@@ -1975,6 +1979,31 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     await expectNoHorizontalOverflow(page);
   });
 
+  test("keeps a narrow profile editor draft when the viewport widens", async ({
+    page,
+    hasTouch,
+  }) => {
+    await seedSession(page);
+    await openOwnProfile(page);
+    await page.setViewportSize({ width: 600, height: 900 });
+    const activate = (control: Locator) =>
+      hasTouch ? control.tap() : control.click();
+    await activate(
+      page.getByRole("button", { name: "Edit profile", exact: true })
+    );
+    await activate(page.getByRole("button", { name: "About", exact: true }));
+    const input = page.getByRole("textbox", {
+      name: "About statement",
+      exact: true,
+    });
+    await input.fill("Unsaved narrow editor draft");
+    for (const width of [1024, 600]) {
+      await page.setViewportSize({ width, height: 900 });
+      await expect(input).toBeVisible();
+      await expect(input).toHaveValue("Unsaved narrow editor draft");
+    }
+  });
+
   test("opens all fields on wide touch and hybrid screens", async ({
     page,
     isMobile,
@@ -2175,6 +2204,11 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     await page
       .getByRole("textbox", { name: "About statement", exact: true })
       .fill("Unsaved touch QA draft");
+    for (const width of [800, 1024]) {
+      await page.setViewportSize({ width, height: 900 });
+      await expect(aboutInput).toBeVisible();
+      await expect(aboutInput).toHaveValue("Unsaved touch QA draft");
+    }
     await page.getByRole("button", { name: "Cancel", exact: true }).click();
     const discardDialog = page.getByRole("dialog", {
       name: "Discard your changes?",

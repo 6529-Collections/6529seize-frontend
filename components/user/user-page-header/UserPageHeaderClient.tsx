@@ -24,7 +24,6 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { useIdentityEditingPaused } from "@/hooks/useIdentityMovePhase";
 import { useIdentity } from "@/hooks/useIdentity";
-import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { toProfileIdentitySegment } from "@/helpers/profile-identity-segment";
@@ -68,6 +67,7 @@ type Props = {
 };
 
 const PROFILE_PREFERENCES_BUTTON_KEY = "profilePreferences.button";
+const PROFILE_MOBILE_ONLY_CLASS = "lg:tw-hidden";
 const ABOUT_STATEMENT_TYPE: CicStatement["statement_type"] = STATEMENT_TYPE.BIO;
 
 type WebsiteAction = Readonly<{
@@ -311,7 +311,7 @@ function ProfileHeaderContent({
 
         {websiteAction ? (
           <div
-            className={`tw-mb-4 tw-flex tw-flex-wrap tw-items-center tw-gap-2 ${isApp ? "" : "lg:tw-hidden"}`}
+            className={`tw-mb-4 tw-flex tw-flex-wrap tw-items-center tw-gap-2 ${isApp ? "" : PROFILE_MOBILE_ONLY_CLASS}`}
           >
             <ButtonLink
               variant="secondary"
@@ -328,7 +328,7 @@ function ProfileHeaderContent({
         ) : null}
 
         {showSubscriptionStatus ? (
-          <div className={isApp ? "" : "lg:tw-hidden"}>
+          <div className={isApp ? "" : PROFILE_MOBILE_ONLY_CLASS}>
             <UserPageHeaderSubscriptionStatus
               profile={profile}
               layout="wide-row"
@@ -448,7 +448,6 @@ export default function UserPageHeaderClient({
   const params = useParams();
   const router = useRouter();
   const { isApp } = useDeviceInfo();
-  const isMobileLayoutViewport = useIsMobileLayoutViewport();
   const routeHandleOrWallet = params["user"]?.toString().toLowerCase() ?? null;
   const normalizedHandleOrWallet =
     routeHandleOrWallet ?? handleOrWallet.toLowerCase();
@@ -668,12 +667,16 @@ export default function UserPageHeaderClient({
   const editProfileButton = canEdit ? (
     <UserPageHeaderEditProfileDesktop {...editProfileProps} />
   ) : null;
-  let mobileEditProfileButton = canEdit ? (
-    <UserPageHeaderEditProfile {...editProfileProps} />
+  const mobileEditProfileButton = canEdit ? (
+    <>
+      <div className={isApp ? PROFILE_MOBILE_ONLY_CLASS : ""}>
+        <UserPageHeaderEditProfile {...editProfileProps} />
+      </div>
+      {isApp ? (
+        <div className="tw-hidden lg:tw-block">{editProfileButton}</div>
+      ) : null}
+    </>
   ) : null;
-  if (isApp && !isMobileLayoutViewport) {
-    mobileEditProfileButton = editProfileButton;
-  }
   const mobileOwnerControls =
     canEdit || canManageProfilePreferences ? (
       <div className="tw-flex tw-items-center">
@@ -700,7 +703,7 @@ export default function UserPageHeaderClient({
           />
           {mobileOwnerControls ? (
             <div
-              className={`tw-absolute tw-right-4 tw-top-3 tw-z-20 sm:tw-right-6 sm:tw-top-4 md:tw-right-8 ${isApp ? "" : "lg:tw-hidden"}`}
+              className={`tw-absolute tw-right-4 tw-top-3 tw-z-20 sm:tw-right-6 sm:tw-top-4 md:tw-right-8 ${isApp ? "" : PROFILE_MOBILE_ONLY_CLASS}`}
             >
               {mobileOwnerControls}
             </div>
