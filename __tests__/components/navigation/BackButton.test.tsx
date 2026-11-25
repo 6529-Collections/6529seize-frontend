@@ -3,6 +3,25 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import BackButton from "@/components/navigation/BackButton";
 let mockIsApp = false;
+let mockIsIos = false;
+jest.mock("@capacitor/core", () => {
+  const actual = jest.requireActual("@capacitor/core");
+  return {
+    ...actual,
+    Capacitor: {
+      ...actual.Capacitor,
+      getPlatform: () => (mockIsIos ? "ios" : "android"),
+    },
+  };
+});
+const mockChevronBack = jest.fn((_: string, navigate: () => void) =>
+  navigate()
+);
+jest.mock("@/helpers/waves/wave-navigation-transition", () => ({
+  ...jest.requireActual("@/helpers/waves/wave-navigation-transition"),
+  runPhoneChevronBackTransition: (pathname: string, navigate: () => void) =>
+    mockChevronBack(pathname, navigate),
+}));
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
@@ -90,8 +109,69 @@ function setup(
 describe("BackButton", () => {
   afterEach(() => {
     mockIsApp = false;
+    mockIsIos = false;
     jest.clearAllMocks();
     window.history.replaceState(null, "", "/");
+  });
+
+  it("uses the whole-channel transition for iPhone chevron Back", () => {
+    mockIsApp = true;
+    mockIsIos = true;
+    const { setActiveWave } = setup(
+      {},
+      { activeWaveId: "w1", pathname: "/waves/w1" }
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
+    expect(mockChevronBack).toHaveBeenCalledWith(
+      "/waves",
+      expect.any(Function)
+    );
+    expect(setActiveWave).toHaveBeenCalledWith(null, {
+      isDirectMessage: false,
+    });
+  });
+
+  it.each([true, false])(
+    "slides back to Messages on iPhone even if DM details are pending (loaded: %s)",
+    (isDm) => {
+      mockIsApp = true;
+      mockIsIos = true;
+      const { setActiveWave } = setup({}, { pathname: "/messages/dm1", isDm });
+      fireEvent.click(screen.getByRole("button", { name: "Back" }));
+      expect(mockChevronBack).toHaveBeenCalledWith(
+        "/messages",
+        expect.any(Function)
+      );
+      expect(mockClearLastVisited).toHaveBeenCalledWith("dm");
+      expect(setActiveWave).toHaveBeenCalledWith(null, {
+        isDirectMessage: true,
+      });
+    }
+  );
+
+  it.each([
+    "other-native",
+    "phone-web",
+    "other-native-dm",
+    "profile-feed",
+    "other-section",
+  ])("preserves the existing Back path for %s", (surface) => {
+    mockIsApp = surface !== "phone-web";
+    mockIsIos = !surface.startsWith("other-native");
+    const query =
+      surface === "profile-feed"
+        ? { returnTo: "/waves?view=profile-feed" }
+        : {};
+    let pathname = "/waves/w1";
+    if (surface === "other-native-dm") pathname = "/messages/w1";
+    if (surface === "other-section") pathname = "/network";
+    setup(query, {
+      activeWaveId: "w1",
+      pathname,
+      isDm: surface === "other-native-dm",
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
+    expect(mockChevronBack).not.toHaveBeenCalled();
   });
 
   it.each([

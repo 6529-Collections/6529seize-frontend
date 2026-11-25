@@ -6,6 +6,7 @@ import {
   skipWaveNavigationTransition,
   consumeWaveSwipeHandoff,
   isForwardWaveNavigation,
+  usesFadeOnlyWaveEntry,
   type WaveScreen,
 } from "@/helpers/waves/wave-navigation-transition";
 
@@ -22,7 +23,10 @@ export function getWaveNavigationScreen(
 }
 
 /** Animate a committed list/detail change without remounting its content. */
-export function useWaveNavigationTransition(screen: WaveNavigationScreen) {
+export function useWaveNavigationTransition(
+  screen: WaveNavigationScreen,
+  pathname: string
+) {
   const containerRef = useRef<HTMLDivElement>(null);
   const previousScreenRef = useRef(screen);
 
@@ -31,8 +35,9 @@ export function useWaveNavigationTransition(screen: WaveNavigationScreen) {
   useLayoutEffect(() => {
     const previousScreen = previousScreenRef.current;
     previousScreenRef.current = screen;
-    const swipeHandoff = screen !== previousScreen && consumeWaveSwipeHandoff();
-    if (commitWaveNavigationTransition(screen) || swipeHandoff) return;
+    const swipeHandoff = consumeWaveSwipeHandoff();
+    if (commitWaveNavigationTransition(screen, pathname) || swipeHandoff)
+      return;
     const container = containerRef.current;
     if (
       !container ||
@@ -47,16 +52,19 @@ export function useWaveNavigationTransition(screen: WaveNavigationScreen) {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (reducedMotion.matches) return;
 
-    const animation = container.animate(
-      [
-        {
-          opacity: 0.75,
-          transform: `scale(${isForwardWaveNavigation(screen, previousScreen) ? 0.98 : 1.02})`,
-        },
-        { opacity: 1, transform: "none" },
-      ],
-      { duration: 240, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" }
-    );
+    const keyframes = usesFadeOnlyWaveEntry(screen)
+      ? [{ opacity: 0.75 }, { opacity: 1 }]
+      : [
+          {
+            opacity: 0.75,
+            transform: `scale(${isForwardWaveNavigation(screen, previousScreen) ? 0.98 : 1.02})`,
+          },
+          { opacity: 1, transform: "none" },
+        ];
+    const animation = container.animate(keyframes, {
+      duration: 240,
+      easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
+    });
     const stopForReducedMotion = () => {
       if (reducedMotion.matches) animation.cancel();
     };
@@ -65,7 +73,7 @@ export function useWaveNavigationTransition(screen: WaveNavigationScreen) {
       animation.cancel();
       reducedMotion.removeEventListener("change", stopForReducedMotion);
     };
-  }, [screen]);
+  }, [screen, pathname]);
 
   return containerRef;
 }

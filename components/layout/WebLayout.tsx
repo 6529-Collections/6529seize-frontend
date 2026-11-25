@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useLayoutEffect, useMemo } from "react";
+import { commitWaveNavigationTransition } from "@/helpers/waves/wave-navigation-transition";
 import { useParams, usePathname } from "next/navigation";
 import { isUserProfilePage } from "../user/layout/userTabs.config";
 import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
@@ -36,6 +37,11 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
   const pathname = usePathname();
   const params = useParams();
   const isPhoneWidth = useMediaQuery(PHONE_WAVES_LAYOUT_QUERY);
+  useLayoutEffect(() => {
+    if (isSmall && isPhoneWidth) {
+      commitWaveNavigationTransition(null, pathname);
+    }
+  }, [pathname, isSmall, isPhoneWidth]);
   const showSiteHeader =
     isSmall && !(isPhoneWidth && getWaveIdFromPathname(pathname));
   const smallWebOverflow =
@@ -79,6 +85,7 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
           : "layout-root tw-relative tw-flex tw-w-full tw-justify-between"
       }
       style={isSmall ? undefined : cssVars}
+      data-phone-wave-page={isSmall && isPhoneWidth ? true : undefined}
       data-mobile={isMobile}
       data-narrow={isNarrow}
       data-offcanvas={isOffcanvasOpen}

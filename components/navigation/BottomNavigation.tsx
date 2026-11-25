@@ -5,6 +5,7 @@ import React, {
   Suspense,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -496,7 +497,7 @@ const BottomNavigationResolvedContent: React.FC<
     mobileNavRef.current = node;
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     registerRef(
       "mobileNav",
       hidden && !preserveMeasurementWhileHidden ? null : mobileNavRef.current
