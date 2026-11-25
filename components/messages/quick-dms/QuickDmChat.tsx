@@ -145,6 +145,7 @@ export const QuickDmChat = ({
         onDropClick={openDropInMessages}
         waveViewStyleOverride={CHAT_PANEL_STYLE}
         showLegacyDmBanner={false}
+        manageWaveRoute={false}
       />
     );
   } else if (isFetching) {
