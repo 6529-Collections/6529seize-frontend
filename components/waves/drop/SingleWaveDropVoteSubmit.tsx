@@ -29,6 +29,7 @@ import {
   chainWriteDetails,
   chainWriteFailure,
 } from "@/components/chain-waves/chainWavesErrorMessage";
+import { chainIdentityPointer } from "@/components/chain-waves/chainIdentityPointer";
 import {
   SingleWaveDropVoteSize,
   SingleWaveDropVoteSubmissionMode,
@@ -170,7 +171,9 @@ const SingleWaveDropVoteSubmit = forwardRef<
         setToast({
           type: "error",
           title: "Couldn't submit your vote.",
-          description: chainWriteFailure(locale, error, "Please try again."),
+          description:
+            chainIdentityPointer(locale, error) ??
+            chainWriteFailure(locale, error, "Please try again."),
           details: chainWriteDetails(error),
         });
       },

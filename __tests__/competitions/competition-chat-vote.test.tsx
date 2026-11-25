@@ -18,6 +18,10 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiCompetitionCreditBudget } from "@/generated/models/ApiCompetitionCreditBudget";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { useCompetitionViewer } from "@/hooks/competitions/useCompetitionQueries";
+import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWriters";
+import { isChainIdentityActive } from "@/lib/chain-identity/active";
+import { chainGateway } from "@/lib/chain-identity/gateway";
+import { identityOfWallet } from "@/lib/chain-waves/signing";
 import {
   fetchDropCompetitionContext,
   fetchCompetitionCredits,
@@ -29,6 +33,13 @@ let mockMovePaused = false;
 jest.mock("@/hooks/useWavesMovePhase", () => ({
   ...jest.requireActual("@/hooks/useWavesMovePhase"),
   useWavesWritesPaused: () => mockMovePaused,
+}));
+jest.mock("@/components/chain-waves/useChainWavesWriters", () => ({
+  useChainWavesWriters: jest.fn(() => null),
+}));
+jest.mock("@/lib/chain-identity/active", () => ({
+  ...jest.requireActual("@/lib/chain-identity/active"),
+  isChainIdentityActive: jest.fn(() => false),
 }));
 jest.mock("@/components/auth/auth-session-scope", () => ({
   isAuthSessionForProfile: jest.fn(() => true),
@@ -1213,4 +1224,85 @@ it("keeps zero-credit voting bounded in both modes", async () => {
   fireEvent.change(input, { target: { value: "1" } });
   expect(screen.getByRole("button", { name: voteButtonName })).toBeDisabled();
   expect(setCompetitionVote).not.toHaveBeenCalled();
+});
+
+describe("a chain vote from a wallet with no identity on the 6529 Network", () => {
+  /** The vote stops where the chain writer looks up the wallet. */
+  const voteWithoutIdentity = () => {
+    jest.spyOn(chainGateway, "getIdentityByWallet").mockResolvedValue(null);
+    return identityOfWallet(`0x${"12".repeat(20)}`).then(() => undefined);
+  };
+
+  beforeEach(() => {
+    jest.mocked(useChainWavesWriters).mockReturnValue({
+      vote: jest.fn(voteWithoutIdentity),
+      pollBallot: jest.fn(),
+      waveRating: jest.fn(),
+    });
+  });
+  afterEach(() => {
+    jest.mocked(useChainWavesWriters).mockReturnValue(null);
+    jest.mocked(isChainIdentityActive).mockReturnValue(false);
+    jest.restoreAllMocks();
+  });
+
+  it("points to the identity page in the vote panel once it takes changes", async () => {
+    jest.mocked(isChainIdentityActive).mockReturnValue(true);
+    mount();
+    const input = await screen.findByRole("spinbutton", { name: "Your vote" });
+    fireEvent.change(input, { target: { value: "25" } });
+    fireEvent.click(screen.getByRole("button", { name: voteButtonName }));
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(
+      "This wallet has no identity on the 6529 Network yet. Set one up on your identity page."
+    );
+    expect(
+      screen.getByRole("link", { name: "your identity page" })
+    ).toHaveAttribute("href", "/network/identity");
+    expect(setCompetitionVote).not.toHaveBeenCalled();
+  });
+
+  it("shows the same line under the compact My Votes input", async () => {
+    jest.mocked(isChainIdentityActive).mockReturnValue(true);
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    try {
+      render(
+        <QueryClientProvider client={client}>
+          <CompetitionVoteForm
+            competition={context.competition as never}
+            entryId="entry"
+            dropId="drop"
+            disabled={false}
+            compact
+            myVotes
+          />
+        </QueryClientProvider>
+      );
+      const input = await screen.findByRole("textbox", { name: "Your vote" });
+      fireEvent.focus(input);
+      fireEvent.change(input, { target: { value: "25" } });
+      fireEvent.submit(input);
+      expect(
+        await screen.findByRole("link", { name: "your identity page" })
+      ).toHaveAttribute("href", "/network/identity");
+    } finally {
+      client.clear();
+    }
+  });
+
+  it("keeps the plain line while the identity page can't help", async () => {
+    mount();
+    const input = await screen.findByRole("spinbutton", { name: "Your vote" });
+    fireEvent.change(input, { target: { value: "25" } });
+    fireEvent.click(screen.getByRole("button", { name: voteButtonName }));
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(
+      "This wallet has no identity on the 6529 Network yet."
+    );
+    expect(
+      screen.queryByRole("link", { name: "your identity page" })
+    ).not.toBeInTheDocument();
+  });
 });

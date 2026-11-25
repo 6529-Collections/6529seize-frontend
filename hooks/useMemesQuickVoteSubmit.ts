@@ -15,6 +15,7 @@ import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWrit
 import { withViewerVote } from "@/lib/chain-waves/optimistic";
 import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
 import { chainWriteFailure } from "@/components/chain-waves/chainWavesErrorMessage";
+import { chainIdentityPointer } from "@/components/chain-waves/chainIdentityPointer";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import type { UseMutationResult } from "@tanstack/react-query";
 import type { Dispatch, ReactNode, SetStateAction } from "react";
@@ -26,7 +27,9 @@ const DEFAULT_DROP_RATE_CATEGORY = "Rep";
 const NOTHING_SENT = "Nothing was sent.";
 
 type SetToast = (options: {
-  readonly message: string | ReactNode;
+  readonly message?: string | ReactNode;
+  readonly title?: ReactNode;
+  readonly description?: ReactNode;
   readonly type: TypeOptions;
 }) => void;
 
@@ -93,6 +96,28 @@ const getQueuedRatingAppliedAmount = ({
   }
 
   return Math.abs(queuedRating.amount);
+};
+
+/**
+ * The toast for a quick vote that didn't go in. A vote the 6529 Network
+ * refused shows its reason under a title, so 6529.io's wording for its own
+ * connection errors never replaces it; a wallet with no identity gets the
+ * link to the identity page when that page takes changes.
+ */
+const getQueuedRatingFailureToast = (
+  error: unknown,
+  message: string
+): Parameters<SetToast>[0] => {
+  const chainReason =
+    chainIdentityPointer(DEFAULT_LOCALE, error) ??
+    chainWriteFailure(DEFAULT_LOCALE, error, "");
+  return chainReason === ""
+    ? { message, type: "error" }
+    : {
+        type: "error",
+        title: "Couldn't submit your vote.",
+        description: chainReason,
+      };
 };
 
 const getQueuedRatingErrorMessage = ({
@@ -208,7 +233,7 @@ const flushMemesQuickVoteRatings = async ({
               type: queuedRating.type,
             });
         if (isRuntimeActive() && !declined) {
-          setToast({ message, type: "error" });
+          setToast(getQueuedRatingFailureToast(error, message));
         }
         onRatingFailure(
           queuedRating.drop,

@@ -10,6 +10,7 @@ import {
   chainWriteDetails,
   chainWriteFailure,
 } from "@/components/chain-waves/chainWavesErrorMessage";
+import { chainIdentityPointer } from "@/components/chain-waves/chainIdentityPointer";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { DropVoteState } from "@/hooks/drops/types";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
@@ -106,11 +107,9 @@ export default function DropListItemRateGiveSubmit({
       setToast({
         type: "error",
         title: "Couldn't submit your rating.",
-        description: chainWriteFailure(
-          DEFAULT_LOCALE,
-          error,
-          "Please try again."
-        ),
+        description:
+          chainIdentityPointer(DEFAULT_LOCALE, error) ??
+          chainWriteFailure(DEFAULT_LOCALE, error, "Please try again."),
         details: chainWriteDetails(error),
       });
     },

@@ -37,6 +37,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWriters";
 import { chainWavesErrorMessage } from "@/components/chain-waves/chainWavesErrorMessage";
+import { chainIdentityPointer } from "@/components/chain-waves/chainIdentityPointer";
 import {
   budgetAfterVote,
   scheduleIndexRefresh,
@@ -184,7 +185,7 @@ export function CompetitionVoteForm({
   );
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState<MessageKey | null>(null);
-  const [chainFailure, setChainFailure] = useState<string | null>(null);
+  const [chainFailure, setChainFailure] = useState<ReactNode>(null);
   const [saved, setSaved] = useState(false);
   const [lastVote, setLastVote] = useState<{
     source: string;
@@ -325,7 +326,10 @@ export function CompetitionVoteForm({
       // Cancelled at the wallet prompt: nothing was sent.
       if (chainWriters && isUserRejectedSigningError(error)) return;
       setChainFailure(
-        chainWriters ? chainWavesErrorMessage(locale, error) : null
+        chainWriters
+          ? (chainIdentityPointer(locale, error) ??
+              chainWavesErrorMessage(locale, error))
+          : null
       );
       setFailed(
         getCompetitionSignatureFailureKey(error) ?? "competitions.failure"
@@ -432,7 +436,7 @@ export function CompetitionVoteForm({
             min: formatInteger(locale, min ?? 0),
             max: formatInteger(locale, max ?? 0),
           })}
-          error={failed ? t(locale, failed) : null}
+          error={failed ? (chainFailure ?? t(locale, failed)) : null}
           saveLabel={t(
             locale,
             busy ? "competitions.saving" : "competitions.vote"

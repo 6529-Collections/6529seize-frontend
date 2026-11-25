@@ -20,6 +20,9 @@ import { publicEnv } from "@/config/env";
  */
 export type WavesMovePhase = "none" | "notice" | "frozen" | "moved";
 
+/** setTimeout fires at once for delays above 2^31 - 1 ms (about 24.8 days). */
+export const MAX_TIMER_DELAY_MS = 2_147_483_647;
+
 export interface WavesMoveSchedule {
   readonly freezeAtMs: number;
   readonly switchOnMs: number;

@@ -57,6 +57,12 @@ Times are shown in UTC. The notice changes at the freeze and at the switch-on
 while the page stays open. Hiding it is remembered in the browser until the
 notice changes.
 
+6529.io settles no result while waves are frozen. In a wave whose result falls
+due then (the Main Stage's, for one), the notice adds, from the time it is due:
+"The result due Wednesday 16:00 UTC is counted on the 6529 Network after
+Thursday 00:00 UTC." Until the switch-on the wave's leaderboard keeps its
+standings and its countdown moves on to the next result.
+
 ## What Is Paused From the Freeze
 
 Paused controls are hidden, or disabled with the paused line:
