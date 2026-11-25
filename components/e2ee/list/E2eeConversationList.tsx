@@ -2,6 +2,7 @@
 
 import { BellSlashIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { rememberE2eeChatOrigin } from "../conversation/e2eeChatOrigin";
 import type { ReactNode } from "react";
 import {
   getEncryptedConversationRoute,
@@ -226,6 +227,7 @@ function E2eeConversationRow({
   const href = active
     ? getEncryptedMessagesRoute()
     : getEncryptedConversationRoute(conversation.g);
+  const rememberOrigin = () => rememberE2eeChatOrigin(conversation.g);
   const hasUnread =
     !muted && (conversation.unread > 0 || conversation.mentions > 0);
   const rowClass = active
@@ -237,6 +239,7 @@ function E2eeConversationRow({
       <li>
         <Link
           href={href}
+          onClick={active ? undefined : rememberOrigin}
           aria-current={active ? "page" : undefined}
           aria-label={title}
           title={title}
@@ -262,6 +265,7 @@ function E2eeConversationRow({
     <li>
       <Link
         href={href}
+        onClick={active ? undefined : rememberOrigin}
         aria-current={active ? "page" : undefined}
         className={`tw-flex tw-min-w-0 tw-items-center tw-gap-3 tw-rounded-lg tw-px-3 tw-py-2 tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${rowClass}`}
       >

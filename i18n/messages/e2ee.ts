@@ -350,6 +350,7 @@ export const E2EE_MESSAGES = {
   "e2ee.conversation.notFound.body":
     "This encrypted chat isn’t on this device. Devices only receive chats they were added to.",
   "e2ee.conversation.back": "Back to encrypted messages",
+  "e2ee.conversation.backToMessages": "Back to messages",
   "e2ee.conversation.info": "Chat info",
   "e2ee.conversation.search.open": "Search this chat",
   "e2ee.conversation.search.label": "Search messages on this device",

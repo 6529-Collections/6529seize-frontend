@@ -272,8 +272,11 @@ Select **Direct Message** on someone’s profile or profile card to open
 chat** for an existing encrypted conversation or **Start chat** for a new one.
 Opening the composer creates no conversation.
 
-In the 6529 app, the back arrow to the left of the chat avatar returns to the
-encrypted messages list. It stays visible on iPad in portrait and landscape.
+In the 6529 app, the back arrow to the left of the chat avatar (and a swipe
+to the right) returns to the list you opened the chat from: **Messages** or the
+encrypted messages list. A chat opened another way, such as from a profile or a
+link, returns to the encrypted messages list. The arrow stays visible on iPad
+in portrait and landscape.
 
 1. Select **+** beside **Messages** to open **New message** at `/messages/new`.
    On desktop, the chat list stays beside the form.

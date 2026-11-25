@@ -40,6 +40,7 @@ import { E2eeContinuedNotice } from "./E2eeContinuedNotice";
 import { E2eeConversationBanners } from "./E2eeConversationBanners";
 import { E2eeUntrustedDeviceBanners } from "./E2eeUntrustedDeviceBanners";
 import { E2eeConversationHeader } from "./E2eeConversationHeader";
+import { getE2eeChatReturnRoute } from "./e2eeChatOrigin";
 import type { E2eeMessageActions } from "./E2eeMessageItem";
 import { E2eeReportDialog } from "./E2eeReportDialog";
 import { E2eeSearchPanel } from "./E2eeSearchPanel";
@@ -146,6 +147,7 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
   const composerInputId = useId();
   const { engine, profileId } = e2ee;
   const { conversation, messages } = useE2eeConversation(g);
+  const returnRoute = useMemo(() => getE2eeChatReturnRoute(g), [g]);
   const { ref: swipeBackRef, onTouchStart } = useWaveListSwipeBack<HTMLElement>(
     {
       enabled: isCapacitor && conversation !== null,
@@ -153,7 +155,7 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
       onSwipeBack: () => {
         const input = document.activeElement;
         if (input instanceof HTMLElement) input.blur();
-        router.push(getEncryptedMessagesRoute(), { scroll: false });
+        router.push(returnRoute, { scroll: false });
       },
     }
   );
@@ -312,6 +314,7 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
         searchPanelId={searchPanelId}
         onToggleSearch={() => setSearchOpen((open) => !open)}
         onOpenInfo={() => setInfoOpen(true)}
+        backHref={returnRoute}
       />
       <E2eeDmHistory
         conversation={conversation}

@@ -8,6 +8,7 @@ import {
   screen,
 } from "@testing-library/react";
 import { E2eeConversationView } from "@/components/e2ee/conversation/E2eeConversationView";
+import { rememberE2eeChatOrigin } from "@/components/e2ee/conversation/e2eeChatOrigin";
 import { getEncryptedMessagesRoute } from "@/helpers/navigation.helpers";
 import {
   contextFor,
@@ -45,6 +46,11 @@ const touch = (clientX: number, clientY = 100) => ({
   clientX,
   clientY,
 });
+
+function openedFrom(route: string, g = conversation().g) {
+  globalThis.history.replaceState(null, "", route);
+  rememberE2eeChatOrigin(g);
+}
 
 function renderConversation() {
   const chat = conversation();
@@ -95,6 +101,8 @@ describe("encrypted conversation swipe back", () => {
     mockIsCapacitor = true;
     Element.prototype.scrollTo = jest.fn();
     Element.prototype.scrollIntoView = jest.fn();
+    // No list origin unless a test opens the chat from one.
+    openedFrom("/");
   });
 
   afterEach(() => {
@@ -115,6 +123,43 @@ describe("encrypted conversation swipe back", () => {
       scroll: false,
     });
     expect(surface.style.transform).toBe("");
+    expect(
+      screen.getByRole("link", { name: "Back to encrypted messages" })
+    ).toHaveAttribute("href", getEncryptedMessagesRoute());
+  });
+
+  it("returns Back and swipe to the Messages list the chat was opened from", () => {
+    openedFrom("/messages");
+    const surface = renderConversation();
+    expect(
+      screen.getByRole("link", { name: "Back to messages" })
+    ).toHaveAttribute("href", "/messages");
+
+    fireEvent.touchStart(surface, { touches: [touch(80)] });
+    move(surface, 200);
+    release(surface, 200);
+    expect(mockPush).toHaveBeenCalledWith("/messages", { scroll: false });
+  });
+
+  it("returns to the encrypted list when the chat was opened there or elsewhere", () => {
+    openedFrom(getEncryptedMessagesRoute());
+    renderConversation();
+    expect(
+      screen.getByRole("link", { name: "Back to encrypted messages" })
+    ).toHaveAttribute("href", getEncryptedMessagesRoute());
+    cleanup();
+
+    // A Messages origin recorded for a different chat does not apply here.
+    openedFrom("/messages", "0xother");
+    renderConversation();
+    expect(
+      screen.getByRole("link", { name: "Back to encrypted messages" })
+    ).toHaveAttribute("href", getEncryptedMessagesRoute());
+    cleanup();
+
+    // Opening from another chat, a profile or a link is not a list origin.
+    openedFrom(`${getEncryptedMessagesRoute()}/0xother`);
+    renderConversation();
     expect(
       screen.getByRole("link", { name: "Back to encrypted messages" })
     ).toHaveAttribute("href", getEncryptedMessagesRoute());

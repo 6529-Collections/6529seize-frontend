@@ -4,6 +4,7 @@ import { E2eeRenewalBanner } from "@/components/e2ee/gate/E2eeRenewalBanner";
 import { E2eeConversationListPage } from "@/components/e2ee/list/E2eeConversationListPage";
 import { E2eeMessagesSection } from "@/components/e2ee/sidebar/E2eeMessagesSection";
 import { setE2eeChatMuted } from "@/components/e2ee/e2eeMutedChats";
+import { getE2eeChatReturnRoute } from "@/components/e2ee/conversation/e2eeChatOrigin";
 import { useE2eeUnreadSummary } from "@/hooks/e2ee/useE2ee";
 import {
   ALICE_ID,
@@ -271,6 +272,30 @@ describe("encrypted conversation list", () => {
     );
     expect(realRow).toHaveTextContent("alice");
     expect(realRow).not.toHaveTextContent("bob");
+  });
+
+  it("remembers the Messages list as the place an opened chat returns to", () => {
+    globalThis.history.replaceState(null, "", "/messages");
+    mockPathname.mockReturnValue("/messages");
+    render(
+      <E2eeTestProvider
+        value={contextFor(createFakeE2eeEngine({ conversations }))}
+      >
+        <E2eeMessagesSection variant="app" />
+      </E2eeTestProvider>
+    );
+    const row = within(
+      screen.getByRole("list", { name: "Encrypted chats" })
+    ).getByRole("link", { name: /Collectors/ });
+    const keepPage = (event: Event) => event.preventDefault();
+    document.addEventListener("click", keepPage, true);
+    try {
+      fireEvent.click(row);
+    } finally {
+      document.removeEventListener("click", keepPage, true);
+      globalThis.history.replaceState(null, "", "/");
+    }
+    expect(getE2eeChatReturnRoute(GROUP_G)).toBe("/messages");
   });
 
   it("marks a chat muted on this device and leaves it out of the badge", () => {

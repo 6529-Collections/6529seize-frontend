@@ -31,6 +31,8 @@ interface E2eeConversationHeaderProps {
   readonly searchPanelId: string;
   readonly onToggleSearch: () => void;
   readonly onOpenInfo: () => void;
+  /** The conversation list this chat returns to. */
+  readonly backHref?: string | undefined;
 }
 
 export function E2eeConversationHeader({
@@ -40,6 +42,7 @@ export function E2eeConversationHeader({
   searchPanelId,
   onToggleSearch,
   onOpenInfo,
+  backHref = getEncryptedMessagesRoute(),
 }: E2eeConversationHeaderProps) {
   const locale = useBrowserLocale();
   const { isCapacitor } = useCapacitor();
@@ -57,8 +60,13 @@ export function E2eeConversationHeader({
   return (
     <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-py-2.5 sm:tw-px-4">
       <Link
-        href={getEncryptedMessagesRoute()}
-        aria-label={t(locale, "e2ee.conversation.back")}
+        href={backHref}
+        aria-label={t(
+          locale,
+          backHref === getEncryptedMessagesRoute()
+            ? "e2ee.conversation.back"
+            : "e2ee.conversation.backToMessages"
+        )}
         className={`tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-text-iron-300 tw-no-underline hover:tw-bg-iron-900 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${isCapacitor ? "" : "lg:tw-hidden"}`}
       >
         <ArrowLeftIcon aria-hidden="true" className="tw-size-5" />
