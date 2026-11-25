@@ -442,6 +442,8 @@ const WaveDropsAllInner: React.FC<WaveDropsAllInnerProps> = ({
 
 export const WaveDropsAllWithoutProvider = WaveDropsAllInner;
 
+// Standalone threads keep their divider local. The routed chat owns its
+// history-backed provider above the message list.
 const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   waveId,
   wave,

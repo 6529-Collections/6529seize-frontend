@@ -68,7 +68,7 @@ import type {
   ChatSubmitDropState,
 } from "./chatSubmitDrop.types";
 
-function parseDividerSerialNo(value: string | null): number | null {
+function parseWaveSerialNo(value: string | null): number | null {
   if (value === null || !/^\d+$/u.test(value)) return null;
   const serialNo = Number(value);
   return Number.isSafeInteger(serialNo) && serialNo > 0 ? serialNo : null;
@@ -268,11 +268,11 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const ownsWaveRoute =
     manageWaveRoute &&
     getActiveWaveIdFromUrl({ pathname, searchParams }) === wave.id;
-  const dropParam = ownsWaveRoute ? searchParams.get("serialNo") : null;
-  const parsedDrop = dropParam ? Number.parseInt(dropParam, 10) : Number.NaN;
-  const requestedScrollTarget = Number.isFinite(parsedDrop) ? parsedDrop : null;
+  const requestedScrollTarget = ownsWaveRoute
+    ? parseWaveSerialNo(searchParams.get("serialNo"))
+    : null;
   const requestedDivider = ownsWaveRoute
-    ? parseDividerSerialNo(searchParams.get("divider"))
+    ? parseWaveSerialNo(searchParams.get("divider"))
     : null;
   const waveDetailDivider = isDirectMessage
     ? null
@@ -281,11 +281,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     requestedDivider ??
     (firstUnreadSerialNo === undefined ? waveDetailDivider : firstUnreadSerialNo);
   const unreadMetadataReady =
-    isDirectMessage ||
-    dividerSerialNo !== null ||
-    (!unreadMetadataPending &&
-      (firstUnreadSerialNo === null ||
-        wave.metrics.your_unread_drops_count === 0));
+    isDirectMessage || dividerSerialNo !== null || !unreadMetadataPending;
   const canMarkRead = !fetchingProfile && unreadMetadataReady;
   useWaveChatReadRegistration(wave.id, ownsWaveRoute && canMarkRead);
 
@@ -354,7 +350,8 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     // removes the document-only feed wrappers and remounts the chat at latest.
     const previousState: unknown = globalThis.history.state;
     globalThis.history.replaceState(null, "", href + globalThis.location.hash);
-    // Preserve visit-specific tab metadata, keeping Next's updated state.
+    // The divider provider captures in a layout effect, before URL cleanup.
+    // Preserve the visit's metadata alongside Next's updated state.
     const currentState: unknown = globalThis.history.state;
     globalThis.history.replaceState(
       {

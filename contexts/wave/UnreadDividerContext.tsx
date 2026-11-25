@@ -34,7 +34,8 @@ interface UnreadDividerHistoryScope {
 const HISTORY_KEY = "waveChatUnreadDivider";
 const HISTORY_CHANGE_EVENT = "wave-chat-unread-divider-change";
 
-const getEmptyDivider = () => undefined;
+// React uses this same snapshot for server rendering and client hydration.
+const getServerDivider = () => undefined;
 const subscribeWithoutHistory = () => () => {};
 
 function subscribeToDividerHistory(onChange: () => void) {
@@ -47,7 +48,8 @@ function subscribeToDividerHistory(onChange: () => void) {
 }
 
 function readDividerHistory(waveId: string, viewerKey: string) {
-  const state: unknown = globalThis.history?.state;
+  if (typeof window === "undefined") return undefined;
+  const state: unknown = window.history.state;
   if (state === null || typeof state !== "object" || !(HISTORY_KEY in state)) {
     return undefined;
   }
@@ -77,6 +79,7 @@ function rememberDividerHistory(
   viewerKey: string,
   serialNo: number | null
 ) {
+  if (typeof window === "undefined") return;
   const { pathname, search } = window.location;
   if (
     getActiveWaveIdFromUrl({
@@ -105,7 +108,9 @@ export function UnreadDividerProvider({
   historyScope,
   children,
 }: UnreadDividerProviderProps) {
-  const [localDivider, setLocalDivider] = useState<number | null>();
+  const [localDivider, setLocalDivider] = useState<number | null | undefined>(
+    () => initialSerialNo ?? undefined
+  );
   const waveId = historyScope?.waveId;
   const viewerKey = historyScope?.viewerKey;
   const hasHistoryScope = waveId !== undefined && viewerKey !== undefined;
@@ -116,27 +121,22 @@ export function UnreadDividerProvider({
   const historyDivider = useSyncExternalStore(
     hasHistoryScope ? subscribeToDividerHistory : subscribeWithoutHistory,
     getHistoryDivider,
-    getEmptyDivider
+    getServerDivider
   );
   const savedDivider = hasHistoryScope ? historyDivider : localDivider;
   // Undefined means no position has arrived. Null means the reader cleared it.
   const unreadDividerSerialNo =
     savedDivider === undefined ? initialSerialNo : savedDivider;
 
-  if (
-    !hasHistoryScope &&
-    localDivider === undefined &&
-    initialSerialNo !== null
-  ) {
-    setLocalDivider(initialSerialNo);
-  }
-
   useLayoutEffect(() => {
-    if (
-      hasHistoryScope &&
-      initialSerialNo !== null &&
-      getHistoryDivider() === undefined
-    ) {
+    if (initialSerialNo === null) return;
+    if (!hasHistoryScope) {
+      setLocalDivider((previous) =>
+        previous === undefined ? initialSerialNo : previous
+      );
+      return;
+    }
+    if (getHistoryDivider() === undefined) {
       rememberDividerHistory(waveId, viewerKey, initialSerialNo);
     }
   }, [getHistoryDivider, hasHistoryScope, initialSerialNo, viewerKey, waveId]);
@@ -151,21 +151,17 @@ export function UnreadDividerProvider({
 
   const setUnreadDividerSerialNo = useCallback<SetUnreadDividerSerialNo>(
     (value) => {
+      const resolve = (current: number | null | undefined) => {
+        if (typeof value !== "function") return value;
+        return value(current === undefined ? initialSerialNo : current);
+      };
       if (!hasHistoryScope) {
-        setLocalDivider((current) =>
-          typeof value === "function"
-            ? value(current === undefined ? initialSerialNo : current)
-            : value
-        );
+        setLocalDivider(resolve);
         return;
       }
+      // An async drop action can finish after navigation or while Chat is hidden.
       if (!isMountedRef.current) return;
-      const current = getHistoryDivider();
-      const serialNo =
-        typeof value === "function"
-          ? value(current === undefined ? initialSerialNo : current)
-          : value;
-      rememberDividerHistory(waveId, viewerKey, serialNo);
+      rememberDividerHistory(waveId, viewerKey, resolve(getHistoryDivider()));
     },
     [getHistoryDivider, hasHistoryScope, initialSerialNo, viewerKey, waveId]
   );

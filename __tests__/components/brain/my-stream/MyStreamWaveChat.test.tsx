@@ -353,6 +353,46 @@ describe("MyStreamWaveChat", () => {
     }
   );
 
+  it("acknowledges Wave reads when settled metadata has a count but no position", () => {
+    const unreadWave = {
+      ...wave,
+      metrics: { ...wave.metrics, your_unread_drops_count: 135 },
+    };
+
+    renderWithProvider(
+      <MyStreamWaveChat
+        wave={unreadWave}
+        firstUnreadSerialNo={undefined}
+        viewMode="chat"
+        onDropClick={mockOnDropClick}
+      />
+    );
+
+    expect(screen.getByTestId("drops")).not.toHaveAttribute("data-divider");
+    expect(capturedPropsHolder.current.markReadEnabled).toBe(true);
+  });
+
+  it.each(["-5", "501x", "9007199254740992"])(
+    "ignores invalid serial targets such as %s",
+    (serialNo) => {
+      const params = new URLSearchParams({ serialNo });
+      searchParamsMock.get.mockImplementation((key: string) => params.get(key));
+      searchParamsMock.toString.mockReturnValue(params.toString());
+
+      renderWithProvider(
+        <MyStreamWaveChat
+          wave={wave}
+          firstUnreadSerialNo={null}
+          viewMode="chat"
+          onDropClick={mockOnDropClick}
+        />
+      );
+
+      expect(capturedPropsHolder.current.initialDrop).toBeNull();
+      expect(mockFetchAroundSerialNo).not.toHaveBeenCalled();
+    }
+  );
+
   it("uses the canonical DM unread count in the open chat", () => {
     mockDmUnreadConversation = { unread_count: 6 };
     const dmWave = {
@@ -466,6 +506,7 @@ describe("MyStreamWaveChat", () => {
       .spyOn(globalThis.history, "state", "get")
       .mockReturnValueOnce({
         waveTabSelection: { waveId: "10", value: "CHAT" },
+        waveChatUnreadDivider: { waveId: "10", viewerKey: "test", serialNo: 3 },
         __NA: true,
         __PRIVATE_NEXTJS_INTERNALS_TREE: "previous-tree",
       })
@@ -493,6 +534,7 @@ describe("MyStreamWaveChat", () => {
       expect(replaceMock).toHaveBeenLastCalledWith(
         {
           waveTabSelection: { waveId: "10", value: "CHAT" },
+        waveChatUnreadDivider: { waveId: "10", viewerKey: "test", serialNo: 3 },
           __NA: true,
           __PRIVATE_NEXTJS_INTERNALS_TREE: "updated-tree",
         },
