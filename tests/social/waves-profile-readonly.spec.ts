@@ -2129,7 +2129,9 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     if (await faq.count()) {
       await expect(faq).toBeAttached();
     } else {
-      await page.getByRole("main").locator("[data-wave-phone-more]").click();
+      const more = page.getByRole("main").locator("[data-wave-phone-more]");
+      if (testInfo.project.use.hasTouch) await more.tap();
+      else await more.click();
       const sections = page.getByRole("dialog", {
         name: "Wave sections",
         exact: true,

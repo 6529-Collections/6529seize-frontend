@@ -67,6 +67,7 @@ type Props = {
 };
 
 const PROFILE_PREFERENCES_BUTTON_KEY = "profilePreferences.button";
+const PROFILE_MOBILE_ONLY_CLASS = "lg:tw-hidden";
 const ABOUT_STATEMENT_TYPE: CicStatement["statement_type"] = STATEMENT_TYPE.BIO;
 
 type WebsiteAction = Readonly<{
@@ -310,7 +311,7 @@ function ProfileHeaderContent({
 
         {websiteAction ? (
           <div
-            className={`tw-mb-4 tw-flex tw-flex-wrap tw-items-center tw-gap-2 ${isApp ? "" : "lg:tw-hidden"}`}
+            className={`tw-mb-4 tw-flex tw-flex-wrap tw-items-center tw-gap-2 ${isApp ? "" : PROFILE_MOBILE_ONLY_CLASS}`}
           >
             <ButtonLink
               variant="secondary"
@@ -327,7 +328,7 @@ function ProfileHeaderContent({
         ) : null}
 
         {showSubscriptionStatus ? (
-          <div className={isApp ? "" : "lg:tw-hidden"}>
+          <div className={isApp ? "" : PROFILE_MOBILE_ONLY_CLASS}>
             <UserPageHeaderSubscriptionStatus
               profile={profile}
               layout="wide-row"
@@ -667,7 +668,14 @@ export default function UserPageHeaderClient({
     <UserPageHeaderEditProfileDesktop {...editProfileProps} />
   ) : null;
   const mobileEditProfileButton = canEdit ? (
-    <UserPageHeaderEditProfile {...editProfileProps} />
+    <>
+      <div className={isApp ? PROFILE_MOBILE_ONLY_CLASS : ""}>
+        <UserPageHeaderEditProfile {...editProfileProps} />
+      </div>
+      {isApp ? (
+        <div className="tw-hidden lg:tw-block">{editProfileButton}</div>
+      ) : null}
+    </>
   ) : null;
   const mobileOwnerControls =
     canEdit || canManageProfilePreferences ? (
@@ -695,7 +703,7 @@ export default function UserPageHeaderClient({
           />
           {mobileOwnerControls ? (
             <div
-              className={`tw-absolute tw-right-4 tw-top-3 tw-z-20 sm:tw-right-6 sm:tw-top-4 md:tw-right-8 ${isApp ? "" : "lg:tw-hidden"}`}
+              className={`tw-absolute tw-right-4 tw-top-3 tw-z-20 sm:tw-right-6 sm:tw-top-4 md:tw-right-8 ${isApp ? "" : PROFILE_MOBILE_ONLY_CLASS}`}
             >
               {mobileOwnerControls}
             </div>
