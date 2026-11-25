@@ -26,6 +26,7 @@ jest.mock("@/contexts/HeaderContext", () => ({
   useHeaderContext: () => ({ setHeaderRef: mockSetHeaderRef }),
 }));
 jest.mock("next/navigation", () => ({
+  useParams: () => ({}),
   usePathname: () => "/artwork-documentation",
   useSearchParams: () => new URLSearchParams(),
 }));

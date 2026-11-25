@@ -172,7 +172,7 @@ const USER_COLLECTED_STATS_MESSAGES = namespaceMessages(
 
 const USER_BRAIN_SIDEBAR_MESSAGES = objectMessages("user.brain.sidebar", {
   createdHeading: "Created Waves",
-  createdMobileHeading: "Created",
+  createdMobileHeading: "Created waves",
   recentlyActiveHeading: "Recently Active In",
   lastPost: "Last post {time}",
   noPostsByProfile: "No posts by this profile",
@@ -1489,6 +1489,7 @@ const FOLLOWERS_MESSAGES = objectMessages("followers", {
 } as const);
 
 const PROFILE_FOLLOW_MESSAGES = objectMessages("profile.follow", {
+  sendDirectMessage: "Send direct message",
   followBack: "Follow back",
   mutualStatus: "You follow each other",
   unfollow: "Unfollow",
@@ -5725,6 +5726,8 @@ export const EN_US_ROOT_MESSAGES = {
   ...WAVE_REP_DETAILS_MESSAGES,
   ...PROFILE_ACTIVITY_RATE_MESSAGES,
   "profileActivity.heading": "Activity Log",
+  "profileActivity.types": "Activity types",
+  "profileActivity.filterTypesLabel": "Filter activity types: {title}",
   "profileActivity.loading": "Loading activity log",
   "profileActivity.loadError": "Unable to load activity log.",
   "profileActivity.retry": "Retry",

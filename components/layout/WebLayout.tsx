@@ -2,7 +2,8 @@
 
 import { useEffect, useLayoutEffect, useMemo } from "react";
 import { commitWaveNavigationTransition } from "@/helpers/waves/wave-navigation-transition";
-import { usePathname } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
+import { isUserProfilePage } from "../user/layout/userTabs.config";
 import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
 import { getWaveIdFromPathname } from "@/helpers/navigation.helpers";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
@@ -34,6 +35,7 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
   } = useSidebarController();
   const { isRightSidebarOpen } = useSidebarState();
   const pathname = usePathname();
+  const params = useParams();
   const isPhoneWidth = useMediaQuery(PHONE_WAVES_LAYOUT_QUERY);
   useLayoutEffect(() => {
     if (isSmall && isPhoneWidth) {
@@ -43,7 +45,9 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
   const showSiteHeader =
     isSmall && !(isPhoneWidth && getWaveIdFromPathname(pathname));
   const smallWebOverflow =
-    pathname === "/the-memes" || /^\/the-memes\/\d+\/?$/.test(pathname)
+    pathname === "/the-memes" ||
+    /^\/the-memes\/\d+\/?$/.test(pathname) ||
+    isUserProfilePage(pathname, params["user"])
       ? "tw-overflow-x-clip"
       : "tw-overflow-auto";
 

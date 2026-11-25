@@ -9,6 +9,8 @@ import {
 } from "@/components/waves/dropComposer.types";
 
 interface WaveDropCreateProps {
+  readonly autoFocus?: boolean | undefined;
+  readonly onAutoFocusRoot?: ((root: HTMLElement | null) => void) | undefined;
   readonly wave: ApiWave;
   readonly onCancel?: (() => void) | undefined;
   readonly onSuccess: () => void;
@@ -27,6 +29,8 @@ interface WaveDropCreateProps {
 }
 
 export const WaveDropCreate: React.FC<WaveDropCreateProps> = ({
+  autoFocus = false,
+  onAutoFocusRoot,
   wave,
   onCancel,
   onSuccess,
@@ -88,6 +92,8 @@ export const WaveDropCreate: React.FC<WaveDropCreateProps> = ({
         </div>
       )}
       <PrivilegedDropCreator
+        autoFocus={autoFocus}
+        onAutoFocusRoot={onAutoFocusRoot}
         wave={wave}
         onCancelReplyQuote={() => {}}
         onDropAddedToQueue={() => {}}

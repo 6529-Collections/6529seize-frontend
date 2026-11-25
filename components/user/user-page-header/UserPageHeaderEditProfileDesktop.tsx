@@ -15,9 +15,10 @@ import {
   PROFILE_EDITOR_TOUCH_TARGETS_CLASS,
 } from "./user-page-header-surface";
 
-export default function UserPageHeaderEditProfileDesktop(
-  props: ProfileEditorProps
-) {
+export default function UserPageHeaderEditProfileDesktop({
+  onRestoreFocus,
+  ...props
+}: ProfileEditorProps & { readonly onRestoreFocus?: () => void }) {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -25,6 +26,7 @@ export default function UserPageHeaderEditProfileDesktop(
     <>
       <Button
         ref={triggerRef}
+        data-profile-edit-trigger
         variant="tertiary"
         size="sm"
         onClick={() => {
@@ -42,7 +44,9 @@ export default function UserPageHeaderEditProfileDesktop(
           {...props}
           onClose={() => {
             setIsOpen(false);
-            globalThis.requestAnimationFrame(() => triggerRef.current?.focus());
+            globalThis.requestAnimationFrame(
+              onRestoreFocus ?? (() => triggerRef.current?.focus())
+            );
           }}
         />
       )}

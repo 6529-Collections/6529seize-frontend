@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 import {
   STATS_SECTION_HEADING_CLASS,
   STATS_TABLE_CLASS,
+  STATS_TABLE_EMPTY_CLASS,
   STATS_TABLE_GROUP_START_ROW_CLASS,
   STATS_TABLE_HEADER_CELL_CLASS,
   STATS_TABLE_HEAD_CLASS,
@@ -415,7 +416,7 @@ function UserPageStatsCollectedMemes({
           </table>
         </UserPageStatsTableScroll>
       ) : (
-        <p className="tw-mb-0 tw-px-4 tw-py-5 tw-text-meta/5 tw-font-normal tw-text-iron-500">
+        <p className={STATS_TABLE_EMPTY_CLASS}>
           {t(locale, "user.collected.stats.details.tables.memesBySeasonEmpty")}
         </p>
       )}
