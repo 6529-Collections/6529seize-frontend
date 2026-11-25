@@ -498,6 +498,7 @@ export default function CreateWaveVoting({
               {waveType === ApiWaveType.Approve ? (
                 <>
                   <TimeWeightedVoting
+                    decisionEditor={isCompetition}
                     config={timeWeighted}
                     errorMessage={timeWeightedErrorMessage}
                     onChange={onTimeWeightedChange}
@@ -520,6 +521,7 @@ export default function CreateWaveVoting({
                   )}
 
                   <NegativeVotingToggle
+                    decisionEditor={isCompetition}
                     allowNegativeVotes={allowNegativeVotes}
                     onChange={onAllowNegativeVotesChange}
                     isDisabled={lockVotingCredits}
@@ -528,11 +530,13 @@ export default function CreateWaveVoting({
               ) : (
                 <>
                   <NegativeVotingToggle
+                    decisionEditor={isCompetition}
                     allowNegativeVotes={allowNegativeVotes}
                     onChange={onAllowNegativeVotesChange}
                     isDisabled={lockVotingCredits}
                   />
                   <TimeWeightedVoting
+                    decisionEditor={isCompetition}
                     config={timeWeighted}
                     errorMessage={timeWeightedErrorMessage}
                     onChange={onTimeWeightedChange}

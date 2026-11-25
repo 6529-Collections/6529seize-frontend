@@ -23,5 +23,29 @@ export const CREATE_WAVE_OPTION_STYLES = {
   content: "tw-relative tw-flex tw-min-w-0 tw-items-center tw-gap-4",
 } as const;
 
+const DEFAULT_OPTION_STYLES = {
+  ...CREATE_WAVE_OPTION_STYLES,
+  title: "tw-block tw-text-sm tw-font-medium",
+  description: "tw-text-xs tw-font-normal tw-leading-4",
+  selectedDescription: "tw-text-iron-300",
+  unselectedDescription: "tw-text-iron-400",
+} as const;
+
+const DECISION_EDITOR_OPTION_STYLES = {
+  ...DEFAULT_OPTION_STYLES,
+  title: "tw-block tw-text-[15px] tw-font-medium tw-leading-5 md:tw-text-sm",
+  description:
+    "tw-text-meta tw-font-normal tw-leading-[18px] md:tw-text-xs md:tw-leading-4",
+  selectedDescription: "tw-text-iron-400 md:tw-text-iron-300",
+  card: "tw-group tw-grid tw-min-w-0 tw-grid-cols-[56px_minmax(0,1fr)] tw-items-center tw-gap-3 tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-p-3 tw-transition-colors focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 motion-reduce:tw-transition-none md:tw-grid-cols-[72px_minmax(0,1fr)] md:tw-gap-4",
+  preview:
+    "tw-h-11 tw-w-14 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/70 tw-p-1 md:tw-h-14 md:tw-w-full md:tw-p-2",
+} as const;
+
+/** Decision setup has a compact phone layout; other forms retain their styles. */
+export function getCreateWaveOptionStyles(decisionEditor: boolean) {
+  return decisionEditor ? DECISION_EDITOR_OPTION_STYLES : DEFAULT_OPTION_STYLES;
+}
+
 export const CREATE_WAVE_FORM_CONTROL_SCOPE_STYLES =
   "[&_input]:tw-text-base sm:[&_input]:tw-text-sm [&_select]:tw-text-base sm:[&_select]:tw-text-sm [&_textarea]:tw-text-base sm:[&_textarea]:tw-text-sm [&_input:not([type=checkbox]):not([type=radio])]:!tw-transition [&_input:not([type=checkbox]):not([type=radio])]:!tw-duration-300 [&_input:not([type=checkbox]):not([type=radio])]:!tw-ease-out [&_select]:!tw-transition [&_select]:!tw-duration-300 [&_select]:!tw-ease-out [&_textarea]:!tw-transition [&_textarea]:!tw-duration-300 [&_textarea]:!tw-ease-out [&_input:not([type=checkbox]):not([type=radio]):focus]:!tw-border-primary-400 [&_input:not([type=checkbox]):not([type=radio]):focus]:!tw-ring-primary-400 [&_select:focus]:!tw-border-primary-400 [&_select:focus]:!tw-ring-primary-400 [&_textarea:focus]:!tw-border-primary-400 [&_textarea:focus]:!tw-ring-primary-400 desktop-hover:[&_input:not([type=checkbox]):not([type=radio]):hover:not(:focus)]:!tw-ring-white/15 desktop-hover:[&_select:hover:not(:focus)]:!tw-ring-white/15 desktop-hover:[&_textarea:hover:not(:focus)]:!tw-ring-white/15";

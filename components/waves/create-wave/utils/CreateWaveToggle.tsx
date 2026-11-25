@@ -3,6 +3,11 @@ interface CreateWaveToggleProps {
   readonly onChange: (enabled: boolean) => void;
   readonly label: string;
   readonly displayLabel?: boolean | undefined;
+  readonly variant?: "default" | "decision" | "decision-media";
+  readonly disabled?: boolean;
+  readonly id?: string;
+  readonly describedBy?: string;
+  readonly checkboxClassName?: string;
 }
 
 export default function CreateWaveToggle({
@@ -10,24 +15,51 @@ export default function CreateWaveToggle({
   onChange,
   label,
   displayLabel = false,
+  variant = "default",
+  disabled = false,
+  id,
+  describedBy,
+  checkboxClassName,
 }: CreateWaveToggleProps) {
+  const decisionEditor = variant !== "default";
+  const rowClasses = {
+    default: "tw-flex tw-min-h-6 tw-cursor-pointer tw-items-center tw-gap-2",
+    decision:
+      "tw-relative tw-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 md:tw-justify-start",
+    "decision-media":
+      "tw-relative tw-flex tw-min-h-8 tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 md:tw-min-h-10",
+  };
+  const labelClasses = {
+    default: "tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-300",
+    decision: "tw-text-sm tw-font-medium tw-text-iron-200",
+    "decision-media": "tw-min-w-0 tw-text-sm tw-font-medium tw-text-iron-300",
+  };
   return (
-    <div>
-      <label className="tw-flex tw-min-h-6 tw-cursor-pointer tw-items-center tw-gap-2">
+    <div className={variant === "decision-media" ? "tw-w-full" : undefined}>
+      <label className={rowClasses[variant]}>
         <input
+          id={id}
+          disabled={disabled}
+          aria-describedby={describedBy}
           type="checkbox"
-          role="switch"
-          className="tw-peer tw-sr-only"
+          role={decisionEditor ? undefined : "switch"}
+          className={
+            decisionEditor
+              ? `tw-peer max-md:tw-absolute max-md:tw-inset-0 max-md:tw-z-10 max-md:tw-m-0 max-md:tw-h-full max-md:tw-w-full max-md:tw-cursor-pointer max-md:tw-opacity-0 ${checkboxClassName ?? ""}`
+              : "tw-peer tw-sr-only"
+          }
           checked={enabled}
           onChange={(event) => onChange(event.target.checked)}
         />
-        {displayLabel && (
-          <span className="tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-300">
-            {label}
-          </span>
-        )}
+        {displayLabel && <span className={labelClasses[variant]}>{label}</span>}
         <span className="tw-sr-only">{!displayLabel ? label : ""}</span>
-        <span className="tw-flex tw-items-center">
+        <span
+          className={
+            decisionEditor
+              ? "tw-flex tw-shrink-0 tw-items-center peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-400 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-950 peer-disabled:tw-opacity-50 md:tw-hidden"
+              : "tw-flex tw-items-center"
+          }
+        >
           <span
             aria-hidden="true"
             className={`tw-rounded-full tw-bg-gradient-to-b tw-p-[1px] peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-500 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-950 ${

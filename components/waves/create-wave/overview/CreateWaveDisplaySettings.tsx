@@ -1,8 +1,9 @@
+import CreateWaveToggle from "../utils/CreateWaveToggle";
 import CommonAnimationHeight from "@/components/utils/animation/CommonAnimationHeight";
 import CreateWaveAdvancedSection from "@/components/waves/create-wave/utils/CreateWaveAdvancedSection";
 import {
   CREATE_WAVE_FORM_STYLES,
-  CREATE_WAVE_OPTION_STYLES,
+  getCreateWaveOptionStyles,
 } from "@/components/waves/create-wave/utils/createWaveFormStyles";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import {
@@ -64,44 +65,58 @@ const getApproveErrorMessage = (
 function ProposalCardAppearancePreview({
   mode,
   isSelected,
+  isCompetition,
 }: {
   readonly mode: CreateWaveProposalCardMode;
   readonly isSelected: boolean;
+  readonly isCompetition: boolean;
 }) {
+  const optionStyles = getCreateWaveOptionStyles(isCompetition);
   const accentClass = isSelected ? "tw-bg-primary-400/80" : "tw-bg-iron-650";
   const detailClass = isSelected ? "tw-bg-primary-400/30" : "tw-bg-iron-800";
+  const previewLineHeight = isCompetition ? "tw-h-0.5" : "tw-h-1 sm:tw-h-0.5";
   return (
-    <div aria-hidden="true" className={CREATE_WAVE_OPTION_STYLES.preview}>
+    <div aria-hidden="true" className={optionStyles.preview}>
       {mode === "standard" ? (
         <div className="tw-flex tw-h-full tw-flex-col tw-justify-center">
           <div className="tw-flex tw-items-center tw-gap-1.5">
             <span
-              className={`tw-size-3 tw-flex-shrink-0 tw-rounded-full sm:tw-size-1.5 ${accentClass}`}
+              className={`tw-flex-shrink-0 tw-rounded-full ${isCompetition ? "tw-size-1.5" : "tw-size-3 sm:tw-size-1.5"} ${accentClass}`}
             />
             <span
-              className={`tw-h-1 tw-w-10 tw-rounded-full sm:tw-w-6 ${accentClass}`}
+              className={`tw-h-1 tw-rounded-full ${isCompetition ? "tw-w-6" : "tw-w-10 sm:tw-w-6"} ${accentClass}`}
             />
           </div>
           <div className="tw-mt-1.5 tw-space-y-1">
             <span
-              className={`tw-block tw-h-1 tw-w-full tw-rounded-full sm:tw-h-0.5 ${detailClass}`}
+              className={`tw-block tw-w-full tw-rounded-full ${previewLineHeight} ${detailClass}`}
             />
-            <span className="tw-block tw-h-1 tw-w-11/12 tw-rounded-full tw-bg-iron-800 sm:tw-h-0.5" />
-            <span className="tw-block tw-h-1 tw-w-full tw-rounded-full tw-bg-iron-800 sm:tw-h-0.5" />
-            <span className="tw-block tw-h-1 tw-w-3/4 tw-rounded-full tw-bg-iron-800 sm:tw-h-0.5" />
-            <span className="tw-block tw-h-1 tw-w-5/6 tw-rounded-full tw-bg-iron-800 sm:tw-hidden" />
+            <span
+              className={`tw-block tw-w-11/12 tw-rounded-full tw-bg-iron-800 ${previewLineHeight}`}
+            />
+            <span
+              className={`tw-block tw-w-full tw-rounded-full tw-bg-iron-800 ${previewLineHeight}`}
+            />
+            <span
+              className={`tw-block tw-w-3/4 tw-rounded-full tw-bg-iron-800 ${previewLineHeight}`}
+            />
+            <span
+              className={`${isCompetition ? "tw-hidden" : "tw-block tw-h-1 tw-w-5/6 tw-rounded-full tw-bg-iron-800 sm:tw-hidden"}`}
+            />
           </div>
         </div>
       ) : (
         <div className="tw-flex tw-h-full tw-items-center tw-gap-2">
           <div className="tw-min-w-0 tw-flex-1">
             <span
-              className={`tw-block tw-h-1.5 tw-w-2/3 tw-rounded-full sm:tw-h-1 ${accentClass}`}
+              className={`tw-block tw-w-2/3 tw-rounded-full ${isCompetition ? "tw-h-1" : "tw-h-1.5 sm:tw-h-1"} ${accentClass}`}
             />
-            <span className="tw-mt-1.5 tw-block tw-h-1 tw-w-4/5 tw-rounded-full tw-bg-iron-800 sm:tw-h-0.5" />
+            <span
+              className={`tw-mt-1.5 tw-block tw-w-4/5 tw-rounded-full tw-bg-iron-800 ${previewLineHeight}`}
+            />
           </div>
           <span
-            className={`tw-size-8 tw-flex-shrink-0 tw-rounded-md sm:tw-size-6 ${detailClass}`}
+            className={`tw-flex-shrink-0 tw-rounded-md ${isCompetition ? "tw-size-6" : "tw-size-8 sm:tw-size-6"} ${detailClass}`}
           />
         </div>
       )}
@@ -115,13 +130,16 @@ export default function CreateWaveDisplaySettings({
   onChange,
   waveType,
   embedded = false,
+  isCompetition = false,
 }: {
   readonly display: CreateWaveDisplayConfig;
   readonly errors: readonly CREATE_WAVE_VALIDATION_ERROR[];
   readonly onChange: (display: CreateWaveDisplayConfig) => void;
   readonly waveType: ApiWaveType;
   readonly embedded?: boolean;
+  readonly isCompetition?: boolean;
 }) {
+  const optionStyles = getCreateWaveOptionStyles(isCompetition);
   const locale = useBrowserLocale();
   const showApproveTabLabels = waveType === ApiWaveType.Approve;
   const hasSubmissionLabelError = errors.includes(
@@ -213,24 +231,28 @@ export default function CreateWaveDisplaySettings({
     });
   };
 
-  const onProposalCardMediaThumbnailChange = (
-    event: ChangeEvent<HTMLInputElement>
-  ) => {
+  const onProposalCardMediaThumbnailChange = (checked: boolean) => {
     onChange({
       ...display,
       proposalCards: {
         ...proposalCards,
-        showMediaThumbnail: event.target.checked,
+        showMediaThumbnail: checked,
       },
     });
   };
 
+  const compactInputSize = isCompetition
+    ? "tw-h-9 tw-w-10 tw-px-1 tw-py-1 min-[361px]:tw-w-14 min-[361px]:tw-px-3 md:tw-w-20"
+    : "tw-h-9 tw-w-20 tw-px-3 tw-py-1";
+
   const inputClasses = ({
     hasError,
     hasValue,
+    compact = false,
   }: {
     readonly hasError: boolean;
     readonly hasValue: boolean;
+    readonly compact?: boolean;
   }) =>
     `${
       hasError
@@ -238,7 +260,7 @@ export default function CreateWaveDisplaySettings({
         : "tw-border-white/10 tw-caret-primary-400 tw-ring-white/10 desktop-hover:hover:tw-ring-white/15 desktop-hover:hover:focus:tw-ring-primary-400 focus:tw-border-primary-400 focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400"
     } ${
       hasValue ? "tw-text-primary-400 focus:tw-text-white" : "tw-text-white"
-    } tw-peer tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-base tw-font-medium tw-shadow-inner tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-bg-iron-900 focus:tw-outline-none sm:tw-text-sm`;
+    } tw-peer tw-form-input tw-block tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900 ${compact ? compactInputSize : "tw-w-full tw-px-4 tw-py-3"} tw-text-base tw-font-medium tw-shadow-inner tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-bg-iron-900 focus:tw-outline-none sm:tw-text-sm`;
 
   const floatingLabelClasses = (hasError = false) =>
     `tw-absolute tw-start-1 tw-top-2 tw-z-10 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-cursor-text tw-whitespace-nowrap tw-bg-iron-950 tw-px-2 tw-text-sm tw-font-normal tw-duration-300 ${
@@ -248,8 +270,12 @@ export default function CreateWaveDisplaySettings({
     }`;
 
   const content = (
-    <div className="tw-space-y-4 tw-p-5">
-      <h3 className={CREATE_WAVE_FORM_STYLES.sectionTitle}>
+    <div
+      className={`tw-space-y-4 tw-p-5 ${isCompetition ? "max-md:tw-p-4" : ""}`}
+    >
+      <h3
+        className={`${CREATE_WAVE_FORM_STYLES.sectionTitle} ${isCompetition ? "max-md:tw-mb-3 max-md:tw-text-[15px] max-md:tw-leading-5 max-md:tw-text-iron-50" : ""}`}
+      >
         {t(locale, "waves.create.overview.displaySettings")}
       </h3>
       <div className="tw-space-y-2">
@@ -310,10 +336,14 @@ export default function CreateWaveDisplaySettings({
         </CommonAnimationHeight>
       </div>
       <fieldset className="tw-m-0 tw-border-0 tw-p-0">
-        <legend className={CREATE_WAVE_FORM_STYLES.fieldLabel}>
+        <legend
+          className={`${CREATE_WAVE_FORM_STYLES.fieldLabel} ${isCompetition ? "max-md:tw-mb-3 max-md:tw-text-[15px] max-md:tw-leading-5 max-md:tw-text-iron-50" : ""}`}
+        >
           {t(locale, "waves.proposalCard.appearanceLabel")}
         </legend>
-        <div className={`tw-mt-3 ${CREATE_WAVE_OPTION_STYLES.grid}`}>
+        <div
+          className={`tw-mt-3 ${optionStyles.grid} ${isCompetition ? "max-md:tw-mt-0" : ""}`}
+        >
           {(["standard", "custom"] as const).map((mode) => {
             const isSelected = proposalCards.mode === mode;
             const isStandard = mode === "standard";
@@ -333,17 +363,16 @@ export default function CreateWaveDisplaySettings({
             return (
               <label
                 key={mode}
-                className={`${CREATE_WAVE_OPTION_STYLES.card} ${
-                  isSelected
-                    ? CREATE_WAVE_OPTION_STYLES.selected
-                    : CREATE_WAVE_OPTION_STYLES.unselected
+                className={`${optionStyles.card} ${
+                  isSelected ? optionStyles.selected : optionStyles.unselected
                 }`}
               >
                 <ProposalCardAppearancePreview
                   mode={mode}
                   isSelected={isSelected}
+                  isCompetition={isCompetition}
                 />
-                <div className={CREATE_WAVE_OPTION_STYLES.content}>
+                <div className={optionStyles.content}>
                   <input
                     id={mode}
                     type="radio"
@@ -368,7 +397,7 @@ export default function CreateWaveDisplaySettings({
                   </span>
                   <div className="tw-min-w-0 tw-flex-1 tw-whitespace-normal">
                     <span
-                      className={`tw-block tw-text-sm tw-font-medium ${
+                      className={`${optionStyles.title} ${
                         isSelected
                           ? "tw-text-primary-400"
                           : "tw-text-iron-300 group-hover:tw-text-white"
@@ -377,9 +406,7 @@ export default function CreateWaveDisplaySettings({
                       {title}
                     </span>
                     <p
-                      className={`tw-mb-0 tw-mt-1 tw-text-xs tw-font-normal tw-leading-4 ${
-                        isSelected ? "tw-text-iron-300" : "tw-text-iron-400"
-                      }`}
+                      className={`tw-mb-0 tw-mt-1 ${optionStyles.description} ${isSelected ? optionStyles.selectedDescription : optionStyles.unselectedDescription}`}
                     >
                       {description}
                     </p>
@@ -392,16 +419,36 @@ export default function CreateWaveDisplaySettings({
         <CommonAnimationHeight>
           {proposalCards.mode === "custom" ? (
             <div className="tw-pt-3">
-              <div className="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2">
-                <div className="tw-min-w-0 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/70 tw-p-4">
-                  <div className="tw-flex tw-min-h-10 tw-flex-wrap tw-items-center tw-gap-3">
+              <div
+                className={
+                  isCompetition
+                    ? "tw-grid tw-grid-cols-1 tw-gap-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/70 md:tw-grid-cols-2 md:tw-gap-3 md:tw-overflow-visible md:tw-rounded-none md:tw-border-0 md:tw-bg-transparent"
+                    : "tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2"
+                }
+              >
+                <div
+                  className={
+                    isCompetition
+                      ? "tw-min-w-0 md:tw-rounded-xl md:tw-border md:tw-border-solid md:tw-border-white/5 md:tw-bg-iron-950/70 md:tw-p-4"
+                      : "tw-min-w-0 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/70 tw-p-4"
+                  }
+                >
+                  <div
+                    className={
+                      isCompetition
+                        ? "tw-flex tw-min-h-[52px] tw-flex-nowrap tw-items-center tw-justify-between tw-gap-1 tw-px-3.5 tw-py-2.5 min-[361px]:tw-gap-3 md:tw-min-h-10 md:tw-flex-wrap md:tw-justify-normal md:tw-p-0"
+                        : "tw-flex tw-min-h-10 tw-flex-wrap tw-items-center tw-gap-3"
+                    }
+                  >
                     <label
                       htmlFor="create-wave-proposal-card-excerpt-length"
-                      className="tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-300"
+                      className={`tw-whitespace-nowrap tw-font-medium tw-text-iron-300 ${isCompetition ? "tw-text-meta min-[361px]:tw-text-sm" : "tw-text-sm"}`}
                     >
                       {t(locale, "waves.proposalCard.excerptLabel")}
                     </label>
-                    <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
+                    <div
+                      className={`tw-flex tw-flex-shrink-0 tw-items-center ${isCompetition ? "tw-gap-1 min-[361px]:tw-gap-2" : "tw-gap-2"}`}
+                    >
                       <input
                         id="create-wave-proposal-card-excerpt-length"
                         type="number"
@@ -421,10 +468,11 @@ export default function CreateWaveDisplaySettings({
                             ? proposalCardExcerptErrorId
                             : undefined
                         }
-                        className={`${inputClasses({
+                        className={inputClasses({
                           hasError: hasProposalCardExcerptError,
                           hasValue: false,
-                        })} !tw-h-9 !tw-w-20 !tw-px-3 !tw-py-1`}
+                          compact: true,
+                        })}
                       />
                       <span className="tw-text-xs tw-leading-4 tw-text-iron-400">
                         {t(locale, "waves.proposalCard.characters")}
@@ -445,21 +493,37 @@ export default function CreateWaveDisplaySettings({
                     ) : null}
                   </CommonAnimationHeight>
                 </div>
-                <label
-                  htmlFor="create-wave-proposal-card-media-thumbnail"
-                  className="tw-flex tw-min-h-10 tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/70 tw-p-4"
-                >
-                  <span className="tw-min-w-0 tw-text-sm tw-font-medium tw-text-iron-300">
-                    {t(locale, "waves.proposalCard.mediaLabel")}
-                  </span>
-                  <input
-                    id="create-wave-proposal-card-media-thumbnail"
-                    type="checkbox"
-                    checked={proposalCards.showMediaThumbnail}
-                    onChange={onProposalCardMediaThumbnailChange}
-                    className="tw-form-checkbox tw-size-5 tw-flex-shrink-0 tw-rounded tw-border tw-border-solid tw-border-iron-500 tw-bg-iron-950 tw-text-primary-500 focus:tw-ring-primary-400"
-                  />
-                </label>
+                {isCompetition ? (
+                  <div className="tw-min-h-[52px] tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-3.5 tw-py-2.5 md:tw-flex md:tw-items-center md:tw-rounded-xl md:tw-border md:tw-border-white/5 md:tw-bg-iron-950/70 md:tw-p-4">
+                    <CreateWaveToggle
+                      variant="decision-media"
+                      displayLabel
+                      id="create-wave-proposal-card-media-thumbnail"
+                      label={t(locale, "waves.proposalCard.mediaLabel")}
+                      enabled={proposalCards.showMediaThumbnail}
+                      onChange={onProposalCardMediaThumbnailChange}
+                      checkboxClassName="tw-form-checkbox tw-size-5 tw-flex-shrink-0 tw-rounded tw-border tw-border-solid tw-border-iron-500 tw-bg-iron-950 tw-text-primary-500 focus:tw-ring-primary-400 md:tw-order-last"
+                    />
+                  </div>
+                ) : (
+                  <label
+                    htmlFor="create-wave-proposal-card-media-thumbnail"
+                    className="tw-flex tw-min-h-10 tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/70 tw-p-4"
+                  >
+                    <span className="tw-min-w-0 tw-text-sm tw-font-medium tw-text-iron-300">
+                      {t(locale, "waves.proposalCard.mediaLabel")}
+                    </span>
+                    <input
+                      id="create-wave-proposal-card-media-thumbnail"
+                      type="checkbox"
+                      checked={proposalCards.showMediaThumbnail}
+                      onChange={(event) =>
+                        onProposalCardMediaThumbnailChange(event.target.checked)
+                      }
+                      className="tw-form-checkbox tw-size-5 tw-flex-shrink-0 tw-rounded tw-border tw-border-solid tw-border-iron-500 tw-bg-iron-950 tw-text-primary-500 focus:tw-ring-primary-400"
+                    />
+                  </label>
+                )}
               </div>
             </div>
           ) : null}

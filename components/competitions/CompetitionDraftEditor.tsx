@@ -23,6 +23,7 @@ import CreateWaveGroup from "@/components/waves/create-wave/groups/CreateWaveGro
 import WaveAccessPreview from "@/components/waves/WaveAccessPreview";
 import CreateWaveDisplaySettings from "@/components/waves/create-wave/overview/CreateWaveDisplaySettings";
 import RankScheduleModeSelector from "@/components/waves/create-wave/overview/type/RankScheduleModeSelector";
+import CreateWaveToggle from "@/components/waves/create-wave/utils/CreateWaveToggle";
 import CreateWaveDropdown from "@/components/waves/create-wave/utils/CreateWaveDropdown";
 import { CreateWaveStep, CreateWaveGroupConfigType } from "@/types/waves.types";
 import { getCreateWaveValidationErrors } from "@/helpers/waves/create-wave.validation";
@@ -59,6 +60,8 @@ import { CompetitionState, COMPETITION_BUTTON } from "./CompetitionState";
 
 const EDITOR_INPUT =
   "tw-block tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-base tw-text-iron-50 hover:tw-border-iron-600 focus:tw-border-primary-400 focus:tw-outline focus:tw-outline-2 focus:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 sm:tw-text-sm";
+const MOBILE_EDITOR_ACTION =
+  "max-md:tw-h-11 max-md:tw-flex-1 max-md:tw-rounded-xl max-md:tw-px-2 max-md:tw-text-[15px]";
 const subscribeHydration = () => () => undefined;
 
 const STEPS = [
@@ -431,22 +434,19 @@ function DraftForm({
           />
         </label>
         <div className="tw-space-y-2">
-          <label className="tw-flex tw-min-h-11 tw-items-center tw-gap-3 tw-text-sm tw-font-medium tw-text-iron-200">
-            <input
-              type="checkbox"
-              checked={anonymousSubmissions}
-              onChange={(event) =>
-                setAnonymousSubmissions(event.target.checked)
-              }
-              disabled={anonymityLocked}
-              aria-describedby="competition-anonymity-description"
-              className="tw-h-4 tw-w-4 tw-accent-primary-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-            />
-            {t(locale, "competitions.anonymousSubmissions")}
-          </label>
+          <CreateWaveToggle
+            variant="decision"
+            displayLabel
+            label={t(locale, "competitions.anonymousSubmissions")}
+            enabled={anonymousSubmissions}
+            onChange={setAnonymousSubmissions}
+            disabled={anonymityLocked}
+            describedBy="competition-anonymity-description"
+            checkboxClassName="tw-h-4 tw-w-4 tw-accent-primary-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+          />
           <p
             id="competition-anonymity-description"
-            className="tw-m-0 tw-text-sm tw-leading-5 tw-text-iron-400"
+            className="tw-m-0 tw-text-sm tw-leading-5 tw-text-iron-400 max-md:tw-mt-1"
           >
             {t(locale, "competitions.anonymityDescription")}
           </p>
@@ -461,6 +461,7 @@ function DraftForm({
           />
         )}
         <CreateWaveDisplaySettings
+          isCompetition
           waveType={config.overview.type}
           display={config.display}
           errors={controller.errors}
@@ -542,18 +543,34 @@ function DraftForm({
   return (
     <section
       ref={formRef}
-      className="tw-mx-auto tw-flex tw-w-full tw-max-w-[680px] tw-flex-1 tw-flex-col tw-gap-6"
+      className="tw-mx-auto tw-flex tw-w-full tw-max-w-[680px] tw-flex-1 tw-flex-col tw-gap-6 max-md:[&_:is(p,span).tw-font-normal.tw-text-iron-300]:tw-text-meta max-md:[&_:is(p,span).tw-font-normal.tw-text-iron-300]:tw-leading-[18px] max-md:[&_:is(p,span).tw-font-normal.tw-text-iron-300]:tw-text-iron-400 max-md:[&_:is(p,span,div,output).tw-text-iron-400]:tw-text-meta max-md:[&_:is(p,span,div,output).tw-text-iron-400]:tw-font-normal max-md:[&_:is(p,span,div,output).tw-text-iron-400]:tw-leading-[18px]"
       aria-labelledby="competition-draft-title"
       aria-describedby={rulesLockedNoteId(lockedRules)}
     >
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-        <h1
-          id="competition-draft-title"
-          className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-title tw-text-iron-50 sm:tw-text-[28px] sm:tw-leading-[34px]"
+      <div>
+        <div className="tw-flex tw-flex-col tw-gap-1 md:tw-flex-row md:tw-flex-wrap md:tw-items-center md:tw-justify-between md:tw-gap-3">
+          <h1
+            id="competition-draft-title"
+            className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-title tw-text-iron-50 sm:tw-text-[28px] sm:tw-leading-[34px]"
+          >
+            {t(locale, published ? "competitions.edit" : "competitions.new")}
+          </h1>
+          <output className="tw-text-meta tw-leading-[18px] tw-text-iron-500 md:tw-text-xs md:tw-text-iron-400">
+            {saveStatus}
+          </output>
+        </div>
+        <div
+          aria-hidden="true"
+          data-testid="competition-step-progress"
+          className="tw-mt-3 tw-flex tw-gap-1 md:tw-hidden"
         >
-          {t(locale, published ? "competitions.edit" : "competitions.new")}
-        </h1>
-        <output className="tw-text-xs tw-text-iron-400">{saveStatus}</output>
+          {steps.map((value, stepIndex) => (
+            <span
+              key={value}
+              className={`tw-h-[3px] tw-flex-1 tw-rounded-full ${stepIndex <= index ? "tw-bg-iron-100" : "tw-bg-white/10"}`}
+            />
+          ))}
+        </div>
       </div>
       <p className="tw-m-0 tw-text-sm tw-text-iron-400">
         {t(locale, "competitions.overlap")}
@@ -565,14 +582,15 @@ function DraftForm({
       >
         {content}
         {step === CreateWaveStep.VOTING && (
-          <label className="tw-mt-4 tw-flex tw-min-h-11 tw-items-center tw-gap-3 tw-text-sm tw-text-iron-200">
-            <input
-              type="checkbox"
-              checked={voteSignature}
-              onChange={(event) => setVoteSignature(event.target.checked)}
+          <div className="tw-mt-4 md:[&_label>span]:tw-font-normal">
+            <CreateWaveToggle
+              variant="decision"
+              displayLabel
+              enabled={voteSignature}
+              onChange={setVoteSignature}
+              label={t(locale, "competitions.requireVoteSignature")}
             />
-            {t(locale, "competitions.requireVoteSignature")}
-          </label>
+          </div>
         )}
       </fieldset>
       {visibleErrors.length > 0 && invalid && (
@@ -626,12 +644,12 @@ function DraftForm({
           {t(locale, "competitions.reload")}
         </button>
       )}
-      <div className="tw-sticky tw-bottom-0 tw-z-20 tw-mt-auto tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-black tw-py-4 tw-pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <div className="tw-sticky tw-bottom-0 tw-z-20 tw-mt-auto tw-flex tw-flex-nowrap tw-items-center tw-justify-end tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-bg-iron-950 tw-px-4 tw-pb-[max(0.75rem,env(safe-area-inset-bottom))] tw-pt-3 md:tw-flex-wrap md:tw-border-white/10 md:tw-bg-black md:tw-px-0 md:tw-py-4 md:tw-pb-[max(1rem,env(safe-area-inset-bottom))]">
         <Button
           type="button"
           variant="ghost"
           size="md"
-          className="tw-mr-auto"
+          className="tw-mr-auto max-md:tw-h-11 max-md:tw-rounded-xl max-md:tw-px-1"
           disabled={busy}
           onClick={() => {
             void close();
@@ -644,6 +662,7 @@ function DraftForm({
             type="button"
             variant="secondary"
             size="md"
+            className={MOBILE_EDITOR_ACTION}
             disabled={busy}
             onClick={() => move("backward")}
           >
@@ -655,6 +674,7 @@ function DraftForm({
             type="button"
             variant="action"
             size="md"
+            className={MOBILE_EDITOR_ACTION}
             disabled={busy}
             onClick={() => move("forward")}
           >
@@ -666,6 +686,7 @@ function DraftForm({
             type="button"
             variant="action"
             size="md"
+            className={MOBILE_EDITOR_ACTION}
             disabled={busy || displayedError === "conflict"}
             onClick={() => {
               void publish();
@@ -679,6 +700,7 @@ function DraftForm({
             type="button"
             variant="action"
             size="md"
+            className={MOBILE_EDITOR_ACTION}
             disabled={busy || displayedError === "conflict"}
             onClick={() => {
               if (validateVotingForSave()) void close(true);

@@ -6,12 +6,14 @@ interface NegativeVotingToggleProps {
   readonly allowNegativeVotes: boolean;
   readonly onChange: (allowNegativeVotes: boolean) => void;
   readonly isDisabled?: boolean | undefined;
+  readonly decisionEditor?: boolean;
 }
 
 export default function NegativeVotingToggle({
   allowNegativeVotes,
   onChange,
   isDisabled = true,
+  decisionEditor = false,
 }: NegativeVotingToggleProps) {
   const locale = useBrowserLocale();
   const handleToggle = () => {
@@ -32,10 +34,12 @@ export default function NegativeVotingToggle({
 
   return (
     <section className="tw-mt-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-6">
-      <div className="tw-flex tw-items-center tw-gap-3">
+      <div
+        className={`tw-flex tw-items-center tw-gap-3 ${decisionEditor ? "max-md:tw-min-h-11 max-md:tw-justify-between" : ""}`}
+      >
         <h3
           id="negative-votes-label"
-          className={CREATE_WAVE_FORM_STYLES.sectionTitle}
+          className={`${CREATE_WAVE_FORM_STYLES.sectionTitle} ${decisionEditor ? "max-md:tw-text-sm max-md:tw-font-medium max-md:tw-text-iron-200" : ""}`}
         >
           {t(locale, "waves.create.voting.negative.title")}
         </h3>

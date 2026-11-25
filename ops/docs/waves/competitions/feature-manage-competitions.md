@@ -36,6 +36,10 @@ The **Decisions** tab follows the selected decision's **Settings** tab and prece
    In the app, the setup editor keeps the focused name or description field
    above the keyboard and action bar. Closing the keyboard restores the editor's
    full height.
+   On phones, a segmented progress line follows the steps available for this
+   decision. On/off settings use switches, and the navigation actions stay at
+   the bottom while you scroll. **Text preview limit** and **Image on summary
+   card** share one group under **Appearance and labels**.
 3. Changes save automatically. Incomplete settings are retained on this device;
    valid drafts sync to the server and are visible to wave administrators.
    Opening a draft returns directly to the setup wizard with saved settings

@@ -3010,6 +3010,99 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  for (const surface of ["web", "app"] as const) {
+    for (const mode of ["scheduled", "perpetual", "approve"] as const) {
+      test(`keeps all decision editor steps and actions available for ${mode} on ${surface}`, async ({
+        page,
+        baseURL,
+      }, testInfo) => {
+        test.skip(
+          surface === "app" && testInfo.project.name !== "web-mobile-chromium",
+          "The app surface is a phone."
+        );
+        if (testInfo.project.name === "web-mobile-chromium")
+          await page.setViewportSize({ width: 320, height: 844 });
+        if (surface === "app")
+          await installSurfaceSimulation(
+            page.context(),
+            "capacitor-ios-sim",
+            baseURL
+          );
+        await installCompetitionApi(page);
+        await page.goto(`${ROOT}/new`);
+        await dismissNextDevTools(page);
+        const name = page.getByLabel("Decision name", { exact: true });
+        await name.fill(`Editor layout ${mode}`);
+        if (mode === "approve") {
+          await page
+            .getByRole("combobox", { name: "Decision type", exact: true })
+            .click();
+          await page
+            .getByRole("option", { name: "Approve", exact: true })
+            .click();
+        }
+        if (mode === "perpetual")
+          await page.getByText("Perpetual Ranking", { exact: true }).click();
+        const steps = mode === "perpetual" ? 7 : 8;
+        const editor = page.getByRole("region", {
+          name: "New decision",
+          exact: true,
+        });
+        for (const reopened of [false, true]) {
+          if (reopened) {
+            const issuesBadge = page.getByRole("button", {
+              name: "Collapse issues badge",
+              exact: true,
+            });
+            if (await issuesBadge.isVisible()) await issuesBadge.click();
+
+            await page
+              .getByRole("button", { name: "Close editor", exact: true })
+              .click();
+            await page.goto(`${ROOT}/draft`);
+            await expect(name).toHaveValue(`Editor layout ${mode}`);
+          }
+          for (let step = 0; step < steps; step++) {
+            await expect(
+              editor.getByTestId("competition-step-progress").locator("span")
+            ).toHaveCount(steps);
+            await expect(
+              editor
+                .getByTestId("competition-step-progress")
+                .locator(".tw-bg-iron-100")
+            ).toHaveCount(step + 1);
+            if (mode === "approve" && step === 4)
+              await page
+                .getByRole("textbox", {
+                  name: "Approval threshold",
+                  exact: true,
+                })
+                .fill("1");
+            const action = editor.getByRole("button", {
+              name: step === steps - 1 ? "Publish" : "Next",
+              exact: true,
+            });
+            await expect(action).toBeInViewport({ ratio: 1 });
+            if (step > 0)
+              await expect(
+                editor.getByRole("button", { name: "Previous", exact: true })
+              ).toBeInViewport({ ratio: 1 });
+            await expectNoHorizontalOverflow(page);
+            if (testInfo.project.name === "web-mobile-chromium")
+              await expect(action).toHaveCSS("height", "44px");
+            await editor.screenshot({
+              path: testInfo.outputPath(
+                `${reopened ? "reopened" : "new"}-${mode}-step-${step}.png`
+              ),
+              animations: "disabled",
+            });
+            if (step < steps - 1) await action.click();
+          }
+        }
+      });
+    }
+  }
+
   test("defaults anonymity off and includes an enabled choice in the saved competition draft", async ({
     page,
   }) => {
@@ -12963,34 +13056,81 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       name: "Proposal card appearance",
       exact: true,
     });
+    const mediaChoice = appearance.getByRole("checkbox", {
+      name: "Image on summary card",
+      exact: true,
+    });
+    await mediaChoice.scrollIntoViewIfNeeded();
+    await expect(mediaChoice).toBeInViewport({ ratio: 1 });
     await appearance.screenshot({
       animations: "disabled",
       path: testInfo.outputPath("compact-appearance-options.png"),
     });
     const viewport = page.viewportSize();
     if (!viewport) throw new Error("Viewport missing");
-    for (const width of app ? [viewport.width] : [viewport.width, 639, 640]) {
+    for (const width of app
+      ? [viewport.width, 320]
+      : [viewport.width, 639, 640, 768]) {
       await page.setViewportSize({ ...viewport, width });
       for (const options of [ranking, appearance]) {
         await expect
           .poll(() =>
-            options.getByRole("radio").evaluateAll(
-              (radios, stacked) =>
-                radios.every((radio) => {
-                  const preview = radio.closest("label")?.firstElementChild;
-                  const content = radio.parentElement;
-                  if (!preview || !content) return false;
-                  const previewBox = preview.getBoundingClientRect();
-                  const contentBox = content.getBoundingClientRect();
-                  return stacked
-                    ? previewBox.bottom <= contentBox.top &&
-                        Math.abs(previewBox.width - contentBox.width) <= 1
-                    : previewBox.right <= contentBox.left;
-                }),
-              width < 640
+            options.getByRole("radio").evaluateAll((radios) =>
+              radios.every((radio) => {
+                const preview = radio.closest("label")?.firstElementChild;
+                const content = radio.parentElement;
+                if (!preview || !content) return false;
+                const previewBox = preview.getBoundingClientRect();
+                const contentBox = content.getBoundingClientRect();
+                return previewBox.right <= contentBox.left;
+              })
             )
           )
           .toBe(true);
+      }
+      if (width < 768) {
+        for (const options of [ranking, appearance]) {
+          const previews = await options
+            .getByRole("radio")
+            .evaluateAll((radios) =>
+              radios.map((radio) => {
+                const preview = radio.closest("label")!.firstElementChild!;
+                const bounds = preview.getBoundingClientRect();
+                return { width: bounds.width, height: bounds.height };
+              })
+            );
+          expect(previews).toEqual([
+            { width: 56, height: 44 },
+            { width: 56, height: 44 },
+          ]);
+        }
+        await expect(
+          page.getByRole("button", { name: "Next", exact: true })
+        ).toHaveCSS("height", "44px");
+        const limit = page.getByRole("spinbutton", {
+          name: "Maximum proposal preview characters",
+          exact: true,
+        });
+        const image = page.getByRole("checkbox", {
+          name: "Image on summary card",
+          exact: true,
+        });
+        expect(
+          await limit.evaluate((element) => {
+            const row = element.parentElement!.parentElement!;
+            return row.scrollWidth - row.clientWidth;
+          })
+        ).toBeLessThanOrEqual(1);
+        if (width === 320)
+          await appearance.screenshot({
+            path: testInfo.outputPath("appearance-options-320px.png"),
+            animations: "disabled",
+          });
+        const firstRow = await limit.boundingBox();
+        const secondRow = await image.boundingBox();
+        expect(firstRow).not.toBeNull();
+        expect(secondRow).not.toBeNull();
+        expect(secondRow!.y).toBeGreaterThan(firstRow!.y + firstRow!.height);
       }
       await expectNoHorizontalOverflow(page);
       if (width === 639 || width === 640) {

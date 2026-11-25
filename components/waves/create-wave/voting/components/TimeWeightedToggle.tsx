@@ -6,6 +6,7 @@ import { CREATE_WAVE_FORM_STYLES } from "../../utils/createWaveFormStyles";
 interface TimeWeightedToggleProps {
   /** Whether time-weighted voting is enabled */
   readonly enabled: boolean;
+  readonly decisionEditor?: boolean;
   /** Handler called when the toggle is clicked */
   readonly onToggle: () => void;
 }
@@ -15,15 +16,17 @@ interface TimeWeightedToggleProps {
  * Displays the title, toggle switch, and description for time-weighted voting
  */
 const TimeWeightedToggle = memo(
-  ({ enabled, onToggle }: TimeWeightedToggleProps) => {
+  ({ enabled, onToggle, decisionEditor = false }: TimeWeightedToggleProps) => {
     const locale = useBrowserLocale();
 
     return (
       <>
-        <div className="tw-flex tw-items-center tw-gap-3">
+        <div
+          className={`tw-flex tw-items-center tw-gap-3 ${decisionEditor ? "max-md:tw-min-h-11 max-md:tw-justify-between" : ""}`}
+        >
           <h3
             id="time-weighted-title"
-            className={CREATE_WAVE_FORM_STYLES.sectionTitle}
+            className={`${CREATE_WAVE_FORM_STYLES.sectionTitle} ${decisionEditor ? "max-md:tw-text-sm max-md:tw-font-medium max-md:tw-text-iron-200" : ""}`}
           >
             {t(locale, "waves.create.voting.timeWeighted.title")}
           </h3>
