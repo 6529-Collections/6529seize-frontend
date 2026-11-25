@@ -488,6 +488,13 @@ describe("E2EE engine: read-state sync (D175, P60)", () => {
     await settle(world);
     expect(unread(phone, g)).toBe(0);
 
+    await laptop.engine.setConversationPinned(g, true);
+    // A pending pin survives a restart without a scheduled send. Keep
+    // retrying through the older group while the new one has no sibling.
+    contextOf(laptop).timers.cancel("read-sync:send");
+    await settle(world);
+    expect(phone.engine.getConversation(g)?.pinned).toBe(true);
+
     // Once the phone updates (replacing its last-resort KeyPackage), it is
     // added, at the first pass after the making of all those groups leaves
     // room in the hour's self-group claim budget; then both leave the old

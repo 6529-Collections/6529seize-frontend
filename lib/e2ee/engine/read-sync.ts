@@ -680,7 +680,10 @@ export class ReadSync implements ReadSyncHooks {
       if (
         this.enabled &&
         (this.state().unsent.length > 0 ||
-          (this.pins.hasPending() && this.pins.hasSibling(canonical))) &&
+          (this.pins.hasPending() &&
+            this.sendTargets().some((target) =>
+              this.pins.hasSibling(target)
+            ))) &&
         !this.ctx.timers.has(TIMER_SEND)
       ) {
         this.schedule(0);
