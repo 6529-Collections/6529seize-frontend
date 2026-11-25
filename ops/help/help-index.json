@@ -7643,7 +7643,7 @@
       "keywords": ["waves", "scroll", "unread", "jump", "serial", "divider"],
       "facts": [
         "Wave chat docs cover scroll behavior, unread dividers, unread controls, and serial jump navigation.",
-        "Unread controls help users return to new content in long wave threads.",
+        "Unread controls help users return to new content in long wave threads. The unread position stays available when you reload the same visit. Dismissing the arrow clears it for that visit. Use Mark as unread to set a new position.",
         "On iPhone and iPad, incoming drops can wait while you read older messages. Your own outgoing drops remain in the chat during sending and after saving, with or without images. Sending does not reveal incoming drops that are still waiting; use the bottom control to reveal them.",
         "Image drops keep their place in the conversation as processing finishes; completing an image does not move its message into older history.",
         "Serial jump navigation is separate from page-level browser navigation. Shared serial links load and highlight the selected accessible post. The one-time serialNo and divider parameters clear without reopening chat or jumping to newest messages. Scroll or use the bottom arrow to leave that position.",

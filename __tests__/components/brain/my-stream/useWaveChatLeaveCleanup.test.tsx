@@ -2,7 +2,6 @@ import { useWaveChatLeaveCleanup } from "@/components/brain/my-stream/useWaveCha
 import { act, renderHook, waitFor } from "@testing-library/react";
 
 type CleanupCallbacks = {
-  readonly setUnreadDividerSerialNo: jest.Mock;
   readonly removeWaveDeliveredNotifications: jest.Mock;
   readonly markWaveNotificationsRead: jest.Mock;
 };
@@ -25,7 +24,6 @@ const setDocumentVisibilityState = (state: DocumentVisibilityState) => {
 };
 
 const createCallbacks = (): CleanupCallbacks => ({
-  setUnreadDividerSerialNo: jest.fn(),
   removeWaveDeliveredNotifications: jest.fn().mockResolvedValue(undefined),
   markWaveNotificationsRead: jest.fn().mockResolvedValue(undefined),
 });
@@ -58,12 +56,10 @@ describe("useWaveChatLeaveCleanup", () => {
       await Promise.resolve();
     });
 
-    expect(firstCallbacks.setUnreadDividerSerialNo).not.toHaveBeenCalled();
     expect(
       firstCallbacks.removeWaveDeliveredNotifications
     ).not.toHaveBeenCalled();
     expect(firstCallbacks.markWaveNotificationsRead).not.toHaveBeenCalled();
-    expect(nextCallbacks.setUnreadDividerSerialNo).not.toHaveBeenCalled();
     expect(
       nextCallbacks.removeWaveDeliveredNotifications
     ).not.toHaveBeenCalled();
@@ -95,7 +91,6 @@ describe("useWaveChatLeaveCleanup", () => {
       });
     });
 
-    expect(latestCallbacks.setUnreadDividerSerialNo).toHaveBeenCalledWith(null);
     await waitFor(() => {
       expect(
         latestCallbacks.removeWaveDeliveredNotifications
@@ -105,7 +100,6 @@ describe("useWaveChatLeaveCleanup", () => {
         { queueIfBlocked: false }
       );
     });
-    expect(firstCallbacks.setUnreadDividerSerialNo).not.toHaveBeenCalled();
     expect(
       firstCallbacks.removeWaveDeliveredNotifications
     ).not.toHaveBeenCalled();
@@ -128,7 +122,6 @@ describe("useWaveChatLeaveCleanup", () => {
       });
     });
 
-    expect(callbacks.setUnreadDividerSerialNo).toHaveBeenCalledWith(null);
     await waitFor(() => {
       expect(callbacks.removeWaveDeliveredNotifications).toHaveBeenCalledWith(
         "wave-1"
@@ -210,7 +203,7 @@ describe("useWaveChatLeaveCleanup", () => {
     });
   });
 
-  it("clears the divider but skips notification calls when hidden", async () => {
+  it("skips notification cleanup when hidden", async () => {
     setDocumentVisibilityState("hidden");
     const callbacks = createCallbacks();
     const { unmount } = renderLeaveCleanupHook({
@@ -224,7 +217,6 @@ describe("useWaveChatLeaveCleanup", () => {
       await Promise.resolve();
     });
 
-    expect(callbacks.setUnreadDividerSerialNo).toHaveBeenCalledWith(null);
     expect(callbacks.removeWaveDeliveredNotifications).not.toHaveBeenCalled();
     expect(callbacks.markWaveNotificationsRead).not.toHaveBeenCalled();
   });
