@@ -128,7 +128,7 @@ export async function createLoginE2eeDevice(
         ...(existing?.retired && existing.trust
           ? { trust: existing.trust }
           : {}),
-        ...(existing?.retired && existing.conversationPins
+        ...(existing?.conversationPins
           ? { conversationPins: existing.conversationPins }
           : {}),
       };
