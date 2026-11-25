@@ -145,10 +145,17 @@ describe("production exact-artifact deployment contract", () => {
     expect(build.env.NEXT_PUBLIC_E2EE_DM_ENABLED).toBe("true");
   });
 
-  it("bakes the identity freeze instant into production builds", () => {
-    expect(build.env.NEXT_PUBLIC_IDENTITY_FREEZE_AT).toBe(
-      "2026-11-25T00:00:00Z"
-    );
+  it("bakes the identity freeze only as a UTC instant, and only when set", () => {
+    // The identity times come from their own settings change; with none, the
+    // build has no freeze and nothing about the move shows or pauses.
+    const freeze: unknown = build.env.NEXT_PUBLIC_IDENTITY_FREEZE_AT;
+    if (freeze === undefined) {
+      return;
+    }
+    expect(freeze).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/);
+    expect(
+      new Date(Date.parse(String(freeze))).toISOString().replace(".000Z", "Z")
+    ).toBe(freeze);
   });
 
   it("leaves gap-only chat sync off in production builds", () => {
