@@ -59,7 +59,9 @@ leave without submitting. Their desktop dialogs also offer Cancel.
   `Advanced Wave setup` remains available for custom Wave configuration.
 - **No Curation in the selected source:** `Create curation` opens the compact
   name flow, with curator criteria under `Advanced permissions`. Select
-  `Edit criteria` to adjust who can curate.
+  `Edit criteria` to adjust who can curate. On phones, name presets sit below
+  the input, and the `Advanced permissions` chevron expands the criteria and
+  member preview. The same arrangement applies when editing a Curation.
 - **Empty Curation:** `Add your first post` opens the post composer.
 - **Existing post:** from its Wave menu, choose `Manage curations`, then add or
   remove the post from an eligible named Curation.

@@ -107,6 +107,10 @@ Users can:
 
 ## Common Scenarios
 
+- On phones, the curation form places the name input above a horizontally
+  scrollable preset row. Tapping a preset fills and focuses the input. Criteria
+  appear above the eligible member count and `View members`, with `Edit criteria`
+  alongside them. The full-width `Create` or `Save` action stays in the footer.
 - Use decision Settings to inspect or change entry and voting groups.
 - Restrict a public wave and public Chat by assigning one Visibility group in
   one save.

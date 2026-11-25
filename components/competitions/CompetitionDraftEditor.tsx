@@ -55,13 +55,11 @@ import { useAuth } from "@/components/auth/Auth";
 import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import Button from "@/components/utils/button/Button";
+import CompetitionDraftEditorFooter from "./CompetitionDraftEditorFooter";
 import { CompetitionState, COMPETITION_BUTTON } from "./CompetitionState";
 
 const EDITOR_INPUT =
   "tw-block tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-base tw-text-iron-50 hover:tw-border-iron-600 focus:tw-border-primary-400 focus:tw-outline focus:tw-outline-2 focus:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 sm:tw-text-sm";
-const MOBILE_EDITOR_ACTION =
-  "max-md:tw-h-11 max-md:tw-flex-1 max-md:tw-rounded-xl max-md:tw-px-2 max-md:tw-text-[15px]";
 const subscribeHydration = () => () => undefined;
 
 const STEPS = [
@@ -644,72 +642,25 @@ function DraftForm({
           {t(locale, "competitions.reload")}
         </button>
       )}
-      <div className="tw-sticky tw-bottom-0 tw-z-20 tw-mt-auto tw-flex tw-flex-nowrap tw-items-center tw-justify-end tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-bg-iron-950 tw-px-4 tw-pb-[max(0.75rem,env(safe-area-inset-bottom))] tw-pt-3 md:tw-flex-wrap md:tw-border-white/10 md:tw-bg-black md:tw-px-0 md:tw-py-4 md:tw-pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <Button
-          type="button"
-          variant="ghost"
-          size="md"
-          className="tw-mr-auto max-md:tw-h-11 max-md:tw-rounded-xl max-md:tw-px-1"
-          disabled={busy}
-          onClick={() => {
-            void close();
-          }}
-        >
-          {t(locale, "competitions.cancelEdit")}
-        </Button>
-        {index > 0 && (
-          <Button
-            type="button"
-            variant="secondary"
-            size="md"
-            className={MOBILE_EDITOR_ACTION}
-            disabled={busy}
-            onClick={() => move("backward")}
-          >
-            {t(locale, "competitions.previous")}
-          </Button>
-        )}
-        {index < steps.length - 1 && (
-          <Button
-            type="button"
-            variant="action"
-            size="md"
-            className={MOBILE_EDITOR_ACTION}
-            disabled={busy}
-            onClick={() => move("forward")}
-          >
-            {t(locale, "competitions.next")}
-          </Button>
-        )}
-        {index === steps.length - 1 && !published && (
-          <Button
-            type="button"
-            variant="action"
-            size="md"
-            className={MOBILE_EDITOR_ACTION}
-            disabled={busy || displayedError === "conflict"}
-            onClick={() => {
-              void publish();
-            }}
-          >
-            {t(locale, "competitions.publish")}
-          </Button>
-        )}
-        {index === steps.length - 1 && published && (
-          <Button
-            type="button"
-            variant="action"
-            size="md"
-            className={MOBILE_EDITOR_ACTION}
-            disabled={busy || displayedError === "conflict"}
-            onClick={() => {
-              if (validateVotingForSave()) void close(true);
-            }}
-          >
-            {t(locale, "competitions.save")}
-          </Button>
-        )}
-      </div>
+      <CompetitionDraftEditorFooter
+        locale={locale}
+        index={index}
+        stepCount={steps.length}
+        published={published}
+        busy={busy}
+        conflict={displayedError === "conflict"}
+        onClose={() => {
+          void close();
+        }}
+        onPrevious={() => move("backward")}
+        onNext={() => move("forward")}
+        onPublish={() => {
+          void publish();
+        }}
+        onSave={() => {
+          if (validateVotingForSave()) void close(true);
+        }}
+      />
     </section>
   );
 }

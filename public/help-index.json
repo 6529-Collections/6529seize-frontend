@@ -2181,6 +2181,7 @@
         "The Profile Curation tab lives at /{user}/curations and presents the profile's selected named Curation.",
         "On an owner's empty Curation tab, Create Curation asks for a name and prepares the required access, public source Wave, Curation, and profile connection.",
         "Mobile Curation setup and edit sheets use Close or a downward header swipe to leave without submitting; desktop dialogs also offer Cancel.",
+        "When creating or editing a Curation in an existing source Wave on a phone, name presets sit below the input. Tapping a preset fills and focuses the input. Criteria appear above the member count and View members, with Edit criteria alongside. Profile Curation forms keep these permissions under a collapsible Advanced permissions row. Create or Save spans the footer.",
         "If the owner has no profile handle, Go to Identity opens /{user} so profile setup can be completed first.",
         "After guided setup succeeds, Add post opens automatically; if post creation succeeds but Curation membership fails, Retry add reuses the created post.",
         "Owners see Add post as the primary action. Manage separates profile display actions from Curation actions: Hide from profile keeps the Curation, source Wave, and posts, while Delete Curation deletes the Curation but keeps its source Wave and posts.",

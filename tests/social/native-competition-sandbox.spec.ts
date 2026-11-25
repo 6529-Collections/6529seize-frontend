@@ -14788,6 +14788,138 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await expect(checkbox).toBeChecked({ checked });
   });
 
+  test("keeps profile curation permissions collapsible in the shared editor", async ({
+    page,
+  }, testInfo) => {
+    await installCompetitionApi(page);
+    await page.route("**/api/profiles/*/wave", (route) =>
+      route.fulfill({
+        json: { profile_wave_id: WAVE, profile_curation_id: null },
+      })
+    );
+    await page.route(`**/api/waves/${WAVE}/curations`, (route) =>
+      route.fulfill({ json: [] })
+    );
+    await page.goto("/playwright/curations");
+    await page
+      .getByRole("button", { name: "Create curation", exact: true })
+      .click();
+    const curation = page.getByRole("dialog", {
+      name: "Create curation",
+      exact: true,
+    });
+    const name = curation.getByRole("textbox", { name: "Name", exact: true });
+    const preset = curation.getByRole("button", { name: "Art", exact: true });
+    await preset.click();
+    await expect(name).toHaveValue("Art");
+    await expect(name).toBeFocused();
+    const details = curation.locator("details");
+    const summary = details.locator("summary");
+    await expect(summary).toHaveText("Advanced permissions");
+    await expect(details).not.toHaveAttribute("open");
+    await summary.click();
+    await expect(details).toHaveAttribute("open", "");
+    const editCriteria = details.getByRole("button", {
+      name: "Edit criteria",
+      exact: true,
+    });
+    await expect(editCriteria).toBeVisible();
+    if (testInfo.project.name === "web-mobile-chromium") {
+      await expect(summary).toHaveCSS("min-height", "44px");
+      await expect(summary.locator("svg")).toBeVisible();
+      await expect(name).toHaveCSS("font-size", "16px");
+    } else {
+      await expect(summary.locator("svg")).toBeHidden();
+    }
+    await page.screenshot({
+      path: testInfo.outputPath("profile-curation-permissions.png"),
+      animations: "disabled",
+      style: "nextjs-portal { visibility: hidden; }",
+    });
+    await editCriteria.click();
+    const editor = page.getByRole(
+      testInfo.project.name === "web-mobile-chromium" ? "group" : "dialog",
+      { name: "Edit criteria", exact: true }
+    );
+    await expect(
+      editor.getByRole("button", { name: /^Identities/ })
+    ).toBeVisible();
+    await editor
+      .getByRole("button", { name: "Save changes", exact: true })
+      .click();
+    await expect(name).toHaveValue("Art");
+    await expect(details).toHaveAttribute("open", "");
+    await expect(details.getByText("1 explicitly included user")).toBeVisible();
+    await expect(
+      curation.getByRole("button", { name: "Create", exact: true })
+    ).toBeEnabled();
+    await expectNoHorizontalOverflow(page);
+  });
+
+  test("retains curation criteria loading, unavailable and retry states", async ({
+    page,
+  }) => {
+    await installCompetitionApi(page);
+    const groupId = "curation-retry-group";
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/groups/${composerSandboxConstants.previewGroupId}`
+    );
+    expect(response.ok()).toBe(true);
+    const group = await response.json();
+    let fail = true;
+    let release: () => void = () => undefined;
+    const ready = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await page.route(`**/api/groups/${groupId}`, async (route) => {
+      await ready;
+      await route.fulfill(
+        fail
+          ? { status: 404, json: { error: "Sandbox criteria unavailable" } }
+          : { json: { ...group, id: groupId } }
+      );
+    });
+    await page.route(`**/api/waves/${WAVE}/curations`, (route) =>
+      route.fulfill({
+        json: [
+          { id: "retry-art", name: "Art", wave_id: WAVE, group_id: groupId },
+        ],
+      })
+    );
+    await page.goto(`/waves/${WAVE}?tab=chat`);
+    await openWaveInformation(page);
+    await page.getByRole("tab", { name: "Configuration", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Configure Art", exact: true })
+      .click();
+    await page
+      .getByRole("menuitem", { name: "Edit Curation", exact: true })
+      .click();
+    const curation = page.getByRole("dialog", {
+      name: "Edit curation",
+      exact: true,
+    });
+    await expect(
+      curation.getByText("Loading group criteria…", { exact: true })
+    ).toBeVisible();
+    release();
+    await expect(
+      curation.getByText("Current criteria unavailable", { exact: true })
+    ).toBeVisible();
+    fail = false;
+    await curation
+      .getByRole("button", { name: "Try again", exact: true })
+      .click();
+    await expect(curation.getByText(/TDH at least 100/)).toBeVisible();
+    await expect(
+      curation.getByRole("textbox", { name: "Name", exact: true })
+    ).toHaveValue("Art");
+    await expect(
+      curation.getByRole("button", { name: "Save", exact: true })
+    ).toBeEnabled();
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("opens curator criteria inside one desktop dialog", async ({
     page,
   }, testInfo) => {
@@ -14805,6 +14937,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     const curation = page.getByRole("dialog", {
       name: "Create curation",
       exact: true,
+    });
+    await page.screenshot({
+      path: testInfo.outputPath("curation-create-desktop.png"),
+      animations: "disabled",
+      style: "nextjs-portal { visibility: hidden; }",
     });
     await curation
       .getByRole("textbox", { name: "Name", exact: true })
@@ -15508,6 +15645,26 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         sheet.getByRole("button", { name: "Cancel", exact: true })
       ).toHaveCount(0);
       const name = sheet.getByRole("textbox", { name: "Name", exact: true });
+      await expect(name).toHaveAttribute("maxlength", "50");
+      await expect(name).toHaveCSS("font-size", "16px");
+      await expect(name).toHaveCSS("height", "48px");
+      const preset = sheet.getByRole("button", { name: "Art", exact: true });
+      await expect(preset).toHaveCSS("height", "32px");
+      await expect(preset).toHaveCSS("font-size", "13px");
+      const nameBounds = await name.boundingBox();
+      const presetBounds = await preset.boundingBox();
+      expect(presetBounds!.y).toBeGreaterThanOrEqual(
+        nameBounds!.y + nameBounds!.height
+      );
+      await preset.click();
+      await expect(name).toHaveValue("Art");
+      await expect(name).toBeFocused();
+      await expect(preset).toHaveAttribute("aria-pressed", "true");
+      const createAction = sheet.getByRole("button", {
+        name: "Create",
+        exact: true,
+      });
+      await expect(createAction).toHaveCSS("height", "44px");
       await name.fill("Unsaved curation");
       await expect(
         sheet.getByRole("button", { name: "Create", exact: true })
@@ -15583,6 +15740,24 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         .click();
       await expect(name).toHaveValue("Unsaved curation");
       await expect(sheet.getByText("1 explicitly included user")).toBeVisible();
+      const criteriaLine = sheet.getByText("1 explicitly included user", {
+        exact: true,
+      });
+      await expect(criteriaLine).toHaveCSS("font-size", "14px");
+      await expect(criteriaLine).toHaveCSS("font-weight", "500");
+      const criteriaBounds = await criteriaLine.boundingBox();
+      const membersBounds = await sheet
+        .getByRole("button", { name: "View members", exact: true })
+        .boundingBox();
+      expect(membersBounds!.y).toBeGreaterThanOrEqual(
+        criteriaBounds!.y + criteriaBounds!.height
+      );
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath(`curation-compact-${surface}.png`),
+        animations: "disabled",
+        style: "nextjs-portal { visibility: hidden; }",
+      });
       await expect(
         sheet.getByRole("button", { name: "Create", exact: true })
       ).toBeEnabled();

@@ -12,7 +12,7 @@ export const CREATE_WAVE_FORM_STYLES = {
     "tw-m-0 tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-400",
 } as const;
 
-export const CREATE_WAVE_OPTION_STYLES = {
+const CREATE_WAVE_OPTION_STYLES = {
   grid: "tw-grid tw-grid-cols-1 tw-gap-3",
   card: "tw-group tw-grid tw-min-w-0 tw-grid-cols-1 tw-items-center tw-gap-3 tw-cursor-pointer tw-rounded-xl tw-border tw-border-solid tw-p-3 tw-transition-colors focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 motion-reduce:tw-transition-none sm:tw-grid-cols-[72px_minmax(0,1fr)] sm:tw-gap-4",
   selected: "tw-border-primary-500/60 tw-bg-primary-500/5",
