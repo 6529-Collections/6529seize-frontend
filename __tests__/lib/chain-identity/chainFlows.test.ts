@@ -94,6 +94,27 @@ describe("when the chain path runs", () => {
     expect(isChainIdentityActive(FREEZE + DAY)).toBe(false);
     expect(isRatingPaused(FREEZE + DAY)).toBe(true);
   });
+
+  it.each([
+    ["off", {}],
+    [
+      "on",
+      {
+        NEXT_PUBLIC_FEATURE_CHAIN_IDENTITY: "true",
+        NEXT_PUBLIC_CHAIN_GATEWAY_URL: "https://gateway.example.test",
+      },
+    ],
+  ])(
+    "keeps 6529.io's own path, never paused, with no freeze set and the flag %s",
+    (_flag, env) => {
+      setTestPublicEnv(env);
+      expect(isChainIdentityActive(FREEZE - DAY)).toBe(false);
+      expect(isChainIdentityActive(FREEZE + DAY)).toBe(false);
+      expect(isChainIdentityActive(FREEZE + 365 * DAY)).toBe(false);
+      expect(isRatingPaused(FREEZE + 1)).toBe(false);
+      expect(isRatingPaused(FREEZE + DAY)).toBe(false);
+    }
+  );
 });
 
 describe("chain state reads", () => {
