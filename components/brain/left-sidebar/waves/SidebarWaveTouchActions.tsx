@@ -1,5 +1,6 @@
 "use client";
 
+import "@/i18n/namespaces/wave-sidebar";
 import { useAuth } from "@/components/auth/Auth";
 import FontAwesomeSvgIcon from "@/components/common/icons/FontAwesomeSvgIcon";
 import { MOBILE_BOTTOM_NAV_DOCK_SELECTOR } from "@/helpers/navigation.helpers";

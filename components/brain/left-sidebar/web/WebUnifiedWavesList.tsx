@@ -1,4 +1,5 @@
 "use client";
+import "@/i18n/namespaces/wave-sidebar";
 import { useWaveSidebarSearch } from "@/hooks/useWaveSidebarSearch";
 import { useWaveDiscoveryViewer } from "@/hooks/useWaveDiscoveryViewer";
 import { useWaveSidebarCollection } from "@/hooks/useWaveSidebarCollection";

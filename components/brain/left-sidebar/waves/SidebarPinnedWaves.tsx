@@ -1,5 +1,6 @@
 "use client";
 
+import "@/i18n/namespaces/wave-sidebar";
 import {
   DndContext,
   KeyboardCode,

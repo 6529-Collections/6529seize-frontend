@@ -1,3 +1,4 @@
+import "@/i18n/namespaces/wave-sidebar";
 import { ArrowPathIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { useId } from "react";
 import IconButton from "@/components/utils/button/IconButton";

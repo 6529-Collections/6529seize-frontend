@@ -1,5 +1,6 @@
 "use client";
 
+import "@/i18n/namespaces/wave-sidebar";
 import IconButton from "@/components/utils/button/IconButton";
 
 import useDeviceInfo from "@/hooks/useDeviceInfo";

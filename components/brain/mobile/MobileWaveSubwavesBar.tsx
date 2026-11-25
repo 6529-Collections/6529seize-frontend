@@ -1,5 +1,6 @@
 "use client";
 
+import "@/i18n/namespaces/wave-sidebar";
 import { useCallback, useEffect, useMemo } from "react";
 import { TrophyIcon } from "@heroicons/react/24/solid";
 import { useAuth } from "@/components/auth/Auth";
