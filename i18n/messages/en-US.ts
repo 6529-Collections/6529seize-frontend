@@ -170,7 +170,7 @@ const USER_COLLECTED_STATS_MESSAGES = namespaceMessages(
 
 const USER_BRAIN_SIDEBAR_MESSAGES = objectMessages("user.brain.sidebar", {
   createdHeading: "Created Waves",
-  createdMobileHeading: "Created",
+  createdMobileHeading: "Created waves",
   recentlyActiveHeading: "Recently Active In",
   lastPost: "Last post {time}",
   noPostsByProfile: "No posts by this profile",

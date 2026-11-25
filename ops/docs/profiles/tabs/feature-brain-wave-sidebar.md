@@ -14,7 +14,7 @@ The same wave can appear in both lists. Direct-message waves are excluded.
 
 - Route: `/{user}/brain`
 - Desktop: right column beside the Brain feed
-- Mobile web and app: separate `Created` and `Recently Active In` rows above the
+- Mobile web and app: separate `Created waves` and `Recently Active In` rows above the
   Brain feed, each with its label above its own horizontal scroll area
 
 ## Entry Points
