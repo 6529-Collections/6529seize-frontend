@@ -6,7 +6,7 @@ The `Subscriptions` tab at `/{user}/subscriptions` separates the coverage answer
 from its supporting facts. On desktop the top zone contains the status, headline, brief
 message and owner actions. The quiet bottom zone contains Subscription balance,
 available mints, Forecast use and, when not already named by a deadline, Next
-unfunded. All dates keep their original full-year format and UTC deadline times.
+unfunded. Desktop dates keep their original full-year format and UTC deadline times.
 The original coverage-card gradient is unchanged.
 
 Owners see primary Top up for Action required and Running low.
@@ -191,10 +191,12 @@ On the web and Android, the tab appears after the page loads.
    Escape or Show Less returns to the three-row preview and restores focus.
    Below 768px, mobile web and the native app share a 48px leading column:
    artwork for Minting Today, or an unboxed short month above the day when
-   artwork is absent. Rows show
-   the name first and the existing date and season beneath it, with controls
-   centered beside both lines. Visitor status stacks above the quantity.
-   Full dates remain in the text. Show More and Show Less use full-width
+   artwork is absent. Rows show the name first and the weekday and season beneath
+   it, without repeating the month and day. Tap, hover or focus the date column
+   to read the full date, including its year. Minting Today keeps its existing
+   label and tooltip. Controls sit beside the name; owner controls move below
+   the metadata when the row is too narrow. Names wrap as needed. Visitor status
+   stacks above the quantity. Show More and Show Less use full-width
    disclosure rows at these widths.
    Each Meme title links to its `/the-memes/{id}` page, including before minting,
    with keyboard focus and the tab's existing link styling. Scheduled cards in
@@ -343,7 +345,10 @@ On the web and Android, the tab appears after the page loads.
   - shows first 3 rows by default; `Show More` expands the list
   - desktop rows lead with the UTC date, retaining the abbreviated weekday and
     month plus the year, or `Minting Today` with its existing tooltip
-  - below 768px, web and native rows show the name first and the date beneath it
+  - below 768px, web and native rows show the name first, with an unboxed
+    month/day column and the weekday and season beneath the name. The column
+    reveals the full date on hover, focus or tap. Minting Today retains its
+    artwork, label and tooltip
   - every row shows its season beside the date or `Minting Today`, including
     rows revealed by `Show More`; the section heading has no season label
   - on desktop the Meme number remains smaller below the date
@@ -504,11 +509,8 @@ processed; they do not automatically recover rows stranded by earlier failures.
 
 ## Limitations / Notes
 
-- The mobile layout's fixed columns can crowd long dates and season labels on
-  narrow phones, especially with an owner's quantity selector and switch.
-  Owner drop names can also crowd controls beside the leading artwork or date
-  column. The requested shared layout retains these columns. Profile UI
-  maintainers can revisit the spacing in a later design pass.
+- On phones, the year for a scheduled drop is available in the date column's
+  tooltip and accessible name. Desktop rows show the full date directly.
 
 ### Localization fallback debt
 

@@ -142,6 +142,7 @@ export default function MemeSubscriptionRow(
   const isCompact = props.variant === "compact";
   const locale = useBrowserLocale();
   const allocationDetailsId = useId();
+  const dateTooltipId = useId();
   const [showAllocationDetails, setShowAllocationDetails] = useState(false);
 
   const queryClient = useQueryClient();
@@ -527,27 +528,60 @@ export default function MemeSubscriptionRow(
     );
   }
 
+  const fullDate = props.date
+    ? formatUtcDate(locale, props.date.utcDay, {
+        weekday: "short",
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : "";
+
   return (
     <div className="tw-px-4 tw-py-4 md:tw-px-5 md:tw-py-5">
       <div className="tw-flex tw-min-w-0 tw-flex-row tw-items-start tw-gap-3 md:tw-items-center md:tw-gap-5">
         {props.artwork && <div className="tw-shrink-0">{props.artwork}</div>}
         {!props.artwork && props.date && (
-          <div
-            aria-hidden="true"
-            className="tw-flex tw-w-12 tw-flex-none tw-flex-col tw-items-center tw-justify-center tw-gap-px md:tw-hidden"
-          >
-            <span className="tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-3 tw-tracking-[0.06em] tw-text-iron-500">
-              {formatUtcDate(locale, props.date.utcDay, { month: "short" })}
-            </span>
-            <span className="tw-text-lg tw-font-semibold tw-leading-[22px] tw-text-iron-300">
-              {formatUtcDate(locale, props.date.utcDay, { day: "numeric" })}
-            </span>
-          </div>
+          <>
+            <button
+              type="button"
+              aria-label={fullDate}
+              aria-describedby={dateTooltipId}
+              data-tooltip-id={dateTooltipId}
+              className="tw-flex tw-min-h-11 tw-w-12 tw-flex-none tw-flex-col tw-items-center tw-justify-center tw-gap-px tw-rounded-sm tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 md:tw-hidden"
+            >
+              <span
+                aria-hidden="true"
+                className="tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-3 tw-tracking-[0.06em] tw-text-iron-500"
+              >
+                {formatUtcDate(locale, props.date.utcDay, { month: "short" })}
+              </span>
+              <span
+                aria-hidden="true"
+                className="tw-text-lg tw-font-semibold tw-leading-[22px] tw-text-iron-300"
+              >
+                {formatUtcDate(locale, props.date.utcDay, { day: "numeric" })}
+              </span>
+            </button>
+            <Tooltip
+              id={dateTooltipId}
+              openEvents={{ mouseover: true, focus: true, click: true }}
+              globalCloseEvents={{ escape: true, clickOutsideAnchor: true }}
+              place="top"
+              positionStrategy="fixed"
+              offset={8}
+              delayShow={250}
+              opacity={1}
+              style={TOOLTIP_STYLES}
+            >
+              {fullDate}
+            </Tooltip>
+          </>
         )}
-        <div className="tw-grid tw-w-full tw-min-w-0 tw-flex-1 tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-2 tw-gap-y-0.5 tw-@container/drop-row md:tw-w-auto md:tw-gap-x-5 md:tw-gap-y-1">
+        <div className="tw-grid tw-w-full tw-min-w-0 tw-flex-1 tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-2 tw-gap-y-1 tw-@container/drop-row md:tw-w-auto md:tw-gap-x-5">
           {props.date && (
             <div
-              className={`tw-col-start-1 tw-row-start-2 tw-flex tw-min-w-0 tw-flex-nowrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-whitespace-nowrap tw-text-meta tw-font-normal tw-tabular-nums tw-leading-[18px] tw-text-iron-400 md:tw-row-start-1 md:tw-flex-wrap md:tw-whitespace-normal md:tw-text-base md:tw-font-semibold md:tw-leading-6 ${subscribed ? "md:tw-text-iron-100" : ""}`}
+              className={`tw-col-span-full tw-col-start-1 tw-row-start-2 tw-flex tw-min-w-0 tw-flex-nowrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-whitespace-nowrap tw-text-meta tw-font-normal tw-tabular-nums tw-leading-[18px] tw-text-iron-400 md:tw-col-span-1 md:tw-row-start-1 md:tw-flex-wrap md:tw-whitespace-normal md:tw-text-base md:tw-font-semibold md:tw-leading-6 ${subscribed ? "md:tw-text-iron-100" : ""}`}
             >
               {props.minting_today ? (
                 <MintingTodayLabel
@@ -561,12 +595,14 @@ export default function MemeSubscriptionRow(
                   dateTime={props.date.utcDay.toISOString()}
                   className="tw-min-w-0 tw-break-words"
                 >
-                  {formatUtcDate(locale, props.date.utcDay, {
-                    weekday: "short",
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })}
+                  <span className="md:tw-hidden">
+                    {props.artwork
+                      ? fullDate
+                      : formatUtcDate(locale, props.date.utcDay, {
+                          weekday: "short",
+                        })}
+                  </span>
+                  <span className="tw-hidden md:tw-inline">{fullDate}</span>
                 </time>
               )}
               <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-text-meta tw-font-normal tw-text-iron-400">
@@ -580,19 +616,19 @@ export default function MemeSubscriptionRow(
             </div>
           )}
           <span
-            className={`tw-col-start-1 tw-row-start-1 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-1.5 tw-text-[15px] tw-font-medium tw-tabular-nums tw-leading-5 md:tw-row-start-2 md:tw-text-sm md:tw-font-normal md:tw-text-iron-400 ${subscribed ? "tw-text-iron-100" : "tw-text-iron-300"}`}
+            className={`tw-col-start-1 tw-row-start-1 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-1.5 tw-text-[15px] tw-font-medium tw-tabular-nums tw-leading-5 md:tw-row-start-2 md:tw-text-sm md:tw-font-normal md:tw-text-iron-400 ${subscribed ? "tw-text-iron-100" : "tw-text-iron-300"} ${props.readonly ? "" : "max-md:tw-col-span-full max-md:@[220px]/drop-row:tw-col-span-1"}`}
           >
             <Link
               href={`/the-memes/${props.subscription.token_id}`}
               prefetch={false}
-              className="tw-whitespace-nowrap tw-text-inherit tw-no-underline tw-decoration-white/20 tw-underline-offset-[3px] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-underline"
+              className="tw-whitespace-normal tw-break-words tw-text-inherit tw-no-underline tw-decoration-white/20 tw-underline-offset-[3px] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-underline md:tw-whitespace-nowrap"
             >
               {props.title} #
               {formatInteger(locale, props.subscription.token_id)}
             </Link>
           </span>
           <div
-            className={`tw-col-start-2 tw-row-span-2 tw-row-start-1 tw-flex tw-shrink-0 tw-items-center tw-justify-end tw-gap-2 tw-self-center tw-justify-self-end md:tw-gap-3 ${props.readonly ? "max-md:tw-flex-col-reverse max-md:tw-items-end max-md:tw-gap-0 max-md:tw-text-xs max-md:tw-leading-[17px]" : ""}`}
+            className={`tw-col-start-2 tw-row-start-1 tw-flex tw-shrink-0 tw-items-center tw-justify-end tw-gap-2 tw-self-center tw-justify-self-end md:tw-row-span-2 md:tw-gap-3 ${props.readonly ? "max-md:tw-flex-col-reverse max-md:tw-items-end max-md:tw-gap-0 max-md:tw-text-xs max-md:tw-leading-[17px]" : "max-md:tw-col-start-1 max-md:tw-row-start-3 max-md:tw-justify-self-start max-md:@[220px]/drop-row:tw-col-start-2 max-md:@[220px]/drop-row:tw-row-start-1 max-md:@[220px]/drop-row:tw-justify-self-end"}`}
           >
             {!props.readonly &&
               !props.controlsLoading &&
@@ -610,7 +646,7 @@ export default function MemeSubscriptionRow(
               aria-expanded={showAllocationDetails}
               aria-controls={allocationDetailsId}
               onClick={() => setShowAllocationDetails((open) => !open)}
-              className="tw-col-span-full tw-col-start-1 tw-row-start-3 tw-inline-flex tw-min-h-11 tw-w-full tw-items-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-text-sm tw-font-normal tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-100 md:tw-hidden"
+              className="tw-col-span-full tw-col-start-1 tw-inline-flex tw-min-h-11 tw-w-full tw-items-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-text-sm tw-font-normal tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-100 md:tw-hidden"
             >
               {t(locale, "subscriptions.upcoming.more")}
               <ChevronDownIcon

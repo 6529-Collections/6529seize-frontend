@@ -489,6 +489,7 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
               [
                 "not-set-up",
                 "no-selections",
+                "covered",
                 "zero-funded",
                 "one-funded",
                 "plan-top-up",
@@ -746,15 +747,23 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
             const dateRect = date.getBoundingClientRect();
             const metadataRect = metadata.getBoundingClientRect();
             const controlRect = controls!.getBoundingClientRect();
-            const name = link.parentElement!.getBoundingClientRect();
+            const name = link.getBoundingClientRect();
+            const gridRect = grid.getBoundingClientRect();
             return {
+              visibleDate: date.innerText,
+              dateTime: date.getAttribute("datetime"),
               dateHeight: dateRect.height,
               metadataTop: metadataRect.top,
               metadataBottom: metadataRect.bottom,
               nameTop: name.top,
+              nameBottom: name.bottom,
               nameRight: name.right,
               controlsCenter: controlRect.y + controlRect.height / 2,
+              controlsTop: controlRect.top,
               controlsLeft: controlRect.left,
+              controlsRight: controlRect.right,
+              metadataRight: metadataRect.right,
+              gridRight: gridRect.right,
               leadingWidth:
                 grid.previousElementSibling?.getBoundingClientRect().width ?? 0,
               nameFont: getComputedStyle(link.parentElement!).fontSize,
@@ -765,16 +774,58 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
           expect(geometry.nameFont).toBe("15px");
           expect(geometry.dateFont).toBe("13px");
           expect(geometry.dateHeight).toBeLessThanOrEqual(18);
-          // Both mobile surfaces keep the requested fixed columns and known
-          // narrow-date crowding, with controls centered across both lines.
           expect(geometry.nameTop).toBeLessThan(geometry.metadataTop);
-          expect(
-            Math.abs(
-              (geometry.nameTop + geometry.metadataBottom) / 2 -
-                geometry.controlsCenter
-            )
-          ).toBeLessThanOrEqual(1);
-          expect(geometry.nameRight).toBeLessThanOrEqual(geometry.controlsLeft);
+          expect(geometry.metadataRight).toBeLessThanOrEqual(
+            geometry.gridRight
+          );
+          expect(geometry.controlsRight).toBeLessThanOrEqual(
+            geometry.gridRight
+          );
+          if (geometry.controlsTop < geometry.metadataTop) {
+            expect(
+              Math.abs(
+                (geometry.nameTop + geometry.nameBottom) / 2 -
+                  geometry.controlsCenter
+              )
+            ).toBeLessThanOrEqual(1);
+            expect(geometry.nameRight).toBeLessThanOrEqual(
+              geometry.controlsLeft
+            );
+          } else {
+            expect(geometry.controlsTop).toBeGreaterThanOrEqual(
+              geometry.metadataBottom
+            );
+          }
+          const instant = new Date(geometry.dateTime!);
+          const fullDate = new Intl.DateTimeFormat("en-US", {
+            weekday: "short",
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            timeZone: "UTC",
+          }).format(instant);
+          expect(geometry.visibleDate).toBe(
+            new Intl.DateTimeFormat("en-US", {
+              weekday: "short",
+              timeZone: "UTC",
+            }).format(instant)
+          );
+          const dateColumn = upcoming.getByRole("button", {
+            name: fullDate,
+            exact: true,
+          });
+          await dateColumn.focus();
+          await expect(
+            page.getByRole("tooltip", { name: fullDate })
+          ).toBeVisible();
+          await page.keyboard.press("Escape");
+          await dateColumn.blur();
+          await dateColumn.tap();
+          await expect(
+            page.getByRole("tooltip", { name: fullDate })
+          ).toBeVisible();
+          await page.keyboard.press("Escape");
+          await dateColumn.blur();
           if (owner) {
             const mintingRow = upcoming
               .getByRole("button", { name: "Minting Today", exact: true })
@@ -820,6 +871,36 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
           await expect(
             upcoming.getByRole("button", { name: "Show More", exact: true })
           ).toBeVisible();
+        }
+        if (
+          phase !== "before" &&
+          name === "covered" &&
+          (page.viewportSize()?.width ?? 1280) >= 768
+        ) {
+          const drop = page.getByRole("link", {
+            name: "The Memes #576",
+            exact: true,
+          });
+          await expect(drop).toBeVisible();
+          const desktop = await drop.evaluate((link) => {
+            const grid = link.parentElement!.parentElement!;
+            const date = grid.querySelector("time")!;
+            return {
+              date: date.innerText,
+              dateFont: getComputedStyle(date).fontSize,
+              nameFont: getComputedStyle(link.parentElement!).fontSize,
+              dateFirst:
+                date.getBoundingClientRect().bottom <=
+                link.getBoundingClientRect().top,
+              leadingWidth:
+                grid.previousElementSibling?.getBoundingClientRect().width ?? 0,
+            };
+          });
+          expect(desktop.date).toMatch(/\d{4}/);
+          expect(desktop.dateFont).toBe("16px");
+          expect(desktop.nameFont).toBe("14px");
+          expect(desktop.dateFirst).toBe(true);
+          expect(desktop.leadingWidth).toBe(0);
         }
         if (
           phase !== "before" &&
