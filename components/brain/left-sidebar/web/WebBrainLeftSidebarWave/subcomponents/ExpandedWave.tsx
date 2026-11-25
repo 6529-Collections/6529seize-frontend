@@ -208,7 +208,7 @@ export const ExpandedWave = ({
         <div
           aria-hidden="true"
           data-testid="sidebar-wave-avatar"
-          className="tw-relative tw-flex-shrink-0"
+          className={`tw-relative tw-flex-shrink-0 ${onToggleSubwaves ? "touch-only:tw-self-center" : ""}`}
         >
           <WaveAvatar
             isActive={isActive}

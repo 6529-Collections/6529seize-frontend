@@ -51,6 +51,7 @@ export function SidebarSubwavesToggle({
 
   return (
     <IconButton
+      variant="ghost"
       size={24}
       shape="compact"
       aria-label={t(locale, labelKey, { waveName: parentWaveName })}
@@ -78,6 +79,7 @@ export function SidebarSubwavesToggle({
           {hasUnreadSubwaves && !isExpanded && (
             <span
               aria-hidden="true"
+              data-testid="sidebar-subwave-unread-dot"
               className="tw-pointer-events-none tw-absolute -tw-right-0.5 -tw-top-0.5 tw-size-1.5 tw-rounded-full tw-bg-primary-400"
             />
           )}
