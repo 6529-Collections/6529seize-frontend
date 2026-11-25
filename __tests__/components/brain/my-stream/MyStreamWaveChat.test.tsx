@@ -534,7 +534,7 @@ describe("MyStreamWaveChat", () => {
       expect(replaceMock).toHaveBeenLastCalledWith(
         {
           waveTabSelection: { waveId: "10", value: "CHAT" },
-        waveChatUnreadDivider: { waveId: "10", viewerKey: "test", serialNo: 3 },
+          waveChatUnreadDivider: { waveId: "10", viewerKey: "test", serialNo: 3 },
           __NA: true,
           __PRIVATE_NEXTJS_INTERNALS_TREE: "updated-tree",
         },

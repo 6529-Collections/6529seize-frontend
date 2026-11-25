@@ -36,7 +36,25 @@ const HISTORY_CHANGE_EVENT = "wave-chat-unread-divider-change";
 
 // React uses this same snapshot for server rendering and client hydration.
 const getServerDivider = () => undefined;
-const subscribeWithoutHistory = () => () => {};
+
+function createLocalDividerStore() {
+  let serialNo: number | null | undefined;
+  const listeners = new Set<() => void>();
+  return {
+    get: () => serialNo,
+    set(nextSerialNo: number | null) {
+      if (serialNo === nextSerialNo) return;
+      serialNo = nextSerialNo;
+      listeners.forEach((listener) => listener());
+    },
+    subscribe(listener: () => void) {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+  };
+}
 
 function subscribeToDividerHistory(onChange: () => void) {
   window.addEventListener("popstate", onChange);
@@ -108,9 +126,7 @@ export function UnreadDividerProvider({
   historyScope,
   children,
 }: UnreadDividerProviderProps) {
-  const [localDivider, setLocalDivider] = useState<number | null | undefined>(
-    () => initialSerialNo ?? undefined
-  );
+  const [localStore] = useState(createLocalDividerStore);
   const waveId = historyScope?.waveId;
   const viewerKey = historyScope?.viewerKey;
   const hasHistoryScope = waveId !== undefined && viewerKey !== undefined;
@@ -118,28 +134,26 @@ export function UnreadDividerProvider({
     () => (hasHistoryScope ? readDividerHistory(waveId, viewerKey) : undefined),
     [hasHistoryScope, viewerKey, waveId]
   );
-  const historyDivider = useSyncExternalStore(
-    hasHistoryScope ? subscribeToDividerHistory : subscribeWithoutHistory,
-    getHistoryDivider,
+  const getDivider = hasHistoryScope ? getHistoryDivider : localStore.get;
+  const savedDivider = useSyncExternalStore(
+    hasHistoryScope ? subscribeToDividerHistory : localStore.subscribe,
+    getDivider,
     getServerDivider
   );
-  const savedDivider = hasHistoryScope ? historyDivider : localDivider;
   // Undefined means no position has arrived. Null means the reader cleared it.
   const unreadDividerSerialNo =
     savedDivider === undefined ? initialSerialNo : savedDivider;
 
-  useLayoutEffect(() => {
-    if (initialSerialNo === null) return;
-    if (!hasHistoryScope) {
-      setLocalDivider((previous) =>
-        previous === undefined ? initialSerialNo : previous
-      );
-      return;
-    }
-    if (getHistoryDivider() === undefined) {
-      rememberDividerHistory(waveId, viewerKey, initialSerialNo);
-    }
-  }, [getHistoryDivider, hasHistoryScope, initialSerialNo, viewerKey, waveId]);
+  const rememberDivider = useCallback(
+    (serialNo: number | null) => {
+      if (hasHistoryScope) {
+        rememberDividerHistory(waveId, viewerKey, serialNo);
+      } else {
+        localStore.set(serialNo);
+      }
+    },
+    [hasHistoryScope, localStore, viewerKey, waveId]
+  );
 
   const isMountedRef = useRef(false);
   useLayoutEffect(() => {
@@ -149,21 +163,24 @@ export function UnreadDividerProvider({
     };
   }, []);
 
+  useLayoutEffect(() => {
+    if (initialSerialNo !== null && getDivider() === undefined) {
+      rememberDivider(initialSerialNo);
+    }
+  }, [getDivider, initialSerialNo, rememberDivider]);
+
   const setUnreadDividerSerialNo = useCallback<SetUnreadDividerSerialNo>(
     (value) => {
-      const resolve = (current: number | null | undefined) => {
-        if (typeof value !== "function") return value;
-        return value(current === undefined ? initialSerialNo : current);
-      };
-      if (!hasHistoryScope) {
-        setLocalDivider(resolve);
-        return;
-      }
       // An async drop action can finish after navigation or while Chat is hidden.
       if (!isMountedRef.current) return;
-      rememberDividerHistory(waveId, viewerKey, resolve(getHistoryDivider()));
+      if (typeof value !== "function") {
+        rememberDivider(value);
+        return;
+      }
+      const previous = getDivider();
+      rememberDivider(value(previous === undefined ? initialSerialNo : previous));
     },
-    [getHistoryDivider, hasHistoryScope, initialSerialNo, viewerKey, waveId]
+    [getDivider, initialSerialNo, rememberDivider]
   );
 
   const value = useMemo(
