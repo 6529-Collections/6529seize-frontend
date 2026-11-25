@@ -1162,3 +1162,6 @@ its existing filter visibility while fetching.
 Primary navigation knowledge includes the shared Join 6529 / Validator slot: newcomers
 see Join, signed-in profiles see Validator, and unresolved sessions reserve the
 slot across desktop, mobile web, native menus, and page search.
+
+The Wave list navigation record describes paired phone conversation entry and
+Back slides, including the complete header, a stationary list and Reduced Motion.

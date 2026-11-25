@@ -76,8 +76,39 @@ html[data-wave-navigation-content-pending]::view-transition-new(
 }
 
 /* Chevron Back captures the complete phone page; the destination stays still. */
-html[data-wave-navigation-transition="chevron-back"]::view-transition {
+html[data-wave-navigation-transition="chevron-back"]::view-transition,
+html[data-wave-navigation-transition="conversation-entry"]::view-transition {
   pointer-events: none;
+}
+
+/* Keep the list in the root snapshot while the complete conversation enters. */
+html[data-wave-navigation-transition="conversation-entry"]::view-transition-old(
+    root
+  ) {
+  display: block;
+  mix-blend-mode: normal;
+  animation: none;
+}
+
+html[data-wave-navigation-transition="conversation-entry"]::view-transition-new(
+    root
+  ) {
+  display: none;
+}
+
+html[data-wave-navigation-transition="conversation-entry"]::view-transition-new(
+    wave-navigation
+  ) {
+  animation: wave-conversation-enter 260ms cubic-bezier(0.25, 0, 0.25, 1) both;
+}
+
+@keyframes wave-conversation-enter {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 html[data-wave-navigation-transition="chevron-back"]::view-transition-old(

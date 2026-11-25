@@ -1328,6 +1328,129 @@ test.describe("phone chevron Back", () => {
     ["ios", "/messages"],
     ["web", "/messages"],
   ] as const) {
+    test(`phone ${surface} opens ${destination} with the complete conversation sliding over its list`, async ({
+      context,
+      page,
+      baseURL,
+    }, testInfo) => {
+      test.skip(
+        !["web-mobile-chromium", "web-desktop-webkit"].includes(
+          testInfo.project.name
+        ),
+        "Phone entry is checked in Chromium and WebKit with touch input."
+      );
+      if (surface === "ios")
+        await installSurfaceSimulation(context, "capacitor-ios-sim", baseURL);
+      await hideNextDevOverlay(context);
+      await installMessageFixture(page, baseURL);
+      const name =
+        destination === "/waves"
+          ? /Local Composer Sandbox Wave/u
+          : /Sandbox Direct Message/u;
+      const conversation = `${destination}/${destination === "/waves" ? WAVE : DM}`;
+      await page.goto(conversation, { waitUntil: "domcontentloaded" });
+      await expect(
+        page.getByRole("textbox", { name: "Write a message" }).last()
+      ).toBeVisible({
+        timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+      });
+      await page.getByRole("button", { name: /^(Back|Go back)$/u }).tap();
+      await expect(page).toHaveURL(new RegExp(`${destination}$`, "u"));
+      const row = page.getByRole("link", { name }).first();
+      await expect(row).toBeVisible();
+      await page.evaluate(() => {
+        const root = document.documentElement;
+        const start = document.startViewTransition.bind(document);
+        document.startViewTransition = (...args) => {
+          const transition = start(...args);
+          if (
+            root.dataset["waveNavigationTransition"] === "conversation-entry"
+          ) {
+            void transition.ready.then(
+              () => {
+                for (const animation of document.getAnimations()) {
+                  if (
+                    animation.effect instanceof KeyframeEffect &&
+                    animation.effect.pseudoElement?.includes("wave-navigation")
+                  ) {
+                    animation.pause();
+                    animation.currentTime = 100;
+                  }
+                }
+                const incoming = getComputedStyle(
+                  root,
+                  "::view-transition-new(wave-navigation)"
+                );
+                const list = getComputedStyle(
+                  root,
+                  "::view-transition-old(root)"
+                );
+                const captured = document.querySelector<HTMLElement>(
+                  '[style*="view-transition-name: wave-navigation"]'
+                );
+                const back = Array.from(
+                  document.querySelectorAll("button")
+                ).find(
+                  (button) =>
+                    ["Back", "Go back"].includes(
+                      button.getAttribute("aria-label") ?? ""
+                    ) && button.getBoundingClientRect().width > 0
+                );
+                root.dataset["testConversationEntry"] = JSON.stringify({
+                  x: new DOMMatrix(incoming.transform).m41,
+                  listDisplay: list.display,
+                  listOpacity: Number(list.opacity),
+                  listAnimation: list.animationName,
+                  includesHeader: Boolean(back && captured?.contains(back)),
+                });
+              },
+              () => {}
+            );
+          }
+          return transition;
+        };
+      });
+      await row.tap();
+      await expect(page).toHaveURL(new RegExp(`${conversation}$`, "u"));
+      const root = page.locator("html");
+      await expect(root).toHaveAttribute(
+        "data-test-conversation-entry",
+        /"x":/u
+      );
+      const entry = JSON.parse(
+        (await root.getAttribute("data-test-conversation-entry")) ?? "null"
+      ) as {
+        x: number;
+        listDisplay: string;
+        listOpacity: number;
+        listAnimation: string;
+        includesHeader: boolean;
+      };
+      expect(entry.x).toBeGreaterThan(0);
+      expect(entry.x).toBeLessThanOrEqual(412);
+      expect(entry).toMatchObject({
+        listDisplay: "block",
+        listOpacity: 1,
+        listAnimation: "none",
+        includesHeader: true,
+      });
+      await page.screenshot({
+        path: testInfo.outputPath("conversation-entering.png"),
+      });
+      await page.evaluate(() => {
+        for (const animation of document.getAnimations()) {
+          if (
+            animation.effect instanceof KeyframeEffect &&
+            animation.effect.pseudoElement?.includes("wave-navigation")
+          )
+            animation.finish();
+        }
+      });
+      await expect(root).not.toHaveAttribute("data-wave-navigation-transition");
+      await expectNoHorizontalOverflow(page);
+      await expectNoUnsafeSandboxMutations(baseURL);
+    });
+
     test(`phone ${surface} chevron Back slides the whole page over ${destination}`, async ({
       context,
       page,

@@ -101,6 +101,7 @@ swipe return to the feed at the saved reading position.
 - On iPhone and phone web, tapping Back from a wave or direct message slides
   the complete conversation, including its header, to the right. The Waves
   list, Messages list, or encrypted inbox stays still as it is revealed.
+  Opening a conversation from its list pairs this with a slide in from the right.
   Reduced Motion skips this slide. A new interaction stops the slide, and
   browser Back follows its own history target. Returns to Profile Waves Feed
   keep their own transition.

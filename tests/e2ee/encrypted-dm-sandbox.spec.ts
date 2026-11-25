@@ -112,13 +112,21 @@ async function tapEncryptedBackAndExpectSlide(page: Page) {
     const start = document.startViewTransition.bind(document);
     document.startViewTransition = (update) => {
       const transition = start(update);
-      if (root.dataset["waveNavigationTransition"] === "chevron-back") {
+      const entering =
+        root.dataset["waveNavigationTransition"] === "conversation-entry";
+      if (
+        root.dataset["waveNavigationTransition"] === "chevron-back" ||
+        entering
+      ) {
+        const marker = entering
+          ? "testEncryptedEntrySlide"
+          : "testEncryptedBackSlide";
         void transition.ready.then(
           () => {
-            root.dataset["testEncryptedBackSlide"] = "ready";
+            root.dataset[marker] = "ready";
           },
           () => {
-            root.dataset["testEncryptedBackSlide"] = "skipped";
+            root.dataset[marker] = "skipped";
           }
         );
       }
@@ -571,6 +579,18 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     await expect(bobRow).toBeVisible();
     await tapEncryptedBackAndExpectSlide(bob.page);
     await expect(conversationListRow(bob.page, "alice")).toBeVisible();
+    await bobRow.tap();
+    await expect(alice.page.locator("html")).toHaveAttribute(
+      "data-test-encrypted-entry-slide",
+      "ready"
+    );
+    await expectMessage(alice.page, incoming);
+    await conversationListRow(bob.page, "alice").tap();
+    await expect(bob.page.locator("html")).toHaveAttribute(
+      "data-test-encrypted-entry-slide",
+      "ready"
+    );
+    await expectMessage(bob.page, incoming);
     expect(
       await alice.page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth

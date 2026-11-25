@@ -5,6 +5,7 @@ import {
   consumeWaveSwipeHandoff,
   runWaveNavigationTransition,
   runPhoneChevronBackTransition,
+  runPhoneConversationEntryTransition,
   skipWaveNavigationTransition,
 } from "@/helpers/waves/wave-navigation-transition";
 
@@ -34,6 +35,33 @@ const start = jest.fn((update: () => Promise<void>) => {
   });
   updateDone = Promise.resolve().then(update);
   return { ready: updateDone, finished, skipTransition: skip };
+});
+
+it("keeps the list in the root capture and names only the incoming phone conversation", async () => {
+  window.matchMedia = jest.fn((query) => ({
+    ...media,
+    matches: query === "(width < 768px)",
+  }));
+  document.body.innerHTML = "<div data-wave-swipe-page></div>";
+  const list = document.querySelector<HTMLElement>("[data-wave-swipe-page]")!;
+  const navigate = jest.fn();
+  runPhoneConversationEntryTransition("/messages/abc", navigate);
+  expect(list.style.viewTransitionName).toBe("");
+  expect(document.documentElement.dataset["waveNavigationTransition"]).toBe(
+    "conversation-entry"
+  );
+  await Promise.resolve();
+  expect(navigate).toHaveBeenCalledTimes(1);
+  document.body.innerHTML = "<div data-wave-swipe-page></div>";
+  const conversation = document.querySelector<HTMLElement>(
+    "[data-wave-swipe-page]"
+  )!;
+  expect(commitWaveNavigationTransition(null, "/messages/abc")).toBe(true);
+  expect(conversation.style.viewTransitionName).toBe("wave-navigation");
+  await updateDone;
+  finish();
+  await Promise.resolve();
+  expect(conversation.style.viewTransitionName).toBe("");
 });
 
 beforeEach(() => {

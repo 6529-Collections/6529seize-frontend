@@ -4,7 +4,9 @@ import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
 // The app shell acknowledges the committed screen before the browser captures it.
 // This keeps the outgoing list (including its scroll position) visible during the handoff.
 export type WaveScreen = "list" | "feed" | "wave";
-type TransitionTarget = WaveScreen | { readonly pathname: string };
+type TransitionTarget =
+  | WaveScreen
+  | { readonly pathname: string; readonly direction?: "forward" };
 
 interface SwipeHandoff {
   readonly surface: HTMLElement;
@@ -54,11 +56,26 @@ export function runPhoneChevronBackTransition(
   pathname: string,
   navigate: () => void
 ) {
+  runPhoneConversationTransition({ pathname }, navigate);
+}
+
+/** Opening a phone conversation pairs with its full-page Back slide. */
+export function runPhoneConversationEntryTransition(
+  pathname: string,
+  navigate: () => void
+) {
+  runPhoneConversationTransition({ pathname, direction: "forward" }, navigate);
+}
+
+function runPhoneConversationTransition(
+  target: Exclude<TransitionTarget, WaveScreen>,
+  navigate: () => void
+) {
   if (!window.matchMedia(PHONE_WAVES_LAYOUT_QUERY).matches) {
     navigate();
     return;
   }
-  runWaveNavigationTransition({ pathname }, () =>
+  runWaveNavigationTransition(target, () =>
     navigateWithoutAdditionalMotion(navigate)
   );
 }
@@ -107,7 +124,10 @@ function getTransitionPresentation(
   target: TransitionTarget,
   previous: string | undefined
 ) {
-  if (typeof target !== "string") return "chevron-back";
+  if (typeof target !== "string")
+    return target.direction === "forward"
+      ? "conversation-entry"
+      : "chevron-back";
   if (usesFadeOnlyWaveEntry(target)) return "wave-entry";
   return isForwardWaveNavigation(target, previous) ? "forward" : "back";
 }
@@ -122,9 +142,11 @@ export function runWaveNavigationTransition(
     return false;
   }
   swipeHandoffPending = false;
-  const chevronBack = typeof target !== "string";
+  const capturesWholePage = typeof target !== "string";
+  const enteringConversation =
+    typeof target !== "string" && target.direction === "forward";
   const surface = document.querySelector<HTMLElement>(
-    chevronBack
+    capturesWholePage
       ? "[data-wave-swipe-page], [data-phone-wave-page]"
       : "[data-wave-navigation-screen]"
   );
@@ -154,7 +176,9 @@ export function runWaveNavigationTransition(
     "--wave-transition-height",
     `${surface.getBoundingClientRect().height}px`
   );
-  surface.style.viewTransitionName = "wave-navigation";
+  let namedSurface = surface;
+  if (!enteringConversation)
+    surface.style.viewTransitionName = "wave-navigation";
   root.dataset["waveNavigationTransition"] = getTransitionPresentation(
     target,
     surface.dataset["waveNavigationScreen"]
@@ -169,7 +193,7 @@ export function runWaveNavigationTransition(
   const clearSurface = () => {
     delete root.dataset["waveNavigationTransition"];
     delete root.dataset["waveNavigationContentPending"];
-    surface.style.removeProperty("view-transition-name");
+    namedSurface.style.removeProperty("view-transition-name");
     root.style.removeProperty("--wave-transition-height");
     root.style.removeProperty("--wave-swipe-remainder");
   };
@@ -181,7 +205,8 @@ export function runWaveNavigationTransition(
       if (superseded) return;
       // The old page is captured. Keep the destination in the stationary root
       // snapshot so its header and content stay visible together in WebKit.
-      if (chevronBack) surface.style.removeProperty("view-transition-name");
+      if (capturesWholePage && !enteringConversation)
+        surface.style.removeProperty("view-transition-name");
       // The browser has captured the finger's final position. Prepare the new
       // screen underneath that snapshot, rather than sliding into an empty shell.
       swipe?.surface.style.removeProperty("transform");
@@ -220,6 +245,13 @@ export function runWaveNavigationTransition(
   const pending = {
     target,
     committed: () => {
+      if (enteringConversation && !stopped) {
+        namedSurface =
+          document.querySelector<HTMLElement>(
+            "[data-wave-swipe-page], [data-phone-wave-page]"
+          ) ?? surface;
+        namedSurface.style.viewTransitionName = "wave-navigation";
+      }
       // Finish the DOM update so the virtual list can run its normal layout
       // frames. Keep the opaque old snapshot still until visible cards are ready.
       shellCommitted = true;
@@ -231,7 +263,7 @@ export function runWaveNavigationTransition(
   };
   activeTransition = pending;
   reducedMotion.addEventListener("change", skipMotion, { once: true });
-  if (chevronBack) {
+  if (capturesWholePage) {
     document.addEventListener("pointerdown", skipMotion, { capture: true });
     window.addEventListener("popstate", cancelNavigation);
     window.addEventListener("resize", stopForWidthChange);
@@ -240,7 +272,7 @@ export function runWaveNavigationTransition(
     stopped = true;
     window.clearTimeout(timeout);
     reducedMotion.removeEventListener("change", skipMotion);
-    if (chevronBack) {
+    if (capturesWholePage) {
       document.removeEventListener("pointerdown", skipMotion, true);
       window.removeEventListener("popstate", cancelNavigation);
       window.removeEventListener("resize", stopForWidthChange);

@@ -586,12 +586,19 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
             transform: frames[0]?.["transform"],
             endTransform: frames.at(-1)?.["transform"],
             duration: effect.getTiming().duration,
-            outgoingVisible: animations.some(
-              (item) =>
-                item.effect instanceof KeyframeEffect &&
-                item.effect.pseudoElement ===
-                  "::view-transition-old(wave-navigation)"
-            ),
+            outgoingVisible:
+              (document.documentElement.dataset["waveNavigationTransition"] ===
+                "conversation-entry" &&
+                getComputedStyle(
+                  document.documentElement,
+                  "::view-transition-old(root)"
+                ).display !== "none") ||
+              animations.some(
+                (item) =>
+                  item.effect instanceof KeyframeEffect &&
+                  item.effect.pseudoElement ===
+                    "::view-transition-old(wave-navigation)"
+              ),
           };
         }, snapshot);
       const finishMotion = () =>
@@ -655,8 +662,8 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       );
       if (opening) {
         expect(await (await opening).jsonValue()).toEqual({
-          transform: "scale(1)",
-          endTransform: "scale(1)",
+          transform: "translateX(100%)",
+          endTransform: "translateX(0px)",
           duration: 260,
           outgoingVisible: true,
         });
