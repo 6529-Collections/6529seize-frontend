@@ -213,12 +213,20 @@ export default function UserPageTabs({
     const contentContainer = contentContainerRef.current;
     if (!container) return;
 
-    checkScroll();
-    updateActiveIndicator();
+    const tabs = container.closest("nav");
+    const scope = tabs?.parentElement;
     const updateTabsLayout = () => {
       checkScroll();
       updateActiveIndicator();
+      if (tabs && scope) {
+        const top = Number.parseFloat(getComputedStyle(tabs).top) || 0;
+        scope.style.setProperty(
+          "--profile-tabs-bottom",
+          `${top + tabs.getBoundingClientRect().height}px`
+        );
+      }
     };
+    updateTabsLayout();
     container.addEventListener("scroll", checkScroll, { passive: true });
     window.addEventListener("resize", updateTabsLayout);
 
@@ -236,8 +244,9 @@ export default function UserPageTabs({
       container.removeEventListener("scroll", checkScroll);
       window.removeEventListener("resize", updateTabsLayout);
       resizeObserver?.disconnect();
+      scope?.style.removeProperty("--profile-tabs-bottom");
     };
-  }, [checkScroll, updateActiveIndicator]);
+  }, [checkScroll, updateActiveIndicator, isApp]);
 
   useEffect(() => {
     if (!visibleTabs.length) return;

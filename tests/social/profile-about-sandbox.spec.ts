@@ -2661,6 +2661,285 @@ test.describe("Collected personal actions @auth @medium @local-only", () => {
     });
   }
 
+  test("Collected design keeps wrapped metrics, bottom Details and sticky swipe filters", async ({
+    page,
+    baseURL,
+    request,
+  }, testInfo) => {
+    await hideNextDevOverlay(page.context());
+    await seedSession(page);
+    await installCollectedArtwork(page);
+    const api = getSandboxApiOrigin(baseURL);
+    expect(
+      (await request.post(`${api}/__composer-sandbox/collected-stats`)).ok()
+    ).toBe(true);
+    const mobile = (page.viewportSize()?.width ?? 0) < 768;
+    const summary = page.locator('[data-profile-section="Collection summary"]');
+    const filters = page.locator('[data-profile-section="Filters"]');
+    try {
+      await finishHostedWalletInitialization(page, () =>
+        page.goto("/playwright/collected?details=closed")
+      );
+      const metricRow = summary
+        .locator('[data-profile-section-anchor="Collection summary"]')
+        .locator(":scope > div");
+      await expect(metricRow.locator(":scope > *")).toHaveText([
+        "x5,764Memes·unique x578",
+        "x1Meme Sets",
+        "x62NextGen",
+        "x3Gradients",
+        "x1.76Boost",
+      ]);
+      const memes = summary.getByRole("button", { name: /Memes.*unique/ });
+      await expect(memes.locator("span").first()).toHaveText("x5,764");
+      await expect(memes.getByText("Memes", { exact: true })).toHaveCSS(
+        "text-transform",
+        "none"
+      );
+      await expect(metricRow).toHaveCSS("flex-wrap", "wrap");
+      expect(
+        await metricRow.evaluate((el) => el.scrollWidth - el.clientWidth)
+      ).toBeLessThanOrEqual(1);
+      const details = summary.getByRole("button", {
+        name: "Details",
+        exact: true,
+      });
+      const seasons = summary.getByText("Seasons", { exact: true });
+      const positions = await summary.evaluate((el) => {
+        const season = Array.from(el.querySelectorAll("*")).find(
+          (node) => node.textContent === "Seasons"
+        );
+        const toggle = el.querySelector('[data-profile-action="Details"]');
+        return Boolean(
+          season &&
+          toggle &&
+          season.compareDocumentPosition(toggle) &
+            Node.DOCUMENT_POSITION_FOLLOWING
+        );
+      });
+      expect(positions).toBe(true);
+      await expect(seasons).toBeVisible();
+      await expect(details).toHaveCSS(
+        "width",
+        `${await summary.evaluate((el) => el.clientWidth)}px`
+      );
+      await details.click();
+      const hide = summary.getByRole("button", {
+        name: "Hide Details",
+        exact: true,
+      });
+      await expect(hide).toHaveAttribute("aria-expanded", "true");
+      await expect(
+        page.locator(`[id="${await hide.getAttribute("aria-controls")}"]`)
+      ).toBeVisible();
+      await hide.click();
+      await expect(details).toHaveAttribute("aria-expanded", "false");
+      for (const [label, collection] of [
+        ["NextGen", "nextgen"],
+        ["Gradients", "gradients"],
+        ["Memes", "memes"],
+      ]) {
+        await summary
+          .getByRole("button", { name: new RegExp(label!) })
+          .first()
+          .click();
+        await expectUrlState(
+          page,
+          (url) => url.searchParams.get("collection") === collection
+        );
+      }
+      await expect(memes).toHaveAttribute("aria-pressed", "true");
+      await expect(memes.getByText("Memes", { exact: true })).toHaveCSS(
+        "color",
+        "rgb(236, 236, 238)"
+      );
+      const firstCard = page
+        .getByRole("list", { name: "Collected cards", exact: true })
+        .locator("li")
+        .first();
+      await expect(firstCard).toBeVisible();
+      const cardOrder = await firstCard.locator("h3").evaluate((name) => {
+        const content = name.parentElement!.parentElement!;
+        return Array.from(content.children).map((child) => child.textContent);
+      });
+      expect(cardOrder[0]).toBe("The Memes");
+      expect(cardOrder[1]).toContain("Season 1 artwork 1");
+      expect(cardOrder[2]).toBe("#1");
+      expect(cardOrder[3]).toContain("TDH");
+      await expect(firstCard.getByText("#1", { exact: true })).toHaveCSS(
+        "font-variant-numeric",
+        "normal"
+      );
+      await expect(firstCard.getByText("Rank 1", { exact: true })).toHaveCSS(
+        "background-color",
+        "rgba(0, 0, 0, 0)"
+      );
+      if (mobile) {
+        const scrollRow = filters.locator('[class*="tw-overflow-x-auto"]');
+        const bounds = await scrollRow.boundingBox();
+        const shell = await page.locator("[data-profile-shell]").boundingBox();
+        expect(Math.abs(bounds!.x - shell!.x)).toBeLessThanOrEqual(1);
+        expect(
+          Math.abs(bounds!.x + bounds!.width - shell!.x - shell!.width)
+        ).toBeLessThanOrEqual(1);
+        await expect(
+          filters.getByRole("button", {
+            name: "Scroll filters right",
+            exact: true,
+          })
+        ).toBeHidden();
+        await expect(
+          filters.getByRole("button", {
+            name: "Scroll filters left",
+            exact: true,
+          })
+        ).toBeHidden();
+        const gap = await scrollRow.evaluate((row) => {
+          const content = row.firstElementChild!;
+          const first = content.children[0]!.getBoundingClientRect();
+          const address = content.children[1]!.getBoundingClientRect();
+          return {
+            gap: address.x - first.right,
+            expected: Number.parseFloat(getComputedStyle(content).columnGap),
+          };
+        });
+        expect(gap.gap).toBeCloseTo(gap.expected, 0);
+        await page
+          .getByRole("list", { name: "Collected cards", exact: true })
+          .locator("li")
+          .last()
+          .scrollIntoViewIfNeeded();
+        const sticky = await filters.evaluate((el) => {
+          const tabs = document
+            .querySelector("[data-profile-tabs-scroll]")!
+            .closest("nav")!;
+          return {
+            filterTop: el.getBoundingClientRect().top,
+            tabsBottom: tabs.getBoundingClientRect().bottom,
+            position: getComputedStyle(el).position,
+          };
+        });
+        expect(sticky.position).toBe("sticky");
+        expect(
+          Math.abs(sticky.filterTop - sticky.tabsBottom)
+        ).toBeLessThanOrEqual(1);
+        await scrollRow.evaluate((row) => {
+          row.scrollLeft = row.scrollWidth;
+        });
+        await expectNoHorizontalOverflow(page);
+        await page.screenshot({
+          path: testInfo.outputPath("collected-sticky-filters.png"),
+          animations: "disabled",
+          scale: "css",
+        });
+        await scrollRow.evaluate((row) => {
+          row.scrollLeft = 0;
+        });
+      } else await expect(filters).toHaveCSS("position", "static");
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await expect(memes).toBeVisible();
+      await page.screenshot({
+        path: testInfo.outputPath("collected-design.png"),
+        fullPage: true,
+        animations: "disabled",
+        scale: "css",
+      });
+      const chooseFilter = async (label: string, option: string) => {
+        if (
+          (page.viewportSize()?.width ?? 0) >= 1024 &&
+          label !== "Collection"
+        ) {
+          await filters
+            .getByRole("tablist", { name: label, exact: true })
+            .getByRole("tab", { name: option, exact: true })
+            .click();
+        } else {
+          await filters
+            .getByRole("button", { name: new RegExp(`^${label}:`) })
+            .click();
+          await page
+            .getByRole("menuitem", { name: option, exact: true })
+            .click();
+        }
+      };
+      for (const [label, collection] of [
+        ["Meme Lab", "memelab"],
+        ["All Collections", null],
+        ["The Memes", "memes"],
+      ] as const) {
+        await chooseFilter("Collection", label);
+        await expectUrlState(
+          page,
+          (url) => url.searchParams.get("collection") === collection
+        );
+      }
+      await chooseFilter("Sort By", "Rank");
+      await expectUrlState(
+        page,
+        (url) => url.searchParams.get("sort-by") === "rank"
+      );
+      await page.route("**/api/xtdh/tokens?**", (route) =>
+        route.fulfill({ json: { data: [], page: 1, next: false, count: 0 } })
+      );
+      await page.route("**/api/xtdh/collections?**", (route) =>
+        route.fulfill({ json: { data: [], page: 1, next: false, count: 0 } })
+      );
+      await chooseFilter("View", "Network");
+      await expectUrlState(
+        page,
+        (url) => url.searchParams.get("collection") === "network"
+      );
+      await expect(summary.getByText("Memes", { exact: true })).toBeVisible();
+      await expect(
+        filters.getByRole("button", { name: /^Address:/ })
+      ).toHaveCount(0);
+      await chooseFilter("View", "Native");
+      await expectUrlState(
+        page,
+        (url) => url.searchParams.get("collection") === null
+      );
+      await expect(
+        filters.getByRole("button", { name: /^Address:/ })
+      ).toBeVisible();
+      if (!mobile) {
+        await filters
+          .getByRole("button", { name: "Transfer", exact: true })
+          .click();
+        await expect(
+          firstCard.getByRole("button", {
+            name: "Select NFT for transfer",
+            exact: true,
+          })
+        ).toBeVisible();
+        await firstCard
+          .getByRole("button", { name: "Select NFT for transfer", exact: true })
+          .click();
+        await expect(
+          firstCard.getByRole("button", {
+            name: "Decrease quantity",
+            exact: true,
+          })
+        ).toBeVisible();
+        await expect(firstCard.getByText("#1", { exact: true })).toBeVisible();
+        await filters
+          .getByRole("button", { name: "Exit Transfer", exact: true })
+          .click();
+      }
+      // A profile with only Boost still has a usable summary and Details toggle.
+      expect(
+        (await request.delete(`${api}/__composer-sandbox/collected-stats`)).ok()
+      ).toBe(true);
+      await page.goto("/following-artist-0/collected?details=closed");
+      await expect(summary.getByText("Boost", { exact: true })).toBeVisible();
+      await expect(summary.getByText("Memes", { exact: true })).toHaveCount(0);
+      await expect(
+        summary.getByRole("button", { name: "Details", exact: true })
+      ).toBeVisible();
+    } finally {
+      await request.delete(`${api}/__composer-sandbox/collected-stats`);
+    }
+  });
+
   test("keeps owner action alignment, filters and Back restoration", async ({
     page,
   }, testInfo) => {

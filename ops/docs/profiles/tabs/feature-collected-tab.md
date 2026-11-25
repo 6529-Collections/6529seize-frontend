@@ -55,10 +55,10 @@ Transfer mode is part of the Native collected view (not a separate route).
    - If the URL has `activity=...` without `details=closed`, `Details` starts open and the lower
      section selects that tab when the value is recognized.
 2. Review the top stats block:
-   - On mobile, swipe the headline metrics horizontally. A fade at the right
-     edge indicates more metrics; `Details` remains visible beside the row.
-   - headline metrics can include `NextGen`, `Meme Sets`, `Memes`,
-     `Gradients`, and `Boost`
+   - Headline metrics wrap on every screen, with numbers before their labels.
+     They appear in this order when available: `Memes`, `Meme Sets`, `NextGen`,
+     `Gradients`, and `Boost`.
+   - `Details` sits below Seasons and immediately above the expandable panel.
    - headline metric labels, multiplier values, unique-count copy, and the
      `Details` toggle are message-backed from the source locale
    - collection-backed metrics (`NextGen`, `Meme Sets`, `Memes`, `Gradients`)
@@ -132,6 +132,10 @@ Transfer mode is part of the Native collected view (not a separate route).
    - `Native` for profile card holdings.
    - `Network` for xTDH token holdings.
 6. Apply filters:
+   - On phones, the swipe row sticks directly below the profile tabs, including
+     the app's top bar. It reaches both content edges and keeps the address
+     control beside the other chips without a spacer. Desktop retains its
+     filter arrows and edge fades.
    - Filter controls use compact 32px buttons. On desktop, view and sort options
      use soft gray inactive chips and a light selected chip, without shadows;
      smaller screens keep
@@ -153,6 +157,8 @@ Transfer mode is part of the Native collected view (not a separate route).
      entry instead of adding another one.
 8. In native view (outside transfer mode), open token routes from cards:
    - `/the-memes/{id}`, `/6529-gradient/{id}`, `/nextgen/token/{id}`, `/meme-lab/{id}`.
+   - Native cards show the collection label, name row, token ID, then TDH and
+     plain-text rank. Media badges, balances, and transfer selection work as before.
    - Native card results render as a labelled `Collected cards` list with one
      list item per card for assistive technologies.
    - In the native app, a token opened here uses the app-header Back chevron to
