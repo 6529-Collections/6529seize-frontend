@@ -14,7 +14,7 @@ export class PinnedWaveTouchSensor {
   private activated = false;
   private finished = false;
 
-  static activators: Activators<Options> = [
+  static readonly activators: Activators<Options> = [
     {
       eventName: "onTouchStart",
       handler: ({ nativeEvent }: ReactTouchEvent) =>

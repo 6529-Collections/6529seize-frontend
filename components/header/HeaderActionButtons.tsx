@@ -37,9 +37,9 @@ function HeaderActionButtonsContent() {
   const isNativeWavesDirectory =
     isApp &&
     isOnWavesRoute &&
-    activeView !== "messages" &&
-    searchParams.get("view") !== "notifications" &&
-    searchParams.get("view") !== "profile-feed";
+    !["messages", "notifications", "profile-feed"].includes(
+      searchParams.get("view") ?? ""
+    );
   const buttonSize = isNativeWavesDirectory ? "tw-size-11" : "tw-size-10";
   const baseButtonClasses = `tw-flex ${buttonSize} tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-black tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 active:tw-bg-iron-800`;
   const isOnMessagesRoute = pathname === "/messages" && !waveParam;
