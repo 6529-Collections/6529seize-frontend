@@ -3,7 +3,11 @@
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useScrollToHashOnMount } from "@/hooks/useScrollToHashOnMount";
-import { ChevronRightIcon } from "@heroicons/react/24/outline";
+import {
+  AdjustmentsHorizontalIcon,
+  ClockIcon,
+  ChevronRightIcon,
+} from "@heroicons/react/24/outline";
 import type { ReactNode } from "react";
 import UserPageSubscriptionsSection from "./UserPageSubscriptionsSection";
 import { useSubscriptionDisclosure } from "./useSubscriptionDisclosure";
@@ -29,6 +33,10 @@ export default function UserPageSubscriptionsResponsivePanel({
   children: ReactNode;
 }>) {
   const isMobile = useMediaQuery(SHEET_MEDIA_QUERY);
+  const LeadingIcon =
+    id === "profile-subscriptions-history"
+      ? ClockIcon
+      : AdjustmentsHorizontalIcon;
   const hasSummary = Boolean(summary);
   const { expanded, setExpanded } = useSubscriptionDisclosure(
     id,
@@ -64,8 +72,12 @@ export default function UserPageSubscriptionsResponsivePanel({
         aria-labelledby={`${id}-title`}
         aria-describedby={hasSummary ? `${id}-summary` : undefined}
         onClick={() => setExpanded(true)}
-        className="tw-flex tw-min-h-16 tw-w-full tw-items-center tw-justify-between tw-gap-4 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-5 tw-py-5 tw-text-left tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-white/[0.03]"
+        className="tw-flex tw-min-h-16 tw-w-full tw-items-center tw-justify-between tw-gap-4 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-5 tw-py-5 tw-text-left tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-white/[0.03] max-md:tw-justify-start max-md:tw-gap-3.5"
       >
+        <LeadingIcon
+          aria-hidden="true"
+          className="tw-size-[22px] tw-flex-none tw-text-iron-400 md:tw-hidden"
+        />
         <span className="tw-min-w-0">
           <span
             id={`${id}-title`}
@@ -83,7 +95,7 @@ export default function UserPageSubscriptionsResponsivePanel({
           )}
         </span>
         <ChevronRightIcon
-          className="tw-size-5 tw-shrink-0 tw-text-iron-500"
+          className="tw-size-5 tw-shrink-0 tw-text-iron-500 max-md:tw-ml-auto"
           aria-hidden="true"
         />
       </button>

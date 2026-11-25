@@ -105,7 +105,7 @@ function ReadOnlySubscriptionStatus({
   const locale = useBrowserLocale();
   return (
     <span
-      className={`tw-inline-flex tw-items-center tw-whitespace-nowrap tw-text-sm tw-font-normal tw-leading-5 ${subscribed ? "tw-text-emerald-300" : "tw-text-iron-400"}`}
+      className={`tw-inline-flex tw-items-center tw-whitespace-nowrap tw-text-sm tw-font-normal tw-leading-5 max-md:tw-text-xs max-md:tw-leading-[17px] ${subscribed ? "tw-text-emerald-300" : "tw-text-iron-400"}`}
     >
       {t(
         locale,
@@ -346,7 +346,7 @@ export default function MemeSubscriptionRow(
             title: props.title,
             token: formatInteger(locale, props.subscription.token_id),
           })}
-          className="tw-inline-flex tw-shrink-0 tw-items-center tw-gap-1 tw-whitespace-nowrap tw-text-sm tw-font-normal tw-tabular-nums tw-leading-5"
+          className="tw-inline-flex tw-shrink-0 tw-items-center tw-gap-1 tw-whitespace-nowrap tw-text-sm tw-font-normal tw-tabular-nums tw-leading-5 max-md:tw-text-xs max-md:tw-leading-[17px]"
         >
           <span className="tw-font-normal tw-text-iron-100">
             {formatInteger(
@@ -529,24 +529,37 @@ export default function MemeSubscriptionRow(
 
   return (
     <div className="tw-px-4 tw-py-4 md:tw-px-5 md:tw-py-5">
-      <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-gap-3 sm:tw-flex-row sm:tw-items-center sm:tw-gap-5">
+      <div className="tw-flex tw-min-w-0 tw-flex-row tw-items-start tw-gap-3 md:tw-items-center md:tw-gap-5">
         {props.artwork && <div className="tw-shrink-0">{props.artwork}</div>}
-        <div className="tw-grid tw-w-full tw-min-w-0 tw-flex-1 tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-2 tw-gap-y-1 tw-@container/drop-row sm:tw-w-auto md:tw-gap-x-5">
+        {!props.minting_today && props.date && (
+          <div
+            aria-hidden="true"
+            className="tw-flex tw-size-12 tw-flex-none tw-flex-col tw-items-center tw-justify-center tw-gap-px tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 md:tw-hidden"
+          >
+            <span className="tw-text-[17px] tw-font-semibold tw-leading-5 tw-text-iron-100">
+              {formatUtcDate(locale, props.date.utcDay, { day: "numeric" })}
+            </span>
+            <span className="tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-3 tw-tracking-[0.06em] tw-text-iron-500">
+              {formatUtcDate(locale, props.date.utcDay, { month: "short" })}
+            </span>
+          </div>
+        )}
+        <div className="tw-grid tw-min-h-12 tw-w-full tw-min-w-0 tw-flex-1 tw-grid-cols-[minmax(0,1fr)_auto] tw-content-center tw-items-center tw-gap-x-2 tw-gap-y-0.5 tw-@container/drop-row md:tw-min-h-0 md:tw-w-auto md:tw-content-normal md:tw-gap-x-5 md:tw-gap-y-1">
           {props.date && (
             <div
-              className={`tw-col-span-full tw-col-start-1 tw-row-start-1 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-base tw-font-semibold tw-tabular-nums ${props.readonly ? "md:tw-col-span-1" : "sm:tw-col-span-1"} ${subscribed ? "tw-text-iron-100" : "tw-text-iron-400"}`}
+              className={`tw-col-start-1 tw-row-start-2 tw-flex tw-min-w-0 tw-flex-nowrap tw-items-center tw-gap-x-1 tw-whitespace-nowrap tw-text-meta tw-font-normal tw-tabular-nums tw-leading-[18px] tw-text-iron-400 md:tw-row-start-1 md:tw-flex-wrap md:tw-gap-x-2 md:tw-gap-y-1 md:tw-whitespace-normal md:tw-text-base md:tw-font-semibold md:tw-leading-6 ${subscribed ? "md:tw-text-iron-100" : ""}`}
             >
               {props.minting_today ? (
                 <MintingTodayLabel
                   tokenId={props.subscription.token_id}
                   locale={locale}
                   showIndicator
-                  className="tw-text-base tw-font-semibold tw-leading-6 tw-text-primary-300"
+                  className="tw-text-meta tw-font-normal tw-leading-[18px] tw-text-primary-300 md:tw-text-base md:tw-font-semibold md:tw-leading-6"
                 />
               ) : (
                 <time
                   dateTime={props.date.utcDay.toISOString()}
-                  className="tw-min-w-0 tw-break-words"
+                  className="tw-min-w-0 tw-break-words max-md:tw-whitespace-nowrap max-md:tw-text-iron-400"
                 >
                   {formatUtcDate(locale, props.date.utcDay, {
                     weekday: "short",
@@ -556,7 +569,7 @@ export default function MemeSubscriptionRow(
                   })}
                 </time>
               )}
-              <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-text-meta tw-font-normal tw-text-iron-400">
+              <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-text-meta tw-font-normal tw-text-iron-400 max-md:tw-gap-1">
                 <span className="tw-text-iron-600" aria-hidden="true">
                   /
                 </span>
@@ -566,7 +579,7 @@ export default function MemeSubscriptionRow(
               </span>
             </div>
           )}
-          <span className="tw-col-span-full tw-col-start-1 tw-row-start-2 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-1.5 tw-text-sm tw-font-normal tw-tabular-nums tw-text-iron-400 max-sm:@[18rem]/drop-row:tw-col-span-1 sm:tw-col-span-1">
+          <span className="tw-col-start-1 tw-row-start-1 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-1.5 tw-text-[15px] tw-font-medium tw-tabular-nums tw-leading-5 tw-text-iron-100 md:tw-row-start-2 md:tw-text-sm md:tw-font-normal md:tw-text-iron-400">
             <Link
               href={`/the-memes/${props.subscription.token_id}`}
               prefetch={false}
@@ -575,23 +588,10 @@ export default function MemeSubscriptionRow(
               {props.title} #
               {formatInteger(locale, props.subscription.token_id)}
             </Link>
-            {allocationDetails && props.minting_today && (
-              <button
-                type="button"
-                aria-expanded={showAllocationDetails}
-                aria-controls={allocationDetailsId}
-                onClick={() => setShowAllocationDetails((open) => !open)}
-                className="tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-text-sm tw-font-normal tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-100 md:tw-hidden"
-              >
-                {t(locale, "subscriptions.upcoming.more")}
-                <ChevronDownIcon
-                  aria-hidden="true"
-                  className={`tw-size-4 ${showAllocationDetails ? "tw-rotate-180" : ""}`}
-                />
-              </button>
-            )}
           </span>
-          <div className="tw-col-span-full tw-col-start-1 tw-row-start-3 tw-flex tw-shrink-0 tw-items-center tw-justify-end tw-gap-2 max-sm:@[18rem]/drop-row:tw-col-span-1 max-sm:@[18rem]/drop-row:tw-col-start-2 max-sm:@[18rem]/drop-row:tw-row-start-2 sm:tw-col-span-1 sm:tw-col-start-2 sm:tw-row-start-2 md:tw-row-span-2 md:tw-row-start-1 md:tw-gap-3">
+          <div
+            className={`tw-col-start-2 tw-row-span-2 tw-row-start-1 tw-flex tw-shrink-0 tw-items-center tw-justify-end tw-gap-2 tw-self-center tw-justify-self-end md:tw-gap-3 ${props.readonly ? "max-md:tw-flex-col-reverse max-md:tw-items-end max-md:tw-gap-0 max-md:tw-text-xs max-md:tw-leading-[17px]" : ""}`}
+          >
             {!props.readonly &&
               !props.controlsLoading &&
               !props.controlsUnavailable &&
@@ -602,6 +602,30 @@ export default function MemeSubscriptionRow(
               )}
             {controls}
           </div>
+          {allocationDetails && props.minting_today && (
+            <button
+              type="button"
+              aria-expanded={showAllocationDetails}
+              aria-controls={allocationDetailsId}
+              onClick={() => setShowAllocationDetails((open) => !open)}
+              className="tw-col-span-full tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-text-sm tw-font-normal tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-100 md:tw-hidden"
+            >
+              {t(locale, "subscriptions.upcoming.more")}
+              <ChevronDownIcon
+                aria-hidden="true"
+                className={`tw-size-4 ${showAllocationDetails ? "tw-rotate-180" : ""}`}
+              />
+            </button>
+          )}
+          {!props.readonly &&
+            !props.controlsLoading &&
+            !props.controlsUnavailable &&
+            props.minting_today &&
+            isToggleDisabled && (
+              <p className="tw-col-span-full tw-mb-0 tw-mt-0.5 tw-text-meta tw-font-normal tw-leading-[18px] tw-text-iron-500 md:tw-hidden">
+                {t(locale, "profile.subscriptions.mintingToday.tooltip")}
+              </p>
+            )}
           {hasNoAllocation && (
             <output className="tw-col-span-full tw-text-meta tw-font-normal tw-leading-5 tw-text-iron-500">
               {t(locale, "profile.subscriptions.noAllocation")}

@@ -683,6 +683,156 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
               })
               .locator('#profile-subscriptions-overview [aria-busy="true"]')
           ).toHaveCount(0, { timeout: RESPONSE_TIMEOUT_MS });
+        if (
+          phase !== "before" &&
+          name === "no-selections" &&
+          owner &&
+          (page.viewportSize()?.width ?? 1280) < 640
+        ) {
+          await expect(
+            overview.getByRole("heading", {
+              name: "No upcoming drops selected",
+              exact: true,
+            })
+          ).toHaveCSS("font-size", "20px");
+          const figures = await page
+            .getByRole("region", { name: "Subscription minting", exact: true })
+            .locator("#subscription-overview-actions")
+            .boundingBox();
+          const choose = await overview
+            .getByRole("link", { name: "Choose drops", exact: true })
+            .boundingBox();
+          expect(figures).not.toBeNull();
+          expect(choose).not.toBeNull();
+          expect(choose!.y).toBeGreaterThanOrEqual(
+            figures!.y + figures!.height + 19
+          );
+        }
+        if (
+          phase !== "before" &&
+          name === "covered" &&
+          (page.viewportSize()?.width ?? 1280) < 768
+        ) {
+          const upcoming = page.getByRole("region", {
+            name: "Upcoming Drops",
+            exact: true,
+          });
+          const drop = upcoming.getByRole("link", {
+            name: "The Memes #576",
+            exact: true,
+          });
+          await expect(drop).toBeVisible();
+          const row = upcoming
+            .getByRole("link", { name: "The Memes #576", exact: true })
+            .locator(
+              "xpath=ancestor::div[contains(@class, 'tw-@container/drop-row')]"
+            );
+          if (owner) await expect(row.getByRole("combobox")).toBeEnabled();
+          else
+            await expect(
+              row.getByRole("group", {
+                name: "Subscription quantity for The Memes #576",
+                exact: true,
+              })
+            ).toBeVisible();
+          const geometry = await drop.evaluate((link) => {
+            const grid = link.parentElement!.parentElement!;
+            const date = grid.querySelector("time")!;
+            const metadata = date.parentElement!;
+            const controls =
+              grid.querySelector('[role="switch"]')?.closest("label")
+                ?.parentElement ??
+              grid.querySelector('[role="group"]')?.parentElement;
+            const dateRect = date.getBoundingClientRect();
+            const metadataRect = metadata.getBoundingClientRect();
+            const controlRect = controls!.getBoundingClientRect();
+            const tile = grid.previousElementSibling!;
+            return {
+              dateOverflow: date.scrollWidth > date.clientWidth + 1,
+              dateHeight: dateRect.height,
+              metadataRight: metadataRect.right,
+              controlsLeft: controlRect.left,
+              tileWidth: tile.getBoundingClientRect().width,
+              tileHidden: tile.getAttribute("aria-hidden"),
+            };
+          });
+          expect(geometry.tileWidth).toBe(48);
+          expect(geometry.tileHidden).toBe("true");
+          // The requested fixed columns retain the known narrow-date overlap.
+          // Visitors have enough room at this project's configured viewport.
+          if (!owner) expect(geometry.dateOverflow).toBe(false);
+          expect(geometry.dateHeight).toBeLessThanOrEqual(19);
+          expect(geometry.metadataRight).toBeLessThanOrEqual(
+            geometry.controlsLeft
+          );
+          if (owner) {
+            const mintingRow = upcoming
+              .getByRole("button", { name: "Minting Today", exact: true })
+              .locator(
+                "xpath=ancestor::div[contains(@class, 'tw-@container/drop-row')]"
+              );
+            await expect(mintingRow.getByRole("switch")).toBeDisabled();
+            await expect(
+              mintingRow.getByText("No changes allowed on minting day", {
+                exact: true,
+              })
+            ).toBeVisible();
+            expect(
+              await drop.evaluate(
+                (link) =>
+                  link.parentElement!.parentElement!.querySelector("select")
+                    ?.disabled
+              )
+            ).toBe(false);
+          }
+          await upcoming.screenshot({
+            path: testInfo.outputPath(
+              `compact-drops-${owner ? "owner" : "visitor"}.png`
+            ),
+            animations: "disabled",
+          });
+          await upcoming
+            .getByRole("button", { name: "Show More", exact: true })
+            .click();
+          const expanded =
+            (page.viewportSize()?.width ?? 1280) < 640
+              ? page.getByRole("dialog", {
+                  name: "Upcoming Drops",
+                  exact: true,
+                })
+              : upcoming;
+          await expect(
+            expanded.getByRole("link", { name: "The Memes #579", exact: true })
+          ).toBeVisible();
+          await expanded
+            .getByRole("button", { name: "Show Less", exact: true })
+            .click();
+          await expect(
+            upcoming.getByRole("button", { name: "Show More", exact: true })
+          ).toBeVisible();
+        }
+        if (
+          phase !== "before" &&
+          name === "mint-paid" &&
+          (page.viewportSize()?.width ?? 1280) < 768
+        ) {
+          const upcoming = page.getByRole("region", {
+            name: "Upcoming Drops",
+            exact: true,
+          });
+          const more = upcoming.getByRole("button", {
+            name: "More",
+            exact: true,
+          });
+          await expect(more).toHaveAttribute("aria-expanded", "false");
+          await more.click();
+          await expect(more).toHaveAttribute("aria-expanded", "true");
+          await expect(
+            upcoming.getByText("Subscription Count: x1", { exact: true })
+          ).toBeVisible();
+          await more.click();
+          await expect(more).toHaveAttribute("aria-expanded", "false");
+        }
         await expectNoHorizontalOverflow(page);
         await overview.screenshot({
           path: testInfo.outputPath(
