@@ -45,8 +45,23 @@ export class ConversationPins {
   isPinned = (thread: string): boolean =>
     this.state.versions[thread]?.[3] === true;
 
-  private snapshot(): ConversationPin[] {
-    return Object.values(this.state.versions);
+  private snapshot(): Promise<ConversationPin[]> {
+    return this.ctx.queue.run(() => {
+      // A sibling joining now cannot read the earlier log. Include decisions
+      // already received while their local apply is still queued.
+      const received = this.receivedBatches().flatMap(({ pins }) =>
+        Object.values(pins)
+      );
+      const versions = mergeConversationPins(this.state.versions, received);
+      return Promise.resolve(Object.values(versions));
+    });
+  }
+
+  private receivedBatches() {
+    return [...this.ctx.store.groups.values()].flatMap((runtime) => {
+      const pins = runtime.record.receivedPins;
+      return pins ? [{ runtime, pins }] : [];
+    });
   }
 
   pending(): ConversationPin[] {
@@ -121,7 +136,7 @@ export class ConversationPins {
           const target = this.deps
             .targets()
             .find((item) => item.record.g === g);
-          if (target) await this.send(target, this.snapshot());
+          if (target) await this.send(target, await this.snapshot());
         });
       });
     }
@@ -129,12 +144,7 @@ export class ConversationPins {
 
   apply(): Promise<void> {
     return this.ctx.queue.run(async () => {
-      const received = [...this.ctx.store.groups.values()].flatMap(
-        (runtime) => {
-          const pins = runtime.record.receivedPins;
-          return pins ? [{ runtime, pins }] : [];
-        }
-      );
+      const received = this.receivedBatches();
       if (received.length === 0 || !this.ctx.device) return;
       const updates = received.flatMap(({ pins }) => Object.values(pins));
       const state = this.state;
@@ -215,10 +225,12 @@ export class ConversationPins {
       group: g,
       deviceKeys: new Set(members.map(({ deviceKey }) => deviceKey)),
     };
+    // Remember the roster before sending so the next pass sees changes
+    // that happen during the exchange.
     this.lastExchange = exchange;
     this.run(async () => {
       try {
-        await this.send(runtime, this.snapshot(), true);
+        await this.send(runtime, await this.snapshot(), true);
       } catch (error) {
         if (this.lastExchange === exchange) this.lastExchange = null;
         throw error;

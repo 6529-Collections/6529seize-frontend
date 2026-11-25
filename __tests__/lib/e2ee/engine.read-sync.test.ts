@@ -161,6 +161,25 @@ describe("E2EE engine: read-state sync (D175, P60)", () => {
     expect(newcomer.engine.getConversation(g)?.pinned).toBe(true);
   });
 
+  it("shares a received pin with a new device while local apply is delayed", async () => {
+    const world = await createWorld();
+    const { alice, laptop, phone, g } = await aliceWithTwoDevices(world);
+    const { pins } = contextOf(phone).readSync as ReadSync;
+    const delayed = jest.spyOn(pins, "apply").mockResolvedValue(undefined);
+    try {
+      await laptop.engine.setConversationPinned(g, true);
+      await settle(world);
+      expect(phone.engine.getConversation(g)?.pinned).toBeUndefined();
+      stopDevice(world, laptop);
+
+      const newcomer = await addSyncDevice(world, alice, { readSync: false });
+      await settle(world);
+      expect(newcomer.engine.getConversation(g)?.pinned).toBe(true);
+    } finally {
+      delayed.mockRestore();
+    }
+  });
+
   it("schedules another send after a pin changes during an in-flight flush", async () => {
     const world = await createWorld();
     const { laptop, g } = await aliceWithTwoDevices(world);
