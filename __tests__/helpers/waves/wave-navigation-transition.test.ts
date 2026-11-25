@@ -4,6 +4,7 @@ import {
   navigateAfterWaveSwipe,
   consumeWaveSwipeHandoff,
   runWaveNavigationTransition,
+  runWaveChevronBackTransition,
   skipWaveNavigationTransition,
 } from "@/helpers/waves/wave-navigation-transition";
 
@@ -298,4 +299,119 @@ it("keeps the interruption deadline until both Feed content and shell commit", a
   jest.advanceTimersByTime(500);
   await updateDone;
   expect(skip).toHaveBeenCalledTimes(1);
+});
+
+describe("phone chevron Back", () => {
+  beforeEach(() => {
+    window.matchMedia = jest
+      .fn()
+      .mockImplementation((query: string) =>
+        query === "(width < 768px)" ? { ...media, matches: true } : media
+      );
+    document.body.innerHTML = `
+      <div data-wave-swipe-page>
+        <header>Wave name and Join</header>
+        <div data-wave-navigation-screen="wave">Channel</div>
+      </div>`;
+  });
+
+  it("captures the full channel and lets existing navigation run once without a second transition", async () => {
+    const navigate = jest.fn();
+    runWaveChevronBackTransition(() =>
+      runWaveNavigationTransition("list", navigate)
+    );
+    const page = document.querySelector<HTMLElement>("[data-wave-swipe-page]");
+    const content = document.querySelector<HTMLElement>(
+      "[data-wave-navigation-screen]"
+    );
+    expect(page?.style.viewTransitionName).toBe("wave-navigation");
+    expect(content?.style.viewTransitionName).toBe("");
+    expect(document.documentElement.dataset["waveNavigationTransition"]).toBe(
+      "chevron-back"
+    );
+    expect(navigate).not.toHaveBeenCalled();
+    await Promise.resolve();
+    expect(navigate).toHaveBeenCalledTimes(1);
+    expect(start).toHaveBeenCalledTimes(1);
+    // The destination belongs to the stationary root capture, including WebKit.
+    expect(page?.style.viewTransitionName).toBe("");
+    expect(commitWaveNavigationTransition("list")).toBe(true);
+    await updateDone;
+    expect(consumeWaveSwipeHandoff()).toBe(true);
+    finish();
+    await Promise.resolve();
+    expect(page?.style.viewTransitionName).toBe("");
+  });
+
+  it("uses the stable phone web page without requiring an app content surface", async () => {
+    document.body.innerHTML =
+      "<div data-phone-wave-page><header>Wave name and Join</header>Channel</div>";
+    const navigate = jest.fn();
+    runWaveChevronBackTransition(navigate);
+    expect(
+      document.querySelector<HTMLElement>("[data-phone-wave-page]")?.style
+        .viewTransitionName
+    ).toBe("wave-navigation");
+    await Promise.resolve();
+    commitWaveNavigationTransition("list");
+    await updateDone;
+    expect(navigate).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(["pointerdown", "resize"])(
+    "keeps navigation when %s interrupts the capture",
+    async (eventName) => {
+      const navigate = jest.fn();
+      runWaveChevronBackTransition(navigate);
+      const target = eventName === "pointerdown" ? document : window;
+      target.dispatchEvent(new Event(eventName));
+      await updateDone;
+      expect(navigate).toHaveBeenCalledTimes(1);
+      expect(skip).toHaveBeenCalledTimes(1);
+    }
+  );
+
+  it("does not push the chevron destination after browser history interrupts the capture", async () => {
+    const navigate = jest.fn();
+    runWaveChevronBackTransition(navigate);
+    window.dispatchEvent(new PopStateEvent("popstate"));
+    await updateDone;
+    expect(navigate).not.toHaveBeenCalled();
+    expect(skip).toHaveBeenCalledTimes(1);
+  });
+
+  it("navigates directly with reduced motion, suppressing the content fallback", () => {
+    media.matches = true;
+    const navigate = jest.fn();
+    runWaveChevronBackTransition(navigate);
+    expect(navigate).toHaveBeenCalledTimes(1);
+    expect(start).not.toHaveBeenCalled();
+    expect(consumeWaveSwipeHandoff()).toBe(true);
+    expect(consumeWaveSwipeHandoff()).toBe(false);
+  });
+
+  it("leaves wider layouts on their existing navigation path", () => {
+    window.matchMedia = jest.fn().mockReturnValue(media);
+    const navigate = jest.fn();
+    runWaveChevronBackTransition(navigate);
+    expect(navigate).toHaveBeenCalledTimes(1);
+    expect(start).not.toHaveBeenCalled();
+    expect(consumeWaveSwipeHandoff()).toBe(false);
+  });
+
+  it("clears a superseded content snapshot before capturing its parent", async () => {
+    runWaveNavigationTransition("feed", jest.fn());
+    const content = document.querySelector<HTMLElement>(
+      "[data-wave-navigation-screen]"
+    );
+    expect(content?.style.viewTransitionName).toBe("wave-navigation");
+    runWaveChevronBackTransition(jest.fn());
+    expect(content?.style.viewTransitionName).toBe("");
+    await Promise.resolve();
+    expect(document.documentElement.dataset["waveNavigationTransition"]).toBe(
+      "chevron-back"
+    );
+    commitWaveNavigationTransition("list");
+    await updateDone;
+  });
 });

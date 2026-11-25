@@ -1,3 +1,5 @@
+import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
+
 // The app shell acknowledges the committed screen before the browser captures it.
 // This keeps the outgoing list (including its scroll position) visible during the handoff.
 export type WaveScreen = "list" | "feed" | "wave";
@@ -21,23 +23,37 @@ let activeTransition: {
   readonly skip: () => void;
   readonly contentReady: () => void;
 } | null = null;
-let navigatingFromSwipe = false;
+let navigatingWithoutAdditionalMotion = false;
 let swipeHandoffPending = false;
 
 /** The interactive gesture already animated the outgoing screen. */
 export function navigateAfterWaveSwipe(navigate: () => void) {
   skipWaveNavigationTransition();
-  navigateFromSwipe(navigate);
+  navigateWithoutAdditionalMotion(navigate);
 }
 
-function navigateFromSwipe(navigate: () => void) {
+function navigateWithoutAdditionalMotion(navigate: () => void) {
   swipeHandoffPending = true;
-  navigatingFromSwipe = true;
+  navigatingWithoutAdditionalMotion = true;
   try {
     navigate();
   } finally {
-    navigatingFromSwipe = false;
+    navigatingWithoutAdditionalMotion = false;
   }
+}
+
+/** Tapped phone Back uses one snapshot of the header and channel together. */
+export function runWaveChevronBackTransition(navigate: () => void) {
+  if (!window.matchMedia(PHONE_WAVES_LAYOUT_QUERY).matches) {
+    navigate();
+    return;
+  }
+  runWaveNavigationTransition(
+    "list",
+    () => navigateWithoutAdditionalMotion(navigate),
+    undefined,
+    "chevron-back"
+  );
 }
 
 export function consumeWaveSwipeHandoff() {
@@ -77,16 +93,22 @@ export function skipWaveNavigationTransition() {
 export function runWaveNavigationTransition(
   screen: WaveScreen,
   navigate: () => void,
-  swipe?: SwipeHandoff
+  swipe?: SwipeHandoff,
+  presentation?: "chevron-back"
 ) {
-  if (navigatingFromSwipe) {
+  if (navigatingWithoutAdditionalMotion) {
     navigate();
     return false;
   }
   swipeHandoffPending = false;
-  const surface = document.querySelector<HTMLElement>(
+  const screenSurface = document.querySelector<HTMLElement>(
     "[data-wave-navigation-screen]"
   );
+  const surface =
+    presentation === "chevron-back"
+      ? (screenSurface?.closest<HTMLElement>("[data-wave-swipe-page]") ??
+        document.querySelector<HTMLElement>("[data-phone-wave-page]"))
+      : screenSurface;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   if (
     !surface ||
@@ -114,12 +136,16 @@ export function runWaveNavigationTransition(
     `${surface.getBoundingClientRect().height}px`
   );
   surface.style.viewTransitionName = "wave-navigation";
-  root.dataset["waveNavigationTransition"] = isForwardWaveNavigation(
-    screen,
-    surface.dataset["waveNavigationScreen"]
-  )
-    ? "forward"
-    : "back";
+  if (presentation) {
+    root.dataset["waveNavigationTransition"] = presentation;
+  } else {
+    root.dataset["waveNavigationTransition"] = isForwardWaveNavigation(
+      screen,
+      surface.dataset["waveNavigationScreen"]
+    )
+      ? "forward"
+      : "back";
+  }
   if (swipe) {
     root.dataset["waveNavigationTransition"] = "swipe-back";
     root.style.setProperty(
@@ -140,11 +166,14 @@ export function runWaveNavigationTransition(
   try {
     transition = document.startViewTransition(async () => {
       if (superseded) return;
+      // Only the departing page moves. Keep the destination in the stationary
+      // root capture instead of capturing its fixed/sticky children twice.
+      if (presentation) surface.style.removeProperty("view-transition-name");
       // The browser has captured the finger's final position. Prepare the new
       // screen underneath that snapshot, rather than sliding into an empty shell.
       swipe?.surface.style.removeProperty("transform");
       swipe?.surface.style.removeProperty("will-change");
-      if (swipe) navigateFromSwipe(navigate);
+      if (swipe) navigateWithoutAdditionalMotion(navigate);
       else navigate();
       await committed;
     });
@@ -159,10 +188,12 @@ export function runWaveNavigationTransition(
     if (stopped) return;
     stopped = true;
     commit();
+    clearSurface();
     transition.skipTransition();
   };
   // A route interruption must never leave the app waiting for a screen that cannot commit.
   const skipMotion = () => skip(false);
+  const cancelNavigation = () => skip();
   const timeout = window.setTimeout(skipMotion, 500);
   const contentReady = () => {
     contentPending = false;
@@ -183,10 +214,20 @@ export function runWaveNavigationTransition(
   };
   activeTransition = pending;
   reducedMotion.addEventListener("change", skipMotion, { once: true });
+  if (presentation) {
+    document.addEventListener("pointerdown", skipMotion, { capture: true });
+    window.addEventListener("popstate", cancelNavigation);
+    window.addEventListener("resize", skipMotion);
+  }
   const cleanup = () => {
     stopped = true;
     window.clearTimeout(timeout);
     reducedMotion.removeEventListener("change", skipMotion);
+    if (presentation) {
+      document.removeEventListener("pointerdown", skipMotion, true);
+      window.removeEventListener("popstate", cancelNavigation);
+      window.removeEventListener("resize", skipMotion);
+    }
     swipe?.onFinish?.();
     if (activeTransition !== pending) return;
     activeTransition = null;

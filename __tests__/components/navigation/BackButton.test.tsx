@@ -3,6 +3,23 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import BackButton from "@/components/navigation/BackButton";
 let mockIsApp = false;
+let mockIsIos = false;
+jest.mock("@capacitor/core", () => {
+  const actual = jest.requireActual("@capacitor/core");
+  return {
+    ...actual,
+    Capacitor: {
+      ...actual.Capacitor,
+      getPlatform: () => (mockIsIos ? "ios" : "android"),
+    },
+  };
+});
+const mockChevronBack = jest.fn((navigate: () => void) => navigate());
+jest.mock("@/helpers/waves/wave-navigation-transition", () => ({
+  ...jest.requireActual("@/helpers/waves/wave-navigation-transition"),
+  runWaveChevronBackTransition: (navigate: () => void) =>
+    mockChevronBack(navigate),
+}));
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
@@ -26,6 +43,7 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
   default: () => ({
     isApp: mockIsApp,
+    isAppleMobile: mockIsIos,
     isMobileDevice: false,
     hasTouchScreen: false,
   }),
@@ -90,8 +108,49 @@ function setup(
 describe("BackButton", () => {
   afterEach(() => {
     mockIsApp = false;
+    mockIsIos = false;
     jest.clearAllMocks();
     window.history.replaceState(null, "", "/");
+  });
+
+  it("uses the whole-channel transition for iPhone chevron Back", () => {
+    mockIsApp = true;
+    mockIsIos = true;
+    const { setActiveWave } = setup(
+      {},
+      { activeWaveId: "w1", pathname: "/waves/w1" }
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
+    expect(mockChevronBack).toHaveBeenCalledTimes(1);
+    expect(setActiveWave).toHaveBeenCalledWith(null, {
+      isDirectMessage: false,
+    });
+  });
+
+  it.each([
+    "other-native",
+    "phone-web",
+    "direct-message",
+    "direct-message-pending",
+    "profile-feed",
+    "other-section",
+  ])("preserves the existing Back path for %s", (surface) => {
+    mockIsApp = surface !== "phone-web";
+    mockIsIos = surface !== "other-native";
+    const query =
+      surface === "profile-feed"
+        ? { returnTo: "/waves?view=profile-feed" }
+        : {};
+    let pathname = "/waves/w1";
+    if (surface.startsWith("direct-message")) pathname = "/messages/w1";
+    if (surface === "other-section") pathname = "/network";
+    setup(query, {
+      activeWaveId: "w1",
+      pathname,
+      isDm: surface === "direct-message",
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
+    expect(mockChevronBack).not.toHaveBeenCalled();
   });
 
   it.each([

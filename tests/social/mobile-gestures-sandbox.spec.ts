@@ -1,5 +1,5 @@
 import type { ApiWaveDropsFeedV2 } from "@/generated/models/ApiWaveDropsFeedV2";
-import type { Locator, Page } from "@playwright/test";
+import { devices, type Locator, type Page } from "@playwright/test";
 import {
   expect,
   expectNoHorizontalOverflow,
@@ -1143,4 +1143,144 @@ test.describe("web message gesture regression", () => {
     await expectNoHorizontalOverflow(page);
     await expectNoUnsafeSandboxMutations(baseURL);
   });
+});
+
+test.describe("phone chevron Back", () => {
+  test.use({
+    userAgent: devices["iPhone 14 Pro Max"].userAgent,
+    isMobile: true,
+    hasTouch: true,
+    viewport: { width: 412, height: 840 },
+  });
+  for (const surface of ["ios", "web"] as const) {
+    test(`phone ${surface} chevron Back moves the header with one channel snapshot`, async ({
+      context,
+      page,
+      baseURL,
+    }, testInfo) => {
+      test.skip(
+        !["web-mobile-chromium", "web-desktop-webkit"].includes(
+          testInfo.project.name
+        ),
+        "Phone viewport navigation acceptance in Chromium and WebKit."
+      );
+      if (surface === "ios") {
+        await installSurfaceSimulation(context, "capacitor-ios-sim", baseURL);
+      }
+      await hideNextDevOverlay(context);
+      await page.setViewportSize({ width: 412, height: 840 });
+      await installMessageFixture(page, baseURL);
+      // Warm the list route before timing motion, including on a cold dev server.
+      await page.goto("/waves", { waitUntil: "domcontentloaded" });
+      await expect(
+        page.getByRole("button", { name: "Find a wave…", exact: true })
+      ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+      await page.locator(`a[href="/waves/${WAVE}"]`).first().click();
+      await waitForRouteReady(page);
+      await expect(
+        page.getByRole("textbox", { name: "Write a message" }).last()
+      ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+      await expect(
+        page
+          .getByRole("tabpanel")
+          .locator("[data-wave-drop-id][data-reply-enabled=true]")
+          .first()
+      ).toBeVisible();
+      const backName = surface === "ios" ? "Back" : "Go back";
+      await page.evaluate((label) => {
+        const root = document.documentElement;
+        const start = document.startViewTransition.bind(document);
+        document.startViewTransition = (...args) => {
+          const captured = document.querySelector<HTMLElement>(
+            '[style*="view-transition-name: wave-navigation"]'
+          );
+          const back = Array.from(document.querySelectorAll("button")).find(
+            (button) =>
+              button.getAttribute("aria-label") === label &&
+              button.getBoundingClientRect().width > 0
+          );
+          root.dataset["testChevronCaptures"] = String(
+            Number(root.dataset["testChevronCaptures"] ?? 0) + 1
+          );
+          root.dataset["testChevronHeader"] = String(
+            captured?.contains(back ?? null)
+          );
+          root.dataset["testChevronTop"] = String(
+            captured?.getBoundingClientRect().top
+          );
+          const transition = start(async () => {
+            root.dataset["testChevronUpdate"] = "started";
+            const update = args[0];
+            if (typeof update === "function") await update();
+            root.dataset["testChevronUpdate"] = "completed";
+            root.dataset["testChevronDestinationInRoot"] = String(
+              !captured?.style.viewTransitionName
+            );
+          });
+          void transition.ready.then(
+            () => {
+              requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                  const old = getComputedStyle(
+                    root,
+                    "::view-transition-old(wave-navigation)"
+                  );
+                  const incoming = getComputedStyle(
+                    root,
+                    "::view-transition-new(root)"
+                  );
+                  root.dataset["testChevronMotion"] = JSON.stringify({
+                    x: new DOMMatrix(old.transform).m41,
+                    opacity: Number(old.opacity),
+                    incomingAnimation: incoming.animationName,
+                  });
+                });
+              });
+            },
+            () => {}
+          );
+          return transition;
+        };
+      }, backName);
+      await page.getByRole("button", { name: backName, exact: true }).click();
+      await expect(page).toHaveURL(/\/waves$/);
+      const root = page.locator("html");
+      await expect(root).toHaveAttribute("data-test-chevron-captures", "1");
+      await expect(root).toHaveAttribute("data-test-chevron-header", "true");
+      await expect(root).toHaveAttribute(
+        "data-test-chevron-destination-in-root",
+        "true"
+      );
+      await expect(root).toHaveAttribute("data-test-chevron-top", "0");
+      await expect(root).toHaveAttribute("data-test-chevron-motion", /"x":/);
+      const motion = JSON.parse(
+        (await root.getAttribute("data-test-chevron-motion")) ?? "null"
+      ) as {
+        x: number;
+        opacity: number;
+        incomingAnimation: string;
+      };
+      expect(motion.x).toBeGreaterThan(0);
+      expect(motion.x).toBeLessThanOrEqual(412);
+      expect(motion.opacity).toBe(1);
+      expect(motion.incomingAnimation).toBe("none");
+      await expect(
+        page.getByRole("button", { name: "Find a wave…", exact: true })
+      ).toBeVisible();
+      await expect(root).not.toHaveAttribute("data-wave-navigation-transition");
+      await expectNoHorizontalOverflow(page);
+
+      await page.goBack();
+      await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}`));
+      await expect(
+        page.getByRole("textbox", { name: "Write a message" }).last()
+      ).toBeVisible();
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await page.getByRole("button", { name: backName, exact: true }).click();
+      await expect(page).toHaveURL(/\/waves$/);
+      await expect(root).toHaveAttribute("data-test-chevron-captures", "1");
+      await expect(root).not.toHaveAttribute("data-wave-navigation-transition");
+      await expectNoUnsafeSandboxMutations(baseURL);
+    });
+  }
 });

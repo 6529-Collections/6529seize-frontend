@@ -70,6 +70,24 @@ html[data-wave-navigation-content-pending]::view-transition-new(
   visibility: hidden;
 }
 
+/* Chevron Back captures the complete phone page; the destination stays still. */
+html[data-wave-navigation-transition="chevron-back"]::view-transition {
+  pointer-events: none;
+}
+
+html[data-wave-navigation-transition="chevron-back"]::view-transition-old(
+    wave-navigation
+  ) {
+  z-index: 2;
+  animation: wave-chevron-back 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes wave-chevron-back {
+  to {
+    transform: translateX(100%);
+  }
+}
+
 @keyframes wave-navigation-swipe-leave {
   to {
     transform: translateX(var(--wave-swipe-remainder));

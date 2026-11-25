@@ -1,5 +1,6 @@
 "use client";
 
+import { Capacitor } from "@capacitor/core";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useTransition } from "react";
@@ -21,7 +22,11 @@ import { useClosingDropId } from "@/hooks/useClosingDropId";
 import { useExitActiveWave } from "./useExitActiveWave";
 import { isCompetitionPathname } from "@/helpers/competition.helpers";
 import { getMissingWaveNavigationRoute } from "@/helpers/waves/missing-wave-navigation.helpers";
-import { isProfileWavesFeed } from "@/helpers/waves/profile-feed-navigation";
+import {
+  isProfileWavesFeed,
+  returnsToProfileWavesFeed,
+} from "@/helpers/waves/profile-feed-navigation";
+import { runWaveChevronBackTransition } from "@/helpers/waves/wave-navigation-transition";
 
 export default function BackButton({
   returnTo,
@@ -124,7 +129,18 @@ export default function BackButton({
 
     // Inside a wave → go back to wave list
     if (waveId) {
-      exitActiveWave(isDm);
+      const leave = () => exitActiveWave(isDm);
+      if (
+        isApp &&
+        (pathname === "/waves" || pathname.startsWith("/waves/")) &&
+        Capacitor.getPlatform() === "ios" &&
+        !isDm &&
+        !returnsToProfileWavesFeed(searchParams)
+      ) {
+        runWaveChevronBackTransition(leave);
+      } else {
+        leave();
+      }
       return;
     }
 

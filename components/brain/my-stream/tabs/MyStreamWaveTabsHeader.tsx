@@ -1,5 +1,7 @@
 "use client";
 
+import { runWaveChevronBackTransition } from "@/helpers/waves/wave-navigation-transition";
+
 import IconButton from "@/components/utils/button/IconButton";
 
 import { useWaveInformation } from "@/contexts/WaveInformationContext";
@@ -427,7 +429,12 @@ export default function MyStreamWaveTabsHeader({
     const newUrl = params.toString()
       ? `${basePath}?${params.toString()}`
       : basePath;
-    router.push(newUrl, { scroll: false });
+    const leave = () => router.push(newUrl, { scroll: false });
+    if (isPhoneWave) {
+      runWaveChevronBackTransition(leave);
+    } else {
+      leave();
+    }
   };
 
   const searchMessagesLabel = "Search messages in this wave";
