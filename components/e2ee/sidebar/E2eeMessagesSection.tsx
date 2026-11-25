@@ -14,10 +14,14 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type { E2eeConversation } from "@/lib/e2ee/types";
 
-const E2eeConversationList = dynamic(() =>
-  import("../list/E2eeConversationList").then(
-    (module) => module.E2eeConversationList
-  )
+// Encrypted chats are available only in the browser. Keep their loading
+// boundary inside the sidebar so the inbox can render independently.
+const E2eeConversationList = dynamic(
+  () =>
+    import("../list/E2eeConversationList").then(
+      (module) => module.E2eeConversationList
+    ),
+  { ssr: false }
 );
 
 const SIDEBAR_LIMIT = 8;
