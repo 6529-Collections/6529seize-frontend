@@ -109,8 +109,9 @@ Transfer mode is part of the Native collected view (not a separate route).
    - lower section tabs: `Wallet Activity`, `Distributions`, `TDH History`
      - lower Activity tab labels and the tab-list accessible name are
        message-backed from the source locale
-     - on mobile, lower Activity tabs share available space and keep side padding;
-       labels stay on one line and scroll horizontally when needed
+     - below 768px, lower Activity tabs use the shared 32px pills with 13px
+       labels and content-width sizing; labels stay on one line and scroll
+       horizontally when needed. Wider screens retain the segmented tabs.
      - the selected tab stays visible, including when opened from a deep link
      - lower Activity tabs expose tab/panel relationships and support keyboard
        arrow, Home, and End navigation

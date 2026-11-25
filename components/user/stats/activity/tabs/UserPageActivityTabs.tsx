@@ -1,6 +1,8 @@
 import { useEffect, useRef, type KeyboardEvent } from "react";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import clsx from "clsx";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { CONNECTED_TAB_LIST_CLASSES } from "@/components/utils/select/tabs/connectedTabStyles";
 import type { USER_PAGE_ACTIVITY_TAB } from "../activity.types";
 import {
@@ -36,6 +38,7 @@ export default function UserPageActivityTabs({
   readonly setActiveTab: (tab: USER_PAGE_ACTIVITY_TAB) => void;
   readonly locale: SupportedLocale;
 }) {
+  const compact = useMediaQuery("(max-width: 767px)");
   const tablistRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -45,6 +48,9 @@ export default function UserPageActivityTabs({
     }
 
     const revealSelectedTab = () => {
+      if (tablist.clientWidth === 0) {
+        return;
+      }
       const selectedTab = tablist.querySelector<HTMLButtonElement>(
         '[aria-selected="true"]'
       );
@@ -52,8 +58,10 @@ export default function UserPageActivityTabs({
         return;
       }
 
-      const left = selectedTab.offsetLeft;
-      const right = left + selectedTab.offsetWidth;
+      // Offset metrics round fractional pill widths. Keep a pixel of clearance
+      // so the selected tab's edge stays visible after scrolling.
+      const left = Math.max(0, selectedTab.offsetLeft - 1);
+      const right = selectedTab.offsetLeft + selectedTab.offsetWidth + 1;
       if (left < tablist.scrollLeft) {
         tablist.scrollTo({ left });
       } else if (right > tablist.scrollLeft + tablist.clientWidth) {
@@ -105,9 +113,19 @@ export default function UserPageActivityTabs({
       ref={tablistRef}
       role="tablist"
       aria-label={t(locale, "user.collected.stats.activityTabs.listLabel")}
-      className={`${CONNECTED_TAB_LIST_CLASSES} tw-no-scrollbar tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-nowrap tw-overflow-x-auto tw-overflow-y-hidden tw-overscroll-x-contain sm:tw-inline-flex sm:tw-w-auto`}
+      className={clsx(
+        "tw-no-scrollbar tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-nowrap tw-overflow-x-auto tw-overflow-y-hidden tw-overscroll-x-contain",
+        !compact &&
+          `${CONNECTED_TAB_LIST_CLASSES} sm:tw-inline-flex sm:tw-w-auto`
+      )}
     >
-      <div className="tw-grid tw-min-w-max tw-flex-1 tw-auto-cols-fr tw-grid-flow-col tw-gap-0.5 sm:tw-flex">
+      <div
+        className={
+          compact
+            ? "tw-flex tw-w-max tw-flex-none tw-gap-1 tw-pr-px"
+            : "tw-grid tw-min-w-max tw-flex-1 tw-auto-cols-fr tw-grid-flow-col tw-gap-0.5 sm:tw-flex"
+        }
+      >
         {USER_PAGE_ACTIVITY_TABS.map((tab) => (
           <UserPageActivityTab
             key={tab}
@@ -115,6 +133,7 @@ export default function UserPageActivityTabs({
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             locale={locale}
+            compact={compact}
             onKeyDown={(event) => selectTabFromKeyboard(event, tab)}
           />
         ))}

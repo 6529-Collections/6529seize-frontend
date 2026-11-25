@@ -288,7 +288,7 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
       exact: true,
     });
     await expect(boost).toBeVisible();
-    for (const width of [360, 390, 430, 520, 639, 1280]) {
+    for (const width of [360, 390, 430, 507, 520, 639, 767, 768, 1280]) {
       await page.setViewportSize({ width, height: 844 });
       await expect(page.getByTestId("collected-purchase-actions")).toHaveCount(
         0
@@ -320,44 +320,23 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
         name: "Activity details sections",
       });
       const tabs = tablist.getByRole("tab");
-      await expect(tablist).toHaveCSS("border-radius", "8px");
+      const compactTabs = width < 768;
+      await expect(tablist).toHaveCSS(
+        "border-radius",
+        compactTabs ? "0px" : "8px"
+      );
       for (const tab of await tabs.all()) {
         await expect(tab).toHaveCSS("white-space", "nowrap");
-        await expect(tab).toHaveCSS("border-radius", "6px");
+        await expect(tab).toHaveCSS(
+          "border-radius",
+          compactTabs ? "9999px" : "6px"
+        );
         await expect(tab).toHaveCSS("font-size", "13px");
-        if (width < 640) {
-          await expect(tab).toHaveCSS("flex-grow", "1");
-          const padding = width <= 360 ? "6px" : "12px";
-          await expect(tab).toHaveCSS("padding-left", padding);
-          await expect(tab).toHaveCSS("padding-right", padding);
-        }
-      }
-      if (width < 640) {
-        const sizing = await tablist.evaluate((node) => ({
-          fits: node.scrollWidth <= node.clientWidth,
-          widths: Array.from(node.querySelectorAll("button")).map(
-            (tab) => tab.getBoundingClientRect().width
-          ),
-          gap: Number.parseFloat(
-            getComputedStyle(node.firstElementChild!).columnGap
-          ),
-        }));
-        if (sizing.fits) {
-          expect(
-            Math.max(...sizing.widths) - Math.min(...sizing.widths)
-          ).toBeLessThanOrEqual(1);
-          const filledWidth =
-            sizing.widths.reduce((sum, value) => sum + value, 0) +
-            sizing.gap * (sizing.widths.length - 1);
-          const availableWidth = await tablist.evaluate((node) => {
-            const style = getComputedStyle(node);
-            return (
-              node.clientWidth -
-              Number.parseFloat(style.paddingLeft) -
-              Number.parseFloat(style.paddingRight)
-            );
-          });
-          expect(Math.abs(filledWidth - availableWidth)).toBeLessThanOrEqual(1);
+        if (compactTabs) {
+          await expect(tab).toHaveCSS("height", "32px");
+          await expect(tab).toHaveCSS("flex-grow", "0");
+          await expect(tab).toHaveCSS("padding-left", "12px");
+          await expect(tab).toHaveCSS("padding-right", "12px");
         }
       }
       const heights = await tabs.evaluateAll((nodes) =>
