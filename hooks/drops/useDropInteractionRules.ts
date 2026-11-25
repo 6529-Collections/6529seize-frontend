@@ -5,6 +5,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { DropVoteState } from "./types";
 import { Time } from "@/helpers/time";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 
 interface DropInteractionRules {
   canShowVote: boolean; // determines if voting UI should be visible
@@ -25,6 +26,11 @@ interface DropInteractionRules {
  */
 export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
   const { connectedProfile, activeProfileProxy } = useAuth();
+  const votesPaused = useWavesWritesPaused("votes");
+  const entriesPaused = useWavesWritesPaused("entries");
+  // Deleting someone else's entry is moderation, which stays closed from the
+  // freeze until it opens on the 6529 Network.
+  const entryModerationPaused = useWavesWritesPaused();
 
   // Check if this is a winner drop
   const isWinner = drop.drop_type === ApiDropType.Winner;
@@ -80,6 +86,12 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
       return DropVoteState.CANT_VOTE;
     }
 
+    // Votes on entries move to the 6529 Network: shown, but not changeable
+    // here. Ratings of chat drops stay on this site.
+    if (votesPaused && drop.drop_type !== ApiDropType.Chat) {
+      return DropVoteState.PAUSED;
+    }
+
     if (!drop.context_profile_context?.max_rating) {
       return DropVoteState.NO_CREDIT;
     }
@@ -121,9 +133,18 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
   // Waves with open replies let posters and admins remove replies.
   const canDeleteAsReplyModerator =
     !!drop.reply_to && drop.wave.authenticated_user_can_delete_replies === true;
+  // Deleting an entry withdraws or disqualifies it, which moves to the 6529
+  // Network with the other entry changes. Chat drops stay deletable.
+  const isEntry = drop.drop_type !== ApiDropType.Chat;
+  const isEntryDeletePaused = entriesPaused && isEntry;
+  // On the 6529 Network an author withdraws their own entry while it is in
+  // the running; a winner stays.
+  const isChainWithdrawal = isEntry && entryModerationPaused;
+  const canDeleteEntryOrDrop = isChainWithdrawal
+    ? isAuthor && drop.drop_type === ApiDropType.Participatory
+    : isAuthor || canDeleteAsAdmin || canDeleteAsReplyModerator;
   // Delete rules
-  const canDelete =
-    baseRules && (isAuthor || canDeleteAsAdmin || canDeleteAsReplyModerator);
+  const canDelete = baseRules && !isEntryDeletePaused && canDeleteEntryOrDrop;
   const canSetPinnedDrop = baseRules && isAdmin;
 
   // Check if voting has ended by comparing current time with voting period end time

@@ -11,6 +11,7 @@ import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
 import { getGroupCriteriaSummary } from "@/helpers/groups/group-criteria-summary";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useIdentityEditingPaused } from "@/hooks/useIdentityMovePhase";
 import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { XMarkIcon } from "@heroicons/react/24/outline";
@@ -40,6 +41,7 @@ export default function CommunityMembersGroupDetails({
 }) {
   const locale = useBrowserLocale();
   const { connectedProfile } = useAuth();
+  const identityEditingPaused = useIdentityEditingPaused();
   const [activeRateSelection, setActiveRateSelection] = useState<{
     readonly groupId: string;
     readonly matter: GroupCardRateMatter | null;
@@ -142,10 +144,11 @@ export default function CommunityMembersGroupDetails({
   });
   const hasActiveCriteria =
     criteriaSummary.status === "available" && criteriaSummary.text !== null;
-  const showBulkRateActions =
+  const canBulkRate =
     hasActiveCriteria &&
     Boolean(connectedProfile?.handle) &&
     (!group.is_private || viewerIdentityKey !== null);
+  const showBulkRateActions = canBulkRate && !identityEditingPaused;
 
   return (
     <section
@@ -158,6 +161,11 @@ export default function CommunityMembersGroupDetails({
         </div>
         {closeButton}
       </div>
+      {canBulkRate && identityEditingPaused ? (
+        <p className="tw-mb-0 tw-mt-4 tw-text-sm tw-leading-5 tw-text-iron-400">
+          {t(locale, "identityMove.paused")}
+        </p>
+      ) : null}
       {showBulkRateActions && activeRateMatter === null ? (
         <div
           role="group"

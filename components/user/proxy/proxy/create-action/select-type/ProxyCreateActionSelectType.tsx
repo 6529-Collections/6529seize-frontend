@@ -4,6 +4,8 @@ import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyAct
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import ProxyCreateActionSelectTypeItem from "./ProxyCreateActionSelectTypeItem";
 import Button from "@/components/utils/button/Button";
+import { useIdentityEditingPaused } from "@/hooks/useIdentityMovePhase";
+import { isRatingProxyAction } from "@/lib/identity-move/editGuard";
 
 export default function ProxyCreateActionSelectType({
   currentActions,
@@ -16,10 +18,14 @@ export default function ProxyCreateActionSelectType({
   ) => void;
   readonly onCancel?: (() => void) | undefined;
 }) {
+  const identityEditingPaused = useIdentityEditingPaused();
   const isActionAvailable = (
     actionType: ApiProfileProxyActionType
   ): boolean => {
     if (!PROFILE_PROXY_AVAILABLE_ACTIONS.includes(actionType)) {
+      return false;
+    }
+    if (identityEditingPaused && isRatingProxyAction(actionType)) {
       return false;
     }
     switch (actionType) {

@@ -10,6 +10,44 @@ describe("useDropPrivileges", () => {
     jest.useRealTimers();
   });
 
+  const allowed = {
+    isLoggedIn: true,
+    isProxy: false,
+    canChat: true,
+    canDrop: true,
+    chatDisabled: false,
+    slowModeCooldownMs: null,
+    nextDropAllowed: null,
+    submissionStarts: null,
+    submissionEnds: null,
+    maxDropsCount: null,
+    identityDropsCount: null,
+  };
+
+  it("pauses submissions, not chat, for the move to the 6529 Network", () => {
+    const { result } = renderHook(() =>
+      useDropPrivileges({ ...allowed, submissionsPaused: true })
+    );
+    expect(result.current).toEqual({
+      submissionRestriction: SubmissionRestriction.PAUSED_FOR_MOVE,
+      chatRestriction: null,
+    });
+  });
+
+  it("keeps no-permission ahead of the pause", () => {
+    const { result } = renderHook(() =>
+      useDropPrivileges({ ...allowed, canDrop: false, submissionsPaused: true })
+    );
+    expect(result.current.submissionRestriction).toBe(
+      SubmissionRestriction.NO_PERMISSION
+    );
+  });
+
+  it("leaves submissions open without the pause", () => {
+    const { result } = renderHook(() => useDropPrivileges(allowed));
+    expect(result.current.submissionRestriction).toBeNull();
+  });
+
   it("returns not logged in restrictions", () => {
     const { result } = renderHook(() =>
       useDropPrivileges({

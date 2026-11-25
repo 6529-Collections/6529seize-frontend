@@ -6,6 +6,11 @@ export interface DropMutationBody {
   readonly dropId: string | null;
   readonly onSuccess?: (() => void) | undefined;
   readonly onError?: ((error: unknown) => boolean | void) | undefined;
+  /**
+   * The sender waits for submitDrop's answer and keeps its draft when it is
+   * false, so a refusal needn't say the draft is gone.
+   */
+  readonly keepsDraftWhenRefused?: boolean | undefined;
 }
 
 export interface SlowModeChatReservation {

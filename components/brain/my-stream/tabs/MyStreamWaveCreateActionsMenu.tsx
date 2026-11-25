@@ -22,6 +22,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { isWaveDirectMessage } from "@/helpers/waves/wave.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
+import { useWaveCreationPaused } from "@/hooks/useWavesMovePhase";
 import { t } from "@/i18n/messages";
 import MyStreamWaveCurationCreateDialog from "./MyStreamWaveCurationCreateDialog";
 
@@ -55,6 +56,8 @@ export function useWaveCreateMenuActions({
   };
   const closeAction = () => setAction(null);
   const isDirectMessage = wave ? isWaveDirectMessage(wave.id, wave) : false;
+  // New subwaves move to the 6529 Network with the other waves.
+  const wavesWritesPaused = useWaveCreationPaused();
   const waveConfig = wave?.wave as ApiWave["wave"] | null | undefined;
   const parentAdminGroup = waveConfig?.admin_group as
     | ApiWave["wave"]["admin_group"]
@@ -70,6 +73,7 @@ export function useWaveCreateMenuActions({
     !activeProfileProxy &&
     !isDirectMessage &&
     !wave?.parent_wave &&
+    !wavesWritesPaused &&
     Boolean(parentAdminGroupId);
 
   const iconClassName = mobile

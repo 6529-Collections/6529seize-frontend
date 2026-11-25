@@ -5,6 +5,7 @@ import { useAuthenticatedContent } from "@/hooks/useAuthenticatedContent";
 import WavesRouteLoading from "./WavesRouteLoading";
 import CommunityCurations from "@/components/community-curations/CommunityCurations";
 import { DiscoverWavesLink } from "@/components/waves/discovery/DiscoverWavesLink";
+import WavesMoveNotice from "@/components/waves-move/WavesMoveNotice";
 import WaveRouteShell from "./WaveRouteShell";
 import BrainContent from "../brain/content/BrainContent";
 import useDeviceInfo from "../../hooks/useDeviceInfo";
@@ -41,23 +42,26 @@ const WavesView: React.FC = () => {
     content = (
       <CommunityCurations
         topContent={
-          <nav
-            aria-label={t(locale, "wave.navigation.appSections")}
-            className="tw-mb-5 tw-flex tw-items-center tw-justify-between tw-gap-4 lg:tw-hidden"
-          >
-            <Link
-              href="/waves"
-              prefetch={false}
-              className="tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-px-2 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-300 tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 active:tw-bg-white/[0.05] desktop-hover:hover:tw-bg-white/[0.05] desktop-hover:hover:tw-text-white motion-reduce:tw-transition-none"
+          <>
+            <WavesMoveNotice className="tw-mb-5" />
+            <nav
+              aria-label={t(locale, "wave.navigation.appSections")}
+              className="tw-mb-5 tw-flex tw-items-center tw-justify-between tw-gap-4 lg:tw-hidden"
             >
-              <ArrowLeftIcon
-                aria-hidden="true"
-                className="tw-size-4 tw-flex-shrink-0"
-              />
-              {t(locale, "navigation.primary.waves")}
-            </Link>
-            <DiscoverWavesLink />
-          </nav>
+              <Link
+                href="/waves"
+                prefetch={false}
+                className="tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-px-2 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-300 tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 active:tw-bg-white/[0.05] desktop-hover:hover:tw-bg-white/[0.05] desktop-hover:hover:tw-text-white motion-reduce:tw-transition-none"
+              >
+                <ArrowLeftIcon
+                  aria-hidden="true"
+                  className="tw-size-4 tw-flex-shrink-0"
+                />
+                {t(locale, "navigation.primary.waves")}
+              </Link>
+              <DiscoverWavesLink />
+            </nav>
+          </>
         }
       />
     );

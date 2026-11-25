@@ -5,6 +5,7 @@ import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/React
 import type { ApiUpdateWaveHubChat } from "@/generated/models/ApiUpdateWaveHubChat";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { getWaveChatRepliesUpdate } from "@/helpers/waves/wave-chat-replies.helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { updateWaveHub } from "@/services/api/wave-hub-api";
@@ -18,7 +19,10 @@ export const useWaveSettingUpdater = (wave: ApiWave) => {
     useAuth();
   const { onWaveCreated } = useContext(ReactQueryWrapperContext);
   const [mutating, setMutating] = useState(false);
-  const canEdit = canEditWave({ connectedProfile, activeProfileProxy, wave });
+  const wavesWritesPaused = useWavesWritesPaused();
+  const canEdit =
+    !wavesWritesPaused &&
+    canEditWave({ connectedProfile, activeProfileProxy, wave });
 
   const updateWave = useCallback(
     async (

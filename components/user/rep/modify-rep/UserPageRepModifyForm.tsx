@@ -7,6 +7,8 @@ import Button from "@/components/utils/button/Button";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { chainRatingBlockedText } from "@/components/chain-identity/chainErrorMessage";
+import ChainRatingNote from "@/components/chain-identity/ChainRatingNote";
 import { useRepAllocation } from "@/hooks/useRepAllocation";
 import { t, tRich } from "@/i18n/messages";
 import { useContext, useEffect, useId, useState } from "react";
@@ -41,9 +43,11 @@ export default function UserPageRepModifyForm({
     heroAvailableRep,
     minMaxValues,
     isError,
+    chainError,
     isFetching,
     retry,
   } = useRepAllocation({ profile, category });
+  const blocked = chainRatingBlockedText(locale, chainError);
 
   const [draftRating, setDraftRating] = useState<string | null>(null);
   const adjustedRatingStr =
@@ -75,6 +79,7 @@ export default function UserPageRepModifyForm({
             heroAvailableCredit={heroAvailableRep}
             isLoading={!repState}
           />
+          <ChainRatingNote />
         </div>
         {!repState && !isError && (
           <output className="tw-sr-only">
@@ -87,16 +92,18 @@ export default function UserPageRepModifyForm({
               role="alert"
               className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-xs tw-text-iron-300"
             >
-              {t(locale, "rep.categories.edit.loadError")}
+              {blocked ?? t(locale, "rep.categories.edit.loadError")}
             </p>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={retry}
-              loading={isFetching}
-            >
-              {t(locale, "rep.categories.edit.retry")}
-            </Button>
+            {blocked === null && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={retry}
+                loading={isFetching}
+              >
+                {t(locale, "rep.categories.edit.retry")}
+              </Button>
+            )}
           </div>
         )}
       </div>

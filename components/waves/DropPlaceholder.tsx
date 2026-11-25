@@ -151,6 +151,8 @@ function getSubmissionMessage(
       return t(locale, "waves.chat.restriction.submissionsEnded");
     case SubmissionRestriction.MAX_DROPS_REACHED:
       return t(locale, "waves.chat.restriction.maxDropsReached");
+    case SubmissionRestriction.PAUSED_FOR_MOVE:
+      return t(locale, "wavesMove.paused");
     default:
       return throwUnhandledRestriction("submission", String(restriction));
   }
@@ -187,6 +189,7 @@ function getPlaceholderColor({
     case SubmissionRestriction.NEEDS_PROFILE:
     case SubmissionRestriction.PROXY_USER:
     case SubmissionRestriction.NO_PERMISSION:
+    case SubmissionRestriction.PAUSED_FOR_MOVE:
       return MUTED_TEXT_CLASS;
   }
 }

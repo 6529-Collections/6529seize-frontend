@@ -218,3 +218,32 @@ it.each(["", "tab=rules", "edit=1", "edit=1&competition=native&serialNo=42"])(
     expect(mockReplace).toHaveBeenCalledWith("/waves/wave/decisions");
   }
 );
+
+describe("a decision made on the 6529 Network", () => {
+  beforeEach(() => {
+    mockSearch = "";
+    (mockCompetition as Record<string, unknown>)["chain_id"] =
+      `0x${"3c".repeat(32)}`;
+  });
+
+  afterEach(() => {
+    delete (mockCompetition as Record<string, unknown>)["chain_id"];
+    mockCompetition.permissions.submit = true;
+  });
+
+  it("offers the entry form when 6529.io's API offers it", () => {
+    mockCompetition.permissions.submit = true;
+    render(<CompetitionDetail waveId="wave" competitionId="native" />);
+    expect(
+      screen.getByRole("button", { name: "Submit an entry" })
+    ).toBeVisible();
+  });
+
+  it("offers none when 6529.io's API shows it closed", () => {
+    mockCompetition.permissions.submit = false;
+    render(<CompetitionDetail waveId="wave" competitionId="native" />);
+    expect(
+      screen.queryByRole("button", { name: "Submit an entry" })
+    ).toBeNull();
+  });
+});

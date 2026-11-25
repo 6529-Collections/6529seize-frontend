@@ -31,10 +31,7 @@ describe("invalidateWaveApprovalStatusQueries", () => {
       QueryKey.DROPS_LEADERBOARD,
       { waveId: "wave-1", page_size: 20 },
     ] as const;
-    const dropsKey = [
-      QueryKey.DROPS,
-      { waveId: "wave-1", limit: 20 },
-    ] as const;
+    const dropsKey = [QueryKey.DROPS, { waveId: "wave-1", limit: 20 }] as const;
     const dropVotersKey = [QueryKey.DROP_VOTERS, { dropId: "drop-1" }] as const;
     const dropVoteLogsKey = [
       QueryKey.DROP_VOTE_LOGS,
@@ -96,6 +93,26 @@ describe("invalidateWaveApprovalStatusQueries", () => {
     expect(invalidateQueries).not.toHaveBeenCalled();
   });
 
+  it("waits for 6529.io's index before refetching a vote that went to the 6529 Network", () => {
+    jest.useFakeTimers();
+    try {
+      const invalidate = jest.spyOn(queryClient, "invalidateQueries");
+      applyWaveDropVoteUpdate(
+        queryClient,
+        { id: "drop-1", wave: { id: "wave-1" } } as never,
+        "wave-1",
+        { fromChain: true }
+      );
+      expect(invalidate).not.toHaveBeenCalled();
+      jest.advanceTimersByTime(15_000);
+      expect(invalidate).toHaveBeenCalledWith({
+        queryKey: [QueryKey.DROP_VOTERS, { dropId: "drop-1" }],
+      });
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it("patches only the voted drop and defers leaderboard refetching", () => {
     const leaderboardKey = [
       QueryKey.DROPS_LEADERBOARD,
@@ -109,10 +126,7 @@ describe("invalidateWaveApprovalStatusQueries", () => {
       QueryKey.DROP_VOTERS,
       { dropId: "drop-1", pageSize: 20 },
     ] as const;
-    const dropsKey = [
-      QueryKey.DROPS,
-      { waveId: "wave-1", limit: 50 },
-    ] as const;
+    const dropsKey = [QueryKey.DROPS, { waveId: "wave-1", limit: 50 }] as const;
     const otherVotersKey = [
       QueryKey.DROP_VOTERS,
       { dropId: "drop-2", pageSize: 20 },

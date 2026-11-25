@@ -106,6 +106,10 @@ export function SubmissionActionButton({
         label = t(locale, "memes.submission.action.submissionsClosed");
         disabled = true;
         break;
+      case "paused":
+        label = t(locale, "wavesMove.submissionsPaused");
+        disabled = true;
+        break;
       case "eligible":
         disabled = !isFormValid;
         break;

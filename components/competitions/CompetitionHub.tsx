@@ -28,6 +28,7 @@ import {
 import { getCompetitionRoute } from "@/helpers/competition.helpers";
 import { getWavePathRoute } from "@/helpers/navigation.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { t } from "@/i18n/messages";
 import { formatDate } from "@/i18n/format";
 import { Time } from "@/helpers/time";
@@ -132,7 +133,10 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
   const locale = useBrowserLocale();
   const { isApp } = useDeviceInfo();
   const isMobileViewport = useIsMobileLayoutViewport();
-  const canCreateCompetition = hub.permissions.create_competition;
+  // New decisions move to the 6529 Network.
+  const wavesWritesPaused = useWavesWritesPaused();
+  const canCreateCompetition =
+    hub.permissions.create_competition && !wavesWritesPaused;
   const createClassName = `${COMPACT_ACTION_BUTTON_CLASS} ${isMobileViewport ? COMPACT_ACTION_TOUCH_TARGET_CLASS : ""} tw-h-8 tw-no-underline hover:tw-no-underline`;
   const createContent = (
     <span
