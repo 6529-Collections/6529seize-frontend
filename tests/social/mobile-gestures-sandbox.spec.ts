@@ -1158,6 +1158,8 @@ test.describe("phone chevron Back", () => {
       page,
       baseURL,
     }, testInfo) => {
+      // This acceptance case requires phone input; other project capabilities
+      // are covered by the gesture and desktop regressions above.
       test.skip(
         !["web-mobile-chromium", "web-desktop-webkit"].includes(
           testInfo.project.name
@@ -1170,22 +1172,11 @@ test.describe("phone chevron Back", () => {
       await hideNextDevOverlay(context);
       await page.setViewportSize({ width: 412, height: 840 });
       await installMessageFixture(page, baseURL);
-      // Warm the list route before timing motion, including on a cold dev server.
-      await page.goto("/waves", { waitUntil: "domcontentloaded" });
-      await expect(
-        page.getByRole("button", { name: "Find a wave…", exact: true })
-      ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
-      await page.locator(`a[href="/waves/${WAVE}"]`).first().click();
-      await waitForRouteReady(page);
-      await expect(
-        page.getByRole("textbox", { name: "Write a message" }).last()
-      ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
-      await expect(
-        page
-          .getByRole("tabpanel")
-          .locator("[data-wave-drop-id][data-reply-enabled=true]")
-          .first()
-      ).toBeVisible();
+      // Compile the destination without timing a cold dev build in the slide.
+      // Direct entry also exercises Back without an earlier list history entry.
+      const list = await page.request.get("/waves");
+      expect(list.ok()).toBe(true);
+      await openWave(page);
       const backName = surface === "ios" ? "Back" : "Go back";
       await page.evaluate((label) => {
         const root = document.documentElement;
@@ -1219,30 +1210,39 @@ test.describe("phone chevron Back", () => {
           });
           void transition.ready.then(
             () => {
-              requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                  const old = getComputedStyle(
-                    root,
-                    "::view-transition-old(wave-navigation)"
-                  );
-                  const incoming = getComputedStyle(
-                    root,
-                    "::view-transition-new(root)"
-                  );
-                  root.dataset["testChevronMotion"] = JSON.stringify({
-                    x: new DOMMatrix(old.transform).m41,
-                    opacity: Number(old.opacity),
-                    incomingAnimation: incoming.animationName,
-                  });
+              const sampleMotion = () => {
+                const old = getComputedStyle(
+                  root,
+                  "::view-transition-old(wave-navigation)"
+                );
+                const incoming = getComputedStyle(
+                  root,
+                  "::view-transition-new(root)"
+                );
+                const x = new DOMMatrix(old.transform).m41;
+                // Touch-triggered transitions can start on a later compositor frame.
+                // Wait for movement while this transition still owns the page.
+                if (
+                  x === 0 &&
+                  root.dataset["waveNavigationTransition"] === "chevron-back"
+                ) {
+                  requestAnimationFrame(sampleMotion);
+                  return;
+                }
+                root.dataset["testChevronMotion"] = JSON.stringify({
+                  x,
+                  opacity: Number(old.opacity),
+                  incomingAnimation: incoming.animationName,
                 });
-              });
+              };
+              requestAnimationFrame(sampleMotion);
             },
             () => {}
           );
           return transition;
         };
       }, backName);
-      await page.getByRole("button", { name: backName, exact: true }).click();
+      await page.getByRole("button", { name: backName, exact: true }).tap();
       await expect(page).toHaveURL(/\/waves$/);
       const root = page.locator("html");
       await expect(root).toHaveAttribute("data-test-chevron-captures", "1");
@@ -1276,7 +1276,7 @@ test.describe("phone chevron Back", () => {
         page.getByRole("textbox", { name: "Write a message" }).last()
       ).toBeVisible();
       await page.emulateMedia({ reducedMotion: "reduce" });
-      await page.getByRole("button", { name: backName, exact: true }).click();
+      await page.getByRole("button", { name: backName, exact: true }).tap();
       await expect(page).toHaveURL(/\/waves$/);
       await expect(root).toHaveAttribute("data-test-chevron-captures", "1");
       await expect(root).not.toHaveAttribute("data-wave-navigation-transition");

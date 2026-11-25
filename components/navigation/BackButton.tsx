@@ -91,6 +91,13 @@ export default function BackButton({
 
   const { isDm } = useWave(wave);
 
+  const shouldAnimateWaveBack =
+    isApp &&
+    (pathname === "/waves" || pathname.startsWith("/waves/")) &&
+    Capacitor.getPlatform() === "ios" &&
+    !isDm &&
+    !returnsToProfileWavesFeed(searchParams);
+
   const handleClick = () => {
     if (loading) return;
     if (information?.returnFromNavigation) {
@@ -130,13 +137,7 @@ export default function BackButton({
     // Inside a wave → go back to wave list
     if (waveId) {
       const leave = () => exitActiveWave(isDm);
-      if (
-        isApp &&
-        (pathname === "/waves" || pathname.startsWith("/waves/")) &&
-        Capacitor.getPlatform() === "ios" &&
-        !isDm &&
-        !returnsToProfileWavesFeed(searchParams)
-      ) {
+      if (shouldAnimateWaveBack) {
         runWaveChevronBackTransition(leave);
       } else {
         leave();

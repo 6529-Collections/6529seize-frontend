@@ -10,6 +10,7 @@ import {
 
 const originalStart = document.startViewTransition;
 const originalMatchMedia = window.matchMedia;
+const originalWidth = window.innerWidth;
 const media = {
   matches: false,
   addEventListener: jest.fn(),
@@ -28,6 +29,10 @@ const start = jest.fn((update: () => Promise<void>) => {
 
 beforeEach(() => {
   jest.useFakeTimers();
+  Object.defineProperty(window, "innerWidth", {
+    configurable: true,
+    value: 412,
+  });
   jest.clearAllMocks();
   document.body.innerHTML = '<div data-wave-navigation-screen="list"></div>';
   media.matches = false;
@@ -43,6 +48,10 @@ afterEach(async () => {
   await Promise.resolve();
   jest.useRealTimers();
   window.matchMedia = originalMatchMedia;
+  Object.defineProperty(window, "innerWidth", {
+    configurable: true,
+    value: originalWidth,
+  });
   Object.defineProperty(document, "startViewTransition", {
     value: originalStart,
   });
@@ -364,12 +373,58 @@ describe("phone chevron Back", () => {
       const navigate = jest.fn();
       runWaveChevronBackTransition(navigate);
       const target = eventName === "pointerdown" ? document : window;
+      if (eventName === "resize")
+        Object.defineProperty(window, "innerWidth", { value: 768 });
       target.dispatchEvent(new Event(eventName));
       await updateDone;
       expect(navigate).toHaveBeenCalledTimes(1);
       expect(skip).toHaveBeenCalledTimes(1);
     }
   );
+
+  it("keeps motion on a resize that does not change the page width", async () => {
+    runWaveChevronBackTransition(jest.fn());
+    window.dispatchEvent(new Event("resize"));
+    await Promise.resolve();
+    commitWaveNavigationTransition("list");
+    await updateDone;
+    expect(skip).not.toHaveBeenCalled();
+    finish();
+    await Promise.resolve();
+  });
+
+  it("replaces a rapid second tap without stale navigation or listeners", async () => {
+    const removeDocument = jest.spyOn(document, "removeEventListener");
+    const removeWindow = jest.spyOn(window, "removeEventListener");
+    try {
+      const first = jest.fn();
+      const second = jest.fn();
+      runWaveChevronBackTransition(first);
+      const firstUpdate = updateDone;
+      runWaveChevronBackTransition(second);
+      await firstUpdate;
+      await Promise.resolve();
+      commitWaveNavigationTransition("list");
+      await updateDone;
+      expect(first).not.toHaveBeenCalled();
+      expect(second).toHaveBeenCalledTimes(1);
+      finish();
+      await Promise.resolve();
+      expect(
+        removeDocument.mock.calls.filter(([type]) => type === "pointerdown")
+      ).toHaveLength(2);
+      expect(
+        removeWindow.mock.calls.filter(([type]) => type === "popstate")
+      ).toHaveLength(2);
+      expect(
+        removeWindow.mock.calls.filter(([type]) => type === "resize")
+      ).toHaveLength(2);
+      expect(commitWaveNavigationTransition("list")).toBe(false);
+    } finally {
+      removeDocument.mockRestore();
+      removeWindow.mockRestore();
+    }
+  });
 
   it("does not push the chevron destination after browser history interrupts the capture", async () => {
     const navigate = jest.fn();

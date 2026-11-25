@@ -136,16 +136,11 @@ export function runWaveNavigationTransition(
     `${surface.getBoundingClientRect().height}px`
   );
   surface.style.viewTransitionName = "wave-navigation";
-  if (presentation) {
-    root.dataset["waveNavigationTransition"] = presentation;
-  } else {
-    root.dataset["waveNavigationTransition"] = isForwardWaveNavigation(
-      screen,
-      surface.dataset["waveNavigationScreen"]
-    )
+  root.dataset["waveNavigationTransition"] =
+    presentation ??
+    (isForwardWaveNavigation(screen, surface.dataset["waveNavigationScreen"])
       ? "forward"
-      : "back";
-  }
+      : "back");
   if (swipe) {
     root.dataset["waveNavigationTransition"] = "swipe-back";
     root.style.setProperty(
@@ -166,8 +161,8 @@ export function runWaveNavigationTransition(
   try {
     transition = document.startViewTransition(async () => {
       if (superseded) return;
-      // Only the departing page moves. Keep the destination in the stationary
-      // root capture instead of capturing its fixed/sticky children twice.
+      // The old page is captured. Keep the destination in the stationary root
+      // snapshot so its header and content stay visible together in WebKit.
       if (presentation) surface.style.removeProperty("view-transition-name");
       // The browser has captured the finger's final position. Prepare the new
       // screen underneath that snapshot, rather than sliding into an empty shell.
@@ -194,6 +189,10 @@ export function runWaveNavigationTransition(
   // A route interruption must never leave the app waiting for a screen that cannot commit.
   const skipMotion = () => skip(false);
   const cancelNavigation = () => skip();
+  const viewportWidth = window.innerWidth;
+  const stopForWidthChange = () => {
+    if (window.innerWidth !== viewportWidth) skipMotion();
+  };
   const timeout = window.setTimeout(skipMotion, 500);
   const contentReady = () => {
     contentPending = false;
@@ -217,7 +216,7 @@ export function runWaveNavigationTransition(
   if (presentation) {
     document.addEventListener("pointerdown", skipMotion, { capture: true });
     window.addEventListener("popstate", cancelNavigation);
-    window.addEventListener("resize", skipMotion);
+    window.addEventListener("resize", stopForWidthChange);
   }
   const cleanup = () => {
     stopped = true;
@@ -226,7 +225,7 @@ export function runWaveNavigationTransition(
     if (presentation) {
       document.removeEventListener("pointerdown", skipMotion, true);
       window.removeEventListener("popstate", cancelNavigation);
-      window.removeEventListener("resize", skipMotion);
+      window.removeEventListener("resize", stopForWidthChange);
     }
     swipe?.onFinish?.();
     if (activeTransition !== pending) return;
