@@ -29,12 +29,13 @@ const UnreadDividerContext = createContext<UnreadDividerContextValue | null>(
 interface UnreadDividerHistoryScope {
   readonly waveId: string;
   readonly viewerKey: string;
+  readonly entryUrl: string;
 }
 
 const HISTORY_KEY = "waveChatUnreadDivider";
 const HISTORY_CHANGE_EVENT = "wave-chat-unread-divider-change";
 
-// React uses this same snapshot for server rendering and client hydration.
+// Wait for the browser's visit state before showing a divider during hydration.
 const getServerDivider = () => undefined;
 
 function createLocalDividerStore() {
@@ -47,7 +48,7 @@ function createLocalDividerStore() {
       serialNo = nextSerialNo;
       listeners.forEach((listener) => listener());
     },
-    subscribe(listener: () => void) {
+    subscribe: (listener: () => void) => {
       listeners.add(listener);
       return () => {
         listeners.delete(listener);
@@ -95,15 +96,15 @@ function readDividerHistory(waveId: string, viewerKey: string) {
 function rememberDividerHistory(
   waveId: string,
   viewerKey: string,
+  entryUrl: string,
   serialNo: number | null
 ) {
   if (typeof window === "undefined") return;
   const { pathname, search } = window.location;
+  const searchParams = new URLSearchParams(search);
   if (
-    getActiveWaveIdFromUrl({
-      pathname,
-      searchParams: new URLSearchParams(search),
-    }) !== waveId ||
+    `${pathname}?${searchParams.toString()}` !== entryUrl ||
+    getActiveWaveIdFromUrl({ pathname, searchParams }) !== waveId ||
     readDividerHistory(waveId, viewerKey) === serialNo
   ) {
     return;
@@ -126,33 +127,47 @@ export function UnreadDividerProvider({
   historyScope,
   children,
 }: UnreadDividerProviderProps) {
+  // Chat activity retains this store when only the selected wave view changes.
   const [localStore] = useState(createLocalDividerStore);
   const waveId = historyScope?.waveId;
   const viewerKey = historyScope?.viewerKey;
-  const hasHistoryScope = waveId !== undefined && viewerKey !== undefined;
-  const getHistoryDivider = useCallback(
-    () => (hasHistoryScope ? readDividerHistory(waveId, viewerKey) : undefined),
-    [hasHistoryScope, viewerKey, waveId]
+  const entryUrl = historyScope?.entryUrl;
+  const hasHistoryScope =
+    waveId !== undefined && viewerKey !== undefined && entryUrl !== undefined;
+  const subscribe = useCallback(
+    (onChange: () => void) => {
+      const unsubscribeLocal = localStore.subscribe(onChange);
+      if (!hasHistoryScope) return unsubscribeLocal;
+      const unsubscribeHistory = subscribeToDividerHistory(onChange);
+      return () => {
+        unsubscribeLocal();
+        unsubscribeHistory();
+      };
+    },
+    [hasHistoryScope, localStore]
   );
-  const getDivider = hasHistoryScope ? getHistoryDivider : localStore.get;
+  const getDivider = useCallback(() => {
+    const historyDivider = hasHistoryScope
+      ? readDividerHistory(waveId, viewerKey)
+      : undefined;
+    // Undefined means no position has arrived. Null means the reader cleared it.
+    return historyDivider === undefined ? localStore.get() : historyDivider;
+  }, [hasHistoryScope, localStore, viewerKey, waveId]);
   const savedDivider = useSyncExternalStore(
-    hasHistoryScope ? subscribeToDividerHistory : localStore.subscribe,
+    subscribe,
     getDivider,
     getServerDivider
   );
-  // Undefined means no position has arrived. Null means the reader cleared it.
-  const unreadDividerSerialNo =
-    savedDivider === undefined ? initialSerialNo : savedDivider;
+  const unreadDividerSerialNo = savedDivider ?? null;
 
   const rememberDivider = useCallback(
     (serialNo: number | null) => {
+      localStore.set(serialNo);
       if (hasHistoryScope) {
-        rememberDividerHistory(waveId, viewerKey, serialNo);
-      } else {
-        localStore.set(serialNo);
+        rememberDividerHistory(waveId, viewerKey, entryUrl, serialNo);
       }
     },
-    [hasHistoryScope, localStore, viewerKey, waveId]
+    [entryUrl, hasHistoryScope, localStore, viewerKey, waveId]
   );
 
   const isMountedRef = useRef(false);
@@ -164,10 +179,15 @@ export function UnreadDividerProvider({
   }, []);
 
   useLayoutEffect(() => {
-    if (initialSerialNo !== null && getDivider() === undefined) {
+    // A same-wave router navigation can write a new entry without custom state.
+    // Restore the captured value, including dismissal, from the retained chat.
+    const current = getDivider();
+    if (current !== undefined) {
+      rememberDivider(current);
+    } else if (initialSerialNo !== null) {
       rememberDivider(initialSerialNo);
     }
-  }, [getDivider, initialSerialNo, rememberDivider]);
+  }, [getDivider, initialSerialNo, rememberDivider, savedDivider]);
 
   const setUnreadDividerSerialNo = useCallback<SetUnreadDividerSerialNo>(
     (value) => {

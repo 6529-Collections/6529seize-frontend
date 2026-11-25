@@ -112,10 +112,14 @@ describe("unread position for a Wave visit", () => {
     );
   }
 
-  const chat = (initialSerialNo: number | null, viewerKey = "profile-1") => (
+  const chat = (
+    initialSerialNo: number | null,
+    viewerKey = "profile-1",
+    entryUrl = `/waves/${waveId}?`
+  ) => (
     <UnreadDividerProvider
       initialSerialNo={initialSerialNo}
-      historyScope={{ waveId, viewerKey }}
+      historyScope={{ waveId, viewerKey, entryUrl }}
     >
       <Divider />
     </UnreadDividerProvider>
@@ -147,6 +151,23 @@ describe("unread position for a Wave visit", () => {
 
     render(chat(520));
     expect(screen.getByRole("button", { name: "No divider" })).toBeVisible();
+  });
+
+  it("restores the current divider and dismissal when a same-wave entry loses its key", () => {
+    const view = render(chat(501));
+    const nextEntry = `/waves/${waveId}?tab=chat`;
+    window.history.replaceState({ otherState: true }, "", nextEntry);
+    view.rerender(chat(null, "profile-1", nextEntry));
+    expect(screen.getByRole("button", { name: "501" })).toBeVisible();
+
+    fireEvent.click(screen.getByRole("button", { name: "501" }));
+    const backToChat = `/waves/${waveId}?`;
+    window.history.replaceState(null, "", backToChat);
+    view.rerender(chat(520, "profile-1", backToChat));
+    expect(screen.getByRole("button", { name: "No divider" })).toBeVisible();
+    expect(window.history.state).toMatchObject({
+      waveChatUnreadDivider: { serialNo: null },
+    });
   });
 
   it("starts fresh for a different viewer or a new history entry", () => {

@@ -274,9 +274,10 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const requestedDivider = ownsWaveRoute
     ? parseWaveSerialNo(searchParams.get("divider"))
     : null;
-  const waveDetailDivider = isDirectMessage
-    ? null
-    : (wave.metrics.first_unread_drop_serial_no ?? null);
+  const waveDetailDivider =
+    isDirectMessage || unreadMetadataPending
+      ? null
+      : (wave.metrics.first_unread_drop_serial_no ?? null);
   const dividerSerialNo =
     requestedDivider ??
     (firstUnreadSerialNo === undefined ? waveDetailDivider : firstUnreadSerialNo);
@@ -290,7 +291,11 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     : null;
   const dividerHistoryScope =
     ownsWaveRoute && viewerKey !== null
-      ? { waveId: wave.id, viewerKey }
+      ? {
+          waveId: wave.id,
+          viewerKey,
+          entryUrl: `${pathname}?${searchParams.toString()}`,
+        }
       : undefined;
 
   const collapseReplies = isWaveRepliesCollapsed(wave);
@@ -322,7 +327,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     if (
       viewMode === "gallery" ||
       (requestedScrollTarget === null && requestedDivider === null) ||
-      (requestedDivider !== null && fetchingProfile)
+      fetchingProfile
     ) {
       return;
     }

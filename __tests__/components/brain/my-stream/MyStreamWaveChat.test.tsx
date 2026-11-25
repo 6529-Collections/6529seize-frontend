@@ -299,7 +299,11 @@ describe("MyStreamWaveChat", () => {
     const registerRead = jest.fn();
     const unreadWave = {
       ...wave,
-      metrics: { ...wave.metrics, your_unread_drops_count: 135 },
+      metrics: {
+        ...wave.metrics,
+        your_unread_drops_count: 135,
+        first_unread_drop_serial_no: 400,
+      },
     };
     const chat = (firstUnreadSerialNo: number | undefined) =>
       wrapWithProvider(
@@ -1154,6 +1158,29 @@ describe("MyStreamWaveChat", () => {
       expect(capturedPropsHolder.current.initialDrop).toBe(5);
       expect(mockFetchAroundSerialNo).toHaveBeenCalledWith("10", 5);
     });
+  });
+
+  it("keeps a serial-only link until the profile finishes loading", () => {
+    const params = new URLSearchParams("serialNo=501");
+    searchParamsMock.get.mockImplementation((key: string) => params.get(key));
+    searchParamsMock.toString.mockReturnValue(params.toString());
+    const auth = { connectedProfile: { handle: "tester" } };
+    mockUseAuth.mockReturnValue({ ...auth, fetchingProfile: true });
+
+    const chat = () => (
+      <MyStreamWaveChat
+        wave={wave}
+        firstUnreadSerialNo={null}
+        viewMode="chat"
+        onDropClick={mockOnDropClick}
+      />
+    );
+    const view = renderWithProvider(chat());
+    expect(replaceMock).not.toHaveBeenCalled();
+
+    mockUseAuth.mockReturnValue({ ...auth, fetchingProfile: false });
+    view.rerender(wrapWithProvider(chat()));
+    expect(replaceMock).toHaveBeenCalledWith(null, "", "/waves/10");
   });
 
   it("hydrates the serial target when opening a wave from a route param", async () => {
