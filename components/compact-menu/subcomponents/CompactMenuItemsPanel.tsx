@@ -1,5 +1,5 @@
 import { Fragment, useCallback } from "react";
-import { MenuHeading, MenuSection } from "@headlessui/react";
+import { MenuHeading, MenuSection, MenuSeparator } from "@headlessui/react";
 import clsx from "clsx";
 import type { CompactMenuActionItem, CompactMenuProps } from "../types";
 import { CompactMenuItemButton } from "./CompactMenuItemButton";
@@ -86,9 +86,9 @@ export function CompactMenuItemsPanel({
         return (
           <Fragment key={item.id}>
             {item.separatorBefore && (
-              <div
-                role="separator"
-                className="tw-my-1 tw-border-0 tw-border-t tw-border-solid tw-border-white/10"
+              <MenuSeparator
+                as="hr"
+                className="tw-mx-0 tw-my-1 tw-border-0 tw-border-t tw-border-solid tw-border-white/10"
               />
             )}
             <CompactMenuItemButton

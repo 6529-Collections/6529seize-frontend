@@ -389,7 +389,7 @@ export default function UserFollowBtn({
             size={size === UserFollowBtnSize.SMALL ? 32 : 36}
             onClick={onDirectMessageClick}
             disabled={isDirectMessagePending}
-            aria-label="Send direct message"
+            aria-label={t(locale, "profile.follow.sendDirectMessage")}
             className={
               directMessageButtonLayout
                 ? undefined

@@ -116,9 +116,8 @@ export default function CompactMenuMobileBottomSheet({
             return (
               <Fragment key={item.id}>
                 {item.separatorBefore && (
-                  <div
-                    role="separator"
-                    className="tw-mt-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-2"
+                  <hr
+                    className="tw-mx-0 tw-mb-0 tw-mt-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-2"
                   />
                 )}
                 <button

@@ -1489,6 +1489,7 @@ const FOLLOWERS_MESSAGES = objectMessages("followers", {
 } as const);
 
 const PROFILE_FOLLOW_MESSAGES = objectMessages("profile.follow", {
+  sendDirectMessage: "Send direct message",
   followBack: "Follow back",
   mutualStatus: "You follow each other",
   unfollow: "Unfollow",

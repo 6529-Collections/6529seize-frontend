@@ -72,7 +72,6 @@ import type {
   UploadingFile,
 } from "./types";
 
-// eslint-disable-next-line max-lines-per-function -- This controller intentionally composes the focused composer hooks into one stable layout contract.
 export function useCreateDropContentController({
   activeDrop,
   onCancelReplyQuote,
