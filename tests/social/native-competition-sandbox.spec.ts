@@ -1901,6 +1901,106 @@ async function openAppearanceDraft(
 }
 
 test.describe("Native competition sandbox @auth @medium @local-only", () => {
+  test("keeps the last vote clear of the native keyboard", async ({
+    page,
+    baseURL,
+    isMobile,
+  }) => {
+    test.skip(!isMobile, "The native keyboard requires a phone layout.");
+    await installSurfaceSimulation(
+      page.context(),
+      "capacitor-android-sim",
+      baseURL
+    );
+    const sandbox = await installCompetitionApi(page);
+    sandbox.setVote("alpha", 25);
+    const api = getSandboxApiOrigin(baseURL);
+    const feed = await (
+      await page.request.get(`${api}/api/v2/waves/${WAVE}/drops`)
+    ).json();
+    const drops = Array.from({ length: 5 }, (_, index) => ({
+      ...feed.drops[0],
+      id: `00000000-0000-4000-8000-${String(8100 + index).padStart(12, "0")}`,
+      drop_type: "SUBMISSION",
+      title: `Keyboard QA vote ${index + 1}`,
+      submission_context: {
+        status: "ACTIVE",
+        has_metadata: false,
+        voting: {
+          is_open: true,
+          total_votes_given: 25,
+          current_calculated_vote: 25,
+          predicted_final_vote: 25,
+          voters_count: 1,
+          place: index + 1,
+          context_profile_context: {
+            can_vote: true,
+            min: -100,
+            max: 100,
+            current: 25,
+          },
+        },
+      },
+    }));
+    const { entry, card } = await installArtworkCompetitionResources(
+      page,
+      WAVE,
+      feed.wave,
+      () => drops
+    );
+    await page.route(
+      `**/api/v3/waves/${WAVE}/competitions/alpha/votes/me?**`,
+      (route) =>
+        route.fulfill({
+          json: {
+            ...pageResult(
+              drops.map((drop) => ({
+                entry_id: entry(drop.id).id,
+                drop_id: drop.id,
+                value: 25,
+                credit_spent: 25,
+                entry_status: "ACTIVE",
+              }))
+            ),
+            cards: drops.map(card),
+          },
+        })
+    );
+    await page.goto(`${ROOT}/alpha?tab=votes`, {
+      waitUntil: "domcontentloaded",
+    });
+    const rows = page
+      .getByRole("tabpanel", { name: "My Votes", exact: true })
+      .getByRole("article");
+    await expect(rows).toHaveCount(5);
+    const lastRow = rows.last();
+    await lastRow.scrollIntoViewIfNeeded();
+    const input = myVotesInput(lastRow);
+    await expect(input).toBeVisible();
+    await input.focus();
+    await page.evaluate(() => {
+      Object.defineProperty(globalThis.visualViewport, "height", {
+        configurable: true,
+        value: 420,
+      });
+      globalThis.visualViewport?.dispatchEvent(new Event("resize"));
+    });
+    await emitNativeKeyboard(page, "keyboardDidShow", 424);
+    await expect(input).toBeFocused();
+    await expect
+      .poll(() =>
+        input.evaluate((field) => {
+          const bounds = field.getBoundingClientRect();
+          const viewport = globalThis.visualViewport!;
+          return (
+            bounds.top >= viewport.offsetTop &&
+            bounds.bottom <= viewport.offsetTop + viewport.height
+          );
+        })
+      )
+      .toBe(true);
+  });
+
   test("left-edge Back works from every iPhone wave tab and keeps interior tab scrolling", async ({
     page,
     baseURL,
@@ -8520,7 +8620,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           input.evaluate((field) => {
             const positions: number[] = [];
             for (
-              let element: HTMLElement | null = field;
+              let element: Element | null = field;
               element;
               element = element.parentElement
             ) {

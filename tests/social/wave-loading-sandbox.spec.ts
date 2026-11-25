@@ -147,8 +147,12 @@ test("saves reordered pins across reload on desktop and mobile", async ({
   });
 });
 
-async function startWaveRowTouch(page: Page, row: Locator) {
-  await row.click({ trial: true });
+async function startWaveRowTouch(
+  page: Page,
+  row: Locator,
+  { scrollIntoView = true }: { readonly scrollIntoView?: boolean } = {}
+) {
+  if (scrollIntoView) await row.click({ trial: true });
   const box = await row.boundingBox();
   if (!box) throw new Error("Wave row must be visible");
   const x = Math.max(40, Math.min(260, box.x + box.width / 3));
@@ -355,13 +359,30 @@ for (const pinSurface of [
     const dockBounds = (await dock.isVisible())
       ? await dock.boundingBox()
       : null;
+    const lastRow = page
+      .getByTestId("wave-list-touch-row")
+      .filter({ has: last });
+    // Finish Playwright's actionability scrolling before positioning the row;
+    // another trial click afterward could move it away from the bottom edge.
+    await lastRow.click({ trial: true });
+    const scrollportBottom = await lastRow.evaluate((element) => {
+      let container = element.parentElement;
+      while (
+        container &&
+        !["auto", "scroll"].includes(getComputedStyle(container).overflowY)
+      )
+        container = container.parentElement;
+      if (!container) throw new Error("Missing list scroll container");
+      return container.getBoundingClientRect().bottom;
+    });
     const availableBottom = Math.min(
       viewportBottom,
-      dockBounds?.y ?? viewportBottom
+      dockBounds?.y ?? viewportBottom,
+      scrollportBottom
     );
     // Put this row at the usable bottom edge, including lists with bottom
     // padding. Its menu must choose the space above the row.
-    await last.evaluate((element, bottom) => {
+    await lastRow.evaluate((element, bottom) => {
       let container = element.parentElement;
       while (
         container &&
@@ -372,11 +393,16 @@ for (const pinSurface of [
       container.scrollTop +=
         element.getBoundingClientRect().bottom - (bottom - 12);
     }, availableBottom);
-    const lastRow = page
-      .getByTestId("wave-list-touch-row")
-      .filter({ has: last });
+    await expect
+      .poll(async () => {
+        const box = await lastRow.boundingBox();
+        return box
+          ? Math.abs(box.y + box.height - (availableBottom - 12))
+          : null;
+      })
+      .toBeLessThan(1);
     const rowBounds = await lastRow.boundingBox();
-    touch = await startWaveRowTouch(page, lastRow);
+    touch = await startWaveRowTouch(page, lastRow, { scrollIntoView: false });
     const bottomMenu = page.getByRole("dialog", {
       name: "Unpin wave",
       exact: true,

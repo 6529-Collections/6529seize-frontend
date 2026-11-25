@@ -95,7 +95,8 @@ while each profile loads. The placeholders stay still when reduced motion is ena
    only when the number differs from the saved vote and disappears after saving
    or restoring the saved number. In the app, a focused amount still covered
    after the keyboard opens scrolls just enough into view; visible amounts stay
-   in place. Mobile web keeps the browser's normal focus scrolling.
+   in place. The app list follows the keyboard height so the final vote can
+   scroll clear too. Mobile web keeps the browser's normal focus scrolling.
    Voter avatars stay together in a compact
    group, with separate 24px-wide, 44px-high profile links on mobile.
 6. Optional: select `Explain vote` to open an inline reply composer prefilled as

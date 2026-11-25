@@ -136,7 +136,9 @@ it.each(["hold", "move", "release"])(
     if (phase !== "hold") pointer(wave, "pointermove", 180);
     view.rerender(<Harness enabled={false} />);
     if (phase === "move") pointer(wave, "pointermove", 190);
-    act(() => { jest.advanceTimersByTime(600); });
+    act(() => {
+      jest.advanceTimersByTime(600);
+    });
     pointer(wave, "pointerup", 190);
     expect(onLongPress).not.toHaveBeenCalled();
     expect(onTogglePin).not.toHaveBeenCalled();
@@ -185,8 +187,11 @@ it.each(["pointercancel", "second finger", "blur"])(
     pointer(wave, "pointerdown");
     pointer(wave, "pointermove", 180);
     if (reason === "second finger") pointer(wave, "pointerdown", 110, 110, 2);
-    else if (reason === "blur") fireEvent(globalThis, new Event("blur"));
-    else pointer(wave, "pointercancel");
+    else if (reason === "blur") {
+      act(() => {
+        globalThis.dispatchEvent(new Event("blur"));
+      });
+    } else pointer(wave, "pointercancel");
     pointer(wave, "pointerup", 180);
     act(() => {
       jest.advanceTimersByTime(600);
