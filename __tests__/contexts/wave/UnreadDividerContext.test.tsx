@@ -190,6 +190,20 @@ describe("unread position for a Wave visit", () => {
     });
   });
 
+  it("honors an entry's dismissal over a retained divider and on reopening Chat", () => {
+    const view = render(chat(501));
+    window.history.replaceState(
+      { waveChatUnreadDivider: { waveId, viewerKey: "profile-1", serialNo: null } },
+      ""
+    );
+    view.rerender(chat(501));
+    expect(screen.getByRole("button", { name: "No divider" })).toBeVisible();
+    view.unmount();
+
+    render(chat(520));
+    expect(screen.getByRole("button", { name: "No divider" })).toBeVisible();
+  });
+
   it("starts fresh for a different viewer or a new history entry", () => {
     render(chat(501)).unmount();
 

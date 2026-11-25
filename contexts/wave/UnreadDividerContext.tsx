@@ -150,14 +150,16 @@ export function UnreadDividerProvider({
     },
     [hasHistoryScope, localStore]
   );
+  const getHistoryDivider = useCallback(
+    () => (hasHistoryScope ? readDividerHistory(waveId, viewerKey) : undefined),
+    [hasHistoryScope, viewerKey, waveId]
+  );
   const getDivider = useCallback(() => {
-    const historyDivider = hasHistoryScope
-      ? readDividerHistory(waveId, viewerKey)
-      : undefined;
+    const historyDivider = getHistoryDivider();
     // The active entry wins, including an explicit dismissal. The retained
     // chat supplies the value if a same-wave router write dropped custom state.
     return historyDivider === undefined ? localStore.get() : historyDivider;
-  }, [hasHistoryScope, localStore, viewerKey, waveId]);
+  }, [getHistoryDivider, localStore]);
   const savedDivider = useSyncExternalStore(
     subscribe,
     getDivider,
@@ -185,12 +187,21 @@ export function UnreadDividerProvider({
   }, []);
 
   useLayoutEffect(() => {
-    // Check after each commit. A same-URL router write can drop the key
+    // Check after each commit because a same-URL router write can drop the key
     // without changing the route props or the retained divider snapshot.
-    const current = getDivider();
-    if (current !== undefined) {
-      rememberDivider(current);
-    } else if (initialSerialNo !== null) {
+    const historyDivider = getHistoryDivider();
+    if (historyDivider !== undefined) {
+      localStore.set(historyDivider);
+      return;
+    }
+    const retainedDivider = localStore.get();
+    if (retainedDivider !== undefined) {
+      if (hasHistoryScope) {
+        rememberDividerHistory(waveId, viewerKey, entryUrl, retainedDivider);
+      }
+      return;
+    }
+    if (initialSerialNo !== null) {
       rememberDivider(initialSerialNo);
     }
   });
