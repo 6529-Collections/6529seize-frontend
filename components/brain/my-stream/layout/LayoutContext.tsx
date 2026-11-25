@@ -418,8 +418,12 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   }, [navAdjustedSpaces]);
 
   const myVotesViewStyle = useMemo<React.CSSProperties>(() => {
-    return calculateHeightStyle(navAdjustedSpaces, 0);
-  }, [navAdjustedSpaces]);
+    return calculateNativeKeyboardHeightStyle(
+      navAdjustedSpaces,
+      isCapacitor,
+      isViewportLocked
+    );
+  }, [navAdjustedSpaces, isCapacitor, isViewportLocked]);
 
   const outcomeViewStyle = useMemo<React.CSSProperties>(() => {
     return calculateHeightStyle(navAdjustedSpaces, 0);

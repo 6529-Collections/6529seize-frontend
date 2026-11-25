@@ -177,6 +177,36 @@ test("loads all pins in saved order in one request", async () => {
   expect(pinnedWavesApi.getPinnedWaves).toHaveBeenCalledWith(signal);
 });
 
+test("shares the pin guard between row actions without blocking other waves", async () => {
+  let finishPin: () => void = () => undefined;
+  pinMutateAsync.mockImplementationOnce(
+    () =>
+      new Promise<void>((resolve) => {
+        finishPin = resolve;
+      })
+  );
+  const { result } = renderHook(
+    () => ({
+      swipe: usePinnedWavesServer(),
+      button: usePinnedWavesServer(),
+    }),
+    { wrapper }
+  );
+
+  const pending = result.current.swipe.pinWave("wave-a");
+  expect(result.current.button.isOperationInProgress("wave-a")).toBe(true);
+  await expect(result.current.button.unpinWave("wave-a")).rejects.toThrow(
+    "Operation already in progress"
+  );
+  await result.current.button.unpinWave("wave-b");
+  expect(unpinMutateAsync).toHaveBeenCalledWith("wave-b");
+  finishPin();
+  await pending;
+  expect(result.current.button.isOperationInProgress("wave-a")).toBe(false);
+  await result.current.button.unpinWave("wave-a");
+  expect(unpinMutateAsync).toHaveBeenLastCalledWith("wave-a");
+});
+
 test("rolls back a failed reorder while preserving a pin added during the save", async () => {
   const a = createWave("a");
   const b = createWave("b");
