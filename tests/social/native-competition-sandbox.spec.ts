@@ -8517,6 +8517,8 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           exact: true,
         });
         await expect(firstOption).toBeVisible();
+        await expect(firstOption).toHaveCSS("font-size", "15px");
+        await expect(firstOption).toHaveCSS("color", "rgb(239, 239, 241)");
         // Measure in one frame while the sheet may still be sliding into view.
         const headerGap = await firstOption.evaluate((element) => {
           const header = element

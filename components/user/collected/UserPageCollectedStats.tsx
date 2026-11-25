@@ -13,7 +13,10 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { buildCollectedStatsViewModel } from "./stats/helpers";
 import { CollectedStatsDetailsPanel } from "./stats/subcomponents/CollectedStatsDetailsPanel";
-import { CollectedStatsHeader } from "./stats/subcomponents/CollectedStatsHeader";
+import {
+  CollectedStatsHeader,
+  CollectedStatsDetailsToggle,
+} from "./stats/subcomponents/CollectedStatsHeader";
 import { CollectedStatsSeasons } from "./stats/subcomponents/CollectedStatsSeasons";
 import type { DisplaySeason } from "./stats/types";
 import { useCollectedStatsData } from "./stats/useCollectedStatsData";
@@ -220,15 +223,11 @@ export default function UserPageCollectedStats({
         data-profile-section-anchor={
           mainMetrics.length > 0 ? "Collection summary" : undefined
         }
-        className="tw-px-3 tw-py-2 md:tw-p-5"
+        className="tw-px-3 tw-py-3 md:tw-px-5 md:tw-py-4"
       >
         <CollectedStatsHeader
           metrics={mainMetrics}
           activeCollection={activeCollection}
-          isDetailsOpen={isDetailsOpen}
-          detailsId={detailsId}
-          locale={locale}
-          onToggleDetails={handleToggleDetails}
           onCollectionShortcut={onCollectionShortcut}
         />
       </div>
@@ -314,6 +313,12 @@ export default function UserPageCollectedStats({
             </div>
           )}
         </NftPurchasingGate>
+        <CollectedStatsDetailsToggle
+          isDetailsOpen={isDetailsOpen}
+          detailsId={detailsId}
+          locale={locale}
+          onToggleDetails={handleToggleDetails}
+        />
         <CollectedStatsDetailsPanel
           isOpen={isDetailsOpen}
           isLoading={isDetailsLoading}

@@ -86,6 +86,7 @@ let publicWavePreviewReads = 0;
 let sandboxDropReaction = null;
 let sandboxWaveGuidelinesEnabled = false;
 let sandboxArtistActivityEnabled = false;
+let sandboxCollectedStatsEnabled = false;
 let sandboxSharedPostsEnabled = false;
 let sandboxSharedPostFeedEnabled = false;
 let sandboxProfileRepRating = null;
@@ -2634,6 +2635,14 @@ function requestLog() {
 }
 
 function handleDiagnostics(method, pathname, url, res) {
+  if (
+    pathname === "/__composer-sandbox/collected-stats" &&
+    (method === "POST" || method === "DELETE")
+  ) {
+    sandboxCollectedStatsEnabled = method === "POST";
+    return writeJsonResponse(res, { ok: true });
+  }
+
   if (pathname === "/__composer-sandbox/shared-posts" && method === "POST") {
     sandboxSharedPostsEnabled = true;
     return writeJsonResponse(res, { ok: true });
@@ -2692,6 +2701,7 @@ function handleDiagnostics(method, pathname, url, res) {
     sandboxDropReaction = null;
     sandboxWaveGuidelinesEnabled = false;
     sandboxArtistActivityEnabled = false;
+    sandboxCollectedStatsEnabled = false;
     sandboxSharedPostsEnabled = false;
     sandboxSharedPostFeedEnabled = false;
     sandboxProfileRepRating = null;
@@ -2880,14 +2890,39 @@ const mockApiPatternReadRoutes = [
   // Empty, deterministic holdings keep owner/visitor Collected QA local.
   {
     pattern: /^\/api\/collected-stats\/[^/]+$/,
-    response: () => ({
-      boost: 1,
-      nextgen_balance: 0,
-      gradients_balance: 0,
-      memes_balance: 0,
-      unique_memes: 0,
-      seasons: [],
-    }),
+    response: () =>
+      sandboxCollectedStatsEnabled
+        ? {
+            boost: 1.76,
+            nextgen_balance: 62,
+            gradients_balance: 3,
+            memes_balance: 5764,
+            unique_memes: 578,
+            seasons: [
+              {
+                season: "Season 1",
+                total_cards_in_season: 47,
+                sets_held: 2,
+                partial_set_unique_cards_held: 12,
+                total_cards_held: 106,
+              },
+              {
+                season: "Season 2",
+                total_cards_in_season: 39,
+                sets_held: 1,
+                partial_set_unique_cards_held: 5,
+                total_cards_held: 44,
+              },
+            ],
+          }
+        : {
+            boost: 1,
+            nextgen_balance: 0,
+            gradients_balance: 0,
+            memes_balance: 0,
+            unique_memes: 0,
+            seasons: [],
+          },
   },
   {
     pattern: /^\/api\/profiles\/[^/]+\/collected$/,

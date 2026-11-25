@@ -112,6 +112,10 @@ function applyEffectiveAppPrCiPlan(plan) {
       file.startsWith("components/user/rep/") ||
       file.startsWith("components/user/user-page-header/about/") ||
       file === "components/user/user-page-header/UserPageHeaderClient.tsx" ||
+      file === "components/user/brain/UserPageBrainSidebarMobileStrip.tsx" ||
+      file.startsWith("components/user/waves/") ||
+      file === "components/waves/WaveChip.tsx" ||
+      file === "components/utils/button/iconButtonLayouts.ts" ||
       file.startsWith(
         "components/user/user-page-header/UserPageHeaderEditProfile"
       ) ||

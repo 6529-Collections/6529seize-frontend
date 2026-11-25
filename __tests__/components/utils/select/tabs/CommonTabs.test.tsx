@@ -33,7 +33,9 @@ describe("CommonTabs", () => {
       expect(high).toBeDisabled();
       expect(low).toBeDisabled();
       expect(recent).toBeEnabled();
-      expect(recent).toHaveClass("tw-text-xs");
+      expect(recent).toHaveClass(
+        variant === "sub-view" ? "tw-text-meta" : "tw-text-xs"
+      );
 
       fireEvent.click(high);
       expect(setSelected).not.toHaveBeenCalled();
