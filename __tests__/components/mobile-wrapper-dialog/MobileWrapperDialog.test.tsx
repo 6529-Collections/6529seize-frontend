@@ -1135,6 +1135,7 @@ describe("MobileWrapperDialog", () => {
           );
           expect(container.inert).toBe(true);
           expect(container).toHaveAttribute("aria-hidden", "true");
+          expect(screen.getByRole("heading", { name: "Review" })).toHaveFocus();
         });
 
         await user.keyboard("{Escape}");
