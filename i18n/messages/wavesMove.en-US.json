@@ -7,5 +7,6 @@
   "wavesMove.resultPending": "The result due {resultWeekday} {resultTime} UTC is counted on the 6529 Network after {switchOnWeekday} {switchOnTime} UTC.",
   "wavesMove.day": "{weekday} {day} {month}",
   "wavesMove.paused": "Paused for the move to the 6529 Network.",
+  "wavesMove.pollClosed": "This poll closed when the wave moved to the 6529 Network.",
   "wavesMove.submissionsPaused": "Submissions Paused"
 }

@@ -8,7 +8,10 @@ import {
 import { renderToString } from "react-dom/server";
 import WavesMoveNotice from "@/components/waves-move/WavesMoveNotice";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ReactNode } from "react";
+import { WavesMoveScope } from "@/components/waves-move/WavesMoveScope";
 import {
+  usePollClosedByMove,
   useWavesMovePhase,
   useWavesPausedReason,
   useWavesWritesPaused,
@@ -279,5 +282,102 @@ describe("a result due while waves are frozen", () => {
     // Back on the Main Stage the sentence is new: the notice shows.
     render(<WavesMoveNotice wave={mainStage} />);
     expect(screen.getByTestId("waves-move-notice")).toHaveTextContent(SENTENCE);
+  });
+});
+
+describe("usePollClosedByMove", () => {
+  const scoped =
+    (staysOnSite: boolean | undefined) =>
+    ({ children }: { readonly children: ReactNode }) => (
+      <WavesMoveScope
+        wave={staysOnSite === undefined ? {} : { stays_on_site: staysOnSite }}
+        waveId="wave-1"
+      >
+        {children}
+      </WavesMoveScope>
+    );
+  const OPEN_AT_FREEZE = WAVES_FREEZE_MS + 3 * HOUR;
+  const MADE_BEFORE = WAVES_FREEZE_MS - 24 * HOUR;
+
+  afterEach(() => {
+    clearWavesFreeze();
+    jest.useRealTimers();
+  });
+
+  it("closes a moving wave's poll that was open at the freeze, from the switch-on", () => {
+    setWavesFreezeSchedule();
+    jest.useFakeTimers({ now: WAVES_SWITCH_ON_MS - HOUR });
+    const { result } = renderHook(
+      () => usePollClosedByMove({ closing_time: OPEN_AT_FREEZE }, MADE_BEFORE),
+      {
+        wrapper: scoped(false),
+      }
+    );
+    // Frozen: the paused line covers it.
+    expect(result.current).toBeNull();
+    act(() => {
+      jest.advanceTimersByTime(HOUR + 1);
+    });
+    expect(result.current).toBe(WAVES_FREEZE_MS);
+  });
+
+  it("leaves a poll closed before the freeze, a staying wave's, and any outside a wave", () => {
+    setWavesFreezeSchedule();
+    jest.useFakeTimers({ now: WAVES_SWITCH_ON_MS + HOUR });
+    expect(
+      renderHook(
+        () =>
+          usePollClosedByMove(
+            { closing_time: WAVES_FREEZE_MS - HOUR },
+            MADE_BEFORE
+          ),
+        {
+          wrapper: scoped(false),
+        }
+      ).result.current
+    ).toBeNull();
+    expect(
+      renderHook(
+        () =>
+          usePollClosedByMove({ closing_time: OPEN_AT_FREEZE }, MADE_BEFORE),
+        {
+          wrapper: scoped(true),
+        }
+      ).result.current
+    ).toBeNull();
+    // A poll closing exactly at the freeze took no ballots after it anyway.
+    expect(
+      renderHook(
+        () =>
+          usePollClosedByMove({ closing_time: WAVES_FREEZE_MS }, MADE_BEFORE),
+        { wrapper: scoped(false) }
+      ).result.current
+    ).toBeNull();
+    // A poll made after the freeze isn't one the move closed.
+    expect(
+      renderHook(
+        () =>
+          usePollClosedByMove(
+            { closing_time: OPEN_AT_FREEZE },
+            WAVES_SWITCH_ON_MS
+          ),
+        { wrapper: scoped(false) }
+      ).result.current
+    ).toBeNull();
+    // A wave whose object doesn't say stays.
+    expect(
+      renderHook(
+        () =>
+          usePollClosedByMove({ closing_time: OPEN_AT_FREEZE }, MADE_BEFORE),
+        {
+          wrapper: scoped(undefined),
+        }
+      ).result.current
+    ).toBeNull();
+    expect(
+      renderHook(() =>
+        usePollClosedByMove({ closing_time: OPEN_AT_FREEZE }, MADE_BEFORE)
+      ).result.current
+    ).toBeNull();
   });
 });

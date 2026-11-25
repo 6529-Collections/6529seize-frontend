@@ -111,3 +111,28 @@ export function useWavesPausedReason(): string | null {
   const locale = useBrowserLocale();
   return useWavesWritesPaused() ? t(locale, "wavesMove.paused") : null;
 }
+
+/**
+ * For a poll in a wave that moved, made before the freeze and still open
+ * then: the freeze, when the move closed it on the 6529 Network without
+ * carrying its ballots, though 6529.io's copy may still show it open. Null
+ * before the switch-on, outside a moving wave, and for any other poll.
+ */
+export function usePollClosedByMove(
+  poll: { readonly closing_time: number } | null | undefined,
+  createdAtMs: number
+): number | null {
+  const phase = useWavesMovePhase();
+  const scope = useWavesMoveScope();
+  const schedule = getWavesMoveSchedule();
+  if (
+    !poll ||
+    phase !== "moved" ||
+    scope !== "moves" ||
+    schedule === null ||
+    createdAtMs >= schedule.freezeAtMs
+  ) {
+    return null;
+  }
+  return poll.closing_time > schedule.freezeAtMs ? schedule.freezeAtMs : null;
+}

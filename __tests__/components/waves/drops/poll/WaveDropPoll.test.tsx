@@ -53,6 +53,7 @@ jest.mock("@/services/api/wave-drops-v2-api", () => ({
 
 jest.mock("@/hooks/useWavesMovePhase", () => ({
   useWavesWritesPaused: jest.fn(() => false),
+  usePollClosedByMove: jest.fn(() => null),
 }));
 
 const voteDropPollV2Mock = voteDropPollV2 as jest.MockedFunction<
@@ -380,6 +381,37 @@ describe("WaveDropPoll", () => {
     expect(
       screen.queryByRole("button", { name: "Submit vote" })
     ).not.toBeInTheDocument();
+  });
+
+  it("shows a poll still open when its wave moved as closed then, with no vote", () => {
+    const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
+    const freezeAt = Date.now() - 60 * 60_000;
+    // After the switch-on, in a wave that moved: paused, and closed by the move.
+    wavesMove.useWavesWritesPaused.mockReturnValue(true);
+    wavesMove.usePollClosedByMove.mockReturnValue(freezeAt);
+    try {
+      // 6529.io's copy still shows it open, closing later.
+      const poll = createPoll();
+      renderPoll(poll);
+
+      expect(wavesMove.usePollClosedByMove.mock.calls[0][0]).toEqual(poll);
+      expect(screen.getByText(/^Closed /)).toBeInTheDocument();
+      expect(screen.queryByText(/^Closes /)).toBeNull();
+      expect(
+        screen.getByText(
+          "This poll closed when the wave moved to the 6529 Network."
+        )
+      ).toBeInTheDocument();
+      expect(screen.queryByRole("radio", { name: "First" })).toBeNull();
+      expect(screen.queryByRole("button", { name: "Vote" })).toBeNull();
+      expect(
+        screen.queryByText("Paused for the move to the 6529 Network.")
+      ).toBeNull();
+      expect(voteDropPollV2Mock).not.toHaveBeenCalled();
+    } finally {
+      wavesMove.useWavesWritesPaused.mockReturnValue(false);
+      wavesMove.usePollClosedByMove.mockReturnValue(null);
+    }
   });
 
   it("keeps closed polls in results view only", () => {
