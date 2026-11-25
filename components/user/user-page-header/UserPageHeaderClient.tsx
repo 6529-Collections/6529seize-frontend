@@ -24,6 +24,7 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { useIdentityEditingPaused } from "@/hooks/useIdentityMovePhase";
 import { useIdentity } from "@/hooks/useIdentity";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { toProfileIdentitySegment } from "@/helpers/profile-identity-segment";
@@ -447,6 +448,7 @@ export default function UserPageHeaderClient({
   const params = useParams();
   const router = useRouter();
   const { isApp } = useDeviceInfo();
+  const isMobileLayoutViewport = useIsMobileLayoutViewport();
   const routeHandleOrWallet = params["user"]?.toString().toLowerCase() ?? null;
   const normalizedHandleOrWallet =
     routeHandleOrWallet ?? handleOrWallet.toLowerCase();
@@ -666,9 +668,12 @@ export default function UserPageHeaderClient({
   const editProfileButton = canEdit ? (
     <UserPageHeaderEditProfileDesktop {...editProfileProps} />
   ) : null;
-  const mobileEditProfileButton = canEdit ? (
+  let mobileEditProfileButton = canEdit ? (
     <UserPageHeaderEditProfile {...editProfileProps} />
   ) : null;
+  if (isApp && !isMobileLayoutViewport) {
+    mobileEditProfileButton = editProfileButton;
+  }
   const mobileOwnerControls =
     canEdit || canManageProfilePreferences ? (
       <div className="tw-flex tw-items-center">
