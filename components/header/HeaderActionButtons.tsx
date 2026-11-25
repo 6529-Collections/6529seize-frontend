@@ -24,6 +24,9 @@ function HeaderActionButtonsContent() {
   const { openWave, openDirectMessage, isApp } = useCreateModalState();
   const locale = useBrowserLocale();
   const unifiedCompose = isE2eeEnabled();
+  const messageCreateHref = unifiedCompose
+    ? NEW_MESSAGE_ROUTE
+    : "/messages/create";
 
   const waveParam = getActiveWaveIdFromUrl({ pathname, searchParams });
   const activeView = getActiveViewFromUrl({
@@ -85,7 +88,7 @@ function HeaderActionButtonsContent() {
       // Full prefetch includes the composer beyond the messages loading boundary.
       return (
         <Link
-          href={unifiedCompose ? NEW_MESSAGE_ROUTE : "/messages/create"}
+          href={messageCreateHref}
           prefetch={true}
           aria-label={label}
           title={label}
