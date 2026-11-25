@@ -1486,19 +1486,38 @@ test.describe("phone chevron Back", () => {
           (route) => route.fulfill({ json: { data: [wave], next: false } })
         );
       }
-      // Compile the destination without timing a cold dev build in the slide.
-      // Direct entry also exercises Back without an earlier list history entry.
-      const list = await page.request.get(destination);
-      expect(list.ok()).toBe(true);
+      const backName = surface === "ios" ? "Back" : "Go back";
+      // Enter directly, with no preceding list history entry.
       await page.goto(conversation, { waitUntil: "domcontentloaded" });
       await waitForRouteReady(page);
       await expect(
         page.getByRole("textbox", { name: "Write a message" }).last()
       ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
-      const backName = surface === "ios" ? "Back" : "Go back";
       await expect(
         page.getByRole("button", { name: /^(Back|Go back)$/u })
       ).toHaveCount(1);
+      const backControl = page.getByRole("button", {
+        name: backName,
+        exact: true,
+      });
+      const listControl = isDm
+        ? page.getByRole("link", { name: /Sandbox Direct Message/u }).first()
+        : page.getByRole("button", { name: "Find a wave…", exact: true });
+      // Check cold direct-entry Back, then return to that original history
+      // position. The list is only a forward entry, while its client route is
+      // now loaded for the strict motion checks below.
+      await backControl.tap();
+      await expect(page).toHaveURL(new RegExp(`${destination}$`, "u"));
+      await expect(listControl).toBeVisible();
+      await expect(page.locator("html")).not.toHaveAttribute(
+        "data-wave-navigation-transition"
+      );
+      await page.goBack();
+      await expect(page).toHaveURL(new RegExp(`${conversation}$`, "u"));
+      await expect(
+        page.getByRole("textbox", { name: "Write a message" }).last()
+      ).toBeVisible();
+      await expect(backControl).toBeVisible();
       await page.evaluate((label) => {
         const root = document.documentElement;
         const start = document.startViewTransition.bind(document);
@@ -1520,6 +1539,7 @@ test.describe("phone chevron Back", () => {
           root.dataset["testChevronTop"] = String(
             captured?.getBoundingClientRect().top
           );
+          const startedAt = performance.now();
           const transition = start(async () => {
             root.dataset["testChevronUpdate"] = "started";
             const update = args[0];
@@ -1558,7 +1578,12 @@ test.describe("phone chevron Back", () => {
               };
               requestAnimationFrame(sampleMotion);
             },
-            () => {}
+            (error: unknown) => {
+              root.dataset["testChevronReadyError"] = String(error);
+              root.dataset["testChevronReadyElapsed"] = String(
+                Math.round(performance.now() - startedAt)
+              );
+            }
           );
           return transition;
         };
@@ -1585,9 +1610,6 @@ test.describe("phone chevron Back", () => {
       expect(motion.x).toBeLessThanOrEqual(412);
       expect(motion.opacity).toBe(1);
       expect(motion.incomingAnimation).toBe("none");
-      const listControl = isDm
-        ? page.getByRole("link", { name: /Sandbox Direct Message/u }).first()
-        : page.getByRole("button", { name: "Find a wave…", exact: true });
       await expect(listControl).toBeVisible();
       await expect(root).not.toHaveAttribute("data-wave-navigation-transition");
       await expectNoHorizontalOverflow(page);
@@ -1605,4 +1627,77 @@ test.describe("phone chevron Back", () => {
       await expectNoUnsafeSandboxMutations(baseURL);
     });
   }
+
+  test("phone web Back recovers when a slow inbox skips the optional slide", async ({
+    context,
+    page,
+    baseURL,
+  }, testInfo) => {
+    test.skip(
+      !["web-mobile-chromium", "web-desktop-webkit"].includes(
+        testInfo.project.name
+      ),
+      "Slow phone navigation recovery in Chromium and WebKit."
+    );
+    await hideNextDevOverlay(context);
+    await installMessageFixture(page, baseURL);
+    const inbox = Promise.withResolvers<void>();
+    await page.route(
+      (url) => url.pathname === "/messages" && url.searchParams.has("_rsc"),
+      async (route) => {
+        await inbox.promise;
+        await route.continue();
+      }
+    );
+    await page.goto(`/messages/${DM}`, { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await expect(
+      page.getByRole("textbox", { name: "Write a message" }).last()
+    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    await page.evaluate(() => {
+      const root = document.documentElement;
+      const start = document.startViewTransition.bind(document);
+      document.startViewTransition = (...args) => {
+        const transition = start(...args);
+        root.dataset["testSlowBackCaptures"] = String(
+          Number(root.dataset["testSlowBackCaptures"] ?? 0) + 1
+        );
+        void transition.ready.catch((error: unknown) => {
+          root.dataset["testSlowBackSkipped"] = String(error);
+        });
+        return transition;
+      };
+    });
+    const root = page.locator("html");
+    const back = page.getByRole("button", { name: "Go back", exact: true });
+    try {
+      await back.tap();
+      await expect(root).toHaveAttribute(
+        "data-test-slow-back-skipped",
+        /skipTransition|skipped/iu
+      );
+      await expect(root).toHaveAttribute("data-test-slow-back-captures", "1");
+    } finally {
+      inbox.resolve();
+    }
+    await expect(page).toHaveURL(/\/messages$/u);
+    const row = page
+      .getByRole("link", { name: /Sandbox Direct Message/u })
+      .first();
+    await expect(row).toBeVisible();
+    await expect(root).not.toHaveAttribute("data-wave-navigation-transition");
+    await row.tap();
+    await expect(page).toHaveURL(new RegExp(`/messages/${DM}$`, "u"));
+    await expect(
+      page.getByRole("textbox", { name: "Write a message" }).last()
+    ).toBeVisible();
+    await expect(root).not.toHaveAttribute("data-wave-navigation-transition");
+    await back.tap();
+    await expect(page).toHaveURL(/\/messages$/u);
+    await expect(row).toBeVisible();
+    await expect(root).toHaveAttribute("data-test-slow-back-captures", "3");
+    await expect(root).not.toHaveAttribute("data-wave-navigation-transition");
+    await expectNoHorizontalOverflow(page);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
 });
