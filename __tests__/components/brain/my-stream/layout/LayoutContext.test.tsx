@@ -179,12 +179,12 @@ describe("LayoutProvider", () => {
     try {
       const { rerender, unmount } = render(view(true));
       expect(screen.getByTestId("registered-nav-height")).toHaveTextContent(
-        "80"
+        /^80$/u
       );
       for (const visible of [false, true, false, true]) {
         rerender(view(visible));
         expect(screen.getByTestId("registered-nav-height")).toHaveTextContent(
-          visible ? "80" : "0"
+          visible ? /^80$/u : /^0$/u
         );
       }
       unmount();

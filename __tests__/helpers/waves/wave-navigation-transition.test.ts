@@ -38,10 +38,18 @@ const start = jest.fn((update: () => Promise<void>) => {
 });
 
 it("keeps the list in the root capture and names only the incoming phone conversation", async () => {
-  window.matchMedia = jest.fn((query) => ({
-    ...media,
-    matches: query === "(width < 768px)",
-  }));
+  window.matchMedia = jest.fn(
+    (query: string): MediaQueryList => ({
+      matches: query === "(width < 768px)",
+      media: query,
+      onchange: null,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: media.addEventListener,
+      removeEventListener: media.removeEventListener,
+      dispatchEvent: jest.fn(() => true),
+    })
+  );
   document.body.innerHTML = "<div data-wave-swipe-page></div>";
   const list = document.querySelector<HTMLElement>("[data-wave-swipe-page]")!;
   const navigate = jest.fn();
