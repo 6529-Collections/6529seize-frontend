@@ -1,4 +1,5 @@
 "use client";
+import "@/i18n/namespaces/wave-sidebar";
 import { SidebarAnnouncementSkeleton } from "@/components/brain/left-sidebar/waves/SidebarDiscoverySkeletons";
 import { SidebarDiscovery } from "@/components/brain/left-sidebar/waves/SidebarDiscovery";
 import {
