@@ -120,9 +120,7 @@ describe("MobileWrapperDialog", () => {
       );
       const dialog = screen.getByRole("dialog", { name: "Add post" });
       expect(dialog).toHaveAccessibleDescription("to My Curation");
-      expect(
-        screen.getAllByRole("button", { name: "Close", exact: true })
-      ).toHaveLength(1);
+      expect(screen.getAllByRole("button", { name: "Close" })).toHaveLength(1);
     });
     it("does not render children when closed", () => {
       render(<MobileWrapperDialog {...defaultProps} isOpen={false} />);

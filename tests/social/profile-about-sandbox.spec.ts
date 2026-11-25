@@ -1586,8 +1586,14 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       await expect(eligibility).toBeVisible();
       await eligibility.hover();
       await expect(eligibility).toBeVisible();
+      // The hover card can cover the heading on a narrow mouse viewport.
+      // Click the visible guide label to retain the outside-click contract.
       await page
-        .getByRole("heading", { name: "Your profile is ready" })
+        .getByRole("region", {
+          name: "Getting started with your identity",
+          exact: true,
+        })
+        .getByText("Getting started", { exact: true })
         .click();
       await expect(eligibility).toHaveCount(0);
     }

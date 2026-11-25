@@ -669,7 +669,7 @@ describe("UserPageHeader", () => {
       "!tw-bg-transparent"
     );
     expect(screen.getByTestId("banner").parentElement).toContainElement(
-      preferencesButtons[0]
+      preferencesButtons[0]!
     );
     preferencesButtons.slice(1).forEach((preferencesButton) => {
       expect(preferencesButton).toHaveClass(
