@@ -2102,7 +2102,7 @@
       "facts": [
         "Profile pages are opened from a real handle or wallet-like route target; use Network, Waves, groups, or a known handle to open the exact profile.",
         "Profile pages organize Identity, Curation, Collected, Subscriptions, Proxy, Brain, and xTDH surfaces through tabs.",
-        "In the mobile app, Back and the right-side profile header controls sit over the banner below the phone's status area, clear of the profile picture.",
+        "In the mobile app, the standard app header stays above the profile banner with Search, Share page, and its usual Back or account-menu control. There is no separate profile Back overlay. Owner Edit profile and Preferences stay at the banner's top right. The profile More button sits immediately to the right of Follow or Following on desktop, mobile web, and in the app.",
         "On mobile web and in the app, the profile's Direct Message and More icon buttons share the same 36px appearance and larger touch targets.",
         "On their own profile, owners select Edit beside Preferences on desktop to open all five profile fields together: Profile cover, Profile picture, Profile name, Classification, and About statement. The compact dark editor places name and classification alongside each other when space allows; classification options overlay the content without moving About. Image upload controls retain their upload icon. Smaller layouts keep the circular Edit profile button and its field menu; select a field to open its editor and Back to return.",
         "To add or change an About statement, use the profile editor (Edit profile > About on smaller layouts). Clear the About editor and save to remove it. The header displays only saved About text, with See more and See less for long text on mobile. Visitors, signed-out users, and active proxies never see profile edit controls.",
@@ -6964,7 +6964,7 @@
         "Complete my set and Manage orders appear only on your own Collected tab once your account has loaded and you are signed in directly. They are omitted on other profiles, while signed out, and in proxy sessions, subject to existing platform purchasing restrictions.",
         "It shows collected NFT context, owner balances, stats summary, and transfer-mode behavior where available.",
         "Headline statistics wrap on every screen with values before labels, ordered Memes, Meme Sets, NextGen, Gradients, Boost when available. Details is below Seasons, immediately above the expandable panel.",
-        "On phones, collection filters stick below the profile tabs and the app top bar. Swipe the full-width row to reach the other chips and address filter. Desktop keeps filter arrows and fades.",
+        "On phones, collection filters stick below the profile tabs, respecting the app's top safe area. Swipe the full-width row to reach the other chips and address filter. Desktop keeps filter arrows and fades.",
         "The expandable Details panel can show holdings totals, wallet activity, distributions, TDH history, and boost breakdown.",
         "Details opens and closes without waiting for a page reload. Loading collection details… appears inside the open panel while its data loads. On small screens, opening also brings the panel into view.",
         "Closing Details preserves its activity tab, filters and page and keeps it closed when returning from artwork. Reopening restores those selections. Previous and Next below the artwork move to the start of the new results once loading finishes, with keyboard focus on the results.",

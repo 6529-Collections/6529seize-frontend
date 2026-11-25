@@ -27,14 +27,12 @@ export type ProfileModerationControls = Readonly<{
   onSelectAction: (action: ProfileAction) => void;
 }>;
 
-export function ProfileHeaderActionMenu({
+function ProfileHeaderActionMenu({
   moderationControls,
   profile,
-  placement,
 }: Readonly<{
   moderationControls: ProfileModerationControls;
   profile: ApiIdentity;
-  placement?: "inline" | "mobile" | "native-header" | undefined;
 }>) {
   const { connectedProfile } = useAuth();
   if (!profile.handle) {
@@ -60,7 +58,6 @@ export function ProfileHeaderActionMenu({
 
   return (
     <ProfileBlockActionMenu
-      placement={placement}
       handle={profile.handle}
       hasArtistActivity={
         getSubmissionCount(profile) > 0 || getTrophyArtworkCount(profile) > 0
@@ -92,11 +89,10 @@ export default function ProfileHeaderRelationshipActions({
   const { isApp } = useDeviceInfo();
   const isMobileViewport = useIsMobileLayoutViewport();
   const isCompact = isApp || isMobileViewport;
-  const actionMenu = isApp ? null : (
+  const actionMenu = (
     <ProfileHeaderActionMenu
       moderationControls={moderationControls}
       profile={profile}
-      placement={isCompact ? "mobile" : "inline"}
     />
   );
   if (!profile.handle) return null;
@@ -114,7 +110,7 @@ export default function ProfileHeaderRelationshipActions({
       unblockPending={moderationControls.isUnblocking}
       onUnblock={() => moderationControls.onSelectAction("unblock")}
       onDirectMessage={onDirectMessage}
-      beforeFollowAction={actionMenu}
+      afterFollowAction={actionMenu}
       buttonClassName={isCompact ? PROFILE_MOBILE_ACTION_CLASS : undefined}
       directMessageButtonLayout={isCompact ? "profile-menu" : undefined}
     />

@@ -288,7 +288,7 @@ export default function UserPageTabs({
       aria-label={getUserProfileTabsMessage(
         "user.profile.tabs.navigationLabel"
       )}
-      className={`tw-sticky tw-z-40 tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-bg-black ${isApp ? "tw-top-[calc(env(safe-area-inset-top,0px)+57px)]" : "tw-top-0 lg:tw-relative lg:tw-z-auto"}`}
+      className={`tw-sticky tw-z-40 tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-bg-black ${isApp ? "tw-top-[env(safe-area-inset-top,0px)]" : "tw-top-0 lg:tw-relative lg:tw-z-auto"}`}
     >
       <div
         ref={scrollContainerRef}

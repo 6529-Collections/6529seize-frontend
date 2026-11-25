@@ -108,7 +108,7 @@ export function getUserPageTabByRoute(route: string) {
   );
 }
 
-/** Only the shared profile shell owns the native profile bar and sticky tabs. */
+/** Identify shared profile routes that need document-level sticky tabs. */
 export function isUserProfilePage(pathname: string, user: unknown): boolean {
   const segments = pathname.split("/").filter(Boolean);
   return (

@@ -132,8 +132,8 @@ Transfer mode is part of the Native collected view (not a separate route).
    - `Native` for profile card holdings.
    - `Network` for xTDH token holdings.
 6. Apply filters:
-   - On phones, the swipe row sticks directly below the profile tabs, including
-     the app's top bar. It reaches both content edges and keeps the address
+   - On phones, the swipe row sticks directly below the profile tabs, respecting
+     the app's top safe area. It reaches both content edges and keeps the address
      control beside the other chips without a spacer. Desktop retains its
      filter arrows and edge fades.
    - Filter controls use compact 32px buttons. On desktop, view and sort options

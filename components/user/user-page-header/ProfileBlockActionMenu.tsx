@@ -15,7 +15,6 @@ import {
   BellIcon,
   BellSlashIcon,
   EllipsisVerticalIcon,
-  EllipsisHorizontalIcon,
   MinusCircleIcon,
   NoSymbolIcon,
 } from "@heroicons/react/24/outline";
@@ -34,7 +33,6 @@ type Props = Readonly<{
     | undefined;
   onBlock: () => void;
   showPersonalActions?: boolean | undefined;
-  placement?: "inline" | "mobile" | "native-header" | undefined;
 }>;
 
 export default function ProfileBlockActionMenu(props: Props) {
@@ -58,7 +56,6 @@ function ProfileActionsMenu({
   onBlock,
   showPersonalActions = true,
   scope,
-  placement = "inline",
 }: Props & { readonly scope: string }) {
   const locale = useBrowserLocale();
   const isMobileLayoutViewport = useIsMobileLayoutViewport();
@@ -130,11 +127,9 @@ function ProfileActionsMenu({
   ];
   if (items.length === 0) return null;
 
-  const Icon =
-    placement === "native-header"
-      ? EllipsisHorizontalIcon
-      : EllipsisVerticalIcon;
-  const trigger = <Icon aria-hidden="true" className="tw-size-5" />;
+  const trigger = (
+    <EllipsisVerticalIcon aria-hidden="true" className="tw-size-5" />
+  );
 
   if (isMobileLayoutViewport) {
     return (

@@ -134,6 +134,7 @@ jest.mock("@/components/user/utils/UserFollowBtn", () => ({
     showFollowButton = true,
     showMuteButton = true,
     beforeFollowAction,
+    afterFollowAction,
   }: {
     readonly onDirectMessage?: (() => void) | undefined;
     readonly blocked?: boolean | undefined;
@@ -141,6 +142,7 @@ jest.mock("@/components/user/utils/UserFollowBtn", () => ({
     readonly showFollowButton?: boolean | undefined;
     readonly showMuteButton?: boolean | undefined;
     readonly beforeFollowAction?: React.ReactNode | undefined;
+    readonly afterFollowAction?: React.ReactNode | undefined;
   }) => (
     <div data-testid="profile-actions">
       {onDirectMessage ? (
@@ -159,6 +161,7 @@ jest.mock("@/components/user/utils/UserFollowBtn", () => ({
           {blocked ? "Unblock" : "Follow"}
         </button>
       ) : null}
+      {afterFollowAction}
     </div>
   ),
 }));

@@ -121,16 +121,16 @@ function AppLayoutFallback({ children }: Props) {
 function AppLayoutContent({ children }: Props) {
   useDeepLinkNavigation();
   const { isViewportLocked, registerRef, spaces } = useLayout();
-  const { setHeaderRef, headerRef: activeHeaderRef } = useHeaderContext();
+  const { setHeaderRef } = useHeaderContext();
   const headerRef = useRef<HTMLDivElement | null>(null);
   const pullContentRef = useRef<HTMLDivElement | null>(null);
   const pathname = usePathname();
   const params = useParams();
-  const hasProfileBar = isUserProfilePage(pathname, params["user"]);
+  const hasProfileShell = isUserProfilePage(pathname, params["user"]);
   // This content-height wrapper is not a scrollport on collection pages.
   // Clip horizontally without trapping sticky descendants or document scrolling.
   const overflowClassName =
-    pathname === "/the-memes" || hasProfileBar
+    pathname === "/the-memes" || hasProfileShell
       ? "tw-overflow-x-clip"
       : "tw-overflow-y-auto tw-overflow-x-hidden";
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
@@ -209,14 +209,14 @@ function AppLayoutContent({ children }: Props) {
         className={`${safeAreaClass} ${overflowClassName}`}
         style={streamRouteLoadingReserveStyle}
       >
-        <PullToRefresh contentRef={pullContentRef} triggerZoneRef={hasProfileBar ? activeHeaderRef : headerRef} />
+        <PullToRefresh contentRef={pullContentRef} triggerZoneRef={headerRef} />
         <div
           ref={pullContentRef}
           {...{ [PULL_TO_REFRESH_TRANSFORM_ROOT_ATTRIBUTE]: "true" }}
         >
           <div data-wave-swipe-page>
             <div ref={headerWrapperRef}>
-              {hasProfileBar ? null : <TouchDeviceHeader />}
+              <TouchDeviceHeader />
             </div>
             <div
               ref={waveNavigationRef}

@@ -640,8 +640,71 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     }
   });
 
+  test("profile More sits after Follow with standard app navigation", async ({
+    page,
+  }, testInfo) => {
+    await hideNextDevOverlay(page.context());
+    await seedSession(page);
+    await installHostedWalletReads(page);
+    await finishHostedWalletInitialization(page, () =>
+      page.goto("/following-artist-0")
+    );
+    const header = page.locator('section[aria-labelledby="profile-heading"]');
+    const follow = header.getByRole("button", {
+      name: /^Follow(?: back|ing)?$/,
+    });
+    const more = header.getByRole("button", {
+      name: "Profile actions",
+      exact: true,
+    });
+    await expect(more).toBeVisible();
+    const [followBox, moreBox, dmBox] = await Promise.all([
+      follow.boundingBox(),
+      more.boundingBox(),
+      header
+        .getByRole("button", { name: "Send direct message", exact: true })
+        .boundingBox(),
+    ]);
+    expect(dmBox!.x + dmBox!.width).toBeLessThanOrEqual(followBox!.x);
+    expect(moreBox!.x).toBeGreaterThanOrEqual(followBox!.x + followBox!.width);
+    expect(Math.abs(moreBox!.y - followBox!.y)).toBeLessThanOrEqual(1);
+    await expect(page.locator("[data-profile-top-bar]")).toHaveCount(0);
+    if (isCapacitorSimulationProject(testInfo.project.name)) {
+      await expect(
+        page.getByRole("button", { name: "Search 6529", exact: true })
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Share page", exact: true })
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: /^Open menu/ })
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Back", exact: true })
+      ).toHaveCount(0);
+    }
+    await page.screenshot({
+      path: testInfo.outputPath("profile-inline-more.png"),
+      animations: "disabled",
+      scale: "css",
+    });
+    await more.click();
+    await expect(
+      page
+        .getByRole("menuitem", { name: "Mute notifications", exact: true })
+        .or(
+          page
+            .getByRole("dialog", { name: "Profile actions", exact: true })
+            .getByRole("button", { name: "Mute notifications", exact: true })
+        )
+    ).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(more).toBeFocused();
+    await expectNoHorizontalOverflow(page);
+  });
+
   for (const profile of ["playwright", "following-artist-0"]) {
-    test(`native profile controls clear the avatar with iPhone safe areas for ${profile}`, async ({
+    test(`native profile keeps standard header and inline actions with iPhone safe areas for ${profile}`, async ({
       page,
       baseURL,
       browserName,
@@ -663,8 +726,18 @@ test.describe("Profile editing @auth @medium @local-only", () => {
         insets: { top: 59 },
       });
       await page.goto(`/${profile}`);
-      const back = page.getByRole("button", { name: "Back", exact: true });
-      await expect(back).toBeVisible();
+      await expect(page.locator("[data-profile-top-bar]")).toHaveCount(0);
+      await expect(
+        page.getByRole("button", { name: /^Open menu/ })
+      ).toBeVisible();
+      const search = page.getByRole("button", {
+        name: "Search 6529",
+        exact: true,
+      });
+      await expect(search).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Share page", exact: true })
+      ).toBeVisible();
       const banner = page.getByRole("main").locator("[data-profile-banner]");
       const avatar = page.getByRole("main").locator("[data-profile-avatar]");
       for (const top of [59, 62, 0]) {
@@ -673,29 +746,69 @@ test.describe("Profile editing @auth @medium @local-only", () => {
         });
         await expect
           .poll(async () => {
-            const [buttonBox, avatarBox] = await Promise.all([
-              back.boundingBox(),
-              avatar.boundingBox(),
+            const [buttonBox, bannerBox] = await Promise.all([
+              search.boundingBox(),
+              banner.boundingBox(),
             ]);
-            return buttonBox && avatarBox
-              ? avatarBox.y - buttonBox.y - buttonBox.height - 4
-              : 0;
+            return buttonBox && bannerBox
+              ? bannerBox.y - buttonBox.y - buttonBox.height
+              : -1;
           })
-          .toBeGreaterThanOrEqual(8);
+          .toBeGreaterThanOrEqual(0);
         const [buttonBox, bannerBox, avatarBox] = await Promise.all([
-          back.boundingBox(),
+          search.boundingBox(),
           banner.boundingBox(),
           avatar.boundingBox(),
         ]);
         if (!buttonBox || !bannerBox || !avatarBox)
           throw new Error("Missing native profile header geometry");
         expect(buttonBox.y).toBeGreaterThanOrEqual(top);
-        expect(buttonBox.y + buttonBox.height + 4).toBeLessThanOrEqual(
-          avatarBox.y - 8
-        );
-        expect(buttonBox.y + buttonBox.height).toBeLessThan(
-          bannerBox.y + bannerBox.height
-        );
+        expect(avatarBox.y).toBeGreaterThan(bannerBox.y);
+        if (profile === "playwright") {
+          const edit = await page
+            .getByRole("button", { name: "Edit profile", exact: true })
+            .boundingBox();
+          const preferences = await page
+            .getByRole("link", { name: "Preferences", exact: true })
+            .boundingBox();
+          expect(edit!.y).toBeGreaterThanOrEqual(bannerBox.y);
+          expect(edit!.y + edit!.height).toBeLessThan(avatarBox.y);
+          expect(preferences!.x).toBeGreaterThan(edit!.x);
+        } else {
+          const follow = await page
+            .getByRole("button", {
+              name: /^Follow(?: back|ing)?$/,
+              exact: true,
+            })
+            .boundingBox();
+          const more = page.getByRole("button", {
+            name: "Profile actions",
+            exact: true,
+          });
+          const moreBox = await more.boundingBox();
+          expect(moreBox!.x).toBeGreaterThanOrEqual(follow!.x + follow!.width);
+          expect(Math.abs(moreBox!.y - follow!.y)).toBeLessThanOrEqual(1);
+          if (top === 59) {
+            await more.click();
+            const sheet = page.getByRole("dialog", {
+              name: "Profile actions",
+              exact: true,
+            });
+            await expect(
+              sheet.getByRole("button", {
+                name: "Mute notifications",
+                exact: true,
+              })
+            ).toBeVisible();
+            await expect(
+              sheet.getByRole("button", { name: "Block profile", exact: true })
+            ).toBeVisible();
+            await sheet
+              .getByRole("button", { name: "Close", exact: true })
+              .click();
+            await expect(more).toBeFocused();
+          }
+        }
         if (top === 59)
           await page.screenshot({
             path: testInfo.outputPath("native-profile-safe-area.png"),
@@ -1558,14 +1671,18 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     await seedSession(page);
     await installStatements(page, getSandboxApiOrigin(baseURL));
     await installHostedWalletReads(page);
-    await page.goto("/playwright");
+    await finishHostedWalletInitialization(page, () =>
+      page.goto("/playwright")
+    );
     const edit = page.getByRole("button", {
       name: "Edit profile",
       exact: true,
     });
     const tabs = page.getByRole("navigation", { name: "Profile sections" });
     for (const load of ["direct", "reload"]) {
-      if (load === "reload") await page.reload();
+      if (load === "reload") {
+        await finishHostedWalletInitialization(page, () => page.reload());
+      }
       await expect(edit).toBeVisible({
         timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
       });

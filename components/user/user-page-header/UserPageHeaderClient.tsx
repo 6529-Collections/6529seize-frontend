@@ -4,14 +4,7 @@ import type { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/Ap
 
 import { skipToken, useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
-import {
-  useContext,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-  type RefObject,
-} from "react";
+import { useContext, useMemo, useState, type ReactNode } from "react";
 
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -49,7 +42,6 @@ import UserPageHeaderEditProfile from "./UserPageHeaderEditProfile";
 import UserPageHeaderEditProfileDesktop from "./UserPageHeaderEditProfileDesktop";
 import BlockedProfileHeaderIndicator from "./BlockedProfileHeaderIndicator";
 import ProfileHeaderRelationshipActions, {
-  ProfileHeaderActionMenu,
   type ProfileAction,
   type ProfileModerationControls,
 } from "./ProfileHeaderRelationshipActions";
@@ -61,8 +53,6 @@ import {
   USER_PAGE_HEADER_SURFACE_CLASS,
   USER_PAGE_HEADER_TOUCH_TARGET_CLASS,
 } from "./user-page-header-surface";
-
-import UserPageMobileTopBar from "./UserPageMobileTopBar";
 
 type Props = {
   readonly profile: ApiIdentity;
@@ -160,14 +150,14 @@ function ProfileHeaderActionColumn({
   const topPaddingClass = canManageProfilePreferences
     ? "lg:tw-pt-0"
     : "lg:tw-pt-5";
-  const visibilityClass = followHandle
-    ? "tw-flex"
-    : isApp
-      ? "tw-hidden"
-      : "tw-hidden lg:tw-flex";
+  let visibilityClass = isApp ? "tw-hidden" : "tw-hidden lg:tw-flex";
+  if (followHandle) visibilityClass = "tw-flex";
+  const desktopLayoutClass = isApp
+    ? ""
+    : `lg:tw-col-start-2 lg:tw-row-span-2 lg:tw-row-start-1 lg:tw-w-auto lg:tw-flex-none lg:tw-self-start lg:tw-pb-2 lg:tw-pt-0 ${topPaddingClass}`;
   return (
     <div
-      className={`tw-col-start-2 tw-row-start-1 tw-flex-col tw-items-end tw-gap-4 tw-justify-self-end ${isApp ? "" : `lg:tw-col-start-2 lg:tw-row-span-2 lg:tw-row-start-1 lg:tw-w-auto lg:tw-flex-none lg:tw-self-start lg:tw-pb-2 lg:tw-pt-0 ${topPaddingClass}`} ${visibilityClass}`}
+      className={`tw-col-start-2 tw-row-start-1 tw-flex-col tw-items-end tw-gap-4 tw-justify-self-end ${desktopLayoutClass} ${visibilityClass}`}
     >
       <div className="tw-flex tw-w-full tw-flex-wrap tw-items-end tw-gap-2 md:tw-w-auto md:tw-justify-end">
         {canManageProfilePreferences ? (
@@ -213,7 +203,6 @@ function ProfileHeaderActionColumn({
 
 type ProfileHeaderContentProps = Readonly<{
   isApp: boolean;
-  nameRef: RefObject<HTMLDivElement | null>;
   editProfileButton: ReactNode;
   aboutStatement: CicStatement | null;
   banner1Color: string;
@@ -234,7 +223,6 @@ type ProfileHeaderContentProps = Readonly<{
 
 function ProfileHeaderContent({
   isApp,
-  nameRef,
   editProfileButton,
   aboutStatement,
   banner1Color,
@@ -282,7 +270,6 @@ function ProfileHeaderContent({
             </div>
 
             <div
-              ref={nameRef}
               className={`tw-col-span-2 tw-row-start-2 tw-min-w-0 tw-flex-1 tw-pb-1 ${isApp ? "" : "lg:tw-pb-2 lg:tw-pt-1"}`}
             >
               <UserPageHeaderName
@@ -460,7 +447,6 @@ export default function UserPageHeaderClient({
   const params = useParams();
   const router = useRouter();
   const { isApp } = useDeviceInfo();
-  const nameRef = useRef<HTMLDivElement>(null);
   const routeHandleOrWallet = params["user"]?.toString().toLowerCase() ?? null;
   const normalizedHandleOrWallet =
     routeHandleOrWallet ?? handleOrWallet.toLowerCase();
@@ -695,21 +681,6 @@ export default function UserPageHeaderClient({
 
   return (
     <div className="tailwind-scope">
-      {isApp ? (
-        <UserPageMobileTopBar
-          headingRef={nameRef}
-          label={profile.handle ?? profileLabel}
-        >
-          {mobileOwnerControls}
-          {followHandle ? (
-            <ProfileHeaderActionMenu
-              profile={profile}
-              moderationControls={moderationControls}
-              placement="native-header"
-            />
-          ) : null}
-        </UserPageMobileTopBar>
-      ) : null}
       <section
         aria-labelledby="profile-heading"
         className="tw-relative tw-bg-black tw-pb-4 md:tw-pb-8"
@@ -721,10 +692,11 @@ export default function UserPageHeaderClient({
             defaultBanner2={banner2Color}
             canEdit={false}
             profileLabel={profileLabel}
-            reserveTopSafeArea={isApp}
           />
-          {!isApp && mobileOwnerControls ? (
-            <div className="tw-absolute tw-right-4 tw-top-3 tw-z-20 sm:tw-right-6 sm:tw-top-4 md:tw-right-8 lg:tw-hidden">
+          {mobileOwnerControls ? (
+            <div
+              className={`tw-absolute tw-right-4 tw-top-3 tw-z-20 sm:tw-right-6 sm:tw-top-4 md:tw-right-8 ${isApp ? "" : "lg:tw-hidden"}`}
+            >
               {mobileOwnerControls}
             </div>
           ) : null}
@@ -732,7 +704,6 @@ export default function UserPageHeaderClient({
 
         <ProfileHeaderContent
           isApp={isApp}
-          nameRef={nameRef}
           editProfileButton={editProfileButton}
           aboutStatement={aboutStatement}
           banner1Color={banner1Color}

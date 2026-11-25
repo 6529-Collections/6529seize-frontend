@@ -174,6 +174,7 @@ export default function UserFollowBtn({
   unblockPending = false,
   onUnblock,
   beforeFollowAction,
+  afterFollowAction,
   insideHoverCard = false,
   followLabel,
   followingLabel,
@@ -192,6 +193,7 @@ export default function UserFollowBtn({
   readonly unblockPending?: boolean | undefined;
   readonly onUnblock?: (() => void) | undefined;
   readonly beforeFollowAction?: ReactNode | undefined;
+  readonly afterFollowAction?: ReactNode | undefined;
   readonly insideHoverCard?: boolean | undefined;
   readonly followLabel?: string | undefined;
   readonly followingLabel?: string | undefined;
@@ -455,6 +457,7 @@ export default function UserFollowBtn({
           {actionContent}
         </Button>
       )}
+      {afterFollowAction}
     </div>
   );
 }
