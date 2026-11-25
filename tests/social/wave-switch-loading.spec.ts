@@ -607,30 +607,28 @@ for (const app of [false, true]) {
         await expect(page).toHaveURL(parentRoute);
       }
       if (testInfo.project.name === "web-mobile-chromium") {
-        const avatar = expand
-          .locator("xpath=..")
-          .getByTestId("sidebar-wave-avatar")
-          .locator(":scope > :first-child");
         await expect(expand).toHaveCSS("width", "44px");
         await expect(expand).toHaveCSS("height", "44px");
         await expect(expand).toHaveCSS("border-top-width", "0px");
-        await expect(expand.locator(":scope > span").first()).toHaveCSS(
-          "box-shadow",
-          "none"
-        );
         await expect
-          .poll(async () => {
-            const [chevronBounds, avatarBounds] = await Promise.all([
-              expand.boundingBox(),
-              avatar.boundingBox(),
-            ]);
-            if (!chevronBounds || !avatarBounds)
-              return Number.POSITIVE_INFINITY;
-            const chevronCenter = chevronBounds.y + chevronBounds.height / 2;
-            const avatarCenter = avatarBounds.y + avatarBounds.height / 2;
-            return Math.abs(chevronCenter - avatarCenter);
-          })
-          .toBeLessThanOrEqual(1);
+          .poll(() =>
+            expand.evaluate((button) => {
+              const avatar = button.parentElement?.querySelector(
+                '[data-testid="sidebar-wave-avatar"]'
+              )?.firstElementChild;
+              const surface = button.firstElementChild;
+              if (!avatar || !surface) return null;
+              const chevronBounds = button.getBoundingClientRect();
+              const avatarBounds = avatar.getBoundingClientRect();
+              const chevronCenter = chevronBounds.y + chevronBounds.height / 2;
+              const avatarCenter = avatarBounds.y + avatarBounds.height / 2;
+              return {
+                centered: Math.abs(chevronCenter - avatarCenter) <= 1,
+                surfaceShadow: getComputedStyle(surface).boxShadow,
+              };
+            })
+          )
+          .toEqual({ centered: true, surfaceShadow: "none" });
         const waveListUrl = page.url();
         await expand.tap();
         await expect(childLink).toBeVisible();
