@@ -96,6 +96,8 @@ swipe return to the feed at the saved reading position.
 - Returning to the Waves list with a right swipe moves the channel header,
   including the wave name and Join action, with the content. The bottom
   navigation stays in place.
+- In the iPhone app, swiping right from inside a direct message moves its
+  header and conversation together. Complete the swipe to return to Messages.
 - On iPhone and phone web, tapping Back from a wave or direct message slides
   the complete conversation, including its header, to the right. The Waves
   list, Messages list, or encrypted inbox stays still as it is revealed.

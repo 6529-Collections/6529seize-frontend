@@ -305,6 +305,50 @@ for (const platform of ["ios", "android"] as const) {
         await editor.fill("");
         await expectNoUnsafeSandboxMutations(baseURL);
       });
+
+      test("DM header follows the finger during swipe Back", async ({
+        page,
+        baseURL,
+      }) => {
+        const conversation = `/messages/${DM}`;
+        await page.goto(conversation, { waitUntil: "domcontentloaded" });
+        await waitForRouteReady(page);
+        await expect(
+          page.getByRole("textbox", { name: "Write a message" }).last()
+        ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+
+        const headerBack = page.getByRole("button", {
+          name: "Back",
+          exact: true,
+        });
+        const surface = page.getByTestId("wave-swipe-surface");
+        const horizontalPosition = (element: Locator) =>
+          element.evaluate((node) => node.getBoundingClientRect().x);
+        const headerStart = await horizontalPosition(headerBack);
+        const contentStart = await horizontalPosition(surface);
+        const drag = await touchDrag(page, surface, 115);
+        await expect
+          .poll(async () => (await horizontalPosition(surface)) - contentStart)
+          .toBeGreaterThan(80);
+        const contentTravel =
+          (await horizontalPosition(surface)) - contentStart;
+        expect(
+          (await horizontalPosition(headerBack)) - headerStart
+        ).toBeCloseTo(contentTravel, 0);
+
+        await drag.reverse();
+        await drag.release();
+        await expect(page).toHaveURL(new RegExp(`${conversation}$`, "u"));
+        await expect
+          .poll(() => horizontalPosition(headerBack))
+          .toBeCloseTo(headerStart, 0);
+
+        const committed = await touchDrag(page, surface, 130);
+        await committed.release();
+        await expect(page).toHaveURL(/\/messages$/u);
+        await expectNoHorizontalOverflow(page);
+        await expectNoUnsafeSandboxMutations(baseURL);
+      });
     }
 
     test("wave-back follows interior touch, reverses and then commits without a second transition", async ({
