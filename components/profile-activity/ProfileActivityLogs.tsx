@@ -148,9 +148,7 @@ export default function ProfileActivityLogs({
   });
 
   return (
-    <div
-      className={`${initialParams.handleOrWallet ? "" : "tw-mt-2"} ${useProfilePills ? "[&_[role=tab]]:!tw-text-[13px] [&_[role=tab]]:!tw-font-medium" : ""}`}
-    >
+    <div className={initialParams.handleOrWallet ? "" : "tw-mt-2"}>
       <div
         className={`${
           withMatterFilter

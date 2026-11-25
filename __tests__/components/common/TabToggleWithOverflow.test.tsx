@@ -207,17 +207,17 @@ describe("TabToggleWithOverflow", () => {
 
     expect(screen.getByRole("tab", { name: "A" })).toHaveClass(
       "tw-h-8",
-      "tw-text-xs",
+      "tw-text-meta",
       "tw-font-semibold"
     );
     expect(screen.getByRole("tab", { name: "B" })).toHaveClass(
       "tw-h-8",
-      "tw-text-xs",
+      "tw-text-meta",
       "tw-font-medium"
     );
     expect(screen.getByRole("button", { name: "More tabs" })).toHaveClass(
       "tw-h-8",
-      "tw-text-xs",
+      "tw-text-meta",
       "tw-font-medium"
     );
   });

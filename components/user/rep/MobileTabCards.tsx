@@ -25,7 +25,7 @@ function MobileTabButton({
       disabled={disabled}
       aria-pressed={isSelected}
       onClick={() => onTabChange(tab)}
-      className="!tw-text-[13px] !tw-font-medium tw-uppercase"
+      className="tw-uppercase"
     >
       {label}
     </PillTab>
