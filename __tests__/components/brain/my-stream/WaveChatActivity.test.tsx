@@ -1,16 +1,23 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useEffect, useState } from "react";
 import WaveChatActivity from "@/components/brain/my-stream/WaveChatActivity";
-import { WaveChatReadContext } from "@/contexts/wave/WaveChatReadContext";
+import {
+  useWaveChatReadRegistration,
+  WaveChatReadContext,
+} from "@/contexts/wave/WaveChatReadContext";
 
 afterEach(() => jest.restoreAllMocks());
 
 it("registers reading only while Chat is selected and unregisters on leaving", () => {
   const unregister = jest.fn();
   const register = jest.fn(() => unregister);
+  function Chat({ waveId }: { readonly waveId: string }) {
+    useWaveChatReadRegistration(waveId, true);
+    return <p>Chat</p>;
+  }
   const content = (active: boolean, waveId = "wave-1") => (
     <WaveChatReadContext.Provider value={register}>
-      <WaveChatActivity waveId={waveId} active={active} chat={<p>Chat</p>}>
+      <WaveChatActivity active={active} chat={<Chat waveId={waveId} />}>
         <p>Leaderboard</p>
       </WaveChatActivity>
     </WaveChatReadContext.Provider>
