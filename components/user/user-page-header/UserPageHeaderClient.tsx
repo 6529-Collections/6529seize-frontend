@@ -4,7 +4,7 @@ import type { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/Ap
 
 import { skipToken, useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
-import { useContext, useMemo, useState, type ReactNode } from "react";
+import { useContext, useMemo, useRef, useState, type ReactNode } from "react";
 
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -448,6 +448,7 @@ export default function UserPageHeaderClient({
   const params = useParams();
   const router = useRouter();
   const { isApp } = useDeviceInfo();
+  const headerRef = useRef<HTMLElement>(null);
   const routeHandleOrWallet = params["user"]?.toString().toLowerCase() ?? null;
   const normalizedHandleOrWallet =
     routeHandleOrWallet ?? handleOrWallet.toLowerCase();
@@ -663,6 +664,14 @@ export default function UserPageHeaderClient({
     statement: aboutStatement,
     defaultBanner1: banner1Color,
     defaultBanner2: banner2Color,
+    onRestoreFocus: () => {
+      const triggers = headerRef.current?.querySelectorAll<HTMLButtonElement>(
+        "[data-profile-edit-trigger]"
+      );
+      Array.from(triggers ?? [])
+        .find((trigger) => trigger.getClientRects().length > 0)
+        ?.focus();
+    },
   };
   const editProfileButton = canEdit ? (
     <UserPageHeaderEditProfileDesktop {...editProfileProps} />
@@ -690,6 +699,7 @@ export default function UserPageHeaderClient({
   return (
     <div className="tailwind-scope">
       <section
+        ref={headerRef}
         aria-labelledby="profile-heading"
         className="tw-relative tw-bg-black tw-pb-4 md:tw-pb-8"
       >
