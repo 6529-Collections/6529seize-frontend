@@ -12,6 +12,9 @@ export const STATS_SECTION_HEADING_CLASS =
 export const STATS_TABLE_CLASS =
   "tw-w-full tw-border-collapse tw-whitespace-nowrap tw-text-left tw-text-sm [&_:is(thead,tbody,tr)::before]:tw-content-none [&_:is(thead,tbody,tr)::after]:tw-content-none";
 
+export const STATS_TABLE_EMPTY_CLASS =
+  "tw-mb-0 tw-px-4 tw-py-5 tw-text-meta/5 tw-font-normal tw-italic tw-text-iron-500";
+
 export const STATS_TABLE_HEAD_CLASS =
   "tw-bg-white/[0.04] tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-normal tw-text-iron-500 md:tw-tracking-wide";
 
