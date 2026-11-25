@@ -85,6 +85,7 @@ The profile header appears on profile routes under `/{user}` and shows:
      and Escape closes the menu and returns focus to its button.
      See [Artist Artwork Alerts](../../notifications/feature-artist-artwork-alerts.md).
    - **Direct Message** appears beside Follow or Following for another profile.
+     On mobile web and in the app, its 36px icon button matches the More button.
      It opens **New message** with that person selected. Opening the composer
      creates no chat. See [Starting a chat](../../encrypted-messages.md#starting-a-chat).
 

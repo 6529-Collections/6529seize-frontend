@@ -116,11 +116,7 @@ export default function ProfileHeaderRelationshipActions({
       onDirectMessage={onDirectMessage}
       beforeFollowAction={actionMenu}
       buttonClassName={isCompact ? PROFILE_MOBILE_ACTION_CLASS : undefined}
-      directMessageButtonClassName={
-        isCompact
-          ? `${PROFILE_MOBILE_ACTION_CLASS} !tw-size-9 !tw-min-w-9`
-          : undefined
-      }
+      directMessageButtonLayout={isCompact ? "profile-menu" : undefined}
     />
   );
 }
