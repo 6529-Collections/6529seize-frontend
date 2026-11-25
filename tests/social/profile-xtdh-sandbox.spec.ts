@@ -66,7 +66,7 @@ async function installFixtures(page: Page, api: string) {
   await page.route(`${api}/api/xtdh/grants?**`, (route) => {
     const status =
       new URL(route.request().url()).searchParams.get("status") ?? "GRANTED";
-    const pending = status.includes("PENDING");
+    const pending = status.toUpperCase().includes("PENDING");
     return route.fulfill({
       json: {
         count: 2,
@@ -261,7 +261,11 @@ test.describe("Profile xTDH compact design @auth @medium @local-only", () => {
     await expect(
       page.getByRole("heading", { name: "Create New Grant", exact: true })
     ).toBeVisible();
-    await expect(page.getByPlaceholder("0x...")).toBeFocused();
+    await expect(
+      page.getByPlaceholder("Paste an Ethereum contract address…", {
+        exact: true,
+      })
+    ).toBeFocused();
     await expectNoHorizontalOverflow(page);
     await page
       .getByRole("progressbar", { name: "Granted Rate" })
