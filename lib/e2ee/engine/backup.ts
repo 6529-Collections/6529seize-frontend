@@ -58,6 +58,8 @@ export async function backupHistory(
   if (Object.keys(reads).length > 0) {
     out.reads = reads;
   }
+  const pins = Object.values(ctx.device?.conversationPins?.versions ?? {});
+  if (pins.length > 0) out.pins = pins;
   return out;
 }
 

@@ -122,6 +122,47 @@ async function updateClient(
 }
 
 describe("E2EE engine: read-state sync (D175, P60)", () => {
+  it("syncs pins only to own devices and keeps an unpin when a stale device returns", async () => {
+    const world = await createWorld();
+    const { alice, bob, laptop, phone, g } = await aliceWithTwoDevices(world);
+    const dm = dsGroups(world).find((group) => group.g === g);
+    const dmItems = dm?.items.length;
+
+    await laptop.engine.setConversationPinned(g, true);
+    expect(laptop.engine.getConversation(g)?.pinned).toBe(true);
+    await settle(world);
+    expect(phone.engine.getConversation(g)?.pinned).toBe(true);
+    expect(bob.primary.engine.getConversation(g)?.pinned).toBeUndefined();
+    expect(dm?.items).toHaveLength(dmItems ?? 0);
+
+    stopDevice(world, laptop);
+    await phone.engine.setConversationPinned(g, false);
+    await settle(world);
+    const returning = await startDevice(world, alice.profileId, alice.account, {
+      storage: laptop.storage,
+      enroll: false,
+      extra: { readSync: true },
+    });
+    await settle(world);
+    expect(returning.engine.getConversation(g)?.pinned).toBeUndefined();
+    expect(phone.engine.getConversation(g)?.pinned).toBeUndefined();
+  });
+
+  it("shares an existing pin with a newly trusted device", async () => {
+    const world = await createWorld();
+    const alice = await syncUser(world, "alice");
+    const bob = await addUser(world, "bob");
+    const g = await alice.primary.engine.createConversation({
+      profileIds: [bob.profileId],
+      kind: "dm",
+    });
+    await settle(world);
+    await alice.primary.engine.setConversationPinned(g, true);
+    const phone = await addSyncDevice(world, alice);
+    await settle(world);
+    expect(phone.engine.getConversation(g)?.pinned).toBe(true);
+  });
+
   it("clears a chat on the phone after it is read on the laptop", async () => {
     const world = await createWorld();
     const { bob, laptop, phone, g } = await aliceWithTwoDevices(world);

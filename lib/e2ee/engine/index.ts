@@ -99,6 +99,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
       },
     });
     ctx.readSync = this.readSync;
+    ctx.store.conversationPinned = this.readSync.pins.isPinned;
     this.controller = new EngineController(ctx, {
       refreshMe: () => this.refreshMe(),
       onOwnRevoked: () => this.onOwnRejected(),
@@ -585,6 +586,13 @@ class E2eeEngineImpl implements E2eeEngineExt {
     );
   }
 
+  async setConversationPinned(g: string, pinned: boolean): Promise<void> {
+    this.requireReady();
+    if (await this.readSync.pins.set(g.toLowerCase(), pinned)) {
+      this.readSync.schedulePins();
+    }
+  }
+
   async addMembers(g: string, profileIds: string[]) {
     this.requireReady();
     const result = await addMembers(
@@ -702,9 +710,12 @@ class E2eeEngineImpl implements E2eeEngineExt {
 
   async importBackupHistory(history: BackupHistory) {
     this.requireReady();
-    const result = await this.ctx.queue.run(() =>
-      importBackupHistory(this.ctx, history)
-    );
+    const result = await this.ctx.queue.run(async () => {
+      const imported = await importBackupHistory(this.ctx, history);
+      await this.readSync.pins.merge(history.pins ?? []);
+      return imported;
+    });
+    this.readSync.schedulePins();
     await resolveProfiles(this.ctx, memberProfileIds(this.ctx));
     return result;
   }

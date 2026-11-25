@@ -72,6 +72,14 @@ interface E2eeConversationThread {
   readonly sessions: readonly E2eeConversation[];
 }
 
+export function getConversationThreadKey(
+  conversation: DmIdentity & Pick<E2eeConversation, "g">,
+  selfProfileId: string | null
+): string {
+  const peer = getDmPeerId(conversation, selfProfileId);
+  return peer === null ? `group:${conversation.g}` : `dm:${peer}`;
+}
+
 /** One list entry per DM peer. MLS groups and their histories stay intact. */
 export function groupConversationThreads(
   conversations: readonly E2eeConversation[],
@@ -79,8 +87,7 @@ export function groupConversationThreads(
 ): E2eeConversationThread[] {
   const threads = new Map<string, E2eeConversation[]>();
   for (const conversation of conversations) {
-    const peer = getDmPeerId(conversation, selfProfileId);
-    const key = peer === null ? `group:${conversation.g}` : `dm:${peer}`;
+    const key = getConversationThreadKey(conversation, selfProfileId);
     const sessions = threads.get(key) ?? [];
     sessions.push(conversation);
     threads.set(key, sessions);

@@ -1,5 +1,7 @@
 "use client";
 
+import { faThumbtack } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { BellSlashIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -238,7 +240,11 @@ function E2eeConversationRow({
         <Link
           href={href}
           aria-current={active ? "page" : undefined}
-          aria-label={title}
+          aria-label={
+            conversation.pinned
+              ? t(locale, "e2ee.list.pinnedChat", { title })
+              : title
+          }
           title={title}
           className={`tw-relative tw-flex tw-justify-center tw-rounded-lg tw-p-2 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${rowClass}`}
         >
@@ -247,6 +253,15 @@ function E2eeConversationRow({
             selfProfileId={selfProfileId}
             title={title}
           />
+          {conversation.pinned ? (
+            <span className="tw-absolute tw-bottom-1 tw-right-1 tw-flex tw-size-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-text-iron-200">
+              <FontAwesomeIcon
+                aria-hidden="true"
+                icon={faThumbtack}
+                className="tw-size-2.5"
+              />
+            </span>
+          ) : null}
           {!muted && (conversation.unread > 0 || conversation.mentions > 0) ? (
             <span
               aria-hidden="true"
@@ -279,6 +294,18 @@ function E2eeConversationRow({
             >
               {title}
             </span>
+            {conversation.pinned ? (
+              <span className="tw-flex tw-flex-shrink-0 tw-self-center tw-text-iron-300">
+                <FontAwesomeIcon
+                  aria-hidden="true"
+                  icon={faThumbtack}
+                  className="tw-size-3"
+                />
+                <span className="tw-sr-only">
+                  {t(locale, "e2ee.list.pinned")}
+                </span>
+              </span>
+            ) : null}
             <span
               className={`tw-flex-shrink-0 tw-text-xs ${
                 hasUnread
@@ -333,7 +360,10 @@ export function E2eeConversationList({
 }: E2eeConversationListProps) {
   const muted = useMutedE2eeChats(selfProfileId);
   const zone = useDisplayTimeZone();
-  const threads = groupConversationThreads(conversations, selfProfileId);
+  const threads = groupConversationThreads(conversations, selfProfileId).sort(
+    (a, b) =>
+      Number(b.current.pinned === true) - Number(a.current.pinned === true)
+  );
   const visible = limit === undefined ? threads : threads.slice(0, limit);
   return (
     <E2eeEmojiProvider>

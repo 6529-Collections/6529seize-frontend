@@ -1,9 +1,12 @@
 import { asE2eeApiError } from "../api-errors";
+import type { ConversationPin } from "../conversation-pins";
 import {
-  decodeReadSync,
+  decodeSelfSync,
   encodeReadSync,
   newReadSyncId,
   pagePositions,
+  PINS_PER_PAYLOAD,
+  type PinSyncPayload,
   type ReadPosition,
   type ReadSyncPayload,
   type ReadSyncType,
@@ -19,6 +22,7 @@ import {
   type ReadSyncHooks,
   requireMls,
 } from "./context";
+import { ConversationPins } from "./conversation-pins";
 import { E2eeError } from "./errors";
 import { recountUnread } from "./history";
 import { sleep } from "./runtime";
@@ -46,6 +50,7 @@ const SEND_JITTER_MS = 20_000;
 /** At most one batch every 15 s, except when the page is hidden. */
 const MIN_SPACING_MS = 15_000;
 const RETRY_MS = 60_000;
+const PIN_SEND_DELAY_MS = 500;
 /** P60 §5: any device answers a hello after 60–120 s if nobody else did. */
 const HELLO_ANSWER_MS = 60_000;
 const HELLO_JITTER_MS = 60_000;
@@ -110,6 +115,7 @@ interface ReadSyncDeps {
 }
 
 export class ReadSync implements ReadSyncHooks {
+  readonly pins: ConversationPins;
   private readonly ctx: EngineContext;
   private readonly deps: ReadSyncDeps;
   private readonly recount = new Set<string>();
@@ -117,10 +123,12 @@ export class ReadSync implements ReadSyncHooks {
   private lastSentAt = 0;
   /** The device whose hello is waiting for a snapshot, if any. */
   private helloFrom: string | null = null;
+  private pinExchangeGroup: string | null = null;
 
   constructor(ctx: EngineContext, deps: ReadSyncDeps) {
     this.ctx = ctx;
     this.deps = deps;
+    this.pins = new ConversationPins(ctx);
   }
 
   /** Whether this build creates self groups and sends positions. */
@@ -181,6 +189,12 @@ export class ReadSync implements ReadSyncHooks {
     this.schedule(SEND_DELAY_MS + this.ctx.random() * SEND_JITTER_MS);
   }
 
+  schedulePins(): void {
+    if (this.enabled && this.pins.hasPending()) {
+      this.schedule(PIN_SEND_DELAY_MS);
+    }
+  }
+
   private schedule(delayMs: number): void {
     const spacing = this.lastSentAt + MIN_SPACING_MS - this.ctx.now();
     this.ctx.timers.arm(TIMER_SEND, Math.max(delayMs, spacing), () => {
@@ -202,14 +216,13 @@ export class ReadSync implements ReadSyncHooks {
   }
 
   private async flushOnce(): Promise<void> {
-    const state = this.state();
-    if (!this.enabled || state.unsent.length === 0) {
-      return;
-    }
+    if (!this.enabled) return;
     const targets = this.sendTargets();
-    if (targets.length === 0) {
-      return;
-    }
+    if (targets.length === 0) return;
+    const state = this.state();
+    const pinTargets = targets.filter((target) => this.hasSibling(target));
+    const pins = pinTargets.length > 0 ? this.pins.pending() : [];
+    if (state.unsent.length === 0 && pins.length === 0) return;
     const batch = new Set(state.unsent);
     const positions: ReadPosition[] = [];
     for (const g of batch) {
@@ -227,6 +240,9 @@ export class ReadSync implements ReadSyncHooks {
       await inOrder(targets, (target) =>
         inOrder(pages, (page) => this.send(target, "read", page))
       );
+      if (pins.length > 0) {
+        await inOrder(pinTargets, (target) => this.sendPins(target, pins));
+      }
     } catch {
       this.ctx.timers.arm(TIMER_SEND, RETRY_MS, () => {
         this.run(() => this.flush());
@@ -234,6 +250,8 @@ export class ReadSync implements ReadSyncHooks {
       return;
     }
     this.lastSentAt = this.ctx.now();
+    if (pins.length > 0) await this.pins.acknowledge(pins);
+    if (batch.size === 0) return;
     const sent = new Map(positions);
     // Chats read while this batch went out, and chats read further since
     // it was built, stay queued for the next batch.
@@ -271,14 +289,25 @@ export class ReadSync implements ReadSyncHooks {
         (runtime) =>
           runtime !== canonical && !handedOver(runtime, canonical, own)
       ),
-    ].filter(
-      (runtime) =>
-        !runtime.record.pendingCommit &&
-        runtime.record.members.every(
-          (member) =>
-            member.profileId === this.ctx.profileId &&
-            this.ctx.store.findUntrusted(member.deviceKey) === null
-        )
+    ].filter((runtime) => this.canSendTo(runtime));
+  }
+
+  private canSendTo(runtime: GroupRuntime): boolean {
+    return (
+      isActive(runtime) &&
+      isSelfGroup(runtime.record) &&
+      !runtime.record.pendingCommit &&
+      runtime.record.members.every(
+        (member) =>
+          member.profileId === this.ctx.profileId &&
+          this.ctx.store.findUntrusted(member.deviceKey) === null
+      )
+    );
+  }
+
+  private hasSibling(runtime: GroupRuntime): boolean {
+    return runtime.record.members.some(
+      (member) => member.deviceKey !== this.ctx.device?.deviceKey
     );
   }
 
@@ -302,6 +331,51 @@ export class ReadSync implements ReadSyncHooks {
       : Promise.resolve();
   }
 
+  private sendPins(
+    runtime: GroupRuntime,
+    pins: readonly ConversationPin[],
+    request = false
+  ): Promise<void> {
+    if (!this.enabled) return Promise.resolve();
+    const pages: ConversationPin[][] = [];
+    for (let start = 0; start < pins.length; start += PINS_PER_PAYLOAD) {
+      pages.push(pins.slice(start, start + PINS_PER_PAYLOAD));
+    }
+    if (request && pages.length === 0) pages.push([]);
+    return inOrder(pages, async (page, index) => {
+      if (index > 0) await sleep(this.ctx.scheduler, PAGE_SPACING_MS);
+      const body = encodeReadSync({
+        v: 1,
+        t: "pins",
+        pins: page,
+        ...(request && index === 0 ? { request: true } : {}),
+      });
+      await this.sendRetrying(runtime, body, 2);
+    });
+  }
+
+  /** An upgraded client may already have passed pin updates in this log. */
+  private exchangePins(runtime: GroupRuntime): void {
+    const g = runtime.record.g;
+    if (
+      !this.enabled ||
+      this.pinExchangeGroup === g ||
+      !this.canSendTo(runtime) ||
+      !this.hasSibling(runtime)
+    ) {
+      return;
+    }
+    this.pinExchangeGroup = g;
+    this.run(async () => {
+      try {
+        await this.sendPins(runtime, this.pins.snapshot(), true);
+      } catch (error) {
+        if (this.pinExchangeGroup === g) this.pinExchangeGroup = null;
+        throw error;
+      }
+    });
+  }
+
   /** A commit can win the race for the epoch: encrypt again and resend. */
   private async sendRetrying(
     runtime: GroupRuntime,
@@ -323,7 +397,8 @@ export class ReadSync implements ReadSyncHooks {
   private sendOnce(runtime: GroupRuntime, body: Uint8Array): Promise<void> {
     return this.ctx.queue.run(async () => {
       await catchUpGroup(this.ctx, runtime);
-      if (!isActive(runtime)) {
+      // Catch-up can change the roster after sendTargets checked it.
+      if (!this.canSendTo(runtime)) {
         throw new E2eeError("E2EE_CONVERSATION_INACTIVE");
       }
       const g = runtime.record.g;
@@ -398,8 +473,12 @@ export class ReadSync implements ReadSyncHooks {
     body: Uint8Array,
     senderDeviceKey: string
   ): void {
-    const payload = decodeReadSync(body);
+    const payload = decodeSelfSync(body);
     if (!payload || senderDeviceKey === ownDeviceKey(this.ctx)) {
+      return;
+    }
+    if (payload.t === "pins") {
+      this.receivePins(runtime, payload, senderDeviceKey);
       return;
     }
     const record = runtime.record;
@@ -431,6 +510,35 @@ export class ReadSync implements ReadSyncHooks {
       );
     }
     this.scheduleApply();
+  }
+
+  private receivePins(
+    runtime: GroupRuntime,
+    payload: PinSyncPayload,
+    senderDeviceKey: string
+  ): void {
+    const { g, members, badGrants } = runtime.record;
+    const sender = members.find(
+      (member) => member.deviceKey === senderDeviceKey
+    );
+    if (
+      sender?.profileId !== this.ctx.profileId ||
+      badGrants.includes(senderDeviceKey) ||
+      this.ctx.store.findUntrusted(senderDeviceKey) !== null
+    ) {
+      return;
+    }
+    this.pins.receive(runtime, payload.pins);
+    if (payload.pins.length > 0) this.scheduleApply();
+    if (payload.request && this.enabled) {
+      this.ctx.timers.arm(`pin-sync:snapshot:${g}`, 0, () => {
+        this.run(async () => {
+          await this.pins.apply();
+          const target = this.sendTargets().find((item) => item.record.g === g);
+          if (target) await this.sendPins(target, this.pins.snapshot());
+        });
+      });
+    }
   }
 
   /** P60 default: your own message from another device marks the chat read. */
@@ -518,6 +626,7 @@ export class ReadSync implements ReadSyncHooks {
    * never lifted later; chats not joined yet keep their entry.
    */
   async apply(): Promise<void> {
+    await this.pins.apply();
     const candidates = await this.ctx.queue.run(() =>
       Promise.resolve(this.candidates())
     );
@@ -637,9 +746,11 @@ export class ReadSync implements ReadSyncHooks {
     if (canonical) {
       await this.joinedSelfGroup();
       await this.leaveHandedOver(canonical);
+      this.exchangePins(canonical);
       if (
         this.enabled &&
-        this.state().unsent.length > 0 &&
+        (this.state().unsent.length > 0 ||
+          (this.pins.hasPending() && this.hasSibling(canonical))) &&
         !this.ctx.timers.has(TIMER_SEND)
       ) {
         this.schedule(0);

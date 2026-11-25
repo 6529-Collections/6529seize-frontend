@@ -1323,6 +1323,15 @@ export const FR_FR_MESSAGES = {
   ...FR_FR_TRANSFER_MESSAGES,
   ...FR_FR_THE_MEMES_MINT_SUCCESS_MESSAGES,
   ...FR_FR_THE_MEMES_MINT_PROGRESS_MESSAGES,
+  "e2ee.list.pinned": "Épinglée",
+  "e2ee.list.pinnedChat": "{title}, discussion épinglée",
+  "e2ee.info.pin": "Épingler en haut",
+  "e2ee.info.unpin": "Désépingler la discussion",
+  "e2ee.info.pinSyncHelp":
+    "Les discussions épinglées se synchronisent de façon privée avec vos autres appareils de confiance.",
+  "e2ee.info.pinLocalHelp":
+    "Les discussions épinglées restent sur cet appareil jusqu’à ce que la synchronisation chiffrée soit disponible.",
+  "e2ee.info.pinFailed": "Impossible de modifier l’épingle. Réessayez.",
   "e2ee.message.taskChecked": "Tâche cochée",
   "e2ee.message.taskUnchecked": "Tâche non cochée",
   "e2ee.message.imageLink": "Lien vers l’image",
