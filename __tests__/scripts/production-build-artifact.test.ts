@@ -147,7 +147,7 @@ describe("production exact-artifact deployment contract", () => {
 
   it("bakes the identity freeze instant into production builds", () => {
     expect(build.env.NEXT_PUBLIC_IDENTITY_FREEZE_AT).toBe(
-      "2026-11-25T00:00:00Z"
+      "2026-11-26T00:00:00Z"
     );
   });
 
