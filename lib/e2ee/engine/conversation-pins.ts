@@ -46,15 +46,17 @@ export class ConversationPins {
     this.state.versions[thread]?.[3] === true;
 
   private snapshot(): Promise<ConversationPin[]> {
-    return this.ctx.queue.run(() => {
-      // A sibling joining now cannot read the earlier log. Include decisions
-      // already received while their local apply is still queued.
-      const received = this.receivedBatches().flatMap(({ pins }) =>
-        Object.values(pins)
-      );
-      const versions = mergeConversationPins(this.state.versions, received);
-      return Promise.resolve(Object.values(versions));
-    });
+    return this.ctx.queue.run(() =>
+      Promise.resolve(Object.values(this.versionsWithReceivedPins()))
+    );
+  }
+
+  /** Include decisions already received while their local apply is queued. */
+  private versionsWithReceivedPins() {
+    const received = this.receivedBatches().flatMap(({ pins }) =>
+      Object.values(pins)
+    );
+    return mergeConversationPins(this.state.versions, received);
   }
 
   private receivedBatches() {
@@ -84,8 +86,8 @@ export class ConversationPins {
       const conversation = this.ctx.store.getConversation(g.toLowerCase());
       if (!conversation) throw new E2eeError("E2EE_CONVERSATION_INACTIVE");
       const thread = getConversationThreadKey(conversation, this.ctx.profileId);
-      if (this.isPinned(thread) === pinned) return;
-      const current = this.state.versions[thread];
+      const current = this.versionsWithReceivedPins()[thread];
+      if ((current?.[3] === true) === pinned) return;
       const update: ConversationPin = [
         thread,
         (current?.[1] ?? 0) + 1,
