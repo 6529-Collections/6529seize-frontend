@@ -8,6 +8,7 @@ import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 import { useCurationOrder } from "@/hooks/useCurationOrder";
 import CurationOrganize from "@/components/brain/my-stream/curations/CurationOrganize";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { t } from "@/i18n/messages";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import Button from "@/components/utils/button/Button";
@@ -178,14 +179,10 @@ function ProfileCurationActionButton({
   readonly label: string;
   readonly onClick: () => void;
 }) {
+  const isMobile = useIsMobileLayoutViewport();
   return (
-    <Button
-      variant="primary"
-      size="md"
-      onClick={onClick}
-      className="max-lg:tw-h-11"
-    >
-      <PlusIcon className="-tw-ml-0.5 tw-h-5 tw-w-5 tw-flex-shrink-0" />
+    <Button variant="primary" size={isMobile ? "lg" : "md"} onClick={onClick}>
+      <PlusIcon aria-hidden="true" className="tw-size-5 tw-flex-shrink-0" />
       <span>{label}</span>
     </Button>
   );

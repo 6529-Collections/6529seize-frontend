@@ -885,6 +885,13 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       await expect(source).toBeVisible();
       await expect(manage).toHaveCount(owner ? 1 : 0);
       await expect(add).toHaveCount(owner ? 1 : 0);
+      const firstPost = page.getByRole("button", {
+        name: "Add your first post",
+        exact: true,
+      });
+      await expect(firstPost).toHaveCount(owner ? 1 : 0);
+      if (owner)
+        await expect(firstPost).toHaveCSS("height", mobile ? "44px" : "40px");
       if (mobile) {
         await expect(
           page.getByText("12,345 source posts • 6,789 joined", { exact: true })
