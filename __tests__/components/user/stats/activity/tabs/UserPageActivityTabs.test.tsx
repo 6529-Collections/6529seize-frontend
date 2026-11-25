@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import UserPageActivityTabs from "@/components/user/stats/activity/tabs/UserPageActivityTabs";
 import { USER_PAGE_ACTIVITY_TAB } from "@/components/user/stats/activity/activity.types";
@@ -93,6 +93,43 @@ describe("UserPageActivityTabs", () => {
       );
     }
   );
+
+  it("does not move focus into a replacement tablist after unmount", () => {
+    let frame: FrameRequestCallback | undefined;
+    const requestFrame = jest
+      .spyOn(globalThis, "requestAnimationFrame")
+      .mockImplementation((callback) => {
+        frame = callback;
+        return 1;
+      });
+    try {
+      const view = render(
+        <UserPageActivityTabs
+          activeTab={USER_PAGE_ACTIVITY_TAB.WALLET_ACTIVITY}
+          setActiveTab={jest.fn()}
+          locale="en-US"
+        />
+      );
+      fireEvent.keyDown(screen.getByRole("tab", { name: "Wallet Activity" }), {
+        key: "ArrowRight",
+      });
+      expect(frame).toBeDefined();
+      view.unmount();
+      render(
+        <UserPageActivityTabs
+          activeTab={USER_PAGE_ACTIVITY_TAB.WALLET_ACTIVITY}
+          setActiveTab={jest.fn()}
+          locale="en-US"
+        />
+      );
+      const wallet = screen.getByRole("tab", { name: "Wallet Activity" });
+      wallet.focus();
+      frame!(0);
+      expect(wallet).toHaveFocus();
+    } finally {
+      requestFrame.mockRestore();
+    }
+  });
 
   it("reveals the selected tab after late content sizing and stops observing on unmount", () => {
     const originalObserver = globalThis.ResizeObserver;

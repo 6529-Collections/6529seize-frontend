@@ -77,7 +77,9 @@ export default function ProfileActivityLogsFilter({
             <button
               ref={triggerRef}
               type="button"
-              aria-label={`Filter activity types: ${title}`}
+              aria-label={t(locale, "profileActivity.filterTypesLabel", {
+                title,
+              })}
               aria-expanded={isOpen}
               aria-haspopup={isMobile ? "dialog" : undefined}
               aria-controls={isOpen && !isMobile ? listId : undefined}

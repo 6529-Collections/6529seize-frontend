@@ -66,6 +66,7 @@ export const PROFILE_CURATION_MESSAGES = {
   "profileCuration.entry.existingWave": "Use an existing Wave instead",
   "profileCuration.entry.startTitle": "Create your profile Curation",
   "profileCuration.header.fallbackTitle": "Curation",
+  "profileCuration.header.addPost": "Add post",
   "profileCuration.header.source": "Source Wave:",
   "profileCuration.header.openSourceAria": "Open source Wave {waveName}",
   "profileCuration.header.controlsAria": "Curation source controls",

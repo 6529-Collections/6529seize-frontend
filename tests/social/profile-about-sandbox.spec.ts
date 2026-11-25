@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
 import {
@@ -169,6 +169,9 @@ async function installHostedWalletReads(page: Page) {
       json: Array.isArray(payload) ? payload.map(respond) : respond(payload),
     });
   });
+  await page.route("https://rpc.walletconnect.org/v1/identity/**", (route) =>
+    route.fulfill({ json: { name: null, avatar: null } })
+  );
 }
 
 async function finishHostedWalletInitialization(
@@ -295,6 +298,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
   test("profile Curation menus group actions without changing permissions or desktop styling", async ({
     page,
     baseURL,
+    hasTouch,
   }, testInfo) => {
     await hideNextDevOverlay(page.context());
     await seedSession(page);
@@ -381,7 +385,9 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     await expect(
       page.getByText("Other Curation sample post", { exact: true })
     ).toBeVisible();
-    await manage.click();
+    const activate = (control: Locator) =>
+      hasTouch ? control.tap() : control.click();
+    await activate(manage);
     const menu = page.getByRole(mobile ? "dialog" : "menu", {
       name: mobile ? "Manage" : "Curation options",
       exact: true,
@@ -450,7 +456,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
         animations: "disabled",
         scale: "css",
       });
-      await menu.getByRole("button", { name: "Close", exact: true }).click();
+      await activate(menu.getByRole("button", { name: "Close", exact: true }));
     } else await page.keyboard.press("Escape");
     await expect(manage).toBeFocused();
 
@@ -465,7 +471,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
         name: "Post actions",
         exact: true,
       });
-      await trigger.click();
+      await activate(trigger);
       const actions = page.getByRole(mobile ? "dialog" : "menu", {
         name: "Post actions",
         exact: true,
@@ -505,15 +511,15 @@ test.describe("Profile editing @auth @medium @local-only", () => {
           animations: "disabled",
           scale: "css",
         });
-        await actions
-          .getByRole("button", { name: "Close", exact: true })
-          .click();
+        await activate(
+          actions.getByRole("button", { name: "Close", exact: true })
+        );
       } else await page.keyboard.press("Escape");
       await expect(trigger).toBeFocused();
     }
     await expectNoHorizontalOverflow(page);
     const addPost = page.getByRole("button", { name: "Add post", exact: true });
-    await addPost.click();
+    await activate(addPost);
     const composer = page.getByRole("dialog", {
       name: mobile ? "Add post" : `Add post to ${curationName}`,
       exact: true,
@@ -609,13 +615,15 @@ test.describe("Profile editing @auth @medium @local-only", () => {
         }
       }
     }
-    await composer.getByRole("button", { name: "Close", exact: true }).click();
+    await activate(
+      composer.getByRole("button", { name: "Close", exact: true })
+    );
     await expect(addPost).toBeFocused();
     if (!mobile) {
       // A narrow desktop browser has no touch drag handle to supply top space.
       for (const width of [390, 768]) {
         await page.setViewportSize({ width, height: 844 });
-        await addPost.click();
+        await activate(addPost);
         const compactComposer = page.getByRole("dialog", {
           name: "Add post",
           exact: true,
@@ -706,7 +714,8 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       animations: "disabled",
       scale: "css",
     });
-    await more.click();
+    if (testInfo.project.use.hasTouch) await more.tap();
+    else await more.click();
     await expect(
       page
         .getByRole("menuitem", { name: "Mute notifications", exact: true })
@@ -2746,6 +2755,59 @@ async function installCollectedArtwork(page: Page) {
   );
 }
 
+async function installCollectedTransferWallet(page: Page) {
+  // Selection requires a connected wallet as well as the seeded profile session.
+  // This isolated provider cannot sign or submit any transaction.
+  await page.addInitScript((address) => {
+    const events = new EventTarget();
+    const provider = {
+      async request({ method }: { method: string }) {
+        switch (method) {
+          case "eth_accounts":
+          case "eth_requestAccounts":
+            return [address];
+          case "eth_chainId":
+            return "0x1";
+          case "net_version":
+            return "1";
+          case "eth_getBalance":
+            return "0x0";
+          default:
+            throw new Error(
+              `Unsupported layout-fixture wallet method: ${method}`
+            );
+        }
+      },
+      on(event: string, listener: EventListener) {
+        events.addEventListener(event, listener);
+      },
+      removeListener(event: string, listener: EventListener) {
+        events.removeEventListener(event, listener);
+      },
+    };
+    const announce = () =>
+      globalThis.dispatchEvent(
+        new CustomEvent("eip6963:announceProvider", {
+          detail: {
+            info: {
+              uuid: "00000000-0000-4000-8000-000000000529",
+              name: "Profile layout QA wallet",
+              icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E",
+              rdns: "io.6529.profile-layout-qa",
+            },
+            provider,
+          },
+        })
+      );
+    Object.defineProperty(globalThis, "ethereum", {
+      value: provider,
+      configurable: true,
+    });
+    globalThis.addEventListener("eip6963:requestProvider", announce);
+    announce();
+  }, WALLET);
+}
+
 async function openOwnCollected(page: Page) {
   await openOwnProfile(page);
   await page
@@ -2806,8 +2868,11 @@ test.describe("Collected personal actions @auth @medium @local-only", () => {
   test("Collected design keeps wrapped metrics, bottom Details and sticky swipe filters", async ({
     page,
     baseURL,
+    hasTouch,
     request,
   }, testInfo) => {
+    const activate = (control: Locator) =>
+      hasTouch ? control.tap() : control.click();
     await hideNextDevOverlay(page.context());
     await seedSession(page);
     await installCollectedArtwork(page);
@@ -2816,6 +2881,7 @@ test.describe("Collected personal actions @auth @medium @local-only", () => {
       (await request.post(`${api}/__composer-sandbox/collected-stats`)).ok()
     ).toBe(true);
     const mobile = (page.viewportSize()?.width ?? 0) < 768;
+    if (!mobile) await installCollectedTransferWallet(page);
     const summary = page
       .getByRole("main")
       .last()
@@ -2883,7 +2949,7 @@ test.describe("Collected personal actions @auth @medium @local-only", () => {
         "width",
         `${await summary.evaluate((el) => el.clientWidth)}px`
       );
-      await details.click();
+      await activate(details);
       const hide = summary.getByRole("button", {
         name: "Hide Details",
         exact: true,
@@ -2895,17 +2961,16 @@ test.describe("Collected personal actions @auth @medium @local-only", () => {
           .last()
           .locator(`[id="${await hide.getAttribute("aria-controls")}"]`)
       ).toBeVisible();
-      await hide.click();
+      await activate(hide);
       await expect(details).toHaveAttribute("aria-expanded", "false");
       for (const [label, collection] of [
         ["NextGen", "nextgen"],
         ["Gradients", "gradients"],
         ["Memes", "memes"],
       ]) {
-        await summary
-          .getByRole("button", { name: new RegExp(label!) })
-          .first()
-          .click();
+        await activate(
+          summary.getByRole("button", { name: new RegExp(label!) }).first()
+        );
         await expectUrlState(
           page,
           (url) => url.searchParams.get("collection") === collection
@@ -2946,11 +3011,7 @@ test.describe("Collected personal actions @auth @medium @local-only", () => {
           .locator('[data-profile-section="Filters"]')
           .locator('[class*="tw-overflow-x-auto"]');
         const bounds = await scrollRow.boundingBox();
-        const shell = await page
-          .getByRole("main")
-          .last()
-          .locator("[data-profile-shell]")
-          .boundingBox();
+        const shell = await page.getByRole("main").last().boundingBox();
         expect(Math.abs(bounds!.x - shell!.x)).toBeLessThanOrEqual(1);
         expect(
           Math.abs(bounds!.x + bounds!.width - shell!.x - shell!.width)
@@ -3022,17 +3083,18 @@ test.describe("Collected personal actions @auth @medium @local-only", () => {
           (page.viewportSize()?.width ?? 0) >= 1024 &&
           label !== "Collection"
         ) {
-          await filters
-            .getByRole("tablist", { name: label, exact: true })
-            .getByRole("tab", { name: option, exact: true })
-            .click();
+          await activate(
+            filters
+              .getByRole("tablist", { name: label, exact: true })
+              .getByRole("tab", { name: option, exact: true })
+          );
         } else {
-          await filters
-            .getByRole("button", { name: new RegExp(`^${label}:`) })
-            .click();
-          await page
-            .getByRole("menuitem", { name: option, exact: true })
-            .click();
+          await activate(
+            filters.getByRole("button", { name: new RegExp(`^${label}:`) })
+          );
+          await activate(
+            page.getByRole("menuitem", { name: option, exact: true })
+          );
         }
       };
       for (const [label, collection] of [
@@ -3078,6 +3140,9 @@ test.describe("Collected personal actions @auth @medium @local-only", () => {
         await filters
           .getByRole("button", { name: "Transfer", exact: true })
           .click();
+        await expect(
+          filters.getByRole("button", { name: "Exit Transfer", exact: true })
+        ).toBeVisible();
         await expect(
           firstCard.getByRole("button", {
             name: "Select NFT for transfer",

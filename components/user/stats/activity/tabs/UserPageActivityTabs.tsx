@@ -1,4 +1,4 @@
-import { useEffect, useRef, type KeyboardEvent } from "react";
+import { useEffect, useRef, type KeyboardEvent, type RefObject } from "react";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import clsx from "clsx";
@@ -12,13 +12,14 @@ import {
 } from "./activity-tabs.helpers";
 import UserPageActivityTab from "./UserPageActivityTab";
 
-const focusActivityTab = (tab: USER_PAGE_ACTIVITY_TAB) => {
-  if (typeof globalThis.document === "undefined") {
-    return;
-  }
-
+const focusActivityTab = (
+  tablistRef: RefObject<HTMLDivElement | null>,
+  tab: USER_PAGE_ACTIVITY_TAB
+) => {
   const focusTab = () => {
-    globalThis.document.getElementById(getActivityTabId(tab))?.focus();
+    tablistRef.current
+      ?.querySelector<HTMLButtonElement>(`#${getActivityTabId(tab)}`)
+      ?.focus();
   };
 
   if (typeof globalThis.requestAnimationFrame === "function") {
@@ -105,7 +106,7 @@ export default function UserPageActivityTabs({
 
     event.preventDefault();
     setActiveTab(nextTab);
-    focusActivityTab(nextTab);
+    focusActivityTab(tablistRef, nextTab);
   };
 
   return (

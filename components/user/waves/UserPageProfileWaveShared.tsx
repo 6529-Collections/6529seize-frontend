@@ -177,7 +177,7 @@ export function OfficialWaveSummary({
                 className="max-lg:tw-text-[13px]"
               >
                 <PlusIcon className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0" />
-                <span>Add post</span>
+                <span>{t(locale, "profileCuration.header.addPost")}</span>
               </Button>
             </div>
           )}
