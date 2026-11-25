@@ -8,6 +8,8 @@ import type { E2eeApiClient } from "@/lib/e2ee/api";
 import { base64ToBytes } from "@/lib/e2ee/bytes";
 import type { EngineContext } from "@/lib/e2ee/engine/context";
 import { createConversation } from "@/lib/e2ee/engine/membership";
+import type { ReadSync } from "@/lib/e2ee/engine/read-sync";
+import { credentialIdentity, parseCredentialIdentity } from "@/lib/e2ee/grant";
 import { MlsClient } from "@/lib/e2ee/mls-adapter";
 import { createFakeApiClient } from "@/tests/support/e2ee/fakeDeliveryService.cjs";
 import {
@@ -159,6 +161,65 @@ describe("E2EE engine: read-state sync (D175, P60)", () => {
     await settle(world);
     await alice.primary.engine.setConversationPinned(g, true);
     const phone = await addSyncDevice(world, alice);
+    await settle(world);
+    expect(phone.engine.getConversation(g)?.pinned).toBe(true);
+  });
+
+  it("schedules another send after a pin changes during an in-flight flush", async () => {
+    const world = await createWorld();
+    const { laptop, g } = await aliceWithTwoDevices(world);
+    const ctx = contextOf(laptop);
+    ctx.timers.cancel("poll");
+    const { pins } = ctx.readSync as ReadSync;
+    const acknowledge = pins.acknowledge.bind(pins);
+    const started = Promise.withResolvers<void>();
+    const finish = Promise.withResolvers<void>();
+    jest.spyOn(pins, "acknowledge").mockImplementationOnce(async (batch) => {
+      started.resolve();
+      await finish.promise;
+      await acknowledge(batch);
+    });
+
+    await laptop.engine.setConversationPinned(g, true);
+    const flushing = laptop.engine.flushReadSync();
+    await started.promise;
+    try {
+      await laptop.engine.setConversationPinned(g, false);
+      await waitUntil(() => !ctx.timers.has("read-sync:send"));
+    } finally {
+      finish.resolve();
+    }
+    await flushing;
+
+    expect(ctx.timers.has("read-sync:send")).toBe(true);
+    await waitUntil(() => !pins.hasPending());
+  });
+
+  it("holds queued pin updates while a self group contains a locally untrusted wallet", async () => {
+    const world = await createWorld();
+    const { bob, laptop, phone, g } = await aliceWithTwoDevices(world);
+    const [self] = selfGroupsOf(world, "alice");
+    const runtime = contextOf(laptop).store.groups.get(self?.g ?? "");
+    const phoneKey = phone.engine.getLocalDeviceKey();
+    const sibling = runtime?.record.members.find(
+      (member) => member.deviceKey === phoneKey
+    );
+    if (!sibling || !self) throw new Error("no linked sibling");
+    const trustedIdentity = sibling.identity;
+    const credential = parseCredentialIdentity(trustedIdentity);
+    if (!credential) throw new Error("missing sibling credential");
+    sibling.identity = credentialIdentity(
+      bob.account.address,
+      credential.grantId
+    );
+
+    const before = self.items.length;
+    await laptop.engine.setConversationPinned(g, true);
+    await laptop.engine.flushReadSync();
+    expect(self.items).toHaveLength(before);
+
+    sibling.identity = trustedIdentity;
+    await laptop.engine.flushReadSync();
     await settle(world);
     expect(phone.engine.getConversation(g)?.pinned).toBe(true);
   });

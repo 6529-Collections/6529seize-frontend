@@ -586,12 +586,8 @@ class E2eeEngineImpl implements E2eeEngineExt {
     );
   }
 
-  async setConversationPinned(g: string, pinned: boolean): Promise<void> {
-    this.requireReady();
-    if (await this.readSync.pins.set(g.toLowerCase(), pinned)) {
-      this.readSync.schedulePins();
-    }
-  }
+  setConversationPinned = (g: string, pinned: boolean): Promise<void> =>
+    this.readSync.pins.set(g, pinned);
 
   async addMembers(g: string, profileIds: string[]) {
     this.requireReady();
@@ -710,12 +706,9 @@ class E2eeEngineImpl implements E2eeEngineExt {
 
   async importBackupHistory(history: BackupHistory) {
     this.requireReady();
-    const result = await this.ctx.queue.run(async () => {
-      const imported = await importBackupHistory(this.ctx, history);
-      await this.readSync.pins.merge(history.pins ?? []);
-      return imported;
-    });
-    this.readSync.schedulePins();
+    const result = await this.ctx.queue.run(() =>
+      importBackupHistory(this.ctx, history, this.readSync.pins)
+    );
     await resolveProfiles(this.ctx, memberProfileIds(this.ctx));
     return result;
   }
