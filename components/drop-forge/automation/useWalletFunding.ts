@@ -11,6 +11,7 @@ import type { ApiDropForgeSettings } from "@/generated/models/ApiDropForgeSettin
 import type { SupportedLocale } from "@/i18n/locales";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/drop-forge";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import type { OnchainTransactionModalStatus } from "@/components/common/OnchainTransactionModal";
 

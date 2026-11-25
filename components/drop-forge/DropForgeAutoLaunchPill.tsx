@@ -4,6 +4,7 @@ import DropForgeStatusPill from "@/components/drop-forge/DropForgeStatusPill";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useDropForgeLaunch } from "@/hooks/useDropForgeLaunch";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/drop-forge";
 
 export function DropForgeAutoLaunchPill() {
   const locale = useBrowserLocale();

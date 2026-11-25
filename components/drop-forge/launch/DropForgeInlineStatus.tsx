@@ -14,6 +14,7 @@ import {
 } from "@/generated/models/ApiDropForgeLaunch";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/drop-forge";
 
 type Status = {
   key:

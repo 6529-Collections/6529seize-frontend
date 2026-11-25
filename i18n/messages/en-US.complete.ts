@@ -3,6 +3,8 @@ import { AI_DOWNLOAD_MESSAGES } from "@/i18n/namespaces/ai-download";
 import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/namespaces/artwork-documentation";
 import { CHAIN_IDENTITY_MESSAGES } from "@/i18n/namespaces/chain-identity";
 import { DESKTOP_DOWNLOAD_MESSAGES } from "@/i18n/namespaces/desktop-download";
+import { DROP_FORGE_MESSAGES } from "@/i18n/namespaces/drop-forge";
+import { EMMA_MESSAGES } from "@/i18n/namespaces/emma";
 import { MUSEUM_MESSAGES } from "@/i18n/namespaces/museum";
 import { MUSEUM_ONCHAIN_MESSAGES } from "@/i18n/namespaces/museum-onchain";
 import { NETWORK_TDH_MESSAGES } from "@/i18n/namespaces/network-tdh";
@@ -28,6 +30,8 @@ export const EN_US_MESSAGES = {
   ...ARTWORK_DOCUMENTATION_MESSAGES,
   ...CHAIN_IDENTITY_MESSAGES,
   ...DESKTOP_DOWNLOAD_MESSAGES,
+  ...DROP_FORGE_MESSAGES,
+  ...EMMA_MESSAGES,
   ...MUSEUM_MESSAGES,
   ...MUSEUM_ONCHAIN_MESSAGES,
   ...NETWORK_TDH_MESSAGES,

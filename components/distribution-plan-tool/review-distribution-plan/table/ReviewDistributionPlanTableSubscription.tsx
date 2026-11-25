@@ -16,6 +16,7 @@ import { ApiDropForgePreparationModeEnum as PreparationMode } from "@/generated/
 import { useDropForgeProcess } from "@/hooks/useDropForgeProcess";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/drop-forge";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import {
   forgeProcessInputsMatch,

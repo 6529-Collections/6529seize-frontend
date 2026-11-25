@@ -3,6 +3,7 @@ import type { ApiDropForgeSettings } from "@/generated/models/ApiDropForgeSettin
 import { formatAddress, getAddressEtherscanLink } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/drop-forge";
 import { getButtonClasses } from "@/components/utils/button/buttonStyles";
 import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
 import CopyWalletAddressButton from "./CopyWalletAddressButton";

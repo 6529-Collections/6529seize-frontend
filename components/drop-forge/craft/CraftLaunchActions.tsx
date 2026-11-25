@@ -11,6 +11,7 @@ import { useAuth } from "@/components/auth/Auth";
 import { useDropForgeMintingConfig } from "@/components/drop-forge/drop-forge-config";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/drop-forge";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { requestForgeLaunch } from "@/services/api/drop-forge-api";
 import { DropForgeAutoLaunchPill } from "@/components/drop-forge/DropForgeAutoLaunchPill";

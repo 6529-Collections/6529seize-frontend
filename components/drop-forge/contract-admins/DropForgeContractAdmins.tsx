@@ -19,6 +19,7 @@ import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/drop-forge";
 import type { SupportedLocale } from "@/i18n/locales";
 import { getAddressEtherscanLink } from "@/helpers/Helpers";
 import { CREATOR_ADMIN_ABI } from "./creator-admin-abi";

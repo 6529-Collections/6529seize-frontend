@@ -5,6 +5,7 @@ import { useAuth } from "@/components/auth/Auth";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/drop-forge";
 
 export default function CopyWalletAddressButton({
   address,

@@ -13,6 +13,8 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger, selectPluralCategory } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
+import "@/i18n/namespaces/drop-forge";
+import "@/i18n/namespaces/emma";
 import { faDownload, faUpload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
