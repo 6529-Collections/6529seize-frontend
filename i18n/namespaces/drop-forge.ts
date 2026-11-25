@@ -36,6 +36,8 @@ export const DROP_FORGE_MESSAGES = registerSourceMessages({
   "dropForge.inputsChanged":
     "Inputs changed. Reset the distribution before processing again.",
   "dropForge.launch": "Launch",
+  "dropForge.launchDescription":
+    "Queue initialization, phase updates, and airdrops.",
   "dropForge.update": "Update Claim",
   "dropForge.initializing": "Initializing…",
   "dropForge.updating": "Updating…",

@@ -246,18 +246,18 @@ export default function DropForgeCraftClaimPageClient({
             hasPendingChanges={hasPendingPageChanges}
           />
         </DropForgeAccordionSection>
-        <CraftLaunchActions
-          claimId={claimId}
-          metadata={claim.metadata_location}
-          dirty={hasPendingPageChanges || !!claim.media_uploading}
-        />
-
         <DropForgeAccordionSection title="Distribution" defaultOpen={false}>
           <DistributionSection
             claimId={claimId}
             summariesRefreshNonce={distributionSummariesRefreshNonce}
           />
         </DropForgeAccordionSection>
+
+        <CraftLaunchActions
+          claimId={claimId}
+          metadata={claim.metadata_location}
+          dirty={hasPendingPageChanges || !!claim.media_uploading}
+        />
       </div>
     </div>
   );

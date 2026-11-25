@@ -8,6 +8,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import DropForgeAutomationStatus from "@/components/drop-forge/launch/DropForgeAutomationStatus";
@@ -314,8 +315,12 @@ it("shows the Auto Launch pill and initialized state with current metadata", asy
 it("prevents launch for unpublished or unsaved changes", async () => {
   jest.mocked(getForgeLaunch).mockResolvedValue(null);
   renderUI(<CraftLaunchActions claimId={123} metadata={null} dirty />);
-  await screen.findByText("Save and publish Craft changes before continuing.");
-  expect(screen.getByRole("button", { name: "Launch" })).toBeDisabled();
+  const section = within(await screen.findByRole("region", { name: "Launch" }));
+  expect(section.getByRole("heading", { name: "Launch" })).toBeInTheDocument();
+  expect(section.getByRole("status")).toHaveTextContent(
+    "Save and publish Craft changes before continuing."
+  );
+  expect(section.getByRole("button", { name: "Launch" })).toBeDisabled();
   expect(requestForgeLaunch).not.toHaveBeenCalled();
 });
 it.each<[number, string]>([

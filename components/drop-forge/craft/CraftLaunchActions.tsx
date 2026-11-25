@@ -5,14 +5,22 @@ import {
 } from "@/generated/models/ApiDropForgeAction";
 import { ApiDropForgeLaunchStateEnum as LaunchState } from "@/generated/models/ApiDropForgeLaunch";
 import { forgeLaunchKey } from "@/hooks/drop-forge-query-keys";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
+import DropForgeLaunchIcon from "@/components/common/icons/DropForgeLaunchIcon";
+import { BTN_PRIMARY } from "@/components/drop-forge/craft/craft-claim-helpers";
 import { useDropForgeMintingConfig } from "@/components/drop-forge/drop-forge-config";
+import {
+  dropForgePanelClassName,
+  dropForgePanelTitleClassName,
+} from "@/components/drop-forge/drop-forge-section-styles";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/drop-forge";
-import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "@/components/distribution-plan-tool/common/CircleLoader";
 import { requestForgeLaunch } from "@/services/api/drop-forge-api";
 import { DropForgeAutoLaunchPill } from "@/components/drop-forge/DropForgeAutoLaunchPill";
 import { useDropForgeLaunch } from "@/hooks/useDropForgeLaunch";
@@ -43,6 +51,7 @@ export default function CraftLaunchActions({
   const { contract } = useDropForgeMintingConfig();
   const { requestAuth } = useAuth();
   const locale = useBrowserLocale();
+  const headingId = useId();
   const client = useQueryClient();
   const query = useDropForgeLaunch(claimId, { watch: true });
   const settings = useDropForgeSettings();
@@ -111,8 +120,43 @@ export default function CraftLaunchActions({
     getToastErrorDetails(query.error) ??
     (!initialized ? getToastErrorDetails(settings.error) : null);
   return (
-    <div className="tw-flex tw-flex-col tw-gap-3 tw-rounded-xl tw-bg-iron-900 tw-p-4 tw-ring-1 tw-ring-iron-800">
-      {launch && <DropForgeAutoLaunchPill />}
+    <section
+      aria-labelledby={headingId}
+      className={`${dropForgePanelClassName} tw-flex tw-min-h-10 tw-flex-wrap tw-items-center tw-gap-3`}
+    >
+      <div className="tw-min-w-0 tw-flex-1 tw-basis-48 tw-space-y-1">
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+          <h2
+            id={headingId}
+            className={`${dropForgePanelTitleClassName} tw-m-0 tw-text-iron-50`}
+          >
+            {t(locale, "dropForge.launch")}
+          </h2>
+          {launch && <DropForgeAutoLaunchPill />}
+        </div>
+        <div
+          role="status"
+          aria-live="polite"
+          className="tw-text-sm tw-text-iron-300"
+        >
+          {showAction && !initialized && !disabled && !failure && (
+            <div>{t(locale, "dropForge.launchDescription")}</div>
+          )}
+          {initialized && <div>{t(locale, "dropForge.claimInitialized")}</div>}
+          {automaticLaunchOff && (
+            <div>{t(locale, "dropForge.automaticLaunchOff")}</div>
+          )}
+          {!published && <div>{t(locale, "dropForge.publishFirst")}</div>}
+        </div>
+        {failure && (
+          <p
+            role="alert"
+            className="tw-m-0 tw-break-words tw-text-sm tw-text-error"
+          >
+            {failure}
+          </p>
+        )}
+      </div>
       {showAction && (
         <button
           type="button"
@@ -121,9 +165,15 @@ export default function CraftLaunchActions({
           }}
           disabled={disabled}
           aria-busy={!!pending}
-          className="tw-flex tw-min-h-11 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2 tw-font-medium tw-text-white disabled:tw-opacity-50"
+          className={`${BTN_PRIMARY} tw-ml-auto tw-inline-flex tw-min-h-11 tw-w-fit tw-max-w-full tw-items-center tw-justify-center tw-gap-2`}
         >
-          {pending && <CircleLoader />}
+          {pending ? (
+            <CircleLoader size={CircleLoaderSize.SMALL} />
+          ) : (
+            <span aria-hidden="true" className="tw-flex tw-shrink-0">
+              <DropForgeLaunchIcon className="tw-h-4 tw-w-4" />
+            </span>
+          )}
           {t(
             locale,
             launchLabel(
@@ -135,22 +185,6 @@ export default function CraftLaunchActions({
           )}
         </button>
       )}
-      <div
-        role="status"
-        aria-live="polite"
-        className="tw-text-sm tw-text-iron-300"
-      >
-        {initialized && <div>{t(locale, "dropForge.claimInitialized")}</div>}
-        {automaticLaunchOff && (
-          <div>{t(locale, "dropForge.automaticLaunchOff")}</div>
-        )}
-        {!published && <div>{t(locale, "dropForge.publishFirst")}</div>}
-      </div>
-      {failure && (
-        <p role="alert" className="tw-text-sm tw-text-error">
-          {failure}
-        </p>
-      )}
-    </div>
+    </section>
   );
 }
