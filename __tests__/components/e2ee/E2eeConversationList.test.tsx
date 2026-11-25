@@ -273,6 +273,35 @@ describe("encrypted conversation list", () => {
     expect(realRow).not.toHaveTextContent("bob");
   });
 
+  it.each([E2eeConversationListPage, E2eeMessagesSection])(
+    "keeps an older pinned chat above newer chats in %p",
+    (List) => {
+      const chatList = [
+        conversation({ updatedAt: 100_000 }),
+        conversation({
+          g: DM_G,
+          name: "Pinned earlier",
+          pinned: true,
+          updatedAt: 0,
+        }),
+      ];
+      render(
+        <E2eeTestProvider
+          value={contextFor(createFakeE2eeEngine({ conversations: chatList }))}
+        >
+          <List />
+        </E2eeTestProvider>
+      );
+      const rows = within(
+        screen.getByRole("list", { name: "Encrypted chats" })
+      ).getAllByRole("link");
+      expect(rows[0]).toHaveAttribute("href", `/messages/encrypted/${DM_G}`);
+      expect(
+        within(rows[0]!).getByText("Pinned", { exact: true })
+      ).toBeInTheDocument();
+    }
+  );
+
   it("marks a chat muted on this device and leaves it out of the badge", () => {
     setE2eeChatMuted(SELF_ID, GROUP_G, true);
     const engine = createFakeE2eeEngine({ conversations });

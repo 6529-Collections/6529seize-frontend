@@ -128,6 +128,9 @@ export async function createLoginE2eeDevice(
         ...(existing?.retired && existing.trust
           ? { trust: existing.trust }
           : {}),
+        ...(existing?.retired && existing.conversationPins
+          ? { conversationPins: existing.conversationPins }
+          : {}),
       };
       // The key's private half lands with the device record atomically.
       await storage.writeBatch(input.profileId, {
