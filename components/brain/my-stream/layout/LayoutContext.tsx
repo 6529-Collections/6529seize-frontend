@@ -278,8 +278,17 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     lockedValue: lockedSpaces,
   } = useViewportLayoutLock(spaces, isViewportReleaseBlocked);
 
-  // Create refs for callback functions to solve circular dependency
-  const calculateSpacesRef = useRef<() => void>(() => {});
+  // Only measured element heights feed the context. Viewport changes stay in CSS.
+  const calculateSpaces = useCallback(() => {
+    const nextSpaces: LayoutSpaces = {
+      ...measureLayoutSpaces(refMap.current),
+      measurementsComplete: true,
+    };
+
+    setSpaces((prevSpaces) =>
+      spacesAreEqual(prevSpaces, nextSpaces) ? prevSpaces : nextSpaces
+    );
+  }, []);
 
   // Registration function for components to register their elements
   const registerRef = useCallback(
@@ -306,26 +315,11 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
         }
       }
 
-      // Trigger a recalculation using the ref
-      requestAnimationFrame(() => calculateSpacesRef.current());
+      // Commit-time registration must size the new screen before its first paint.
+      calculateSpaces();
     },
-    []
+    [calculateSpaces]
   );
-
-  // Calculate spaces based on current measurements
-  // Only measured element heights feed the context. Window height changes
-  // (including mobile URL-bar collapse while scrolling) must not re-render
-  // every layout consumer; heights are applied through CSS viewport units.
-  const calculateSpaces = useCallback(() => {
-    const nextSpaces: LayoutSpaces = {
-      ...measureLayoutSpaces(refMap.current),
-      measurementsComplete: true,
-    };
-
-    setSpaces((prevSpaces) =>
-      spacesAreEqual(prevSpaces, nextSpaces) ? prevSpaces : nextSpaces
-    );
-  }, []);
 
   // Set up ResizeObserver to monitor elements and recalculate on changes
   useEffect(() => {
@@ -370,11 +364,6 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       if (resizeFramePending) cancelAnimationFrame(resizeFrame);
       window.removeEventListener("resize", scheduleResizeCalculation);
     };
-  }, [calculateSpaces]);
-
-  // Update the ref with the latest calculateSpaces function
-  useEffect(() => {
-    calculateSpacesRef.current = calculateSpaces;
   }, [calculateSpaces]);
 
   const effectiveSpaces = lockedSpaces ?? spaces;

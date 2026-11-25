@@ -147,7 +147,10 @@ function AppLayoutContent({ children }: Props) {
     waveParam,
     isApp && searchParams.get("view") === "profile-feed"
   );
-  const waveNavigationRef = useWaveNavigationTransition(waveNavigationScreen);
+  const waveNavigationRef = useWaveNavigationTransition(
+    waveNavigationScreen,
+    pathname
+  );
   const shouldHideBottomNavForRoute = hidesMobileBottomNavigation({
     pathname,
   });
@@ -188,9 +191,10 @@ function AppLayoutContent({ children }: Props) {
       }),
       [isNavVisible, routeLoadingHeaderReserve, shouldUseContentBottomClearance]
     );
+  // The iPhone chat composer already reserves the bottom safe area inside its height.
   const safeAreaClass =
     !isNavVisible && !isLayoutKeyboardVisible
-      ? "tw-pb-[env(safe-area-inset-bottom,0px)]"
+      ? "tw-pb-[env(safe-area-inset-bottom,0px)] has-[[data-ios-chat-composer]]:tw-pb-0"
       : "";
   let activeContent: ReactNode;
 
