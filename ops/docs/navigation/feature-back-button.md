@@ -96,11 +96,12 @@ swipe return to the feed at the saved reading position.
 - Returning to the Waves list with a right swipe moves the channel header,
   including the wave name and Join action, with the content. The bottom
   navigation stays in place.
-- On iPhone and phone web, tapping the channel Back chevron slides the complete
-  channel, including its header, to the right while revealing the Waves list.
+- On iPhone and phone web, tapping Back from a wave or direct message slides
+  the complete conversation, including its header, to the right. The Waves
+  list, Messages list, or encrypted inbox stays still as it is revealed.
   Reduced Motion skips this slide. A new interaction stops the slide, and
-  browser Back follows its own history target. Direct messages and returns to
-  Profile Waves Feed keep their own behavior.
+  browser Back follows its own history target. Returns to Profile Waves Feed
+  keep their own transition.
 - Vertical gestures and touches that begin on sliders, editors, media controls,
   or horizontally scrollable content do not trigger Back.
 - Profile routes hide `Back` when there is no valid in-app target (for example

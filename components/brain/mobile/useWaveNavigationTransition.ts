@@ -22,7 +22,10 @@ export function getWaveNavigationScreen(
 }
 
 /** Animate a committed list/detail change without remounting its content. */
-export function useWaveNavigationTransition(screen: WaveNavigationScreen) {
+export function useWaveNavigationTransition(
+  screen: WaveNavigationScreen,
+  pathname: string
+) {
   const containerRef = useRef<HTMLDivElement>(null);
   const previousScreenRef = useRef(screen);
 
@@ -31,8 +34,9 @@ export function useWaveNavigationTransition(screen: WaveNavigationScreen) {
   useLayoutEffect(() => {
     const previousScreen = previousScreenRef.current;
     previousScreenRef.current = screen;
-    const swipeHandoff = screen !== previousScreen && consumeWaveSwipeHandoff();
-    if (commitWaveNavigationTransition(screen) || swipeHandoff) return;
+    const swipeHandoff = consumeWaveSwipeHandoff();
+    if (commitWaveNavigationTransition(screen, pathname) || swipeHandoff)
+      return;
     const container = containerRef.current;
     if (
       !container ||
@@ -65,7 +69,7 @@ export function useWaveNavigationTransition(screen: WaveNavigationScreen) {
       animation.cancel();
       reducedMotion.removeEventListener("change", stopForReducedMotion);
     };
-  }, [screen]);
+  }, [screen, pathname]);
 
   return containerRef;
 }

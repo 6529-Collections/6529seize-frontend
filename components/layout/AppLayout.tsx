@@ -144,7 +144,10 @@ function AppLayoutContent({ children }: Props) {
     waveParam,
     isApp && searchParams.get("view") === "profile-feed"
   );
-  const waveNavigationRef = useWaveNavigationTransition(waveNavigationScreen);
+  const waveNavigationRef = useWaveNavigationTransition(
+    waveNavigationScreen,
+    pathname
+  );
   const shouldHideBottomNavForRoute = hidesMobileBottomNavigation({
     pathname,
   });

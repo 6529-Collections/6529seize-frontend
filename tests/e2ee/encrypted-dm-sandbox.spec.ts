@@ -535,9 +535,32 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     await expect(bobRow).toBeVisible();
     await bobRow.click();
     await expectMessage(alice.page, incoming);
+    await alice.page.evaluate(() => {
+      const root = document.documentElement;
+      const start = document.startViewTransition.bind(document);
+      document.startViewTransition = (update) => {
+        const transition = start(update);
+        if (root.dataset["waveNavigationTransition"] === "chevron-back") {
+          void transition.ready.then(
+            () => {
+              root.dataset["testEncryptedBackSlide"] = "ready";
+            },
+            () => {
+              root.dataset["testEncryptedBackSlide"] = "skipped";
+            }
+          );
+        }
+        return transition;
+      };
+    });
     await alice.page
       .getByRole("link", { name: "Back to encrypted messages" })
       .click();
+    await expect(alice.page).toHaveURL(new RegExp(`${ENCRYPTED_ROUTE}$`, "u"));
+    await expect(alice.page.locator("html")).toHaveAttribute(
+      "data-test-encrypted-back-slide",
+      "ready"
+    );
     await expect(bobRow).toBeVisible();
     expect(
       await alice.page.evaluate(

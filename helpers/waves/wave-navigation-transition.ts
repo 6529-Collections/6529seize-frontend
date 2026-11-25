@@ -3,6 +3,7 @@ import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
 // The app shell acknowledges the committed screen before the browser captures it.
 // This keeps the outgoing list (including its scroll position) visible during the handoff.
 export type WaveScreen = "list" | "feed" | "wave";
+type TransitionTarget = WaveScreen | { readonly pathname: string };
 
 interface SwipeHandoff {
   readonly surface: HTMLElement;
@@ -18,7 +19,7 @@ export function isForwardWaveNavigation(
   return screen === "wave" || (screen === "feed" && previous === "list");
 }
 let activeTransition: {
-  readonly screen: WaveScreen;
+  readonly target: TransitionTarget;
   readonly committed: () => void;
   readonly skip: () => void;
   readonly contentReady: () => void;
@@ -42,17 +43,17 @@ function navigateWithoutAdditionalMotion(navigate: () => void) {
   }
 }
 
-/** Tapped phone Back uses one snapshot of the header and channel together. */
-export function runWaveChevronBackTransition(navigate: () => void) {
+/** Tapped phone Back slides the full page over the supplied destination. */
+export function runPhoneChevronBackTransition(
+  pathname: string,
+  navigate: () => void
+) {
   if (!window.matchMedia(PHONE_WAVES_LAYOUT_QUERY).matches) {
     navigate();
     return;
   }
-  runWaveNavigationTransition(
-    "list",
-    () => navigateWithoutAdditionalMotion(navigate),
-    undefined,
-    "chevron-back"
+  runWaveNavigationTransition({ pathname }, () =>
+    navigateWithoutAdditionalMotion(navigate)
   );
 }
 
@@ -64,22 +65,28 @@ export function consumeWaveSwipeHandoff() {
 }
 
 export function commitWaveNavigationTransition(
-  screen: WaveScreen | null
+  screen: WaveScreen | null,
+  pathname?: string
 ): boolean {
   if (!activeTransition) return false;
-  if (screen !== activeTransition.screen) activeTransition.skip();
+  const { target } = activeTransition;
+  const reachedTarget =
+    typeof target === "string"
+      ? screen === target
+      : pathname === target.pathname;
+  if (!reachedTarget) activeTransition.skip();
   else activeTransition.committed();
   return true;
 }
 
 /** Virtualized content acknowledges its measured visible rows, not just its shell. */
 export function commitWaveNavigationContent(screen: WaveScreen) {
-  if (activeTransition?.screen === screen) activeTransition.contentReady();
+  if (activeTransition?.target === screen) activeTransition.contentReady();
 }
 
 export function isWaveNavigationContentPending(screen: WaveScreen) {
   return (
-    activeTransition?.screen === screen &&
+    activeTransition?.target === screen &&
     document.documentElement.dataset["waveNavigationContentPending"] !==
       undefined
   );
@@ -90,29 +97,34 @@ export function skipWaveNavigationTransition() {
   activeTransition?.skip();
 }
 
+function getTransitionPresentation(
+  target: TransitionTarget,
+  previous: string | undefined
+) {
+  if (typeof target !== "string") return "chevron-back";
+  return isForwardWaveNavigation(target, previous) ? "forward" : "back";
+}
+
 export function runWaveNavigationTransition(
-  screen: WaveScreen,
+  target: TransitionTarget,
   navigate: () => void,
-  swipe?: SwipeHandoff,
-  presentation?: "chevron-back"
+  swipe?: SwipeHandoff
 ) {
   if (navigatingWithoutAdditionalMotion) {
     navigate();
     return false;
   }
   swipeHandoffPending = false;
-  const screenSurface = document.querySelector<HTMLElement>(
-    "[data-wave-navigation-screen]"
+  const chevronBack = typeof target !== "string";
+  const surface = document.querySelector<HTMLElement>(
+    chevronBack
+      ? "[data-wave-swipe-page], [data-phone-wave-page]"
+      : "[data-wave-navigation-screen]"
   );
-  const surface =
-    presentation === "chevron-back"
-      ? (screenSurface?.closest<HTMLElement>("[data-wave-swipe-page]") ??
-        document.querySelector<HTMLElement>("[data-phone-wave-page]"))
-      : screenSurface;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   if (
     !surface ||
-    surface.dataset["waveNavigationScreen"] === screen ||
+    surface.dataset["waveNavigationScreen"] === target ||
     typeof document.startViewTransition !== "function" ||
     reducedMotion.matches
   ) {
@@ -123,7 +135,7 @@ export function runWaveNavigationTransition(
 
   activeTransition?.skip();
   const root = document.documentElement;
-  let contentPending = screen === "feed";
+  let contentPending = target === "feed";
   let shellCommitted = false;
   if (contentPending) root.dataset["waveNavigationContentPending"] = "true";
   else delete root.dataset["waveNavigationContentPending"];
@@ -136,11 +148,10 @@ export function runWaveNavigationTransition(
     `${surface.getBoundingClientRect().height}px`
   );
   surface.style.viewTransitionName = "wave-navigation";
-  root.dataset["waveNavigationTransition"] =
-    presentation ??
-    (isForwardWaveNavigation(screen, surface.dataset["waveNavigationScreen"])
-      ? "forward"
-      : "back");
+  root.dataset["waveNavigationTransition"] = getTransitionPresentation(
+    target,
+    surface.dataset["waveNavigationScreen"]
+  );
   if (swipe) {
     root.dataset["waveNavigationTransition"] = "swipe-back";
     root.style.setProperty(
@@ -163,7 +174,7 @@ export function runWaveNavigationTransition(
       if (superseded) return;
       // The old page is captured. Keep the destination in the stationary root
       // snapshot so its header and content stay visible together in WebKit.
-      if (presentation) surface.style.removeProperty("view-transition-name");
+      if (chevronBack) surface.style.removeProperty("view-transition-name");
       // The browser has captured the finger's final position. Prepare the new
       // screen underneath that snapshot, rather than sliding into an empty shell.
       swipe?.surface.style.removeProperty("transform");
@@ -200,7 +211,7 @@ export function runWaveNavigationTransition(
     if (shellCommitted) window.clearTimeout(timeout);
   };
   const pending = {
-    screen,
+    target,
     committed: () => {
       // Finish the DOM update so the virtual list can run its normal layout
       // frames. Keep the opaque old snapshot still until visible cards are ready.
@@ -213,7 +224,7 @@ export function runWaveNavigationTransition(
   };
   activeTransition = pending;
   reducedMotion.addEventListener("change", skipMotion, { once: true });
-  if (presentation) {
+  if (chevronBack) {
     document.addEventListener("pointerdown", skipMotion, { capture: true });
     window.addEventListener("popstate", cancelNavigation);
     window.addEventListener("resize", stopForWidthChange);
@@ -222,7 +233,7 @@ export function runWaveNavigationTransition(
     stopped = true;
     window.clearTimeout(timeout);
     reducedMotion.removeEventListener("change", skipMotion);
-    if (presentation) {
+    if (chevronBack) {
       document.removeEventListener("pointerdown", skipMotion, true);
       window.removeEventListener("popstate", cancelNavigation);
       window.removeEventListener("resize", stopForWidthChange);

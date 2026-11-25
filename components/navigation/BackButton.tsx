@@ -11,6 +11,7 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import {
   getActiveWaveIdFromUrl,
+  getMessageIdFromPathname,
   getMessagesBaseRoute,
   isMessageComposePathname,
   getWavesBaseRoute,
@@ -26,7 +27,7 @@ import {
   isProfileWavesFeed,
   returnsToProfileWavesFeed,
 } from "@/helpers/waves/profile-feed-navigation";
-import { runWaveChevronBackTransition } from "@/helpers/waves/wave-navigation-transition";
+import { runPhoneChevronBackTransition } from "@/helpers/waves/wave-navigation-transition";
 
 export default function BackButton({
   returnTo,
@@ -91,12 +92,18 @@ export default function BackButton({
 
   const { isDm } = useWave(wave);
 
-  const shouldAnimateWaveBack =
-    isApp &&
+  const isMessageRoute =
+    Boolean(getMessageIdFromPathname(pathname)) ||
+    (pathname === getMessagesBaseRoute(isApp) && searchParams.has("wave"));
+  const isDirectMessage = isMessageRoute || isDm;
+  const isWaveListReturn =
     (pathname === "/waves" || pathname.startsWith("/waves/")) &&
-    Capacitor.getPlatform() === "ios" &&
-    !isDm &&
+    !isDirectMessage &&
     !returnsToProfileWavesFeed(searchParams);
+  const shouldAnimateConversationBack =
+    isApp &&
+    Capacitor.getPlatform() === "ios" &&
+    (isMessageRoute || isWaveListReturn);
 
   const handleClick = () => {
     if (loading) return;
@@ -136,9 +143,12 @@ export default function BackButton({
 
     // Inside a wave → go back to wave list
     if (waveId) {
-      const leave = () => exitActiveWave(isDm);
-      if (shouldAnimateWaveBack) {
-        runWaveChevronBackTransition(leave);
+      const leave = () => exitActiveWave(isDirectMessage);
+      if (shouldAnimateConversationBack) {
+        runPhoneChevronBackTransition(
+          getWaveHomeRoute({ isDirectMessage, isApp }),
+          leave
+        );
       } else {
         leave();
       }

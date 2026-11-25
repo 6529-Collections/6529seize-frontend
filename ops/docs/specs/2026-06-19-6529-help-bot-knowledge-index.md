@@ -31,9 +31,9 @@ short landscape iPhone chat viewports.
 Live swipe-back to the Waves list moves the channel header and content together
 while the bottom navigation stays fixed. Cancelling restores the whole page;
 the existing return destination and feed reading-position behavior are preserved.
-The Back record also covers the complete channel slide when tapping the chevron
-on iPhone or phone web, its stationary Waves destination, interruption and
-Reduced Motion. DM and Profile Waves Feed returns retain their existing behavior.
+The Back record also covers the complete conversation slide when tapping Back
+on iPhone or phone web, its stationary list destination, interruption and
+Reduced Motion. Profile Waves Feed returns retain their own transition.
 
 The signing, encrypted-messages and connection-sharing records cover the shared
 permission consent flow, separate or combined grants, shared server device names,

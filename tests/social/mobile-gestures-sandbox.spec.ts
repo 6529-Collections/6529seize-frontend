@@ -17,6 +17,7 @@ import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import { longPressMessage } from "../support/longPressMessage";
 
 const WAVE = "00000000-0000-4000-8000-000000000529";
+const DM = "00000000-0000-4000-8000-000000000532";
 useLocalSandboxMutationGuard(
   test,
   "PLAYWRIGHT_AUTH_SANDBOX",
@@ -1152,8 +1153,13 @@ test.describe("phone chevron Back", () => {
     hasTouch: true,
     viewport: { width: 412, height: 840 },
   });
-  for (const surface of ["ios", "web"] as const) {
-    test(`phone ${surface} chevron Back moves the header with one channel snapshot`, async ({
+  for (const [surface, destination] of [
+    ["ios", "/waves"],
+    ["web", "/waves"],
+    ["ios", "/messages"],
+    ["web", "/messages"],
+  ] as const) {
+    test(`phone ${surface} chevron Back slides the whole page over ${destination}`, async ({
       context,
       page,
       baseURL,
@@ -1172,11 +1178,31 @@ test.describe("phone chevron Back", () => {
       await hideNextDevOverlay(context);
       await page.setViewportSize({ width: 412, height: 840 });
       await installMessageFixture(page, baseURL);
+      const isDm = destination === "/messages";
+      const conversation = `${destination}/${isDm ? DM : WAVE}`;
+      if (isDm) {
+        const origin = getSandboxApiOrigin(baseURL);
+        const response = await page.request.get(
+          `${origin}/api/v2/waves/${DM}/drops`
+        );
+        const { wave } = (await response.json()) as ApiWaveDropsFeedV2;
+        const dmList = new URL(`${origin}/api/v2/waves`).pathname;
+        await page.route(
+          (url) =>
+            url.pathname === dmList &&
+            url.searchParams.get("direct_message") === "true",
+          (route) => route.fulfill({ json: { data: [wave], next: false } })
+        );
+      }
       // Compile the destination without timing a cold dev build in the slide.
       // Direct entry also exercises Back without an earlier list history entry.
-      const list = await page.request.get("/waves");
+      const list = await page.request.get(destination);
       expect(list.ok()).toBe(true);
-      await openWave(page);
+      await page.goto(conversation, { waitUntil: "domcontentloaded" });
+      await waitForRouteReady(page);
+      await expect(
+        page.getByRole("textbox", { name: "Write a message" }).last()
+      ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
       const backName = surface === "ios" ? "Back" : "Go back";
       await page.evaluate((label) => {
         const root = document.documentElement;
@@ -1243,7 +1269,7 @@ test.describe("phone chevron Back", () => {
         };
       }, backName);
       await page.getByRole("button", { name: backName, exact: true }).tap();
-      await expect(page).toHaveURL(/\/waves$/);
+      await expect(page).toHaveURL(new RegExp(`${destination}$`, "u"));
       const root = page.locator("html");
       await expect(root).toHaveAttribute("data-test-chevron-captures", "1");
       await expect(root).toHaveAttribute("data-test-chevron-header", "true");
@@ -1264,20 +1290,21 @@ test.describe("phone chevron Back", () => {
       expect(motion.x).toBeLessThanOrEqual(412);
       expect(motion.opacity).toBe(1);
       expect(motion.incomingAnimation).toBe("none");
-      await expect(
-        page.getByRole("button", { name: "Find a wave…", exact: true })
-      ).toBeVisible();
+      const listControl = isDm
+        ? page.getByRole("link", { name: /Sandbox Direct Message/u }).first()
+        : page.getByRole("button", { name: "Find a wave…", exact: true });
+      await expect(listControl).toBeVisible();
       await expect(root).not.toHaveAttribute("data-wave-navigation-transition");
       await expectNoHorizontalOverflow(page);
 
       await page.goBack();
-      await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}`));
+      await expect(page).toHaveURL(new RegExp(conversation, "u"));
       await expect(
         page.getByRole("textbox", { name: "Write a message" }).last()
       ).toBeVisible();
       await page.emulateMedia({ reducedMotion: "reduce" });
       await page.getByRole("button", { name: backName, exact: true }).tap();
-      await expect(page).toHaveURL(/\/waves$/);
+      await expect(page).toHaveURL(new RegExp(`${destination}$`, "u"));
       await expect(root).toHaveAttribute("data-test-chevron-captures", "1");
       await expect(root).not.toHaveAttribute("data-wave-navigation-transition");
       await expectNoUnsafeSandboxMutations(baseURL);

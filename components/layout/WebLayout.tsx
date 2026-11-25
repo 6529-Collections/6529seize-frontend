@@ -37,7 +37,7 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
   const isPhoneWidth = useMediaQuery(PHONE_WAVES_LAYOUT_QUERY);
   useLayoutEffect(() => {
     if (isSmall && isPhoneWidth) {
-      commitWaveNavigationTransition(pathname === "/waves" ? "list" : null);
+      commitWaveNavigationTransition(null, pathname);
     }
   }, [pathname, isSmall, isPhoneWidth]);
   const showSiteHeader =

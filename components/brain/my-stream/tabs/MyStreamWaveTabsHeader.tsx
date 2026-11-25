@@ -1,6 +1,6 @@
 "use client";
 
-import { runWaveChevronBackTransition } from "@/helpers/waves/wave-navigation-transition";
+import { runPhoneChevronBackTransition } from "@/helpers/waves/wave-navigation-transition";
 
 import IconButton from "@/components/utils/button/IconButton";
 
@@ -430,8 +430,8 @@ export default function MyStreamWaveTabsHeader({
       ? `${basePath}?${params.toString()}`
       : basePath;
     const leave = () => router.push(newUrl, { scroll: false });
-    if (isPhoneWave) {
-      runWaveChevronBackTransition(leave);
+    if (!isApp && isCompact) {
+      runPhoneChevronBackTransition(basePath, leave);
     } else {
       leave();
     }

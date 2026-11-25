@@ -23,7 +23,7 @@ function Surface({
 }: {
   readonly screen: Parameters<typeof useWaveNavigationTransition>[0];
 }) {
-  const ref = useWaveNavigationTransition(screen);
+  const ref = useWaveNavigationTransition(screen, "/waves");
   return <div ref={ref}>Wave content</div>;
 }
 
