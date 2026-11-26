@@ -18,7 +18,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
 const NAME_CLASS_NAME =
-  "tw-m-0 tw-truncate tw-text-lg tw-font-semibold tw-leading-normal tw-tracking-tight tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out desktop-hover:group-hover:tw-text-iron-400";
+  "tw-m-0 tw-truncate tw-text-lg tw-font-medium tw-leading-normal tw-tracking-tight tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out desktop-hover:group-hover:tw-text-iron-400";
 
 export default function WaveHeaderName({
   wave: source,

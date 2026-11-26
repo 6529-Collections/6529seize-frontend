@@ -688,6 +688,7 @@ const getContentBlock = ({
         </div>
       )}
       <div
+        data-wave-drop-content-column
         className={`tw-flex tw-w-full tw-flex-col ${
           showAuthorInfo && !inlineAuthorOnDesktop
             ? "md:tw-max-w-[calc(100%-3.5rem)]"
