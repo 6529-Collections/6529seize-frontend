@@ -506,7 +506,6 @@ export default function CreateWaveDisplaySettings({
                       label={t(locale, "waves.proposalCard.mediaLabel")}
                       enabled={proposalCards.showMediaThumbnail}
                       onChange={onProposalCardMediaThumbnailChange}
-                      checkboxClassName="tw-form-checkbox tw-size-5 tw-flex-shrink-0 tw-rounded tw-border tw-border-solid tw-border-iron-500 tw-bg-iron-950 tw-text-primary-500 focus:tw-ring-primary-400 md:tw-order-last"
                     />
                   </div>
                 ) : (

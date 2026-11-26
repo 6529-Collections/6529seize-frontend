@@ -43,8 +43,10 @@ The **Decisions** tab follows the selected decision's **Settings** tab and prece
    above the keyboard and action bar. Closing the keyboard restores the editor's
    full height.
    On phones, a segmented progress line follows the steps available for this
-   decision. On/off settings use switches, and the navigation actions stay at
-   the bottom while you scroll. If **Next** finds incomplete required settings,
+   decision, and the navigation actions stay at the bottom while you scroll.
+   Decision on/off settings use matching switches on phones and larger screens.
+   The desktop editor uses **Close editor** without a duplicate **All decisions**
+   link. If **Next** finds incomplete required settings,
    the validation message appears above the phone navigation actions.
    **Text preview limit** and **Image on summary card** share one group under
    **Appearance and labels**.
@@ -53,6 +55,8 @@ The **Decisions** tab follows the selected decision's **Settings** tab and prece
    Opening a draft returns directly to the setup wizard with saved settings
    prefilled. **Close editor** returns to the decision list without publishing
    and preserves your draft.
+   When editing a saved draft on a phone, **Archive** remains available inside
+   the editor sheet and keeps its name-confirmation step.
 4. The final step has **Previous**, **Close editor** and **Publish**. Review and
    publish it. A scheduled first result must be in the future,
    and participation or voting periods must not already have ended.

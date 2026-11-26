@@ -25,7 +25,7 @@ export default function CreateWaveToggle({
   const rowClasses = {
     default: "tw-flex tw-min-h-6 tw-cursor-pointer tw-items-center tw-gap-2",
     decision:
-      "tw-relative tw-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 md:tw-justify-start",
+      "tw-relative tw-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3",
     "decision-media":
       "tw-relative tw-flex tw-min-h-8 tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 md:tw-min-h-10",
   };
@@ -45,7 +45,7 @@ export default function CreateWaveToggle({
           role={decisionEditor ? undefined : "switch"}
           className={
             decisionEditor
-              ? `tw-peer max-md:tw-absolute max-md:tw-inset-0 max-md:tw-z-10 max-md:tw-m-0 max-md:tw-h-full max-md:tw-w-full max-md:tw-cursor-pointer max-md:tw-opacity-0 ${checkboxClassName ?? ""}`
+              ? `tw-peer tw-absolute tw-inset-0 tw-z-10 tw-m-0 tw-h-full tw-w-full tw-cursor-pointer tw-opacity-0 ${checkboxClassName ?? ""}`
               : "tw-peer tw-sr-only"
           }
           checked={enabled}
@@ -56,7 +56,7 @@ export default function CreateWaveToggle({
         <span
           className={
             decisionEditor
-              ? "tw-flex tw-shrink-0 tw-items-center peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-400 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-950 peer-disabled:tw-opacity-50 md:tw-hidden"
+              ? "tw-flex tw-shrink-0 tw-items-center peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-400 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-950 peer-disabled:tw-opacity-50"
               : "tw-flex tw-items-center"
           }
         >

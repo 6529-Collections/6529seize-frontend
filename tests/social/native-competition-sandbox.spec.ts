@@ -3359,7 +3359,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
 
   test("defaults anonymity off and includes an enabled choice in the saved competition draft", async ({
     page,
-  }) => {
+  }, testInfo) => {
     const sandbox = await installCompetitionApi(page);
     await page.goto(`${ROOT}/new`);
     const choice = page.getByRole("checkbox", {
@@ -3367,6 +3367,25 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       exact: true,
     });
     await expect(choice).not.toBeChecked();
+    await expect(choice).toHaveCSS("opacity", "0");
+    const indicator = await choice.evaluate((element) => {
+      const label = element.closest("label");
+      const track = label?.querySelector(".tw-h-5.tw-w-9");
+      if (!label || !track) throw new Error("Switch indicator missing");
+      const bounds = track.getBoundingClientRect();
+      return {
+        width: bounds.width,
+        height: bounds.height,
+        rightInset: Math.round(
+          label.getBoundingClientRect().right - bounds.right
+        ),
+      };
+    });
+    expect(indicator).toEqual({ width: 36, height: 20, rightInset: 1 });
+    if ((page.viewportSize()?.width ?? 1280) >= 768)
+      await expect(
+        page.getByRole("link", { name: "All decisions", exact: true })
+      ).toHaveCount(0);
     await choice.check();
     await page
       .getByLabel("Decision name", { exact: true })
@@ -3384,6 +3403,54 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         })
       )
       .toBe(true);
+    await page.screenshot({
+      path: testInfo.outputPath("decision-anonymity-switch.png"),
+      animations: "disabled",
+      style: "nextjs-portal { visibility: hidden; }",
+    });
+    for (let step = 0; step < 4; step++)
+      await page.getByRole("button", { name: "Next", exact: true }).click();
+    await expect(
+      page.getByRole("checkbox", {
+        name: "Require a wallet signature for votes",
+        exact: true,
+      })
+    ).toHaveCSS("opacity", "0");
+    const advanced = page.getByRole("button", {
+      name: /^Vote limits and behavior/,
+    });
+    await advanced.click();
+    for (const name of [/negative/i, /time.weighted/i]) {
+      const alignment = await page
+        .getByRole("checkbox", { name })
+        .evaluate((element) => {
+          const label = element.closest("label");
+          const row = label?.parentElement;
+          const heading = row?.querySelector("h3");
+          if (!label || !row || !heading)
+            throw new Error("Voting switch row missing");
+          return {
+            rightInset: Math.round(
+              row.getBoundingClientRect().right -
+                label.getBoundingClientRect().right
+            ),
+            fontSize: getComputedStyle(heading).fontSize,
+            fontWeight: getComputedStyle(heading).fontWeight,
+          };
+        });
+      expect(alignment).toEqual({
+        rightInset: 0,
+        fontSize: "14px",
+        fontWeight: "500",
+      });
+    }
+    await page
+      .getByRole("button", { name: /^Vote limits and behavior/ })
+      .locator("..")
+      .screenshot({
+        path: testInfo.outputPath("decision-voting-switches.png"),
+        animations: "disabled",
+      });
     await expectNoHorizontalOverflow(page);
   });
   for (const { delay, hiddenBy } of [
@@ -11679,17 +11746,45 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await expect(page.getByLabel("Decision name", { exact: true })).toHaveValue(
       "Native draft"
     );
-    await expect(competitionContent(page)).toBeVisible();
+    // The phone editor is modal; retain the rendered background-shell checks.
+    const draftContent = page
+      .getByRole("main", { includeHidden: true })
+      .locator(
+        '[data-competition-detail], [data-competition-navigation="flat"]'
+      )
+      .filter({ visible: true });
+    const sharedTabs = page
+      .getByRole("tablist", { includeHidden: true })
+      .filter({
+        has: page.getByRole("tab", {
+          name: "Chat",
+          exact: true,
+          includeHidden: true,
+        }),
+      })
+      .filter({ visible: true });
+    await expect(draftContent).toBeVisible();
     await expect(
-      waveTabStrip(page).getByRole("tab", { name: "Leaderboard", exact: true })
-    ).toBeVisible();
-    await expect(
-      competitionContent(page).getByRole("tab", {
+      sharedTabs.getByRole("tab", {
         name: "Leaderboard",
         exact: true,
+        includeHidden: true,
+      })
+    ).toBeVisible();
+    await expect(
+      draftContent.getByRole("tab", {
+        name: "Leaderboard",
+        exact: true,
+        includeHidden: true,
       })
     ).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
+    if ((page.viewportSize()?.width ?? 1280) < 768)
+      await expect(
+        page
+          .getByRole("dialog", { name: "New decision", exact: true })
+          .getByRole("button", { name: "Archive", exact: true })
+      ).toBeVisible();
     await page.getByRole("button", { name: "Archive", exact: true }).click();
     const archiveDialog = page.getByRole("dialog").last();
     await expect(
@@ -13603,6 +13698,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       ? [viewport.width, 320]
       : [viewport.width, 639, 640, 768]) {
       await page.setViewportSize({ ...viewport, width });
+      await expect(mediaChoice).toHaveCSS("opacity", "0");
       for (const options of [ranking, appearance]) {
         await expect
           .poll(() =>

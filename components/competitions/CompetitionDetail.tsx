@@ -173,10 +173,12 @@ export function NativeCompetitionContent({
   )
     return (
       <div className="tw-flex tw-min-h-full tw-flex-1 tw-flex-col tw-gap-5">
-        {competition.lifecycle === ApiCompetitionLifecycle.Draft && (
-          <CompetitionAdmin archiveOnly />
-        )}
         <CompetitionDraftEditor
+          actions={
+            competition.lifecycle === ApiCompetitionLifecycle.Draft && (
+              <CompetitionAdmin archiveOnly />
+            )
+          }
           wave={wave}
           competition={competition}
           onClose={() => {
@@ -319,7 +321,7 @@ export default function CompetitionDetail({
       className={`tw-h-full tw-min-h-0 tw-overflow-y-auto tw-px-4 tw-pt-4 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10 hover:tw-scrollbar-thumb-white/15 sm:tw-px-6 sm:tw-pt-6 ${isDraft ? "tw-scroll-pb-24" : "tw-pb-4 sm:tw-pb-6"}`}
     >
       <div
-        className={`tw-mx-auto tw-max-w-5xl ${isDraft ? "tw-flex tw-min-h-full tw-flex-col tw-gap-5" : "tw-space-y-5"}`}
+        className={`tw-mx-auto tw-max-w-5xl [&:has(#competition-draft-title)>header]:tw-hidden ${isDraft ? "tw-flex tw-min-h-full tw-flex-col tw-gap-5" : "tw-space-y-5"}`}
       >
         <header className="tw-space-y-3">
           <nav>

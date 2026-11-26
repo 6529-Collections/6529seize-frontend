@@ -1,5 +1,6 @@
 "use client";
 import { ApiCompetitionLifecycle } from "@/generated/models/ApiCompetitionLifecycle";
+import type { ReactNode } from "react";
 import {
   useEffect,
   useMemo,
@@ -56,7 +57,11 @@ import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import CompetitionDraftEditorFooter from "./CompetitionDraftEditorFooter";
-import CompetitionDraftEditorLayout from "./CompetitionDraftEditorLayout";
+import CompetitionDraftEditorLayout, {
+  RulesLockedNote,
+  rulesLockedNoteId,
+  useDisplaySettingsDisclosure,
+} from "./CompetitionDraftEditorLayout";
 import { CompetitionState, COMPETITION_BUTTON } from "./CompetitionState";
 
 const EDITOR_INPUT =
@@ -89,19 +94,11 @@ function getSaveStatus(
   );
 }
 
-/** Keep the disclosure open across responsive remounts and reset on step exit. */
-function useDisplaySettingsDisclosure(step: CreateWaveStep) {
-  const [open, setOpen] = useState(false);
-  if (step !== CreateWaveStep.OVERVIEW && open) {
-    setOpen(false);
-  }
-  return [open, setOpen] as const;
-}
-
 /** Edit competition rules while retaining the parent Wave's shared chat settings. */
 function DraftForm({
   wave,
   competition,
+  actions,
   initial,
   lockedRules = false,
   preservePublishedRules = false,
@@ -110,6 +107,7 @@ function DraftForm({
 }: {
   readonly wave: ApiWave;
   readonly competition?: ApiCompetition;
+  readonly actions?: ReactNode;
   readonly initial?: ApiCompetitionDraftInput;
   readonly lockedRules?: boolean;
   readonly preservePublishedRules?: boolean;
@@ -452,7 +450,6 @@ function DraftForm({
             onChange={setAnonymousSubmissions}
             disabled={anonymityLocked}
             describedBy="competition-anonymity-description"
-            checkboxClassName="tw-h-4 tw-w-4 tw-accent-primary-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
           />
           <p
             id="competition-anonymity-description"
@@ -581,6 +578,7 @@ function DraftForm({
   );
   return (
     <CompetitionDraftEditorLayout
+      actions={actions}
       contentRef={formRef}
       title={t(locale, published ? "competitions.edit" : "competitions.new")}
       saveStatus={saveStatus}
@@ -603,7 +601,7 @@ function DraftForm({
       >
         {content}
         {step === CreateWaveStep.VOTING && (
-          <div className="tw-mt-4 md:[&_label>span]:tw-font-normal">
+          <div className="tw-mt-4">
             <CreateWaveToggle
               variant="decision"
               displayLabel
@@ -665,35 +663,16 @@ function DraftForm({
   );
 }
 
-const RULES_LOCKED_NOTE_ID = "competition-draft-rules-locked";
-
-const rulesLockedNoteId = (lockedRules: boolean): string | undefined =>
-  lockedRules ? RULES_LOCKED_NOTE_ID : undefined;
-
-/** Explains why entries have fixed the decision's rules. */
-function RulesLockedNote({
-  locale,
-  show,
-}: {
-  readonly locale: ReturnType<typeof useBrowserLocale>;
-  readonly show: boolean;
-}) {
-  if (!show) return null;
-  return (
-    <p id={RULES_LOCKED_NOTE_ID} className="tw-m-0 tw-text-sm tw-text-iron-400">
-      {t(locale, "competitions.rulesLockedAfterEntries")}
-    </p>
-  );
-}
-
 /** Load an existing competition configuration or open a new viewer-scoped draft. */
 export default function CompetitionDraftEditor({
   wave,
   competition,
+  actions,
   onClose,
 }: {
   readonly wave: ApiWave;
   readonly competition?: ApiCompetition;
+  readonly actions?: ReactNode;
   readonly onClose: () => void;
 }) {
   const hydrated = useSyncExternalStore(
@@ -724,12 +703,19 @@ export default function CompetitionDraftEditor({
     { limit: "1" },
     competition?.lifecycle === ApiCompetitionLifecycle.Published
   );
-  if (!hydrated) return <CompetitionState />;
+  if (!hydrated)
+    return (
+      <>
+        {actions}
+        <CompetitionState />
+      </>
+    );
   if (!competition)
     return (
       <DraftForm
         key={`${wave.id}:${viewer ?? "anonymous"}`}
         wave={wave}
+        actions={actions}
         onClose={onClose}
       />
     );
@@ -738,21 +724,30 @@ export default function CompetitionDraftEditor({
     (competition.lifecycle === ApiCompetitionLifecycle.Published &&
       entries.isPending)
   )
-    return <CompetitionState />;
+    return (
+      <>
+        {actions}
+        <CompetitionState />
+      </>
+    );
   if (query.isError || entries.isError)
     return (
-      <CompetitionState
-        error
-        retry={() => {
-          void entries.refetch();
-          void query.refetch();
-        }}
-      />
+      <>
+        {actions}
+        <CompetitionState
+          error
+          retry={() => {
+            void entries.refetch();
+            void query.refetch();
+          }}
+        />
+      </>
     );
   return (
     <DraftForm
       key={`${competition.id}:${viewer ?? "anonymous"}`}
       wave={wave}
+      actions={actions}
       competition={competition}
       initial={query.data}
       lockedRules={
