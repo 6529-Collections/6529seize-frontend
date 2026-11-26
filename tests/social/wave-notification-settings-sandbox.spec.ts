@@ -93,10 +93,15 @@ async function openAbout(page: Page) {
 async function expectReachable(page: Page, role: "menuitemradio") {
   for (const name of [ALL, BROADCAST, MENTIONS]) {
     const choice = page.getByRole(role, { name, exact: true });
+    await expect(choice).toHaveText(name);
+    await expect(choice).toHaveAccessibleDescription("");
     await expect(choice).toBeInViewport({ ratio: 1 });
     // Trial pointer action verifies stacking and modal inertness, not only DOM visibility.
     await choice.click({ trial: true });
   }
+  await expect(
+    page.getByRole("menuitem", { name: "Mute wave", exact: true })
+  ).toHaveText("Mute");
   await expectNoHorizontalOverflow(page);
 }
 
@@ -452,28 +457,15 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
       await page.keyboard.press("Enter");
       const menu = page.getByRole("menu");
       await expect(menu).toBeVisible();
-      const broadcastChoice = menu.getByRole("menuitemradio", {
-        name: BROADCAST,
-      });
-      await expect(broadcastChoice).toHaveAccessibleDescription(
-        "Includes @contributors"
-      );
-      const subtitle = broadcastChoice.getByText("Includes @contributors", {
-        exact: true,
-      });
-      expect(
-        await subtitle.evaluate(
-          (element) =>
-            element.getBoundingClientRect().height /
-            Number.parseFloat(getComputedStyle(element).lineHeight)
-        )
-      ).toBe(1);
       await expect(bell).toHaveAttribute("aria-expanded", "true");
       await expect(bell).toHaveAttribute(
         "aria-controls",
         (await menu.getAttribute("id")) ?? ""
       );
       await expectReachable(page, "menuitemradio");
+      await page.screenshot({
+        path: testInfo.outputPath(`notification-choices-desktop-${width}.png`),
+      });
       await page.keyboard.press("ArrowDown");
       await expect(menu).toHaveAttribute("aria-activedescendant", /.+/);
       await page.keyboard.press("End");

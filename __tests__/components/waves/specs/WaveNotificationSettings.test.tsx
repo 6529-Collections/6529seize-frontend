@@ -101,7 +101,7 @@ describe("WaveNotificationSettings", () => {
     mockDelete.mockResolvedValue(undefined);
   });
 
-  it("replaces both controls with one neutral bell and three radio choices", async () => {
+  it("shows three label-only levels and mute under one neutral bell", async () => {
     renderComponent();
     expect(screen.getAllByRole("button")).toHaveLength(1);
     const trigger = await openMenu();
@@ -118,14 +118,14 @@ describe("WaveNotificationSettings", () => {
       screen.getByRole("group", { name: "Notification level" })
     ).toContainElement(choice(MENTIONS));
     expect(screen.queryByText("Notify me about")).not.toBeInTheDocument();
-    expect(screen.getByText("Every new post")).toBeInTheDocument();
-    expect(screen.getByText("Includes @contributors")).toBeInTheDocument();
-    expect(screen.getByText("Your mentions and replies")).toBeInTheDocument();
-    expect(screen.getByRole("menuitem", { name: "Mute wave" })).toBeEnabled();
-    expect(
-      screen.getByRole("menuitem", { name: "Mute wave" })
-    ).toHaveAccessibleDescription("No alerts");
-    expect(screen.getByText("No alerts")).toBeInTheDocument();
+    for (const name of [ALL, BROADCAST, MENTIONS]) {
+      expect(choice(name).textContent).toBe(name);
+      expect(choice(name)).not.toHaveAccessibleDescription();
+    }
+    const mute = screen.getByRole("menuitem", { name: "Mute wave" });
+    expect(mute).toBeEnabled();
+    expect(mute.textContent).toBe("Mute");
+    expect(mute).not.toHaveAccessibleDescription();
   });
 
   it.each([
