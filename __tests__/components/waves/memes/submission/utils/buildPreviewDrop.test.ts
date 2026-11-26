@@ -41,6 +41,7 @@ describe("buildPreviewDrop", () => {
     expect(previewDrop.realtime_rating).toBe(6529420);
     expect(previewDrop.rating_prediction).toBe(69420);
     expect(previewDrop.raters_count).toBe(69);
+    expect(previewDrop.wave).not.toHaveProperty("stays_on_site");
   });
 
   it("copies the additional action declaration and plan into the preview drop", () => {
@@ -60,6 +61,7 @@ describe("buildPreviewDrop", () => {
         chat: { authenticated_user_eligible: true },
         wave: { admin_drop_deletion_enabled: false },
         pinned: false,
+        stays_on_site: false,
       } as any,
       traits: {
         title: "Preview Title",
@@ -82,6 +84,7 @@ describe("buildPreviewDrop", () => {
     });
 
     expect(previewDrop.is_additional_action_promised).toBe(true);
+    expect(previewDrop.wave.stays_on_site).toBe(false);
     expect(previewDrop.metadata).toContainEqual({
       data_key: "additional_action_plan",
       data_value: "A free exhibition if selected.",
