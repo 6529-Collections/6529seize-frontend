@@ -1,7 +1,9 @@
 "use client";
 import { ApiCompetitionLifecycle } from "@/generated/models/ApiCompetitionLifecycle";
+import type { ReactNode } from "react";
 import {
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -23,6 +25,7 @@ import CreateWaveGroup from "@/components/waves/create-wave/groups/CreateWaveGro
 import WaveAccessPreview from "@/components/waves/WaveAccessPreview";
 import CreateWaveDisplaySettings from "@/components/waves/create-wave/overview/CreateWaveDisplaySettings";
 import RankScheduleModeSelector from "@/components/waves/create-wave/overview/type/RankScheduleModeSelector";
+import CreateWaveToggle from "@/components/waves/create-wave/utils/CreateWaveToggle";
 import CreateWaveDropdown from "@/components/waves/create-wave/utils/CreateWaveDropdown";
 import { CreateWaveStep, CreateWaveGroupConfigType } from "@/types/waves.types";
 import { getCreateWaveValidationErrors } from "@/helpers/waves/create-wave.validation";
@@ -53,8 +56,17 @@ import {
 import { useAuth } from "@/components/auth/Auth";
 import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
 import { t } from "@/i18n/messages";
-import Button from "@/components/utils/button/Button";
+import CompetitionDraftEditorFooter from "./CompetitionDraftEditorFooter";
+import CompetitionDraftEditorLayout, {
+  DecisionNameField,
+  getDecisionValidationFeedback,
+  RulesLockedNote,
+  rulesLockedNoteId,
+  useDisplaySettingsDisclosure,
+} from "./CompetitionDraftEditorLayout";
 import { CompetitionState, COMPETITION_BUTTON } from "./CompetitionState";
 
 const EDITOR_INPUT =
@@ -91,6 +103,7 @@ function getSaveStatus(
 function DraftForm({
   wave,
   competition,
+  actions,
   initial,
   lockedRules = false,
   preservePublishedRules = false,
@@ -99,6 +112,7 @@ function DraftForm({
 }: {
   readonly wave: ApiWave;
   readonly competition?: ApiCompetition;
+  readonly actions?: ReactNode;
   readonly initial?: ApiCompetitionDraftInput;
   readonly lockedRules?: boolean;
   readonly preservePublishedRules?: boolean;
@@ -106,6 +120,8 @@ function DraftForm({
   readonly onClose: () => void;
 }) {
   const locale = useBrowserLocale();
+  const isPhone = useMediaQuery(PHONE_WAVES_LAYOUT_QUERY);
+  const validationFeedbackId = useId();
   const router = useRouter();
   const client = useQueryClient();
   const { connectedProfile, requestAuth } = useAuth();
@@ -148,6 +164,8 @@ function DraftForm({
   const conflictCopyKey = useRef<string | null>(null);
   const formRef = useRef<HTMLElement>(null);
   useKeyboardFocusScroll(formRef);
+  const [displaySettingsOpen, setDisplaySettingsOpen] =
+    useDisplaySettingsDisclosure(step);
   const [saveErrorFocusRequest, setSaveErrorFocusRequest] = useState(0);
   const votingErrors = getCreateWaveValidationErrors({
     config,
@@ -374,27 +392,27 @@ function DraftForm({
     });
     return result.ok ? result.group : null;
   };
-  const invalid = getCreateWaveValidationErrors({ config, step }).length > 0;
+  const currentStepErrors = getCreateWaveValidationErrors({ config, step });
+  const invalid = currentStepErrors.length > 0;
   let content;
   if (step === CreateWaveStep.OVERVIEW)
     content = (
       <div className="tw-space-y-6">
         <div className="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-[minmax(0,1fr)_190px]">
-          <label className="tw-block tw-min-w-0 tw-space-y-2 tw-text-sm tw-font-medium tw-text-iron-300">
-            <span>{t(locale, "competitions.titleLabel")}</span>
-            <input
-              required
-              maxLength={250}
-              className={EDITOR_INPUT}
-              value={config.overview.name}
-              onChange={(event) =>
-                controller.setOverview({
-                  ...config.overview,
-                  name: event.target.value,
-                })
-              }
-            />
-          </label>
+          <DecisionNameField
+            locale={locale}
+            inputClassName={EDITOR_INPUT}
+            errors={visibleErrors}
+            currentErrors={currentStepErrors}
+            feedbackId={validationFeedbackId}
+            value={config.overview.name}
+            onChange={(event) =>
+              controller.setOverview({
+                ...config.overview,
+                name: event.target.value,
+              })
+            }
+          />
           <div className="tw-min-w-0 tw-space-y-2 tw-text-sm tw-font-medium tw-text-iron-300">
             <span>{t(locale, "competitions.type")}</span>
             <CreateWaveDropdown
@@ -431,22 +449,18 @@ function DraftForm({
           />
         </label>
         <div className="tw-space-y-2">
-          <label className="tw-flex tw-min-h-11 tw-items-center tw-gap-3 tw-text-sm tw-font-medium tw-text-iron-200">
-            <input
-              type="checkbox"
-              checked={anonymousSubmissions}
-              onChange={(event) =>
-                setAnonymousSubmissions(event.target.checked)
-              }
-              disabled={anonymityLocked}
-              aria-describedby="competition-anonymity-description"
-              className="tw-h-4 tw-w-4 tw-accent-primary-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-            />
-            {t(locale, "competitions.anonymousSubmissions")}
-          </label>
+          <CreateWaveToggle
+            variant="decision"
+            displayLabel
+            label={t(locale, "competitions.anonymousSubmissions")}
+            enabled={anonymousSubmissions}
+            onChange={setAnonymousSubmissions}
+            disabled={anonymityLocked}
+            describedBy="competition-anonymity-description"
+          />
           <p
             id="competition-anonymity-description"
-            className="tw-m-0 tw-text-sm tw-leading-5 tw-text-iron-400"
+            className="tw-m-0 tw-text-sm tw-leading-5 tw-text-iron-400 max-md:tw-mt-1"
           >
             {t(locale, "competitions.anonymityDescription")}
           </p>
@@ -461,6 +475,9 @@ function DraftForm({
           />
         )}
         <CreateWaveDisplaySettings
+          isCompetition
+          advancedOpen={displaySettingsOpen}
+          onAdvancedOpenChange={setDisplaySettingsOpen}
           waveType={config.overview.type}
           display={config.display}
           errors={controller.errors}
@@ -539,22 +556,50 @@ function DraftForm({
       />
     );
   const saveStatus = getSaveStatus(locale, persistence);
+  const validationFeedback = getDecisionValidationFeedback(
+    locale,
+    visibleErrors,
+    invalid,
+    validationFeedbackId,
+    isPhone
+  );
+  const footer = (
+    <CompetitionDraftEditorFooter
+      locale={locale}
+      index={index}
+      stepCount={steps.length}
+      published={published}
+      busy={busy}
+      conflict={displayedError === "conflict"}
+      validationFeedback={validationFeedback.footer}
+      onClose={() => {
+        void close();
+      }}
+      onPrevious={() => move("backward")}
+      onNext={() => move("forward")}
+      onPublish={() => {
+        void publish();
+      }}
+      onSave={() => {
+        if (validateVotingForSave()) void close(true);
+      }}
+    />
+  );
   return (
-    <section
-      ref={formRef}
-      className="tw-mx-auto tw-flex tw-w-full tw-max-w-[680px] tw-flex-1 tw-flex-col tw-gap-6"
-      aria-labelledby="competition-draft-title"
-      aria-describedby={rulesLockedNoteId(lockedRules)}
+    <CompetitionDraftEditorLayout
+      actions={actions}
+      contentRef={formRef}
+      title={t(locale, published ? "competitions.edit" : "competitions.new")}
+      saveStatus={saveStatus}
+      steps={steps}
+      index={index}
+      busy={busy}
+      onClose={() => {
+        void close();
+      }}
+      describedBy={rulesLockedNoteId(lockedRules)}
+      footer={footer}
     >
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-        <h1
-          id="competition-draft-title"
-          className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-title tw-text-iron-50 sm:tw-text-[28px] sm:tw-leading-[34px]"
-        >
-          {t(locale, published ? "competitions.edit" : "competitions.new")}
-        </h1>
-        <output className="tw-text-xs tw-text-iron-400">{saveStatus}</output>
-      </div>
       <p className="tw-m-0 tw-text-sm tw-text-iron-400">
         {t(locale, "competitions.overlap")}
       </p>
@@ -565,21 +610,20 @@ function DraftForm({
       >
         {content}
         {step === CreateWaveStep.VOTING && (
-          <label className="tw-mt-4 tw-flex tw-min-h-11 tw-items-center tw-gap-3 tw-text-sm tw-text-iron-200">
-            <input
-              type="checkbox"
-              checked={voteSignature}
-              onChange={(event) => setVoteSignature(event.target.checked)}
+          <div className="tw-mt-4">
+            <CreateWaveToggle
+              variant="decision"
+              displayLabel
+              enabled={voteSignature}
+              onChange={setVoteSignature}
+              label={t(locale, "competitions.requireVoteSignature")}
             />
-            {t(locale, "competitions.requireVoteSignature")}
-          </label>
+          </div>
         )}
       </fieldset>
-      {visibleErrors.length > 0 && invalid && (
-        <p role="alert" className="tw-m-0 tw-text-red">
-          {t(locale, "competitions.required")}
-        </p>
-      )}
+      <div className="tw-contents max-md:tw-hidden">
+        {validationFeedback.body}
+      </div>
       {displayedError && (
         <p role="alert" className="tw-m-0 tw-text-red">
           {t(
@@ -626,90 +670,7 @@ function DraftForm({
           {t(locale, "competitions.reload")}
         </button>
       )}
-      <div className="tw-sticky tw-bottom-0 tw-z-20 tw-mt-auto tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-black tw-py-4 tw-pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <Button
-          type="button"
-          variant="ghost"
-          size="md"
-          className="tw-mr-auto"
-          disabled={busy}
-          onClick={() => {
-            void close();
-          }}
-        >
-          {t(locale, "competitions.cancelEdit")}
-        </Button>
-        {index > 0 && (
-          <Button
-            type="button"
-            variant="secondary"
-            size="md"
-            disabled={busy}
-            onClick={() => move("backward")}
-          >
-            {t(locale, "competitions.previous")}
-          </Button>
-        )}
-        {index < steps.length - 1 && (
-          <Button
-            type="button"
-            variant="action"
-            size="md"
-            disabled={busy}
-            onClick={() => move("forward")}
-          >
-            {t(locale, "competitions.next")}
-          </Button>
-        )}
-        {index === steps.length - 1 && !published && (
-          <Button
-            type="button"
-            variant="action"
-            size="md"
-            disabled={busy || displayedError === "conflict"}
-            onClick={() => {
-              void publish();
-            }}
-          >
-            {t(locale, "competitions.publish")}
-          </Button>
-        )}
-        {index === steps.length - 1 && published && (
-          <Button
-            type="button"
-            variant="action"
-            size="md"
-            disabled={busy || displayedError === "conflict"}
-            onClick={() => {
-              if (validateVotingForSave()) void close(true);
-            }}
-          >
-            {t(locale, "competitions.save")}
-          </Button>
-        )}
-      </div>
-    </section>
-  );
-}
-
-const RULES_LOCKED_NOTE_ID = "competition-draft-rules-locked";
-
-const rulesLockedNoteId = (lockedRules: boolean): string | undefined =>
-  lockedRules ? RULES_LOCKED_NOTE_ID : undefined;
-
-/** Explains why entries have fixed the decision's rules. */
-function RulesLockedNote({
-  locale,
-  show,
-}: {
-  readonly locale: ReturnType<typeof useBrowserLocale>;
-  readonly show: boolean;
-}) {
-  if (!show) return null;
-  return (
-    <p id={RULES_LOCKED_NOTE_ID} className="tw-m-0 tw-text-sm tw-text-iron-400">
-      {t(locale, "competitions.rulesLockedAfterEntries")}
-    </p>
+    </CompetitionDraftEditorLayout>
   );
 }
 
@@ -717,10 +678,12 @@ function RulesLockedNote({
 export default function CompetitionDraftEditor({
   wave,
   competition,
+  actions,
   onClose,
 }: {
   readonly wave: ApiWave;
   readonly competition?: ApiCompetition;
+  readonly actions?: ReactNode;
   readonly onClose: () => void;
 }) {
   const hydrated = useSyncExternalStore(
@@ -751,12 +714,19 @@ export default function CompetitionDraftEditor({
     { limit: "1" },
     competition?.lifecycle === ApiCompetitionLifecycle.Published
   );
-  if (!hydrated) return <CompetitionState />;
+  if (!hydrated)
+    return (
+      <>
+        {actions}
+        <CompetitionState />
+      </>
+    );
   if (!competition)
     return (
       <DraftForm
         key={`${wave.id}:${viewer ?? "anonymous"}`}
         wave={wave}
+        actions={actions}
         onClose={onClose}
       />
     );
@@ -765,21 +735,30 @@ export default function CompetitionDraftEditor({
     (competition.lifecycle === ApiCompetitionLifecycle.Published &&
       entries.isPending)
   )
-    return <CompetitionState />;
+    return (
+      <>
+        {actions}
+        <CompetitionState />
+      </>
+    );
   if (query.isError || entries.isError)
     return (
-      <CompetitionState
-        error
-        retry={() => {
-          void entries.refetch();
-          void query.refetch();
-        }}
-      />
+      <>
+        {actions}
+        <CompetitionState
+          error
+          retry={() => {
+            void entries.refetch();
+            void query.refetch();
+          }}
+        />
+      </>
     );
   return (
     <DraftForm
       key={`${competition.id}:${viewer ?? "anonymous"}`}
       wave={wave}
+      actions={actions}
       competition={competition}
       initial={query.data}
       lockedRules={

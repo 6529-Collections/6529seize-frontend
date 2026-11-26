@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, type RefObject } from "react";
+import { useCallback, useEffect, useMemo, type RefObject } from "react";
 import {
   type InfiniteData,
   useMutation,
@@ -30,6 +30,27 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
 export const MAX_PINNED_WAVES = 100;
+
+// The row button, gestures and details can each mount their own hook. Keep
+// their guards together without sharing operations between viewers or clients.
+const pinOperationsByClient = new WeakMap<
+  QueryClient,
+  Map<string | null, Set<string>>
+>();
+
+function getPinOperations(client: QueryClient, viewer: string | null) {
+  let viewers = pinOperationsByClient.get(client);
+  if (!viewers) {
+    viewers = new Map();
+    pinOperationsByClient.set(client, viewers);
+  }
+  let operations = viewers.get(viewer);
+  if (!operations) {
+    operations = new Set();
+    viewers.set(viewer, operations);
+  }
+  return operations;
+}
 
 // Cache time constants for React Query
 const PINNED_WAVES_STALE_TIME = 5 * 60 * 1000; // 5 minutes
@@ -461,7 +482,6 @@ export function usePinnedWavesServer(
   } = useAuth();
   const { address, hasValidWalletAuth } = useSeizeConnectContext();
   const queryClient = useQueryClient();
-  const ongoingOperations = useRef<Set<string>>(new Set());
   const hasValidWalletAuthorization = hasValidWalletAuth !== false;
   const hasAuthContextProfile =
     isAuthenticated ??
@@ -492,6 +512,10 @@ export function usePinnedWavesServer(
     isPendingAuthSwitch,
   ]);
   const pinnedWavesQueryKey = usePinnedWavesQueryKey(viewerIdentityKey);
+  const ongoingOperations = useMemo(
+    () => ({ current: getPinOperations(queryClient, viewerIdentityKey) }),
+    [queryClient, viewerIdentityKey]
+  );
   const { waves: officialWaves } = useOfficialWaves({
     viewerIdentityKey,
     enabled: isEnabled && !isPendingAuthSwitch,
@@ -624,7 +648,14 @@ export function usePinnedWavesServer(
         ongoingOperations.current.delete(waveId);
       }
     },
-    [canPinWave, pinMutation, requestAuth, viewerIdentityKey, primaryProfileId]
+    [
+      canPinWave,
+      pinMutation,
+      requestAuth,
+      viewerIdentityKey,
+      primaryProfileId,
+      ongoingOperations,
+    ]
   );
 
   const unpinWave = useCallback(
@@ -646,7 +677,13 @@ export function usePinnedWavesServer(
         ongoingOperations.current.delete(waveId);
       }
     },
-    [unpinMutation, requestAuth, viewerIdentityKey, primaryProfileId]
+    [
+      unpinMutation,
+      requestAuth,
+      viewerIdentityKey,
+      primaryProfileId,
+      ongoingOperations,
+    ]
   );
 
   return {

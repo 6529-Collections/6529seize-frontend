@@ -1,6 +1,7 @@
 import type { ApiWave } from "@/generated/models/ApiWave";
 import FollowersListWrapper from "@/components/utils/followers/FollowersListWrapper";
 import { useWaveFollowers } from "@/hooks/useWaveFollowers";
+import { CircleLoaderSize } from "@/components/distribution-plan-tool/common/CircleLoader";
 
 export default function WaveFollowersList({
   wave,
@@ -14,7 +15,7 @@ export default function WaveFollowersList({
   );
 
   return (
-    <div className="tw-min-h-full tw-w-full tw-rounded-b-xl tw-bg-iron-950 tw-px-4 tw-py-2 lg:tw-rounded-b-none">
+    <div className="tw-min-h-full tw-w-full tw-rounded-b-xl tw-bg-iron-950 tw-px-4 tw-py-2 lg:tw-rounded-b-none [&_[data-follower-handle]>a:focus-visible]:tw-ring-2 [&_[data-follower-handle]>a:focus-visible]:tw-ring-primary-400 desktop-hover:[&_[data-follower-handle]>a:hover]:tw-text-opacity-80 [&_[data-follower-handle]>a]:tw-rounded-sm [&_[data-follower-handle]>a]:tw-text-iron-200 [&_[data-follower-handle]]:tw-leading-5 [&_[data-follower-row]]:tw-px-0 [&_[data-followers-loader]]:tw-mt-4">
       {onBackClick && (
         <button
           onClick={onBackClick}
@@ -41,6 +42,7 @@ export default function WaveFollowersList({
       <FollowersListWrapper
         followers={followers}
         loading={isFetching}
+        loaderSize={CircleLoaderSize.SMALL}
         onBottomIntersection={onBottomIntersection}
       />
     </div>

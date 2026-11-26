@@ -3,12 +3,13 @@ import { useRef } from "react";
 import useKeyboardFocusScroll from "@/components/waves/create-wave/hooks/useKeyboardFocusScroll";
 
 const mockHasTouchScreen = { value: true };
+const mockIsApp = { value: false };
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
   default: () => ({
     isMobileDevice: true,
     hasTouchScreen: mockHasTouchScreen.value,
-    isApp: false,
+    isApp: mockIsApp.value,
     isAppleMobile: true,
   }),
 }));
@@ -30,6 +31,18 @@ function Harness({
   );
 }
 
+function AppVoteHarness() {
+  const formRef = useRef<HTMLFormElement>(null);
+  useKeyboardFocusScroll(formRef, "reveal", { appOnly: true });
+  return (
+    <div data-testid="vote-list" style={{ overflowY: "auto" }}>
+      <form ref={formRef}>
+        <input aria-label="Vote amount" />
+      </form>
+    </div>
+  );
+}
+
 describe("useKeyboardFocusScroll", () => {
   let scrollIntoView: jest.Mock;
   const realVV = window.visualViewport;
@@ -43,6 +56,7 @@ describe("useKeyboardFocusScroll", () => {
   beforeEach(() => {
     jest.useFakeTimers();
     mockHasTouchScreen.value = true;
+    mockIsApp.value = false;
     observer = {
       observe: jest.fn(),
       unobserve: jest.fn(),
@@ -209,5 +223,81 @@ describe("useKeyboardFocusScroll", () => {
     expect(scrollBy).not.toHaveBeenCalled();
     unmount();
     expect(observer.disconnect).toHaveBeenCalled();
+  });
+
+  const setupAppVote = (fieldTop: number, isApp = true) => {
+    mockIsApp.value = isApp;
+    const baseStyle = getComputedStyle(document.body);
+    jest.spyOn(globalThis, "getComputedStyle").mockImplementation((element) =>
+      Object.assign({}, baseStyle, {
+        overflowY:
+          element instanceof HTMLElement ? element.style.overflowY : "",
+      })
+    );
+    const view = render(<AppVoteHarness />);
+    const input = view.getByLabelText("Vote amount");
+    const list = view.getByTestId("vote-list");
+    const scrollBy = jest.fn();
+    list.scrollBy = scrollBy;
+    jest
+      .spyOn(list, "getBoundingClientRect")
+      .mockReturnValue(new DOMRect(0, 0, 400, 600));
+    const fieldBounds = jest
+      .spyOn(input, "getBoundingClientRect")
+      .mockReturnValue(new DOMRect(0, fieldTop, 300, 40));
+    Object.defineProperty(window.visualViewport, "height", { value: 300 });
+    return { ...view, input, list, scrollBy, fieldBounds };
+  };
+
+  it("reveals a covered app vote by moving its list only after the keyboard settles", () => {
+    const { input, list, scrollBy } = setupAppVote(480);
+    input.focus();
+    expect(observer.observe).toHaveBeenCalledWith(list);
+    (
+      window.visualViewport as unknown as { dispatchResize: () => void }
+    ).dispatchResize();
+    jest.advanceTimersByTime(349);
+    expect(scrollBy).not.toHaveBeenCalled();
+    jest.advanceTimersByTime(1);
+    expect(scrollBy).toHaveBeenCalledTimes(1);
+    expect(scrollBy).toHaveBeenCalledWith({ top: 220, behavior: "instant" });
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it.each([0, 100, 260])(
+    "leaves an already visible app vote at %ipx alone",
+    (top) => {
+      const { input, scrollBy } = setupAppVote(top);
+      input.focus();
+      jest.advanceTimersByTime(400);
+      (
+        window.visualViewport as unknown as { dispatchResize: () => void }
+      ).dispatchResize();
+      jest.advanceTimersByTime(400);
+      expect(scrollBy).not.toHaveBeenCalled();
+      expect(scrollIntoView).not.toHaveBeenCalled();
+    }
+  );
+
+  it("leaves a vote alone when native focus scrolling already revealed it", () => {
+    const { input, scrollBy, fieldBounds } = setupAppVote(480);
+    input.focus();
+    jest.advanceTimersByTime(200);
+    fieldBounds.mockReturnValue(new DOMRect(0, 100, 300, 40));
+    jest.advanceTimersByTime(200);
+    expect(scrollBy).not.toHaveBeenCalled();
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it("keeps browser vote focus scrolling entirely native", () => {
+    const { input, scrollBy } = setupAppVote(480, false);
+    input.focus();
+    (
+      window.visualViewport as unknown as { dispatchResize: () => void }
+    ).dispatchResize();
+    jest.advanceTimersByTime(400);
+    expect(scrollBy).not.toHaveBeenCalled();
+    expect(scrollIntoView).not.toHaveBeenCalled();
+    expect(observer.observe).not.toHaveBeenCalled();
   });
 });

@@ -11,6 +11,7 @@ import type { OnchainTransactionModalStatus } from "@/components/common/OnchainT
 import { CREATOR_ADMIN_ABI } from "./creator-admin-abi";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/drop-forge";
 import type { SupportedLocale } from "@/i18n/locales";
 
 export type AdminOperation = {

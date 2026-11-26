@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import IconButton from "@/components/utils/button/IconButton";
 import { useAuth } from "@/components/auth/Auth";
 import useArtistArtworkAlert from "@/hooks/useArtistArtworkAlert";
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
@@ -17,9 +18,6 @@ import {
   MinusCircleIcon,
   NoSymbolIcon,
 } from "@heroicons/react/24/outline";
-
-const TRIGGER_CLASS_NAME =
-  "tw-flex tw-size-9 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-p-0 tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-transition tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-default disabled:tw-opacity-60 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100";
 
 type Props = Readonly<{
   handle: string;
@@ -96,6 +94,9 @@ function ProfileActionsMenu({
             id: "block-profile",
             label: t(locale, "contentModeration.actions.blockProfile"),
             icon: <NoSymbolIcon aria-hidden="true" className="tw-size-4" />,
+            iconClassName: isMobileLayoutViewport
+              ? "tw-size-5 tw-flex-none tw-text-current"
+              : undefined,
             onSelect: onBlock,
             className: "tw-text-red desktop-hover:hover:tw-text-red",
           },
@@ -113,6 +114,9 @@ function ProfileActionsMenu({
                 <ArrowPathIcon aria-hidden="true" className="tw-size-4" />
               ),
             onSelect: moderationAction.onSelect,
+            iconClassName: isMobileLayoutViewport
+              ? "tw-size-5 tw-flex-none tw-text-current"
+              : undefined,
             className:
               moderationAction.kind === "suspend"
                 ? "tw-text-amber-300 desktop-hover:hover:tw-text-amber-200"
@@ -134,7 +138,23 @@ function ProfileActionsMenu({
         ariaLabel={menuLabel}
         items={items}
         trigger={trigger}
-        triggerClassName={TRIGGER_CLASS_NAME}
+        renderTriggerButton={({
+          ariaLabel,
+          ariaExpanded,
+          disabled: triggerDisabled,
+          onClick,
+        }) => (
+          <IconButton
+            layout="profile-menu"
+            aria-label={ariaLabel}
+            aria-haspopup="dialog"
+            aria-expanded={ariaExpanded}
+            disabled={triggerDisabled}
+            onClick={onClick}
+          >
+            {trigger}
+          </IconButton>
+        )}
         disabled={disabled}
         onOpenChange={setMenuOpen}
       />
@@ -147,8 +167,12 @@ function ProfileActionsMenu({
       items={items}
       disabled={disabled}
       onOpenChange={setMenuOpen}
-      trigger={trigger}
-      triggerClassName={TRIGGER_CLASS_NAME}
+      trigger={
+        <IconButton layout="profile-menu" aria-label={menuLabel}>
+          {trigger}
+        </IconButton>
+      }
+      triggerAsChild
       unstyledTrigger
       autoFocusItem={false}
       menuWidthClassName="tw-w-72"

@@ -34,6 +34,7 @@ import { getUserProfileTabsMessage } from "./user-tabs.messages";
 import { useUserPageTabFallbackRedirect } from "./useUserPageTabFallbackRedirect";
 import { useUserPageTabIndicator } from "./useUserPageTabIndicator";
 import { useUserPageNavigation } from "./UserPageNavigation";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 const DEFAULT_TAB = DEFAULT_USER_PAGE_TAB;
 
@@ -50,6 +51,7 @@ export default function UserPageTabs({
   readonly initialProfile: ApiIdentity;
 }) {
   const pathname = usePathname();
+  const { isApp } = useDeviceInfo();
   const navigation = useUserPageNavigation();
   const params = useParams();
   const handleOrWallet = params["user"]?.toString() ?? "";
@@ -211,12 +213,20 @@ export default function UserPageTabs({
     const contentContainer = contentContainerRef.current;
     if (!container) return;
 
-    checkScroll();
-    updateActiveIndicator();
+    const tabs = container.closest("nav");
+    const scope = tabs?.parentElement;
     const updateTabsLayout = () => {
       checkScroll();
       updateActiveIndicator();
+      if (tabs && scope) {
+        const top = Number.parseFloat(getComputedStyle(tabs).top) || 0;
+        scope.style.setProperty(
+          "--profile-tabs-bottom",
+          `${top + tabs.getBoundingClientRect().height}px`
+        );
+      }
     };
+    updateTabsLayout();
     container.addEventListener("scroll", checkScroll, { passive: true });
     window.addEventListener("resize", updateTabsLayout);
 
@@ -234,8 +244,9 @@ export default function UserPageTabs({
       container.removeEventListener("scroll", checkScroll);
       window.removeEventListener("resize", updateTabsLayout);
       resizeObserver?.disconnect();
+      scope?.style.removeProperty("--profile-tabs-bottom");
     };
-  }, [checkScroll, updateActiveIndicator]);
+  }, [checkScroll, updateActiveIndicator, isApp]);
 
   useEffect(() => {
     if (!visibleTabs.length) return;
@@ -277,12 +288,12 @@ export default function UserPageTabs({
       aria-label={getUserProfileTabsMessage(
         "user.profile.tabs.navigationLabel"
       )}
-      className="tw-relative tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10"
+      className={`tw-sticky tw-z-40 tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-bg-black ${isApp ? "tw-top-[env(safe-area-inset-top,0px)]" : "tw-top-0 lg:tw-relative lg:tw-z-auto"}`}
     >
       <div
         ref={scrollContainerRef}
         data-profile-tabs-scroll
-        className="tw-w-full tw-overflow-x-auto tw-overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [touch-action:pan-x] [&::-webkit-scrollbar]:tw-hidden"
+        className="tw-w-full tw-overflow-x-auto tw-overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:tw-hidden"
       >
         <div
           ref={contentContainerRef}
@@ -307,7 +318,9 @@ export default function UserPageTabs({
       </div>
       {canScrollLeft && (
         <>
-          <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-top-0 tw-z-10 tw-w-16 tw-bg-gradient-to-r tw-from-black tw-via-black/40 tw-to-black/0" />
+          <div
+            className={`${isApp ? "tw-hidden" : "tw-hidden lg:tw-block"} tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-top-0 tw-z-10 tw-w-16 tw-bg-gradient-to-r tw-from-black tw-via-black/40 tw-to-black/0`}
+          />
           <IconButton
             onClick={scrollLeft}
             aria-label={getUserProfileTabsMessage(
@@ -315,7 +328,7 @@ export default function UserPageTabs({
             )}
             type="submit"
             layout="scroll-profile"
-            className="tw-left-0"
+            className={isApp ? "tw-hidden" : "tw-left-0 tw-hidden lg:tw-flex"}
           >
             <FontAwesomeIcon
               icon={faChevronLeft}
@@ -326,7 +339,9 @@ export default function UserPageTabs({
       )}
       {canScrollRight && (
         <>
-          <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-right-0 tw-top-0 tw-z-10 tw-w-16 tw-bg-gradient-to-l tw-from-black tw-via-black/40 tw-to-black/0" />
+          <div
+            className={`${isApp ? "tw-hidden" : "tw-hidden lg:tw-block"} tw-pointer-events-none tw-absolute tw-bottom-0 tw-right-0 tw-top-0 tw-z-10 tw-w-16 tw-bg-gradient-to-l tw-from-black tw-via-black/40 tw-to-black/0`}
+          />
           <IconButton
             onClick={scrollRight}
             aria-label={getUserProfileTabsMessage(
@@ -334,7 +349,7 @@ export default function UserPageTabs({
             )}
             type="submit"
             layout="scroll-profile"
-            className="tw-right-0"
+            className={isApp ? "tw-hidden" : "tw-right-0 tw-hidden lg:tw-flex"}
           >
             <FontAwesomeIcon
               icon={faChevronRight}

@@ -7,6 +7,17 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
+The Waves record covers touch-only row pinning: swipe right and release while
+armed, reverse below the threshold to cancel, or hold still for the single
+Pin/Unpin menu. It includes the All/Joined pin status mark, bottom-navigation
+clearance, pin-limit toast, top-level personal-view eligibility, and the existing
+thread-header alternative. Pinned reordering requires a brief hold followed by
+vertical movement; stationary holding opens the menu.
+
+The encrypted chats record explains how to drag pinned chats in the inbox
+or sidebar, including touch and keyboard gestures. It covers the position of
+new pins, encrypted sync to trusted devices, and encrypted backup.
+
 The `waves.discovery` record covers plain-text description previews, retained
 media, visible Worth Checking Out edges and minimum artwork tint, full-height Active
 Votes artwork, wrapping metrics and neutral zero-submission status without a
@@ -31,6 +42,9 @@ short landscape iPhone chat viewports.
 Live swipe-back to the Waves list moves the channel header and content together
 while the bottom navigation stays fixed. Cancelling restores the whole page;
 the existing return destination and feed reading-position behavior are preserved.
+The Back record also covers the complete conversation slide when tapping Back
+on iPhone or phone web, its stationary list destination, interruption and
+Reduced Motion. Profile Waves Feed returns retain their own transition.
 
 The signing, encrypted-messages and connection-sharing records cover the shared
 permission consent flow, separate or combined grants, shared server device names,
@@ -49,6 +63,11 @@ The `media.video-player` record covers preview frames and the video-icon fallbac
 for Additional Media and Promo Video in submission details. Additional Media
 keeps original video downloads deferred until Play; Promo Video retains metadata
 preloading.
+
+The `waves.about-sections` record describes the widest Total summary block,
+followed by separate Positive, Negative and Your REP blocks, category search and
+contributors, and the activity rows with signed changes, rating transitions,
+timestamps and optional reasons.
 
 The `waves.native-competitions` record covers optional anonymous submissions,
 their default-off creation setting, publication lock, per-entry winner reveal,
@@ -344,9 +363,14 @@ fixtures do not ship as page data.
 These remain frontend-owned facts published through the existing
 help-index sync and consumed by the existing backend loader.
 
-The `waves.notification-controls` record describes the notification subview inside the About sheet
-on phone layouts, dismissal back to About, and the anchored keyboard-accessible
-menu in desktop and tablet sidebars.
+The `waves.notification-controls` record describes one bell menu, neutral when
+unmuted and rose-toned when muted, with
+three label-only single-choice levels and Mute/Unmute below a divider, no row
+descriptions or hints, disabled saved levels while muted,
+Retry inside the menu, the shared picker sheet on smaller screens and anchored
+desktop/tablet menu.
+Muted wave rows use an icon-only iron bell-slash on the avatar, separate from
+scores and numbers; unread counts stay hidden and muted waves sort last.
 
 The `network.identities-leaderboard` record describes the mobile filter's vertical
 criteria list, individual editors, Back navigation, preserved drafts, and
@@ -377,6 +401,13 @@ and smaller-layout field menu. Keep these instructions aligned with the header.
 The drop-actions record covers current reactor names in desktop tooltips and
 Reactions dialogs, touch long press, live count updates, and closing and reopening
 details to retry a failed names request without reloading the thread.
+
+The Waves navigation record distinguishes the mobile web and native headers.
+Mobile web keeps its site header, feed icon and labeled `Create wave` button.
+The native list keeps the `Create wave` plus button, `Search 6529` and `More`
+visible in the header. The `More` sheet contains `Profile Waves Feed` and
+`Share page`; page sharing uses the existing native share sheet. Both surfaces
+use the same feed icon and action names.
 
 ## Problem Statement
 
@@ -1159,3 +1190,6 @@ its existing filter visibility while fetching.
 Primary navigation knowledge includes the shared Join 6529 / Validator slot: newcomers
 see Join, signed-in profiles see Validator, and unresolved sessions reserve the
 slot across desktop, mobile web, native menus, and page search.
+
+The Wave list navigation record describes paired phone conversation entry and
+Back slides, including the complete header, a stationary list and Reduced Motion.

@@ -5,7 +5,10 @@ import type { CreateWaveConfig } from "@/types/waves.types";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import CreateWaveStepHeader from "./utils/CreateWaveStepHeader";
-import { CREATE_WAVE_FORM_STYLES } from "./utils/createWaveFormStyles";
+import {
+  CREATE_WAVE_FORM_STYLES,
+  DECISION_EDITOR_MOBILE_STYLES,
+} from "./utils/createWaveFormStyles";
 
 interface CreateWaveRulesProps {
   readonly config: CreateWaveConfig;
@@ -39,7 +42,7 @@ export default function CreateWaveRules({
       >
         <h3
           id="create-wave-guidelines-title"
-          className={`${CREATE_WAVE_FORM_STYLES.sectionTitle} tw-px-5 tw-py-4`}
+          className={`${CREATE_WAVE_FORM_STYLES.sectionTitle} tw-px-5 tw-py-4 ${DECISION_EDITOR_MOBILE_STYLES.panelHeader}`}
         >
           {t(
             locale,
@@ -48,7 +51,9 @@ export default function CreateWaveRules({
               : "waves.create.rules.guidelinesFieldLabel"
           )}
         </h3>
-        <div className="tw-space-y-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-p-5">
+        <div
+          className={`tw-space-y-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-p-5 ${DECISION_EDITOR_MOBILE_STYLES.panelPadding}`}
+        >
           <section>
             <div className="tw-space-y-3">
               <div>

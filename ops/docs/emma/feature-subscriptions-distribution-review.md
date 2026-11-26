@@ -26,10 +26,11 @@ The Memes token distribution outputs.
   - can export `JSON`, `CSV`, and `Manifold` for normal phase/component rows.
 - Subscriptions admins:
   - get an extra synthetic `Public` phase row.
-  - get phase-level `Subscription Lists` / `Public Subscriptions` downloads.
+  - get phase-level `Subscription Lists` / `Public Subscriptions` downloads
+    after choosing manual preparation or completing a background job.
   - get footer controls: `Change Token ID`, `Reset Subscriptions`,
     `Artist Airdrops`, `Team Airdrops`, `Distribution Photos`,
-    `Finalize Distribution`, `Publish to GitHub`.
+    the preparation controls, and `Publish to GitHub`.
 - Admin users must confirm token ID before footer actions and subscription
   downloads unlock.
 - `Confirm Token ID` is blocking (`backdrop="static"` and `keyboard={false}`).
@@ -40,12 +41,25 @@ The Memes token distribution outputs.
 1. Inspect phase and component rows.
 2. Export baseline results (`JSON` / `CSV` / `Manifold`) for normal rows.
 3. If you are a subscriptions admin, confirm token ID.
-4. Download subscription CSV bundles from phase rows.
-5. Use the footer controls to upload, inspect, or download artist/team
-   airdrops and to upload or inspect distribution photos.
-6. Run `Finalize Distribution` until the status shows `✅`.
-7. Click `Publish to GitHub` when it becomes enabled.
-8. Use the GitHub modal to watch progress, then close or retry.
+4. Use the footer controls to upload artist/team allocations and distribution photos.
+5. Choose a preparation mode for the confirmed token.
+   - **Prepare manually** opens the phase controls. Download `Subscription Lists`
+     for Phase 0, Phase 1 and Phase 2 in order. Download `Public Subscriptions`,
+     then click `Finalize Distribution`. You can still select **Process and
+     Finalize** before the first manual write succeeds.
+   - **Process and Finalize** starts a background job. The preparation row shows
+     the current step out of five, and refreshing restores progress.
+     If authorization expires before input capture, click `Sign in to resume`.
+     `Download lists` appears in each phase and Public row once the job
+     completes with matching phase inputs. The preparation row then says
+     **Completed · Lists ready to download**.
+6. In manual mode, `Finalize Distribution` and `Publish to GitHub` share
+   the finishing row. A red × beside `Finalize Distribution` indicates that
+   the distribution still needs finalization, and a green check shows it is
+   finalized. In background mode, finalization is part of processing.
+   Click `Publish to GitHub` when it becomes enabled and follow its modal.
+   The information button next to **Prepare distribution** explains both
+   methods and the effects of resetting.
 
 ## Subscriptions Action Rules
 
@@ -54,15 +68,17 @@ The Memes token distribution outputs.
   - non-`Public` phase downloads: `airdrops`, `airdrops_unconsolidated`,
     `allowlists`.
   - `Public` phase downloads: `airdrops` only.
-- `Reset Subscriptions` resets current `contract + token + plan` data.
+- `Reset Subscriptions` clears subscriber work for the confirmed token and
+  restores both preparation choices. Artist and team uploads are kept. If a
+  background step is still running, retry the reset once the step finishes.
 - `Artist Airdrops` and `Team Airdrops`:
   - each footer group provides upload, view, and CSV download controls for one
     airdrop phase.
-  - the visible label shows `addresses/total` from the current distribution
-    overview.
+  - the row shows wallet and token counts from the current distribution overview.
   - uploads accept pasted CSV text or `.csv`, `text/csv`, `text/plain` files up
     to `10MB`.
-  - CSV must use raw `address,count` lines only; header rows are rejected.
+  - downloaded CSVs include an `address,count` header. File uploads accept
+    that header or a headerless CSV. Paste only wallet-and-count data rows.
   - each line must contain exactly one valid Ethereum address and one positive
     integer count.
   - uploads replace the current artist/team airdrop list for the confirmed
@@ -76,13 +92,30 @@ The Memes token distribution outputs.
   - `Distribution Photos` viewer opens a thumbnail grid for the confirmed token.
   - clicking a thumbnail opens a full-size lightbox; a separate icon opens the
     source image in a new tab.
-- `Finalize Distribution`:
-  - runs normalization for the confirmed token.
-  - button shows `✅` when normalized, `❌` otherwise.
+- `Process and Finalize`:
+  - requires a distribution plan, a confirmed token ID, and one phase each
+    for 0, 1, and 2. Names like `Phase 1`, `Phase1`, `P 1`, `P1`, and `1`
+    are equivalent, regardless of case. Missing or duplicate phases are shown
+    beside the action. A phase can have zero wallets. Public is generated
+    automatically.
+  - shows processing, completed, failed or sign-in-required status from a durable backend job.
+  - `Sign in to resume` renews the current admin's authorization for the same job.
+    Captured inputs and completed checkpoints are preserved. Once inputs are
+    saved, later processing and finalization continue without the login token.
+  - snapshot inputs remain consistent across the operation. Conflicting uploads
+    are rejected while the job is active. Reset clears the job between steps.
+  - changed phase selections or distribution inputs require explicit reset and
+    processing again. Subscription downloads unlock only for completed matching
+    jobs; baseline plan exports retain their existing behavior.
+  - if a saved active or completed job has different phase selections, processing
+    stays disabled. Progress takes priority while the job runs. If a reset is
+    still required after it stops, the panel shows reset guidance. A reset
+    invalidates the old job and allows a new operation. To resume the existing
+    job, restore the original phase selections and sign in.
 - `Publish to GitHub`:
   - enabled only when all are true: normalized, photos count > 0, combined
     artist/team airdrops count > 0.
-  - disabled state explains the missing requirement via tooltip.
+  - the finishing row explains the current publishing requirement when disabled.
   - while publishing, modal close is blocked.
   - success modal can show message, GitHub folder link, deleted files, uploaded
     files.
@@ -96,7 +129,9 @@ The Memes token distribution outputs.
   `Download successful`.
 - Airdrop and photo viewers can show inline loading, empty, or error states
   without leaving `Review`.
-- Reset, upload, finalize, and publish failures show toast or modal errors.
+- Reset, upload, process and publish failures show toast or inline errors.
+- A failed process can be retried after correcting its cause. Refresh checks
+  the current job before starting another; completed downloads never retry writes.
 - CSV and image validation errors are shown before upload.
 - If plan run fails, the warning bar shows `Distribution plan building failed`
   with `Run Analysis`. See [EMMA Distribution Plan Operations Flow](flow-emma-distribution-plan-operations.md).

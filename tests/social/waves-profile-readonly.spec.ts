@@ -233,10 +233,11 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       await expect(sortControl).toHaveCount(1);
       await expect(sortControl).toBeDisabled();
       await expect(sortControl).toHaveCSS("font-size", "14px");
-      await expect(sortControl).toHaveCSS(
-        "height",
-        (page.viewportSize()?.width ?? 1280) >= 1024 ? "32px" : "44px"
-      );
+      const width = page.viewportSize()?.width ?? 1280;
+      let sortHeight = "44px";
+      if (width < 768) sortHeight = "40px";
+      else if (width >= 1024) sortHeight = "32px";
+      await expect(sortControl).toHaveCSS("height", sortHeight);
       loadingLayout = await skeleton.evaluate(measureCard);
       await expectNoHorizontalOverflow(page);
       await captureSafeScreenshot(
@@ -657,22 +658,17 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       await expect(statuses).toHaveCount(3);
       await expect(upcoming.getByRole("switch")).toHaveCount(0);
       await expect(upcoming.getByRole("combobox")).toHaveCount(0);
-      for (const width of [390, 492, 639, 640, 1024]) {
+      for (const width of [390, 492, 639, 640, 767, 768, 1024]) {
         await page.setViewportSize({ width, height: 900 });
         const imageBox = await artwork.boundingBox();
         const labelBox = await mintingToday.boundingBox();
         expect(imageBox).not.toBeNull();
         expect(labelBox).not.toBeNull();
-        if (width < 640) {
-          expect(labelBox!.y).toBeGreaterThanOrEqual(
-            imageBox!.y + imageBox!.height
-          );
-          expect(Math.abs(labelBox!.x - imageBox!.x)).toBeLessThanOrEqual(1);
-        } else {
-          expect(labelBox!.x).toBeGreaterThanOrEqual(
-            imageBox!.x + imageBox!.width
-          );
-        }
+        expect(labelBox!.x).toBeGreaterThanOrEqual(
+          imageBox!.x + imageBox!.width
+        );
+        expect(imageBox!.width).toBe(width < 768 ? 48 : 80);
+        expect(imageBox!.height).toBe(width < 768 ? 68 : 113);
         const rightEdges = await statuses.evaluateAll((elements) =>
           elements.map((element) => element.getBoundingClientRect().right)
         );
@@ -1481,8 +1477,8 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     expect(narrowTitle).not.toBeNull();
     expect(narrowQuantityBox).not.toBeNull();
     expect(narrowStatusBox).not.toBeNull();
-    // Visitor values may share the title line when space permits; neither
-    // layout may overlap or split quantity from its status.
+    // Below md, the approved visitor stack places status above quantity.
+    // Values beside the name must still leave room for the complete title.
     if (narrowQuantityBox!.y < narrowTitle!.y + narrowTitle!.height) {
       expect(narrowQuantityBox!.x).toBeGreaterThanOrEqual(
         narrowTitle!.x + narrowTitle!.width
@@ -1492,8 +1488,15 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         narrowTitle!.y + narrowTitle!.height
       );
     }
+    expect(narrowQuantityBox!.y).toBeGreaterThanOrEqual(
+      narrowStatusBox!.y + narrowStatusBox!.height - 1
+    );
     expect(
-      Math.abs(narrowQuantityBox!.y - narrowStatusBox!.y)
+      Math.abs(
+        narrowQuantityBox!.x +
+          narrowQuantityBox!.width -
+          (narrowStatusBox!.x + narrowStatusBox!.width)
+      )
     ).toBeLessThanOrEqual(1);
     const settingsOpener = page.getByRole("button", {
       name: "Minting settings",
@@ -1677,7 +1680,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await page.setViewportSize({ width: 390, height: viewport.height });
     await expect(
       upcoming.getByRole("button", { name: "Show More", exact: true })
-    ).toHaveCSS("justify-content", "center");
+    ).toHaveCSS("justify-content", "space-between");
     for (const quantity of await upcoming
       .getByRole("group", {
         name: /^Subscription quantity for The Memes #/,
@@ -2129,7 +2132,9 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     if (await faq.count()) {
       await expect(faq).toBeAttached();
     } else {
-      await page.getByRole("main").locator("[data-wave-phone-more]").click();
+      const more = page.getByRole("main").locator("[data-wave-phone-more]");
+      if (testInfo.project.use.hasTouch) await more.tap();
+      else await more.click();
       const sections = page.getByRole("dialog", {
         name: "Wave sections",
         exact: true,

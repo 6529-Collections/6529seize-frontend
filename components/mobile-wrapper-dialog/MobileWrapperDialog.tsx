@@ -32,7 +32,9 @@ const BROWSER_KEYBOARD_MIN_INSET = 100;
 
 type MobileWrapperDialogProps = {
   readonly id?: string | undefined;
+  readonly className?: string | undefined;
   readonly title?: string | undefined;
+  readonly subtitle?: string | undefined;
   readonly ariaLabel?: string | undefined;
   readonly isOpen: boolean;
   readonly onClose: () => void;
@@ -82,6 +84,7 @@ type MobileWrapperDialogProps = {
   readonly surfaceClassName?: string | undefined;
   readonly titleClassName?: string | undefined;
   readonly focusTitleOnOpen?: boolean | undefined;
+  readonly initialFocusRef?: RefObject<HTMLElement | null> | undefined;
   readonly backLabel?: string | undefined;
   readonly closeLabel?: string | undefined;
   readonly dismissible?: boolean | undefined;
@@ -382,7 +385,9 @@ function DragHandle({
 
 export default function MobileWrapperDialog({
   id,
+  className,
   title,
+  subtitle,
   ariaLabel,
   isOpen,
   onClose,
@@ -421,6 +426,7 @@ export default function MobileWrapperDialog({
   footer,
   titleClassName,
   focusTitleOnOpen = false,
+  initialFocusRef,
   backLabel,
   closeLabel,
   dismissible = true,
@@ -444,6 +450,8 @@ export default function MobileWrapperDialog({
   const isMobileLayoutViewport = useIsMobileLayoutViewport();
   const isTouchDevice = useIsTouchDevice();
   const titleRef = useRef<HTMLElement>(null);
+  const dialogInitialFocusRef =
+    initialFocusRef ?? (focusTitleOnOpen ? titleRef : undefined);
   const dialogRef = useRef<HTMLDivElement>(null);
   const [dialogMount, setDialogMount] = useState<HTMLSpanElement | null>(null);
   const resolvedBackLabel = backLabel ?? t(locale, "common.back");
@@ -584,7 +592,7 @@ export default function MobileWrapperDialog({
   );
 
   useEffect(() => {
-    if (!dialogOpen || !focusTitleOnOpen) {
+    if (!dialogOpen || !focusTitleOnOpen || initialFocusRef) {
       return;
     }
 
@@ -593,7 +601,7 @@ export default function MobileWrapperDialog({
     });
 
     return () => globalThis.cancelAnimationFrame(frame);
-  }, [focusTitleOnOpen, dialogOpen, title]);
+  }, [focusTitleOnOpen, initialFocusRef, dialogOpen, title]);
 
   if (shouldHideOnDesktopHover) {
     return null;
@@ -611,7 +619,11 @@ export default function MobileWrapperDialog({
         as="div"
         open={dialogOpen}
         unmount={!keepMounted}
-        className={clsx("tailwind-scope tw-absolute", zIndexClassName)}
+        className={clsx(
+          "tailwind-scope tw-absolute",
+          zIndexClassName,
+          className
+        )}
         onClose={handleClose}
         onKeyDown={(event) => {
           // Headless UI blurs focus before calling onClose for Escape. Keep
@@ -629,7 +641,32 @@ export default function MobileWrapperDialog({
           }
         }}
         aria-label={ariaLabel}
-        {...(focusTitleOnOpen ? { initialFocus: titleRef } : {})}
+        onFocusCapture={(event) => {
+          // Touch dialogs default to container focus. Only an explicit content
+          // target opts back into field focus for a user-opened composer.
+          if (
+            !dialogOpen ||
+            !initialFocusRef ||
+            event.target !== event.currentTarget
+          )
+            return;
+          const container = event.currentTarget;
+          // Let the dialog finish its touch-device fallback focus first.
+          queueMicrotask(() => {
+            const target = initialFocusRef.current;
+            if (
+              container.isConnected &&
+              document.activeElement === container &&
+              target &&
+              container.contains(target)
+            ) {
+              target.focus({ preventScroll: true });
+            }
+          });
+        }}
+        {...(dialogInitialFocusRef
+          ? { initialFocus: dialogInitialFocusRef }
+          : {})}
       >
         <MobileDialogOverlay
           onBeforeLeave={onBeforeLeave}
@@ -713,6 +750,7 @@ export default function MobileWrapperDialog({
                           />
                           <MobileWrapperDialogHeader
                             title={title}
+                            subtitle={subtitle}
                             showDesktopCloseButton={
                               showDesktopHeaderCloseButton
                             }

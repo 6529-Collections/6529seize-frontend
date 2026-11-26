@@ -16,6 +16,10 @@ import { ApiProfileMin } from '../models/ApiProfileMin';
 import { HttpFile } from '../http/http';
 
 export class ApiGroupFull {
+    /**
+    * True when the group stays on 6529.io: it is hidden, private, a direct message\'s group, or made after the waves freeze. False when it moves to the 6529 chain.
+    */
+    'stays_on_site': boolean;
     'id': string;
     'name': string;
     'group': ApiGroupDescription;
@@ -30,6 +34,12 @@ export class ApiGroupFull {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "stays_on_site",
+            "baseName": "stays_on_site",
+            "type": "boolean",
+            "format": ""
+        },
         {
             "name": "id",
             "baseName": "id",

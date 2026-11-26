@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "@/components/auth/Auth";
 import MobileNavigationView from "@/components/mobile-navigation/MobileNavigationView";
 import { MobilePageDraft } from "@/components/mobile-navigation/MobilePageContext";
@@ -146,9 +147,11 @@ const getSubmitButtonLabel = (
 function CurationNameField({
   name,
   onChange,
+  isPhone,
 }: {
   readonly name: string;
   readonly onChange: (name: string) => void;
+  readonly isPhone: boolean;
 }) {
   const inputId = useId();
   const nameInputRef = useRef<HTMLInputElement>(null);
@@ -173,51 +176,58 @@ function CurationNameField({
     onChange(event.target.value);
   };
 
+  const presets = (
+    <div
+      key="presets"
+      className="tw-no-scrollbar tw-order-3 -tw-mx-4 tw-mt-3 tw-flex tw-flex-nowrap tw-gap-2 tw-overflow-x-auto tw-px-4 sm:-tw-mx-6 sm:tw-px-6 md:tw-order-none md:tw-mx-0 md:tw-mt-0 md:tw-flex-wrap md:tw-gap-2.5 md:tw-overflow-visible md:tw-px-0"
+    >
+      {CURATION_NAME_PRESETS.map((key) => {
+        const preset = t(locale, key);
+        const isSelected = preset.toLocaleLowerCase(locale) === normalizedName;
+
+        return (
+          <button
+            key={key}
+            type="button"
+            onClick={() => handlePresetSelect(preset)}
+            aria-pressed={isSelected}
+            className={clsx(
+              "tw-inline-flex tw-h-8 tw-shrink-0 tw-appearance-none tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-px-2.5 tw-py-0 tw-text-meta tw-font-medium tw-shadow-none tw-transition-all tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 md:tw-h-auto md:tw-px-4 md:tw-py-2 md:tw-text-sm md:tw-shadow-sm md:group-data-[profile-typography=true]/curation-dialog:tw-text-meta",
+              isSelected
+                ? "tw-border-white/20 tw-bg-iron-800 tw-text-iron-100"
+                : "tw-border-white/10 tw-bg-iron-900 tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50"
+            )}
+          >
+            {preset}
+          </button>
+        );
+      })}
+    </div>
+  );
+  const nameInput = (
+    <div key="input" className="tw-relative tw-w-full sm:tw-max-w-[260px]">
+      <input
+        ref={nameInputRef}
+        id={inputId}
+        type="text"
+        value={name}
+        onChange={handleNameChange}
+        maxLength={50}
+        autoComplete="off"
+        placeholder={t(locale, "profileCuration.editor.namePlaceholder")}
+        className="tw-form-input tw-block tw-h-12 tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-0 tw-text-base tw-font-normal tw-text-iron-100 tw-caret-primary-400 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-base placeholder:tw-text-iron-500 hover:tw-ring-iron-650 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 md:tw-h-auto md:tw-py-3 md:tw-text-sm md:tw-font-medium md:placeholder:tw-text-sm md:group-data-[profile-typography=true]/curation-dialog:tw-text-base md:group-data-[profile-typography=true]/curation-dialog:tw-font-normal md:group-data-[profile-typography=true]/curation-dialog:placeholder:tw-text-base md:desktop-hover:group-data-[profile-typography=true]/curation-dialog:tw-text-sm md:desktop-hover:group-data-[profile-typography=true]/curation-dialog:placeholder:tw-text-sm"
+      />
+    </div>
+  );
   return (
-    <div className="tw-space-y-4">
+    <div className="tw-flex tw-flex-col md:tw-gap-4">
       <label
         htmlFor={inputId}
-        className="tw-block tw-text-sm tw-font-medium tw-text-iron-300 group-data-[profile-typography=true]/curation-dialog:tw-text-iron-100"
+        className="tw-mb-3 tw-block tw-text-[15px] tw-font-semibold tw-leading-5 tw-text-iron-50 md:tw-mb-0 md:tw-text-sm md:tw-font-medium md:tw-text-iron-300 md:group-data-[profile-typography=true]/curation-dialog:tw-text-iron-100"
       >
         {t(locale, "profileCuration.editor.name")}
       </label>
-      <div className="tw-flex tw-flex-wrap tw-gap-2.5">
-        {CURATION_NAME_PRESETS.map((key) => {
-          const preset = t(locale, key);
-          const isSelected =
-            preset.toLocaleLowerCase(locale) === normalizedName;
-
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => handlePresetSelect(preset)}
-              aria-pressed={isSelected}
-              className={clsx(
-                "tw-inline-flex tw-appearance-none tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-shadow-sm tw-transition-all tw-duration-300 group-data-[profile-typography=true]/curation-dialog:tw-text-meta focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400",
-                isSelected
-                  ? "tw-border-white/20 tw-bg-iron-800 tw-text-iron-100"
-                  : "tw-border-white/10 tw-bg-iron-900 tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50"
-              )}
-            >
-              {preset}
-            </button>
-          );
-        })}
-      </div>
-      <div className="tw-relative tw-w-full sm:tw-max-w-[260px]">
-        <input
-          ref={nameInputRef}
-          id={inputId}
-          type="text"
-          value={name}
-          onChange={handleNameChange}
-          maxLength={50}
-          autoComplete="off"
-          placeholder={t(locale, "profileCuration.editor.namePlaceholder")}
-          className="tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-100 tw-caret-primary-400 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-sm placeholder:tw-text-iron-500 group-data-[profile-typography=true]/curation-dialog:tw-text-base group-data-[profile-typography=true]/curation-dialog:tw-font-normal group-data-[profile-typography=true]/curation-dialog:placeholder:tw-text-base hover:tw-ring-iron-650 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 md:desktop-hover:group-data-[profile-typography=true]/curation-dialog:tw-text-sm md:desktop-hover:group-data-[profile-typography=true]/curation-dialog:placeholder:tw-text-sm"
-        />
-      </div>
+      {isPhone ? [nameInput, presets] : [presets, nameInput]}
     </div>
   );
 }
@@ -386,6 +396,7 @@ export default function MyStreamWaveCurationCreateDialog({
   const criteriaSummary = (
     <CurationCriteriaSummary
       target={preview}
+      membersAppearance={isPhone ? "inline" : "details"}
       fallback={criteriaFallback}
       editButtonRef={editButtonRef}
       disabled={saveMutation.isPending}
@@ -422,8 +433,8 @@ export default function MyStreamWaveCurationCreateDialog({
         ref={scrollRef}
         className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
       >
-        <div className="tw-flex tw-flex-col tw-gap-8 tw-px-4 tw-py-6 sm:tw-px-6">
-          <CurationNameField name={name} onChange={setName} />
+        <div className="tw-flex tw-flex-col tw-gap-7 tw-px-4 tw-pb-6 tw-pt-5 sm:tw-px-6 md:tw-gap-8 md:tw-py-6">
+          <CurationNameField name={name} onChange={setName} isPhone={isPhone} />
 
           {permissionMode === "profile" ? (
             <details
@@ -431,12 +442,16 @@ export default function MyStreamWaveCurationCreateDialog({
               onToggle={(event) =>
                 setAdvancedPermissionsOpen(event.currentTarget.open)
               }
-              className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/60 tw-px-4 tw-py-3"
+              className="tw-group/details tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/60 tw-px-4 tw-py-1 md:tw-py-3"
             >
-              <summary className="tw-cursor-pointer tw-text-meta tw-font-medium tw-text-iron-300 group-data-[profile-typography=true]/curation-dialog:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400">
+              <summary className="tw-cursor-pointer tw-text-meta tw-font-medium tw-text-iron-300 group-data-[profile-typography=true]/curation-dialog:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 max-md:tw-flex max-md:tw-min-h-11 max-md:tw-list-none max-md:tw-items-center max-md:tw-justify-between max-md:tw-gap-3 max-md:[&::-webkit-details-marker]:tw-hidden">
                 {t(locale, "profileCuration.permissions.advanced")}
+                <ChevronDownIcon
+                  aria-hidden="true"
+                  className="tw-size-4 tw-shrink-0 tw-text-iron-400 tw-transition-transform group-open/details:tw-rotate-180 motion-reduce:tw-transition-none md:tw-hidden"
+                />
               </summary>
-              <div className="tw-mt-4 tw-space-y-4">
+              <div className="tw-mt-1 tw-space-y-4 tw-pb-3 md:tw-mt-4 md:tw-pb-0">
                 <p className="tw-mb-0 tw-text-meta tw-font-normal tw-leading-5 tw-text-iron-500">
                   {t(locale, "profileCuration.permissions.description")}
                 </p>
@@ -444,8 +459,8 @@ export default function MyStreamWaveCurationCreateDialog({
               </div>
             </details>
           ) : (
-            <div className="tw-space-y-4">
-              <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-300 group-data-[profile-typography=true]/curation-dialog:tw-text-iron-100">
+            <div className="md:tw-space-y-4">
+              <span className="tw-mb-3 tw-block tw-text-[15px] tw-font-semibold tw-leading-5 tw-text-iron-50 md:tw-mb-0 md:tw-text-sm md:tw-font-medium md:tw-text-iron-300 md:group-data-[profile-typography=true]/curation-dialog:tw-text-iron-100">
                 {t(locale, "profileCuration.editor.whoCanCurate")}
               </span>
               {criteriaSummary}
@@ -454,7 +469,7 @@ export default function MyStreamWaveCurationCreateDialog({
         </div>
       </div>
 
-      <div className="tw-flex-shrink-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-bg-iron-950 tw-px-5 tw-py-5 sm:tw-px-6">
+      <div className="tw-flex-shrink-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-bg-iron-950 tw-px-4 tw-pb-3 tw-pt-3 sm:tw-px-6 md:tw-py-5">
         <div className="tw-flex tw-justify-end tw-gap-3">
           {!isEmbedded && (
             <Button
@@ -472,7 +487,7 @@ export default function MyStreamWaveCurationCreateDialog({
             onClick={handleSubmit}
             variant="primary"
             size="md"
-            className="tw-px-6"
+            className="tw-px-6 max-md:tw-h-11 max-md:tw-w-full max-md:tw-rounded-xl max-md:tw-text-[15px]"
           >
             {submitButtonLabel}
           </Button>

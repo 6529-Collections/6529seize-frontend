@@ -9,7 +9,10 @@ import { Time } from "@/helpers/time";
 import CollapsibleCard from "@/components/common/CollapsibleCard";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
+import {
+  CREATE_WAVE_FORM_STYLES,
+  DECISION_EDITOR_MOBILE_STYLES,
+} from "../utils/createWaveFormStyles";
 
 interface StartDatesProps {
   readonly waveType: ApiWaveType;
@@ -64,6 +67,8 @@ export default function StartDates({
 
   return (
     <CollapsibleCard
+      headerClassName={DECISION_EDITOR_MOBILE_STYLES.disclosureHeader}
+      titleClassName={DECISION_EDITOR_MOBILE_STYLES.heading}
       title={
         <span className="tw-text-iron-100">
           {t(locale, "waves.create.dates.rank.timeline.title")}
@@ -107,7 +112,9 @@ export default function StartDates({
       }
     >
       {/* Calendar Selection */}
-      <div className="tw-grid tw-grid-cols-1 tw-gap-x-10 tw-gap-y-8 tw-px-5 tw-pb-5 tw-pt-2 md:tw-grid-cols-2">
+      <div
+        className={`tw-grid tw-grid-cols-1 tw-gap-x-10 tw-gap-y-8 tw-px-5 tw-pb-5 tw-pt-2 md:tw-grid-cols-2 ${DECISION_EDITOR_MOBILE_STYLES.panelInlinePadding}`}
+      >
         <div className="tw-col-span-1">
           <h3 className={CREATE_WAVE_FORM_STYLES.sectionTitle}>
             {t(locale, "waves.create.dates.rank.timeline.submissionLabel")}

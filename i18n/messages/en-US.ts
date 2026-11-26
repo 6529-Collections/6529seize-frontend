@@ -2,7 +2,6 @@ import { BOOKMARK_MESSAGES } from "@/i18n/messages/bookmarks";
 import { NOTIFICATIONS_INBOX_MESSAGES } from "@/i18n/messages/notifications-inbox";
 import { VOTING_CREDIT_RETURN_MESSAGES } from "@/i18n/messages/voting-credit-returns";
 import { MEME_COLLABORATION_MESSAGES } from "@/i18n/messages/meme-collaborations";
-import emmaMessages from "@/i18n/messages/emma.en-US.json";
 import additionalActionMessages from "@/i18n/messages/additionalAction.en-US.json";
 import { EN_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
 import waveCreationMessages from "@/i18n/messages/wave-creation.en-US.json";
@@ -172,7 +171,7 @@ const USER_COLLECTED_STATS_MESSAGES = namespaceMessages(
 
 const USER_BRAIN_SIDEBAR_MESSAGES = objectMessages("user.brain.sidebar", {
   createdHeading: "Created Waves",
-  createdMobileHeading: "Created",
+  createdMobileHeading: "Created waves",
   recentlyActiveHeading: "Recently Active In",
   lastPost: "Last post {time}",
   noPostsByProfile: "No posts by this profile",
@@ -1489,6 +1488,7 @@ const FOLLOWERS_MESSAGES = objectMessages("followers", {
 } as const);
 
 const PROFILE_FOLLOW_MESSAGES = objectMessages("profile.follow", {
+  sendDirectMessage: "Send direct message",
   followBack: "Follow back",
   mutualStatus: "You follow each other",
   unfollow: "Unfollow",
@@ -1498,69 +1498,6 @@ const PROFILE_FOLLOW_MESSAGES = objectMessages("profile.follow", {
   "error.unfollow": "Couldn't unfollow this profile.",
   "error.authenticate": "Couldn't verify your sign-in.",
   "error.retry": "Please try again.",
-} as const);
-
-const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
-  "pinControl.pinTooltip": "Pin",
-  "pinControl.unpinTooltip": "Unpin",
-  "pinControl.pinAriaLabel": "Pin wave",
-  "pinControl.unpinAriaLabel": "Unpin wave",
-  "pinControl.pinErrorTitle": "Couldn't pin this wave.",
-  "pinControl.unpinErrorTitle": "Couldn't unpin this wave.",
-  "pinControl.retryDescription": PLEASE_TRY_AGAIN,
-  "pinControl.limitMessage": "Maximum {count} pinned waves allowed",
-  "pinControl.limitTooltip":
-    "Max {count} pinned waves. Unpin another wave first.",
-  "pinControl.viewerChanged": "The active profile changed. Please try again.",
-  dragInstructions:
-    "While focused on the wave, press Space to pick it up. Use the arrow keys to move it, Space to drop, or Escape to cancel.",
-  dragStarted: "Picked up wave.",
-  dragPosition: "Position {position}.",
-  dragCancelled: "Reordering cancelled.",
-  pinsRetryLabel: "Retry loading pinned waves",
-  pinOrderSaved: "Pinned wave order saved.",
-  pinOrderSaveError: "Couldn’t save the pinned wave order. Please try again.",
-  pinsLoadError: "Couldn’t load pinned waves.",
-  highlyRated: "Worth Checking Out",
-  highlyRatedInfoTooltip: "Highly rated waves you don’t follow yet.",
-  "highlyRatedPreviewOpenAriaLabel.none": "Open {waveName}",
-  "highlyRatedPreviewOpenAriaLabel.withScore": "Open {waveName}, score {score}",
-  highlyRatedPreviewScore: "Score {score}",
-  pinned: "Pinned",
-  allWaves: "All Waves",
-  all: "All",
-  filterAriaLabel: "Wave list filter",
-  filterAll: "All",
-  filterJoined: "Joined",
-  joinedEmptyMessage: "No joined waves to display",
-  joinedLoadError: "Some joined waves could not be loaded.",
-  joinedRetry: "Retry",
-  joinedRetryLabel: "Retry loading joined waves",
-  joinedLoadMore: "Load more joined waves",
-  allLoadError: "Some waves could not be loaded.",
-  allRetryLabel: "Retry loading all waves",
-  allLoadMore: "Load more waves",
-  announcementWavesAriaLabel: "Announcement waves",
-  highlyRatedAriaLabel: "Worth checking out waves",
-  pinnedAriaLabel: "Pinned waves",
-  followingListAriaLabel: "Following waves list",
-  allRecentActivityAriaLabel: "All recent waves list",
-  allQualityRankedAriaLabel: "All quality-ranked waves list",
-  directMessagesAriaLabel: "Direct message conversations",
-  expandControlExpandAriaLabel: "Expand {waveName} subwaves",
-  expandControlCollapseAriaLabel: "Collapse {waveName} subwaves",
-  expandControlLoadingAriaLabel: "Loading {waveName} subwaves",
-  subwavesToggleView: "View subwaves",
-  subwavesToggleViewCountOne: "View {count} subwave",
-  subwavesToggleViewCountMany: "View {count} subwaves",
-  subwavesToggleHide: "Hide subwaves",
-  subwavesToggleLoading: "Loading subwaves",
-  subwavesToggleUnreadBadge: "{count} new",
-  subwavesToggleViewAriaLabel: "View {waveName} subwaves",
-  subwavesToggleViewCountOneAriaLabel: "View {count} subwave for {waveName}",
-  subwavesToggleViewCountManyAriaLabel: "View {count} subwaves for {waveName}",
-  subwavesToggleHideAriaLabel: "Hide {waveName} subwaves",
-  subwavesToggleLoadingAriaLabel: "Loading {waveName} subwaves",
 } as const);
 
 const QUICK_DM_MESSAGES = objectMessages("quickDm", {
@@ -1716,19 +1653,18 @@ const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
   [
     ["trigger.tooltip", "Notification settings"],
     ["trigger.ariaLabel", "Open notification settings"],
-    ["broadcastMentions.label", "Broadcast mentions"],
-    [
-      "broadcastMentions.ariaLabel",
-      "Receive @all and @contributors notifications",
-    ],
+    ["levels.ariaLabel", "Notification level"],
+    ["broadcastMentions.label", "Mentions and @all"],
+    ["mentionsOnly.label", "Mentions only"],
+    ["mentionsOnly.ariaLabel", "Mentions only"],
+    ["broadcastMentions.ariaLabel", "Mentions and @all"],
     ["allMessages.label", "All messages"],
-    ["allMessages.ariaLabel", "Receive notifications for all messages"],
+    ["allMessages.ariaLabel", "All messages"],
     ["mute.label", "Mute"],
     ["mute.activeLabel", "Muted"],
+    ["mute.unmuteLabel", "Unmute"],
     ["mute.ariaLabel", "Mute wave"],
     ["mute.unmuteAriaLabel", "Unmute wave"],
-    ["mute.tooltip.enable", "Click to mute this wave"],
-    ["mute.tooltip.disable", "Click to unmute this wave"],
     ["mute.error.muteTitle", "Couldn't mute this wave."],
     ["mute.error.unmuteTitle", "Couldn't unmute this wave."],
     ["mute.error.description", PLEASE_TRY_AGAIN],
@@ -2832,6 +2768,7 @@ const WAVE_REP_DETAILS_MESSAGES = objectMessages("waves.rep.details", {
   "activity.title": "Wave REP activity",
   "activity.description": "Recent edits across all categories",
   "activity.unknownRater": "Unknown",
+  "activity.to": "to",
   "activity.error": "Could not load Wave REP activity.",
   "activity.empty": "No Wave REP activity yet.",
   "activity.loadMoreError": "Could not load more activity.",
@@ -3069,7 +3006,24 @@ const XTDH_COLLECTION_MESSAGES = objectMessages("xtdh.collections", {
 } as const);
 
 const XTDH_GRANT_MESSAGES = objectMessages("xtdh.grant", {
+  createAction: "Grant",
+  createHeading: "Create New Grant",
+  actions: "Grant actions",
+  stopAction: "Stop Grant",
+  revokeAction: "Revoke Grant",
   "lastGrant.label": "Last grant",
+  statusTabsLabel: "Select tab",
+} as const);
+
+const XTDH_STATS_MESSAGES = objectMessages("xtdh.stats", {
+  generating: "Generating",
+  inbound: "Inbound",
+  outbound: "Outbound",
+  net: "Net",
+  perDay: "/day",
+  grantedRate: "Granted rate",
+  grantedRateLabel: "Granted Rate",
+  actionTitle: "Action",
 } as const);
 
 const WAVE_SLOW_MODE_NOTICE_MESSAGES = objectMessages("waves.slowMode.notice", {
@@ -3746,6 +3700,7 @@ export const EN_US_ROOT_MESSAGES = {
   ...IDENTITY_FILTER_MESSAGES,
   ...XTDH_COLLECTION_MESSAGES,
   ...XTDH_GRANT_MESSAGES,
+  ...XTDH_STATS_MESSAGES,
   ...WAVE_SLOW_MODE_NOTICE_MESSAGES,
   ...COLLECTION_DELEGATION_MESSAGES,
   ...DELEGATION_EXPIRY_MESSAGES,
@@ -5667,7 +5622,8 @@ export const EN_US_ROOT_MESSAGES = {
   ...USER_CIC_TYPE_MESSAGES,
   ...FOLLOWERS_MESSAGES,
   ...PROFILE_FOLLOW_MESSAGES,
-  ...WAVES_SIDEBAR_MESSAGES,
+  "waves.sidebar.pinControl.viewerChanged":
+    "The active profile changed. Please try again.",
   ...wavesRightPanelMessages,
   ...wavesMoveMessages,
   ...QUICK_DM_MESSAGES,
@@ -5725,13 +5681,14 @@ export const EN_US_ROOT_MESSAGES = {
   ...WAVE_REP_DETAILS_MESSAGES,
   ...PROFILE_ACTIVITY_RATE_MESSAGES,
   "profileActivity.heading": "Activity Log",
+  "profileActivity.types": "Activity types",
+  "profileActivity.filterTypesLabel": "Filter activity types: {title}",
   "profileActivity.loading": "Loading activity log",
   "profileActivity.loadError": "Unable to load activity log.",
   "profileActivity.retry": "Retry",
   ...USER_RATE_MESSAGES,
   ...aboutMessages,
   ...emmaSnapshotsMessages,
-  ...emmaMessages,
   ...safeCollectingMessages,
   ...delegationTapGuideMessages,
   ...pageMetadataMessages,

@@ -85,7 +85,10 @@ describe("CollapsedWave", () => {
     const link = screen.getByRole("link", { name: "Chat Wave" });
     expect(link.querySelector(".tw-bg-primary-500")).toBeNull();
     expect(screen.queryByText("3")).not.toBeInTheDocument();
-    expect(link.querySelector('[data-icon="bell-slash"]')).not.toBeNull();
+    const badge = screen.getByTestId("wave-muted-badge");
+    expect(badge).toHaveClass("tw-bg-iron-800", "tw-text-iron-300");
+    expect(badge.textContent).toBe("");
+    expect(badge.querySelector("svg")).toBeInTheDocument();
   });
 
   it("forwards hover enter and leave to the wave link", () => {

@@ -1310,6 +1310,24 @@ export const ES_ES_MESSAGES = {
   ...ES_ES_TRANSFER_MESSAGES,
   ...ES_ES_THE_MEMES_MINT_SUCCESS_MESSAGES,
   ...ES_ES_THE_MEMES_MINT_PROGRESS_MESSAGES,
+  "e2ee.list.pinned": "Fijado",
+  "e2ee.list.pinnedChat": "{title}, chat fijado",
+  "e2ee.list.pinChat": "Fijar {title} arriba",
+  "e2ee.list.pinDragInstructions":
+    "Pulsa la barra espaciadora para levantar este chat. Usa las flechas para moverlo y pulsa la barra espaciadora para soltarlo o Escape para cancelar.",
+  "e2ee.list.pinDragStarted": "Chat fijado levantado.",
+  "e2ee.list.pinDragPosition": "Posición {position}.",
+  "e2ee.list.pinDragCancelled": "Reordenación cancelada.",
+  "e2ee.list.pinOrderSaved": "Orden de los chats fijados guardado.",
+  "e2ee.list.pinOrderError":
+    "No se pudo guardar el orden de los chats fijados. Inténtalo de nuevo.",
+  "e2ee.info.pin": "Fijar arriba",
+  "e2ee.info.unpin": "Desfijar chat",
+  "e2ee.info.pinSyncHelp":
+    "Los chats fijados se sincronizan de forma privada con tus otros dispositivos de confianza.",
+  "e2ee.info.pinLocalHelp":
+    "Los chats fijados se guardan en este dispositivo hasta que esté disponible la sincronización cifrada.",
+  "e2ee.info.pinFailed": "No se pudo cambiar el pin. Inténtalo de nuevo.",
   "e2ee.message.taskChecked": "Tarea marcada",
   "e2ee.message.taskUnchecked": "Tarea sin marcar",
   "e2ee.message.imageLink": "Enlace de imagen",

@@ -74,6 +74,7 @@ function createDrop(hideLinkPreview = false): ApiDrop {
       forbid_negative_votes: false,
       pinned: false,
       identity_wave: false,
+      stays_on_site: true,
     },
     author: {
       id: "profile-1",

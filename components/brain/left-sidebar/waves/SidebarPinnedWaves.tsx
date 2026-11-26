@@ -1,23 +1,12 @@
 "use client";
 
-import {
-  DndContext,
-  KeyboardCode,
-  KeyboardSensor,
-  MouseSensor,
-  TouchSensor,
-  closestCenter,
-  useSensor,
-  useSensors,
-  type DragCancelEvent,
-  type DragEndEvent,
-} from "@dnd-kit/core";
+import "@/i18n/namespaces/wave-sidebar";
+import { DndContext, closestCenter, type DragEndEvent } from "@dnd-kit/core";
 import {
   SortableContext,
   arrayMove,
   useSortable,
   verticalListSortingStrategy,
-  sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
@@ -36,6 +25,11 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { PinnedWaveLinkContext } from "./PinnedWaveLinkContext";
 import { SidebarWaveTreeRowTransition } from "./SidebarWaveTreeRowTransition";
+import {
+  canDragPinnedRowFrom,
+  suppressPinnedRowDropClick,
+  usePinnedRowSensors,
+} from "./pinnedRowDrag";
 
 interface PinnedWaveGroup {
   readonly id: string;
@@ -55,7 +49,7 @@ function groupPinnedRows(
 ): PinnedWaveGroup[] {
   const groups: PinnedWaveGroup[] = [];
   for (const row of rows) {
-    if (row.depth === 0 && row.rowType === "wave") {
+    if (row.depth === 0) {
       groups.push({
         id: row.wave.id,
         parent: row,
@@ -66,35 +60,6 @@ function groupPinnedRows(
     }
   }
   return groups;
-}
-
-function canDragFrom(target: EventTarget) {
-  return (
-    target instanceof Element &&
-    !target.closest("button, input, select, textarea, [role='button']")
-  );
-}
-
-function suppressDropClick({ activatorEvent }: DragEndEvent | DragCancelEvent) {
-  if (activatorEvent instanceof KeyboardEvent) return;
-
-  // dnd-kit stops the release click from bubbling, but the link still has a
-  // browser default action. Cancel it until the next pointer gesture.
-  const controller = new AbortController();
-  const options = { capture: true, signal: controller.signal };
-  const clear = () => controller.abort();
-  document.addEventListener(
-    "click",
-    (event) => {
-      if (event.detail > 0) {
-        event.preventDefault();
-        clear();
-      }
-    },
-    options
-  );
-  document.addEventListener("pointerdown", clear, options);
-  globalThis.setTimeout(clear, 100);
 }
 
 function SortablePinnedWave({
@@ -118,13 +83,13 @@ function SortablePinnedWave({
   const { parent, children } = group;
 
   function onMouseDown(event: MouseEvent<HTMLDivElement>) {
-    if (event.button === 0 && canDragFrom(event.target)) {
+    if (event.button === 0 && canDragPinnedRowFrom(event.target)) {
       listeners?.["onMouseDown"]?.(event);
     }
   }
 
   function onTouchStart(event: TouchEvent<HTMLDivElement>) {
-    if (canDragFrom(event.target)) {
+    if (canDragPinnedRowFrom(event.target)) {
       listeners?.["onTouchStart"]?.(event);
     }
   }
@@ -192,20 +157,7 @@ function SidebarPinnedWaves({
   const dragStartIds = useRef<readonly string[]>([]);
   const saving = useRef(false);
   const [status, setStatus] = useState<"saved" | "error" | null>(null);
-  const sensors = useSensors(
-    useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(TouchSensor, {
-      activationConstraint: { delay: 200, tolerance: 8 },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-      keyboardCodes: {
-        start: [KeyboardCode.Space],
-        end: [KeyboardCode.Space, KeyboardCode.Enter, KeyboardCode.Tab],
-        cancel: [KeyboardCode.Esc],
-      },
-    })
-  );
+  const sensors = usePinnedRowSensors();
 
   async function move(from: number, to: number) {
     if (
@@ -232,7 +184,7 @@ function SidebarPinnedWaves({
   }
 
   function endDrag(event: DragEndEvent) {
-    suppressDropClick(event);
+    suppressPinnedRowDropClick(event);
     const { active, over } = event;
     if (
       !over ||
@@ -281,7 +233,7 @@ function SidebarPinnedWaves({
             dragStartIds.current = ids;
           }}
           onDragEnd={endDrag}
-          onDragCancel={suppressDropClick}
+          onDragCancel={suppressPinnedRowDropClick}
         >
           <SortableContext items={ids} strategy={verticalListSortingStrategy}>
             {groups.map((group) => (

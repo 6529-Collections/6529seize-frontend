@@ -15,7 +15,10 @@ import CreateWaveDropsSubmissionMode from "./submission-mode/CreateWaveDropsSubm
 import CreateWaveDropsTypes from "./types/CreateWaveDropsTypes";
 import CreateWaveTermsOfService from "./terms/CreateWaveTermsOfService";
 import CreateWaveStepHeader from "../utils/CreateWaveStepHeader";
-import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
+import {
+  CREATE_WAVE_FORM_STYLES,
+  DECISION_EDITOR_MOBILE_STYLES,
+} from "../utils/createWaveFormStyles";
 
 export default function CreateWaveDrops({
   waveType,
@@ -108,11 +111,13 @@ export default function CreateWaveDrops({
       >
         <h3
           id="create-wave-submission-requirements-title"
-          className={`${CREATE_WAVE_FORM_STYLES.sectionTitle} tw-px-5 tw-py-4`}
+          className={`${CREATE_WAVE_FORM_STYLES.sectionTitle} tw-px-5 tw-py-4 ${DECISION_EDITOR_MOBILE_STYLES.panelHeader}`}
         >
           {t(locale, "waves.create.drops.requirementsTitle")}
         </h3>
-        <div className="tw-flex tw-flex-col tw-gap-y-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-p-5">
+        <div
+          className={`tw-flex tw-flex-col tw-gap-y-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-p-5 ${DECISION_EDITOR_MOBILE_STYLES.panelPadding}`}
+        >
           <CreateWaveDropsTypes
             requiredTypes={drops.requiredTypes}
             onRequiredTypeChange={onRequiredTypeChange}

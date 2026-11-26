@@ -1,9 +1,8 @@
 "use client";
 
-import IconButton from "@/components/utils/button/IconButton";
+import MobileWrapperDialogCloseButton from "@/components/mobile-wrapper-dialog/MobileWrapperDialogCloseButton";
 
 import { DialogTitle } from "@headlessui/react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { ProfileWaveActivityQueryState } from "@/hooks/useProfileWaveActivityWaves";
 import { formatInteger } from "@/i18n/format";
@@ -83,19 +82,13 @@ export default function UserPageBrainSidebarCreatedModal({
             </div>
 
             {!isApp && (
-              <IconButton
-                type="button"
+              <MobileWrapperDialogCloseButton
                 onClick={onClose}
-                size={40}
-                variant="contrast"
-                pressEffect
-                aria-label={getUserPageBrainSidebarMessage(
+                label={getUserPageBrainSidebarMessage(
                   locale,
                   "user.brain.sidebar.closeCreatedWaves"
                 )}
-              >
-                <XMarkIcon aria-hidden="true" className="tw-h-5 tw-w-5" />
-              </IconButton>
+              />
             )}
           </header>
 

@@ -169,6 +169,41 @@ test.describe("Live wave unread state @auth @local-only", () => {
     await expect(chat.getByLabel(/unread messages/)).toHaveCount(0);
   });
 
+  test("remembers the unread jump and its dismissal across a Wave reload", async ({
+    page,
+    baseURL,
+  }) => {
+    await installChatPerfFixture(page, baseURL);
+    const waveId = perfWaveId(PERF_OPEN_WAVE_INDEX);
+    await page.goto(`/waves/${waveId}?divider=1`, {
+      waitUntil: "domcontentloaded",
+    });
+    const jump = page.getByRole("button", {
+      name: "Scroll to first unread message",
+    });
+    const newestMessage = page.getByText(perfMessageText(40), {
+      exact: true,
+    });
+
+    await expect(jump).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(page).not.toHaveURL(/[?&]divider=/u);
+    await page.reload({ waitUntil: "domcontentloaded" });
+
+    await expect(jump).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await page.keyboard.press("Escape");
+    await expect(jump).toHaveCount(0);
+    await page.reload({ waitUntil: "domcontentloaded" });
+
+    await expect(newestMessage.last()).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(jump).toHaveCount(0);
+  });
+
   test("a message in another wave raises its badge and links to the first unread", async ({
     page,
     baseURL,

@@ -2,6 +2,8 @@
 
 import UserPageXtdhGrant from "./UserPageXtdhGrant";
 import UserPageXtdhGrantedList from "./UserPageXtdhGrantedList";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 export default function UserPageXtdhGranted({
   canGrant,
@@ -12,6 +14,7 @@ export default function UserPageXtdhGranted({
   readonly grantor: string;
   readonly isSelf: boolean;
 }) {
+  const locale = useBrowserLocale();
   return (
     <div className="tw-flex tw-flex-col tw-gap-8">
       <UserPageXtdhGrantedList grantor={grantor} isSelf={isSelf} />
@@ -20,7 +23,7 @@ export default function UserPageXtdhGranted({
         <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.04] tw-bg-iron-900 tw-p-5 sm:tw-p-6">
           <div className="tw-hidden" />
           <h3 className="tw-m-0 tw-mb-6 tw-text-lg tw-font-semibold tw-tracking-tight tw-text-iron-100 md:tw-text-xl">
-            Create New Grant
+            {t(locale, "xtdh.grant.createHeading")}
           </h3>
           <UserPageXtdhGrant />
         </section>

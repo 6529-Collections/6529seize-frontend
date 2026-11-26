@@ -16,6 +16,7 @@ import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
 import { uploadDistributionPhotos } from "@/services/distribution/distributionPhotoUpload";
 import {
+  type ReactElement,
   useCallback,
   useContext,
   useEffect,
@@ -27,11 +28,16 @@ import useDownloader from "@/hooks/useDownloader";
 import { DistributionAirdropsPhase } from "./ReviewDistributionPlanTableSubscriptionFooterPhaseAirdrops";
 import { ConfirmTokenIdModal } from "./ReviewDistributionPlanTableSubscriptionFooterConfirmTokenId";
 import type { GithubUploadResult } from "./ReviewDistributionPlanTableSubscriptionFooterGithubUploadModal";
-import {
-  canPublishToGithub,
-  getGithubUploadTooltip,
-  SubscriptionFooterMain,
-} from "./ReviewDistributionPlanTableSubscriptionFooterMain";
+import { SubscriptionFooterMain } from "./ReviewDistributionPlanTableSubscriptionFooterMain";
+import { resolveForgePhaseInputs } from "@/services/api/drop-forge-process-inputs";
+import { useEmmaPreparationMode } from "@/hooks/useEmmaPreparationMode";
+import { ApiDropForgePreparationModeEnum as PreparationMode } from "@/generated/models/ApiDropForgePreparation";
+import ProcessAndFinalize from "../ProcessAndFinalize";
+import Button from "@/components/utils/button/Button";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/drop-forge";
+import "@/i18n/namespaces/emma";
 import { isSubscriptionsAdmin } from "./ReviewDistributionPlanTableSubscription.utils";
 
 function getErrorMessage(error: unknown): string {
@@ -44,8 +50,17 @@ function getErrorMessage(error: unknown): string {
   return "Couldn't complete this request. Please try again.";
 }
 
-export function ReviewDistributionPlanTableSubscriptionFooter() {
-  const { distributionPlan, confirmedTokenId, setConfirmedTokenId } =
+export function ReviewDistributionPlanTableSubscriptionFooter({
+  showManual = false,
+  onChooseManual,
+  onClearManualChoice,
+}: Readonly<{
+  showManual?: boolean;
+  onChooseManual?: () => void;
+  onClearManualChoice?: () => void;
+}> = {}) {
+  const locale = useBrowserLocale();
+  const { distributionPlan, phases, confirmedTokenId, setConfirmedTokenId } =
     useContext(DistributionPlanToolContext);
   const { connectedProfile, setToast } = useContext(AuthContext);
   const { seizeSettings } = useSeizeSettings();
@@ -57,6 +72,17 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
     [seizeSettings.distribution_admin_wallets]
   );
 
+  const canPrepare = isSubscriptionsAdmin(
+    connectedProfile,
+    distributionAdminWallets
+  );
+  const preparation = useEmmaPreparationMode(
+    MEMES_CONTRACT,
+    confirmedTokenId,
+    distributionPlan?.id,
+    canPrepare
+  );
+
   const [showUploadPhotos, setShowUploadPhotos] = useState(false);
   const [showViewPhotos, setShowViewPhotos] = useState(false);
   const [showUploadAirdropsPhase, setShowUploadAirdropsPhase] =
@@ -65,6 +91,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
     useState<DistributionAirdropsPhase | null>(null);
   const [showConfirmTokenId, setShowConfirmTokenId] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
+  const [resetCount, setResetCount] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadingAirdropsPhase, setUploadingAirdropsPhase] =
     useState<DistributionAirdropsPhase | null>(null);
@@ -118,7 +145,6 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
   const overviewRequestIdRef = useRef(0);
   const photosViewerRequestIdRef = useRef(0);
   const airdropsViewerRequestIdRef = useRef(0);
-  const githubUploadTooltip = getGithubUploadTooltip(overview);
 
   const clearOverviewState = useCallback(() => {
     overviewRequestIdRef.current += 1;
@@ -199,6 +225,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
 
   const handleChangeTokenId = () => {
     clearOverviewState();
+    onClearManualChoice?.();
     setConfirmedTokenId(null);
     setShowConfirmTokenId(true);
   };
@@ -214,11 +241,16 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
         endpoint: `subscriptions/allowlists/${contract}/${tokenId}/${planId}/reset`,
         body: {},
       });
+      onClearManualChoice?.();
+      setResetCount((count) => count + 1);
       setToast({
         type: "success",
         message: "Subscriptions reset.",
       });
-      await refreshOverview(contract, tokenId);
+      await Promise.all([
+        preparation.refresh(),
+        refreshOverview(contract, tokenId),
+      ]);
     } catch (error: unknown) {
       setToast({
         type: "error",
@@ -252,7 +284,10 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
           title: "Distribution normalized.",
           description: response.message,
         });
-        await refreshOverview(contract, tokenId);
+        await Promise.all([
+          preparation.refresh(),
+          refreshOverview(contract, tokenId),
+        ]);
       } else {
         setToast({
           type: "error",
@@ -262,6 +297,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
         });
       }
     } catch (error: unknown) {
+      void preparation.refresh();
       setToast({
         type: "error",
         title: "Couldn't normalize this distribution.",
@@ -488,7 +524,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
     setViewedAirdropsError(null);
   }, []);
 
-  if (!isSubscriptionsAdmin(connectedProfile, distributionAdminWallets)) {
+  if (!canPrepare) {
     return <></>;
   }
 
@@ -511,6 +547,49 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
       resetSubscriptions(contract, confirmedTokenId, distributionPlan.id);
     }
   };
+
+  const canChooseMode = preparation.mode === PreparationMode.Unstarted;
+  let processingControl: ReactElement | undefined;
+  if (canChooseMode || preparation.mode === PreparationMode.Background) {
+    const planId = distributionPlan?.id ?? "";
+    const phaseInputs = resolveForgePhaseInputs(phases);
+    processingControl = (
+      <ProcessAndFinalize
+        key={`${planId}:${confirmedTokenId}:${resetCount}`}
+        contract={contract}
+        claim={Number(confirmedTokenId)}
+        plan={planId}
+        phaseIds={phaseInputs.phaseIds}
+        phaseIssues={phaseInputs}
+        onStarted={preparation.refresh}
+        disabled={isResetting || isFinalizing}
+        onCompleted={() => {
+          void refreshOverview(contract, confirmedTokenId);
+        }}
+      />
+    );
+  } else if (preparation.mode === undefined) {
+    processingControl = preparation.isError ? (
+      <button
+        type="button"
+        className="tw-text-sm tw-text-error"
+        onClick={() => void preparation.refresh()}
+      >
+        {t(locale, "emma.review.preparationLoadError")}
+      </button>
+    ) : (
+      <output className="tw-text-sm tw-text-iron-300">
+        {t(locale, "emma.review.preparationLoading")}
+      </output>
+    );
+  }
+
+  let preparationStatus: string | undefined;
+  if (preparation.mode === PreparationMode.Manual) {
+    preparationStatus = t(locale, "emma.review.manualLocked");
+  } else if (canChooseMode && showManual) {
+    preparationStatus = t(locale, "emma.review.manualOpen");
+  }
 
   return (
     <SubscriptionFooterMain
@@ -539,8 +618,6 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
       viewedAirdropsError={viewedAirdropsError}
       viewingPhotos={viewingPhotos}
       viewingAirdropsPhase={viewingAirdropsPhase}
-      canPublish={canPublishToGithub(overview)}
-      githubUploadTooltip={githubUploadTooltip}
       onConfirmTokenId={handleConfirmTokenId}
       onChangeTokenId={handleChangeTokenId}
       onResetSubscriptions={handleResetSubscriptions}
@@ -552,6 +629,23 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
       onShowViewPhotos={() => handleShowViewPhotos(contract, confirmedTokenId)}
       onDownloadAirdrops={(phase) =>
         handleDownloadAirdrops(contract, confirmedTokenId, phase)
+      }
+      preparationChoice={
+        canChooseMode && !showManual ? (
+          <Button
+            variant="secondary"
+            disabled={isResetting}
+            onClick={onChooseManual}
+          >
+            {t(locale, "dropForge.prepareManually")}
+          </Button>
+        ) : undefined
+      }
+      processingControl={processingControl}
+      preparationStatus={preparationStatus}
+      showManualFinalize={
+        preparation.mode === PreparationMode.Manual ||
+        (canChooseMode && showManual)
       }
       onFinalize={() => finalizeDistribution(contract, confirmedTokenId)}
       onUploadToGithub={() => uploadToGithub(contract, confirmedTokenId)}

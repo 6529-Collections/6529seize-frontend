@@ -330,9 +330,7 @@ it.each([false, true])(
     expect(
       screen.getByRole("combobox", { name: "Decision type" })
     ).toBeDisabled();
-    expect(
-      screen.queryByText(/already has entries/)
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/already has entries/)).not.toBeInTheDocument();
     for (let step = 0; step < 2; step++)
       fireEvent.click(screen.getByRole("button", { name: "Next" }));
     expect(mockStepProps).toMatchObject({
@@ -374,6 +372,9 @@ it("keeps sibling rule editing locked after accepted entries", () => {
   ).toHaveAccessibleDescription(
     "This decision already has entries, so its credit, signing, submission, timing, result and outcome rules can no longer change. Access, name, description and presentation can still be edited."
   );
+  const progress = screen.getByTestId("competition-step-progress");
+  expect(progress).toHaveAttribute("aria-hidden", "true");
+  expect(progress.children).toHaveLength(4);
   for (let step = 0; step < 2; step++)
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
   expect(screen.getByText("RULES", { exact: true })).toBeInTheDocument();

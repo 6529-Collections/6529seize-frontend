@@ -47,6 +47,19 @@ export function startNewChain(local: BackupLocalState): void {
   local.groupPrints = {};
   local.messagePrints = {};
   local.readsSent = {};
+  local.pinIds = {};
+}
+
+const pinRankKey = (thread: string): string => `rank:${thread}`;
+
+export function backupPinIds({
+  pins = [],
+  pinRanks = [],
+}: Pick<BackupHistory, "pins" | "pinRanks">): Record<string, string> {
+  return Object.fromEntries([
+    ...pins.map(([thread, , id]) => [thread, id] as const),
+    ...pinRanks.map(([[thread], , id]) => [pinRankKey(thread), id] as const),
+  ]);
 }
 
 /**
@@ -66,6 +79,12 @@ export function changedHistory(
         )
       )
     : {};
+  const pins = (history.pins ?? []).filter(
+    ([thread, , id]) => local.pinIds?.[thread] !== id
+  );
+  const pinRanks = (history.pinRanks ?? []).filter(
+    ([[thread], , id]) => local.pinIds?.[pinRankKey(thread)] !== id
+  );
   return {
     groups: history.groups.filter(
       (group) => local.groupPrints[group.g] !== fingerprint(group)
@@ -76,5 +95,7 @@ export function changedHistory(
         fingerprint(message)
     ),
     ...(Object.keys(reads).length > 0 ? { reads } : {}),
+    ...(pins.length > 0 ? { pins } : {}),
+    ...(pinRanks.length > 0 ? { pinRanks } : {}),
   };
 }

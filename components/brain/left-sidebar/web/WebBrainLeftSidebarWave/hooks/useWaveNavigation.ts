@@ -25,6 +25,7 @@ interface UseWaveNavigationOptions {
   readonly waveId: string;
   readonly hasTouchScreen: boolean;
   readonly firstUnreadDropSerialNo?: number | null | undefined;
+  readonly onOpen?: ((waveId: string) => void) | undefined;
 }
 
 interface UseWaveNavigationResult {
@@ -46,6 +47,7 @@ export const useWaveNavigation = ({
   waveId,
   hasTouchScreen,
   firstUnreadDropSerialNo,
+  onOpen,
 }: UseWaveNavigationOptions): UseWaveNavigationResult => {
   const currentWaveId =
     activeWaveId ??
@@ -111,6 +113,9 @@ export const useWaveNavigation = ({
       cancelHoverIntent();
       prefetchWave();
       const nextWaveId = waveId === currentWaveId ? null : waveId;
+      if (nextWaveId !== null) {
+        onOpen?.(nextWaveId);
+      }
       setActiveWave(nextWaveId, {
         isDirectMessage,
         divider: nextWaveId ? firstUnreadDropSerialNo : null,
@@ -120,6 +125,7 @@ export const useWaveNavigation = ({
       cancelHoverIntent,
       currentWaveId,
       isDirectMessage,
+      onOpen,
       prefetchWave,
       setActiveWave,
       waveId,

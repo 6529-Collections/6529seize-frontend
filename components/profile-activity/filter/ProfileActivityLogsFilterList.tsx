@@ -6,14 +6,18 @@ export default function UserPageIdentityActivityLogFilterList({
   selected,
   options,
   setSelected,
+  fitContainer = false,
 }: {
   readonly id: string;
   readonly selected: ProfileActivityLogType[];
   readonly options: ProfileActivityLogType[];
   readonly setSelected: (selected: ProfileActivityLogType) => void;
+  readonly fitContainer?: boolean;
 }) {
   return (
-    <div className="tw-absolute tw-right-0 tw-z-20 tw-mt-2 tw-w-full tw-min-w-[16rem] tw-origin-top-right">
+    <div
+      className={`tw-absolute tw-right-0 tw-z-20 tw-mt-2 tw-w-full tw-origin-top-right ${fitContainer ? "tw-min-w-0" : "tw-min-w-[16rem]"}`}
+    >
       <ul
         id={id}
         aria-label="Activity types"

@@ -2,7 +2,7 @@ import { act, renderHook } from "@testing-library/react";
 import type { MouseEvent } from "react";
 import { useWaveNavigation } from "@/components/brain/left-sidebar/web/WebBrainLeftSidebarWave/hooks/useWaveNavigation";
 
-const clickEvent = () =>
+const clickEvent = (overrides: Partial<MouseEvent<HTMLAnchorElement>> = {}) =>
   ({
     defaultPrevented: false,
     metaKey: false,
@@ -11,6 +11,7 @@ const clickEvent = () =>
     altKey: false,
     button: 0,
     preventDefault: jest.fn(),
+    ...overrides,
   }) as unknown as MouseEvent<HTMLAnchorElement>;
 
 const setup = (
@@ -85,13 +86,17 @@ describe("useWaveNavigation hover prefetch", () => {
   });
 
   it("prefetches immediately on click and drops the pending hover prefetch", () => {
-    const { result, onHover, prefetchWaveData, setActiveWave } = setup();
+    const onOpen = jest.fn();
+    const { result, onHover, prefetchWaveData, setActiveWave } = setup({
+      onOpen,
+    });
 
     act(() => result.current.onMouseEnter?.());
     act(() => result.current.onClick(clickEvent()));
 
     expect(prefetchWaveData).toHaveBeenCalledTimes(1);
     expect(onHover).toHaveBeenCalledTimes(1);
+    expect(onOpen).toHaveBeenCalledWith("wave-1");
     expect(setActiveWave).toHaveBeenCalledWith(
       "wave-1",
       expect.objectContaining({ isDirectMessage: false })
@@ -102,6 +107,18 @@ describe("useWaveNavigation hover prefetch", () => {
     });
     expect(prefetchWaveData).toHaveBeenCalledTimes(1);
     expect(onHover).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps modified clicks available for new-tab navigation", () => {
+    const onOpen = jest.fn();
+    const { result, setActiveWave } = setup({ onOpen });
+    const event = clickEvent({ metaKey: true });
+
+    act(() => result.current.onClick(event));
+
+    expect(event.preventDefault).not.toHaveBeenCalled();
+    expect(onOpen).not.toHaveBeenCalled();
+    expect(setActiveWave).not.toHaveBeenCalled();
   });
 
   it("does not expose hover handlers on touch screens", () => {

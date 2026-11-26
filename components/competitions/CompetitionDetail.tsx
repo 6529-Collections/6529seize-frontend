@@ -9,7 +9,7 @@ import { WaveLeaderboardCurationDropModal } from "@/components/waves/leaderboard
 import { ApiCompetitionLifecycle } from "@/generated/models/ApiCompetitionLifecycle";
 import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
 import { getApproveWaveTabLabelsFromMetadata } from "@/helpers/waves/wave-metadata.helpers";
-import { useMemo, useState, type RefObject } from "react";
+import { useMemo, useState, type ReactNode, type RefObject } from "react";
 import { WaveDisplayMetadataContext } from "@/contexts/WaveDisplayMetadataContext";
 import { TabToggle } from "@/components/common/TabToggle";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
@@ -170,28 +170,34 @@ export function NativeCompetitionContent({
     (competition.lifecycle === ApiCompetitionLifecycle.Draft ||
       (search.get("edit") === "1" &&
         competition.permissions.edit_rules_after_activity === true))
-  )
+  ) {
+    const renderEditor = (actions?: ReactNode) => (
+      <CompetitionDraftEditor
+        actions={actions}
+        wave={wave}
+        competition={competition}
+        onClose={() => {
+          const params = new URLSearchParams(search.toString());
+          params.delete("edit");
+          params.set("tab", "rules");
+          router.replace(
+            competition.lifecycle === ApiCompetitionLifecycle.Draft
+              ? getCompetitionsRoute(wave.id)
+              : `${pathname}?${params.toString()}`
+          );
+        }}
+      />
+    );
     return (
       <div className="tw-flex tw-min-h-full tw-flex-1 tw-flex-col tw-gap-5">
-        {competition.lifecycle === ApiCompetitionLifecycle.Draft && (
-          <CompetitionAdmin archiveOnly />
+        {competition.lifecycle === ApiCompetitionLifecycle.Draft ? (
+          <CompetitionAdmin archiveOnly renderActions={renderEditor} />
+        ) : (
+          renderEditor()
         )}
-        <CompetitionDraftEditor
-          wave={wave}
-          competition={competition}
-          onClose={() => {
-            const params = new URLSearchParams(search.toString());
-            params.delete("edit");
-            params.set("tab", "rules");
-            router.replace(
-              competition.lifecycle === ApiCompetitionLifecycle.Draft
-                ? getCompetitionsRoute(wave.id)
-                : `${pathname}?${params.toString()}`
-            );
-          }}
-        />
       </div>
     );
+  }
   return (
     <div
       ref={providedScrollContainer ? undefined : setScrollContainer}
@@ -319,7 +325,7 @@ export default function CompetitionDetail({
       className={`tw-h-full tw-min-h-0 tw-overflow-y-auto tw-px-4 tw-pt-4 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10 hover:tw-scrollbar-thumb-white/15 sm:tw-px-6 sm:tw-pt-6 ${isDraft ? "tw-scroll-pb-24" : "tw-pb-4 sm:tw-pb-6"}`}
     >
       <div
-        className={`tw-mx-auto tw-max-w-5xl ${isDraft ? "tw-flex tw-min-h-full tw-flex-col tw-gap-5" : "tw-space-y-5"}`}
+        className={`tw-mx-auto tw-max-w-5xl [&:has(#competition-draft-title)>header]:tw-hidden ${isDraft ? "tw-flex tw-min-h-full tw-flex-col tw-gap-5" : "tw-space-y-5"}`}
       >
         <header className="tw-space-y-3">
           <nav>

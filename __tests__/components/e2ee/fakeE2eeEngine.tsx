@@ -202,6 +202,8 @@ export function createFakeE2eeEngine(
     remove: jest.fn(async () => undefined),
     react: jest.fn(async () => undefined),
     markRead: jest.fn(),
+    setConversationPinned: jest.fn().mockResolvedValue(undefined),
+    moveConversationPin: jest.fn().mockResolvedValue(undefined),
     rename: jest.fn(async () => undefined),
     addMembers: jest.fn(async (_g: string, profileIds: string[]) =>
       profileIds.map((profileId) => ({ profileId, status: "OK" as const }))

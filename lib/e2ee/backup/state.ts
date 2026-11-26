@@ -26,6 +26,8 @@ export interface BackupLocalState {
   readsSent?: Record<string, number>;
   /** When read positions last went up (ms). */
   readsAt?: number;
+  /** Latest uploaded pin and rank decision IDs. Rank keys are prefixed. */
+  pinIds?: Record<string, string>;
 }
 
 export interface BackupStateStore {
@@ -54,6 +56,7 @@ class MemoryBackupStateStore implements BackupStateStore {
             groupPrints: { ...state.groupPrints },
             messagePrints: { ...state.messagePrints },
             readsSent: { ...state.readsSent },
+            pinIds: { ...state.pinIds },
           }
         : null
     );
@@ -66,6 +69,7 @@ class MemoryBackupStateStore implements BackupStateStore {
       groupPrints: { ...state.groupPrints },
       messagePrints: { ...state.messagePrints },
       readsSent: { ...state.readsSent },
+      pinIds: { ...state.pinIds },
     });
     return Promise.resolve();
   }

@@ -3860,6 +3860,14 @@ paths:
                 $ref: "#/components/schemas/ApiCmsSite"
         "401":
           description: Unauthorized - authentication required
+        "410":
+          description: >-
+            Legacy CMS sites are read-only once profile sites follow the 6529
+            chain (code cms_legacy_retired)
+        "423":
+          description: >-
+            The identity freeze is on (code IDENTITY_FROZEN), while profiles
+            move to the 6529 Network.
   /cms/sites/{site_id}/published-packages:
     post:
       tags:
@@ -3893,6 +3901,14 @@ paths:
           description: Forbidden - only site owners can publish
         "404":
           description: CMS site not found
+        "410":
+          description: >-
+            Legacy CMS sites are read-only once profile sites follow the 6529
+            chain (code cms_legacy_retired)
+        "423":
+          description: >-
+            The identity freeze is on (code IDENTITY_FROZEN), while profiles
+            move to the 6529 Network.
   /collect/capabilities:
     get:
       tags:
@@ -8491,6 +8507,639 @@ paths:
           description: Invalid request
         "403":
           description: Forbidden - not a Subscription Admin
+  /drop-forge/automation-settings:
+    get:
+      tags:
+        - Drop Forge
+      operationId: getDropForgeSettings
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drop-forge/drop-forge-settings.handlers"
+          name: getDropForgeSettings
+      responses:
+        "200":
+          description: Authorized Drop Forge operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropForgeSettings"
+        "400":
+          description: Invalid input or incomplete configuration
+        "401":
+          description: Authentication required
+        "403":
+          description: Administrator permission required
+        "409":
+          description: Settings revision changed
+    put:
+      tags:
+        - Drop Forge
+      operationId: putDropForgeSettings
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drop-forge/drop-forge-settings.handlers"
+          name: putDropForgeSettings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiDropForgeSettingsRequest"
+      responses:
+        "200":
+          description: Authorized Drop Forge operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropForgeSettings"
+        "400":
+          description: Invalid input or incomplete configuration
+        "401":
+          description: Authentication required
+        "403":
+          description: Administrator permission required
+        "409":
+          description: Settings revision changed
+  /drop-forge/funding:
+    post:
+      tags:
+        - Drop Forge
+      operationId: postDropForgeFunding
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drop-forge/drop-forge-settings.handlers"
+          name: postDropForgeFunding
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiDropForgeFundingRequest"
+      responses:
+        "200":
+          description: Authorized Drop Forge operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropForgeFundingResponse"
+        "400":
+          description: Invalid input or incomplete configuration
+        "401":
+          description: Authentication required
+        "403":
+          description: Administrator permission required
+        "409":
+          description: Settings revision changed
+  /drop-forge/launches/{contract}/{claim_id}/ready:
+    post:
+      tags:
+        - Drop Forge
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drop-forge/drop-forge-operations.handlers"
+          name: readyDropForgeLaunch
+      operationId: readyDropForgeLaunch
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: Durable operation or read-only result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropForgeLaunch"
+        "400":
+          description: Invalid input or operation not ready
+        "401":
+          description: Authentication required
+        "403":
+          description: Administrator permission required
+        "404":
+          description: Operation not found
+        "409":
+          description: Conflicting operation
+  /drop-forge/launches/{contract}/{claim_id}/metadata:
+    post:
+      tags:
+        - Drop Forge
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drop-forge/drop-forge-operations.handlers"
+          name: updateDropForgeMetadata
+      operationId: updateDropForgeMetadata
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: Durable operation or read-only result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropForgeLaunch"
+        "400":
+          description: Invalid input or operation not ready
+        "401":
+          description: Authentication required
+        "403":
+          description: Administrator permission required
+        "404":
+          description: Operation not found
+        "409":
+          description: Conflicting operation
+  /drop-forge/launches/{contract}/{claim_id}/manual:
+    post:
+      tags:
+        - Drop Forge
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drop-forge/drop-forge-operations.handlers"
+          name: coordinateDropForgeManualAction
+      operationId: coordinateDropForgeManualAction
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiDropForgeManualRequest"
+      responses:
+        "200":
+          description: Durable operation or read-only result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropForgeManualResponse"
+        "400":
+          description: Invalid input or operation not ready
+        "401":
+          description: Authentication required
+        "403":
+          description: Administrator permission required
+        "404":
+          description: Operation not found
+        "409":
+          description: Conflicting operation
+  /drop-forge/distribution-jobs/{job_id}/lists/{phase_id}/{list}:
+    get:
+      tags:
+        - Drop Forge
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drop-forge/drop-forge-operations.handlers"
+          name: getDropForgeCompletedList
+      operationId: getDropForgeCompletedList
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: phase_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: list
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - airdrops
+              - airdrops_unconsolidated
+              - allowlists
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        "200":
+          description: Durable operation or read-only result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropForgeListPage"
+        "400":
+          description: Invalid input or operation not ready
+        "401":
+          description: Authentication required
+        "403":
+          description: Administrator permission required
+        "404":
+          description: Operation not found
+        "409":
+          description: Conflicting operation
+  /drop-forge/launches/{contract}/{claim_id}:
+    get:
+      tags:
+        - Drop Forge
+      operationId: getDropForgeLaunch
+      summary: getDropForgeLaunch
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drop-forge/drop-forge.handlers"
+          name: getDropForgeLaunch
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Current durable state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropForgeLaunch"
+        "400":
+          description: Invalid configuration or unsafe transition
+        "401":
+          description: Authentication required
+        "403":
+          description: Administrator access required
+        "404":
+          description: Launch or distribution job not found
+        "409":
+          description: Revision or existing launch conflict
+    put:
+      tags:
+        - Drop Forge
+      operationId: putDropForgeLaunch
+      summary: putDropForgeLaunch
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drop-forge/drop-forge.handlers"
+          name: putDropForgeLaunch
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiDropForgePlanRequest"
+      responses:
+        "200":
+          description: Current durable state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropForgeLaunch"
+        "400":
+          description: Invalid configuration or unsafe transition
+        "401":
+          description: Authentication required
+        "403":
+          description: Administrator access required
+        "409":
+          description: Revision or existing launch conflict
+  /drop-forge/launches/{contract}/{claim_id}/control:
+    post:
+      tags:
+        - Drop Forge
+      operationId: controlDropForgeLaunch
+      summary: controlDropForgeLaunch
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drop-forge/drop-forge.handlers"
+          name: controlDropForgeLaunch
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiDropForgeControlRequest"
+      responses:
+        "200":
+          description: Current durable state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropForgeLaunch"
+        "400":
+          description: Invalid configuration or unsafe transition
+        "401":
+          description: Authentication required
+        "403":
+          description: Administrator access required
+        "404":
+          description: Launch or distribution job not found
+        "409":
+          description: Revision or existing launch conflict
+  /drop-forge/launches/{contract}/{claim_id}/recovery:
+    post:
+      tags:
+        - Drop Forge
+      operationId: recoverDropForgeLaunch
+      summary: recoverDropForgeLaunch
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drop-forge/drop-forge-recovery.handler"
+          name: recoverDropForgeLaunch
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiDropForgeRecoveryRequest"
+      responses:
+        "200":
+          description: Current durable state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropForgeLaunch"
+        "400":
+          description: Invalid configuration or unsafe transition
+        "401":
+          description: Authentication required
+        "403":
+          description: Administrator access required
+        "404":
+          description: Launch or distribution job not found
+        "409":
+          description: Revision or existing launch conflict
+  /drop-forge/distribution-preparation/{contract}/{claim_id}:
+    get:
+      tags:
+        - Drop Forge
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drop-forge/drop-forge-operations.handlers"
+          name: getDropForgePreparation
+      operationId: getDropForgePreparation
+      summary: Get the preparation mode for a distribution
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: Distribution preparation mode
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropForgePreparation"
+        "401":
+          description: Authentication required
+        "403":
+          description: Distribution administrator permission required
+  /drop-forge/distribution-jobs/{contract}/{claim_id}:
+    get:
+      tags:
+        - Drop Forge
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drop-forge/drop-forge-operations.handlers"
+          name: getLatestDropForgeProcess
+      operationId: getLatestDropForgeProcess
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+        - name: plan_id
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: >-
+            Latest processing job as a single-element array; empty array if
+            processing has not started
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiDropForgeJob"
+        "401":
+          description: Authentication required
+        "403":
+          description: Distribution administrator permission required
+    post:
+      tags:
+        - Drop Forge
+      operationId: createDropForgeDistributionJob
+      summary: createDropForgeDistributionJob
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drop-forge/drop-forge.handlers"
+          name: createDropForgeDistributionJob
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiDropForgeJobRequest"
+      responses:
+        "200":
+          description: >-
+            Created job or existing job returned for the same request_id and
+            inputs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropForgeJob"
+        "400":
+          description: Invalid configuration or unsafe transition
+        "401":
+          description: Authentication required
+        "403":
+          description: Administrator access required
+        "409":
+          description: Revision or existing launch conflict
+  /drop-forge/distribution-jobs/{job_id}:
+    get:
+      tags:
+        - Drop Forge
+      operationId: getDropForgeDistributionJob
+      summary: getDropForgeDistributionJob
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drop-forge/drop-forge.handlers"
+          name: getDropForgeDistributionJob
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Current durable state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropForgeJob"
+        "400":
+          description: Invalid configuration or unsafe transition
+        "401":
+          description: Authentication required
+        "403":
+          description: Administrator access required
+        "404":
+          description: Launch or distribution job not found
+        "409":
+          description: Revision or existing launch conflict
   /drops/{drop_id}/collaborations:
     get:
       operationId: getMemeCollaborationState
@@ -15109,7 +15758,7 @@ paths:
           required: true
           schema:
             type: string
-          description: Notification ID or string "all" to mark all notifications as read
+          description: Notification ID
       responses:
         "201":
           description: successful operation
@@ -16011,6 +16660,38 @@ paths:
           description: Missing CMS publish permissions
         "404":
           description: CMS package not found
+        "409":
+          description: >-
+            The pointer changed (expected-current guard). With profile sites on
+            the 6529 chain, publish records the signed publication record and
+            returns the draft with its publication_cid and, in
+            chain_documents, the content core and the record; the person's
+            browser uploads both to the gateway's document store, and the
+            person's PROFILE_REPLACE then makes it primary. Publishing a draft
+            that already has a publication_cid returns it as stored, with its
+            chain_documents, without signing again.
+        "413":
+          description: >-
+            With profile sites on the 6529 chain: the content core or the
+            publication record is larger than the gateway's document store
+            takes, 2 MiB a file (code cms_chain_document_too_large). Nothing
+            was recorded.
+        "423":
+          description: >-
+            The identity freeze is on (code IDENTITY_FROZEN), while profiles
+            move to the 6529 Network.
+        "502":
+          description: >-
+            With profile sites on the 6529 chain, when the draft's publication
+            record was recorded earlier (a second publish, or another click
+            that recorded first): the record read back from storage doesn't
+            match its CID (code cms_publication_mismatch).
+        "503":
+          description: >-
+            With profile sites on the 6529 chain, when the draft's publication
+            record was recorded earlier (a second publish, or another click
+            that recorded first): the record can't be read from storage now
+            (code cms_check_unavailable). Publish again shortly.
   /profile-cms/packages/{id}/rollback:
     post:
       tags:
@@ -16051,6 +16732,28 @@ paths:
           description: Missing CMS publish permissions
         "404":
           description: CMS package not found
+        "409":
+          description: >-
+            The pointer changed (expected-current guard); the version was
+            published under a former handle (code cms_profile_changed), so
+            public reads wouldn't serve it; or profile sites are on the 6529
+            chain and the target passed the check the chain index will run (code
+            cms_pointer_on_chain): move the pointer with PROFILE_REPLACE
+            instead.
+        "422":
+          description: >-
+            Profile sites are on the 6529 chain and the chain index would refuse
+            this version (code cms_rollback_target_refused), so it can't be made
+            the site.
+        "423":
+          description: >-
+            The identity freeze is on (code IDENTITY_FROZEN), while profiles
+            move to the 6529 Network.
+        "503":
+          description: >-
+            Profile sites are on the 6529 chain and this version's files or its
+            Safe signature can't be checked right now (code
+            cms_check_unavailable); try again.
   /profile-cms/packages/{id}/archive:
     post:
       tags:
@@ -16089,6 +16792,10 @@ paths:
           description: Missing CMS publish permissions
         "404":
           description: CMS package not found
+        "423":
+          description: >-
+            The identity freeze is on (code IDENTITY_FROZEN), while profiles
+            move to the 6529 Network.
   /profile-cms/packages/{id}/export:
     get:
       tags:
@@ -16297,7 +17004,14 @@ paths:
         "404":
           description: CMS package not found
         "409":
-          description: Current primary no longer matches the expected version
+          description: >-
+            The current package does not match the guard, or profile sites are
+            on the 6529 chain (code cms_pointer_on_chain): unpublish with
+            PROFILE_REPLACE instead.
+        "423":
+          description: >-
+            The identity freeze is on (code IDENTITY_FROZEN), while profiles
+            move to the 6529 Network.
   /profile-cms/packages/{id}/agent-grants:
     post:
       tags:
@@ -18532,6 +19246,59 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiAvailableRatingCredit"
+  /rememes/add:
+    post:
+      tags:
+        - ReMemes
+      summary: Add ReMemes
+      description: >-
+        Registers NFTs from one Ethereum mainnet contract as ReMemes. The
+        signing wallet must be the contract deployer or meet the configured TDH
+        minimum. A wallet signature authorizes the request without a bearer
+        token. Password-protected deployments also require `x-6529-auth`. A
+        verified structured signature consumes its nonce before the NFT and
+        eligibility checks. Use a fresh signature for each attempt.
+      operationId: addRememe
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiAddRememeRequest"
+      responses:
+        "201":
+          description: ReMemes added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiAddRememeResponse"
+        "400":
+          description: >-
+            Request, signature, contract, or eligibility errors have a top-level
+            error. Per-token validation failures have contract and NFT results,
+            including an error for each affected token.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiAddRememeBadRequest"
+              examples:
+                invalidSignature:
+                  value:
+                    valid: false
+                    error: Invalid signature
+                tokenValidationFailed:
+                  value:
+                    valid: false
+                    contract:
+                      address: "0x1000000000000000000000000000000000000000"
+                    nfts:
+                      - tokenId: "123"
+                        raw:
+                          error: Rememe already exists
+                      - metadataError: >-
+                          Error fetching metadata for token_id 124: metadata
+                          unavailable
   /subscriptions/consolidation/coverage/{consolidation_key}:
     get:
       tags:
@@ -23251,6 +24018,131 @@ components:
           type: string
         device_signature:
           $ref: "#/components/schemas/ApiDeviceSignature"
+    ApiAddRememeBadRequest:
+      oneOf:
+        - $ref: "#/components/schemas/ApiAddRememeError"
+        - $ref: "#/components/schemas/ApiAddRememeTokenErrors"
+    ApiAddRememeError:
+      type: object
+      additionalProperties: false
+      required:
+        - valid
+        - error
+      properties:
+        valid:
+          type: boolean
+          enum:
+            - false
+        error:
+          type: string
+    ApiAddRememeRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - address
+        - signature
+        - rememe
+      properties:
+        address:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Ethereum address of the signing wallet.
+        signature:
+          type: string
+          minLength: 1
+          maxLength: 10000
+          description: >-
+            Ethereum personal-sign signature over the exact text of
+            `signature_message`. Structured messages support externally owned
+            accounts and EIP-1271 contract wallets.
+        signature_message:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 10000
+          description: |-
+            Version 2 action message. Fill in the placeholders and join these
+            lines with LF before signing.
+
+            ```text
+            6529 Action
+            Version: 2
+            Audience: <API host, e.g. api.6529.io>
+            Domain: <client host>
+            Wallet: <address>
+            Chain ID: 1
+            Issued At: <ISO 8601 UTC timestamp>
+            Expiration Time: <ISO 8601 UTC timestamp>
+            Nonce: <fresh UUID>
+            Action: add_rememe
+            Payload Hash: <64 lowercase hex characters>
+            Purpose: Sign this message to add a 6529 ReMeme.
+            ```
+
+            Compute the payload hash from the `rememe` object alone. Use
+            compact JSON with recursively sorted object keys and the original
+            array order. Hash the UTF-8 bytes with SHA-256 and encode the digest
+            as lowercase hex. Send `references` as JSON numbers so the signed
+            values match the validated payload.
+
+            Use a five-minute expiration as the web frontend does. The server
+            accepts a lifetime of up to ten minutes and checks expiry and
+            single use.
+
+            If strict structured signatures are disabled, an externally owned
+            account may omit this field or send null and personal-sign
+            `JSON.stringify(rememe)` with the same key order as the request.
+        rememe:
+          $ref: "#/components/schemas/ApiRememePayload"
+    ApiAddRememeResponse:
+      type: object
+      required:
+        - valid
+        - address
+        - references
+        - contract
+        - nfts
+      properties:
+        valid:
+          type: boolean
+          enum:
+            - true
+        address:
+          type: string
+          description: Wallet that submitted the ReMemes.
+        references:
+          type: array
+          items:
+            type: number
+        contract:
+          $ref: "#/components/schemas/ApiRememeContractMetadata"
+        nfts:
+          type: array
+          description: Alchemy NFT metadata in request order.
+          items:
+            $ref: "#/components/schemas/ApiRememeNftMetadata"
+    ApiAddRememeTokenErrors:
+      type: object
+      additionalProperties: false
+      required:
+        - valid
+        - contract
+        - nfts
+      properties:
+        valid:
+          type: boolean
+          enum:
+            - false
+        contract:
+          $ref: "#/components/schemas/ApiRememeContractMetadata"
+        nfts:
+          type: array
+          description: Results in request order, with at least one token error.
+          items:
+            oneOf:
+              - $ref: "#/components/schemas/ApiRememeNftLookupError"
+              - $ref: "#/components/schemas/ApiRememeNftMetadata"
     ApiAggregatedActivity:
       type: object
       required:
@@ -29169,7 +30061,14 @@ components:
         - ended_at
         - cancelled_at
         - archived_at
+        - stays_on_site
       properties:
+        stays_on_site:
+          type: boolean
+          description: >-
+            The decision's wave's stays_on_site: true when the wave, and with
+            it this decision, stays on 6529.io; false when it moves to the
+            6529 chain.
         main_stage_trait_rules:
           type: array
           description: >-
@@ -29193,6 +30092,14 @@ components:
         id:
           type: string
           format: uuid
+        chain_id:
+          type: string
+          nullable: true
+          pattern: ^0x[0-9a-f]{64}$
+          description: >-
+            The decision's id on the 6529 chain (lowercase), for an imported
+            decision too. Null while 6529.io doesn't know it. Every route that
+            takes a competition id also takes this id.
         wave_id:
           type: string
         type:
@@ -33110,6 +34017,611 @@ components:
           type: integer
           format: int64
           minimum: 1
+    ApiDropForgeAction:
+      type: object
+      required:
+        - id
+        - kind
+        - state
+        - phase
+        - due
+        - deadline
+        - recipients
+      properties:
+        supply_evidence:
+          $ref: "#/components/schemas/ApiDropForgeSupplyEvidence"
+        payment_recipient:
+          type: string
+          nullable: true
+        payment_amount_wei:
+          type: string
+          nullable: true
+        disabled_reason:
+          type: string
+          nullable: true
+        group:
+          type: string
+          description: >-
+            Scheduled phase group, metadata, or research; completion remains per
+            action
+        attempt_count:
+          type: integer
+        attempt_error:
+          type: string
+          nullable: true
+        wallet_retry_available:
+          type: boolean
+          description: The operator can request a retry within the execution window
+        wallet_blocked:
+          type: boolean
+          description: >-
+            This pending action is waiting on operational wallet permission or
+            funding
+        retry_at:
+          type: integer
+          format: int64
+          nullable: true
+        observed:
+          type: boolean
+          description: >-
+            Completed work detected on-chain and skipped without another
+            transaction
+        recovery:
+          $ref: "#/components/schemas/ApiDropForgeRecovery"
+        label:
+          type: string
+        id:
+          type: string
+        kind:
+          type: string
+          enum:
+            - INITIALIZE
+            - AIRDROP
+            - UPDATE
+            - METADATA
+            - PAY_ARTIST
+        state:
+          type: string
+          enum:
+            - PENDING
+            - RESERVED
+            - SIGNED
+            - CONFIRMED
+            - SKIPPED
+            - FAILED
+            - CANCELLED
+        phase:
+          type: integer
+        due:
+          type: integer
+          format: int64
+        deadline:
+          type: integer
+          format: int64
+        recipients:
+          type: integer
+          description: Recipient count; transaction bytes are never returned
+        unfilled_tokens:
+          type: integer
+          minimum: 0
+          description: Requested subscription cards unavailable due to edition supply
+        hash:
+          type: string
+          nullable: true
+        block_number:
+          type: integer
+          nullable: true
+    ApiDropForgeControlRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - revision
+        - operation
+      properties:
+        revision:
+          type: integer
+          minimum: 1
+        operation:
+          type: string
+          enum:
+            - ARM
+            - PAUSE
+            - RESUME
+            - CANCEL
+            - RETRY
+    ApiDropForgeFundingRequest:
+      type: object
+      required:
+        - hash
+      properties:
+        hash:
+          type: string
+    ApiDropForgeFundingResponse:
+      type: object
+      required:
+        - accepted
+      properties:
+        accepted:
+          type: boolean
+    ApiDropForgeJob:
+      type: object
+      required:
+        - id
+        - contract
+        - claim_id
+        - kind
+        - status
+        - updated_at
+        - step
+      properties:
+        step:
+          type: integer
+          minimum: 0
+        phase_ids:
+          type: array
+          items:
+            type: string
+        id:
+          type: string
+          format: uuid
+        contract:
+          type: string
+        claim_id:
+          type: integer
+        kind:
+          type: string
+          enum:
+            - PHASE
+            - FINALIZE
+            - PROCESS_ALL
+        status:
+          type: string
+          enum:
+            - PENDING
+            - COMPLETED
+            - FAILED
+            - AWAITING_AUTH
+        result_json:
+          type: string
+          nullable: true
+          description: Durable download result serialized as JSON
+        error:
+          type: string
+          nullable: true
+        updated_at:
+          type: integer
+          format: int64
+    ApiDropForgeJobRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - request_id
+        - kind
+      properties:
+        phase_ids:
+          type: array
+          minItems: 3
+          maxItems: 3
+          items:
+            type: string
+        request_id:
+          type: string
+          format: uuid
+          description: Stable client ID for retrying the same request
+        kind:
+          type: string
+          enum:
+            - PHASE
+            - FINALIZE
+            - PROCESS_ALL
+        plan_id:
+          type: string
+          maxLength: 100
+        phase_id:
+          type: string
+          maxLength: 100
+          description: EMMA phase ID or public
+    ApiDropForgeLaunch:
+      type: object
+      required:
+        - id
+        - revision
+        - state
+        - chain_id
+        - contract
+        - claim_id
+        - signer
+        - payment_receiver
+        - distribution_hash
+        - phases
+        - actions
+        - updated_at
+      properties:
+        metadata_location:
+          type: string
+        manual_pending:
+          type: boolean
+        id:
+          type: string
+        revision:
+          type: integer
+        state:
+          type: string
+          enum:
+            - DRAFT
+            - ARMED
+            - RUNNING
+            - PAUSED
+            - BLOCKED
+            - COMPLETED
+            - CANCELLED
+        error:
+          type: string
+          nullable: true
+        chain_id:
+          type: integer
+        contract:
+          type: string
+        claim_id:
+          type: integer
+        signer:
+          type: string
+        payment_receiver:
+          type: string
+        distribution_hash:
+          type: string
+        phases:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropForgePhase"
+        actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropForgeAction"
+        updated_at:
+          type: integer
+          format: int64
+    ApiDropForgeListPage:
+      type: object
+      required:
+        - rows
+        - next_offset
+      properties:
+        rows:
+          type: array
+          items:
+            type: object
+            required:
+              - wallet
+              - amount
+            properties:
+              wallet:
+                type: string
+              amount:
+                type: integer
+        next_offset:
+          type: integer
+          nullable: true
+    ApiDropForgeManualRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - operation
+      properties:
+        action:
+          type: string
+          enum:
+            - ARTIST_AIRDROP
+            - TEAM_AIRDROP
+            - PHASE0_AIRDROP
+            - PHASE1_AIRDROP
+            - PHASE2_AIRDROP
+            - PUBLIC_PHASE_AIRDROP
+            - RESEARCH_AIRDROP
+            - PAY_ARTIST
+        operation:
+          type: string
+          enum:
+            - BEGIN
+            - SUBMIT
+            - CANCEL
+        lease_id:
+          type: string
+          format: uuid
+        hash:
+          type: string
+          pattern: ^0x[a-fA-F0-9]{64}$
+    ApiDropForgeManualResponse:
+      type: object
+      required:
+        - lease_id
+      properties:
+        lease_id:
+          type: string
+          nullable: true
+          description: >-
+            Null explicitly permits legacy manual work when automation is
+            disabled or the claim is unmanaged. Conflicts on a managed claim
+            reject BEGIN with 409.
+    ApiDropForgePhase:
+      type: object
+      required:
+        - name
+        - start
+        - end
+        - price_wei
+        - root
+      properties:
+        name:
+          type: string
+        start:
+          type: integer
+          format: int64
+        end:
+          type: integer
+          format: int64
+        price_wei:
+          type: string
+        root:
+          type: string
+    ApiDropForgePhaseInput:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - start
+        - end
+        - price_wei
+        - is_public
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        start:
+          type: integer
+          format: int64
+          description: Unix seconds
+        end:
+          type: integer
+          format: int64
+          description: Unix seconds
+        price_wei:
+          type: string
+          pattern: ^[0-9]+$
+        is_public:
+          type: boolean
+    ApiDropForgePlanRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - revision
+        - initialize_at
+        - phases
+        - include_artist_airdrops
+        - include_team_airdrops
+      properties:
+        revision:
+          type: integer
+          minimum: 0
+          description: Zero creates a new plan; otherwise must equal the current revision
+        initialize_at:
+          type: integer
+          format: int64
+        phases:
+          type: array
+          minItems: 1
+          maxItems: 20
+          items:
+            $ref: "#/components/schemas/ApiDropForgePhaseInput"
+        include_artist_airdrops:
+          type: boolean
+        include_team_airdrops:
+          type: boolean
+    ApiDropForgePreparation:
+      type: object
+      required:
+        - mode
+      properties:
+        mode:
+          type: string
+          enum:
+            - UNSTARTED
+            - MANUAL
+            - BACKGROUND
+    ApiDropForgeRecovery:
+      type: object
+      required:
+        - nonce
+        - attempts
+        - allocations
+        - cancel_requested
+      properties:
+        nonce:
+          type: integer
+        cancel_requested:
+          type: boolean
+        attempts:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropForgeRecoveryAttempt"
+        allocations:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropForgeRecoveryAllocation"
+        outcome:
+          type: string
+          enum:
+            - EXECUTED
+            - CANCELLED
+            - REVERTED
+        winner_hash:
+          type: string
+        supply:
+          type: integer
+        block_number:
+          type: integer
+    ApiDropForgeRecoveryAllocation:
+      type: object
+      required:
+        - address
+        - amount
+      properties:
+        address:
+          type: string
+        amount:
+          type: integer
+    ApiDropForgeRecoveryAttempt:
+      type: object
+      required:
+        - id
+        - operation
+        - requested_by
+        - requested_at
+      properties:
+        id:
+          type: string
+        operation:
+          type: string
+          enum:
+            - ORIGINAL
+            - SPEED_UP
+            - CANCEL
+        requested_by:
+          type: string
+        requested_at:
+          type: integer
+          format: int64
+        hash:
+          type: string
+          nullable: true
+    ApiDropForgeRecoveryRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - revision
+        - request_id
+        - action_id
+        - expected_hash
+        - operation
+      properties:
+        transaction_hash:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{64}$
+        revision:
+          type: integer
+          minimum: 1
+        request_id:
+          type: string
+          format: uuid
+        action_id:
+          type: string
+          maxLength: 100
+        expected_hash:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{64}$
+        operation:
+          type: string
+          enum:
+            - SPEED_UP
+            - CANCEL
+            - RETRY
+            - DELIVER_REMAINING
+            - RECORD_WINNER
+    ApiDropForgeSettings:
+      type: object
+      required:
+        - revision
+        - automation_enabled
+        - max_artist_payment_eth
+        - pay_artist_enabled
+        - updated_by
+        - updated_at
+        - can_edit
+        - can_top_up
+        - chain_id
+        - contract
+        - signer_address
+        - ens_name
+        - balance_wei
+      properties:
+        revision:
+          type: integer
+        automation_enabled:
+          type: boolean
+        max_artist_payment_eth:
+          type: string
+          nullable: true
+          pattern: ^\d{1,59}(?:\.\d{1,18})?$
+        pay_artist_enabled:
+          type: boolean
+        updated_by:
+          type: string
+          nullable: true
+        updated_at:
+          type: integer
+        can_edit:
+          type: boolean
+        can_top_up:
+          type: boolean
+        chain_id:
+          type: integer
+        contract:
+          type: string
+        operations_wave_id:
+          type: string
+          format: uuid
+          description: Wave where Drop Forge posts operational updates.
+        signer_address:
+          type: string
+        ens_name:
+          type: string
+          nullable: true
+        balance_wei:
+          type: string
+          nullable: true
+    ApiDropForgeSettingsRequest:
+      type: object
+      required:
+        - revision
+      properties:
+        revision:
+          type: integer
+        automation_enabled:
+          type: boolean
+        max_artist_payment_eth:
+          type: string
+          nullable: true
+          pattern: ^\d{1,59}(?:\.\d{1,18})?$
+        pay_artist_enabled:
+          type: boolean
+    ApiDropForgeSupplyEvidence:
+      type: object
+      required:
+        - status
+        - checked_at
+      properties:
+        status:
+          type: string
+          enum:
+            - VERIFIED
+            - WAITING
+        checked_at:
+          type: integer
+          format: int64
+        block_number:
+          type: integer
+        block_hash:
+          type: string
+        block_timestamp:
+          type: integer
+        indexed_through:
+          type: integer
+        rpc_total:
+          type: integer
+        db_total:
+          type: integer
+        reason:
+          type: string
     ApiDropGroupMention:
       type: string
       enum:
@@ -33117,6 +34629,7 @@ components:
         - CONTRIBUTORS
         - ADMINS
         - DEVS_6529
+        - DROPS_6529
     ApiDropHiddenState:
       type: object
       required:
@@ -35807,7 +37320,14 @@ components:
         - created_by
         - visible
         - is_private
+        - stays_on_site
       properties:
+        stays_on_site:
+          type: boolean
+          description: >-
+            True when the group stays on 6529.io: it is hidden, private, a
+            direct message's group, or made after the waves freeze. False
+            when it moves to the 6529 chain.
         id:
           type: string
         name:
@@ -38632,6 +40152,11 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiMintingClaimAction"
+        drop_forge_launch_exists:
+          type: boolean
+          description: >-
+            Whether this claim has a Drop Forge launch record in the current
+            environment.
     ApiMintingClaimActionTypesResponse:
       type: object
       required:
@@ -40963,6 +42488,34 @@ components:
                 type: string
             generated_for_external_agents:
               type: boolean
+    ApiProfileCmsChainDocument:
+      type: object
+      required:
+        - cid
+        - bytes_base64
+      properties:
+        cid:
+          type: string
+          description: The file's CID (CIDv1, raw codec, sha2-256).
+        bytes_base64:
+          type: string
+          description: The file's bytes, base64.
+    ApiProfileCmsChainDocuments:
+      type: object
+      description: >-
+        Only in a publish answer with profile sites on the 6529 chain: the two
+        files the person's browser uploads to the gateway's document store,
+        each with its CID, before the PROFILE_REPLACE that names them. With
+        the package, the answer stays under 5 MB for a package at the 2 MiB
+        storage cap.
+      required:
+        - content_core
+        - publication
+      properties:
+        content_core:
+          $ref: "#/components/schemas/ApiProfileCmsChainDocument"
+        publication:
+          $ref: "#/components/schemas/ApiProfileCmsChainDocument"
     ApiProfileCmsPackage:
       type: object
       required:
@@ -41011,6 +42564,15 @@ components:
         published_at:
           type: integer
           format: int64
+        publication_cid:
+          type: string
+          description: >-
+            CID (CIDv1, raw codec, sha2-256) of the package's signed publication
+            record, once the package was signed for publishing. With profile
+            sites on the 6529 chain, a draft that has it waits for the person's
+            PROFILE_REPLACE to name it in their ProfileDoc.
+        chain_documents:
+          $ref: "#/components/schemas/ApiProfileCmsChainDocuments"
     ApiProfileCmsPackageExport:
       type: object
       required:
@@ -42283,6 +43845,71 @@ components:
         platform:
           type: string
           description: Optional platform (ios, android, web)
+    ApiRememeContractMetadata:
+      type: object
+      description: Contract metadata from Alchemy. Additional fields may vary.
+      additionalProperties: true
+      required:
+        - address
+      properties:
+        address:
+          type: string
+        contractDeployer:
+          type: string
+    ApiRememeNftLookupError:
+      type: object
+      additionalProperties: false
+      required:
+        - metadataError
+      properties:
+        metadataError:
+          type: string
+          description: The token lookup failed before returning metadata.
+    ApiRememeNftMetadata:
+      type: object
+      description: NFT metadata from Alchemy. Additional fields may vary.
+      additionalProperties: true
+      required:
+        - tokenId
+      properties:
+        tokenId:
+          type: string
+        raw:
+          type: object
+          additionalProperties: true
+          properties:
+            error:
+              type: string
+              description: >-
+                A provider metadata error or Rememe already exists for a
+                previously registered token.
+    ApiRememePayload:
+      type: object
+      additionalProperties: false
+      required:
+        - contract
+        - token_ids
+        - references
+      properties:
+        contract:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Ethereum mainnet NFT contract address.
+        token_ids:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            type: string
+            minLength: 1
+            maxLength: 100
+        references:
+          type: array
+          description: Referenced Meme IDs. The array may be empty.
+          maxItems: 1000
+          items:
+            type: number
     ApiRenameDeviceRequest:
       type: object
       required:
@@ -44259,10 +45886,31 @@ components:
         - pauses
         - pinned
         - identity_wave
+        - stays_on_site
       properties:
+        stays_on_site:
+          type: boolean
+          description: >-
+            True when the wave stays on 6529.io, served from its database as
+            today. Before the switch-on a wave stays when it is a direct
+            message, the records wave or members-only; when a group it uses
+            stays (hidden, private, a direct message's, missing, or made after
+            the waves freeze); when its chat is off and it has no admin group;
+            when it was made after the freeze; or when a wave above it stays.
+            False when the wave moves to the 6529 chain. After the switch-on a
+            wave stays unless the chain holds it, and a direct message or the
+            records wave always stays.
         id:
           description: The ID of the wave
           type: string
+        chain_id:
+          type: string
+          nullable: true
+          pattern: ^0x[0-9a-f]{64}$
+          description: >-
+            The wave's id on the 6529 chain (lowercase), for an imported wave
+            too; a wave made on the chain has it as its id. Null while 6529.io
+            doesn't know it.
         serial_no:
           description: Sequence number of the wave in Seize
           type: number
@@ -44958,7 +46606,20 @@ components:
         - forbid_negative_votes
         - pinned
         - identity_wave
+        - stays_on_site
       properties:
+        stays_on_site:
+          type: boolean
+          description: >-
+            True when the wave stays on 6529.io, served from its database as
+            today. Before the switch-on a wave stays when it is a direct
+            message, the records wave or members-only; when a group it uses
+            stays (hidden, private, a direct message's, missing, or made after
+            the waves freeze); when its chat is off and it has no admin group;
+            when it was made after the freeze; or when a wave above it stays.
+            False when the wave moves to the 6529 chain. After the switch-on a
+            wave stays unless the chain holds it, and a direct message or the
+            records wave always stays.
         is_direct_message:
           type: boolean
           description: Whether conversation links should open in Messages.

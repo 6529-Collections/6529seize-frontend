@@ -6,6 +6,7 @@ import { useEffect, useRef } from "react";
 import type { UserPageTabConfig, UserPageTabKey } from "./userTabs.config";
 import { useUserPageNavigation } from "./UserPageNavigation";
 import { getUnderlineTabClasses } from "@/components/common/underlineTabStyles";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 interface UserPageTabProps {
   readonly tab: UserPageTabConfig;
@@ -14,6 +15,7 @@ interface UserPageTabProps {
 
 export default function UserPageTab({ tab, activeTabId }: UserPageTabProps) {
   const params = useParams();
+  const { isApp } = useDeviceInfo();
   const searchParams = useSearchParams();
   const navigation = useUserPageNavigation();
   const handleOrWallet = params["user"]?.toString() ?? "";
@@ -89,7 +91,7 @@ export default function UserPageTab({ tab, activeTabId }: UserPageTabProps) {
       }}
       className={`${
         isActive ? "tw-pointer-events-none" : ""
-      } tw-p-0 tw-text-base tw-font-medium tw-leading-4 tw-no-underline`}
+      } tw-p-0 tw-text-sm tw-font-medium tw-leading-4 tw-no-underline ${isApp ? "" : "lg:tw-text-base"}`}
       aria-current={isActive ? "page" : undefined}
       aria-label={linkLabel}
     >

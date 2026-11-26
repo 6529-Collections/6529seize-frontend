@@ -88,29 +88,33 @@ export async function getMemesMintStat(
   });
 }
 
-export async function getMemesMintingClaimActionTypes(): Promise<ApiMintingClaimActionTypesResponse> {
+export async function getMemesMintingClaimActionTypes(
+  contract = MEMES_CONTRACT
+): Promise<ApiMintingClaimActionTypesResponse> {
   return commonApiFetch<ApiMintingClaimActionTypesResponse>({
-    endpoint: `minting-claims/actions/${encodeURIComponent(MEMES_CONTRACT)}/types`,
+    endpoint: `minting-claims/actions/${encodeURIComponent(contract)}/types`,
   });
 }
 
 export async function getMemesMintingClaimActions(
-  claimId: number
+  claimId: number,
+  contract = MEMES_CONTRACT
 ): Promise<ApiMintingClaimActionsResponse> {
   return commonApiFetch<ApiMintingClaimActionsResponse>({
-    endpoint: `minting-claims/actions/${encodeURIComponent(MEMES_CONTRACT)}/${claimId}`,
+    endpoint: `minting-claims/actions/${encodeURIComponent(contract)}/${claimId}`,
   });
 }
 
 export async function upsertMemesMintingClaimAction(
   claimId: number,
-  body: ApiMintingClaimActionUpdateRequest
+  body: ApiMintingClaimActionUpdateRequest,
+  contract = MEMES_CONTRACT
 ): Promise<ApiMintingClaimActionsResponse> {
   return commonApiPost<
     ApiMintingClaimActionUpdateRequest,
     ApiMintingClaimActionsResponse
   >({
-    endpoint: `minting-claims/actions/${encodeURIComponent(MEMES_CONTRACT)}/${claimId}`,
+    endpoint: `minting-claims/actions/${encodeURIComponent(contract)}/${claimId}`,
     body,
   });
 }

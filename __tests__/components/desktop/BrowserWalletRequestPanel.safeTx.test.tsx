@@ -60,13 +60,14 @@ const vector = (name: string) => {
 
 async function fragmentFor(name: string): Promise<string> {
   const { payload, chainId } = vector(name);
+  const issuedAt = Date.now();
   const envelope: WalletRequestEnvelope = {
     v: 1,
     id: ID,
     scheme: "localcore6529",
     origin: globalThis.location.origin,
-    issuedAt: Date.now(),
-    expiresAt: Date.now() + WALLET_REQUEST_TTL_MS,
+    issuedAt,
+    expiresAt: issuedAt + WALLET_REQUEST_TTL_MS,
     request: {
       method: "eth_signTypedData_v4",
       params: [SAFE_TX_SIGNER, payload],

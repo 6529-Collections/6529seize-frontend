@@ -12,7 +12,12 @@ import {
 } from "./chain";
 import { chunkHash, sealChunk } from "./crypto";
 import { type EncodedSegment, fingerprint, messageKey } from "./format";
-import { decodeChunk, followChunk, startNewChain } from "./local-chain";
+import {
+  backupPinIds,
+  decodeChunk,
+  followChunk,
+  startNewChain,
+} from "./local-chain";
 import type { BackupLocalState } from "./state";
 
 /**
@@ -220,6 +225,9 @@ async function tryAppend(
       ...Object.fromEntries(segment.reads),
     };
     local.readsAt = io.now();
+  }
+  if (segment.pins.length > 0 || segment.pinRanks.length > 0) {
+    local.pinIds = { ...local.pinIds, ...backupPinIds(segment) };
   }
   let forked = false;
   if (link.index === 0) {

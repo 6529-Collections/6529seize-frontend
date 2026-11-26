@@ -510,6 +510,7 @@ export default function UserPageProfileWave({
         <OfficialWaveSummary
           waveName={wave.name}
           metadataLabel={getOfficialWaveMetadataLabel(wave)}
+          mobileMetadataLabel={getOfficialWaveMetadataLabel(wave, locale)}
           profileCurationLabel={
             profileCuration ? getProfileCurationTitle(profileCuration) : null
           }

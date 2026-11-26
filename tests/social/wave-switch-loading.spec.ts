@@ -1,4 +1,5 @@
 import type { Page, Request } from "@playwright/test";
+import type { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
 import { expect, expectNoHorizontalOverflow, test } from "../testHelpers";
 import {
   dismissNextDevTools,
@@ -8,6 +9,7 @@ import {
 import { expectAxeClean } from "../support/a11yAssertions";
 import { gateSidebarHydration } from "../support/sidebarHydration";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
+import { expectUrlState } from "../support/urlState";
 
 const SOURCE = "00000000-0000-4000-8000-000000000529";
 const TARGET = "00000000-0000-4000-8000-000000000533";
@@ -248,7 +250,10 @@ for (const { app, emptyDescription } of [
             .boundingBox();
       const pendingName = app
         ? null
-        : await pending.getByRole("heading").locator("span").boundingBox();
+        : await pending
+            .getByRole("heading")
+            .locator(":scope > span")
+            .boundingBox();
       // Hold the real query pending across painted frames; an endpoint-only
       // assertion misses the original all-black interval.
       const emptyFrames = await page.evaluate(
@@ -482,95 +487,205 @@ for (const name of ["Sandbox Direct Message", "sandboxfriend"]) {
   });
 }
 
-test("keeps the subwave title in place when parent navigation arrives", async ({
-  page,
-  baseURL,
-}) => {
-  const apiOrigin = getSandboxApiOrigin(baseURL);
-  const overviewResponse = await page.request.get(`${apiOrigin}/api/v2/waves`);
-  const parent = (await overviewResponse.json()).data[0];
-  const child = {
-    ...parent,
-    id: TARGET,
-    name: NAME,
-    parent_wave: parent,
-    // The full child fixture below has no description text.
-    description_drop: { contents: "", media: [] },
-  };
-  const waveResponse = await page.request.get(
-    `${apiOrigin}/api/waves/${TARGET}`
-  );
-  const wave = await waveResponse.json();
-  await page.route("**/api/open-graph**", (route) =>
-    route.fulfill({ json: {} })
-  );
-  await page.route(/\/api\/v2\/waves(?:\/all)?(?:\?|$)/, (route) =>
-    route.fulfill({
-      json: {
-        data: [{ ...parent, has_subwaves: true }],
-        page: 1,
-        next: false,
-        next_cursor: null,
-        snapshot_expires_at: Date.now() + 900000,
+for (const app of [false, true]) {
+  const title = app
+    ? "shows a centered unread subwave chevron in the app"
+    : "keeps the subwave title in place when parent navigation arrives";
+  test(title, async ({ page, baseURL }, testInfo) => {
+    // Capacitor simulation runs in the phone project. The web case covers desktop.
+    test.skip(
+      app && testInfo.project.name !== "web-mobile-chromium",
+      "Native simulation uses the mobile viewport."
+    );
+    if (app)
+      await installSurfaceSimulation(
+        page.context(),
+        "capacitor-ios-sim",
+        baseURL
+      );
+    const apiOrigin = getSandboxApiOrigin(baseURL);
+    const overviewResponse = await page.request.get(
+      `${apiOrigin}/api/v2/waves`
+    );
+    const { data }: { data: ApiWaveOverview[] } = await overviewResponse.json();
+    const parentOverview = data[0];
+    if (!parentOverview) throw new Error("Missing parent wave in the sandbox");
+    const parent = {
+      ...parentOverview,
+      has_subwaves: true,
+      context_profile_context: {
+        ...parentOverview.context_profile_context,
+        followed_subwaves_count: 1,
+        subwave_unread_drops: 2,
       },
-    })
-  );
-  await page.route(`**/api/waves/${SOURCE}/subwaves?**`, (route) =>
-    route.fulfill({
-      json: {
-        data: [child],
-        page: 1,
-        next: false,
+    };
+    const child = {
+      ...parentOverview,
+      id: TARGET,
+      name: NAME,
+      parent_wave: parent,
+      context_profile_context: {
+        ...parentOverview.context_profile_context,
+        subscribed: true,
+        unread_drops: 2,
       },
-    })
-  );
-  let release!: () => void;
-  const gate = new Promise<void>((resolve) => {
-    release = resolve;
+      // The full child fixture below has no description text.
+      description_drop: { contents: "", media: [] },
+    };
+    const waveResponse = await page.request.get(
+      `${apiOrigin}/api/waves/${TARGET}`
+    );
+    const wave = await waveResponse.json();
+    await page.route("**/api/open-graph**", (route) =>
+      route.fulfill({ json: {} })
+    );
+    await page.route(/\/api\/v2\/waves(?:\/all)?(?:\?|$)/, (route) =>
+      route.fulfill({
+        json: {
+          data: [parent],
+          page: 1,
+          next: false,
+          next_cursor: null,
+          snapshot_expires_at: Date.now() + 900000,
+        },
+      })
+    );
+    await page.route(`**/api/waves/${SOURCE}/subwaves?**`, (route) =>
+      route.fulfill({
+        json: {
+          data: [child],
+          page: 1,
+          next: false,
+        },
+      })
+    );
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await page.route(`**/api/waves/${TARGET}`, async (route) => {
+      await gate;
+      await route.fulfill({ json: { ...wave, parent_wave: parent } });
+    });
+    try {
+      await page.goto("/waves");
+      const parentLink = page
+        .getByRole("link", { name: parent.name, exact: true })
+        .filter({ visible: true })
+        .first();
+      const expand = page
+        .getByRole("button", {
+          name: `Expand ${parent.name} subwaves`,
+          expanded: false,
+        })
+        .filter({ visible: true })
+        .first();
+      const collapse = page
+        .getByRole("button", {
+          name: `Collapse ${parent.name} subwaves`,
+          expanded: true,
+        })
+        .filter({ visible: true })
+        .first();
+      const childLink = page
+        .getByRole("link", { name: NAME, exact: true })
+        .filter({ visible: true })
+        .first();
+      await expect(expand).toBeVisible();
+      await expect(expand).toHaveAccessibleDescription("2 new in subwaves");
+      await expect(
+        expand.getByTestId("sidebar-subwave-unread-dot")
+      ).toBeVisible();
+      await expect(childLink).toBeHidden();
+      if (testInfo.project.name === "web-desktop-chromium") {
+        const chevronBounds = await expand.boundingBox();
+        const linkBounds = await parentLink.boundingBox();
+        expect(chevronBounds!.x + chevronBounds!.width).toBeLessThan(
+          linkBounds!.x
+        );
+        await parentLink.click();
+        const isParentRoute = (url: URL) => url.pathname === `/waves/${SOURCE}`;
+        await expectUrlState(page, isParentRoute);
+        await expect(childLink).toBeVisible();
+        await collapse.press("Space");
+        await expect(childLink).toBeHidden();
+        await expectUrlState(page, isParentRoute);
+      }
+      if (testInfo.project.name === "web-mobile-chromium") {
+        await expect(expand).toHaveCSS("width", "44px");
+        await expect(expand).toHaveCSS("height", "44px");
+        await expect(expand).toHaveCSS("border-top-width", "0px");
+        await expect
+          .poll(() =>
+            expand.evaluate((button) => {
+              const avatar = button.parentElement?.querySelector(
+                '[data-testid="sidebar-wave-avatar"]'
+              )?.firstElementChild;
+              const surface = button.firstElementChild;
+              if (!avatar || !surface) return null;
+              const chevronBounds = button.getBoundingClientRect();
+              const avatarBounds = avatar.getBoundingClientRect();
+              const chevronCenter = chevronBounds.y + chevronBounds.height / 2;
+              const avatarCenter = avatarBounds.y + avatarBounds.height / 2;
+              return {
+                centered: Math.abs(chevronCenter - avatarCenter) <= 1,
+                surfaceShadow: getComputedStyle(surface).boxShadow,
+              };
+            })
+          )
+          .toEqual({ centered: true, surfaceShadow: "none" });
+        const waveListUrl = page.url();
+        await expand.tap();
+        await expect(childLink).toBeVisible();
+        await expect(page).toHaveURL(waveListUrl);
+      } else {
+        await expand.click();
+      }
+      await expect(collapse).toBeVisible();
+      await expect(
+        collapse.getByTestId("sidebar-subwave-unread-dot")
+      ).toHaveCount(0);
+      if (app) {
+        await collapse.tap();
+        await expect(childLink).toBeHidden();
+        await expect(
+          expand.getByTestId("sidebar-subwave-unread-dot")
+        ).toBeVisible();
+        await expectNoHorizontalOverflow(page);
+        return;
+      }
+      await childLink.click();
+      const pending = page.getByTestId("wave-pending");
+      await expect(pending.getByRole("heading")).toHaveText(NAME);
+      const pendingHeader = await pending
+        .getByRole("heading")
+        .locator("xpath=ancestor::div[contains(@class, 'tw-border-b')][1]")
+        .boundingBox();
+      const before = await pending
+        .getByRole("heading")
+        .locator(":scope > span")
+        .boundingBox();
+      release();
+      const ready = page
+        .getByTestId("wave-content")
+        .getByRole("heading")
+        .first();
+      await expect(ready).toHaveText(NAME);
+      const readyHeader = await page
+        .getByTestId("wave-content")
+        .locator("header")
+        .boundingBox();
+      expect(readyHeader?.height).toBe(pendingHeader?.height);
+      const after = await ready.getByRole("button").boundingBox();
+      expect(after?.x).toBe(before?.x);
+      expect(after?.y).toBe(before?.y);
+      expect(after?.height).toBe(before?.height);
+      await expectNoHorizontalOverflow(page);
+    } finally {
+      release();
+    }
   });
-  await page.route(`**/api/waves/${TARGET}`, async (route) => {
-    await gate;
-    await route.fulfill({ json: { ...wave, parent_wave: parent } });
-  });
-  try {
-    await page.goto("/waves");
-    await page
-      .getByRole("button", { name: /View.*subwave/ })
-      .filter({ visible: true })
-      .first()
-      .click();
-    await page
-      .getByRole("link", { name: NAME, exact: true })
-      .filter({ visible: true })
-      .first()
-      .click();
-    const pending = page.getByTestId("wave-pending");
-    await expect(pending.getByRole("heading")).toHaveText(NAME);
-    const pendingHeader = await pending
-      .getByRole("heading")
-      .locator("xpath=ancestor::div[contains(@class, 'tw-border-b')][1]")
-      .boundingBox();
-    const before = await pending
-      .getByRole("heading")
-      .locator("span")
-      .boundingBox();
-    release();
-    const ready = page.getByTestId("wave-content").getByRole("heading").first();
-    await expect(ready).toHaveText(NAME);
-    const readyHeader = await page
-      .getByTestId("wave-content")
-      .locator("header")
-      .boundingBox();
-    expect(readyHeader?.height).toBe(pendingHeader?.height);
-    const after = await ready.getByRole("button").boundingBox();
-    expect(after?.x).toBe(before?.x);
-    expect(after?.y).toBe(before?.y);
-    expect(after?.height).toBe(before?.height);
-    await expectNoHorizontalOverflow(page);
-  } finally {
-    release();
-  }
-});
+}
 
 for (const app of [false, true]) {
   test(`keeps deep-linked drop loading over the wave (${app ? "app" : "web"})`, async ({
