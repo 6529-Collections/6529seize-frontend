@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import { useId, useState, type ReactNode } from "react";
+import { useEffect, useId, useState, type ReactNode } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
@@ -11,6 +11,8 @@ export default function CreateWaveAdvancedSection({
   isCustomized,
   hasError,
   defaultOpen = false,
+  open,
+  onOpenChange,
   variant = "default",
   children,
 }: {
@@ -19,6 +21,8 @@ export default function CreateWaveAdvancedSection({
   readonly isCustomized: boolean;
   readonly hasError: boolean;
   readonly defaultOpen?: boolean | undefined;
+  readonly open?: boolean | undefined;
+  readonly onOpenChange?: ((open: boolean) => void) | undefined;
   readonly variant?: "default" | "filled";
   readonly children: ReactNode;
 }) {
@@ -37,7 +41,11 @@ export default function CreateWaveAdvancedSection({
     }
   }
 
-  const isExpanded = isOpen || hasError;
+  const isExpanded = (open ?? isOpen) || hasError;
+  // Preserve validation-opened content when a responsive host remounts it.
+  useEffect(() => {
+    if (hasError) onOpenChange?.(true);
+  }, [hasError, onOpenChange]);
   const isFilled = variant === "filled";
   const sectionTitle = title ?? t(locale, "waves.create.advanced.title");
   const detail = hasError
@@ -67,7 +75,11 @@ export default function CreateWaveAdvancedSection({
         type="button"
         aria-expanded={isExpanded}
         aria-controls={contentId}
-        onClick={() => setIsOpen((current) => (hasError ? true : !current))}
+        onClick={() => {
+          const next = hasError || !isExpanded;
+          setIsOpen(next);
+          onOpenChange?.(next);
+        }}
         className={`tw-group tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-between tw-gap-4 tw-border-0 tw-px-4 tw-py-3 tw-text-left tw-transition-colors tw-duration-300 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 motion-reduce:tw-transition-none ${buttonClasses}`}
       >
         <span className="tw-flex tw-min-w-0 tw-flex-col tw-gap-0">

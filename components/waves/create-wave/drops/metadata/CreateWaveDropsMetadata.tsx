@@ -4,6 +4,7 @@ import type { CreateWaveDropsRequiredMetadata } from "@/types/waves.types";
 import CreateWaveDropsMetadataRow from "./CreateWaveDropsMetadataRow";
 import CreateWaveDropsMetadataAddRowButton from "./CreateWaveDropsMetadataAddRowButton";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
+import { CREATE_WAVE_FORM_STYLES } from "../../utils/createWaveFormStyles";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import {
   IDENTITY_SUBMISSION_RESERVED_METADATA_ERROR,
@@ -104,7 +105,7 @@ export default function CreateWaveDropsMetadata({
 
   return (
     <div>
-      <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
+      <h3 className={CREATE_WAVE_FORM_STYLES.sectionTitle}>
         Required metadata
       </h3>
       <div className="tw-mt-3 tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-4">

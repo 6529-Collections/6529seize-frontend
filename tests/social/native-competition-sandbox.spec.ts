@@ -694,11 +694,6 @@ async function selectCompetitionFilter(page: Page, name: string) {
     await tab.click();
   }
 }
-const competitionContent = (page: Page) =>
-  page
-    .getByRole("main")
-    .locator('[data-competition-detail], [data-competition-navigation="flat"]')
-    .filter({ visible: true });
 const waveTabStrip = (page: Page) =>
   page.getByRole("tablist").filter({
     has: page.getByRole("tab", { name: "Chat", exact: true }),
@@ -3126,9 +3121,243 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  for (const surface of ["web", "app"] as const) {
+    for (const mode of ["scheduled", "perpetual", "approve"] as const) {
+      test(`keeps all decision editor steps and actions available for ${mode} on ${surface}`, async ({
+        page,
+        baseURL,
+      }, testInfo) => {
+        test.skip(
+          surface === "app" && testInfo.project.name !== "web-mobile-chromium",
+          "The app surface is a phone."
+        );
+        if (testInfo.project.name === "web-mobile-chromium")
+          await page.setViewportSize({ width: 320, height: 844 });
+        if (surface === "app")
+          await installSurfaceSimulation(
+            page.context(),
+            "capacitor-ios-sim",
+            baseURL
+          );
+        await installCompetitionApi(page);
+        await page.goto(`${ROOT}/new`);
+        await dismissNextDevTools(page);
+        const name = page.getByLabel("Decision name", { exact: true });
+        await name.fill(`Editor layout ${mode}`);
+        if (mode === "approve") {
+          await page
+            .getByRole("combobox", { name: "Decision type", exact: true })
+            .click();
+          await page
+            .getByRole("option", { name: "Approve", exact: true })
+            .click();
+        }
+        if (mode === "perpetual")
+          await page.getByText("Perpetual Ranking", { exact: true }).click();
+        const steps = mode === "perpetual" ? 7 : 8;
+        const editor = page.getByRole(
+          testInfo.project.name === "web-mobile-chromium" ? "dialog" : "region",
+          {
+            name: "New decision",
+            exact: true,
+          }
+        );
+        for (const reopened of [false, true]) {
+          if (reopened) {
+            await page.addStyleTag({
+              content: "nextjs-portal { visibility: hidden; }",
+            });
+
+            await page
+              .getByRole("button", { name: "Close editor", exact: true })
+              .click();
+            await page.goto(`${ROOT}/draft`);
+            await expect(name).toHaveValue(`Editor layout ${mode}`);
+          }
+          for (let step = 0; step < steps; step++) {
+            await expect(
+              editor.getByTestId("competition-step-progress").locator("span")
+            ).toHaveCount(steps);
+            await expect(
+              editor
+                .getByTestId("competition-step-progress")
+                .locator(".tw-bg-iron-100")
+            ).toHaveCount(step + 1);
+            if (mode === "approve" && step === 4)
+              await page
+                .getByRole("textbox", {
+                  name: "Approval threshold",
+                  exact: true,
+                })
+                .fill("1");
+            const action = editor.getByRole("button", {
+              name: step === steps - 1 ? "Publish" : "Next",
+              exact: true,
+            });
+            await expect(action).toBeInViewport({ ratio: 1 });
+            if (step > 0)
+              await expect(
+                editor.getByRole("button", { name: "Previous", exact: true })
+              ).toBeInViewport({ ratio: 1 });
+            await expectNoHorizontalOverflow(page);
+            if (testInfo.project.name === "web-mobile-chromium")
+              await expect(action).toHaveCSS("height", "44px");
+            const region = page.getByRole("region", {
+              name: "New decision",
+              exact: true,
+            });
+            if (step >= 2) {
+              const heading = region.getByRole("heading", { level: 2 });
+              await expect(heading).toHaveCount(1);
+              await expect(heading).toHaveCSS(
+                "font-size",
+                testInfo.project.name === "web-mobile-chromium"
+                  ? "15px"
+                  : "20px"
+              );
+            }
+            if (testInfo.project.name === "web-mobile-chromium") {
+              const compactOptions = region.getByRole("radio", {
+                name: /^(Standard drops|Identity nominations|Whole decision|Each drop)$/,
+              });
+              for (const radio of await compactOptions.all()) {
+                const layout = await radio.evaluate((element) => {
+                  const preview = element.closest("label")?.firstElementChild;
+                  const content = element.parentElement;
+                  if (!preview || !content)
+                    throw new Error("Option layout missing");
+                  const bounds = preview.getBoundingClientRect();
+                  return {
+                    width: bounds.width,
+                    height: bounds.height,
+                    sideBySide:
+                      bounds.right <= content.getBoundingClientRect().left,
+                  };
+                });
+                expect(layout).toEqual({
+                  width: 56,
+                  height: 44,
+                  sideBySide: true,
+                });
+              }
+              if (
+                process.env["PLAYWRIGHT_EDITOR_VISUAL_REVIEW"] === "1" &&
+                !reopened
+              ) {
+                const scrollport = page
+                  .getByRole("region", { name: "New decision", exact: true })
+                  .locator(":scope > div")
+                  .first();
+                const pages = await scrollport.evaluate((element) =>
+                  Math.max(
+                    1,
+                    Math.ceil(
+                      (element.scrollHeight - element.clientHeight) /
+                        (element.clientHeight * 0.8)
+                    ) + 1
+                  )
+                );
+                for (let part = 0; part < pages; part++) {
+                  await scrollport.evaluate((element, index) => {
+                    element.scrollTop = index * element.clientHeight * 0.8;
+                  }, part);
+                  await page.screenshot({
+                    path: testInfo.outputPath(
+                      `visual-${mode}-step-${step}-part-${part}.png`
+                    ),
+                    animations: "disabled",
+                    style: "nextjs-portal { visibility: hidden; }",
+                  });
+                }
+                await scrollport.evaluate((element) => {
+                  element.scrollTop = 0;
+                });
+              }
+            }
+            await page.screenshot({
+              path: testInfo.outputPath(
+                `${reopened ? "reopened" : "new"}-${mode}-step-${step}.png`
+              ),
+              animations: "disabled",
+              style: "nextjs-portal { visibility: hidden; }",
+            });
+            if (step < steps - 1) await action.click();
+          }
+        }
+      });
+    }
+  }
+
+  test("uses the decision sheet below md and preserves drafts when its header closes", async ({
+    page,
+  }, testInfo) => {
+    await installCompetitionApi(page);
+    for (const width of [767, 768]) {
+      await page.setViewportSize({ width, height: 844 });
+      await page.goto(`${ROOT}/new`);
+      await dismissNextDevTools(page);
+      const name = page.getByRole("textbox", {
+        name: "Decision name",
+        exact: true,
+      });
+      await expect(name).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: "New decision", exact: true })
+      ).toHaveCount(1);
+      const sheet = page.getByRole("dialog", {
+        name: "New decision",
+        exact: true,
+      });
+      if (width < 768) {
+        await expect(
+          sheet.getByRole("button", { name: "Close", exact: true })
+        ).toBeVisible();
+        const panel = page
+          .getByRole("dialog", { name: "New decision", exact: true })
+          .locator(".mobile-wrapper-dialog");
+        await expect
+          .poll(async () => {
+            const bounds = await panel.boundingBox();
+            return bounds && Math.round(bounds.y + bounds.height);
+          })
+          .toBe(844);
+        const bounds = await panel.boundingBox();
+        expect(bounds!.width).toBeCloseTo(width, 0);
+        expect(bounds!.y).toBeGreaterThan(0);
+        await expect(
+          sheet.getByRole("button", { name: "Next", exact: true })
+        ).toBeInViewport({ ratio: 1 });
+      } else {
+        await expect(sheet).toHaveCount(0);
+        await expect(
+          page.getByRole("region", { name: "New decision", exact: true })
+        ).toBeVisible();
+      }
+      await name.fill(`Sheet draft ${width}`);
+      await page.screenshot({
+        path: testInfo.outputPath(`decision-presentation-${width}.png`),
+        animations: "disabled",
+      });
+      await page
+        .getByRole("button", {
+          name: width < 768 ? "Close" : "Close editor",
+          exact: true,
+        })
+        .click();
+      await expect(page).toHaveURL(ROOT);
+      await page.goto(`${ROOT}/draft`);
+      await expect(name).toHaveValue(`Sheet draft ${width}`);
+      await page
+        .getByRole("button", { name: "Close editor", exact: true })
+        .click();
+      await expect(page).toHaveURL(ROOT);
+      await expectNoHorizontalOverflow(page);
+    }
+  });
+
   test("defaults anonymity off and includes an enabled choice in the saved competition draft", async ({
     page,
-  }) => {
+  }, testInfo) => {
     const sandbox = await installCompetitionApi(page);
     await page.goto(`${ROOT}/new`);
     const choice = page.getByRole("checkbox", {
@@ -3136,6 +3365,25 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       exact: true,
     });
     await expect(choice).not.toBeChecked();
+    await expect(choice).toHaveCSS("opacity", "0");
+    const indicator = await choice.evaluate((element) => {
+      const label = element.closest("label");
+      const track = label?.querySelector(".tw-h-5.tw-w-9");
+      if (!label || !track) throw new Error("Switch indicator missing");
+      const bounds = track.getBoundingClientRect();
+      return {
+        width: bounds.width,
+        height: bounds.height,
+        rightInset: Math.round(
+          label.getBoundingClientRect().right - bounds.right
+        ),
+      };
+    });
+    expect(indicator).toEqual({ width: 36, height: 20, rightInset: 1 });
+    if ((page.viewportSize()?.width ?? 1280) >= 768)
+      await expect(
+        page.getByRole("link", { name: "All decisions", exact: true })
+      ).toHaveCount(0);
     await choice.check();
     await page
       .getByLabel("Decision name", { exact: true })
@@ -3153,6 +3401,54 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         })
       )
       .toBe(true);
+    await page.screenshot({
+      path: testInfo.outputPath("decision-anonymity-switch.png"),
+      animations: "disabled",
+      style: "nextjs-portal { visibility: hidden; }",
+    });
+    for (let step = 0; step < 4; step++)
+      await page.getByRole("button", { name: "Next", exact: true }).click();
+    await expect(
+      page.getByRole("checkbox", {
+        name: "Require a wallet signature for votes",
+        exact: true,
+      })
+    ).toHaveCSS("opacity", "0");
+    const advanced = page.getByRole("button", {
+      name: /^Vote limits and behavior/,
+    });
+    await advanced.click();
+    for (const name of [/negative/i, /time.weighted/i]) {
+      const alignment = await page
+        .getByRole("checkbox", { name })
+        .evaluate((element) => {
+          const label = element.closest("label");
+          const row = label?.parentElement;
+          const heading = row?.querySelector("h3");
+          if (!label || !row || !heading)
+            throw new Error("Voting switch row missing");
+          return {
+            rightInset: Math.round(
+              row.getBoundingClientRect().right -
+                label.getBoundingClientRect().right
+            ),
+            fontSize: getComputedStyle(heading).fontSize,
+            fontWeight: getComputedStyle(heading).fontWeight,
+          };
+        });
+      expect(alignment).toEqual({
+        rightInset: 0,
+        fontSize: "14px",
+        fontWeight: "500",
+      });
+    }
+    await page
+      .getByRole("button", { name: /^Vote limits and behavior/ })
+      .locator("..")
+      .screenshot({
+        path: testInfo.outputPath("decision-voting-switches.png"),
+        animations: "disabled",
+      });
     await expectNoHorizontalOverflow(page);
   });
   for (const { delay, hiddenBy } of [
@@ -11473,6 +11769,83 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     }
   });
 
+  for (const outcome of ["success", "unavailable"] as const) {
+    test(`retains Archive confirmation while draft configuration becomes ${outcome}`, async ({
+      page,
+    }) => {
+      const sandbox = await installCompetitionApi(page);
+      sandbox.setCompetition("alpha", { lifecycle: "DRAFT" });
+      let release = () => {};
+      const ready = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      await page.route(
+        `**/api/v3/waves/${WAVE}/competitions/alpha/configuration`,
+        async (route) => {
+          await ready;
+          if (outcome === "unavailable") {
+            await route.fulfill({
+              status: 503,
+              json: { error: "Unavailable" },
+            });
+          } else {
+            await route.fallback();
+          }
+        }
+      );
+      await page.goto(`${ROOT}/alpha?edit=1`);
+      const archive = page.getByRole("button", {
+        name: "Archive",
+        exact: true,
+      });
+      await archive.click();
+      const confirmation = page.getByRole("dialog", {
+        name: "Archive: Parallel Alpha",
+        exact: true,
+      });
+      const input = confirmation.getByRole("textbox", {
+        name: "Decision name to confirm archival",
+        exact: true,
+      });
+      await input.fill("Parallel");
+      release();
+      if (outcome === "success") {
+        await expect(
+          page.getByRole("textbox", {
+            name: "Decision name",
+            exact: true,
+            includeHidden: true,
+          })
+        ).toHaveValue("Parallel Alpha");
+      } else {
+        await expect(
+          page.getByRole("button", {
+            name: "Try again",
+            exact: true,
+            includeHidden: true,
+          })
+        ).toBeAttached();
+      }
+      await expect(input).toBeVisible();
+      await expect(input).toHaveValue("Parallel");
+      await expect(input).toBeFocused();
+      await expect(
+        confirmation.getByRole("button", { name: "Confirm", exact: true })
+      ).toBeDisabled();
+      await input.fill("Parallel Alpha");
+      await expect(
+        confirmation.getByRole("button", { name: "Confirm", exact: true })
+      ).toBeEnabled();
+      await confirmation
+        .getByRole("button", { name: "Go back", exact: true })
+        .click();
+      await expect(confirmation).toHaveCount(0);
+      await expect(archive).toBeVisible();
+      await expect(archive).toBeFocused();
+      expect(sandbox.requests).toEqual([]);
+    });
+  }
+
   test("saves and resumes a native draft through the existing configuration controls", async ({
     page,
   }) => {
@@ -11513,17 +11886,45 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await expect(page.getByLabel("Decision name", { exact: true })).toHaveValue(
       "Native draft"
     );
-    await expect(competitionContent(page)).toBeVisible();
+    // The phone editor is modal; retain the rendered background-shell checks.
+    const draftContent = page
+      .getByRole("main", { includeHidden: true })
+      .locator(
+        '[data-competition-detail], [data-competition-navigation="flat"]'
+      )
+      .filter({ visible: true });
+    const sharedTabs = page
+      .getByRole("tablist", { includeHidden: true })
+      .filter({
+        has: page.getByRole("tab", {
+          name: "Chat",
+          exact: true,
+          includeHidden: true,
+        }),
+      })
+      .filter({ visible: true });
+    await expect(draftContent).toBeVisible();
     await expect(
-      waveTabStrip(page).getByRole("tab", { name: "Leaderboard", exact: true })
-    ).toBeVisible();
-    await expect(
-      competitionContent(page).getByRole("tab", {
+      sharedTabs.getByRole("tab", {
         name: "Leaderboard",
         exact: true,
+        includeHidden: true,
+      })
+    ).toBeVisible();
+    await expect(
+      draftContent.getByRole("tab", {
+        name: "Leaderboard",
+        exact: true,
+        includeHidden: true,
       })
     ).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
+    if ((page.viewportSize()?.width ?? 1280) < 768)
+      await expect(
+        page
+          .getByRole("dialog", { name: "New decision", exact: true })
+          .getByRole("button", { name: "Archive", exact: true })
+      ).toBeVisible();
     await page.getByRole("button", { name: "Archive", exact: true }).click();
     const archiveDialog = page.getByRole("dialog").last();
     await expect(
@@ -11945,11 +12346,21 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           .locator("..")
           .getByRole("button", { name: "Curation options", exact: true });
         await curationMenu.click();
+        const actions = page.getByRole("dialog", {
+          name: "Curation options",
+          exact: true,
+        });
         await expect(
-          page.getByRole("menuitem", { name: "Edit Curation", exact: true })
+          actions.getByRole("heading", {
+            name: "Curation options",
+            exact: true,
+          })
+        ).toBeVisible();
+        await expect(
+          actions.getByRole("button", { name: "Edit Curation", exact: true })
         ).toBeVisible();
         await page.keyboard.press("Escape");
-        await expect(page.getByRole("menu")).toHaveCount(0);
+        await expect(actions).toHaveCount(0);
         await expect(curationMenu).toBeFocused();
       }
       await page.screenshot({
@@ -11989,6 +12400,81 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       });
     });
   }
+
+  test("uses the existing More filters below md on the web without changing selections", async ({
+    page,
+  }, testInfo) => {
+    await installCompetitionApi(page);
+    await page.setViewportSize({ width: 320, height: 844 });
+    await page.goto(ROOT);
+    const collection = page.getByRole("region", {
+      name: "Decisions",
+      exact: true,
+    });
+    const active = collection.getByRole("tab", {
+      name: "Active and upcoming",
+      exact: true,
+    });
+    const more = collection.getByRole("button", {
+      name: "More tabs",
+      exact: true,
+    });
+    for (const width of [320, 767, 768]) {
+      await page.setViewportSize({ width, height: 844 });
+      await expect(active).toHaveAttribute("aria-selected", "true");
+      if (width < 768) {
+        await expect(more).toBeVisible();
+        await more.click();
+        await page.keyboard.press("Escape");
+        await expect(more).toBeFocused();
+        await expect(active).toHaveAttribute("aria-selected", "true");
+      } else {
+        await expect(more).toHaveCount(0);
+      }
+      for (const label of ["Completed", "Drafts", "All"]) {
+        if (width < 768) {
+          await expect(
+            collection.getByRole("tab", { name: label, exact: true })
+          ).toHaveCount(0);
+          await more.click();
+          await page
+            .getByRole("menuitem", { name: label, exact: true })
+            .click();
+          await expect(
+            collection.getByRole("tab", { name: label, exact: true })
+          ).toHaveAttribute("aria-selected", "true");
+          await expect(more).toHaveText("More");
+          await expect(more).toBeFocused();
+        } else {
+          const tab = collection.getByRole("tab", { name: label, exact: true });
+          await tab.click();
+          await expect(tab).toHaveAttribute("aria-selected", "true");
+        }
+        await expect(
+          collection.getByRole("tabpanel", { name: label, exact: true })
+        ).toBeVisible();
+      }
+      await page.screenshot({
+        path: testInfo.outputPath(`decision-filters-${width}.png`),
+        animations: "disabled",
+        style: "nextjs-portal { visibility: hidden; }",
+      });
+      await selectCompetitionFilter(page, "Active and upcoming");
+      await expectNoHorizontalOverflow(page);
+    }
+    await collection.getByRole("tab", { name: "Drafts", exact: true }).click();
+    await page.setViewportSize({ width: 767, height: 844 });
+    await expect(
+      collection.getByRole("tab", { name: "Drafts", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
+    await expect(
+      collection.getByRole("tabpanel", { name: "Drafts", exact: true })
+    ).toBeVisible();
+    await page.setViewportSize({ width: 768, height: 844 });
+    await expect(
+      collection.getByRole("tab", { name: "Drafts", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
+  });
 
   test("separates wave and competition creation while preserving the filter pills", async ({
     page,
@@ -12106,17 +12592,21 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         exact: true,
       });
       await expect(competitionAction).toBeInViewport({ ratio: 1 });
-      const filterBounds = await active.boundingBox();
-      const actionBounds = await competitionAction.boundingBox();
-      expect(filterBounds).not.toBeNull();
-      expect(actionBounds).not.toBeNull();
-      expect(
-        Math.abs(
-          filterBounds!.y +
-            filterBounds!.height / 2 -
-            (actionBounds!.y + actionBounds!.height / 2)
-        )
-      ).toBeLessThanOrEqual(1);
+      const alignment = await active.evaluate((element) => {
+        const row = element.closest("[data-competition-filters-scroll]")
+          ?.parentElement?.parentElement;
+        const action = row?.querySelector("a");
+        if (!action) throw new Error("Missing decision creation action");
+        // Read both positions in one frame while the native header settles.
+        const filterBounds = element.getBoundingClientRect();
+        const actionBounds = action.getBoundingClientRect();
+        return Math.abs(
+          filterBounds.y +
+            filterBounds.height / 2 -
+            (actionBounds.y + actionBounds.height / 2)
+        );
+      });
+      expect(alignment).toBeLessThanOrEqual(1);
       await collectionMore.scrollIntoViewIfNeeded();
       await expect(collectionMore).toBeInViewport({ ratio: 1 });
       await expect(rightFade).toHaveCount(0);
@@ -12137,10 +12627,19 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await page
         .getByRole("menuitem", { name: "Completed", exact: true })
         .tap();
-      await expect(collectionMore).toHaveText("Completed");
+      await expect(
+        collection.getByRole("tab", { name: "Completed", exact: true })
+      ).toHaveAttribute("aria-selected", "true");
       await expect(
         collection.getByRole("tabpanel", { name: "Completed", exact: true })
       ).toBeVisible();
+      await expect(
+        collection.getByRole("tab", { name: "Completed", exact: true })
+      ).toBeInViewport({ ratio: 1 });
+      // Keep exercising overflow with the longer selected label on a phone.
+      await page.setViewportSize({ width: 320, height: 800 });
+      await selectCompetitionFilter(page, "Active and upcoming");
+      await expect(active).toHaveAttribute("aria-selected", "true");
       await expect
         .poll(() =>
           filtersScroller.evaluate(
@@ -12150,7 +12649,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         .toBeGreaterThan(0);
       await expect
         .poll(async () => {
-          const pill = await collectionMore.boundingBox();
+          const pill = await active.boundingBox();
           const row = await filtersScroller.boundingBox();
           return Boolean(
             pill &&
@@ -12162,13 +12661,17 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         .toBe(true);
       await expect(rightFade).toHaveCount(0);
       await page.screenshot({
-        path: testInfo.outputPath("completed-filter-in-view.png"),
+        path: testInfo.outputPath("selected-filter-in-view.png"),
         animations: "disabled",
         style: "nextjs-portal { visibility: hidden; }",
       });
+      await collectionMore.scrollIntoViewIfNeeded();
+      await expect(collectionMore).toBeInViewport({ ratio: 1 });
       await collectionMore.press("Enter");
       await page.getByRole("menuitem", { name: "Drafts", exact: true }).tap();
-      await expect(collectionMore).toHaveText("Drafts");
+      await expect(
+        collection.getByRole("tab", { name: "Drafts", exact: true })
+      ).toHaveAttribute("aria-selected", "true");
       await expect(collectionMore).toHaveAttribute("aria-expanded", "false");
       if (viewport) await page.setViewportSize(viewport);
     } else {
@@ -12180,7 +12683,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await expect(
       collection.getByRole("tabpanel", { name: "Drafts", exact: true })
     ).toBeVisible();
-    await active.click();
+    await selectCompetitionFilter(page, "Active and upcoming");
     await page.screenshot({
       path: testInfo.outputPath("competition-collection-tabs.png"),
       animations: "disabled",
@@ -12763,9 +13266,21 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await expect(name).toHaveValue("Footer layout draft");
       }
       for (const progress of [0, 0.5, 1]) {
+        await name.evaluate((element, fraction) => {
+          let container = element.parentElement;
+          while (
+            container &&
+            !/(auto|scroll)/.test(getComputedStyle(container).overflowY)
+          ) {
+            container = container.parentElement;
+          }
+          if (!container) throw new Error("Draft scroll container missing");
+          container.scrollTop =
+            fraction * (container.scrollHeight - container.clientHeight);
+        }, progress);
         await expect
           .poll(() =>
-            footer.evaluate((element, fraction) => {
+            footer.evaluate((element) => {
               let container = element.parentElement;
               while (
                 container &&
@@ -12774,13 +13289,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
                 container = container.parentElement;
               }
               if (!container) throw new Error("Draft scroll container missing");
-              container.scrollTop =
-                fraction * (container.scrollHeight - container.clientHeight);
               return Math.abs(
                 container.getBoundingClientRect().bottom -
                   element.getBoundingClientRect().bottom
               );
-            }, progress)
+            })
           )
           .toBeLessThanOrEqual(1);
         await expect(
@@ -12824,6 +13337,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await page.goto(`${ROOT}/draft`);
         await expect(name).toHaveValue("Appearance layout draft");
       }
+      await expect
+        .poll(() =>
+          footer.evaluate((element) => element.getBoundingClientRect().bottom)
+        )
+        .toBeCloseTo(800, 0);
       const restingBottom = await footer.evaluate(
         (element) => element.getBoundingClientRect().bottom
       );
@@ -12979,7 +13497,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           restingBottom = bounds ? bounds.y + bounds.height : 0;
           return restingBottom;
         })
-        .toBeGreaterThan(0);
+        .toBeCloseTo(page.viewportSize()!.height, 0);
       for (const label of ["Decision name", "Description"]) {
         const field = page.getByLabel(label, { exact: true });
         expect(
@@ -13068,6 +13586,130 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     }
   });
 
+  test("keeps decision validation feedback visible above phone navigation", async ({
+    page,
+  }, testInfo) => {
+    await installCompetitionApi(page);
+    const widths =
+      testInfo.project.name === "web-mobile-chromium"
+        ? [498, 320, 768]
+        : [1280];
+    for (const width of widths) {
+      await page.setViewportSize({ width, height: width === 320 ? 560 : 844 });
+      await page.goto(`${ROOT}/new`);
+      const name = page.getByRole("textbox", {
+        name: "Decision name",
+        exact: true,
+      });
+      await name.fill("");
+      const next = page.getByRole("button", { name: "Next", exact: true });
+      const footer = page
+        .getByRole("button", { name: "Next", exact: true })
+        .locator("..");
+      await expect(name).toHaveAttribute("required", "");
+      await expect(
+        page.getByLabel("Decision name", { exact: true })
+      ).toHaveCount(1);
+      await expect(name).toHaveAttribute("aria-invalid", "false");
+      await expect(name).toHaveAccessibleDescription("");
+      await next.click();
+      await expect(name).toHaveAttribute("aria-invalid", "true");
+      await expect(name).toBeFocused();
+      await expect(name).toHaveCSS("border-width", "1px");
+      await expect(name).toHaveCSS("outline-width", "1px");
+      await expect(name).toBeInViewport({ ratio: 1 });
+      const message = page.getByRole("alert").filter({
+        hasText: "Complete the required fields before continuing.",
+      });
+      await expect(message).toHaveCount(1);
+      await expect(message).toBeVisible();
+      await expect(name).toHaveAccessibleDescription(
+        "Complete the required fields before continuing."
+      );
+      await expect(
+        page.getByRole("alert", { includeHidden: true }).filter({
+          hasText: "Complete the required fields before continuing.",
+        })
+      ).toHaveCount(1);
+      if (width < 768) {
+        await expect(message).toBeInViewport({ ratio: 1 });
+        await expect(next).toBeInViewport({ ratio: 1 });
+        await expect(footer).toContainText(
+          "Complete the required fields before continuing."
+        );
+        const messageBounds = await message.boundingBox();
+        const actionBounds = await next.boundingBox();
+        expect(messageBounds!.y + messageBounds!.height).toBeLessThanOrEqual(
+          actionBounds!.y - 8
+        );
+      } else {
+        await expect(footer.getByRole("alert")).toHaveCount(0);
+      }
+      await page.screenshot({
+        path: testInfo.outputPath(`decision-validation-${width}px.png`),
+        animations: "disabled",
+        style: "nextjs-portal { visibility: hidden; }",
+      });
+      await name.fill("Validation placement draft");
+      await expect(name).toHaveAttribute("aria-invalid", "false");
+      await expect(name).not.toHaveAttribute("aria-describedby", /.+/);
+      await expect(name).toHaveAccessibleDescription("");
+      await expect(message).toHaveCount(0);
+      await name.fill("   ");
+      await next.click();
+      await expect(name).toHaveAttribute("aria-invalid", "true");
+      await expect(name).toHaveAccessibleDescription(
+        "Complete the required fields before continuing."
+      );
+      await name.fill("Validation placement draft");
+      await expect(name).toHaveAccessibleDescription("");
+      await next.click();
+      await expect(
+        page.getByRole("group", { name: "Who can drop", exact: true })
+      ).toBeVisible();
+      await expectNoHorizontalOverflow(page);
+    }
+  });
+
+  test("keeps phone web decision type options on the sheet surface", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-mobile-chromium",
+      "The sheet surface is specific to the phone viewport."
+    );
+    await page.setViewportSize({ width: 498, height: 844 });
+    await installCompetitionApi(page);
+    await page.goto(`${ROOT}/new`);
+    const trigger = page.getByRole("combobox", {
+      name: "Decision type",
+      exact: true,
+    });
+    await trigger.click();
+    const sheet = page.getByRole("dialog", {
+      name: "Decision type",
+      exact: true,
+    });
+    const choices = sheet.getByRole("listbox", {
+      name: "Decision type",
+      exact: true,
+    });
+    await expect(choices).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+    await expect(
+      choices.getByRole("option", { name: "Rank", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
+    await page.screenshot({
+      path: testInfo.outputPath("phone-web-decision-type-surface.png"),
+      animations: "disabled",
+      style: "nextjs-portal { visibility: hidden; }",
+    });
+    await choices.getByRole("option", { name: "Approve", exact: true }).click();
+    await expect(sheet).toBeHidden();
+    await expect(trigger).toHaveText("Approve");
+    await expect(trigger).toBeFocused();
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("uses the shared competition type dropdown and app bottom sheet", async ({
     page,
   }, testInfo) => {
@@ -13127,6 +13769,8 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       exact: true,
     });
     await expect(choices).toBeVisible();
+    if (app)
+      await expect(choices).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
     await expect(
       choices.getByRole("option", { name: "Rank", exact: true })
     ).toHaveAttribute("aria-selected", "true");
@@ -13232,34 +13876,91 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       name: "Proposal card appearance",
       exact: true,
     });
+    const mediaChoice = appearance.getByRole("checkbox", {
+      name: "Image on summary card",
+      exact: true,
+    });
+    await mediaChoice.scrollIntoViewIfNeeded();
+    await expect(mediaChoice).toBeInViewport({ ratio: 1 });
     await appearance.screenshot({
       animations: "disabled",
       path: testInfo.outputPath("compact-appearance-options.png"),
     });
     const viewport = page.viewportSize();
     if (!viewport) throw new Error("Viewport missing");
-    for (const width of app ? [viewport.width] : [viewport.width, 639, 640]) {
+    for (const width of app
+      ? [viewport.width, 320]
+      : [viewport.width, 639, 640, 768]) {
       await page.setViewportSize({ ...viewport, width });
+      await expect(mediaChoice).toHaveCSS("opacity", "0");
       for (const options of [ranking, appearance]) {
         await expect
           .poll(() =>
-            options.getByRole("radio").evaluateAll(
-              (radios, stacked) =>
-                radios.every((radio) => {
-                  const preview = radio.closest("label")?.firstElementChild;
-                  const content = radio.parentElement;
-                  if (!preview || !content) return false;
-                  const previewBox = preview.getBoundingClientRect();
-                  const contentBox = content.getBoundingClientRect();
-                  return stacked
-                    ? previewBox.bottom <= contentBox.top &&
-                        Math.abs(previewBox.width - contentBox.width) <= 1
-                    : previewBox.right <= contentBox.left;
-                }),
-              width < 640
+            options.getByRole("radio").evaluateAll((radios) =>
+              radios.every((radio) => {
+                const preview = radio.closest("label")?.firstElementChild;
+                const content = radio.parentElement;
+                if (!preview || !content) return false;
+                const previewBox = preview.getBoundingClientRect();
+                const contentBox = content.getBoundingClientRect();
+                return previewBox.right <= contentBox.left;
+              })
             )
           )
           .toBe(true);
+      }
+      if (width < 768) {
+        for (const options of [ranking, appearance]) {
+          const previews = await options
+            .getByRole("radio")
+            .evaluateAll((radios) =>
+              radios.map((radio) => {
+                const preview = radio.closest("label")!.firstElementChild!;
+                const bounds = preview.getBoundingClientRect();
+                return { width: bounds.width, height: bounds.height };
+              })
+            );
+          expect(previews).toEqual([
+            { width: 56, height: 44 },
+            { width: 56, height: 44 },
+          ]);
+        }
+        await expect(
+          page.getByRole("button", { name: "Next", exact: true })
+        ).toHaveCSS("height", "44px");
+        await expect(
+          page.getByRole("button", { name: "Next", exact: true })
+        ).toHaveCSS("flex-grow", "0");
+        const limit = page.getByRole("spinbutton", {
+          name: "Maximum proposal preview characters",
+          exact: true,
+        });
+        const image = page.getByRole("checkbox", {
+          name: "Image on summary card",
+          exact: true,
+        });
+        await expect(limit).toHaveCSS("width", "80px");
+        await expect(
+          page
+            .getByRole("button", { name: "Appearance and labels", exact: true })
+            .locator("..")
+        ).not.toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+        expect(
+          await limit.evaluate((element) => {
+            const row = element.parentElement!.parentElement!;
+            return row.scrollWidth - row.clientWidth;
+          })
+        ).toBeLessThanOrEqual(1);
+        if (width === 320)
+          await appearance.screenshot({
+            path: testInfo.outputPath("appearance-options-320px.png"),
+            animations: "disabled",
+          });
+        const firstRow = await limit.boundingBox();
+        const secondRow = await image.boundingBox();
+        expect(firstRow).not.toBeNull();
+        expect(secondRow).not.toBeNull();
+        expect(secondRow!.y).toBeGreaterThan(firstRow!.y + firstRow!.height);
       }
       await expectNoHorizontalOverflow(page);
       if (width === 639 || width === 640) {
@@ -14917,6 +15618,292 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await expect(checkbox).toBeChecked({ checked });
   });
 
+  test("switches curation actions to a phone sheet below md and preserves both dialogs", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page);
+    sandbox.clearCompetitions();
+    await page.route("**/api/profiles/*/wave", (route) =>
+      route.fulfill({
+        json: { profile_wave_id: WAVE, profile_curation_id: "phone-actions" },
+      })
+    );
+    await page.route(`**/api/waves/${WAVE}/curations`, (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: "phone-actions",
+            name: "Art",
+            wave_id: WAVE,
+            group_id: composerSandboxConstants.previewGroupId,
+            created_at: 1,
+            updated_at: 1,
+            priority_order: 1,
+          },
+        ],
+      })
+    );
+    for (const width of [767, 768]) {
+      await page.setViewportSize({ width, height: 844 });
+      await page.goto("/playwright/curations");
+      await dismissNextDevTools(page);
+      await page
+        .getByRole("button", {
+          name: "Open source Wave Local Composer Sandbox Wave",
+          exact: true,
+        })
+        .click();
+      await expect(
+        page.getByRole("tab", {
+          name: /^(Profile curation )?Art( Profile curation)?$/,
+        })
+      ).toHaveAttribute("aria-selected", "true");
+      const trigger = page.getByRole("button", {
+        name: "Curation options",
+        exact: true,
+      });
+      const phone = width < 768;
+      const actions = page.getByRole(phone ? "dialog" : "menu", {
+        name: "Curation options",
+        exact: true,
+      });
+      await expect(trigger).toHaveAttribute(
+        "aria-haspopup",
+        phone ? "dialog" : "menu"
+      );
+      await trigger.click();
+      if (phone) {
+        await expect(
+          actions.getByRole("heading", {
+            name: "Curation options",
+            exact: true,
+          })
+        ).toBeVisible();
+      } else {
+        await expect(actions).toBeVisible();
+      }
+      const actionRole = phone ? "button" : "menuitem";
+      await expect(
+        actions.getByRole(actionRole, { name: "Edit Curation", exact: true })
+      ).toBeVisible();
+      await expect(
+        actions.getByRole(actionRole, { name: "Delete Curation", exact: true })
+      ).toBeVisible();
+      if (phone) {
+        const panel = page
+          .getByRole("dialog", { name: "Curation options", exact: true })
+          .locator(".mobile-wrapper-dialog");
+        await expect
+          .poll(async () => {
+            const bounds = await panel.boundingBox();
+            return bounds && Math.round(bounds.y + bounds.height);
+          })
+          .toBe(844);
+        const bounds = await panel.boundingBox();
+        expect(bounds).not.toBeNull();
+        expect(bounds!.width).toBeCloseTo(width, 0);
+      }
+      await page.screenshot({
+        path: testInfo.outputPath(`curation-actions-${width}.png`),
+        animations: "disabled",
+      });
+      await page.keyboard.press("Escape");
+      await expect(actions).toHaveCount(0);
+      await expect(trigger).toBeFocused();
+      await trigger.click();
+      await actions
+        .getByRole(actionRole, { name: "Edit Curation", exact: true })
+        .click();
+      const edit = page.getByRole("dialog", {
+        name: "Edit curation",
+        exact: true,
+      });
+      await expect(
+        edit.getByRole("textbox", { name: "Name", exact: true })
+      ).toHaveValue("Art");
+      await expect(page.getByRole("dialog")).toHaveCount(1);
+      await edit
+        .getByRole("button", { name: phone ? "Close" : "Cancel", exact: true })
+        .click();
+      await expect(edit).toHaveCount(0);
+      await expect(trigger).toBeFocused();
+      await trigger.click();
+      await actions
+        .getByRole(actionRole, { name: "Delete Curation", exact: true })
+        .click();
+      const confirmation = page.getByRole("dialog", {
+        name: "Delete Curation?",
+        exact: true,
+      });
+      await expect(
+        confirmation.getByRole("button", {
+          name: "Delete Curation",
+          exact: true,
+        })
+      ).toBeVisible();
+      await expect(page.getByRole("dialog")).toHaveCount(1);
+      await confirmation
+        .getByRole("button", { name: "Cancel", exact: true })
+        .click();
+      await expect(confirmation).toHaveCount(0);
+      await expect(trigger).toBeFocused();
+      await expectNoHorizontalOverflow(page);
+    }
+  });
+
+  test("keeps profile curation permissions collapsible in the shared editor", async ({
+    page,
+  }, testInfo) => {
+    await installCompetitionApi(page);
+    await page.route("**/api/profiles/*/wave", (route) =>
+      route.fulfill({
+        json: { profile_wave_id: WAVE, profile_curation_id: null },
+      })
+    );
+    await page.route(`**/api/waves/${WAVE}/curations`, (route) =>
+      route.fulfill({ json: [] })
+    );
+    await page.goto("/playwright/curations");
+    await page
+      .getByRole("button", { name: "Create curation", exact: true })
+      .click();
+    const curation = page.getByRole("dialog", {
+      name: "Create curation",
+      exact: true,
+    });
+    const name = curation.getByRole("textbox", { name: "Name", exact: true });
+    const preset = curation.getByRole("button", { name: "Art", exact: true });
+    await preset.click();
+    await expect(name).toHaveValue("Art");
+    await expect(name).toBeFocused();
+    const presetRow = curation
+      .getByRole("button", { name: "Art", exact: true })
+      .locator("..");
+    if (page.viewportSize()!.width < 768) {
+      await name.press("Tab");
+      await expect(presetRow.getByRole("button").first()).toBeFocused();
+      await page.keyboard.press("Shift+Tab");
+    } else {
+      await name.press("Shift+Tab");
+      await expect(presetRow.getByRole("button").last()).toBeFocused();
+      await page.keyboard.press("Tab");
+    }
+    await expect(name).toBeFocused();
+    const summary = curation.getByText("Advanced permissions", { exact: true });
+    const details = curation
+      .getByText("Advanced permissions", { exact: true })
+      .locator("..");
+    const chevron = curation
+      .getByText("Advanced permissions", { exact: true })
+      .locator("svg");
+    await expect(summary).toHaveText("Advanced permissions");
+    await expect(details).not.toHaveAttribute("open");
+    await summary.click();
+    await expect(details).toHaveAttribute("open", "");
+    const editCriteria = details.getByRole("button", {
+      name: "Edit criteria",
+      exact: true,
+    });
+    await expect(editCriteria).toBeVisible();
+    if (testInfo.project.name === "web-mobile-chromium") {
+      await expect(summary).toHaveCSS("min-height", "44px");
+      await expect(chevron).toBeVisible();
+      await expect(name).toHaveCSS("font-size", "16px");
+    } else {
+      await expect(chevron).toBeHidden();
+    }
+    await page.screenshot({
+      path: testInfo.outputPath("profile-curation-permissions.png"),
+      animations: "disabled",
+      style: "nextjs-portal { visibility: hidden; }",
+    });
+    await editCriteria.click();
+    const editor = page.getByRole(
+      testInfo.project.name === "web-mobile-chromium" ? "group" : "dialog",
+      { name: "Edit criteria", exact: true }
+    );
+    await expect(
+      editor.getByRole("button", { name: /^Identities/ })
+    ).toBeVisible();
+    await editor
+      .getByRole("button", { name: "Save changes", exact: true })
+      .click();
+    await expect(name).toHaveValue("Art");
+    await expect(details).toHaveAttribute("open", "");
+    await expect(details.getByText("1 explicitly included user")).toBeVisible();
+    await expect(
+      curation.getByRole("button", { name: "Create", exact: true })
+    ).toBeEnabled();
+    await expectNoHorizontalOverflow(page);
+  });
+
+  test("retains curation criteria loading, unavailable and retry states", async ({
+    page,
+  }) => {
+    await installCompetitionApi(page);
+    const groupId = "curation-retry-group";
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/groups/${composerSandboxConstants.previewGroupId}`
+    );
+    expect(response.ok()).toBe(true);
+    const group = await response.json();
+    let fail = true;
+    let release: () => void = () => undefined;
+    const ready = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await page.route(`**/api/groups/${groupId}`, async (route) => {
+      await ready;
+      await route.fulfill(
+        fail
+          ? { status: 404, json: { error: "Sandbox criteria unavailable" } }
+          : { json: { ...group, id: groupId } }
+      );
+    });
+    await page.route(`**/api/waves/${WAVE}/curations`, (route) =>
+      route.fulfill({
+        json: [
+          { id: "retry-art", name: "Art", wave_id: WAVE, group_id: groupId },
+        ],
+      })
+    );
+    await page.goto(`/waves/${WAVE}?tab=chat`);
+    await openWaveInformation(page);
+    await page.getByRole("tab", { name: "Configuration", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Configure Art", exact: true })
+      .click();
+    await page
+      .getByRole(page.viewportSize()!.width < 768 ? "button" : "menuitem", {
+        name: "Edit Curation",
+        exact: true,
+      })
+      .click();
+    const curation = page.getByRole("dialog", {
+      name: "Edit curation",
+      exact: true,
+    });
+    await expect(
+      curation.getByText("Loading group criteria…", { exact: true })
+    ).toBeVisible();
+    release();
+    await expect(
+      curation.getByText("Current criteria unavailable", { exact: true })
+    ).toBeVisible();
+    fail = false;
+    await curation
+      .getByRole("button", { name: "Try again", exact: true })
+      .click();
+    await expect(curation.getByText(/TDH at least 100/)).toBeVisible();
+    await expect(
+      curation.getByRole("textbox", { name: "Name", exact: true })
+    ).toHaveValue("Art");
+    await expect(
+      curation.getByRole("button", { name: "Save", exact: true })
+    ).toBeEnabled();
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("opens curator criteria inside one desktop dialog", async ({
     page,
   }, testInfo) => {
@@ -14934,6 +15921,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     const curation = page.getByRole("dialog", {
       name: "Create curation",
       exact: true,
+    });
+    await page.screenshot({
+      path: testInfo.outputPath("curation-create-desktop.png"),
+      animations: "disabled",
+      style: "nextjs-portal { visibility: hidden; }",
     });
     await curation
       .getByRole("textbox", { name: "Name", exact: true })
@@ -15637,6 +16629,26 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         sheet.getByRole("button", { name: "Cancel", exact: true })
       ).toHaveCount(0);
       const name = sheet.getByRole("textbox", { name: "Name", exact: true });
+      await expect(name).toHaveAttribute("maxlength", "50");
+      await expect(name).toHaveCSS("font-size", "16px");
+      await expect(name).toHaveCSS("height", "48px");
+      const preset = sheet.getByRole("button", { name: "Art", exact: true });
+      await expect(preset).toHaveCSS("height", "32px");
+      await expect(preset).toHaveCSS("font-size", "13px");
+      const nameBounds = await name.boundingBox();
+      const presetBounds = await preset.boundingBox();
+      expect(presetBounds!.y).toBeGreaterThanOrEqual(
+        nameBounds!.y + nameBounds!.height
+      );
+      await preset.click();
+      await expect(name).toHaveValue("Art");
+      await expect(name).toBeFocused();
+      await expect(preset).toHaveAttribute("aria-pressed", "true");
+      const createAction = sheet.getByRole("button", {
+        name: "Create",
+        exact: true,
+      });
+      await expect(createAction).toHaveCSS("height", "44px");
       await name.fill("Unsaved curation");
       await expect(
         sheet.getByRole("button", { name: "Create", exact: true })
@@ -15712,6 +16724,24 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         .click();
       await expect(name).toHaveValue("Unsaved curation");
       await expect(sheet.getByText("1 explicitly included user")).toBeVisible();
+      const criteriaLine = sheet.getByText("1 explicitly included user", {
+        exact: true,
+      });
+      await expect(criteriaLine).toHaveCSS("font-size", "14px");
+      await expect(criteriaLine).toHaveCSS("font-weight", "500");
+      const criteriaBounds = await criteriaLine.boundingBox();
+      const membersBounds = await sheet
+        .getByRole("button", { name: "View members", exact: true })
+        .boundingBox();
+      expect(membersBounds!.y).toBeGreaterThanOrEqual(
+        criteriaBounds!.y + criteriaBounds!.height
+      );
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath(`curation-compact-${surface}.png`),
+        animations: "disabled",
+        style: "nextjs-portal { visibility: hidden; }",
+      });
       await expect(
         sheet.getByRole("button", { name: "Create", exact: true })
       ).toBeEnabled();
@@ -15732,7 +16762,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       });
       await configure.click();
       await page
-        .getByRole("menuitem", { name: "Edit Curation", exact: true })
+        .getByRole("button", { name: "Edit Curation", exact: true })
         .click();
       await expect(sheet).toHaveCount(1);
       await expect(sheet).toHaveAccessibleName("Edit curation");

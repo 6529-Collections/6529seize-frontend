@@ -17,7 +17,10 @@ import {
   clampApproveWaveEndDate,
   getEarliestApproveWaveEndTimestamp,
 } from "./approveWaveDates.helpers";
-import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
+import {
+  CREATE_WAVE_FORM_STYLES,
+  DECISION_EDITOR_MOBILE_STYLES,
+} from "../utils/createWaveFormStyles";
 
 interface CreateWaveDatesApproveEndProps {
   readonly dates: CreateWaveDatesConfig;
@@ -112,7 +115,9 @@ export default function CreateWaveDatesApproveEnd({
   };
 
   return (
-    <section className="tw-bg-transparent tw-p-5">
+    <section
+      className={`tw-bg-transparent tw-p-5 ${DECISION_EDITOR_MOBILE_STYLES.panelPadding}`}
+    >
       <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
         <div className="tw-space-y-1">
           <div className="tw-flex tw-items-center tw-gap-x-2">

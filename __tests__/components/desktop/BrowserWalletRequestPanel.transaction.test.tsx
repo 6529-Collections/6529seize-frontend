@@ -53,20 +53,23 @@ const envelope = (
   to: string,
   value: bigint,
   expiresIn = 300_000
-): WalletRequestEnvelope => ({
-  v: 1,
-  id: ID,
-  scheme: "localcore6529",
-  origin: globalThis.location.origin,
-  issuedAt: Date.now(),
-  expiresAt: Date.now() + expiresIn,
-  request: {
-    method: "eth_sendTransaction",
-    params: [{ from: ADDRESS, to, data: "0x", value: numberToHex(value) }],
-    address: ADDRESS,
-    chainId: 1,
-  },
-});
+): WalletRequestEnvelope => {
+  const issuedAt = Date.now();
+  return {
+    v: 1,
+    id: ID,
+    scheme: "localcore6529",
+    origin: globalThis.location.origin,
+    issuedAt,
+    expiresAt: issuedAt + expiresIn,
+    request: {
+      method: "eth_sendTransaction",
+      params: [{ from: ADDRESS, to, data: "0x", value: numberToHex(value) }],
+      address: ADDRESS,
+      chainId: 1,
+    },
+  };
+};
 
 async function fragmentFor(value: WalletRequestEnvelope): Promise<string> {
   const bytes = new TextEncoder().encode(JSON.stringify(value));
@@ -88,6 +91,10 @@ const returnedData = () => {
 const sendButton = () => screen.getByRole("button", { name: "Send in wallet" });
 
 describe("BrowserWalletRequestPanel: transactions", () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     account = { isConnected: true, address: ADDRESS, chainId: 1 };
@@ -100,6 +107,12 @@ describe("BrowserWalletRequestPanel: transactions", () => {
   });
 
   it("shows the decoded transaction, checks it and returns the hash", async () => {
+    const issuedAt = Date.now();
+    // Exercise the maximum lifetime when the clock advances between reads.
+    jest
+      .spyOn(Date, "now")
+      .mockReturnValueOnce(issuedAt)
+      .mockReturnValueOnce(issuedAt + 1);
     render(
       <BrowserWalletRequestPanel
         hash={await fragmentFor(envelope(SUBSCRIPTIONS, TOP_UP))}
