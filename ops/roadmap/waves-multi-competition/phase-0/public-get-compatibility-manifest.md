@@ -2,8 +2,8 @@
 
 ## Guarantee
 
-Every externally reachable GET route mounted at this baseline is permanently
-backwards compatible. The guarantee freezes:
+GET routes in the Phase 0 baseline are permanently backwards compatible,
+subject to approved retirements. The guarantee freezes:
 
 - path and path/query parameter names, accepted values, defaults, validation,
   and optional/required behavior;
@@ -24,17 +24,10 @@ different competition, or change null/required/type/enum meaning.
 
 ## Accepted Operational Retirements
 
-The accepted complete Release Bus removal retires the operational UI routes
-`/deploy/ui/branch-head`, `/deploy/ui/bus`, and `/deploy/ui/bus/app.js`.
-The earlier V1 removal in backend PR #1831 retired
+The Simple Release Bus V1 removal in backend PR #1831 retired
 `/deploy/release-bus/controls`, `/deploy/release-candidates`,
-`/deploy/release-trains`, and `/deploy/release-trains/:id`.
-
-The frozen 296-route baseline remains byte-for-byte unchanged as historical
-contract evidence. The backend runtime census excludes only these seven
-explicitly retired operational routes. The ordinary deployment UI and all
-other GET compatibility checks remain enforced; this exception does not relax
-wave, drop, competition, or unrelated API contracts.
+`/deploy/release-trains`, and `/deploy/release-trains/:id`. The backend
+runtime census excludes those historical records from compatibility checks.
 
 ## Machine-Readable Census
 
@@ -45,11 +38,11 @@ The complete contract is split into two checked-in snapshots:
    objects, recursively reachable 357 component schemas, security schemes,
    formats, enums, required arrays, nullability, defaults, paging/filter/order
    descriptions, and error responses.
-2. [Runtime route manifest](./baseline/runtime-get-route-manifest.json): all 296
-   mounted GET route shapes, actual none/optional/required auth classification,
+2. [Runtime route manifest](./baseline/runtime-get-route-manifest.json): 288
+   retained GET route shapes, actual none/optional/required auth classification,
    cache middleware presence, declared response type where present, source
    evidence, and linkage to the OpenAPI operation. All 183 OpenAPI operations
-   link to a runtime route; 113 runtime routes are not published in OpenAPI.
+   link to a runtime route. The manifest includes 105 runtime-only routes.
 
 Both snapshots record the inspected backend source revision. The OpenAPI
 snapshot uses stable two-space JSON; the runtime manifest keeps one complete

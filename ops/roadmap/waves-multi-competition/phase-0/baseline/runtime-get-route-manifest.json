@@ -1,7 +1,7 @@
 {
   "baseline": {
     "captured_on": "2026-07-20",
-    "scope": "Every externally reachable HTTP GET route mounted by the API application at the roadmap Phase 0 baseline, including authenticated operational GETs and raw contract endpoints; the interactive Swagger UI is documentation rather than a stable API response.",
+    "scope": "Externally reachable HTTP GET routes from the roadmap Phase 0 baseline, with approved retirements reflected in this inventory. This includes authenticated operational GETs and raw contract endpoints. The interactive Swagger UI serves as documentation.",
     "permanent_compatibility": [
       "path",
       "parameters",
@@ -24,10 +24,10 @@
       "note": "This deployment gate is in addition to each route auth mode and is itself frozen for legacy GET clients."
     },
     "counts": {
-      "runtime_route_shapes": 296,
+      "runtime_route_shapes": 288,
       "openapi_get_operations": 183,
       "openapi_linked_to_runtime_shape": 183,
-      "runtime_only_route_shapes": 113,
+      "runtime_only_route_shapes": 105,
       "openapi_unlinked_by_static_router_scan": 0
     },
     "source_backend_revision": "2c189ec27869fa39eb1583ce634b3114a7fd54c5",
@@ -299,14 +299,6 @@
     {"path":"/deploy/release-candidates","auth":"required","cache":"uncached","declared_response":null,"source":"src/api-serverless/src/deploy/deploy.routes.ts:409","contract_source":"runtime-only","openapi_path":null,"operation_id":null},
     {"path":"/deploy/release-trains","auth":"required","cache":"uncached","declared_response":null,"source":"src/api-serverless/src/deploy/deploy.routes.ts:430","contract_source":"runtime-only","openapi_path":null,"operation_id":null},
     {"path":"/deploy/release-trains/:id","auth":"required","cache":"uncached","declared_response":null,"source":"src/api-serverless/src/deploy/deploy.routes.ts:437","contract_source":"runtime-only","openapi_path":null,"operation_id":null},
-    {"path":"/deploy/ui","auth":"none","cache":"uncached","declared_response":null,"source":"src/api-serverless/src/deploy/deploy.routes.ts:102","contract_source":"runtime-only","openapi_path":null,"operation_id":null},
-    {"path":"/deploy/ui/app.js","auth":"none","cache":"uncached","declared_response":null,"source":"src/api-serverless/src/deploy/deploy.routes.ts:111","contract_source":"runtime-only","openapi_path":null,"operation_id":null},
-    {"path":"/deploy/ui/branch-head","auth":"required","cache":"uncached","declared_response":null,"source":"src/api-serverless/src/deploy/deploy.routes.ts:130","contract_source":"runtime-only","openapi_path":null,"operation_id":null},
-    {"path":"/deploy/ui/bus","auth":"none","cache":"uncached","declared_response":null,"source":"src/api-serverless/src/deploy/deploy.routes.ts:118","contract_source":"runtime-only","openapi_path":null,"operation_id":null},
-    {"path":"/deploy/ui/bus/app.js","auth":"none","cache":"uncached","declared_response":null,"source":"src/api-serverless/src/deploy/deploy.routes.ts:124","contract_source":"runtime-only","openapi_path":null,"operation_id":null},
-    {"path":"/deploy/ui/refs","auth":"required","cache":"uncached","declared_response":null,"source":"src/api-serverless/src/deploy/deploy.routes.ts:185","contract_source":"runtime-only","openapi_path":null,"operation_id":null},
-    {"path":"/deploy/ui/runs","auth":"required","cache":"uncached","declared_response":null,"source":"src/api-serverless/src/deploy/deploy.routes.ts:167","contract_source":"runtime-only","openapi_path":null,"operation_id":null},
-    {"path":"/deploy/ui/session","auth":"required","cache":"uncached","declared_response":null,"source":"src/api-serverless/src/deploy/deploy.routes.ts:151","contract_source":"runtime-only","openapi_path":null,"operation_id":null},
     {"path":"/desktop/splash","auth":"none","cache":"uncached","declared_response":null,"source":"src/api-serverless/src/desktop/routes.desktop.ts:9","contract_source":"runtime-only","openapi_path":null,"operation_id":null},
     {"path":"/favicon.svg","auth":"none","cache":"uncached","declared_response":null,"source":"src/api-serverless/src/app.ts:1591","contract_source":"runtime-only","openapi_path":null,"operation_id":null},
     {"path":"/health","auth":"none","cache":"uncached","declared_response":null,"source":"src/api-serverless/src/app.ts:1369","contract_source":"runtime-only","openapi_path":null,"operation_id":null},
