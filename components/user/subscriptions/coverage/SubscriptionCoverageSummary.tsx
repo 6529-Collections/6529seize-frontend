@@ -15,6 +15,7 @@ import {
 import type { ApiSubscriptionCoverage } from "@/generated/models/ApiSubscriptionCoverage";
 import { ApiSubscriptionCoverageStatus as Status } from "@/generated/models/ApiSubscriptionCoverageStatus";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { formatInteger } from "@/i18n/format";
 import { t, tRich, type MessageKey } from "@/i18n/messages";
 import {
@@ -220,6 +221,7 @@ function CoverageSummaryContent({
   readonly now: number;
 }) {
   const locale = useBrowserLocale();
+  const isPhoneLayout = useMediaQuery("(max-width: 639px)");
   const status = coverage?.status ?? Status.Unknown;
   const presentation = getSubscriptionCoverageSummaryPresentation(
     locale,
@@ -386,6 +388,35 @@ function CoverageSummaryContent({
       primary: false,
     };
 
+  const ownerActions = showActions ? (
+    <div
+      key="owner-actions"
+      className={`tw-mt-5 tw-grid tw-w-full tw-gap-2 sm:tw-w-auto sm:tw-self-end ${showChooseDrops ? "tw-grid-cols-2 sm:tw-col-start-1 sm:tw-row-start-2 sm:tw-mt-4 sm:tw-flex sm:tw-justify-self-start" : "tw-grid-cols-1 sm:tw-col-start-2 sm:tw-row-start-1 sm:tw-mt-0"}`}
+    >
+      {sectionAction && (
+        <ButtonLink
+          href={sectionAction.hash}
+          onNavigate={(event) => {
+            if (sectionAction)
+              navigateToSubscriptionSection(event, sectionAction.hash);
+          }}
+          variant={sectionAction.primary ? "primary" : "secondary"}
+          size={null}
+          className="tw-min-h-11 tw-min-w-0 tw-px-3 tw-py-1.5 tw-text-sm sm:tw-min-h-9"
+        >
+          {t(locale, sectionAction.label)}
+          {showChooseDrops && (
+            <ArrowRightIcon
+              aria-hidden="true"
+              className="tw-hidden tw-size-4 sm:tw-block"
+            />
+          )}
+        </ButtonLink>
+      )}
+      {!showSetUp && !showHistory && topUp}
+    </div>
+  ) : null;
+
   return (
     <div className="tw-contents">
       <div
@@ -490,6 +521,7 @@ function CoverageSummaryContent({
             </p>
           )}
         </div>
+        {!isPhoneLayout && ownerActions}
         <div
           id="subscription-overview-actions"
           className={`tw-col-span-full tw-mt-5 tw-grid tw-min-w-0 tw-grid-cols-[minmax(0,1fr)_max-content] tw-gap-x-4 tw-gap-y-0.5 tw-text-sm max-[383px]:tw-grid-cols-1 sm:tw-mt-0 sm:tw-flex sm:tw-flex-row sm:tw-flex-wrap sm:tw-gap-x-5 sm:tw-gap-y-3 sm:tw-self-end sm:tw-pt-6 ${showChooseDrops ? "sm:tw-row-start-3" : "sm:tw-row-start-2"}`}
@@ -526,33 +558,7 @@ function CoverageSummaryContent({
             </dl>
           )}
         </div>
-        {showActions && (
-          <div
-            className={`tw-mt-5 tw-grid tw-w-full tw-gap-2 sm:tw-w-auto sm:tw-self-end ${showChooseDrops ? "tw-grid-cols-2 sm:tw-col-start-1 sm:tw-row-start-2 sm:tw-mt-4 sm:tw-flex sm:tw-justify-self-start" : "tw-grid-cols-1 sm:tw-col-start-2 sm:tw-row-start-1 sm:tw-mt-0"}`}
-          >
-            {sectionAction && (
-              <ButtonLink
-                href={sectionAction.hash}
-                onNavigate={(event) => {
-                  if (sectionAction)
-                    navigateToSubscriptionSection(event, sectionAction.hash);
-                }}
-                variant={sectionAction.primary ? "primary" : "secondary"}
-                size={null}
-                className="tw-min-h-11 tw-min-w-0 tw-px-3 tw-py-1.5 tw-text-sm sm:tw-min-h-9"
-              >
-                {t(locale, sectionAction.label)}
-                {showChooseDrops && (
-                  <ArrowRightIcon
-                    aria-hidden="true"
-                    className="tw-hidden tw-size-4 sm:tw-block"
-                  />
-                )}
-              </ButtonLink>
-            )}
-            {!showSetUp && !showHistory && topUp}
-          </div>
-        )}
+        {isPhoneLayout && ownerActions}
       </div>
       {showHistory && topUp && <div className="tw-mt-4">{topUp}</div>}
       {children}
