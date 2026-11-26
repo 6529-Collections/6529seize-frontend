@@ -15,6 +15,7 @@ import {
 } from "@/lib/device-signing/grant-message";
 import { E2EE_CIPHERSUITE, grantExpiresAt } from "@/lib/e2ee/grant";
 import { createLoginE2eeDevice } from "@/lib/e2ee/login-device";
+import type { StoredConversationPins } from "@/lib/e2ee/records";
 import { createMemoryE2eeStorage, type E2eeStorage } from "@/lib/e2ee/storage";
 import {
   addUser,
@@ -390,6 +391,32 @@ describe("E2EE engine: combined sign-in grant (NC8)", () => {
     const fresh = (await signIn.storage.getDevice("alice"))!;
     expect(fresh.deviceKey).not.toBe(signIn.deviceKey);
     expect(fresh.trust?.wallets).toEqual(trust.wallets);
+  });
+
+  it("keeps conversation pins when a sign-in replaces a pending device", async () => {
+    const world = await createWorld();
+    const account = privateKeyToAccount(generatePrivateKey());
+    world.ds.setWallets("alice", [account.address]);
+    const first = await combinedSignIn(world, "alice", account);
+    const pending = (await first.storage.getDevice("alice"))!;
+    expect(pending.registered).toBe(false);
+    const thread = "dm:bob";
+    const conversationPins: StoredConversationPins = {
+      versions: { [thread]: [thread, 1, "a".repeat(32), true] },
+      unsent: [thread],
+    };
+    await first.storage.writeBatch("alice", {
+      device: { ...pending, conversationPins },
+    });
+
+    const second = await combinedSignIn(world, "alice", account, first.storage);
+
+    expect(second.adopted).toBe(true);
+    expect(second.deviceKey).not.toBe(first.deviceKey);
+    expect(await second.storage.getDevice("alice")).toMatchObject({
+      deviceKey: second.deviceKey,
+      conversationPins,
+    });
   });
 
   it("keeps an enrolled device when a later sign-in grants a new key", async () => {

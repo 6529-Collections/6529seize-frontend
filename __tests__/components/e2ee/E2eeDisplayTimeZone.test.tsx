@@ -244,6 +244,9 @@ describe("encrypted chats in the display time zone", () => {
       />
     );
     expect(screen.getByText("10:00 AM UTC")).toBeInTheDocument();
+    expect(screen.getByRole("link")).toHaveAccessibleDescription(
+      "10:00 AM UTC"
+    );
   });
 
   it("states the zone in exported message times", () => {
