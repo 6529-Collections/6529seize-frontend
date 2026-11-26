@@ -1,4 +1,5 @@
 import type { HistorySummary } from "./history-order";
+import type { ConversationPin, PinRankVersions } from "./conversation-pins";
 import type {
   ApiE2eeDeviceGrant,
   ApiE2eeNotifyHint,
@@ -63,6 +64,14 @@ export interface StoredDevice {
   retired?: boolean;
   /** Read-state sync bookkeeping of this device (D175, P60). */
   readSync?: StoredReadSync;
+  conversationPins?: StoredConversationPins;
+}
+
+export interface StoredConversationPins {
+  readonly versions: Readonly<Record<string, ConversationPin>>;
+  readonly unsent: readonly string[];
+  readonly ranks?: PinRankVersions;
+  readonly unsentRanks?: readonly string[];
 }
 
 /** What this device still owes its siblings in read-state sync (P60 §4). */
@@ -216,6 +225,9 @@ export interface StoredGroup {
    * profile's other devices, kept until they apply. Chat handle -> seq.
    */
   readSync?: { received: Record<string, number> };
+  /** Pin updates from the self group, saved atomically with its log cursor. */
+  receivedPins?: Readonly<Record<string, ConversationPin>>;
+  receivedPinRanks?: PinRankVersions;
 }
 
 export interface StoredNotice {

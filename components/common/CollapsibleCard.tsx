@@ -17,6 +17,8 @@ interface CollapsibleCardProps {
   readonly children: React.ReactNode;
   readonly showChevron?: boolean | undefined;
   readonly compactHeader?: boolean | undefined;
+  readonly headerClassName?: string | undefined;
+  readonly titleClassName?: string | undefined;
 }
 
 export default function CollapsibleCard({
@@ -28,6 +30,8 @@ export default function CollapsibleCard({
   children,
   showChevron = true,
   compactHeader = false,
+  headerClassName,
+  titleClassName,
 }: CollapsibleCardProps) {
   const contentId = useId();
   const titleId = `${contentId}-title`;
@@ -59,7 +63,7 @@ export default function CollapsibleCard({
           aria-labelledby={titleId}
           className={`tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-transparent tw-text-left tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
             compactHeader ? "tw-h-12 tw-px-3" : "tw-h-16 tw-px-5"
-          }`}
+          } ${headerClassName ?? ""}`}
         >
           <span
             className={`tw-flex tw-min-w-0 tw-items-center ${
@@ -87,7 +91,7 @@ export default function CollapsibleCard({
                 compactHeader
                   ? "tw-text-sm tw-leading-4 tw-text-iron-200"
                   : "tw-text-base tw-text-iron-300"
-              }`}
+              } ${titleClassName ?? ""}`}
             >
               {title}
             </span>

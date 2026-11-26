@@ -8,8 +8,9 @@ import { installSurfaceSimulation } from "../support/surfaceSimulation";
 
 const WAVE = "00000000-0000-4000-8000-000000000529";
 const TITLE = "Local Composer Sandbox Wave";
-const BROADCAST = "Receive @all and @contributors notifications";
-const ALL = "Receive notifications for all messages";
+const BROADCAST = "Mentions and @all";
+const ALL = "All messages";
+const MENTIONS = "Mentions only";
 
 async function installPreferences(
   page: Page,
@@ -28,6 +29,12 @@ async function installPreferences(
   expect(response.ok()).toBe(true);
   const wave = await response.json();
   wave.subscribed_actions = ["DROP_CREATED"];
+  const muteWrites: string[] = [];
+  await page.route(`**/api/waves/${waveId}/mute`, (route) => {
+    muteWrites.push(route.request().method());
+    wave.metrics.muted = route.request().method() === "POST";
+    return route.fulfill({ json: {} });
+  });
   await page.route(`**/api/waves/${waveId}`, (route) =>
     route.fulfill({ json: wave })
   );
@@ -58,6 +65,7 @@ async function installPreferences(
   );
   return {
     writes,
+    muteWrites,
     failUpdate: () => {
       fail = true;
     },
@@ -81,16 +89,18 @@ async function openAbout(page: Page) {
   return page.getByRole("dialog", { name: `About ${TITLE}`, exact: true });
 }
 
-async function expectReachable(
-  page: Page,
-  role: "checkbox" | "menuitemcheckbox"
-) {
-  for (const name of [BROADCAST, ALL]) {
+async function expectReachable(page: Page, role: "menuitemradio") {
+  for (const name of [ALL, BROADCAST, MENTIONS]) {
     const choice = page.getByRole(role, { name, exact: true });
+    await expect(choice).toHaveText(name);
+    await expect(choice).toHaveAccessibleDescription("");
     await expect(choice).toBeInViewport({ ratio: 1 });
     // Trial pointer action verifies stacking and modal inertness, not only DOM visibility.
     await choice.click({ trial: true });
   }
+  await expect(
+    page.getByRole("menuitem", { name: "Mute wave", exact: true })
+  ).toHaveText("Mute");
   await expectNoHorizontalOverflow(page);
 }
 
@@ -172,24 +182,35 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
           includeHidden: true,
         })
       ).toHaveAttribute("aria-expanded", "true");
-      await expectReachable(page, "checkbox");
+      await expectReachable(page, "menuitemradio");
+      const allMessages = choices.getByRole("menuitemradio", { name: ALL });
+      await allMessages.focus();
+      await page.keyboard.press("ArrowDown");
+      await expect(
+        choices.getByRole("menuitemradio", { name: BROADCAST })
+      ).toBeFocused();
+      await page.keyboard.press("End");
+      await expect(
+        choices.getByRole("menuitem", { name: "Mute wave" })
+      ).toBeFocused();
+      await page.keyboard.press("Home");
+      await expect(allMessages).toBeFocused();
+      // Reuse the common picker sheet over About, without changing its page.
       await expect(page.getByRole("dialog")).toHaveCount(1);
-      expect(
-        await choices
-          .getByRole("heading", { name: "Notification settings", exact: true })
-          .evaluate(
-            (heading) =>
-              heading
-                .closest("[data-mobile-navigation-view]")
-                ?.getBoundingClientRect().height
-          )
-      ).toBeCloseTo(originalHeight ?? 0, 0);
+      await expect(
+        page.getByRole("dialog", {
+          name: `About ${TITLE}`,
+          exact: true,
+          includeHidden: true,
+        })
+      ).toHaveCount(1);
       await expect(
         choices.getByRole("button", { name: "Back", exact: true })
+      ).toHaveCount(0);
+      await expect(
+        choices.getByRole("button", { name: "Close panel", exact: true })
       ).toBeVisible();
-      await expect(choices.getByRole("list").getByRole("listitem")).toHaveCount(
-        2
-      );
+      await expect(choices.getByRole("menuitemradio")).toHaveCount(3);
       await expect(page.getByRole("tooltip")).toHaveCount(0);
       await page.screenshot({
         path: testInfo.outputPath(`notification-choices-${surface}.png`),
@@ -210,37 +231,44 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
                 ?.getBoundingClientRect().height
           )
       ).toBeCloseTo(originalHeight ?? 0, 0);
+      if (surface === "android") {
+        await bell.tap();
+        await page.waitForFunction(() => {
+          const runtime = globalThis as typeof globalThis & {
+            __playwrightAppListeners?: string[];
+          };
+          return runtime.__playwrightAppListeners?.includes("backButton");
+        });
+        await page.evaluate(() =>
+          globalThis.dispatchEvent(
+            new CustomEvent("playwright:backButton", {
+              detail: { canGoBack: true },
+              cancelable: true,
+            })
+          )
+        );
+        await expect(choices).toHaveCount(0);
+        await expect(about).toBeVisible();
+        await expect(bell).toBeFocused();
+      }
       await bell.tap();
-      await page.goBack();
-      await expect(choices).toHaveCount(0);
-      await expect(
-        about.getByRole("heading", { name: `About ${TITLE}`, exact: true })
-      ).toBeVisible();
-      await expect(bell).toBeFocused();
-      await bell.tap();
-      await choices.getByRole("button", { name: "Back", exact: true }).tap();
-      await expect(choices).toHaveCount(0);
-      await expect(bell).toBeFocused();
-      await bell.tap();
-      await expect(
-        choices.getByRole("button", { name: "Close", exact: true })
-      ).toHaveCount(0);
-      await choices.getByRole("button", { name: "Back", exact: true }).tap();
+      await choices
+        .getByRole("button", { name: "Close panel", exact: true })
+        .tap();
       await expect(choices).toHaveCount(0);
       await about.getByRole("button", { name: "Back", exact: true }).tap();
       await expect(about).toHaveCount(0);
       await openAbout(page);
       await bell.tap();
-      await choices.getByRole("checkbox").first().click({ trial: true });
-      // Full-screen information has no backdrop to dismiss by tapping outside.
+      await choices.getByRole("menuitemradio").first().click({ trial: true });
+      // The shared picker dismisses through its backdrop and keeps About open.
       await page.touchscreen.tap(page.viewportSize()!.width - 8, 12);
-      await expect(choices).toBeVisible();
-      await choices.getByRole("button", { name: "Back", exact: true }).tap();
+      await expect(choices).toHaveCount(0);
       await expect(bell).toBeFocused();
       await bell.tap();
       api.delayUpdate();
-      await choices.getByRole("checkbox", { name: ALL }).tap();
-      await expect(bell).toBeDisabled();
+      await choices.getByRole("menuitemradio", { name: ALL }).tap();
+      await expect(bell).toHaveAttribute("aria-busy", "true");
       await expect(choices).toHaveCount(0);
       await expect(bell).toBeEnabled();
       await expect(bell).toBeFocused();
@@ -248,12 +276,22 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
         { subscribed: true, enabled_group_notifications: ["ALL"] },
       ]);
       await bell.tap();
-      await expect(choices.getByRole("checkbox", { name: ALL })).toBeChecked();
-      await choices.getByRole("checkbox", { name: BROADCAST }).tap();
+      await expect(
+        choices.getByRole("menuitemradio", { name: ALL })
+      ).toBeChecked();
+      await page.screenshot({
+        path: testInfo.outputPath(`notification-all-messages-${surface}.png`),
+      });
+      await choices.getByRole("menuitemradio", { name: BROADCAST }).tap();
+      await expect(choices).toHaveCount(0);
+      await expect(bell).toBeFocused();
       await expect(bell).toBeEnabled();
       await bell.tap();
       await expect(
-        choices.getByRole("checkbox", { name: BROADCAST })
+        choices.getByRole("menuitemradio", { name: BROADCAST })
+      ).toBeChecked();
+      await expect(
+        choices.getByRole("menuitemradio", { name: ALL })
       ).not.toBeChecked();
       await page.keyboard.press("Escape");
       await expect(
@@ -263,6 +301,68 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
       await expect(about).toHaveCount(0);
     });
   }
+
+  test("keeps one bell in place while muting and restores the saved level on unmute", async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    const api = await installPreferences(page, baseURL);
+    await page.goto(`/waves/${WAVE}`);
+    await page
+      .getByRole("button", { name: `About ${TITLE}`, exact: true })
+      .first()
+      .click();
+    const bell = page.getByRole("button", {
+      name: "Open notification settings",
+    });
+    // Wait for the information panel's slide-in before measuring its controls.
+    await bell.click({ trial: true });
+    const initialBox = await bell.boundingBox();
+    expect(initialBox).not.toBeNull();
+    await bell.click();
+    await expect(
+      page.getByRole("menuitemradio", { name: BROADCAST })
+    ).toBeChecked();
+    await page
+      .getByRole("menuitem", { name: "Mute wave", exact: true })
+      .click();
+    await expect(bell).toHaveAttribute("aria-busy", "false");
+    await expect(bell).toHaveCSS("color", "rgb(249, 112, 102)");
+    await expect(bell).toBeFocused();
+    await bell.click({ trial: true });
+    expect(await bell.boundingBox()).toEqual(initialBox);
+    await bell.click();
+    for (const name of [ALL, BROADCAST, MENTIONS]) {
+      await expect(
+        page.getByRole("menuitemradio", { name, exact: true })
+      ).toBeDisabled();
+    }
+    await expect(
+      page.getByRole("menuitemradio", { name: BROADCAST })
+    ).toBeChecked();
+    const unmute = page.getByRole("menuitem", {
+      name: "Unmute wave",
+      exact: true,
+    });
+    await expect(unmute).toBeEnabled();
+    await page.screenshot({
+      path: testInfo.outputPath("notification-muted.png"),
+    });
+    await unmute.click();
+    await expect(bell).toHaveAttribute("aria-busy", "false");
+    await expect(bell).not.toHaveCSS("color", "rgb(249, 112, 102)");
+    await expect(bell).toBeFocused();
+    await bell.click({ trial: true });
+    expect(await bell.boundingBox()).toEqual(initialBox);
+    await bell.click();
+    await expect(
+      page.getByRole("menuitemradio", { name: BROADCAST })
+    ).toBeChecked();
+    await expect(page.getByRole("menuitemradio", { name: ALL })).toBeEnabled();
+    expect(api.muteWrites).toEqual(["POST", "DELETE"]);
+    expect(api.writes).toHaveLength(0);
+    await expectNoHorizontalOverflow(page);
+  });
 
   test("keeps desktop and tablet overlay choices reachable with keyboard navigation", async ({
     page,
@@ -294,12 +394,19 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
         "aria-controls",
         (await menu.getAttribute("id")) ?? ""
       );
-      await expectReachable(page, "menuitemcheckbox");
+      await expectReachable(page, "menuitemradio");
+      await page.screenshot({
+        path: testInfo.outputPath(`notification-choices-desktop-${width}.png`),
+      });
       await page.keyboard.press("ArrowDown");
       await expect(menu).toHaveAttribute("aria-activedescendant", /.+/);
       await page.keyboard.press("End");
       await expect(
-        menu.getByRole("menuitemcheckbox", { name: ALL, exact: true })
+        menu.getByRole("menuitem", { name: "Mute wave", exact: true })
+      ).toHaveCSS("box-shadow", /0px 0px 0px 2px inset/);
+      await page.keyboard.press("Home");
+      await expect(
+        menu.getByRole("menuitemradio", { name: ALL, exact: true })
       ).toHaveCSS("box-shadow", /0px 0px 0px 2px inset/);
       await page.keyboard.press("Escape");
       await expect(menu).toHaveCount(0);
@@ -332,9 +439,15 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
         name: "Open notification settings",
       });
       await bell.tap();
-      // Both touch layouts keep notification preferences inside their information panel.
-      const choiceRole = "checkbox";
+      // The common picker overlays the existing information panel on touch layouts.
+      const choiceRole = "menuitemradio";
       await expect(page.getByRole("dialog")).toHaveCount(1);
+      await expect(
+        page.getByRole("button", {
+          name: "Open notification settings",
+          includeHidden: true,
+        })
+      ).toHaveCount(1);
       await expectReachable(page, choiceRole);
       const choice = page.getByRole(choiceRole, { name: BROADCAST });
       const box = await choice.boundingBox();
@@ -375,17 +488,26 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
     api.failRead();
     await page.goto(`/waves/${WAVE}`);
     const about = await openAbout(page);
-    const retry = about.getByRole("button", { name: /retry/i });
-    await expect(retry).toBeVisible({ timeout: 15000 });
-    api.recoverRead();
-    await retry.tap();
     const bell = about.getByRole("button", {
       name: "Open notification settings",
     });
+    await bell.tap();
+    const retry = page.getByRole("menuitem", {
+      name: "Retry notification settings",
+    });
+    await expect(retry).toBeVisible({ timeout: 15000 });
+    api.recoverRead();
+    await retry.tap();
+    await expect(page.getByRole("menuitemradio", { name: ALL })).toBeEnabled();
+    await page.keyboard.press("Escape");
+    await expect(
+      page.getByRole("dialog", { name: "Notification settings", exact: true })
+    ).toHaveCount(0);
+    await expect(bell).toBeFocused();
     await expect(bell).toBeEnabled();
     api.failUpdate();
     await bell.tap();
-    await page.getByRole("checkbox", { name: ALL }).tap();
+    await page.getByRole("menuitemradio", { name: ALL }).tap();
     await expect(
       page.getByRole("dialog", {
         name: "Notification settings",
@@ -403,6 +525,8 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
     ).toBeVisible();
     await expect(bell).toBeEnabled();
     await bell.tap();
-    await expect(page.getByRole("checkbox", { name: ALL })).not.toBeChecked();
+    await expect(
+      page.getByRole("menuitemradio", { name: ALL })
+    ).not.toBeChecked();
   });
 });

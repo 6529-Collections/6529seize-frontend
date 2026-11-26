@@ -68,12 +68,14 @@ export default function MyStreamWavePending({
   const backButtonSizeClass = isDirectMessage
     ? "tw-mt-0.5 tw-size-11 tw-self-start sm:-tw-ml-2.5 sm:desktop-hover:tw-h-9"
     : `tw-h-8 tw-w-6 @[21rem]/wave-header:tw-w-8 @[48rem]/wave-header:tw-mt-0.5 md:-tw-ml-2.5 md:tw-size-11 md:tw-self-start md:desktop-hover:tw-h-9 ${COMPACT_ACTION_TOUCH_TARGET_CLASS}`;
+  let titleHeightClass = "tw-min-h-6";
+  if (isPhoneWave)
+    titleHeightClass = preview?.parentWaveId ? "tw-min-h-9" : "tw-min-h-11";
   let nameClassName = hasProfileIdentity
     ? "tw-block tw-truncate"
     : "tw-block tw-min-h-6 tw-max-w-full tw-truncate tw-text-sm tw-font-normal tw-leading-6";
   if (isPhoneWave) {
-    nameClassName =
-      "tw-flex tw-min-h-11 tw-max-w-full tw-items-center tw-text-sm tw-font-medium tw-leading-[18px]";
+    nameClassName = `tw-flex ${titleHeightClass} tw-max-w-full tw-items-center tw-text-sm tw-font-medium tw-leading-tight`;
   }
   const status = preview
     ? t(locale, "waves.loadingWave", { name: preview.name })
@@ -109,7 +111,7 @@ export default function MyStreamWavePending({
             className={`tw-flex tw-min-w-0 tw-flex-1 tw-items-center ${isPhoneWave ? "tw-gap-2" : "tw-gap-x-[13px]"} ${isPhoneWave ? "" : identityPadding} ${showDescriptionPreview ? descriptionRowHeightClass : ""}`}
           >
             <div
-              className={`tw-size-9 tw-shrink-0 tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950 ${!isPhoneWave || preview?.parentWaveId ? "tw-self-start" : ""}`}
+              className={`tw-size-9 tw-shrink-0 tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950 ${showDescriptionPreview ? "md:@[40rem]/wave-header:tw-self-start" : ""}`}
             >
               {preview && (
                 <WavePicture
@@ -136,9 +138,17 @@ export default function MyStreamWavePending({
                   hasProfileIdentity ? "" : "tw-flex tw-min-h-6 tw-items-center"
                 }
               >
-                <h1 className="tw-m-0 tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
+                <h1
+                  className={`tw-m-0 tw-min-w-0 tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl ${isPhoneWave ? "" : "tw-truncate"}`}
+                >
                   <span className={nameClassName}>
-                    {preview?.name ?? t(locale, "waves.loadingWaveUnknown")}
+                    {isPhoneWave ? (
+                      <span className="tw-line-clamp-2 tw-min-w-0 tw-break-words tw-leading-[18px]">
+                        {preview?.name ?? t(locale, "waves.loadingWaveUnknown")}
+                      </span>
+                    ) : (
+                      (preview?.name ?? t(locale, "waves.loadingWaveUnknown"))
+                    )}
                   </span>
                 </h1>
               </div>

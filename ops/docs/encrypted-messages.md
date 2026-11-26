@@ -107,6 +107,21 @@ links and images do not open or load separately. Long previews end with an
 ellipsis. Custom emojis render inline at a compact size, while code keeps emoji
 shortcodes literal.
 
+Use the pin icon on a chat row in the encrypted inbox or sidebar to keep the
+chat above unpinned chats. When a row shows a timestamp, the pin sits just to
+its left. On desktop, hover the row or tab to the icon. On a touchscreen,
+tap the icon. Select the filled pin to unpin the chat. **Chat info**
+also has **Pin to top** and **Unpin chat**. Your pin follows the direct
+conversation when it continues in a new encryption session. Pins sync privately
+to your other trusted devices after they connect. If encrypted sync is off, the
+pin is saved on this device until sync is available.
+
+Drag a pinned chat row to move it among your pins. On a touchscreen, hold
+briefly, then drag vertically. With a keyboard, focus the chat, press Space,
+move it with the arrow keys, then press Space again to save. Press Escape to
+cancel. New pins and re-pins go to the bottom. Your order syncs privately to
+your trusted devices and is included in encrypted backup when enabled.
+
 On mobile web and in the app, open **+** beside the message input for **Attach**,
 **Poll** when available, and **GIF**. The tray opens below the input and closes
 when you pick an action, start typing, or tap outside it. On desktop, these
@@ -691,8 +706,9 @@ restore it on a new device.
   exists, closing the dialog doesn't stop the upload.
 - What is backed up: messages you have on this device (text, edits,
   deletions, reactions, notices), the chat names and members needed to show
-  them, and references to attachments with their keys. Never the device's
-  encryption state; a new device always joins chats as a new device.
+  them, references to attachments with their keys, and the pins saved on
+  this device. A fresh device restores this inbox state with the backup
+  and joins chats using its own encryption keys.
 - Backups are incremental: after a change the device uploads only what
   changed, about 30 seconds later. **Back up now** uploads immediately and
   then shows "Backup is up to date." in the status line for a few seconds.

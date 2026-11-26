@@ -27,9 +27,11 @@ import type {
 export default function ReviewDistributionPlanTableRow({
   item,
   rows,
+  showManual = false,
 }: {
   readonly item: ReviewDistributionPlanTableItem;
   readonly rows: ReviewDistributionPlanTablePhase[];
+  readonly showManual?: boolean;
 }) {
   const { distributionPlan } = useContext(DistributionPlanToolContext);
 
@@ -192,25 +194,31 @@ export default function ReviewDistributionPlanTableRow({
       <td className={commonClasses}>
         {isPublic ? "-" : formatCount(item.spotsCount)}
       </td>
-      <td className={`${commonClasses} tw-flex tw-justify-start tw-gap-x-3`}>
-        <RoundedJsonIconButton
-          onClick={() => fetchResults(FetchResultsType.JSON)}
-          loading={isLoadingJson}
-          disabled={isPublic}
-        />
-        <RoundedCsvIconButton
-          onClick={() => fetchResults(FetchResultsType.CSV)}
-          loading={isLoadingCsv}
-          disabled={isPublic}
-        />
-        <RoundedManifoldIconButton
-          onClick={() => fetchResults(FetchResultsType.MANIFOLD)}
-          loading={isLoadingManifold}
-          disabled={isPublic}
-        />
-        {distributionPlan && (
-          <SubscriptionLinks plan={distributionPlan} phase={item} />
-        )}
+      <td className={`${commonClasses} tw-align-middle`}>
+        <div className="tw-flex tw-items-center tw-gap-x-3">
+          <RoundedJsonIconButton
+            onClick={() => fetchResults(FetchResultsType.JSON)}
+            loading={isLoadingJson}
+            disabled={isPublic}
+          />
+          <RoundedCsvIconButton
+            onClick={() => fetchResults(FetchResultsType.CSV)}
+            loading={isLoadingCsv}
+            disabled={isPublic}
+          />
+          <RoundedManifoldIconButton
+            onClick={() => fetchResults(FetchResultsType.MANIFOLD)}
+            loading={isLoadingManifold}
+            disabled={isPublic}
+          />
+          {distributionPlan && (
+            <SubscriptionLinks
+              plan={distributionPlan}
+              phase={item}
+              showManual={showManual}
+            />
+          )}
+        </div>
       </td>
     </DistributionPlanTableRowWrapper>
   );

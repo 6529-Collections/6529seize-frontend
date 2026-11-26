@@ -21,10 +21,10 @@ export function GrantItemContent({
   const name = contract.name ?? shortenAddress(contract.address);
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-4 [&>dl>div]:tw-min-w-0 max-sm:[&>dl]:tw-grid-cols-2 [&>dl_dd>div>span]:tw-whitespace-normal [&>dl_dd>div]:tw-flex-wrap [&>dl_dd>div]:tw-gap-y-1 [&>dl_dd]:tw-break-words">
-      <header className="tw-flex tw-flex-col tw-items-start tw-justify-between tw-gap-4 md:tw-flex-row">
-        <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-3">
-          <div className="tw-relative tw-h-12 tw-w-12 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-iron-800 sm:tw-h-16 sm:tw-w-16">
+    <div className="tw-flex tw-flex-col tw-gap-3 md:tw-gap-4 [&>dl>div]:tw-min-w-0 max-sm:[&>dl]:tw-grid-cols-2 [&>dl_dd>div>span]:tw-whitespace-normal [&>dl_dd>div]:tw-flex-wrap [&>dl_dd>div]:tw-gap-y-1 [&>dl_dd]:tw-break-words">
+      <header className="tw-flex tw-flex-row tw-items-center tw-justify-between tw-gap-3 md:tw-items-start md:tw-gap-4">
+        <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3 md:tw-flex-wrap">
+          <div className="tw-relative tw-size-10 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-iron-800 md:tw-size-16">
             {imageUrl && imageUrl !== failedImageUrl ? (
               <Image
                 key={imageUrl}
@@ -45,23 +45,27 @@ export function GrantItemContent({
             )}
           </div>
           <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-0.5">
-            <p className="tw-m-0 tw-break-words tw-text-sm tw-font-medium tw-text-iron-100 group-data-[typography=profile]/profile-xtdh:tw-text-[15px] group-data-[typography=profile]/profile-xtdh:tw-font-semibold">
+            <p className="tw-m-0 tw-break-words tw-text-sm tw-font-medium tw-text-iron-100 group-data-[typography=profile]/profile-xtdh:tw-text-[15px] group-data-[typography=profile]/profile-xtdh:tw-font-semibold max-md:tw-leading-5">
               {name}
             </p>
-            <p className="tw-m-0 tw-text-xs tw-text-iron-500 group-data-[typography=profile]/profile-xtdh:tw-text-meta group-data-[typography=profile]/profile-xtdh:tw-font-normal group-data-[typography=profile]/profile-xtdh:tw-tabular-nums">
+            <p className="tw-m-0 tw-text-xs tw-text-iron-500 group-data-[typography=profile]/profile-xtdh:tw-text-meta group-data-[typography=profile]/profile-xtdh:tw-font-normal group-data-[typography=profile]/profile-xtdh:tw-tabular-nums max-md:tw-leading-[18px]">
               {shortenAddress(contract.address)}
             </p>
           </div>
         </div>
-        <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-3">
-          <GrantExpiryBadge
-            validUntil={typeof validTo === "number" ? validTo : null}
-          />
-          <StatusBadge
-            status={status}
-            validFrom={validFrom}
-            validTo={validTo}
-          />
+        <div className="tw-flex tw-min-w-0 tw-max-w-[50%] tw-shrink-0 tw-items-start tw-gap-1 md:tw-max-w-none md:tw-flex-wrap md:tw-items-center md:tw-gap-3">
+          <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-end tw-gap-1.5 md:tw-contents">
+            <div className="tw-order-2 md:tw-order-none max-md:[&>div]:tw-flex-wrap max-md:[&>div]:tw-justify-end max-md:[&_time]:tw-text-right">
+              <GrantExpiryBadge
+                validUntil={typeof validTo === "number" ? validTo : null}
+              />
+            </div>
+            <StatusBadge
+              status={status}
+              validFrom={validFrom}
+              validTo={validTo}
+            />
+          </div>
           {actions}
         </div>
       </header>

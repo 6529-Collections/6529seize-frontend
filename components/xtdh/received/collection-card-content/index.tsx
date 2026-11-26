@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import { useMemo } from "react";
 import clsx from "clsx";
 
@@ -25,6 +26,7 @@ type ApiXtdhCollection = ApiXTdhCollectionsPage["data"][number];
 type InteractionMode = "button" | "static";
 
 interface XtdhReceivedCollectionCardProps {
+  readonly variant?: "default" | "profile";
   readonly collection: ApiXtdhCollection;
   readonly isSelected?: boolean | undefined;
   readonly onSelect?:
@@ -35,6 +37,7 @@ interface XtdhReceivedCollectionCardProps {
 }
 
 export function XtdhReceivedCollectionCard({
+  variant = "default",
   collection,
   isSelected = false,
   onSelect,
@@ -115,15 +118,23 @@ export function XtdhReceivedCollectionCard({
         interactionMode === "static"
           ? "tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-4"
           : "tw-rounded-b-xl tw-px-6 tw-py-6 desktop-hover:hover:tw-bg-iron-900",
+        variant === "profile" &&
+          "tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.04] tw-bg-iron-900/50 max-md:tw-p-4",
         isSelected && "tw-bg-iron-900/50",
         !isSelectable &&
           interactionMode === "button" &&
           "tw-cursor-not-allowed tw-opacity-70"
       )}
     >
-      <header className="tw-flex tw-flex-col tw-items-start tw-justify-between tw-gap-x-3 tw-gap-y-6 md:tw-flex-row">
-        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center">
-          <div className="tw-relative tw-h-16 tw-w-16 tw-overflow-hidden tw-rounded-lg tw-bg-iron-800 tw-shadow-inner tw-transition-transform tw-duration-300 group-hover:tw-scale-105">
+      <header
+        className={`tw-relative tw-flex tw-flex-col tw-items-start tw-justify-between tw-gap-x-3 tw-gap-y-6 md:tw-flex-row ${variant === "profile" ? "max-md:tw-gap-2.5" : ""}`}
+      >
+        <div
+          className={`tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center ${variant === "profile" ? "max-md:tw-w-full max-md:tw-flex-row max-md:tw-items-center max-md:tw-pr-6" : ""}`}
+        >
+          <div
+            className={`tw-relative tw-h-16 tw-w-16 tw-overflow-hidden tw-rounded-lg tw-bg-iron-800 tw-shadow-inner tw-transition-transform tw-duration-300 group-hover:tw-scale-105 ${variant === "profile" ? "tw-shrink-0 max-md:tw-size-10" : ""}`}
+          >
             {imageUrl ? (
               <Image
                 src={imageUrl}
@@ -139,7 +150,7 @@ export function XtdhReceivedCollectionCard({
             )}
           </div>
           <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-0.5">
-            <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50 group-data-[typography=profile]/profile-xtdh:tw-text-[15px] group-data-[typography=profile]/profile-xtdh:tw-text-iron-100">
+            <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50 group-data-[typography=profile]/profile-xtdh:tw-text-[15px] group-data-[typography=profile]/profile-xtdh:tw-text-iron-100 max-md:group-data-[typography=profile]/profile-xtdh:tw-break-words max-md:group-data-[typography=profile]/profile-xtdh:tw-leading-5">
               {displayName}
             </p>
             <div className="tw-flex tw-w-full tw-items-center tw-gap-2">
@@ -155,9 +166,25 @@ export function XtdhReceivedCollectionCard({
             </div>
           </div>
         </div>
-        <XtdhRatePill rateLabel={xtdhRateLabel} totalLabel={xtdhValueLabel} />
+        <XtdhRatePill
+          rateLabel={xtdhRateLabel}
+          totalLabel={xtdhValueLabel}
+          className={
+            variant === "profile"
+              ? "max-md:[&>span:first-child]:tw-font-normal max-md:[&>span:first-child]:tw-text-iron-400 max-md:[&>span:last-child]:tw-font-medium"
+              : undefined
+          }
+        />
+        {variant === "profile" && isSelectable && (
+          <ChevronRightIcon
+            aria-hidden="true"
+            className="tw-absolute tw-right-0 tw-top-0 tw-size-4 tw-text-iron-400 md:tw-hidden"
+          />
+        )}
       </header>
-      <dl className="tw-mb-0 tw-mt-6 tw-grid tw-gap-x-6 tw-gap-y-4 sm:tw-grid-cols-2 md:tw-ml-20 md:tw-mt-4 md:tw-grid-cols-3">
+      <dl
+        className={`tw-mb-0 tw-mt-6 tw-grid tw-gap-x-6 tw-gap-y-4 sm:tw-grid-cols-2 md:tw-ml-20 md:tw-mt-4 md:tw-grid-cols-3 ${variant === "profile" ? "max-md:tw-mt-4 max-md:tw-grid-cols-2 max-md:tw-gap-x-3 max-md:tw-gap-y-3" : ""}`}
+      >
         <CollectionMetric label="Total supply" value={totalSupplyLabel} />
         <CollectionMetric
           label="Active tokens"
@@ -195,7 +222,10 @@ export function XtdhReceivedCollectionCard({
         onClick={handleSelect}
         disabled={!isSelectable}
         aria-pressed={isSelected}
-        className="tw-w-full tw-border-none tw-bg-transparent tw-p-0 tw-text-left"
+        className={clsx(
+          "tw-w-full tw-border-none tw-bg-transparent tw-p-0 tw-text-left",
+          variant === "profile" && "tw-rounded-xl"
+        )}
       >
         {content}
       </button>

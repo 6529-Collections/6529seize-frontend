@@ -82,12 +82,17 @@ const WaveDropAuthorPfp: React.FC<WaveDropAuthorPfpProps> = ({
   };
 
   if (!profileHref || disableNavigation) {
-    return <div className={containerClasses}>{avatarContent}</div>;
+    return (
+      <div data-wave-drop-author-avatar className={containerClasses}>
+        {avatarContent}
+      </div>
+    );
   }
 
   return (
     <UserProfileTooltipWrapper user={tooltipUser}>
       <Link
+        data-wave-drop-author-avatar
         href={profileHref}
         prefetch={false}
         aria-label={`View ${tooltipUser}'s profile`}

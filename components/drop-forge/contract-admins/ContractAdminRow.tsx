@@ -8,6 +8,7 @@ import Button from "@/components/utils/button/Button";
 import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/drop-forge";
 
 export default function ContractAdminRow({
   address,

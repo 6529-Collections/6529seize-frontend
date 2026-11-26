@@ -392,6 +392,10 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
       baseURL
     );
     await gotoCreateWave(page);
+    // Measure the loaded app header, not its taller dynamic-import placeholder.
+    await expect(
+      page.getByRole("button", { name: "Share page", exact: true })
+    ).toBeVisible();
     const flow = page
       .getByLabel(/Wave Name/)
       .locator("xpath=ancestor::*[@data-flow-title]/div[1]");
@@ -1887,7 +1891,8 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
     await expect(page).toHaveURL(
       new RegExp(`/waves/${CREATED_COMPETITION_WAVE_ID}/decisions$`)
     );
-    await page.getByRole("tab", { name: "Drafts", exact: true }).click();
+    await page.getByRole("button", { name: "More tabs", exact: true }).click();
+    await page.getByRole("menuitem", { name: "Drafts", exact: true }).click();
     await page
       .getByRole("link")
       .filter({

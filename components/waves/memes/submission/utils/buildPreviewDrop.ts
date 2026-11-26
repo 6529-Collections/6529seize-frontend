@@ -3,6 +3,7 @@
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
 import { DropSize, getOptimisticDropId } from "@/helpers/waves/drop.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -10,6 +11,7 @@ import type { OperationalData } from "../types/OperationalData";
 import type { TraitsData } from "../types/TraitsData";
 import { buildSubmissionMetadata } from "./submissionMetadata";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
+import { withStaysOnSite } from "@/lib/waves-move/scope";
 
 interface PreviewMediaSelection {
   readonly mediaSource: "upload" | "url";
@@ -111,35 +113,38 @@ export const buildPreviewDrop = ({
     serial_no: now,
     drop_type: ApiDropType.Participatory,
     rank: null,
-    wave: {
-      id: wave.id,
-      name: wave.name,
-      picture: wave.picture,
-      description_drop_id: wave.description_drop.id,
-      last_drop_time: wave.last_drop_time,
-      authenticated_user_eligible_to_vote:
-        wave.voting.authenticated_user_eligible,
-      authenticated_user_eligible_to_participate:
-        wave.participation.authenticated_user_eligible,
-      authenticated_user_eligible_to_chat:
-        wave.chat.authenticated_user_eligible,
-      authenticated_user_admin: false,
-      visibility_group_id: null,
-      participation_group_id: null,
-      chat_group_id: null,
-      voting_group_id: null,
-      admin_group_id: null,
-      voting_period_start: wave.voting.period?.min ?? null,
-      voting_period_end: wave.voting.period?.max ?? null,
-      voting_credit_type: wave.voting.credit_type,
-      admin_drop_deletion_enabled: wave.wave.admin_drop_deletion_enabled,
-      forbid_negative_votes: wave.voting.forbid_negative_votes,
-      pinned: wave.pinned,
-      identity_wave: wave.identity_wave,
-      submission_type: wave.participation.submission_strategy?.type ?? null,
-      voting_credit_nfts: wave.voting.credit_nfts,
-      voting_credit_scope: wave.voting.credit_scope,
-    },
+    wave: withStaysOnSite(
+      {
+        id: wave.id,
+        name: wave.name,
+        picture: wave.picture,
+        description_drop_id: wave.description_drop.id,
+        last_drop_time: wave.last_drop_time,
+        authenticated_user_eligible_to_vote:
+          wave.voting.authenticated_user_eligible,
+        authenticated_user_eligible_to_participate:
+          wave.participation.authenticated_user_eligible,
+        authenticated_user_eligible_to_chat:
+          wave.chat.authenticated_user_eligible,
+        authenticated_user_admin: false,
+        visibility_group_id: null,
+        participation_group_id: null,
+        chat_group_id: null,
+        voting_group_id: null,
+        admin_group_id: null,
+        voting_period_start: wave.voting.period?.min ?? null,
+        voting_period_end: wave.voting.period?.max ?? null,
+        voting_credit_type: wave.voting.credit_type,
+        admin_drop_deletion_enabled: wave.wave.admin_drop_deletion_enabled,
+        forbid_negative_votes: wave.voting.forbid_negative_votes,
+        pinned: wave.pinned,
+        identity_wave: wave.identity_wave,
+        submission_type: wave.participation.submission_strategy?.type ?? null,
+        voting_credit_nfts: wave.voting.credit_nfts,
+        voting_credit_scope: wave.voting.credit_scope,
+      } satisfies Omit<ApiWaveMin, "stays_on_site">,
+      wave
+    ) as ApiWaveMin,
     author: {
       id: connectedProfile?.id ?? "preview-user",
       handle: connectedProfile?.handle ?? "preview-user",

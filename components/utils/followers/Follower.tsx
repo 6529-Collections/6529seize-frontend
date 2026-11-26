@@ -88,7 +88,10 @@ export default function Follower({
 
   return (
     <li ref={setRowRef} className={`${backgroundClass} tw-py-3`}>
-      <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3 tw-px-4 sm:tw-px-6">
+      <div
+        data-follower-row
+        className="tw-flex tw-items-center tw-justify-between tw-gap-x-3 tw-px-4 sm:tw-px-6"
+      >
         <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-3">
           <div className="tw-relative tw-h-10 tw-w-10 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800">
             <div className="tw-h-full tw-w-full tw-rounded-lg">
@@ -117,7 +120,11 @@ export default function Follower({
           <div className="tw-flex tw-min-w-0 tw-flex-col">
             <div className="tw-flex tw-items-center tw-gap-x-1">
               <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-2">
-                <p className="tw-m-0 tw-min-w-0 tw-text-md tw-font-semibold tw-leading-none tw-text-iron-50">
+                <p
+                  data-follower-handle
+                  data-wave-typography="preserve"
+                  className="tw-m-0 tw-min-w-0 tw-text-md tw-font-semibold tw-leading-none tw-text-iron-50"
+                >
                   <Link
                     href={`/${followerProfileRoute}`}
                     aria-label={profileLabel}
