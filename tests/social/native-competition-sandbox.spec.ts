@@ -4163,7 +4163,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     const pin = details.getByRole("button", { name: "Pin wave", exact: true });
     await expect(pin).toHaveCSS("color", "rgb(206, 207, 212)");
     const mute = details.getByRole("button", {
-      name: "Mute wave",
+      name: "Open notification settings",
       exact: true,
     });
     await expect(mute).toHaveCSS("background-color", "rgb(38, 39, 43)");

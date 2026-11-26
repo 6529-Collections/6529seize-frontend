@@ -354,9 +354,11 @@ fixtures do not ship as page data.
 These remain frontend-owned facts published through the existing
 help-index sync and consumed by the existing backend loader.
 
-The `waves.notification-controls` record describes the notification subview inside the About sheet
-on phone layouts, dismissal back to About, and the anchored keyboard-accessible
-menu in desktop and tablet sidebars.
+The `waves.notification-controls` record describes one neutral bell menu with
+three single-choice levels and Mute/Unmute, disabled saved levels while muted,
+Retry inside the menu, the phone About subview and anchored desktop/tablet menu.
+Muted wave rows use an icon-only iron bell-slash on the avatar, separate from
+scores and numbers; unread counts stay hidden and muted waves sort last.
 
 The `network.identities-leaderboard` record describes the mobile filter's vertical
 criteria list, individual editors, Back navigation, preserved drafts, and

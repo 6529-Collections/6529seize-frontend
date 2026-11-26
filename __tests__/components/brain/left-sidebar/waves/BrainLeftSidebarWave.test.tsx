@@ -1,4 +1,10 @@
-import { act, createEvent, fireEvent, render, screen } from "@testing-library/react";
+import {
+  act,
+  createEvent,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import BrainLeftSidebarWave from "@/components/brain/left-sidebar/waves/BrainLeftSidebarWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
@@ -311,10 +317,13 @@ describe("BrainLeftSidebarWave", () => {
   it("shows muted indicator when wave is muted", () => {
     const mutedWave = { ...baseWave, id: "5", isMuted: true };
     render(<BrainLeftSidebarWave wave={mutedWave} onHover={onHover} />);
-    const bellSlashIcons = document.querySelectorAll(
-      '[data-icon="bell-slash"]'
-    );
-    expect(bellSlashIcons.length).toBeGreaterThan(0);
+    const badge = screen.getByTestId("wave-muted-badge");
+    expect(badge).toHaveClass("tw-bg-iron-800", "tw-text-iron-300");
+    expect(badge).toHaveTextContent("");
+    expect(badge.querySelector("svg")).toBeInTheDocument();
+    expect(
+      screen.queryByText(String(mutedWave.unreadDropsCount))
+    ).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Chat Wave" })).toHaveClass(
       "tw-text-iron-400"
     );
@@ -324,10 +333,7 @@ describe("BrainLeftSidebarWave", () => {
   it("does not show muted indicator when wave is not muted", () => {
     const unmutedWave = { ...baseWave, id: "6", isMuted: false };
     render(<BrainLeftSidebarWave wave={unmutedWave} onHover={onHover} />);
-    const bellSlashIcons = document.querySelectorAll(
-      '[data-icon="bell-slash"]'
-    );
-    expect(bellSlashIcons.length).toBe(0);
+    expect(screen.queryByTestId("wave-muted-badge")).not.toBeInTheDocument();
   });
 
   it("keeps hidden subwave unread out of the main row unread badge", () => {

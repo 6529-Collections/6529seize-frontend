@@ -1,6 +1,9 @@
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 
-export type NotificationLoadingTarget = "broadcast-mentions" | "all-drops";
+export type NotificationLevel =
+  | "all-messages"
+  | "broadcast-mentions"
+  | "mentions-only";
 
 // The persisted ALL value is the backward-compatible preference key for both
 // admin-only broadcast mentions: @all and @contributors.
