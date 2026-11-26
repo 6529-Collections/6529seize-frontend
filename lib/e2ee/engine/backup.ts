@@ -5,6 +5,7 @@ import type { StoredGroup, StoredMessage } from "../records";
 import { checkpoint, ownDeviceKey, type EngineContext } from "./context";
 import type { ConversationPins } from "./conversation-pins";
 import { newRuntime } from "./groups";
+import { memberProfileIds, resolveProfiles } from "./setup";
 import type { GroupRuntime } from "./store";
 
 /**
@@ -59,8 +60,11 @@ export async function backupHistory(
   if (Object.keys(reads).length > 0) {
     out.reads = reads;
   }
-  const pins = Object.values(ctx.device?.conversationPins?.versions ?? {});
+  const saved = ctx.device?.conversationPins;
+  const pins = Object.values(saved?.versions ?? {});
   if (pins.length > 0) out.pins = pins;
+  const pinRanks = Object.values(saved?.ranks ?? {});
+  if (pinRanks.length > 0) out.pinRanks = pinRanks;
   return out;
 }
 
@@ -117,12 +121,22 @@ function groupMessages(
   return out;
 }
 
+export async function importBackupHistory(
+  ctx: EngineContext,
+  history: BackupHistory,
+  pins: ConversationPins
+): Promise<{ conversations: number; messages: number }> {
+  const result = await ctx.queue.run(() => importHistory(ctx, history, pins));
+  await resolveProfiles(ctx, memberProfileIds(ctx));
+  return result;
+}
+
 /**
  * Merges restored history into local state: local copies win (they are this
  * device's own view), missing messages are added, unknown conversations are
  * added as read-only. Must run inside the serial queue.
  */
-export async function importBackupHistory(
+async function importHistory(
   ctx: EngineContext,
   history: BackupHistory,
   pins: ConversationPins
@@ -180,7 +194,7 @@ export async function importBackupHistory(
     ctx,
     new Map([...reads].filter(([g]) => !restoredHere.has(g)))
   );
-  await pins.merge(history.pins ?? []);
+  await pins.merge({ pins: history.pins ?? [], ranks: history.pinRanks ?? [] });
   return { conversations, messages: imported };
 }
 

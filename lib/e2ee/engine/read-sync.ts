@@ -237,8 +237,8 @@ export class ReadSync implements ReadSyncHooks {
     if (targets.length === 0) return;
     const state = this.state();
     const pinTargets = targets.filter((target) => this.pins.hasSibling(target));
-    const pins = pinTargets.length > 0 ? this.pins.pending() : [];
-    if (state.unsent.length === 0 && pins.length === 0) return;
+    const pins = pinTargets.length > 0 ? this.pins.pending() : null;
+    if (state.unsent.length === 0 && !pins) return;
     const batch = new Set(state.unsent);
     const positions: ReadPosition[] = [];
     for (const g of batch) {
@@ -256,7 +256,7 @@ export class ReadSync implements ReadSyncHooks {
       await inOrder(targets, (target) =>
         inOrder(pages, (page) => this.send(target, "read", page))
       );
-      if (pins.length > 0) {
+      if (pins) {
         await inOrder(pinTargets, (target) => this.pins.send(target, pins));
       }
     } catch {
@@ -266,7 +266,7 @@ export class ReadSync implements ReadSyncHooks {
       return;
     }
     this.lastSentAt = this.ctx.now();
-    if (pins.length > 0) await this.pins.acknowledge(pins);
+    if (pins) await this.pins.acknowledge(pins);
     if (batch.size === 0) return;
     const sent = new Map(positions);
     // Chats read while this batch went out, and chats read further since

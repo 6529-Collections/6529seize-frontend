@@ -154,7 +154,9 @@ export class EngineStore {
   devices: E2eeDeviceInfo[] = [];
   /** Server switch (GET /e2ee/me); false until the server has answered. */
   attachmentsEnabled = false;
-  conversationPinned: ((thread: string) => boolean) | null = null;
+  conversationPin:
+    | ((thread: string) => { pinned: true; pinPosition?: number } | undefined)
+    | null = null;
   /**
    * Whether this device trusts a member device for its owner (set by the
    * engine from its trust record); member snapshots carry it.
@@ -469,7 +471,7 @@ export class EngineStore {
     );
     return {
       dmPeer,
-      ...(this.conversationPinned?.(thread) ? { pinned: true } : {}),
+      ...this.conversationPin?.(thread),
       g: record.g,
       kind,
       name: record.metadata.name,

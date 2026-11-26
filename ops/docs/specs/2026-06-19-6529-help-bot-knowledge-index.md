@@ -13,6 +13,10 @@ includes pin button states, the pin limit, eligibility for top-level wave pins,
 and the thread-header pin control. In Pinned, press and hold the wave name, then
 drag it up or down to reorder.
 
+The encrypted chats record explains how to drag pinned chats in the inbox
+or sidebar, including touch and keyboard gestures. It covers the position of
+new pins, encrypted sync to trusted devices, and encrypted backup.
+
 The `waves.discovery` record covers plain-text description previews, retained
 media, visible Worth Checking Out edges and minimum artwork tint, full-height Active
 Votes artwork, wrapping metrics and neutral zero-submission status without a

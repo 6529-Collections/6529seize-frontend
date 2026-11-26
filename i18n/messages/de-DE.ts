@@ -1340,6 +1340,14 @@ export const DE_DE_MESSAGES = {
   "e2ee.list.pinned": "Angeheftet",
   "e2ee.list.pinnedChat": "{title}, angehefteter Chat",
   "e2ee.list.pinChat": "{title} oben anheften",
+  "e2ee.list.pinDragInstructions":
+    "Drücke die Leertaste, um diesen Chat aufzunehmen. Verschiebe ihn mit den Pfeiltasten und drücke die Leertaste zum Ablegen oder die Esc-Taste zum Abbrechen.",
+  "e2ee.list.pinDragStarted": "Angehefteten Chat aufgenommen.",
+  "e2ee.list.pinDragPosition": "Position {position}.",
+  "e2ee.list.pinDragCancelled": "Sortierung abgebrochen.",
+  "e2ee.list.pinOrderSaved": "Reihenfolge der angehefteten Chats gespeichert.",
+  "e2ee.list.pinOrderError":
+    "Die Reihenfolge der angehefteten Chats konnte nicht gespeichert werden. Versuche es erneut.",
   "e2ee.info.pin": "Oben anheften",
   "e2ee.info.unpin": "Anheftung aufheben",
   "e2ee.info.pinSyncHelp":
