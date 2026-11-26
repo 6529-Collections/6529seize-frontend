@@ -11776,11 +11776,21 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           .locator("..")
           .getByRole("button", { name: "Curation options", exact: true });
         await curationMenu.click();
+        const actions = page.getByRole("dialog", {
+          name: "Curation options",
+          exact: true,
+        });
         await expect(
-          page.getByRole("menuitem", { name: "Edit Curation", exact: true })
+          actions.getByRole("heading", {
+            name: "Curation options",
+            exact: true,
+          })
+        ).toBeVisible();
+        await expect(
+          actions.getByRole("button", { name: "Edit Curation", exact: true })
         ).toBeVisible();
         await page.keyboard.press("Escape");
-        await expect(page.getByRole("menu")).toHaveCount(0);
+        await expect(actions).toHaveCount(0);
         await expect(curationMenu).toBeFocused();
       }
       await page.screenshot({
@@ -14788,6 +14798,139 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await expect(checkbox).toBeChecked({ checked });
   });
 
+  test("switches curation actions to a phone sheet below md and preserves both dialogs", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page);
+    sandbox.clearCompetitions();
+    await page.route("**/api/profiles/*/wave", (route) =>
+      route.fulfill({
+        json: { profile_wave_id: WAVE, profile_curation_id: "phone-actions" },
+      })
+    );
+    await page.route(`**/api/waves/${WAVE}/curations`, (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: "phone-actions",
+            name: "Art",
+            wave_id: WAVE,
+            group_id: composerSandboxConstants.previewGroupId,
+            created_at: 1,
+            updated_at: 1,
+            priority_order: 1,
+          },
+        ],
+      })
+    );
+    for (const width of [767, 768]) {
+      await page.setViewportSize({ width, height: 844 });
+      await page.goto("/playwright/curations");
+      await dismissNextDevTools(page);
+      await page
+        .getByRole("button", {
+          name: "Open source Wave Local Composer Sandbox Wave",
+          exact: true,
+        })
+        .click();
+      await expect(
+        page.getByRole("tab", {
+          name: /^(Profile curation )?Art( Profile curation)?$/,
+        })
+      ).toHaveAttribute("aria-selected", "true");
+      const trigger = page.getByRole("button", {
+        name: "Curation options",
+        exact: true,
+      });
+      const phone = width < 768;
+      const actions = page.getByRole(phone ? "dialog" : "menu", {
+        name: "Curation options",
+        exact: true,
+      });
+      await expect(trigger).toHaveAttribute(
+        "aria-haspopup",
+        phone ? "dialog" : "menu"
+      );
+      await trigger.click();
+      if (phone) {
+        await expect(
+          actions.getByRole("heading", {
+            name: "Curation options",
+            exact: true,
+          })
+        ).toBeVisible();
+      } else {
+        await expect(actions).toBeVisible();
+      }
+      const actionRole = phone ? "button" : "menuitem";
+      await expect(
+        actions.getByRole(actionRole, { name: "Edit Curation", exact: true })
+      ).toBeVisible();
+      await expect(
+        actions.getByRole(actionRole, { name: "Delete Curation", exact: true })
+      ).toBeVisible();
+      if (phone) {
+        const panel = page
+          .getByRole("dialog", { name: "Curation options", exact: true })
+          .locator(".mobile-wrapper-dialog");
+        await expect
+          .poll(async () => {
+            const bounds = await panel.boundingBox();
+            return bounds && Math.round(bounds.y + bounds.height);
+          })
+          .toBe(844);
+        const bounds = await panel.boundingBox();
+        expect(bounds).not.toBeNull();
+        expect(bounds!.width).toBeCloseTo(width, 0);
+      }
+      await page.screenshot({
+        path: testInfo.outputPath(`curation-actions-${width}.png`),
+        animations: "disabled",
+      });
+      await page.keyboard.press("Escape");
+      await expect(actions).toHaveCount(0);
+      await expect(trigger).toBeFocused();
+      await trigger.click();
+      await actions
+        .getByRole(actionRole, { name: "Edit Curation", exact: true })
+        .click();
+      const edit = page.getByRole("dialog", {
+        name: "Edit curation",
+        exact: true,
+      });
+      await expect(
+        edit.getByRole("textbox", { name: "Name", exact: true })
+      ).toHaveValue("Art");
+      await expect(page.getByRole("dialog")).toHaveCount(1);
+      await edit
+        .getByRole("button", { name: phone ? "Close" : "Cancel", exact: true })
+        .click();
+      await expect(edit).toHaveCount(0);
+      await expect(trigger).toBeFocused();
+      await trigger.click();
+      await actions
+        .getByRole(actionRole, { name: "Delete Curation", exact: true })
+        .click();
+      const confirmation = page.getByRole("dialog", {
+        name: "Delete Curation?",
+        exact: true,
+      });
+      await expect(
+        confirmation.getByRole("button", {
+          name: "Delete Curation",
+          exact: true,
+        })
+      ).toBeVisible();
+      await expect(page.getByRole("dialog")).toHaveCount(1);
+      await confirmation
+        .getByRole("button", { name: "Cancel", exact: true })
+        .click();
+      await expect(confirmation).toHaveCount(0);
+      await expect(trigger).toBeFocused();
+      await expectNoHorizontalOverflow(page);
+    }
+  });
+
   test("keeps profile curation permissions collapsible in the shared editor", async ({
     page,
   }, testInfo) => {
@@ -14813,8 +14956,13 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await preset.click();
     await expect(name).toHaveValue("Art");
     await expect(name).toBeFocused();
-    const details = curation.locator("details");
-    const summary = details.locator("summary");
+    const summary = curation.getByText("Advanced permissions", { exact: true });
+    const details = curation
+      .getByText("Advanced permissions", { exact: true })
+      .locator("..");
+    const chevron = curation
+      .getByText("Advanced permissions", { exact: true })
+      .locator("svg");
     await expect(summary).toHaveText("Advanced permissions");
     await expect(details).not.toHaveAttribute("open");
     await summary.click();
@@ -14826,10 +14974,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await expect(editCriteria).toBeVisible();
     if (testInfo.project.name === "web-mobile-chromium") {
       await expect(summary).toHaveCSS("min-height", "44px");
-      await expect(summary.locator("svg")).toBeVisible();
+      await expect(chevron).toBeVisible();
       await expect(name).toHaveCSS("font-size", "16px");
     } else {
-      await expect(summary.locator("svg")).toBeHidden();
+      await expect(chevron).toBeHidden();
     }
     await page.screenshot({
       path: testInfo.outputPath("profile-curation-permissions.png"),
@@ -14893,7 +15041,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       .getByRole("button", { name: "Configure Art", exact: true })
       .click();
     await page
-      .getByRole("menuitem", { name: "Edit Curation", exact: true })
+      .getByRole(page.viewportSize()!.width < 768 ? "button" : "menuitem", {
+        name: "Edit Curation",
+        exact: true,
+      })
       .click();
     const curation = page.getByRole("dialog", {
       name: "Edit curation",
@@ -15778,7 +15929,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       });
       await configure.click();
       await page
-        .getByRole("menuitem", { name: "Edit Curation", exact: true })
+        .getByRole("button", { name: "Edit Curation", exact: true })
         .click();
       await expect(sheet).toHaveCount(1);
       await expect(sheet).toHaveAccessibleName("Edit curation");

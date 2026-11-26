@@ -111,6 +111,10 @@ Users can:
   scrollable preset row. Tapping a preset fills and focuses the input. Criteria
   appear above the eligible member count and `View members`, with `Edit criteria`
   alongside them. The full-width `Create` or `Save` action stays in the footer.
+- Below 768px, a Curation's options open a bottom sheet containing
+  `Edit Curation` and `Delete Curation`. Selecting either closes the action
+  sheet before opening its editor or confirmation. Wider Wave controls retain
+  the dropdown menu.
 - Use decision Settings to inspect or change entry and voting groups.
 - Restrict a public wave and public Chat by assigning one Visibility group in
   one save.
