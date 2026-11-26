@@ -235,15 +235,11 @@ test.describe("Profile xTDH compact design @auth @medium @local-only", () => {
       // The existing shared confirmation has no dialog role. Scope to its
       // unchanged message and controls without changing the product markup.
       const confirmation = page
-        .locator("div")
-        .filter({ has: page.getByText(message, { exact: true }) })
-        .filter({
-          has: page.getByRole("button", { name: "Cancel", exact: true }),
-        })
-        .last();
+        .getByText(message, { exact: true })
+        .locator("xpath=ancestor::div[.//button[normalize-space()='Cancel']][1]");
       await expect(confirmation).toBeVisible();
       await expect(
-        confirmation.locator("p").filter({ hasText: action })
+        confirmation.getByRole("paragraph").filter({ hasText: action })
       ).toHaveText(action);
       await expect(
         confirmation.getByText(message, { exact: true })

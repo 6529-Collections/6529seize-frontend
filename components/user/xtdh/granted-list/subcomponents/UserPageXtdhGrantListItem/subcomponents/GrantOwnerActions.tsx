@@ -78,6 +78,7 @@ export function GrantOwnerActions({
           >
             {isStopping ? (
               <svg
+                aria-hidden="true"
                 className="tw-h-4 tw-w-4 tw-animate-spin"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -99,6 +100,7 @@ export function GrantOwnerActions({
               </svg>
             ) : (
               <svg
+                aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="currentColor"
@@ -122,6 +124,7 @@ export function GrantOwnerActions({
           >
             {isRevoking ? (
               <svg
+                aria-hidden="true"
                 className="tw-h-4 tw-w-4 tw-animate-spin"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -143,6 +146,7 @@ export function GrantOwnerActions({
               </svg>
             ) : (
               <svg
+                aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="currentColor"
