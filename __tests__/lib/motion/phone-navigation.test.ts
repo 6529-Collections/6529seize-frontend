@@ -1,0 +1,185 @@
+import { animate } from "framer-motion";
+import { createPhoneNavigationMotion } from "@/lib/motion/phone-navigation";
+import { MOTION_SPRINGS } from "@/lib/motion/springs";
+
+jest.mock("framer-motion", () => ({ animate: jest.fn() }));
+
+const originalWidth = window.innerWidth;
+const originalMatchMedia = window.matchMedia;
+const stop = jest.fn();
+let motionPreference: MediaQueryList;
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  Object.defineProperty(window, "innerWidth", {
+    configurable: true,
+    value: 400,
+  });
+  motionPreference = Object.assign(new EventTarget(), {
+    matches: false,
+    media: "(prefers-reduced-motion: reduce)",
+    onchange: null,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+  });
+  window.matchMedia = jest.fn().mockReturnValue(motionPreference);
+  jest.mocked(animate).mockReturnValue({ stop } as ReturnType<typeof animate>);
+});
+
+afterEach(() => {
+  document.body.replaceChildren();
+  window.matchMedia = originalMatchMedia;
+  Object.defineProperty(window, "innerWidth", {
+    configurable: true,
+    value: originalWidth,
+  });
+});
+
+function setup() {
+  const page = document.createElement("div");
+  const destination = document.createElement("div");
+  const dim = document.createElement("div");
+  destination.append(dim);
+  document.body.append(destination, page);
+  destination.scrollTop = 850;
+  return {
+    page,
+    destination,
+    dim,
+    motion: createPhoneNavigationMotion(() => ({ page, destination, dim })),
+  };
+}
+
+function options() {
+  const call = jest.mocked(animate).mock.calls.at(-1);
+  if (!call?.[2]) throw new Error("Expected a running navigation spring");
+  return call[2];
+}
+
+it("reveals the real destination with depth without changing its reading position", () => {
+  const { motion, page, destination, dim } = setup();
+  const gesture = motion.begin();
+  expect(gesture?.width).toBe(400);
+  gesture?.move(100);
+  expect(page.style.transform).toBe("translate3d(100px,0,0)");
+  expect(destination.style.visibility).toBe("visible");
+  expect(destination.style.opacity).toBe("1");
+  expect(destination.style.transform).toBe("translate3d(-100px,0,0)");
+  expect(destination.scrollTop).toBe(850);
+  expect(Number(dim.style.opacity)).toBeCloseTo(0.09);
+  expect(page.style.boxShadow).not.toBe("");
+  motion.dispose();
+});
+
+it("carries release velocity and commits only once when the page reaches the edge", () => {
+  const { motion } = setup();
+  const navigate = jest.fn();
+  const gesture = motion.begin();
+  gesture?.move(120);
+  gesture?.end(true, 1800, navigate);
+  expect(animate).toHaveBeenLastCalledWith(
+    120,
+    400,
+    expect.objectContaining({
+      ...MOTION_SPRINGS.spatial.default,
+      velocity: 1800,
+    })
+  );
+  options().onUpdate?.(399.8);
+  options().onComplete?.();
+  expect(navigate).toHaveBeenCalledTimes(1);
+  motion.commit(false);
+});
+
+it("cancels back to the same page and leaves the destination mounted", () => {
+  const { motion, page, destination, dim } = setup();
+  const navigate = jest.fn();
+  const gesture = motion.begin();
+  gesture?.move(110);
+  gesture?.end(false, 0, navigate);
+  options().onComplete?.();
+  expect(navigate).not.toHaveBeenCalled();
+  expect(page.style.transform).toBe("");
+  expect(destination.style.visibility).toBe("");
+  expect(destination.style.opacity).toBe("");
+  expect(dim.style.opacity).toBe("");
+  expect(dim.style.willChange).toBe("");
+  expect(destination.isConnected).toBe(true);
+  expect(destination.scrollTop).toBe(850);
+  motion.dispose();
+});
+
+it("catches an in-flight Back and prevents its old completion from navigating", () => {
+  const { motion, page } = setup();
+  const navigate = jest.fn();
+  motion.transition("back", navigate);
+  const outgoing = options();
+  outgoing.onUpdate?.(140);
+  const gesture = motion.begin();
+  expect(stop).toHaveBeenCalled();
+  expect(gesture?.origin).toBe(140);
+  gesture?.move(-20);
+  expect(page.style.transform).toBe("translate3d(120px,0,0)");
+  outgoing.onComplete?.();
+  expect(navigate).not.toHaveBeenCalled();
+  gesture?.end(false, -500, navigate);
+  options().onComplete?.();
+  expect(navigate).not.toHaveBeenCalled();
+  motion.dispose();
+});
+
+it("crossfades with reduced motion without translating, dimming or shadow", () => {
+  Object.defineProperty(motionPreference, "matches", { value: true });
+  const { motion, page, destination, dim } = setup();
+  motion.transition("back", jest.fn());
+  options().onUpdate?.(100);
+  expect(page.style.transform).toBe("");
+  expect(destination.style.transform).toBe("");
+  expect(dim.style.opacity).toBe("0");
+  expect(page.style.opacity).toBe("0.75");
+  expect(destination.style.opacity).toBe("1");
+  expect(page.style.boxShadow).toBe("");
+  motion.dispose();
+});
+
+it("honors reduced-motion changes during a drag and removes its listener on disposal", () => {
+  const { motion, page, destination, dim } = setup();
+  const removeListener = jest.spyOn(motionPreference, "removeEventListener");
+  const gesture = motion.begin();
+  gesture?.move(100);
+  Object.defineProperty(motionPreference, "matches", {
+    configurable: true,
+    value: true,
+  });
+  motionPreference.dispatchEvent(new Event("change"));
+  expect(page.style.transform).toBe("");
+  expect(page.style.opacity).toBe("0.75");
+  expect(page.style.boxShadow).toBe("");
+  expect(destination.style.transform).toBe("");
+  expect(dim.style.opacity).toBe("0");
+
+  Object.defineProperty(motionPreference, "matches", { value: false });
+  motionPreference.dispatchEvent(new Event("change"));
+  expect(page.style.opacity).toBe("");
+  expect(page.style.transform).toBe("translate3d(100px,0,0)");
+  expect(page.style.boxShadow).not.toBe("");
+  expect(Number(dim.style.opacity)).toBeCloseTo(0.09);
+  motion.dispose();
+  expect(removeListener).toHaveBeenCalledWith("change", expect.any(Function));
+  removeListener.mockRestore();
+});
+
+it("opens over the same retained source and cleans its final motion styles", () => {
+  const { motion, page, destination } = setup();
+  const navigate = jest.fn();
+  motion.transition("forward", navigate);
+  expect(navigate).toHaveBeenCalledTimes(1);
+  motion.commit(true);
+  expect(page.style.transform).toBe("translate3d(400px,0,0)");
+  expect(destination.style.transform).toBe("translate3d(0px,0,0)");
+  options().onComplete?.();
+  expect(page.style.transform).toBe("");
+  expect(destination.style.transform).toBe("");
+  expect(destination.scrollTop).toBe(850);
+  motion.dispose();
+});

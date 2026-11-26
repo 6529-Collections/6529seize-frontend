@@ -127,15 +127,21 @@ it("captures the old screen before navigating and releases after the new screen 
   ).toBe("");
 });
 
-it("keeps navigation immediate with reduced motion or no browser support", () => {
+it("uses the reduced-motion crossfade and keeps navigation immediate without browser support", async () => {
   const navigate = jest.fn();
   media.matches = true;
   runWaveNavigationTransition("wave", navigate);
+  await Promise.resolve();
+  expect(start).toHaveBeenCalledTimes(1);
+  commitWaveNavigationTransition("wave");
+  await updateDone;
+  finish();
+  await Promise.resolve();
   media.matches = false;
   Object.defineProperty(document, "startViewTransition", { value: undefined });
   runWaveNavigationTransition("wave", navigate);
   expect(navigate).toHaveBeenCalledTimes(2);
-  expect(start).not.toHaveBeenCalled();
+  expect(start).toHaveBeenCalledTimes(1);
 });
 
 it("clears pending Feed content when a Waves return takes ownership", async () => {
@@ -509,12 +515,16 @@ describe("phone chevron Back", () => {
     expect(skip).toHaveBeenCalledTimes(1);
   });
 
-  it("navigates directly with reduced motion, suppressing the content fallback", () => {
+  it("captures the reduced-motion crossfade without replaying the content fallback", async () => {
     media.matches = true;
     const navigate = jest.fn();
     runPhoneChevronBackTransition("/waves", navigate);
+    await Promise.resolve();
     expect(navigate).toHaveBeenCalledTimes(1);
-    expect(start).not.toHaveBeenCalled();
+    expect(start).toHaveBeenCalledTimes(1);
+    commitWaveNavigationTransition(null, "/waves");
+    await updateDone;
+    finish();
     expect(consumeWaveSwipeHandoff()).toBe(true);
     expect(consumeWaveSwipeHandoff()).toBe(false);
   });

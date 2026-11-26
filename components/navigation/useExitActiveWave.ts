@@ -10,7 +10,8 @@ import {
   isProfileWavesFeed,
   returnsToProfileWavesFeed,
 } from "@/helpers/waves/profile-feed-navigation";
-import { runWaveNavigationTransition } from "@/helpers/waves/wave-navigation-transition";
+import { runPhoneChevronBackTransition } from "@/helpers/waves/wave-navigation-transition";
+import { getWaveHomeRoute } from "@/helpers/navigation.helpers";
 
 export function useExitActiveWave() {
   const myStream = useMyStreamOptional();
@@ -21,24 +22,27 @@ export function useExitActiveWave() {
 
   return useCallback(
     (isDirectMessage: boolean) => {
-      clearLastVisited(isDirectMessage ? "dm" : "wave");
       const search = new URLSearchParams(globalThis.location.search);
-      if (
+      const returnToFeed =
         isApp &&
         !isDirectMessage &&
         !isProfileWavesFeed(globalThis.location.pathname, search) &&
-        returnsToProfileWavesFeed(search)
-      ) {
-        if (setActiveWave) {
-          setActiveWave(null, { profileFeed: true });
-        } else {
-          runWaveNavigationTransition("feed", () =>
-            router.push(PROFILE_WAVES_FEED_HREF, { scroll: false })
-          );
+        returnsToProfileWavesFeed(search);
+      const destination = returnToFeed
+        ? PROFILE_WAVES_FEED_HREF
+        : getWaveHomeRoute({ isDirectMessage, isApp });
+      runPhoneChevronBackTransition(
+        returnToFeed ? "/waves" : destination,
+        () => {
+          clearLastVisited(isDirectMessage ? "dm" : "wave");
+          if (setActiveWave)
+            setActiveWave(
+              null,
+              returnToFeed ? { profileFeed: true } : { isDirectMessage }
+            );
+          else router.push(destination, { scroll: false });
         }
-        return;
-      }
-      setActiveWave?.(null, { isDirectMessage });
+      );
     },
     [clearLastVisited, setActiveWave, isApp, router]
   );

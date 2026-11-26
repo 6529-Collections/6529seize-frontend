@@ -106,6 +106,86 @@ async function openWave(page: Page) {
   ).toBeVisible();
 }
 
+function sampleNativeNavigation(
+  page: Page,
+  destination: string,
+  forward: boolean
+) {
+  return page.evaluate(
+    ({ destinationScreen, entering }) =>
+      new Promise<
+        {
+          x: number;
+          underlayX: number;
+          headerOffset: number;
+          destinationVisible: boolean;
+          dimOpacity: number;
+        }[]
+      >((resolve, reject) => {
+        const frames: {
+          x: number;
+          underlayX: number;
+          headerOffset: number;
+          destinationVisible: boolean;
+          dimOpacity: number;
+        }[] = [];
+        const deadline = performance.now() + 10000;
+        const sample = () => {
+          const top = document.querySelector<HTMLElement>(
+            '[data-phone-navigation-screen="conversation"]'
+          );
+          const underlay = document.querySelector<HTMLElement>(
+            `[data-phone-navigation-screen="${destinationScreen}"]`
+          );
+          if (top && underlay) {
+            const x = top.getBoundingClientRect().x;
+            const header = top.querySelector<HTMLElement>(
+              'button[aria-label="Back"]'
+            );
+            frames.push({
+              x,
+              underlayX: underlay.getBoundingClientRect().x,
+              headerOffset: (header?.getBoundingClientRect().x ?? x) - x,
+              destinationVisible:
+                getComputedStyle(underlay).visibility === "visible" &&
+                Number(getComputedStyle(underlay).opacity) > 0,
+              dimOpacity: Number(
+                getComputedStyle(
+                  underlay.querySelector<HTMLElement>(
+                    ":scope > [data-phone-navigation-dim]"
+                  )!
+                ).opacity
+              ),
+            });
+            if (entering && frames.length > 5 && Math.abs(x) < 0.5)
+              return resolve(frames);
+          } else if (!entering && frames.length > 0) return resolve(frames);
+          if (performance.now() > deadline)
+            return reject(new Error("Native navigation did not settle"));
+          requestAnimationFrame(sample);
+        };
+        requestAnimationFrame(sample);
+      }),
+    {
+      destinationScreen: destination === "/waves" ? "waves" : "messages",
+      entering: forward,
+    }
+  );
+}
+
+function expectNativeNavigation(
+  frames: Awaited<ReturnType<typeof sampleNativeNavigation>>
+) {
+  const moving = frames.filter((frame) => frame.x > 1 && frame.x < 411);
+  expect(moving.length).toBeGreaterThan(0);
+  for (const frame of moving) {
+    expect(frame.destinationVisible).toBe(true);
+    expect(frame.dimOpacity).toBeCloseTo((1 - frame.x / 412) * 0.12, 2);
+    expect(frame.underlayX).toBeCloseTo((frame.x - 412) / 3, 0);
+    expect(frame.headerOffset).toBeCloseTo(moving[0]!.headerOffset, 0);
+  }
+}
+
 async function keyboardEvent(page: Page, name: string, height = 0) {
   await page.waitForFunction(
     (eventName) =>
@@ -545,7 +625,8 @@ for (const platform of ["ios", "android"] as const) {
           return start(...args);
         };
       });
-      const committed = await touchDrag(page, row, 130);
+      // Slow drags now require half the viewport; short flicks are checked separately.
+      const committed = await touchDrag(page, row, 240);
       await committed.release();
       await expect(page).toHaveURL(/\/waves$/);
       await expect(
@@ -1327,8 +1408,10 @@ test.describe("phone chevron Back", () => {
   });
   for (const [surface, destination] of [
     ["ios", "/waves"],
+    ["android", "/waves"],
     ["web", "/waves"],
     ["ios", "/messages"],
+    ["android", "/messages"],
     ["web", "/messages"],
   ] as const) {
     test(`phone ${surface} opens ${destination} with the complete conversation sliding over its list`, async ({
@@ -1342,8 +1425,12 @@ test.describe("phone chevron Back", () => {
         ),
         "Phone entry is checked in Chromium and WebKit with touch input."
       );
-      if (surface === "ios")
-        await installSurfaceSimulation(context, "capacitor-ios-sim", baseURL);
+      if (surface !== "web")
+        await installSurfaceSimulation(
+          context,
+          `capacitor-${surface}-sim`,
+          baseURL
+        );
       await hideNextDevOverlay(context);
       await installMessageFixture(page, baseURL);
       const name =
@@ -1361,6 +1448,32 @@ test.describe("phone chevron Back", () => {
       await expect(page).toHaveURL(new RegExp(`${destination}$`, "u"));
       const row = page.getByRole("link", { name }).first();
       await expect(row).toBeVisible();
+      if (surface !== "web") {
+        const source = await page
+          .locator(
+            `[data-phone-navigation-screen="${destination === "/waves" ? "waves" : "messages"}"]`
+          )
+          .elementHandle();
+        if (!source) throw new Error("Missing native source screen");
+        const frames = sampleNativeNavigation(page, destination, true);
+        await row.tap();
+        expectNativeNavigation(await frames);
+        expect(await source.evaluate((element) => element.isConnected)).toBe(
+          true
+        );
+        // Discovery descendants explicitly use visibility:visible. The retained
+        // screen must suppress the whole subtree once the chat has settled.
+        await expect(
+          page.locator(
+            `[data-phone-navigation-screen="${destination === "/waves" ? "waves" : "messages"}"]`
+          )
+        ).toHaveCSS("opacity", "0");
+        await expect(page).toHaveURL(new RegExp(`${conversation}$`, "u"));
+        await source.dispose();
+        await expectNoHorizontalOverflow(page);
+        await expectNoUnsafeSandboxMutations(baseURL);
+        return;
+      }
       await page.evaluate(() => {
         const root = document.documentElement;
         const start = document.startViewTransition.bind(document);
@@ -1434,7 +1547,7 @@ test.describe("phone chevron Back", () => {
       expect(entry).toMatchObject({
         listDisplay: "block",
         listOpacity: 1,
-        listAnimation: "none",
+        listAnimation: "wave-underlay-forward",
         includesHeader: true,
       });
       await page.screenshot({
@@ -1467,8 +1580,12 @@ test.describe("phone chevron Back", () => {
         ),
         "Phone viewport navigation acceptance in Chromium and WebKit."
       );
-      if (surface === "ios") {
-        await installSurfaceSimulation(context, "capacitor-ios-sim", baseURL);
+      if (surface !== "web") {
+        await installSurfaceSimulation(
+          context,
+          `capacitor-${surface}-sim`,
+          baseURL
+        );
       }
       await hideNextDevOverlay(context);
       await page.setViewportSize({ width: 412, height: 840 });
@@ -1489,7 +1606,7 @@ test.describe("phone chevron Back", () => {
           (route) => route.fulfill({ json: { data: [wave], next: false } })
         );
       }
-      const backName = surface === "ios" ? "Back" : "Go back";
+      const backName = surface !== "web" ? "Back" : "Go back";
       // Enter directly, with no preceding list history entry.
       await page.goto(conversation, { waitUntil: "domcontentloaded" });
       await waitForRouteReady(page);
@@ -1521,6 +1638,22 @@ test.describe("phone chevron Back", () => {
         page.getByRole("textbox", { name: "Write a message" }).last()
       ).toBeVisible();
       await expect(backControl).toBeVisible();
+      if (surface !== "web") {
+        const frames = sampleNativeNavigation(page, destination, false);
+        await backControl.tap();
+        expectNativeNavigation(await frames);
+        await expect(page).toHaveURL(new RegExp(`${destination}$`, "u"));
+        await expect(listControl).toBeVisible();
+        await page.goBack();
+        await expect(backControl).toBeVisible();
+        await page.emulateMedia({ reducedMotion: "reduce" });
+        await backControl.tap();
+        await expect(page).toHaveURL(new RegExp(`${destination}$`, "u"));
+        await expect(listControl).toBeVisible();
+        await expectNoHorizontalOverflow(page);
+        await expectNoUnsafeSandboxMutations(baseURL);
+        return;
+      }
       await page.evaluate((label) => {
         const root = document.documentElement;
         const start = document.startViewTransition.bind(document);
@@ -1612,7 +1745,7 @@ test.describe("phone chevron Back", () => {
       expect(motion.x).toBeGreaterThan(0);
       expect(motion.x).toBeLessThanOrEqual(412);
       expect(motion.opacity).toBe(1);
-      expect(motion.incomingAnimation).toBe("none");
+      expect(motion.incomingAnimation).toBe("wave-underlay-back");
       await expect(listControl).toBeVisible();
       await expect(root).not.toHaveAttribute("data-wave-navigation-transition");
       await expectNoHorizontalOverflow(page);
@@ -1625,7 +1758,7 @@ test.describe("phone chevron Back", () => {
       await page.emulateMedia({ reducedMotion: "reduce" });
       await page.getByRole("button", { name: backName, exact: true }).tap();
       await expect(page).toHaveURL(new RegExp(`${destination}$`, "u"));
-      await expect(root).toHaveAttribute("data-test-chevron-captures", "1");
+      await expect(root).toHaveAttribute("data-test-chevron-captures", "2");
       await expect(root).not.toHaveAttribute("data-wave-navigation-transition");
       await expectNoUnsafeSandboxMutations(baseURL);
     });

@@ -3,7 +3,6 @@
 import { BellSlashIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import useCapacitor from "@/hooks/useCapacitor";
 import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
 import { runPhoneConversationEntryTransition } from "@/helpers/waves/wave-navigation-transition";
 import type { ReactNode } from "react";
@@ -226,7 +225,6 @@ function E2eeConversationRow({
 }: E2eeConversationRowProps) {
   const locale = useBrowserLocale();
   const router = useRouter();
-  const { isCapacitor, isIos } = useCapacitor();
   const title = getConversationTitle(locale, conversation, selfProfileId);
   const statusKey = STATUS_KEYS[conversation.status];
   const href = active
@@ -240,7 +238,6 @@ function E2eeConversationRow({
   const handleNavigate = (event: { preventDefault: () => void }) => {
     if (
       active ||
-      (isCapacitor && !isIos) ||
       !window.matchMedia(PHONE_WAVES_LAYOUT_QUERY).matches ||
       !["/messages", getEncryptedMessagesRoute()].includes(
         window.location.pathname

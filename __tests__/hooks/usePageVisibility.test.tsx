@@ -1,11 +1,10 @@
-import { createElement } from "react";
+import { createElement, type ReactNode } from "react";
+import { ReadonlyURLSearchParams } from "next/navigation";
+import { PhoneNavigationScreenContext } from "@/contexts/PhoneNavigationScreenContext";
 import { act, renderHook } from "@testing-library/react";
 import { hydrateRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";
-import {
-  usePageVisible,
-  useVisibleInterval,
-} from "@/hooks/usePageVisibility";
+import { usePageVisible, useVisibleInterval } from "@/hooks/usePageVisibility";
 import { subscribeNativeAppActivity } from "@/services/app-activity/native-app-activity";
 
 let mockNativeActive = true;
@@ -117,6 +116,37 @@ describe("usePageVisible", () => {
 });
 
 describe("useVisibleInterval", () => {
+  it("pauses a retained screen and catches up once when it becomes active", () => {
+    let active = true;
+    const callback = jest.fn();
+    const { rerender } = renderHook(() => useVisibleInterval(callback, 1000), {
+      wrapper: ({ children }: { readonly children: ReactNode }) =>
+        createElement(PhoneNavigationScreenContext.Provider, {
+          value: {
+            pathname: "/waves",
+            searchParams: new ReadonlyURLSearchParams(""),
+            active,
+          },
+          children,
+        }),
+    });
+    act(() => jest.advanceTimersByTime(1000));
+    expect(callback).toHaveBeenCalledTimes(1);
+    active = false;
+    rerender();
+    expect(jest.getTimerCount()).toBe(0);
+    act(() => jest.advanceTimersByTime(60_000));
+    expect(callback).toHaveBeenCalledTimes(1);
+    active = true;
+    rerender();
+    expect(callback).toHaveBeenCalledTimes(2);
+    expect(jest.getTimerCount()).toBe(1);
+    setVisibility("visible");
+    expect(callback).toHaveBeenCalledTimes(2);
+    act(() => jest.advanceTimersByTime(1000));
+    expect(callback).toHaveBeenCalledTimes(3);
+  });
+
   it("runs on its cadence while the page is visible", () => {
     const callback = jest.fn();
     renderHook(() => useVisibleInterval(callback, 1000));

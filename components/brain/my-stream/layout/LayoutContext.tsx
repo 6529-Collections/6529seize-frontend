@@ -527,6 +527,59 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
 // Custom hook to use the layout context
 export const useLayout = () => useContext(LayoutContext);
 
+/** Retained lists measure their own header without registering a second viewport lock. */
+export function PhoneListLayoutProvider({
+  active,
+  children,
+}: {
+  readonly active: boolean;
+  readonly children: ReactNode;
+}) {
+  const parent = useLayout();
+  const { isCapacitor } = useCapacitor();
+  const header = useRef<HTMLDivElement | null>(null);
+  const [headerHeight, setHeaderHeight] = useState(64);
+  const registerRef = useCallback(
+    (type: LayoutRefType, element: HTMLDivElement | null) => {
+      if (type !== "header") return;
+      header.current = element;
+      if (element) setHeaderHeight(element.getBoundingClientRect().height);
+    },
+    []
+  );
+  useLayoutEffect(() => {
+    if (!active || !header.current) return;
+    const element = header.current;
+    const observer = new ResizeObserver(() =>
+      setHeaderHeight(element.getBoundingClientRect().height)
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [active]);
+  const value = useMemo(() => {
+    const spaces = {
+      ...defaultSpaces,
+      headerSpace: headerHeight,
+      measurementsComplete: true,
+    };
+    const style = calculateNativeKeyboardHeightStyle(
+      spaces,
+      active && isCapacitor,
+      parent.isViewportLocked
+    );
+    return {
+      ...parent,
+      registerRef,
+      spaces,
+      mobileWavesViewStyle: style,
+      waveViewStyle: style,
+    };
+  }, [active, headerHeight, isCapacitor, parent, registerRef]);
+  return (
+    <LayoutContext.Provider value={value}>{children}</LayoutContext.Provider>
+  );
+}
+
 export const useLayoutViewportLock = (isLocked: boolean) => {
   const { acquireViewportLock } = useLayout();
 

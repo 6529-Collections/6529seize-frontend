@@ -1,5 +1,8 @@
 import { Capacitor } from "@capacitor/core";
 import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
+import { runPhoneNavigationMotion } from "@/lib/motion/phone-navigation";
+import { spring } from "framer-motion";
+import { MOTION_SPRINGS } from "@/lib/motion/springs";
 
 // The app shell acknowledges the committed screen before the browser captures it.
 // This keeps the outgoing list (including its scroll position) visible during the handoff.
@@ -34,6 +37,25 @@ let activeTransition: {
 } | null = null;
 let navigatingWithoutAdditionalMotion = false;
 let swipeHandoffPending = false;
+
+function setConversationSpring(root: HTMLElement) {
+  const generator = spring({
+    ...MOTION_SPRINGS.spatial.default,
+    keyframes: [0, 1],
+  });
+  const samples = [0];
+  let time = 0;
+  do {
+    time += 16;
+    samples.push(Math.min(1, Math.max(0, generator.next(time).value)));
+  } while (samples.at(-1)! < 0.999 && time < 1000);
+  samples[samples.length - 1] = 1;
+  root.style.setProperty("--wave-navigation-duration", `${time}ms`);
+  root.style.setProperty(
+    "--wave-navigation-easing",
+    `linear(${samples.join(",")})`
+  );
+}
 
 /** The interactive gesture already animated the outgoing screen. */
 export function navigateAfterWaveSwipe(navigate: () => void) {
@@ -141,6 +163,20 @@ export function runWaveNavigationTransition(
     navigate();
     return false;
   }
+  const forward =
+    typeof target === "string"
+      ? target === "wave" ||
+        (target === "feed" &&
+          globalThis.location.pathname === "/waves" &&
+          !new URLSearchParams(globalThis.location.search).has("wave"))
+      : target.direction === "forward";
+  if (
+    !swipe &&
+    runPhoneNavigationMotion(forward ? "forward" : "back", () =>
+      navigateWithoutAdditionalMotion(navigate)
+    )
+  )
+    return true;
   swipeHandoffPending = false;
   const capturesWholePage = typeof target !== "string";
   const enteringConversation =
@@ -154,8 +190,7 @@ export function runWaveNavigationTransition(
   if (
     !surface ||
     surface.dataset["waveNavigationScreen"] === target ||
-    typeof document.startViewTransition !== "function" ||
-    reducedMotion.matches
+    typeof document.startViewTransition !== "function"
   ) {
     activeTransition?.skip();
     if (!swipe) navigate();
@@ -164,6 +199,7 @@ export function runWaveNavigationTransition(
 
   activeTransition?.skip();
   const root = document.documentElement;
+  if (capturesWholePage) setConversationSpring(root);
   let contentPending = target === "feed";
   let shellCommitted = false;
   if (contentPending) root.dataset["waveNavigationContentPending"] = "true";
@@ -196,6 +232,8 @@ export function runWaveNavigationTransition(
     namedSurface.style.removeProperty("view-transition-name");
     root.style.removeProperty("--wave-transition-height");
     root.style.removeProperty("--wave-swipe-remainder");
+    root.style.removeProperty("--wave-navigation-duration");
+    root.style.removeProperty("--wave-navigation-easing");
   };
   let transition: ViewTransition;
   let stopped = false;

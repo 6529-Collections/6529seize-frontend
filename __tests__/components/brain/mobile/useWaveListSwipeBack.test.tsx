@@ -3,8 +3,11 @@ import { animate } from "framer-motion";
 import { useWaveListSwipeBack } from "@/components/brain/mobile/useWaveListSwipeBack";
 import * as waveNavigation from "@/helpers/waves/wave-navigation-transition";
 import { MOTION_SPRINGS } from "@/lib/motion/springs";
+import { Capacitor } from "@capacitor/core";
+import { Keyboard } from "@capacitor/keyboard";
 
 jest.mock("framer-motion", () => ({ animate: jest.fn() }));
+jest.mock("@capacitor/keyboard", () => ({ Keyboard: { hide: jest.fn() } }));
 
 const touch = (clientX: number, clientY = 100) => ({
   clientX,
@@ -75,6 +78,10 @@ function SwipeHarness({
 
 beforeEach(() => {
   jest.useFakeTimers();
+  // React substitutes Date.now() for a zero event time; keep the source clock positive.
+  jest
+    .spyOn(Event.prototype, "timeStamp", "get")
+    .mockImplementation(() => performance.now() + 1);
   jest.mocked(animate).mockReset();
 });
 
@@ -127,6 +134,32 @@ function setup(enabled = true, targetScreen?: waveNavigation.WaveScreen) {
     content: screen.getByTestId("content"),
   };
 }
+
+it("keeps the first native swipe when keyboard dismissal would blur the WebView", () => {
+  jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(true);
+  jest.spyOn(Capacitor, "isPluginAvailable").mockReturnValue(true);
+  jest.mocked(Keyboard.hide).mockImplementation(async () => {
+    globalThis.dispatchEvent(new Event("blur"));
+  });
+  const { content, onSwipeBack } = setup();
+  fireEvent.touchStart(content, { touches: [touch(160)] });
+  fireEvent.touchMove(content, { touches: [touch(740)] });
+  act(() => jest.advanceTimersByTime(20));
+  fireEvent.touchEnd(content, { touches: [], changedTouches: [touch(740)] });
+  expect(onSwipeBack).toHaveBeenCalledTimes(1);
+});
+
+it("blurs the focused text input when dragging starts", () => {
+  const { content } = setup();
+  const input = screen.getByRole("textbox", { name: "Amount" });
+  input.focus();
+  expect(document.activeElement).toBe(input);
+  fireEvent.touchStart(content, { touches: [touch(160)] });
+  fireEvent.touchMove(content, { touches: [touch(220)] });
+  act(() => jest.advanceTimersByTime(20));
+  expect(document.activeElement).not.toBe(input);
+  fireEvent.touchCancel(content);
+});
 
 it("carries release velocity into the shared spring and reveals the list before its invisible tail", async () => {
   const now = jest.spyOn(performance, "now").mockReturnValue(0);

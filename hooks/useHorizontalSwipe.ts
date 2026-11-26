@@ -14,9 +14,11 @@ const VELOCITY_JITTER_PX = 1;
 interface HorizontalSwipeOptions {
   readonly enabled: boolean;
   readonly direction: -1 | 1;
-  readonly threshold: number;
+  readonly threshold: number | (() => number);
   readonly intentRatio?: number;
   readonly flick?: boolean;
+  /** Average recent source events for phone Back; other gestures keep their timing. */
+  readonly velocityWindowMs?: number | undefined;
   /** Catch a running animation at touch-down, before axis intent is known. */
   readonly captureOnPress?: boolean;
   readonly allowReverse?: boolean;
@@ -49,6 +51,7 @@ interface Gesture {
   velocityPeak: number;
   velocityPeakAt: number;
   velocity: number;
+  readonly velocitySamples: { distance: number; time: number }[];
   movedAt: number;
   frame: number | null;
 }
@@ -111,10 +114,15 @@ function suppressClick(element: HTMLElement) {
 function paint(current: Gesture) {
   current.frame = null;
   const options = current.owner?.options.current;
-  options?.onMove(current.distance, current.distance >= options.threshold);
+  if (!options) return;
+  const threshold =
+    typeof options.threshold === "function"
+      ? options.threshold()
+      : options.threshold;
+  options.onMove(current.distance, current.distance >= threshold);
 }
 
-function finish(commit: boolean) {
+function finish(commit: boolean, timestamp?: number) {
   const current = gesture;
   gesture = null;
   const capture = current?.capture ?? false;
@@ -133,13 +141,20 @@ function finish(commit: boolean) {
   if (!options) return;
   clickExpiry = globalThis.setTimeout(() => releaseClickSuppression?.(), 400);
   paint(current);
-  const velocity =
-    performance.now() - current.movedAt <= 100 ? current.velocity : 0;
+  const lastSample = current.velocitySamples.at(-1);
+  const sampleAge =
+    (options.velocityWindowMs ?? 0) > 0 && timestamp !== undefined && lastSample
+      ? timestamp - lastSample.time
+      : performance.now() - current.movedAt;
+  const velocity = sampleAge <= 100 ? current.velocity : 0;
   const committed =
     commit &&
     options.enabled &&
     velocity > -0.2 &&
-    (current.distance >= options.threshold ||
+    (current.distance >=
+      (typeof options.threshold === "function"
+        ? options.threshold()
+        : options.threshold) ||
       (options.flick === true &&
         current.distance >= FLICK_DISTANCE &&
         velocity >= FLICK_VELOCITY));
@@ -154,30 +169,44 @@ function additionalTouch(event: TouchEvent) {
   if (event.touches.length !== 1) cancel();
 }
 
-function trackVelocity(current: Gesture, distance: number) {
-  if (distance !== current.distance) {
-    const now = performance.now();
-    if (distance > current.velocityPeak) {
-      current.velocityPeak = distance;
-      current.velocityPeakAt = now;
-    }
-    const reversing = current.velocityPeak - distance >= VELOCITY_JITTER_PX;
-    const referenceDistance = reversing
-      ? current.velocityPeak
-      : current.velocityDistance;
-    const referenceTime = reversing ? current.velocityPeakAt : current.movedAt;
-    // Native WebViews interpolate tiny final moves as well as rounding release
-    // coordinates. Keep either from replacing the finger's forward velocity.
-    if (Math.abs(distance - referenceDistance) >= VELOCITY_JITTER_PX) {
-      current.velocity =
-        (distance - referenceDistance) / Math.max(1, now - referenceTime);
-      current.movedAt = now;
-      current.velocityDistance = distance;
-      current.velocityPeak = distance;
-      current.velocityPeakAt = now;
-    }
-    current.distance = distance;
+function trackVelocity(current: Gesture, distance: number, timestamp: number) {
+  if (distance === current.distance) return;
+  const now = performance.now();
+  if (distance > current.velocityPeak) {
+    current.velocityPeak = distance;
+    current.velocityPeakAt = now;
   }
+  const reversing = current.velocityPeak - distance >= VELOCITY_JITTER_PX;
+  const referenceDistance = reversing
+    ? current.velocityPeak
+    : current.velocityDistance;
+  const referenceTime = reversing ? current.velocityPeakAt : current.movedAt;
+  current.distance = distance;
+  // Native WebViews interpolate tiny final moves as well as rounding release
+  // coordinates. Keep either from replacing the finger's forward velocity.
+  if (Math.abs(distance - referenceDistance) < VELOCITY_JITTER_PX) return;
+  const windowMs = current.owner?.options.current.velocityWindowMs ?? 0;
+  const samples = current.velocitySamples;
+  if (windowMs > 0 && !reversing) {
+    // WebKit may batch delivery and taper a flick's last few pixels. Use
+    // event times over a short window, rather than the last delivered pair.
+    samples.push({ distance, time: timestamp });
+    while (samples.length > 2 && timestamp - samples[1]!.time >= windowMs)
+      samples.shift();
+    const first = samples[0]!;
+    current.velocity =
+      (distance - first.distance) / Math.max(1, timestamp - first.time);
+  } else {
+    current.velocity =
+      (distance - referenceDistance) / Math.max(1, now - referenceTime);
+    // Reversing must cancel immediately, without older forward samples.
+    if (windowMs > 0)
+      samples.splice(0, samples.length, { distance, time: timestamp });
+  }
+  current.movedAt = now;
+  current.velocityDistance = distance;
+  current.velocityPeak = distance;
+  current.velocityPeakAt = now;
 }
 
 function claimGesture(current: Gesture, deltaX: number, deltaY: number) {
@@ -217,7 +246,7 @@ function claimGesture(current: Gesture, deltaX: number, deltaY: number) {
     current.owner.options.current.onStart?.();
 }
 
-function track(current: Gesture, touch: Touch) {
+function track(current: Gesture, touch: Touch, timestamp: number) {
   const deltaX = touch.clientX - current.x;
   const deltaY = Math.abs(touch.clientY - current.y);
   if (!current.owner) claimGesture(current, deltaX, deltaY);
@@ -226,7 +255,7 @@ function track(current: Gesture, touch: Touch) {
   const distance = current.owner.options.current.allowReverse
     ? delta
     : Math.max(0, delta);
-  trackVelocity(current, distance);
+  trackVelocity(current, distance, timestamp);
 }
 
 /** A long press/menu owns the remainder of its original touch sequence. */
@@ -262,7 +291,7 @@ function move(event: TouchEvent) {
     cancel();
     return;
   }
-  track(current, touch);
+  track(current, touch, event.timeStamp);
   if (gesture !== current || !current.owner) return;
   if (event.cancelable) event.preventDefault();
   current.frame ??= globalThis.requestAnimationFrame(() => paint(current));
@@ -280,8 +309,8 @@ function end(event: TouchEvent) {
   }
   // An end event cannot acquire a gesture: vertical scrolling or a tap must
   // have demonstrated horizontal intent while the finger was down.
-  if (current.owner) track(current, touch);
-  finish(true);
+  if (current.owner) track(current, touch, event.timeStamp);
+  finish(true, event.timeStamp);
 }
 
 function removeCandidate(candidate: Candidate | null) {
@@ -344,6 +373,7 @@ export function useHorizontalSwipe(
         velocityPeak: 0,
         velocityPeakAt: performance.now(),
         velocity: 0,
+        velocitySamples: [{ distance: 0, time: event.timeStamp }],
         movedAt: performance.now(),
         frame: null,
       };

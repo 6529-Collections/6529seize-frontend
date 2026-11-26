@@ -10,6 +10,7 @@ import DeviceSecurityStatus from "@/components/device-signing/DeviceSecurityStat
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP } from "@/constants/constants";
 import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
+import { usePhoneNavigationScreen } from "@/contexts/PhoneNavigationScreenContext";
 import {
   type HeaderWaveDropAction,
   useHeaderContext,
@@ -342,7 +343,9 @@ export default function AppHeader() {
   const { waveDropAction } = useHeaderContext();
   const { isCapacitor } = useCapacitor();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
-  const searchParams = useSearchParams();
+  const currentSearchParams = useSearchParams();
+  const retainedScreen = usePhoneNavigationScreen();
+  const searchParams = retainedScreen?.searchParams ?? currentSearchParams;
   const {
     address,
     hasValidWalletAuth,
@@ -352,7 +355,8 @@ export default function AppHeader() {
     seizeSwitchConnectedAccount,
   } = useSeizeConnectContext();
   const { connectedProfile, activeProfileProxy } = useAuth();
-  const pathname = usePathname();
+  const currentPathname = usePathname();
+  const pathname = retainedScreen?.pathname ?? currentPathname;
   const params = useParams();
   const { canGoBack } = useNavigationHistoryContext();
   const information = useWaveInformation();
@@ -386,7 +390,7 @@ export default function AppHeader() {
       .replace(/^./, (c) => c.toUpperCase()) ?? "Home";
 
   const { activeWave, headerWavePreview, isWaveResolving, waveId } =
-    useHeaderActiveWave(myStream);
+    useHeaderActiveWave(myStream, retainedScreen ? null : undefined);
   const headerDropAction = getHeaderDropAction({ activeWave, waveDropAction });
 
   const { viewMode, toggleViewMode } = useWaveViewMode(waveId ?? "");

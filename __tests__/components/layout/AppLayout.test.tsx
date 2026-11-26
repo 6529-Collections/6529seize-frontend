@@ -22,6 +22,9 @@ let mockLayoutSpaces = {
 
 jest.mock("next/dynamic", () => (loader: () => Promise<unknown>) => {
   const loaderSource = loader.toString();
+  if (loaderSource.includes("PhoneNavigationStack")) {
+    return ({ children }: { readonly children: React.ReactNode }) => children;
+  }
 
   if (loaderSource.includes("../header/AppHeader")) {
     const MockDynamicHeader = () => <div data-testid="header" />;

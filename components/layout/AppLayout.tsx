@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { getPhoneNavigationRoute } from "@/helpers/waves/phone-navigation-route";
 import type { CSSProperties, ReactNode } from "react";
 import { Suspense, useCallback, useMemo, useRef } from "react";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
@@ -35,6 +36,9 @@ const TouchDeviceHeader = dynamic(() => import("../header/AppHeader"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
 });
+const PhoneNavigationStack = dynamic(
+  () => import("../mobile-navigation/PhoneNavigationStack")
+);
 
 interface Props {
   readonly children: ReactNode;
@@ -142,13 +146,20 @@ function AppLayoutContent({ children }: Props) {
     searchParams,
   });
   const { isApp } = useDeviceInfo();
+  const phoneRoute = isApp
+    ? getPhoneNavigationRoute(
+        pathname,
+        new URLSearchParams(searchParams.toString()),
+        waveParam
+      )
+    : null;
   const waveNavigationScreen = getWaveNavigationScreen(
     pathname,
     waveParam,
     isApp && searchParams.get("view") === "profile-feed"
   );
   const waveNavigationRef = useWaveNavigationTransition(
-    waveNavigationScreen,
+    phoneRoute ? null : waveNavigationScreen,
     pathname
   );
   const shouldHideBottomNavForRoute = hidesMobileBottomNavigation({
@@ -206,7 +217,7 @@ function AppLayoutContent({ children }: Props) {
     activeContent = <main>{children}</main>;
   }
 
-  return (
+  const page = (
     <>
       <div
         data-mobile-bottom-nav-scroll-target="true"
@@ -244,6 +255,13 @@ function AppLayoutContent({ children }: Props) {
         />
       )}
     </>
+  );
+  return phoneRoute ? (
+    <PhoneNavigationStack key={phoneRoute.family} route={phoneRoute}>
+      {page}
+    </PhoneNavigationStack>
+  ) : (
+    page
   );
 }
 
