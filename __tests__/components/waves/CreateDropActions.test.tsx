@@ -8,6 +8,7 @@ import {
   within,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useState } from "react";
 
 // Mock ResizeObserver
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
@@ -387,6 +388,44 @@ describe("CreateDropActions", () => {
       expect(mockSetToast).toHaveBeenCalledWith(
         expect.objectContaining({ type: "warning" })
       );
+      expect(defaultProps.setShowOptions).not.toHaveBeenCalled();
+    } finally {
+      wavesMove.useWavesWritesPaused.mockReturnValue(false);
+      wavesMove.useWaveMovedToChain.mockReturnValue(false);
+    }
+  });
+
+  it("keeps the compact tray open and the focus on its poll button when polls aren't open", async () => {
+    const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
+    wavesMove.useWavesWritesPaused.mockReturnValue(true);
+    wavesMove.useWaveMovedToChain.mockReturnValue(true);
+    // The tray's open state lives in the composer, as on the page.
+    function ComposerActions() {
+      const [showOptions, setShowOptions] = useState(true);
+      return (
+        <CreateDropActions
+          {...defaultProps}
+          canCreatePoll={true}
+          isCompactLayout={true}
+          showOptions={showOptions}
+          setShowOptions={setShowOptions}
+        />
+      );
+    }
+    try {
+      render(<ComposerActions />);
+      const pollButton = within(
+        screen.getByTestId("drop-actions-compact-tray")
+      ).getByRole("button", { name: "Poll" });
+      pollButton.focus();
+      await userEvent.keyboard("{Enter}");
+      expect(mockSetToast).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "warning" })
+      );
+      expect(screen.getByTestId("drop-actions-compact-tray")).toContainElement(
+        pollButton
+      );
+      expect(pollButton).toHaveFocus();
     } finally {
       wavesMove.useWavesWritesPaused.mockReturnValue(false);
       wavesMove.useWaveMovedToChain.mockReturnValue(false);

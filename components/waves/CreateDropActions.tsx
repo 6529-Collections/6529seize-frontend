@@ -371,7 +371,9 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                             aria-disabled="true"
                             aria-describedby={`${pollsNotOpenReasonId}-compact`}
                             muted
-                            onClick={() => runCompactAction(showPollsNotOpen)}
+                            // Only a toast: the tray stays open, so focus
+                            // stays on this button.
+                            onClick={showPollsNotOpen}
                             icon={<ChartBarIcon className="tw-size-5" />}
                           />
                           <span
