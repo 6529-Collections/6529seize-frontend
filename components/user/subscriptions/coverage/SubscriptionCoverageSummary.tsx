@@ -15,6 +15,7 @@ import {
 import type { ApiSubscriptionCoverage } from "@/generated/models/ApiSubscriptionCoverage";
 import { ApiSubscriptionCoverageStatus as Status } from "@/generated/models/ApiSubscriptionCoverageStatus";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { formatInteger } from "@/i18n/format";
 import { t, tRich, type MessageKey } from "@/i18n/messages";
 import {
@@ -220,6 +221,7 @@ function CoverageSummaryContent({
   readonly now: number;
 }) {
   const locale = useBrowserLocale();
+  const isPhoneLayout = useMediaQuery("(max-width: 639px)");
   const status = coverage?.status ?? Status.Unknown;
   const presentation = getSubscriptionCoverageSummaryPresentation(
     locale,
@@ -386,9 +388,40 @@ function CoverageSummaryContent({
       primary: false,
     };
 
+  const ownerActions = showActions ? (
+    <div
+      key="owner-actions"
+      className={`tw-mt-5 tw-grid tw-w-full tw-gap-2 sm:tw-w-auto sm:tw-self-end ${showChooseDrops ? "tw-grid-cols-2 sm:tw-col-start-1 sm:tw-row-start-2 sm:tw-mt-4 sm:tw-flex sm:tw-justify-self-start" : "tw-grid-cols-1 sm:tw-col-start-2 sm:tw-row-start-1 sm:tw-mt-0"}`}
+    >
+      {sectionAction && (
+        <ButtonLink
+          href={sectionAction.hash}
+          onNavigate={(event) => {
+            if (sectionAction)
+              navigateToSubscriptionSection(event, sectionAction.hash);
+          }}
+          variant={sectionAction.primary ? "primary" : "secondary"}
+          size={null}
+          className="tw-min-h-11 tw-min-w-0 tw-px-3 tw-py-1.5 tw-text-sm sm:tw-min-h-9"
+        >
+          {t(locale, sectionAction.label)}
+          {showChooseDrops && (
+            <ArrowRightIcon
+              aria-hidden="true"
+              className="tw-hidden tw-size-4 sm:tw-block"
+            />
+          )}
+        </ButtonLink>
+      )}
+      {!showSetUp && !showHistory && topUp}
+    </div>
+  ) : null;
+
   return (
-    <>
-      <div className="tw-grid tw-min-w-0 tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-[minmax(0,1fr)_auto] sm:tw-gap-x-5">
+    <div className="tw-contents">
+      <div
+        className={`tw-grid tw-min-w-0 tw-flex-1 tw-grid-cols-1 sm:tw-grid-cols-[minmax(0,1fr)_auto] sm:tw-gap-x-5 ${showChooseDrops ? "sm:tw-grid-rows-[auto_auto_1fr]" : "sm:tw-grid-rows-[auto_1fr]"}`}
+      >
         <div
           className={`tw-min-w-0 ${showChooseDrops ? "sm:tw-col-span-full" : ""}`}
         >
@@ -419,7 +452,7 @@ function CoverageSummaryContent({
                     .filter(Boolean)
                     .join(" ") || undefined
             }
-            className={`tw-m-0 tw-font-semibold tw-tracking-tight focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${pending ? "tw-text-sm tw-font-normal tw-text-iron-400" : "tw-text-2xl tw-text-iron-100 sm:tw-text-[28px] sm:tw-leading-9"}`}
+            className={`tw-m-0 tw-font-semibold tw-tracking-tight focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${pending ? "tw-text-sm tw-font-normal tw-text-iron-400" : "tw-text-xl tw-leading-[26px] tw-text-iron-100 sm:tw-text-[28px] sm:tw-leading-9"}`}
           >
             {pending ? t(locale, "subscriptions.coverage.loading") : headline}
           </h2>
@@ -488,70 +521,48 @@ function CoverageSummaryContent({
             </p>
           )}
         </div>
-        {showActions && (
-          <div
-            className={`tw-grid tw-w-full tw-gap-2 sm:tw-w-auto sm:tw-self-end ${showChooseDrops ? "tw-grid-cols-2 sm:tw-col-start-1 sm:tw-flex sm:tw-justify-self-start" : "tw-grid-cols-1 sm:tw-col-start-2"}`}
-          >
-            {sectionAction && (
-              <ButtonLink
-                href={sectionAction.hash}
-                onNavigate={(event) => {
-                  if (sectionAction)
-                    navigateToSubscriptionSection(event, sectionAction.hash);
-                }}
-                variant={sectionAction.primary ? "primary" : "secondary"}
-                size={null}
-                className="tw-min-h-11 tw-min-w-0 tw-px-3 tw-py-1.5 tw-text-sm sm:tw-min-h-9"
-              >
-                {t(locale, sectionAction.label)}
-                {showChooseDrops && (
-                  <ArrowRightIcon
-                    aria-hidden="true"
-                    className="tw-hidden tw-size-4 sm:tw-block"
-                  />
+        {!isPhoneLayout && ownerActions}
+        <div
+          id="subscription-overview-actions"
+          className={`tw-col-span-full tw-mt-5 tw-grid tw-min-w-0 tw-grid-cols-[minmax(0,1fr)_max-content] tw-gap-x-4 tw-gap-y-0.5 tw-text-sm max-[383px]:tw-grid-cols-1 sm:tw-mt-0 sm:tw-flex sm:tw-flex-row sm:tw-flex-wrap sm:tw-gap-x-5 sm:tw-gap-y-3 sm:tw-self-end sm:tw-pt-6 ${showChooseDrops ? "sm:tw-row-start-3" : "sm:tw-row-start-2"}`}
+        >
+          {action}
+          <SubscriptionCoverageForecast
+            coverage={coverage}
+            isLoading={pending}
+            description={!coverage ? description : undefined}
+          />
+          {paid && coverage && (
+            <p className="tw-col-span-full tw-m-0 tw-text-sm tw-text-iron-400">
+              {t(locale, "subscriptions.coverage.summary.forecastSnapshot", {
+                funded: getFundedDropsLabel(
+                  locale,
+                  coverage.fully_funded_drops
+                ),
+              })}
+            </p>
+          )}
+          {showNextUnfunded && coverage?.next_unfunded && (
+            <dl className="tw-col-span-full tw-m-0 tw-flex tw-min-w-0 tw-items-baseline tw-justify-between tw-gap-3 tw-text-sm sm:tw-justify-start sm:tw-gap-2">
+              <dt className="tw-shrink-0 tw-text-iron-500">
+                {t(
+                  locale,
+                  paymentUnavailable
+                    ? "subscriptions.coverage.summary.nextDrop"
+                    : "subscriptions.coverage.nextUnfunded"
                 )}
-              </ButtonLink>
-            )}
-            {!showSetUp && !showHistory && topUp}
-          </div>
-        )}
-      </div>
-      <div
-        id="subscription-overview-actions"
-        className="tw-mt-6 tw-grid tw-min-w-0 tw-grid-cols-[minmax(0,1fr)_max-content] tw-gap-x-4 tw-gap-y-0.5 tw-text-sm max-[383px]:tw-grid-cols-1 sm:tw-mt-auto sm:tw-flex sm:tw-flex-row sm:tw-flex-wrap sm:tw-gap-x-5 sm:tw-gap-y-3 sm:tw-pt-6"
-      >
-        {action}
-        <SubscriptionCoverageForecast
-          coverage={coverage}
-          isLoading={pending}
-          description={!coverage ? description : undefined}
-        />
-        {paid && coverage && (
-          <p className="tw-col-span-full tw-m-0 tw-text-sm tw-text-iron-400">
-            {t(locale, "subscriptions.coverage.summary.forecastSnapshot", {
-              funded: getFundedDropsLabel(locale, coverage.fully_funded_drops),
-            })}
-          </p>
-        )}
-        {showNextUnfunded && coverage?.next_unfunded && (
-          <dl className="tw-col-span-full tw-m-0 tw-flex tw-min-w-0 tw-items-baseline tw-justify-between tw-gap-3 tw-text-sm sm:tw-justify-start sm:tw-gap-2">
-            <dt className="tw-shrink-0 tw-text-iron-500">
-              {t(
-                locale,
-                paymentUnavailable
-                  ? "subscriptions.coverage.summary.nextDrop"
-                  : "subscriptions.coverage.nextUnfunded"
-              )}
-            </dt>
-            <dd className="tw-m-0 tw-min-w-0 tw-text-right tw-font-medium tw-text-iron-100 sm:tw-text-left">
-              <CoveragePoint point={coverage.next_unfunded} />
-            </dd>
-          </dl>
-        )}
+              </dt>
+              <dd className="tw-m-0 tw-min-w-0 tw-text-right tw-font-medium tw-text-iron-100 sm:tw-text-left">
+                <CoveragePoint point={coverage.next_unfunded} />
+              </dd>
+            </dl>
+          )}
+        </div>
+        {isPhoneLayout && ownerActions}
       </div>
       {showHistory && topUp && <div className="tw-mt-4">{topUp}</div>}
       {children}
-    </>
+    </div>
   );
 }
 
