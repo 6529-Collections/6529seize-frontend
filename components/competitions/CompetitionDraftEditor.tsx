@@ -3,6 +3,7 @@ import { ApiCompetitionLifecycle } from "@/generated/models/ApiCompetitionLifecy
 import type { ReactNode } from "react";
 import {
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -55,6 +56,8 @@ import {
 import { useAuth } from "@/components/auth/Auth";
 import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
 import { t } from "@/i18n/messages";
 import CompetitionDraftEditorFooter from "./CompetitionDraftEditorFooter";
 import CompetitionDraftEditorLayout, {
@@ -117,6 +120,8 @@ function DraftForm({
   readonly onClose: () => void;
 }) {
   const locale = useBrowserLocale();
+  const isPhone = useMediaQuery(PHONE_WAVES_LAYOUT_QUERY);
+  const validationFeedbackId = useId();
   const router = useRouter();
   const client = useQueryClient();
   const { connectedProfile, requestAuth } = useAuth();
@@ -399,6 +404,7 @@ function DraftForm({
             inputClassName={EDITOR_INPUT}
             errors={visibleErrors}
             currentErrors={currentStepErrors}
+            feedbackId={validationFeedbackId}
             value={config.overview.name}
             onChange={(event) =>
               controller.setOverview({
@@ -553,7 +559,8 @@ function DraftForm({
   const validationFeedback = getDecisionValidationFeedback(
     locale,
     visibleErrors,
-    invalid
+    invalid,
+    validationFeedbackId
   );
   const footer = (
     <CompetitionDraftEditorFooter
@@ -563,7 +570,7 @@ function DraftForm({
       published={published}
       busy={busy}
       conflict={displayedError === "conflict"}
-      validationFeedback={validationFeedback}
+      validationFeedback={isPhone ? validationFeedback : false}
       onClose={() => {
         void close();
       }}
@@ -613,7 +620,9 @@ function DraftForm({
           </div>
         )}
       </fieldset>
-      <div className="tw-contents max-md:tw-hidden">{validationFeedback}</div>
+      <div className="tw-contents max-md:tw-hidden">
+        {!isPhone && validationFeedback}
+      </div>
       {displayedError && (
         <p role="alert" className="tw-m-0 tw-text-red">
           {t(

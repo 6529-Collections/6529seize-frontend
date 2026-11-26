@@ -13541,6 +13541,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         page.getByLabel("Decision name", { exact: true })
       ).toHaveCount(1);
       await expect(name).toHaveAttribute("aria-invalid", "false");
+      await expect(name).toHaveAccessibleDescription("");
       await next.click();
       await expect(name).toHaveAttribute("aria-invalid", "true");
       await expect(name).toBeFocused();
@@ -13552,6 +13553,14 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       });
       await expect(message).toHaveCount(1);
       await expect(message).toBeVisible();
+      await expect(name).toHaveAccessibleDescription(
+        "Complete the required fields before continuing."
+      );
+      await expect(
+        page.getByRole("alert", { includeHidden: true }).filter({
+          hasText: "Complete the required fields before continuing.",
+        })
+      ).toHaveCount(1);
       if (width < 768) {
         await expect(message).toBeInViewport({ ratio: 1 });
         await expect(next).toBeInViewport({ ratio: 1 });
@@ -13573,7 +13582,17 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       });
       await name.fill("Validation placement draft");
       await expect(name).toHaveAttribute("aria-invalid", "false");
+      await expect(name).not.toHaveAttribute("aria-describedby", /.+/);
+      await expect(name).toHaveAccessibleDescription("");
       await expect(message).toHaveCount(0);
+      await name.fill("   ");
+      await next.click();
+      await expect(name).toHaveAttribute("aria-invalid", "true");
+      await expect(name).toHaveAccessibleDescription(
+        "Complete the required fields before continuing."
+      );
+      await name.fill("Validation placement draft");
+      await expect(name).toHaveAccessibleDescription("");
       await next.click();
       await expect(
         page.getByRole("group", { name: "Who can drop", exact: true })

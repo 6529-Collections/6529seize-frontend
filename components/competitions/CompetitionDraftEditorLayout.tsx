@@ -19,12 +19,13 @@ const RULES_LOCKED_NOTE_ID = "competition-draft-rules-locked";
 export function getDecisionValidationFeedback(
   locale: SupportedLocale,
   errors: readonly CREATE_WAVE_VALIDATION_ERROR[],
-  invalid: boolean
+  invalid: boolean,
+  feedbackId: string
 ) {
   return (
     errors.length > 0 &&
     invalid && (
-      <p role="alert" className="tw-m-0 tw-text-red">
+      <p id={feedbackId} role="alert" className="tw-m-0 tw-text-red">
         {t(locale, "competitions.required")}
       </p>
     )
@@ -36,6 +37,7 @@ export function DecisionNameField({
   inputClassName,
   errors,
   currentErrors,
+  feedbackId,
   value,
   onChange,
 }: {
@@ -43,6 +45,7 @@ export function DecisionNameField({
   readonly inputClassName: string;
   readonly errors: readonly CREATE_WAVE_VALIDATION_ERROR[];
   readonly currentErrors: readonly CREATE_WAVE_VALIDATION_ERROR[];
+  readonly feedbackId: string;
   readonly value: string;
   readonly onChange: ChangeEventHandler<HTMLInputElement>;
 }) {
@@ -67,6 +70,7 @@ export function DecisionNameField({
         maxLength={250}
         aria-labelledby={labelId}
         aria-invalid={isNameError}
+        aria-describedby={isNameError ? feedbackId : undefined}
         className={`${inputClassName} aria-[invalid=true]:tw-border-error aria-[invalid=true]:hover:tw-border-error aria-[invalid=true]:focus:tw-border-error aria-[invalid=true]:focus:tw-outline-1 aria-[invalid=true]:focus:tw-outline-error`}
         value={value}
         onChange={onChange}
