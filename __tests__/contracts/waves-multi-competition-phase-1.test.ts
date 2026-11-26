@@ -148,6 +148,7 @@ describe("waves multi-competition Phase 1 frontend contract", () => {
       ended_at: null,
       cancelled_at: null,
       archived_at: null,
+      stays_on_site: true,
     };
     const fields = ApiCompetition.attributeTypeMap.map(({ name }) => name);
     expect(competition.id).toBeTruthy();
