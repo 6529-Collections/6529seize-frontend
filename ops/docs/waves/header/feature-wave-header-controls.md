@@ -61,7 +61,8 @@ when available. Hover, click, or use the keyboard to open its details card and
 
 When the description preview is hidden, a subwave's parent link and name form
 a compact stack centred beside the avatar. The parent link and the wave name
-remain separate actions.
+remain separate actions. The loading header reserves the same title lines so
+the name stays in place when the wave finishes loading.
 
 When the center column becomes narrow, including when a sidebar is open, the
 name and score stay together on one line. The description teaser remains visible
