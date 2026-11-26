@@ -136,6 +136,7 @@ export const buildPreviewDrop = ({
       forbid_negative_votes: wave.voting.forbid_negative_votes,
       pinned: wave.pinned,
       identity_wave: wave.identity_wave,
+      stays_on_site: wave.stays_on_site,
       submission_type: wave.participation.submission_strategy?.type ?? null,
       voting_credit_nfts: wave.voting.credit_nfts,
       voting_credit_scope: wave.voting.credit_scope,

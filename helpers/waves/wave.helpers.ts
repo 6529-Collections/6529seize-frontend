@@ -1,4 +1,3 @@
-import { withStaysOnSite } from "@/lib/waves-move/scope";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 
@@ -102,6 +101,7 @@ export const toApiWaveMin = (wave: ApiWave): ApiWaveMin => {
     forbid_negative_votes: wave.voting.forbid_negative_votes,
     pinned: wave.pinned,
     identity_wave: wave.identity_wave,
+    stays_on_site: wave.stays_on_site,
     submission_type: wave.participation.submission_strategy?.type ?? null,
     voting_credit_nfts: wave.voting.credit_nfts,
     links_disabled: wave.chat.links_disabled,
@@ -110,7 +110,5 @@ export const toApiWaveMin = (wave: ApiWave): ApiWaveMin => {
     is_direct_message: wave.chat.scope.group?.is_direct_message ?? false,
   };
 
-  // Whether the wave stays on 6529.io: a drop rebuilt from the full wave
-  // keeps the API's word on it.
-  return withStaysOnSite(waveMin, wave);
+  return waveMin;
 };
