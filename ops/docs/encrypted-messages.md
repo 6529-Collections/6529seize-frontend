@@ -107,12 +107,13 @@ links and images do not open or load separately. Long previews end with an
 ellipsis. Custom emojis render inline at a compact size, while code keeps emoji
 shortcodes literal.
 
-Open **Chat info** and select **Pin to top** to keep a chat above unpinned
-chats in the inbox and sidebar. Select **Unpin chat** to return it to the
-regular list. Your pin follows the direct conversation when it continues
-in a new encryption session. Pins sync privately to your other trusted
-devices after they connect. If encrypted sync is off, the pin is saved on
-this device until sync is available.
+Use the pin icon on a chat row in the encrypted inbox or sidebar to keep the
+chat above unpinned chats. On desktop, hover the row or tab to the icon. On a
+touchscreen, tap the icon. Select the filled pin to unpin the chat. **Chat info**
+also has **Pin to top** and **Unpin chat**. Your pin follows the direct
+conversation when it continues in a new encryption session. Pins sync privately
+to your other trusted devices after they connect. If encrypted sync is off, the
+pin is saved on this device until sync is available.
 
 On mobile web and in the app, open **+** beside the message input for **Attach**,
 **Poll** when available, and **GIF**. The tray opens below the input and closes

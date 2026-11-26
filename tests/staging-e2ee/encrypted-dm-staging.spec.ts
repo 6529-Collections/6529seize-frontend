@@ -30,6 +30,7 @@ import {
 } from "../support/markdownParity";
 
 import { checkEncryptedPoll } from "../support/e2ee/polls";
+import { e2eeMessage } from "../support/e2ee/e2eeCopy";
 import { expect, test } from "../testHelpers";
 import {
   plaintextEncodings,
@@ -348,6 +349,31 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     ).toHaveAttribute("href", `/${a.user.handle}`);
     await expectNothingUndecryptable(a);
     await expectNothingUndecryptable(b);
+
+    await gotoStaging(b.page, ENCRYPTED_ROUTE);
+    const lists = b.page.getByRole("list", {
+      name: e2eeMessage("e2ee.list.label"),
+    });
+    await expect(lists).toHaveCount(2, { timeout: UI_TIMEOUT_MS });
+    const sidebar = lists.first();
+    const pinButton = {
+      name: e2eeMessage("e2ee.list.pinChat", { title: a.user.handle }),
+      exact: true,
+    };
+    const sidebarPin = sidebar.getByRole("button", pinButton);
+    const inboxPin = lists.last().getByRole("button", pinButton);
+    const sidebarChat = sidebar.getByRole("link", { name: a.user.handle });
+    await expect(sidebarChat).toHaveAttribute(
+      "href",
+      `${ENCRYPTED_ROUTE}/${dm}`
+    );
+    await sidebarChat.hover();
+    await sidebarPin.click();
+    await expect(inboxPin).toHaveAttribute("aria-pressed", "true");
+    await expect(b.page).toHaveURL((url) => url.pathname === ENCRYPTED_ROUTE);
+    await inboxPin.click();
+    await expect(sidebarPin).toHaveAttribute("aria-pressed", "false");
+    await expect(b.page).toHaveURL((url) => url.pathname === ENCRYPTED_ROUTE);
 
     expect(
       a.evidence.requestsMatching(

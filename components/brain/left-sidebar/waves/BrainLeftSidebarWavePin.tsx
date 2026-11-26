@@ -2,6 +2,7 @@
 
 import "@/i18n/namespaces/wave-sidebar";
 import React, { useEffect, useState } from "react";
+import { PinIcon } from "@/components/common/icons/PinIcon";
 import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
 import IconButton from "@/components/utils/button/IconButton";
 import type { IconButtonLayout } from "@/components/utils/button/iconButtonLayouts";
@@ -22,29 +23,6 @@ interface MaxLimitTooltipRequest {
   readonly waveId: string;
   readonly pinnedIdsKey: string;
 }
-
-const WavePinIcon = ({
-  className,
-  filled,
-}: {
-  readonly className: string;
-  readonly filled: boolean;
-}) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill={filled ? "currentColor" : "none"}
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-    className={className}
-  >
-    <path d="M12 17v5" />
-    <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z" />
-  </svg>
-);
 
 const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   waveId,
@@ -143,7 +121,7 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
         data-tooltip-id={`wave-pin-${waveId}`}
         data-tooltip-content={tooltipContent}
       >
-        <WavePinIcon
+        <PinIcon
           className={`${iconSizeClasses} tw-flex-shrink-0 ${isPinned ? "tw-rotate-[-45deg]" : ""}`}
           filled={isPinned}
         />

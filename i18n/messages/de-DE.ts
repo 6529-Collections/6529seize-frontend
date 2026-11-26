@@ -1339,6 +1339,7 @@ export const DE_DE_MESSAGES = {
   ...DE_DE_THE_MEMES_MINT_PROGRESS_MESSAGES,
   "e2ee.list.pinned": "Angeheftet",
   "e2ee.list.pinnedChat": "{title}, angehefteter Chat",
+  "e2ee.list.pinChat": "{title} oben anheften",
   "e2ee.info.pin": "Oben anheften",
   "e2ee.info.unpin": "Anheftung aufheben",
   "e2ee.info.pinSyncHelp":

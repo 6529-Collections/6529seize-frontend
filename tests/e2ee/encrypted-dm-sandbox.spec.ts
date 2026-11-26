@@ -1199,8 +1199,29 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     await sendMessage(alice.page, "An earlier encrypted message");
     await openConversationFromList(bob.page, "alice");
     await expectMessage(bob.page, "An earlier encrypted message");
+    await gotoPath(alice.page, ENCRYPTED_ROUTE);
+    const row = conversationListRow(alice.page, "bob");
+    const pin = alice.page
+      .getByRole("list", { name: "Encrypted chats" })
+      .last()
+      .getByRole("button", { name: "Pin bob to top", exact: true });
+    const mobile = isMobileWebProject(testInfo.project.name);
+    if (mobile) {
+      await expect(pin).toHaveCSS("opacity", "1");
+      await expect(pin).toHaveCSS("width", "44px");
+      await pin.tap();
+    } else {
+      await alice.page.mouse.move(0, 0);
+      await expect(pin).toHaveCSS("opacity", "0");
+      await row.hover();
+      await expect(pin).toHaveCSS("opacity", "1");
+      await pin.click();
+    }
+    await expect(pin).toHaveAttribute("aria-pressed", "true");
+    await expect(alice.page).toHaveURL(new RegExp(`${ENCRYPTED_ROUTE}$`, "u"));
+    await row.click();
+    await expect(alice.page).toHaveURL(oldUrl);
     const settings = await openChatInfo(alice.page);
-    await settings.getByRole("button", { name: "Pin to top" }).click();
     await expect(
       settings.getByRole("button", { name: "Unpin chat" })
     ).toBeVisible();
@@ -1224,9 +1245,20 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     const freshUrl = alice.page.url();
     await sendMessage(alice.page, "A fresh encrypted message");
     await gotoPath(alice.page, ENCRYPTED_ROUTE);
-    const row = conversationListRow(alice.page, "bob");
     await expect(row).toHaveCount(1);
     await expect(row.getByText("Pinned", { exact: true })).toHaveCount(1);
+    if (mobile) {
+      await pin.tap();
+    } else {
+      await alice.page.mouse.move(0, 0);
+      await row.focus();
+      await alice.page.keyboard.press("Tab");
+      await expect(pin).toBeFocused();
+      await alice.page.keyboard.press("Space");
+      await expect(pin).toHaveCSS("opacity", "1");
+    }
+    await expect(pin).toHaveAttribute("aria-pressed", "false");
+    await expect(alice.page).toHaveURL(new RegExp(`${ENCRYPTED_ROUTE}$`, "u"));
     await row.click();
     await expect(alice.page).toHaveURL(freshUrl);
     const history = alice.page.getByRole("combobox", {

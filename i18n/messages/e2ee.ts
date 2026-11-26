@@ -284,6 +284,7 @@ export const E2EE_MESSAGES = {
   "e2ee.list.muted": "Muted",
   "e2ee.list.pinned": "Pinned",
   "e2ee.list.pinnedChat": "{title}, pinned",
+  "e2ee.list.pinChat": "Pin {title} to top",
   "e2ee.list.status.left": "You left",
   "e2ee.list.status.removed": "Removed",
   "e2ee.list.status.restored": "From backup",
