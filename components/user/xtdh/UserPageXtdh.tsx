@@ -1,6 +1,5 @@
 "use client";
 
-import PillTab from "@/components/common/PillTab";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import {
@@ -139,24 +138,24 @@ export default function UserPageXtdh({ profile }: UserPageXtdhProps) {
       />
 
       <div className="tw-mt-2">
-        <div className="tw-mb-3 tw-flex tw-items-center tw-gap-2">
+        <div className="tw-mb-3 tw-flex tw-items-center tw-gap-4 md:tw-gap-6">
           {XTDH_TAB_CONFIG.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeFilter === tab.key;
             return (
-              <PillTab
+              <button
                 key={tab.key}
-                active={isActive}
+                type="button"
                 aria-pressed={isActive}
                 onClick={() => handleFilterChange(tab.key)}
-                className={`!tw-gap-1.5 !tw-text-[13px] !tw-font-medium focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${isActive ? "!tw-bg-iron-800 !tw-text-white" : "!tw-text-iron-400 desktop-hover:hover:!tw-text-iron-200"}`}
+                className={`tw-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-text-[13px] tw-tracking-tight tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black md:tw-gap-2 md:tw-text-xl ${isActive ? "tw-font-semibold tw-text-iron-100" : "tw-font-medium tw-text-iron-500 desktop-hover:hover:tw-text-iron-400"}`}
               >
                 <Icon
                   aria-hidden="true"
-                  className="tw-size-3.5 tw-shrink-0 tw-opacity-70"
+                  className="tw-size-3.5 tw-shrink-0 tw-opacity-70 md:tw-size-4 md:tw-opacity-50"
                 />
                 {tab.label}
-              </PillTab>
+              </button>
             );
           })}
           {canGrant && (

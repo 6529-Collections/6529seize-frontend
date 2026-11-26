@@ -49,7 +49,8 @@ View-specific query keys:
 - The stats header shows `Generating`, `Inbound`, `Outbound`, `Net`, and `Granted rate`.
 - Below medium widths, the stats form one compact summary card with Net first and
   Generating, Inbound, and Outbound in rows. Desktop retains its summary layout.
-- Granted and Received use compact pill buttons on every screen size.
+- Granted and Received use text buttons without a background. Below medium
+  widths, the buttons use compact text; desktop uses larger text.
 - First load shows skeleton cards.
 - Fetch failure shows inline error text and `Retry`.
 - In owner mode, the `Outbound` card is a quick action that switches to `Granted` and scrolls to `Create New Grant`.

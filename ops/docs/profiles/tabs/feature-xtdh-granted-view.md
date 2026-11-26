@@ -57,7 +57,8 @@ Shared tab routing and owner-mode rules are documented in:
 
 - Grants are separate cards. Status badges use sentence case and retain their
   status colors and symbols.
-- Status tabs are compact, horizontally scrollable filter chips:
+- Below medium widths, status tabs are compact, horizontally scrollable pills.
+  Desktop uses connected tabs:
   - `Active`, `Pending`, `Revoked`, `Failed`.
   - `Pending` shows a live count badge while pending grants exist.
 - `Active` sub-filter appears only on `Active`.
