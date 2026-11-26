@@ -1,4 +1,5 @@
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
+import DropdownToolbar from "@/components/utils/select/dropdown/DropdownToolbar";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import type { XtdhCollectionsSortField } from "@/hooks/useXtdhCollectionsQuery";
 import type { SortDirection } from "@/entities/ISort";
@@ -73,7 +74,18 @@ export function XtdhCollectionsControls({
           />
         </div>
         <div className="lg:tw-hidden">
-          <CommonDropdown {...sortProps} />
+          {variant === "profile" ? (
+            <>
+              <DropdownToolbar variant="regular" className="md:tw-hidden">
+                <CommonDropdown {...sortProps} />
+              </DropdownToolbar>
+              <div className="tw-hidden md:tw-block">
+                <CommonDropdown {...sortProps} />
+              </div>
+            </>
+          ) : (
+            <CommonDropdown {...sortProps} />
+          )}
         </div>
       </div>
     </section>
