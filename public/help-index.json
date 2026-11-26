@@ -7848,7 +7848,7 @@
         "contributors"
       ],
       "facts": [
-        "The neutral bell opens notification settings for a connected non-proxy profile before or after joining. Muting changes it to a bell-slash with the existing rose-toned muted-control colours in the same place.",
+        "The neutral bell opens notification settings for a connected non-proxy profile before or after joining. It rings for All messages and stays plain for either mention level. Muting overrides the saved level with a bell-slash and the existing rose-toned muted-control colours in the same place.",
         "On smaller screens, notification choices use the site's standard picker sheet over About. Selecting a level or Mute/Unmute, closing the picker, tapping its backdrop, or pressing Escape restores focus to the bell. About keeps its content and scroll position.",
         "Desktop and tablet sidebars use an anchored notification menu with arrow-key navigation and Escape to return to the bell.",
         "Joined waves show exactly one selected level: All messages (Every new post), Mentions and @all (Includes @contributors), or Mentions only (Your mentions and replies).",

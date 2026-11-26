@@ -180,7 +180,10 @@ export default function WaveNotificationPreferenceButtons({
   const instanceId = useId();
   const tooltipId = `wave-notification-actions-${waveId}-${instanceId}`;
   const busy = settings.muteLoading || settings.loadingTarget !== null;
-  const Icon = settings.isMuted ? BellSlashIcon : BellIcon;
+  let Icon = BellIcon;
+  if (settings.isMuted) Icon = BellSlashIcon;
+  else if (settings.following && settings.notificationLevel === "all-messages")
+    Icon = BellAlertIcon;
   const trigger = (
     <IconButton
       id={`${tooltipId}-trigger`}
