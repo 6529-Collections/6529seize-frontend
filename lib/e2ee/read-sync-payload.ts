@@ -1,4 +1,5 @@
 import { randomBytes, utf8Decode, utf8Encode } from "./bytes";
+import { isConversationPin, type ConversationPin } from "./conversation-pins";
 
 /**
  * The payload of a self group (D175, design P60 §3): read positions shared
@@ -12,6 +13,8 @@ const READ_SYNC_VERSION = 1;
 const READ_SYNC_BODY_BYTES = 3072;
 /** Positions per message; a longer list goes out as several pages. */
 const READ_SYNC_MAX_POSITIONS = 32;
+/** Leaves room in the same bucket for the longer pin records. */
+export const PINS_PER_PAYLOAD = 16;
 
 const GROUP_PATTERN = /^0x[0-9a-f]{64}$/u;
 const ID_PATTERN = /^[0-9a-f]{32}$/u;
@@ -34,14 +37,28 @@ export interface ReadSyncPayload {
   readonly s?: readonly [id: string, page: number, pages: number];
 }
 
+export interface PinSyncPayload {
+  readonly v: typeof READ_SYNC_VERSION;
+  readonly t: "pins";
+  readonly pins: readonly ConversationPin[];
+  /** A device joined or restarted and wants its siblings' state. */
+  readonly request?: true;
+}
+
 export const newReadSyncId = (): string =>
   Array.from(randomBytes(16), (byte) =>
     byte.toString(16).padStart(2, "0")
   ).join("");
 
 /** Encodes and pads to exactly READ_SYNC_BODY_BYTES; throws if it cannot. */
-export function encodeReadSync(payload: ReadSyncPayload): Uint8Array {
-  if (payload.r.length > READ_SYNC_MAX_POSITIONS) {
+export function encodeReadSync(
+  payload: ReadSyncPayload | PinSyncPayload
+): Uint8Array {
+  if (
+    payload.t === "pins"
+      ? payload.pins.length > PINS_PER_PAYLOAD
+      : payload.r.length > READ_SYNC_MAX_POSITIONS
+  ) {
     throw new Error("E2EE_READ_SYNC_TOO_MANY");
   }
   const bare = utf8Encode(JSON.stringify({ ...payload, p: "" }));
@@ -91,7 +108,9 @@ function decodeSnapshot(value: unknown): ReadSyncPayload["s"] | null {
  * (another `v` or `t`, or a broken envelope), which the engine ignores
  * without failing the group. Malformed positions are dropped one by one.
  */
-export function decodeReadSync(bytes: Uint8Array): ReadSyncPayload | null {
+export function decodeSelfSync(
+  bytes: Uint8Array
+): ReadSyncPayload | PinSyncPayload | null {
   let parsed: unknown;
   try {
     parsed = JSON.parse(utf8Decode(bytes));
@@ -102,6 +121,26 @@ export function decodeReadSync(bytes: Uint8Array): ReadSyncPayload | null {
     return null;
   }
   const json = parsed as Record<string, unknown>;
+  if (json["v"] === READ_SYNC_VERSION && json["t"] === "pins") {
+    if (!Array.isArray(json["pins"])) return null;
+    return {
+      v: READ_SYNC_VERSION,
+      t: "pins",
+      pins: json["pins"].slice(0, PINS_PER_PAYLOAD).filter(isConversationPin),
+      ...(json["request"] === true ? { request: true } : {}),
+    };
+  }
+  return decodeReadPayload(json);
+}
+
+export function decodeReadSync(bytes: Uint8Array): ReadSyncPayload | null {
+  const payload = decodeSelfSync(bytes);
+  return payload?.t === "pins" ? null : payload;
+}
+
+function decodeReadPayload(
+  json: Record<string, unknown>
+): ReadSyncPayload | null {
   const type = json["t"];
   if (
     json["v"] !== READ_SYNC_VERSION ||

@@ -282,6 +282,9 @@ export const E2EE_MESSAGES = {
   "e2ee.list.mentions.other": "{count} mentions",
   "e2ee.list.status.invalid": "Paused",
   "e2ee.list.muted": "Muted",
+  "e2ee.list.pinned": "Pinned",
+  "e2ee.list.pinnedChat": "{title}, pinned",
+  "e2ee.list.pinChat": "Pin {title} to top",
   "e2ee.list.status.left": "You left",
   "e2ee.list.status.removed": "Removed",
   "e2ee.list.status.restored": "From backup",
@@ -584,6 +587,12 @@ export const E2EE_MESSAGES = {
   "e2ee.info.safetyCodeHelp":
     "Compare this code with the other members in person or in another app you trust. If everyone sees the same code, everyone sees the same people and devices in this chat. Check the wallet shown with each device to know whose it is.",
   "e2ee.info.mute": "Mute on this device",
+  "e2ee.info.pin": "Pin to top",
+  "e2ee.info.unpin": "Unpin chat",
+  "e2ee.info.pinSyncHelp": "Pins sync privately to your other trusted devices.",
+  "e2ee.info.pinLocalHelp":
+    "Pins stay on this device until encrypted sync is available.",
+  "e2ee.info.pinFailed": "Couldn’t update the pin. Try again.",
   "e2ee.info.unmute": "Unmute on this device",
   "e2ee.info.muteHelp":
     "Muted chats don’t show unread counts or notify you here.",

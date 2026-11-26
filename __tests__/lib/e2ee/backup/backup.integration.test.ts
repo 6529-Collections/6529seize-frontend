@@ -267,6 +267,43 @@ describe("E2EE encrypted history backup", () => {
     );
   });
 
+  it("restores pins and unpins from incremental encrypted backups", async () => {
+    const world = await createWorld();
+    const server = createFakeBackupServer(world.clock.now);
+    const alice = await addUser(world, "alice");
+    const bob = await addUser(world, "bob");
+    const engine = alice.primary.engine;
+    const dm = await engine.createConversation({
+      profileIds: [bob.profileId],
+      kind: "dm",
+    });
+    const group = await engine.createConversation({
+      profileIds: [bob.profileId],
+      kind: "group",
+    });
+    await settle(world);
+    await engine.setConversationPinned(dm, true);
+
+    const backup = managerFor(world, server, alice.primary);
+    await backup.start();
+    const prepared = await backup.prepareBackup();
+    await backup.confirmBackup(prepared);
+
+    await engine.setConversationPinned(dm, false);
+    await engine.setConversationPinned(group, true);
+    await backup.backupNow();
+    stopDevice(world, alice.primary);
+    stopDevice(world, bob.primary);
+
+    const fresh = await startDevice(world, alice.profileId, alice.account);
+    const restore = managerFor(world, server, fresh);
+    await restore.start();
+    await restore.restore(prepared.code);
+    expect(fresh.engine.getConversation(dm)).toBeDefined();
+    expect(fresh.engine.getConversation(dm)?.pinned).toBeUndefined();
+    expect(fresh.engine.getConversation(group)?.pinned).toBe(true);
+  });
+
   it("backs up read positions with other changes, alone at most every 6 h, and restores them (P60 §5)", async () => {
     const world = await createWorld();
     const server = createFakeBackupServer(world.clock.now);

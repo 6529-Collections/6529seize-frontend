@@ -1,4 +1,4 @@
-import { getDmPeerId } from "../dm-conversations";
+import { getConversationThreadKey, getDmPeerId } from "../dm-conversations";
 import { compareHistory } from "../history-order";
 import { safetyCodeFromFp } from "../digests";
 import { E2EE_LEGACY_CIPHERSUITE, parseCredentialIdentity } from "../grant";
@@ -154,6 +154,7 @@ export class EngineStore {
   devices: E2eeDeviceInfo[] = [];
   /** Server switch (GET /e2ee/me); false until the server has answered. */
   attachmentsEnabled = false;
+  conversationPinned: ((thread: string) => boolean) | null = null;
   /**
    * Whether this device trusts a member device for its owner (set by the
    * engine from its trust record); member snapshots carry it.
@@ -462,8 +463,13 @@ export class EngineStore {
     }
     const members = this.buildMembers(record);
     const dmPeer = this.buildDmPeer(record, members);
+    const thread = getConversationThreadKey(
+      { ...record.metadata, members },
+      this.ownProfileId
+    );
     return {
       dmPeer,
+      ...(this.conversationPinned?.(thread) ? { pinned: true } : {}),
       g: record.g,
       kind,
       name: record.metadata.name,

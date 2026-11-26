@@ -26,6 +26,8 @@ export interface BackupLocalState {
   readsSent?: Record<string, number>;
   /** When read positions last went up (ms). */
   readsAt?: number;
+  /** Id of the last decision uploaded for each pinned or unpinned thread. */
+  pinIds?: Record<string, string>;
 }
 
 export interface BackupStateStore {
@@ -54,6 +56,7 @@ class MemoryBackupStateStore implements BackupStateStore {
             groupPrints: { ...state.groupPrints },
             messagePrints: { ...state.messagePrints },
             readsSent: { ...state.readsSent },
+            pinIds: { ...state.pinIds },
           }
         : null
     );
@@ -66,6 +69,7 @@ class MemoryBackupStateStore implements BackupStateStore {
       groupPrints: { ...state.groupPrints },
       messagePrints: { ...state.messagePrints },
       readsSent: { ...state.readsSent },
+      pinIds: { ...state.pinIds },
     });
     return Promise.resolve();
   }
