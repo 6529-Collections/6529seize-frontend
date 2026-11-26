@@ -6,6 +6,7 @@ import { ActionButton } from "./CreateWaveInlineGroupButtons";
 
 export default function CreateWaveInlineGroupHeader({
   currentGroupLabel,
+  currentGroupNamePending = false,
   showCurrentGroupTitle,
   showSummary = true,
   unsavedGroupDescription,
@@ -17,6 +18,8 @@ export default function CreateWaveInlineGroupHeader({
   quiet = false,
 }: {
   readonly currentGroupLabel: string;
+  /** The group's name is 6529.io's placeholder for a group made on the 6529 Network. */
+  readonly currentGroupNamePending?: boolean | undefined;
   readonly showCurrentGroupTitle: boolean;
   readonly showSummary?: boolean;
   readonly unsavedGroupDescription: string | null;
@@ -82,6 +85,11 @@ export default function CreateWaveInlineGroupHeader({
               className={`${showCurrentGroupTitle ? "tw-col-span-full" : "tw-col-start-1 tw-row-start-1"} tw-m-0 tw-max-w-full tw-truncate tw-text-left tw-text-sm tw-font-semibold tw-text-iron-100`}
             >
               {currentGroupLabel}
+              {currentGroupNamePending && (
+                <span className="tw-mt-1 tw-block tw-whitespace-normal tw-text-xs tw-font-normal tw-text-iron-400">
+                  {t(locale, "wavesMove.groupNamePending")}
+                </span>
+              )}
             </p>
           ) : (
             <div

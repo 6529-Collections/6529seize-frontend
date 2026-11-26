@@ -16,10 +16,12 @@ const mockRequestAuth = jest.fn();
 const mockSetToast = jest.fn();
 const mockProcessIncomingDrop = jest.fn();
 
+let mockConnectedProfile: { readonly handle: string } | null = null;
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({
     requestAuth: mockRequestAuth,
     setToast: mockSetToast,
+    connectedProfile: mockConnectedProfile,
   }),
 }));
 
@@ -201,6 +203,94 @@ describe("WaveDropPoll", () => {
       wavesMove.useWavesWritesPaused.mockReturnValue(false);
     }
   });
+
+  it("tells the author why the post can't be edited or deleted while its wave moves", () => {
+    const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
+    wavesMove.useWavesWritesPaused.mockReturnValue(true);
+    mockConnectedProfile = { handle: "me" };
+    const queryClient = new QueryClient();
+    const post = (handle: string) =>
+      ({
+        ...createDrop(createPoll()),
+        author: { handle },
+      }) as unknown as ApiDrop;
+    const line =
+      "A post with a poll can't be edited or deleted on this site in a wave that moves to the 6529 Network.";
+    try {
+      const { unmount } = render(
+        <QueryClientProvider client={queryClient}>
+          <WaveDropPoll drop={post("me")} />
+        </QueryClientProvider>
+      );
+      expect(screen.getByText(line)).toBeInTheDocument();
+      unmount();
+      render(
+        <QueryClientProvider client={queryClient}>
+          <WaveDropPoll drop={post("someone-else")} />
+        </QueryClientProvider>
+      );
+      expect(screen.queryByText(line)).toBeNull();
+    } finally {
+      wavesMove.useWavesWritesPaused.mockReturnValue(false);
+      mockConnectedProfile = null;
+    }
+  });
+
+  it.each([
+    [
+      "an admin who can delete posts",
+      { authenticated_user_admin: true, admin_drop_deletion_enabled: true },
+      {},
+      true,
+    ],
+    [
+      "an admin who can't delete posts",
+      { authenticated_user_admin: true, admin_drop_deletion_enabled: false },
+      {},
+      false,
+    ],
+    [
+      "a reply moderator, on a reply",
+      { authenticated_user_can_delete_replies: true },
+      { reply_to: { drop_id: "parent" } },
+      true,
+    ],
+    [
+      "a reply moderator, on a post that isn't a reply",
+      { authenticated_user_can_delete_replies: true },
+      {},
+      false,
+    ],
+  ])(
+    "tells %s why the post can't be deleted while its wave moves",
+    (_who, waveRights, postExtra, shown) => {
+      const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
+      wavesMove.useWavesWritesPaused.mockReturnValue(true);
+      mockConnectedProfile = { handle: "moderator" };
+      const base = createDrop(createPoll()) as unknown as {
+        readonly wave: Record<string, unknown>;
+      };
+      const post = {
+        ...base,
+        ...postExtra,
+        author: { handle: "someone-else" },
+        wave: { ...base.wave, ...waveRights },
+      } as unknown as ApiDrop;
+      const line =
+        "A post with a poll can't be edited or deleted on this site in a wave that moves to the 6529 Network.";
+      try {
+        render(
+          <QueryClientProvider client={new QueryClient()}>
+            <WaveDropPoll drop={post} />
+          </QueryClientProvider>
+        );
+        expect(screen.queryByText(line) !== null).toBe(shown);
+      } finally {
+        wavesMove.useWavesWritesPaused.mockReturnValue(false);
+        mockConnectedProfile = null;
+      }
+    }
+  );
 
   it("sends the ballot to the 6529 Network once waves have moved there", async () => {
     const writers = jest.requireMock(

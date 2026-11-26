@@ -20,7 +20,11 @@ import MyStreamActionTooltip from "@/components/brain/my-stream/MyStreamActionTo
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
+import { useAuth } from "@/components/auth/Auth";
+import {
+  useWaveMovedToChain,
+  useWavesWritesPaused,
+} from "@/hooks/useWavesMovePhase";
 import { createDropGifPickerLoader } from "./CreateDropGifPickerLoader";
 import LazyCreateDropGifPicker from "./LazyCreateDropGifPicker";
 import StormButton from "./StormButton";
@@ -96,10 +100,15 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
     const prefersReducedMotion = useReducedMotion();
     const locale = useBrowserLocale();
     const actionTrayId = useId();
+    const pollsNotOpenReasonId = useId();
     const tooltipScopeId = useId();
     // New polls move to the 6529 Network. A poll already in the draft stays,
     // so it can be removed, and sending refuses it instead of dropping it.
     const pollsPausedForMove = useWavesWritesPaused();
+    // In a wave that moved, the poll button stays and says why new polls
+    // can't be made here yet, instead of disappearing.
+    const pollsNotOpenHere = useWaveMovedToChain() && pollsPausedForMove;
+    const { setToast } = useAuth();
     const addGifLabel = t(locale, "waves.gifPicker.open");
     const showActionsLabel = t(locale, "waves.composer.actions.show");
     const hideActionsLabel = t(locale, "waves.composer.actions.hide");
@@ -223,6 +232,38 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
     const isCompactToggleRequired =
       (isDropMode && isRequiredMetadataMissing) || isRequiredMediaMissing;
 
+    const pollsNotOpenReason = `${t(locale, "wavesMove.pollsNotOpen")} ${t(
+      locale,
+      "wavesMove.chainPolls"
+    )}`;
+    const showPollsNotOpen = () =>
+      setToast({ message: pollsNotOpenReason, type: "warning" });
+    const notOpenPollAction =
+      canCreatePoll && !isPollActive && pollsNotOpenHere ? (
+        <>
+          <button
+            type="button"
+            aria-label={addPollLabel}
+            aria-disabled="true"
+            aria-describedby={pollsNotOpenReasonId}
+            onClick={showPollsNotOpen}
+            className={`${COMPOSER_ACTION_BUTTON_CLASS_NAME} ${getPollActionStyles(
+              { isStormMode: true }
+            )}`}
+            data-tooltip-id={pollTooltipId}
+            data-tooltip-content={pollsNotOpenReason}
+          >
+            <ChartBarIcon
+              className={COMPOSER_ACTION_ICON_CLASS_NAME}
+              aria-hidden="true"
+            />
+          </button>
+          <span id={pollsNotOpenReasonId} className="tw-sr-only">
+            {pollsNotOpenReason}
+          </span>
+          {!isMobile && <MyStreamActionTooltip id={pollTooltipId} />}
+        </>
+      ) : null;
     const pollAction =
       canCreatePoll && !isPollActive && !pollsPausedForMove ? (
         <>
@@ -244,7 +285,9 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
           </button>
           {!isMobile && <MyStreamActionTooltip id={pollTooltipId} />}
         </>
-      ) : null;
+      ) : (
+        notOpenPollAction
+      );
 
     return (
       <LayoutGroup>
@@ -320,6 +363,26 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                           onClick={() => runCompactAction(onTogglePoll)}
                           icon={<ChartBarIcon className="tw-size-5" />}
                         />
+                      )}
+                      {canCreatePoll && pollsNotOpenHere && (
+                        <>
+                          <CompactComposerActionButton
+                            label={pollLabel}
+                            aria-disabled="true"
+                            aria-describedby={`${pollsNotOpenReasonId}-compact`}
+                            muted
+                            // Only a toast: the tray stays open, so focus
+                            // stays on this button.
+                            onClick={showPollsNotOpen}
+                            icon={<ChartBarIcon className="tw-size-5" />}
+                          />
+                          <span
+                            id={`${pollsNotOpenReasonId}-compact`}
+                            className="tw-sr-only"
+                          >
+                            {pollsNotOpenReason}
+                          </span>
+                        </>
                       )}
                       <CompactComposerActionButton
                         label={stormLabel}

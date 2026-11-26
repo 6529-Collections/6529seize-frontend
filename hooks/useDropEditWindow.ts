@@ -2,6 +2,8 @@
 
 import { useCallback, useSyncExternalStore } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 
 const EDIT_WINDOW_MS = 5 * 60_000;
 const getServerSnapshot = () => false;
@@ -34,5 +36,15 @@ export function useDropEditWindow(drop: ApiDrop, isAuthor: boolean): boolean {
     },
     [deadline, exempt, isAuthor]
   );
-  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const inWindow = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    getServerSnapshot
+  );
+  // Once its wave moves, 6529.io takes no edit of an entry or of a post
+  // with a poll: the poll footer says why for the poll.
+  const editPaused =
+    useWavesWritesPaused() &&
+    (!!drop.poll || drop.drop_type !== ApiDropType.Chat);
+  return inWindow && !editPaused;
 }

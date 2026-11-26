@@ -110,6 +110,7 @@ jest.mock("@/lib/chain-identity/active", () => ({
 }));
 jest.mock("@/hooks/useWavesMovePhase", () => ({
   useWavesWritesPaused: jest.fn(() => false),
+  useWaveMovedToChain: jest.fn(() => false),
 }));
 jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
@@ -1846,7 +1847,7 @@ describe("CreateDrop", () => {
         await waitFor(() => expect(setToast).toHaveBeenCalled());
         const toast = shownToast(setToast.mock.calls[0][0]);
         expect(toast).toHaveTextContent(
-          "This wallet has no identity on the 6529 Network yet. Set one up on your identity page. Nothing was sent. Your entry is still here."
+          "This wallet has no identity on the 6529 Network yet. Create one on your identity page. Nothing was sent. Your entry is still here."
         );
         expect(
           within(toast).getByRole("link", { name: "your identity page" })
