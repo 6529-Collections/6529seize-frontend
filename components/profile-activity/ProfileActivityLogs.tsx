@@ -21,6 +21,8 @@ import {
 } from "@/types/enums";
 import type { CommonSelectItem } from "../utils/select/CommonSelect";
 import CommonTabs from "../utils/select/tabs/CommonTabs";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 
 export interface ActivityLogParams {
   readonly page: number;
@@ -82,6 +84,10 @@ export default function ProfileActivityLogs({
   readonly children?: React.ReactNode | undefined;
 }) {
   const { activeGroupId } = useActiveGroup();
+  const { isApp } = useDeviceInfo();
+  const isMobileViewport = useIsMobileLayoutViewport();
+  const useProfilePills =
+    !!initialParams.handleOrWallet && (isApp || isMobileViewport);
   const [selectedFilters, setSelectedFilters] = useState<
     ProfileActivityLogType[]
   >(initialParams.logTypes);
@@ -142,7 +148,7 @@ export default function ProfileActivityLogs({
   });
 
   return (
-    <div className={`${initialParams.handleOrWallet ? "" : "tw-mt-2"} `}>
+    <div className={initialParams.handleOrWallet ? "" : "tw-mt-2"}>
       <div
         className={`${
           withMatterFilter
@@ -154,22 +160,35 @@ export default function ProfileActivityLogs({
           <div className="tw-flex-none tw-whitespace-nowrap">{children}</div>
         )}
         {withFilters && !withMatterFilter && (
-          <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-3">
+          <div className="tw-relative tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-3">
             {initialParams.handleOrWallet && (
-              <div className="tw-w-full sm:tw-w-fit">
+              <div
+                className={
+                  useProfilePills
+                    ? "tw-w-max tw-min-w-0 tw-max-w-full tw-flex-auto"
+                    : "tw-w-full sm:tw-w-fit"
+                }
+              >
                 <CommonTabs
                   items={DIRECTION_TAB_ITEMS}
                   activeItem={targetType}
                   filterLabel="Filter direction"
                   setSelected={onTargetType}
-                  variant="connected"
+                  variant={useProfilePills ? "sub-view" : "connected"}
                   connectedSize="sm"
                 />
               </div>
             )}
             {matter === RateMatter.NIC && (
-              <div className="tw-flex-1 md:tw-ml-auto md:tw-w-[17.5rem] md:tw-flex-none min-[1200px]:tw-w-[18rem] min-[1400px]:tw-w-[20rem]">
+              <div
+                className={
+                  useProfilePills
+                    ? "tw-w-max tw-max-w-full tw-flex-none"
+                    : "tw-flex-1 md:tw-ml-auto md:tw-w-[17.5rem] md:tw-flex-none min-[1200px]:tw-w-[18rem] min-[1400px]:tw-w-[20rem]"
+                }
+              >
                 <ProfileActivityLogsFilter
+                  inline={useProfilePills}
                   user={initialParams.handleOrWallet}
                   options={initialParams.logTypes}
                   selected={selectedFilters}
@@ -188,7 +207,7 @@ export default function ProfileActivityLogs({
                   activeItem={matter}
                   filterLabel="Filter matter"
                   setSelected={onMatterChange}
-                  variant="connected"
+                  variant={useProfilePills ? "sub-view" : "connected"}
                   connectedSize="sm"
                 />
               </div>
@@ -199,7 +218,7 @@ export default function ProfileActivityLogs({
                     activeItem={targetType}
                     filterLabel="Filter direction"
                     setSelected={onTargetType}
-                    variant="connected"
+                    variant={useProfilePills ? "sub-view" : "connected"}
                     connectedSize="sm"
                   />
                 </div>

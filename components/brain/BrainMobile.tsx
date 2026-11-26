@@ -1,4 +1,5 @@
 "use client";
+import { Capacitor } from "@capacitor/core";
 import { closeDropInCurrentUrl } from "@/helpers/waves/close-drop.helpers";
 import { useWaveCompetitionsTab } from "@/hooks/competitions/useWaveCompetitionsTab";
 import {
@@ -428,6 +429,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
   const swipeBackHandlers = useWaveListSwipeBack({
     enabled: canSwipeBackToWaves,
     edgeSwipeBack: hasWave && !isDirectMessage,
+    includeHeader: isDirectMessage && Capacitor.getPlatform() === "ios",
     scope: waveId ?? (isProfileFeed ? "profile-feed" : "root"),
     onIntentStart: handleSwipeBackIntent,
     onSwipeBack: handleSwipeBackToWaves,

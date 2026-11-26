@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, type ReactNode } from "react";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import Link from "next/link";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import { useWaveSidebarPreference } from "@/hooks/useWaveSidebarPreference";
@@ -40,12 +41,15 @@ function DiscoverySection({
 }) {
   const id = useId();
   const locale = useBrowserLocale();
+  const { isApp } = useDeviceInfo();
   return (
     <section
       aria-label={label}
       className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800"
     >
-      <div className="tw-relative tw-mx-4 tw-flex tw-min-h-9 tw-items-center tw-gap-1.5">
+      <div
+        className={`tw-relative tw-flex tw-min-h-9 tw-items-center tw-gap-1.5 ${isApp ? "tw-mx-2 sm:tw-mx-4" : "tw-mx-4"}`}
+      >
         <h3 id={`${id}-heading`} className="tw-m-0 tw-min-w-0">
           <button
             {...waveFeatureAttributes("sidebar_section", featureValue)}
@@ -94,7 +98,11 @@ function DiscoverySection({
         className={`tw-grid tw-transition-[grid-template-rows,visibility] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none ${collapsed ? "tw-invisible tw-grid-rows-[0fr]" : "tw-visible tw-grid-rows-[1fr]"}`}
       >
         <div className="tw-min-h-0 tw-overflow-hidden">
-          <div className="tw-px-4 tw-pb-2">{children}</div>
+          <div
+            className={`tw-pb-2 ${isApp ? "tw-px-2 sm:tw-px-4" : "tw-px-4"}`}
+          >
+            {children}
+          </div>
         </div>
       </div>
     </section>

@@ -14,6 +14,7 @@ import type {
   WebSocketRoute,
 } from "@playwright/test";
 import type { ApiDropAndWave } from "@/generated/models/ApiDropAndWave";
+import type { ApiDropRater } from "@/generated/models/ApiDropRater";
 import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
 import type { ApiDropV2PageWithoutCount } from "@/generated/models/ApiDropV2PageWithoutCount";
 import type { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
@@ -769,6 +770,8 @@ async function expectWaveSectionOffered(
     else await expect(option).toHaveCount(0);
     await page.keyboard.press("Escape");
     await expect(sheet).toBeHidden();
+    // The dialog role hides before its exit layer finishes retiring.
+    await more.click({ trial: true });
   } else if (available) {
     await expect(direct).toBeVisible();
   } else {
@@ -1301,6 +1304,7 @@ async function installCompetitionApi(
   const configurations = new Map<string, Record<string, unknown>>();
   const anonymousEntries = new Set<string>();
   const votes: Record<string, number> = { alpha: 0, beta: 0 };
+  let topRaters: ApiDropRater[] = [];
   const requests: { path: string; body: Record<string, unknown> }[] = [];
   await page.route("**/v3/waves", async (route) => {
     const request = route.request().postDataJSON() as Record<string, unknown>;
@@ -1348,8 +1352,8 @@ async function installCompetitionApi(
       rating_prediction: votes[id] ?? 0,
       user_vote: votes[id] ?? 0,
       rank: 1,
-      raters_count: votes[id] ? 1 : 0,
-      top_raters: [],
+      raters_count: Math.max(topRaters.length, votes[id] ? 1 : 0),
+      top_raters: topRaters,
       over_threshold_since_ms: null,
     },
   });
@@ -1388,8 +1392,11 @@ async function installCompetitionApi(
                 rating_prediction: votes[owner.id] ?? 0,
                 user_vote: votes[owner.id] ?? 0,
                 rank: 1,
-                raters_count: votes[owner.id] ? 1 : 0,
-                top_raters: [],
+                raters_count: Math.max(
+                  topRaters.length,
+                  votes[owner.id] ? 1 : 0
+                ),
+                top_raters: topRaters,
                 over_threshold_since_ms: null,
               }
             : null,
@@ -1508,8 +1515,8 @@ async function installCompetitionApi(
               rating_prediction: votes[id] ?? 0,
               user_vote: votes[id] ?? 0,
               rank: 1,
-              raters_count: votes[id] ? 1 : 0,
-              top_raters: [],
+              raters_count: Math.max(topRaters.length, votes[id] ? 1 : 0),
+              top_raters: topRaters,
               over_threshold_since_ms: null,
             },
           })),
@@ -1624,6 +1631,12 @@ async function installCompetitionApi(
     },
     setVote: (id: string, value: number) => {
       votes[id] = value;
+    },
+    setTopRaters: (handles: string[]) => {
+      topRaters = handles.map((handle) => ({
+        profile: { ...entryFixture.drops[0].author, id: handle, handle },
+        rating: 10,
+      }));
     },
     setAnonymousEntry: (id: string, hidden: boolean) => {
       if (hidden) anonymousEntries.add(id);
@@ -1890,6 +1903,106 @@ async function openAppearanceDraft(
 }
 
 test.describe("Native competition sandbox @auth @medium @local-only", () => {
+  test("keeps the last vote clear of the native keyboard", async ({
+    page,
+    baseURL,
+    isMobile,
+  }) => {
+    test.skip(!isMobile, "The native keyboard requires a phone layout.");
+    await installSurfaceSimulation(
+      page.context(),
+      "capacitor-android-sim",
+      baseURL
+    );
+    const sandbox = await installCompetitionApi(page);
+    sandbox.setVote("alpha", 25);
+    const api = getSandboxApiOrigin(baseURL);
+    const feed = await (
+      await page.request.get(`${api}/api/v2/waves/${WAVE}/drops`)
+    ).json();
+    const drops = Array.from({ length: 5 }, (_, index) => ({
+      ...feed.drops[0],
+      id: `00000000-0000-4000-8000-${String(8100 + index).padStart(12, "0")}`,
+      drop_type: "SUBMISSION",
+      title: `Keyboard QA vote ${index + 1}`,
+      submission_context: {
+        status: "ACTIVE",
+        has_metadata: false,
+        voting: {
+          is_open: true,
+          total_votes_given: 25,
+          current_calculated_vote: 25,
+          predicted_final_vote: 25,
+          voters_count: 1,
+          place: index + 1,
+          context_profile_context: {
+            can_vote: true,
+            min: -100,
+            max: 100,
+            current: 25,
+          },
+        },
+      },
+    }));
+    const { entry, card } = await installArtworkCompetitionResources(
+      page,
+      WAVE,
+      feed.wave,
+      () => drops
+    );
+    await page.route(
+      `**/api/v3/waves/${WAVE}/competitions/alpha/votes/me?**`,
+      (route) =>
+        route.fulfill({
+          json: {
+            ...pageResult(
+              drops.map((drop) => ({
+                entry_id: entry(drop.id).id,
+                drop_id: drop.id,
+                value: 25,
+                credit_spent: 25,
+                entry_status: "ACTIVE",
+              }))
+            ),
+            cards: drops.map(card),
+          },
+        })
+    );
+    await page.goto(`${ROOT}/alpha?tab=votes`, {
+      waitUntil: "domcontentloaded",
+    });
+    const rows = page
+      .getByRole("tabpanel", { name: "My Votes", exact: true })
+      .getByRole("article");
+    await expect(rows).toHaveCount(5);
+    const lastRow = rows.last();
+    await lastRow.scrollIntoViewIfNeeded();
+    const input = myVotesInput(lastRow);
+    await expect(input).toBeVisible();
+    await input.focus();
+    await page.evaluate(() => {
+      Object.defineProperty(globalThis.visualViewport, "height", {
+        configurable: true,
+        value: 420,
+      });
+      globalThis.visualViewport?.dispatchEvent(new Event("resize"));
+    });
+    await emitNativeKeyboard(page, "keyboardDidShow", 424);
+    await expect(input).toBeFocused();
+    await expect
+      .poll(() =>
+        input.evaluate((field) => {
+          const bounds = field.getBoundingClientRect();
+          const viewport = globalThis.visualViewport!;
+          return (
+            bounds.top >= viewport.offsetTop &&
+            bounds.bottom <= viewport.offsetTop + viewport.height
+          );
+        })
+      )
+      .toBe(true);
+  });
+
   test("left-edge Back works from every iPhone wave tab and keeps interior tab scrolling", async ({
     page,
     baseURL,
@@ -8473,6 +8586,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         }
         const sandbox = await installCompetitionApi(page);
         sandbox.setVote("alpha", 25);
+        sandbox.setTopRaters(["voter-one", "voter-two", "voter-three"]);
         await page.goto(`${ROOT}/alpha?tab=votes`);
         await dismissNextDevTools(page);
         const panel = page.getByRole("tabpanel", {
@@ -8598,7 +8712,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           .getByText("1st", { exact: true })
           .boundingBox())!;
         const compactVoters = (await row
-          .getByText("1 voter", { exact: true })
+          .getByText("3 voters", { exact: true })
           .boundingBox())!;
         expect(compactRank.x).toBeGreaterThan(
           compactVoters.x + compactVoters.width
@@ -8611,6 +8725,21 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
               compactVoters.height / 2
           )
         ).toBeLessThanOrEqual(1);
+        const avatarBounds = await row
+          .getByRole("link", { name: /^Voter voter-/ })
+          .evaluateAll((links) =>
+            links.map((link) => {
+              const avatar = link.firstElementChild!.getBoundingClientRect();
+              return { left: avatar.left, right: avatar.right };
+            })
+          );
+        expect(avatarBounds).toHaveLength(3);
+        for (let index = 1; index < avatarBounds.length; index += 1) {
+          const gap =
+            avatarBounds[index]!.left - avatarBounds[index - 1]!.right;
+          expect(gap).toBeGreaterThanOrEqual(0);
+          expect(gap).toBeLessThanOrEqual(1);
+        }
         await capture("rest");
         await panel.getByRole("button", { name: /^Sort by:/ }).click();
         const sortSheet = page.getByRole("dialog", {
@@ -8622,6 +8751,8 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           exact: true,
         });
         await expect(firstOption).toBeVisible();
+        await expect(firstOption).toHaveCSS("font-size", "15px");
+        await expect(firstOption).toHaveCSS("color", "rgb(239, 239, 241)");
         // Measure in one frame while the sheet may still be sliding into view.
         const headerGap = await firstOption.evaluate((element) => {
           const header = element
@@ -8651,6 +8782,69 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         expect(sandbox.requests).toHaveLength(0);
         await input.focus();
         await expect(row.getByText(/^Enter a whole number/)).toBeVisible();
+        const scrollPositions = () =>
+          input.evaluate((field) => {
+            const positions: number[] = [];
+            for (
+              let element: Element | null = field;
+              element;
+              element = element.parentElement
+            ) {
+              positions.push(element.scrollTop);
+            }
+            return positions;
+          });
+        const visiblePositions = await scrollPositions();
+        // Catch the delayed keyboard fallback: a visible amount must not
+        // receive a second scroll after the browser has focused it.
+        await page.waitForTimeout(450);
+        expect(await scrollPositions()).toEqual(visiblePositions);
+        if (testInfo.project.use.hasTouch) {
+          for (const height of surface === "mobile web" ? [420] : [420, 300]) {
+            if (surface === "mobile web") {
+              await input.blur();
+              await page.setViewportSize({ width: 390, height });
+              // Headless Chromium has no software keyboard. Refocus against the
+              // smaller viewport to exercise the browser's native focus reveal.
+              await input.focus();
+            } else {
+              await page.evaluate((height) => {
+                const viewport = globalThis.visualViewport!;
+                Object.defineProperty(viewport, "height", {
+                  configurable: true,
+                  value: height,
+                });
+                viewport.dispatchEvent(new Event("resize"));
+              }, height);
+            }
+            await expect(input).toBeFocused();
+            await expect
+              .poll(() =>
+                input.evaluate((field) => {
+                  const bounds = field.getBoundingClientRect();
+                  const viewport = globalThis.visualViewport!;
+                  return (
+                    bounds.top >= viewport.offsetTop &&
+                    bounds.bottom <= viewport.offsetTop + viewport.height
+                  );
+                })
+              )
+              .toBe(true);
+          }
+          await page.screenshot({
+            path: testInfo.outputPath("my-votes-focused-keyboard.png"),
+            animations: "disabled",
+          });
+          if (surface === "mobile web") {
+            await page.setViewportSize({ width: 390, height: 844 });
+          } else {
+            await page.evaluate(() => {
+              const viewport = globalThis.visualViewport!;
+              Reflect.deleteProperty(viewport, "height");
+              viewport.dispatchEvent(new Event("resize"));
+            });
+          }
+        }
         await input.fill("40");
         await expect(
           row.getByRole("button", { name: "Save vote", exact: true })
@@ -16427,6 +16621,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         hotness_score: 98,
         rep_sort_score: 85,
       };
+      wave.wave_rep = {
+        total_rep: 494061,
+        authenticated_user_contribution: null,
+      };
       let writes = 0;
       await page.route(`**/api/waves/${WAVE}`, (route) =>
         route.fulfill({ json: wave })
@@ -16468,7 +16666,48 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       ).toHaveCount(0);
       await avatar.click();
       const details = page.getByRole("dialog");
-      await details.getByRole("button", { name: "Score", exact: true }).click();
+      const stats = details.getByLabel("Wave trust stats", { exact: true });
+      await expect(stats).toBeVisible();
+      const alignment = await stats.evaluate((element) =>
+        [...element.children].map((stat) => {
+          const label = stat.querySelector("dt");
+          const value = stat.querySelector("dd");
+          if (!label || !value) throw new Error("Missing wave statistic");
+          return {
+            label: label.textContent?.trim(),
+            labelY: label.getBoundingClientRect().y,
+            valueY: value.getBoundingClientRect().y,
+          };
+        })
+      );
+      expect(alignment.map((stat) => stat.label)).toEqual([
+        "Score",
+        "Quality",
+        "Hot",
+        "Wave REP",
+      ]);
+      for (const stat of alignment) expect(stat.labelY).toBe(stat.valueY);
+      expect(alignment[0]?.labelY).toBe(alignment[1]?.labelY);
+      expect(alignment[2]?.labelY).toBe(alignment[3]?.labelY);
+      const score = details.getByRole("button", { name: "Score", exact: true });
+      await expect(score).toHaveCSS("text-decoration-line", "underline");
+      expect(
+        await score.evaluate((button) => {
+          const r = button.getBoundingClientRect();
+          const x = r.x + r.width / 2;
+          const y = r.y + r.height / 2;
+          const points = [
+            [x - 21, y],
+            [x + 21, y],
+            [x, y - 21],
+            [x, y + 21],
+          ] as const;
+          return points.every(([px, py]) =>
+            button.contains(document.elementFromPoint(px, py))
+          );
+        })
+      ).toBe(true);
+      await score.click();
       await expect(
         page.getByRole("link", { name: "Learn more", exact: true })
       ).toBeVisible();

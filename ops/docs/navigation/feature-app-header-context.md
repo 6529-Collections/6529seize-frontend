@@ -75,8 +75,13 @@ menu stays disabled. Search and menu controls become available after hydration.
    - In the native app and small-screen web header, `Share page` appears
      immediately before `Search` on pages outside `/`, `/messages*`, and
      `/notifications*`. In the native app, it is also hidden while an active
-     wave is open because that wave keeps its share action in `More`.
-   - `Search` is always available.
+     wave is open because that wave keeps its share action in `More`. The native
+     Waves list also places `Share page` in its `More` sheet.
+   - `Search` is always available. In the native Waves list, `Search 6529` stays
+     directly beside the `Create wave` plus button and `More`. The `More` sheet
+     contains `Profile Waves Feed` and `Share page`; page sharing opens the
+     existing native share sheet. Mobile web keeps its site header
+     and the `Waves` title row with the feed icon and labeled `Create wave` button.
 7. More actions:
    - Wave-specific actions can appear in the overflow menu. The wave share
      action uses the arrow-style share icon there.

@@ -17,7 +17,10 @@ controls.
 
 - Open your own profile and select `Curation`.
 - Open another profile's `Curation` tab to view its public collection.
-- Select the underlined source Wave name below the Curation title to open it.
+- Select the blue source Wave name beside `Source Wave:` below the Curation
+  title to open it. Long Wave names truncate on one line. On mobile web and in
+  the app, source post and joined counts appear on their own line with thousands
+  separators.
 - Use `Manage curations` from a post's Wave action menu to add or remove that
   post from a named Curation you can manage.
 
@@ -66,10 +69,28 @@ leave without submitting. Their desktop dialogs also offer Cancel.
 - **Existing post:** from its Wave menu, choose `Manage curations`, then add or
   remove the post from an eligible named Curation.
 - **Profile post actions:** open the card menu to open the original Wave, edit
-  the post when you are its author, or remove it from the Curation.
+  the post when you are its author, or remove it from the Curation. Removal is
+  separated from the other actions and shown in red.
 - **Owner controls:** `Add post` is the primary action. `Manage` includes
-  `Organize posts` under `This Curation` when available and groups profile display
-  actions separately from actions that change the Curation itself.
+  `Edit Curation`, `Organize posts`, and `Show on profile` when available under
+  `This Curation`, followed by profile display actions under `Shown on profile`.
+  `Delete Curation` is a separate red action at the bottom. Desktop menus use
+  the same order. Mobile web and app sheets show icons beside the action labels.
+- **Mobile owner controls:** the 18px title shares its row with the square
+  `Manage` icon button at the right. Long titles wrap as one block beside it.
+  `Manage` opens a sheet with the same title on mobile web and in the app.
+  `+ Add post` sits at the right of the separate stats row. Visitors see the
+  title and stats at full width without owner controls.
+- **Mobile Add post:** the sheet has an `Add post` heading with `to <Curation
+  name>` on a second, single-line subtitle. The header uses the same close
+  button as the other profile sheets. The chat composer requests input focus
+  when it opens, and the sheet follows the available keyboard viewport.
+- **Mobile empty states:** owner and visitor panels use the same compact frame
+  and subtle gradient background, including `No featured wave yet` and
+  `No Curations yet`.
+  The owner's `Create Curation` action is a single primary button, with
+  `Advanced Wave setup` as a text action below it. Existing setup and empty-state
+  copy stays the same.
 - **Profile display:** `Choose another Curation`, `Use another source Wave`,
   and `Hide from profile` only change what this profile displays. Hiding keeps
   the Curation, source Wave, Groups, and posts available.

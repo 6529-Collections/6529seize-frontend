@@ -2,6 +2,7 @@
 
 import WavesIcon from "@/components/common/icons/WavesIcon";
 import Button from "@/components/utils/button/Button";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -15,7 +16,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useId, useState, type ReactNode } from "react";
-import { getWaveHref } from "./userPageProfileWave.helpers";
+import { CREATE_WAVE_HREF, getWaveHref } from "./userPageProfileWave.helpers";
 import type { resolveWavePickerViewState } from "./userPageProfileWave.helpers";
 
 type WavePickerVariant = "panel" | "dropdown" | "mobile-sheet";
@@ -252,13 +253,13 @@ export default function UserPageProfileWavePickerReady({
   }
 
   return (
-    <section className="tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-white/10 tw-bg-black sm:tw-rounded-3xl">
+    <section className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black lg:tw-rounded-3xl">
       <div className="tw-p-5">
         <div className="tw-max-w-2xl">
-          <h2 className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-400">
+          <h2 className="tw-m-0 tw-text-[17px] tw-font-semibold tw-text-iron-400 lg:tw-text-sm lg:tw-font-medium">
             {title}
           </h2>
-          <p className="tw-mb-0 tw-mt-1 tw-text-meta tw-font-normal tw-leading-relaxed tw-text-iron-500 md:tw-mt-2">
+          <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-500 md:tw-mt-2 lg:tw-text-meta">
             {t(locale, "profileCuration.entry.noEligibleNone")}
           </p>
         </div>
@@ -268,10 +269,16 @@ export default function UserPageProfileWavePickerReady({
             variant="primary"
             size="md"
             onClick={onCreateProfileCuration}
-            className="tw-w-full sm:tw-w-auto"
+            className="tw-w-full max-lg:tw-h-11 sm:tw-w-auto"
           >
             {t(locale, "profileCuration.entry.create")}
           </Button>
+        </div>
+
+        <div className="tw-mt-2 lg:tw-hidden">
+          <ButtonLink href={CREATE_WAVE_HREF} variant="ghost" size="sm">
+            {t(locale, "profileCuration.entry.advancedWave")}
+          </ButtonLink>
         </div>
 
         <div className="tw-mt-2">

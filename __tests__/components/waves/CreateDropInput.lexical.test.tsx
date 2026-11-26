@@ -102,10 +102,12 @@ jest.mock("@/components/waves/EditLastDropArrowUpPlugin", () => {
 
 const renderInput = (
   ref: React.RefObject<CreateDropInputHandles | null>,
-  onEditorState = jest.fn()
+  onEditorState = jest.fn(),
+  autoFocus = false
 ) =>
   render(
     <CreateDropInput
+      autoFocus={autoFocus}
       ref={ref}
       waveId="wave"
       editorState={null}
@@ -120,6 +122,16 @@ const renderInput = (
       onMentionedWave={jest.fn()}
     />
   );
+
+it.each([true, false])(
+  "focuses a newly mounted editor only when requested (autoFocus: %s)",
+  async (autoFocus) => {
+    renderInput(createRef<CreateDropInputHandles>(), jest.fn(), autoFocus);
+    const editor = screen.getByRole("textbox");
+    if (autoFocus) await waitFor(() => expect(editor).toHaveFocus());
+    else expect(editor).not.toHaveFocus();
+  }
+);
 
 it("reports upload completion even when it merges into the current undo step", async () => {
   const onEditorState = jest.fn();

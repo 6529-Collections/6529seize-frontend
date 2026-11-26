@@ -1,5 +1,6 @@
 "use client";
 
+import { Capacitor } from "@capacitor/core";
 import { usePublicWaveFeedReady } from "@/components/waves/PublicWaveFeedReady";
 import { ChatFileDropOverlay } from "@/components/composer/ChatFileDropOverlay";
 import { useChatFileDrop } from "@/hooks/useChatFileDrop";
@@ -597,6 +598,9 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
         </WaveReplyThreadsProvider>
         {!(isApp && editingDropId) && (
           <div
+            data-ios-chat-composer={
+              isApp && Capacitor.getPlatform() === "ios" ? true : undefined
+            }
             className={composerContainerClassName}
             style={composerContainerStyle}
           >
