@@ -173,6 +173,43 @@ function getTransitionPresentation(
   return isForwardWaveNavigation(target, previous) ? "forward" : "back";
 }
 
+function navigateWithoutTransition(
+  navigate: () => void,
+  swipe: SwipeHandoff | undefined
+) {
+  // A swipe caller owns its fallback animation and navigation.
+  if (!swipe) navigate();
+  return false;
+}
+
+function prepareTransitionSurface(
+  root: HTMLElement,
+  surface: HTMLElement,
+  target: TransitionTarget,
+  swipe: SwipeHandoff | undefined
+) {
+  if (typeof target !== "string") setConversationSpring(root);
+  if (target === "feed") root.dataset["waveNavigationContentPending"] = "true";
+  else delete root.dataset["waveNavigationContentPending"];
+  root.style.setProperty(
+    "--wave-transition-height",
+    `${surface.getBoundingClientRect().height}px`
+  );
+  if (typeof target === "string" || target.direction !== "forward")
+    surface.style.viewTransitionName = "wave-navigation";
+  root.dataset["waveNavigationTransition"] = getTransitionPresentation(
+    target,
+    surface.dataset["waveNavigationScreen"]
+  );
+  if (swipe) {
+    root.dataset["waveNavigationTransition"] = "swipe-back";
+    root.style.setProperty(
+      "--wave-swipe-remainder",
+      `${Math.max(0, swipe.width - swipe.distance)}px`
+    );
+  }
+}
+
 export function runWaveNavigationTransition(
   target: TransitionTarget,
   navigate: () => void,
@@ -205,40 +242,20 @@ export function runWaveNavigationTransition(
     typeof document.startViewTransition !== "function"
   ) {
     activeTransition?.skip();
-    if (!swipe) navigate();
-    return false;
+    return navigateWithoutTransition(navigate, swipe);
   }
 
   activeTransition?.skip();
   const root = document.documentElement;
   const sourcePathname = globalThis.location.pathname;
-  if (capturesWholePage) setConversationSpring(root);
+  prepareTransitionSurface(root, surface, target, swipe);
   let contentPending = target === "feed";
   let shellCommitted = false;
-  if (contentPending) root.dataset["waveNavigationContentPending"] = "true";
-  else delete root.dataset["waveNavigationContentPending"];
   let commit = () => {};
   const committed = new Promise<void>((resolve) => {
     commit = resolve;
   });
-  root.style.setProperty(
-    "--wave-transition-height",
-    `${surface.getBoundingClientRect().height}px`
-  );
   let namedSurface = surface;
-  if (!enteringConversation)
-    surface.style.viewTransitionName = "wave-navigation";
-  root.dataset["waveNavigationTransition"] = getTransitionPresentation(
-    target,
-    surface.dataset["waveNavigationScreen"]
-  );
-  if (swipe) {
-    root.dataset["waveNavigationTransition"] = "swipe-back";
-    root.style.setProperty(
-      "--wave-swipe-remainder",
-      `${Math.max(0, swipe.width - swipe.distance)}px`
-    );
-  }
   const clearSurface = () => {
     delete root.dataset["waveNavigationTransition"];
     delete root.dataset["waveNavigationContentPending"];
@@ -269,8 +286,7 @@ export function runWaveNavigationTransition(
   } catch {
     // Motion is optional: an engine failure must not prevent navigation.
     clearSurface();
-    if (!swipe) navigate();
-    return false;
+    return navigateWithoutTransition(navigate, swipe);
   }
   const skip = (cancelNavigation = true) => {
     superseded ||= cancelNavigation;

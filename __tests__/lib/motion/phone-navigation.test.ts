@@ -23,7 +23,9 @@ beforeEach(() => {
     removeListener: jest.fn(),
   });
   window.matchMedia = jest.fn().mockReturnValue(motionPreference);
-  jest.mocked(animate).mockReturnValue({ stop } as ReturnType<typeof animate>);
+  jest
+    .mocked(animate)
+    .mockReturnValue({ stop } as unknown as ReturnType<typeof animate>);
 });
 
 afterEach(() => {
