@@ -1,5 +1,6 @@
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
+import { withStaysOnSite } from "@/lib/waves-move/scope";
 
 interface WaveDetailsLike {
   readonly chat?:
@@ -72,7 +73,7 @@ export const isPublicNonDirectMessageWave = (
   );
 
 export const toApiWaveMin = (wave: ApiWave): ApiWaveMin => {
-  const waveMin: ApiWaveMinWithChatLinkSettings = {
+  const waveMin: Omit<ApiWaveMinWithChatLinkSettings, "stays_on_site"> = {
     id: wave.id,
     name: wave.name,
     picture: wave.picture,
@@ -101,7 +102,6 @@ export const toApiWaveMin = (wave: ApiWave): ApiWaveMin => {
     forbid_negative_votes: wave.voting.forbid_negative_votes,
     pinned: wave.pinned,
     identity_wave: wave.identity_wave,
-    stays_on_site: wave.stays_on_site,
     submission_type: wave.participation.submission_strategy?.type ?? null,
     voting_credit_nfts: wave.voting.credit_nfts,
     links_disabled: wave.chat.links_disabled,
@@ -110,5 +110,6 @@ export const toApiWaveMin = (wave: ApiWave): ApiWaveMin => {
     is_direct_message: wave.chat.scope.group?.is_direct_message ?? false,
   };
 
-  return waveMin;
+  // Older API responses can omit the move signal.
+  return withStaysOnSite(waveMin, wave) as ApiWaveMin;
 };
