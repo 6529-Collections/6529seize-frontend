@@ -105,7 +105,7 @@ describe("WaveNotificationSettings", () => {
     );
     expect(screen.getAllByRole("menuitemradio")).toHaveLength(3);
     expect(
-      screen.getByRole("group", { name: "Notification settings" })
+      screen.getByRole("group", { name: "Notification level" })
     ).toContainElement(choice(MENTIONS));
     expect(screen.queryByText("Notify me about")).not.toBeInTheDocument();
     expect(screen.getByText("Every new post")).toBeInTheDocument();

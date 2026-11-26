@@ -84,6 +84,7 @@ function NotificationMenuItem({
       aria-label={ariaLabel}
       aria-describedby={describedBy}
       aria-busy={loading}
+      onKeyDown={mobile ? onMobileMenuKeyDown : undefined}
       onClick={(event) => {
         event.stopPropagation();
         onSelect();
@@ -145,16 +146,18 @@ const LEVELS = [
   icon: typeof BellIcon;
 }[];
 
-function onSheetMenuKeyDown(event: KeyboardEvent<HTMLUListElement>) {
-  if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
+function onMobileMenuKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
+  const menu = event.currentTarget.closest('[role="menu"]');
+  if (!menu || !["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key))
+    return;
   event.preventDefault();
   const items = Array.from(
-    event.currentTarget.querySelectorAll<HTMLButtonElement>(
+    menu.querySelectorAll<HTMLButtonElement>(
       "button[role^=menuitem]:not(:disabled)"
     )
   );
   if (!items.length) return;
-  const current = items.findIndex((item) => item === document.activeElement);
+  const current = items.indexOf(event.currentTarget);
   let next = (current + 1) % items.length;
   if (event.key === "ArrowUp")
     next = (current - 1 + items.length) % items.length;
@@ -208,12 +211,14 @@ export default function WaveNotificationPreferenceButtons({
       id={mobile ? `${tooltipId}-menu` : undefined}
       role={mobile ? "menu" : "none"}
       aria-label={mobile ? title : undefined}
-      onKeyDown={mobile ? onSheetMenuKeyDown : undefined}
       className={`tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-0.5 ${mobile ? "tw-p-0" : "tw-px-2"}`}
     >
       {settings.following && (
         <>
-          <li role="group" aria-label={title}>
+          <li
+            role="group"
+            aria-label={message("waves.notificationSettings.levels.ariaLabel")}
+          >
             <ul
               role="none"
               className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-0.5 tw-p-0"
@@ -259,10 +264,9 @@ export default function WaveNotificationPreferenceButtons({
               )}
             </ul>
           </li>
-          <li
-            role="separator"
-            className="tw-my-1 tw-border-0 tw-border-t tw-border-solid tw-border-white/10"
-          />
+          <li role="none">
+            <hr className="tw-mx-0 tw-my-1 tw-border-0 tw-border-t tw-border-solid tw-border-white/10" />
+          </li>
         </>
       )}
       <NotificationMenuItem
