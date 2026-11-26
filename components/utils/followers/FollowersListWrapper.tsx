@@ -9,11 +9,13 @@ import { getFollowersMessage } from "./followers.messages";
 export default function FollowersListWrapper({
   followers,
   loading,
+  loaderSize = CircleLoaderSize.XXLARGE,
   onBottomIntersection,
   showFollowButtons = false,
 }: {
   readonly followers: ApiIdentityAndSubscriptionActions[];
   readonly loading: boolean;
+  readonly loaderSize?: CircleLoaderSize | undefined;
   readonly onBottomIntersection: (state: boolean) => void;
   readonly showFollowButtons?: boolean | undefined;
 }) {
@@ -27,13 +29,14 @@ export default function FollowersListWrapper({
       />
       {loading && (
         <div
+          data-followers-loader
           role="status"
           aria-live="polite"
           aria-label={loadingLabel}
           className="tw-mt-8 tw-w-full tw-text-center"
         >
           <span className="tw-sr-only">{loadingLabel}</span>
-          <CircleLoader size={CircleLoaderSize.XXLARGE} />
+          <CircleLoader size={loaderSize} />
         </div>
       )}
       <CommonIntersectionElement onIntersection={onBottomIntersection} />

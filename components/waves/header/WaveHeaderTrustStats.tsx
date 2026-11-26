@@ -147,7 +147,7 @@ export default function WaveHeaderTrustStats({
         WAVE_HEADER_TRUST_LOCALE,
         "waves.score.details.statsAriaLabel"
       )}
-      className={`tw-m-0 tw-grid tw-gap-x-2.5 tw-gap-y-[13px] tw-border-0 tw-px-0 tw-pt-[13px] min-[361px]:tw-gap-x-4 min-[361px]:tw-px-[5px] ${
+      className={`tw-m-0 tw-grid tw-gap-x-2.5 tw-gap-y-[13px] tw-border-0 tw-px-0 tw-pt-[13px] min-[361px]:tw-gap-x-4 ${
         stats.length === 1 ? "tw-grid-cols-1" : "tw-grid-cols-2"
       }`}
     >
