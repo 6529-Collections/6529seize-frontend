@@ -2,11 +2,15 @@
  * @jest-environment node
  */
 import { utf8Decode, utf8Encode } from "@/lib/e2ee/bytes";
+import type { ConversationPinRank } from "@/lib/e2ee/conversation-pins";
 import {
   decodeReadSync,
+  decodeSelfSync,
   encodeReadSync,
   newReadSyncId,
   pagePositions,
+  PIN_RANKS_PER_PAYLOAD,
+  type PinSyncPayload,
   type ReadPosition,
 } from "@/lib/e2ee/read-sync-payload";
 
@@ -59,6 +63,47 @@ describe("read-sync payload (D175, P60 §3)", () => {
     expect(() =>
       encodeReadSync({ ...payload, r: [...full(1), [handle(99), 1]] })
     ).toThrow("E2EE_READ_SYNC_TOO_MANY");
+  });
+
+  it("fits a full page of the largest pin ranks in the existing padded envelope", () => {
+    const ranks = Array.from(
+      { length: PIN_RANKS_PER_PAYLOAD },
+      (): ConversationPinRank => [
+        [
+          `dm:${"x".repeat(100)}`,
+          Number.MAX_SAFE_INTEGER,
+          newReadSyncId(),
+          true,
+        ],
+        Number.MAX_SAFE_INTEGER,
+        newReadSyncId(),
+        Number.MAX_SAFE_INTEGER,
+      ]
+    );
+    const payload: PinSyncPayload = { v: 1, t: "pins", pins: [], ranks };
+    const bytes = encodeReadSync(payload);
+    expect(bytes).toHaveLength(READ_SYNC_BODY_BYTES);
+    expect(decodeSelfSync(bytes)).toEqual(payload);
+    expect(decodeReadSync(bytes)).toBeNull();
+  });
+
+  it("retains pin decisions when new or malformed order records are absent", () => {
+    const pin = ["dm:alice", 1, newReadSyncId(), true] as const;
+    const old: PinSyncPayload = { v: 1, t: "pins", pins: [pin] };
+    expect(decodeSelfSync(encodeReadSync(old))).toEqual(old);
+    expect(
+      decodeSelfSync(
+        utf8Encode(
+          JSON.stringify({
+            ...old,
+            ranks: [
+              [pin, 1, newReadSyncId(), -1],
+              [pin, 1, "bad-id", 0],
+            ],
+          })
+        )
+      )
+    ).toEqual(old);
   });
 
   it("ignores what this version does not understand", () => {

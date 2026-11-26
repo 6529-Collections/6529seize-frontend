@@ -438,6 +438,7 @@ export class E2eeBackupManager {
       changed.groups.length > 0 ||
       changed.messages.length > 0 ||
       (changed.pins?.length ?? 0) > 0 ||
+      (changed.pinRanks?.length ?? 0) > 0 ||
       this.engineChanges !== checked
     );
   }
@@ -635,7 +636,7 @@ export class E2eeBackupManager {
           ),
           readsSent: { ...history.reads },
           readsAt: this.now(),
-          pinIds: backupPinIds(history.pins ?? []),
+          pinIds: backupPinIds(history),
         };
         await this.deps.state.put(local);
         this.local = local;
