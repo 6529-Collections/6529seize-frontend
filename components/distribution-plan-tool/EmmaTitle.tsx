@@ -5,6 +5,7 @@ import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/emma";
 
 export default function EmmaTitle() {
   const about = t(DEFAULT_LOCALE, "emma.about");

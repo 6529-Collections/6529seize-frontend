@@ -69,8 +69,8 @@ actions are blocked.
   `Finalize Distribution` first, then upload at least one photo and at least
   one artist or team airdrop entry.
 - `Artist Airdrops` or `Team Airdrops` upload is rejected:
-  remove any header row and use raw `address,count` lines with one valid wallet
-  and one positive integer per line.
+  CSV files can start with `address,count`. When pasting, enter only data rows.
+  Each data row needs one valid wallet address and a positive integer count.
 - `JSON`/`CSV`/`Manifold` buttons are disabled on `Public`:
   this is expected; the synthetic `Public` row keeps those exports visible but disabled.
 

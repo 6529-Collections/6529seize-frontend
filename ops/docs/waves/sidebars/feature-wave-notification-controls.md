@@ -27,7 +27,8 @@ The control requires a connected profile handle and no proxy session.
 3. Choose `Mute` to stop wave alerts, or `Unmute` to restore the saved level.
 4. Choosing a level or Mute/Unmute closes the menu.
 
-Changing a level preserves independently configured group alert preferences.
+Changing a level preserves independently configured group alert preferences,
+including `@dropforgeops`.
 `All messages` also keeps the saved broadcast preference. `Mentions and @all`
 enables both broadcasts; `Mentions only` disables them.
 

@@ -2,7 +2,6 @@ import { BOOKMARK_MESSAGES } from "@/i18n/messages/bookmarks";
 import { NOTIFICATIONS_INBOX_MESSAGES } from "@/i18n/messages/notifications-inbox";
 import { VOTING_CREDIT_RETURN_MESSAGES } from "@/i18n/messages/voting-credit-returns";
 import { MEME_COLLABORATION_MESSAGES } from "@/i18n/messages/meme-collaborations";
-import emmaMessages from "@/i18n/messages/emma.en-US.json";
 import additionalActionMessages from "@/i18n/messages/additionalAction.en-US.json";
 import { EN_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
 import waveCreationMessages from "@/i18n/messages/wave-creation.en-US.json";
@@ -5689,7 +5688,6 @@ export const EN_US_ROOT_MESSAGES = {
   ...USER_RATE_MESSAGES,
   ...aboutMessages,
   ...emmaSnapshotsMessages,
-  ...emmaMessages,
   ...safeCollectingMessages,
   ...delegationTapGuideMessages,
   ...pageMetadataMessages,
