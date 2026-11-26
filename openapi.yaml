@@ -15758,7 +15758,7 @@ paths:
           required: true
           schema:
             type: string
-          description: Notification ID or string "all" to mark all notifications as read
+          description: Notification ID
       responses:
         "201":
           description: successful operation
