@@ -261,7 +261,10 @@ for (const { app, emptyDescription } of [
             .boundingBox();
       const pendingName = app
         ? null
-        : await pending.getByRole("heading").locator("span").boundingBox();
+        : await pending
+            .getByRole("heading")
+            .locator(":scope > span")
+            .boundingBox();
       // Hold the real query pending across painted frames; an endpoint-only
       // assertion misses the original all-black interval.
       const emptyFrames = await page.evaluate(
@@ -671,7 +674,7 @@ for (const app of [false, true]) {
         .boundingBox();
       const before = await pending
         .getByRole("heading")
-        .locator("span")
+        .locator(":scope > span")
         .boundingBox();
       release();
       const ready = page
