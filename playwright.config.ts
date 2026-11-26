@@ -39,6 +39,14 @@ const webServerPort = (() => {
 const webServerCommand =
   process.env["PLAYWRIGHT_WEB_SERVER_COMMAND"] ||
   "node scripts/require-6529-command.cjs && node scripts/dev-with-fallback.cjs";
+// Fixture package commands supply their own root URL. Probe the Next server
+// without waiting for unrelated homepage data; browser cases assert their routes.
+const webServerReadyUrl =
+  process.env["PLAYWRIGHT_ENV"] === "local" &&
+  webServerCommand.includes("composerSandboxServer.cjs") &&
+  new URL(webServerUrl).pathname === "/"
+    ? new URL("/api/version", webServerUrl).toString()
+    : webServerUrl;
 const forceWebServer =
   process.env["PLAYWRIGHT_FORCE_WEB_SERVER"] === "1" ||
   process.env["PLAYWRIGHT_FORCE_WEB_SERVER"] === "true";
@@ -110,7 +118,7 @@ const config = defineConfig({
             // leaving only refused connections (see scripts/dev-with-fallback.cjs).
             DEV_SERVER_PORT_WATCHDOG: "1",
           },
-          url: webServerUrl,
+          url: webServerReadyUrl,
           reuseExistingServer: !process.env["CI"] && !forceWebServer,
           timeout: webServerTimeout,
         },
