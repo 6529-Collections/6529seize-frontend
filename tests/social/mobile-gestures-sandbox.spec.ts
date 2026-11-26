@@ -710,7 +710,7 @@ for (const platform of ["ios", "android"] as const) {
       await expect(grid).toBeVisible();
       await feed.evaluate((element) => element.scrollTo({ top: 800 }));
       await expect(post).toBeVisible();
-      await post.scrollIntoViewIfNeeded();
+      await post.tap({ trial: true });
       await expect(post).toBeInViewport();
       await expect(grid).toHaveCSS("pointer-events", "auto");
       await expect(page).toHaveURL(/\/waves\?view=profile-feed$/);
@@ -750,7 +750,7 @@ for (const platform of ["ios", "android"] as const) {
                   exact: true,
                 })
             : post;
-        await tapTarget.scrollIntoViewIfNeeded();
+        await tapTarget.tap({ trial: true });
         const readingPosition = await feed.evaluate(
           (element) => element.scrollTop
         );
@@ -916,7 +916,7 @@ for (const platform of ["ios", "android"] as const) {
       await feed.evaluate((element) => element.scrollTo({ top: 1600 }));
       const post = page.getByText("Compact feed post 10.", { exact: true });
       await expect(post).toBeVisible();
-      await post.scrollIntoViewIfNeeded();
+      await post.tap({ trial: true });
       for (let visit = 0; visit < 3; visit += 1) {
         await expect(page.locator("html")).not.toHaveAttribute(
           "data-wave-navigation-transition"

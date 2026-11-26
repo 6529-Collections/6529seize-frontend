@@ -31,7 +31,12 @@ import {
   monitorRememberedLeaderboard,
   retainDesktopWaveSidebar,
 } from "../support/waveNavigationContinuity";
-import { expect, expectNoHorizontalOverflow, test } from "../testHelpers";
+import {
+  expect,
+  expectNoHorizontalOverflow,
+  test,
+  waitForRouteReady,
+} from "../testHelpers";
 import {
   dismissNextDevTools,
   expectNoUnsafeSandboxMutations,
@@ -12888,6 +12893,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       testInfo.project.use.baseURL
     );
     await page.goto(`${ROOT}/new`);
+    await waitForRouteReady(page);
     const name = page.getByLabel("Decision name", { exact: true });
     const footer = page
       .getByRole("button", { name: "Close editor", exact: true })
@@ -12902,6 +12908,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await expect(name).toHaveValue("Keyboard layout draft");
       }
       await expect(name).toBeVisible({ timeout: 30000 });
+      await expect(footer).toBeInViewport();
       const restingBottom = await footer.evaluate(
         (element) => element.getBoundingClientRect().bottom
       );
