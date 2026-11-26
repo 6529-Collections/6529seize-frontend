@@ -300,9 +300,9 @@ describe("production exact-artifact deployment contract", () => {
   });
 
   it("bakes the waves freeze and switch-on into production builds", () => {
-    expect(build.env.NEXT_PUBLIC_WAVES_FREEZE_AT).toBe("2026-11-28T00:00:00Z");
+    expect(build.env.NEXT_PUBLIC_WAVES_FREEZE_AT).toBe("2026-11-29T00:00:00Z");
     expect(build.env.NEXT_PUBLIC_WAVES_SWITCH_ON_AT).toBe(
-      "2026-11-29T00:00:00Z"
+      "2026-11-30T00:00:00Z"
     );
   });
 
