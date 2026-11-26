@@ -3,10 +3,10 @@
 ## Overview
 
 The `Subscriptions` tab at `/{user}/subscriptions` separates the coverage answer
-from its supporting facts. The top zone contains the status, headline, brief
+from its supporting facts. On desktop the top zone contains the status, headline, brief
 message and owner actions. The quiet bottom zone contains Subscription balance,
 available mints, Forecast use and, when not already named by a deadline, Next
-unfunded. All dates keep their original full-year format and UTC deadline times.
+unfunded. Desktop dates keep their original full-year format and UTC deadline times.
 The original coverage-card gradient is unchanged.
 
 Owners see primary Top up for Action required and Running low.
@@ -14,8 +14,8 @@ Covered and Plan a top up keep Top up quiet with a transparent outline.
 Not set up keeps its setup explanation and shows Set up, which opens Minting settings.
 Only No upcoming drops selected
 shows primary Choose drops first and secondary Top up second. Actions sit beside
-the message on desktop and beneath it on phones; the two phone actions share a
-row. Visitors have no owner actions, and Loading shows skeletons without actions.
+the message on desktop. Below 640px they follow Subscription balance and Forecast
+use at the bottom of the card; the two phone actions share a row. Visitors have no owner actions, and Loading shows skeletons without actions.
 
 Facts use 14px labels and desktop values. Desktop facts wrap into compact inline
 rows. On phones, Subscription balance and Forecast use sit side by side, with
@@ -32,7 +32,8 @@ setting labels are brighter, values and supporting details sit beneath them on
 the left, and owner switches sit on the right. The existing owner switches keep their selected-value labels. Airdrop Address uses the original short address format, with the full address available on hover, focus or tap. Below 1024px,
 Minting settings and Subscription History become two compact rows together after
 Upcoming Drops. The settings row summarizes the saved mode and edition preference.
-Settings and history open their full content in the shared mobile bottom sheet; settings uses the full-height sheet. Learn more opens the existing subscriptions guide. Inside settings,
+Below 768px, these rows have settings and clock icons beside their original
+titles. Settings and history open their full content in the shared mobile bottom sheet; settings uses the full-height sheet. Learn more opens the existing subscriptions guide. Inside settings,
 visitor settings use three columns from 768px and owner settings use two; phones
 stack the groups with dividers. Owner labels remain above their controls.
 History retains its compact pill tabs and original entries. Redeemed rows
@@ -188,10 +189,15 @@ On the web and Android, the tab appears after the page loads.
    selections or quantities. From 640px, `Show More` reveals the remaining rows
    inline. On phones it opens the full list in the shared bottom sheet; Close,
    Escape or Show Less returns to the three-row preview and restores focus.
-   Phone rows keep the date first and the title beneath it. The quantity selector
-   and toggle stay together beside the title when there is room, or below it
-   together on narrower rows. Minting Today artwork sits above the full-width
-   text on phones, and the Meme name stays on one line.
+   Below 768px, mobile web and the native app share a 48px leading column:
+   artwork for Minting Today, or a short month above the day inside a thin border
+   when artwork is absent. Rows show the name first and the weekday and season beneath
+   it, without repeating the month and day. Tap, hover or focus the date column
+   to read the full date, including its year. Minting Today keeps its existing
+   label and tooltip. Controls sit beside the name; owner controls move below
+   the metadata when the row is too narrow. Names wrap as needed. Visitor status
+   stacks above the quantity. Show More and Show Less use full-width
+   disclosure rows at these widths.
    Each Meme title links to its `/the-memes/{id}` page, including before minting,
    with keyboard focus and the tab's existing link styling. Scheduled cards in
    the upcoming subscription season open the existing upcoming-card view;
@@ -200,7 +206,8 @@ On the web and Android, the tab appears after the page loads.
    uses the matching minted thumbnail or, before indexing, a Main Stage winner
    explicitly mapped to that Meme number. Winner artwork uses a small resized
    image or preview. Unmatched, unavailable or failed artwork leaves no image
-   slot. Artwork data is requested only when a Minting Today row is present,
+   slot; below 768px the date column appears instead. Artwork data is requested
+   only when a Minting Today row is present,
    reusing the shared cache; title links do not prefetch Meme pages.
    Visitors keep static quantity
    and subscription status. One amber boundary follows the last funded drop,
@@ -210,7 +217,10 @@ On the web and Android, the tab appears after the page loads.
    rows revealed by Show More. The boundary appears when its row is visible,
    including in the three-row preview. Minting Today rows stay locked;
    focus, tap, or hover the label for the explanation. Below 768px, a More button expands the supplied Phase, Subscription Position,
-   Airdrop Address and Subscription Count below the row. More sits beside the title so the control stays close to its text. Desktop keeps those
+   Airdrop Address and Subscription Count below the row. More and details span
+   the text grid below both lines on mobile web and in the native app.
+   Owners also see the existing No changes allowed on
+   minting day explanation under disabled controls; the tooltip remains. Desktop keeps those
    details visible below the title; the tooltip only explains the mint-day lock.
 5. Use Minting settings beside the coverage panel from 1024px. Below that width,
    tap its compact row after Upcoming Drops to open the shared, content-sized
@@ -333,11 +343,15 @@ On the web and Android, the tab appears after the page loads.
     unfunded drop instead. There are no repeated row tags or additional Top up
     links; stale coverage does not mark rows
   - shows first 3 rows by default; `Show More` expands the list
-  - each row leads with the UTC date, retaining the abbreviated weekday and
+  - desktop rows lead with the UTC date, retaining the abbreviated weekday and
     month plus the year, or `Minting Today` with its existing tooltip
+  - below 768px, web and native rows show the name first, with a bordered
+    month/day box and the weekday and season beneath the name. The column
+    reveals the full date on hover, focus or tap. Minting Today retains its
+    artwork, label and tooltip
   - every row shows its season beside the date or `Minting Today`, including
     rows revealed by `Show More`; the section heading has no season label
-  - the Meme number is smaller below the date
+  - on desktop the Meme number remains smaller below the date
   - first row can show phase metadata (phase, position, airdrop address,
     subscribed count)
   - a subscribed first row shows `No subscription allocation` once distribution
@@ -494,6 +508,9 @@ processed; they do not automatically recover rows stranded by earlier failures.
   runway.
 
 ## Limitations / Notes
+
+- On phones, the year for a scheduled drop is available in the date column's
+  tooltip and accessible name. Desktop rows show the full date directly.
 
 ### Localization fallback debt
 

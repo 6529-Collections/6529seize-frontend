@@ -101,7 +101,6 @@ export default function UserPageXtdhGrantedList({
             <UserPageXtdhGrantedListTabs
               activeTab={activeTab}
               onTabChange={handleTabChange}
-              fill={false}
               pendingCount={pendingCount}
             />
           </div>

@@ -2271,7 +2271,8 @@
         "For overlapping upcoming subscriptions to the same Meme Card, the merged group remains subscribed if either active row was subscribed. A subscribed manual quantity takes precedence over automatic quantities, even when it is smaller and the group uses All eligible. If several subscribed manual requests conflict, the largest manual request is retained; otherwise the largest subscribed automatic quantity is retained. The earliest priority timestamp among subscribed rows is preserved; unsubscribed rows do not override active requests.",
         "Distinct upcoming subscriptions, subscription logs, and redeemed history move to the merged group. On a split, subscriptions follow the resulting group with the highest TDH; they are not divided between the resulting groups.",
         "Finalized allocations are handled separately from upcoming requests. Distinct finalized allocations move without changing their delivery or allocation details. Conflicting finalized allocations for the same card are retained under their old group for manual reconciliation, not automatically combined or discarded.",
-        "If a subscription-group move fails, its changes are rolled back so that group is not left partly moved. These merge rules apply when affected consolidations are processed; they do not automatically recover subscription rows stranded by earlier failures."
+        "If a subscription-group move fails, its changes are rolled back so that group is not left partly moved. These merge rules apply when affected consolidations are processed; they do not automatically recover subscription rows stranded by earlier failures.",
+        "Below medium widths, mobile web and the native app share the same Upcoming Drops layout: the name first, with artwork or a month/day box with a thin border on the left. Scheduled drops show only the weekday and season beneath the name, avoiding a repeated month and day. Hover, focus or tap the date column to read the full date including its year. Minting Today keeps its existing label and tooltip. Controls sit beside the name; on narrow owner rows they move below the metadata, and names wrap as needed. Visitor status stacks above the quantity. More and details span below the metadata and controls. Mint-day owners also see the existing disabled-control explanation under the row. Show More and Show Less keep their existing expansion behavior in full-width disclosure rows. Desktop rows keep their full date above the name."
       ],
       "canonical_path": "/{user}/subscriptions",
       "related_paths": ["/about/subscriptions", "/{user}/subscriptions"],
@@ -7381,7 +7382,8 @@
       "facts": [
         "Profile xTDH lives at /{user}/xtdh.",
         "The tab has received and granted views where available.",
-        "Owner mode affects which xTDH grant actions are visible."
+        "Owner mode affects which xTDH grant actions are visible.",
+        "Granted and Received use text buttons without a background, with compact text below medium widths and larger text on desktop. Granted status filters use rounded pills on all screen sizes. Owners can use + Grant beside the view buttons or the Outbound stat to switch to Granted, scroll to Create New Grant and focus its first input."
       ],
       "canonical_path": "/{user}/xtdh",
       "related_paths": ["/network/xtdh"],
@@ -7413,7 +7415,8 @@
         "The xTDH received view has documented collection, token, contributor, and grant detail steps.",
         "While collections first load, full-width placeholder rows appear and the search and sort controls remain visible but disabled.",
         "State can persist across the received-view step flow.",
-        "Use /{user}/xtdh for profile-specific xTDH received information."
+        "Use /{user}/xtdh for profile-specific xTDH received information.",
+        "Profile collections are separate cards; below medium widths search and sort share a row, details use two columns, and a chevron indicates a card opens its tokens. The global xTDH page keeps its layout."
       ],
       "canonical_path": "/{user}/xtdh",
       "related_paths": ["/network/xtdh"],
@@ -7436,7 +7439,8 @@
         "Open a grant's Show tokens disclosure to view its token artwork. If indexed artwork is missing, the grid can recover artwork and placeholder names from original Arweave or IPFS metadata. Unavailable artwork shows the token ID; a failed thumbnail shows Load Error while the token details remain visible. Close and reopen the disclosure to retry the image.",
         "A create-new-grant flow is available where owner permissions allow it.",
         "A grant with an end shows Last grant: the final daily xTDH run that can add xTDH for it, at 00:00 UTC on the UTC date of the grant's end. It is shown in UTC, so every viewer sees the same run.",
-        "Use profile xTDH for profile-specific grants and Network xTDH for global context."
+        "Use profile xTDH for profile-specific grants and Network xTDH for global context.",
+        "Grants appear as separate cards with swipeable status filter chips. Below medium widths, eligible owner Stop Grant and Revoke Grant actions are in the three-dot Grant actions bottom sheet; desktop keeps individual buttons. The same confirmation dialogs are required."
       ],
       "canonical_path": "/{user}/xtdh",
       "related_paths": ["/network/xtdh"],
