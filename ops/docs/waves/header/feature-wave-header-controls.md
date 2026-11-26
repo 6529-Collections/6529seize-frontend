@@ -59,6 +59,10 @@ identity block. The small shield and number beside the name show Wave Score
 when available. Hover, click, or use the keyboard to open its details card and
 `Learn more` link. No score space is left for waves without a score or for DMs.
 
+When the description preview is hidden, a subwave's parent link and name form
+a compact stack centred beside the avatar. The parent link and the wave name
+remain separate actions.
+
 When the center column becomes narrow, including when a sidebar is open, the
 name and score stay together on one line. The description teaser remains visible
 until the center header is narrower than 640px; below that width, the name and

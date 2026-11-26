@@ -385,12 +385,11 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
         name: BROADCAST,
       });
       await expect(broadcastChoice).toHaveAccessibleDescription(
-        "Your mentions and replies, plus @all and @contributors"
+        "Includes @contributors"
       );
-      const subtitle = broadcastChoice.getByText(
-        "Your mentions and replies, plus @all and @contributors",
-        { exact: true }
-      );
+      const subtitle = broadcastChoice.getByText("Includes @contributors", {
+        exact: true,
+      });
       expect(
         await subtitle.evaluate(
           (element) =>

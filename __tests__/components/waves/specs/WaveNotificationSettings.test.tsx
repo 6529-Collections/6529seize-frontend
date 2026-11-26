@@ -109,9 +109,7 @@ describe("WaveNotificationSettings", () => {
     ).toContainElement(choice(MENTIONS));
     expect(screen.queryByText("Notify me about")).not.toBeInTheDocument();
     expect(screen.getByText("Every new post")).toBeInTheDocument();
-    expect(
-      screen.getByText("Your mentions and replies, plus @all and @contributors")
-    ).toBeInTheDocument();
+    expect(screen.getByText("Includes @contributors")).toBeInTheDocument();
     expect(screen.getByText("Your mentions and replies")).toBeInTheDocument();
     expect(screen.getByRole("menuitem", { name: "Mute wave" })).toBeEnabled();
     expect(

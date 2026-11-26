@@ -1656,10 +1656,7 @@ const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
     ["trigger.ariaLabel", "Open notification settings"],
     ["levels.ariaLabel", "Notification level"],
     ["broadcastMentions.label", "Mentions and @all"],
-    [
-      "broadcastMentions.description",
-      "Your mentions and replies, plus @all and @contributors",
-    ],
+    ["broadcastMentions.description", "Includes @contributors"],
     ["mentionsOnly.label", "Mentions only"],
     ["mentionsOnly.ariaLabel", "Mentions only"],
     ["mentionsOnly.description", "Your mentions and replies"],

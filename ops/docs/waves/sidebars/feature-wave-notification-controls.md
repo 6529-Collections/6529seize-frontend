@@ -21,7 +21,7 @@ The control requires a connected profile handle and no proxy session.
 1. Open the bell menu.
 2. If joined, choose one level:
    - `All messages`: every new post.
-   - `Mentions and @all`: your mentions and replies, plus `@all` and `@contributors`.
+   - `Mentions and @all`: includes `@contributors`.
    - `Mentions only`: your mentions and replies.
 3. Choose `Mute` to stop wave alerts, or `Unmute` to restore the saved level.
 4. Choosing a level or Mute/Unmute closes the menu.
