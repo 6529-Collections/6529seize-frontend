@@ -175,12 +175,18 @@ describe("useDropLinkPreviewToggleControl", () => {
       mockWavesWritesPaused = false;
     });
 
+    // A drop whose wave says it moves, unlike createDrop's.
+    const inMovingWave = (drop: ApiDrop): ApiDrop => ({
+      ...drop,
+      wave: { ...drop.wave, stays_on_site: false },
+    });
+
     it("can't change an entry's link previews", () => {
       mockWavesWritesPaused = true;
-      const entry = {
+      const entry = inMovingWave({
         ...createDrop(false),
         drop_type: ApiDropType.Participatory,
-      };
+      });
       const { result } = renderHook(() =>
         useDropLinkPreviewToggleControl(entry)
       );
@@ -190,7 +196,7 @@ describe("useDropLinkPreviewToggleControl", () => {
     it("keeps a chat post's link previews changeable", () => {
       mockWavesWritesPaused = true;
       const { result } = renderHook(() =>
-        useDropLinkPreviewToggleControl(createDrop(false))
+        useDropLinkPreviewToggleControl(inMovingWave(createDrop(false)))
       );
       expect(result.current?.canToggle).toBe(true);
     });
