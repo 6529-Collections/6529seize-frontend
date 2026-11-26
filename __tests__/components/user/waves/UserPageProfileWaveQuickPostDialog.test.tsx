@@ -10,6 +10,21 @@ import { addDropToCuration } from "@/hooks/drops/useDropCurationMembershipMutati
 import { COMMUNITY_CURATIONS_DROPS_QUERY_KEY } from "@/hooks/useCommunityCurationsDrops";
 import { useWave } from "@/hooks/useWave";
 import { useQueryClient } from "@tanstack/react-query";
+import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
+
+let dialogProps: React.ComponentProps<typeof MobileWrapperDialog> | undefined;
+jest.mock("@/hooks/useIsMobileLayoutViewport", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+jest.mock("@/hooks/useCapacitor", () => ({
+  __esModule: true,
+  default: () => ({ isCapacitor: false, isIos: false }),
+}));
+jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
+  useLayoutViewportLock: jest.fn(),
+}));
 
 let waveDropCreateProps: any;
 
@@ -31,8 +46,12 @@ jest.mock("@tanstack/react-query", () => ({
 
 jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => ({
   __esModule: true,
-  default: ({ isOpen, children }: any) =>
-    isOpen ? <div data-testid="quick-post-dialog">{children}</div> : null,
+  default: (props: React.ComponentProps<typeof MobileWrapperDialog>) => {
+    dialogProps = props;
+    return props.isOpen ? (
+      <div data-testid="quick-post-dialog">{props.children}</div>
+    ) : null;
+  },
 }));
 
 jest.mock("@/components/waves/leaderboard/create/WaveDropCreate", () => ({
@@ -74,6 +93,8 @@ const renderDialog = ({
 describe("UserPageProfileWaveQuickPostDialog", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useIsMobileLayoutViewport).mockReturnValue(false);
+    dialogProps = undefined;
     waveDropCreateProps = undefined;
     useAuthMock.mockReturnValue({ setToast: jest.fn() });
     useWaveMock.mockReturnValue({ isCurationWave: true });
@@ -81,6 +102,24 @@ describe("UserPageProfileWaveQuickPostDialog", () => {
       invalidateQueries: jest.fn(() => Promise.resolve()),
     });
     addDropToCurationMock.mockResolvedValue(undefined);
+  });
+
+  it("opts only mobile into the split header and composer focus", () => {
+    jest.mocked(useIsMobileLayoutViewport).mockReturnValue(true);
+    renderDialog();
+    expect(dialogProps?.title).toBe("Add post");
+    expect(dialogProps?.subtitle).toBe("to Art");
+    expect(dialogProps?.headerClassName).not.toContain("tw-border-b");
+    expect(dialogProps?.focusTitleOnOpen).toBe(false);
+    expect(waveDropCreateProps.autoFocus).toBe(true);
+  });
+
+  it("keeps the desktop title, divider, and focus behavior", () => {
+    renderDialog();
+    expect(dialogProps?.title).toBe("Add post to Art");
+    expect(dialogProps?.subtitle).toBeUndefined();
+    expect(dialogProps?.headerClassName).toContain("tw-border-b");
+    expect(waveDropCreateProps.autoFocus).toBe(false);
   });
 
   it("adds each server-created drop to the selected profile curation", async () => {

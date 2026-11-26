@@ -28,7 +28,7 @@ const BrainMobileWaves: React.FC<BrainMobileWavesProps> = ({
   const scrollClearanceClassName = footerStats.isAvailable
     ? MEMES_WAVE_FLOATING_FOOTER_SCROLL_CLEARANCE_CLASS_NAME
     : MEMES_WAVE_DOCK_ONLY_SCROLL_CLEARANCE_CLASS_NAME;
-  const scrollContainerClassName = `tw-min-h-0 tw-flex-1 tw-space-y-4 tw-overflow-y-auto tw-px-2 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300 sm:tw-px-4 md:tw-px-6 ${scrollClearanceClassName}`;
+  const scrollContainerClassName = `tw-min-h-0 tw-flex-1 tw-space-y-4 tw-overflow-y-auto tw-px-2 desktop-hover:tw-scrollbar-thin desktop-hover:tw-scrollbar-track-iron-800 desktop-hover:tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300 sm:tw-px-4 md:tw-px-6 ${scrollClearanceClassName}`;
 
   return (
     <div

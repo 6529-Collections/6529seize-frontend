@@ -1,5 +1,6 @@
 "use client";
 
+import "@/i18n/namespaces/wave-sidebar";
 import IconButton from "@/components/utils/button/IconButton";
 
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -37,6 +38,7 @@ export function SidebarWaveNavigationControls({
   readonly isCollectionLoading?: boolean;
 }) {
   const locale = useBrowserLocale();
+  const { isApp } = useDeviceInfo();
   const inputId = useId();
   const { ref: featureUsageRef } = useWaveFeatureUsage("sidebar");
   const hasHydrated = useHasHydrated();
@@ -63,7 +65,7 @@ export function SidebarWaveNavigationControls({
     <>
       <div
         ref={featureUsageRef}
-        className="tailwind-scope tw-sticky tw-top-0 tw-z-30 tw-bg-[var(--wave-sidebar-background,#000)] tw-px-4 tw-py-2"
+        className={`tailwind-scope tw-sticky tw-top-0 tw-z-30 tw-bg-[var(--wave-sidebar-background,#000)] tw-py-2 ${isApp ? "tw-px-2 sm:tw-px-4" : "tw-px-4"}`}
       >
         {searchOpen ? (
           <>

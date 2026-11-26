@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronRightIcon, LockClosedIcon } from "@heroicons/react/24/outline";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useId } from "react";
@@ -13,7 +14,16 @@ import { useE2ee } from "@/hooks/e2ee/useE2ee";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type { E2eeConversation } from "@/lib/e2ee/types";
-import { E2eeConversationList } from "../list/E2eeConversationList";
+
+// Encrypted chats are available only in the browser. Keep their loading
+// boundary inside the sidebar so the inbox can render independently.
+const E2eeConversationList = dynamic(
+  () =>
+    import("../list/E2eeConversationList").then(
+      (module) => module.E2eeConversationList
+    ),
+  { ssr: false }
+);
 
 const SIDEBAR_LIMIT = 8;
 const HEADING_CLASS =

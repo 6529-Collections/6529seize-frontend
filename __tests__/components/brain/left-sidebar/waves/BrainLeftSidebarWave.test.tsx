@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, createEvent, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import BrainLeftSidebarWave from "@/components/brain/left-sidebar/waves/BrainLeftSidebarWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
@@ -225,6 +225,60 @@ describe("BrainLeftSidebarWave", () => {
     });
   });
 
+  it("opens and expands the parent from the link, and toggles separately", async () => {
+    const onExpandSubwaves = jest.fn();
+    const onToggleSubwaves = jest.fn();
+    render(
+      <BrainLeftSidebarWave
+        wave={baseWave}
+        onHover={onHover}
+        canExpand
+        onExpandSubwaves={onExpandSubwaves}
+        onToggleSubwaves={onToggleSubwaves}
+      />
+    );
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Expand Chat Wave subwaves" })
+    );
+    expect(onToggleSubwaves).toHaveBeenCalledWith("1");
+    expect(setActiveWave).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByRole("link", { name: "Chat Wave" }));
+    expect(onExpandSubwaves).toHaveBeenCalledWith("1");
+    expect(setActiveWave).toHaveBeenCalledWith("1", {
+      isDirectMessage: false,
+      divider: null,
+    });
+    expect(onToggleSubwaves).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    { metaKey: true },
+    { ctrlKey: true },
+    { shiftKey: true },
+    { altKey: true },
+    { button: 1 },
+  ])("preserves modified parent link clicks (%j)", (clickOptions) => {
+    const onExpandSubwaves = jest.fn();
+    render(
+      <BrainLeftSidebarWave
+        wave={baseWave}
+        onHover={onHover}
+        canExpand
+        onExpandSubwaves={onExpandSubwaves}
+      />
+    );
+
+    const link = screen.getByRole("link", { name: "Chat Wave" });
+    const click = createEvent.click(link, clickOptions);
+    fireEvent(link, click);
+
+    expect(click.defaultPrevented).toBe(false);
+    expect(onExpandSubwaves).not.toHaveBeenCalled();
+    expect(setActiveWave).not.toHaveBeenCalled();
+  });
+
   it("shows drop indicators for non-chat waves", () => {
     const dropWave = { ...baseWave, id: "2", type: ApiWaveType.Approve };
     render(<BrainLeftSidebarWave wave={dropWave} onHover={onHover} />);
@@ -331,7 +385,7 @@ describe("BrainLeftSidebarWave", () => {
     expect(
       screen.queryByRole("button", { name: "Expand Chat Wave subwaves" })
     ).not.toBeInTheDocument();
-    expect(row).toHaveClass("tw-px-5");
+    expect(row).toHaveClass("tw-pl-8", "touch-only:tw-pl-12");
     expect(row).toHaveClass("tw-gap-x-4");
     expect(row).toHaveClass("tw-items-center");
     expect(row).not.toHaveClass("tw-items-start");
@@ -354,7 +408,7 @@ describe("BrainLeftSidebarWave", () => {
       screen.queryByRole("button", { name: "Expand Chat Wave subwaves" })
     ).not.toBeInTheDocument();
     expect(getWaveRow().querySelector(".tw-bg-primary-400")).toBeNull();
-    expect(getWaveRow()).toHaveClass("tw-px-5");
+    expect(getWaveRow()).toHaveClass("tw-pl-8", "touch-only:tw-pl-12");
     expect(getWaveRow()).toHaveClass("tw-gap-x-4");
     expect(getWaveRow()).toHaveClass("tw-items-center");
     expect(getWaveRow()).not.toHaveClass("tw-items-start");
@@ -488,8 +542,8 @@ describe("BrainLeftSidebarWave", () => {
     expect(
       screen.queryByRole("button", { name: "Expand Chat Wave subwaves" })
     ).not.toBeInTheDocument();
-    expect(getWaveRow()).toHaveClass("tw-pl-[74px]");
-    expect(getWaveRow()).toHaveClass("md:tw-pl-[70px]");
+    expect(getWaveRow()).toHaveClass("tw-pl-[86px]");
+    expect(getWaveRow()).toHaveClass("md:tw-pl-[82px]");
     expect(screen.getByTestId("wave-picture").parentElement).toHaveClass(
       "tw-size-7"
     );
@@ -498,7 +552,7 @@ describe("BrainLeftSidebarWave", () => {
       '[class~="tw-top-1/2"][class~="tw-bottom-0"]'
     );
     expect(elbow).not.toBeNull();
-    expect(elbow).toHaveClass("tw-left-9");
+    expect(elbow).toHaveClass("tw-left-12");
     expect(elbow).not.toHaveClass("md:tw-left-[52px]");
     expect(elbow).toHaveClass("tw-top-0");
     expect(elbow).toHaveClass("tw-h-1/2");

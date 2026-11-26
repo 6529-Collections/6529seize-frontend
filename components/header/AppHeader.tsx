@@ -595,6 +595,7 @@ export default function AppHeader() {
       <div
         className={clsx(
           "tw-flex tw-flex-shrink-0 tw-items-center tw-justify-end",
+          isWavesDirectory && "tw-justify-self-end",
           (isInsideWave && isWavesRoute) || (isMessagesRoute && !isInsideWave)
             ? "tw-gap-x-2"
             : "tw-gap-x-0.5"
@@ -649,10 +650,13 @@ export default function AppHeader() {
     <div className="tw-w-full tw-bg-black tw-pt-[env(safe-area-inset-top,0px)] tw-text-iron-50">
       <div
         className={clsx(
-          "tw-flex tw-items-center tw-justify-between",
+          "tw-items-center",
           isPhoneWave
             ? "tw-min-h-14 tw-gap-1 tw-px-2 tw-py-1"
-            : "tw-h-16 tw-gap-x-2 tw-px-4"
+            : "tw-h-16 tw-gap-x-2 tw-px-4",
+          isWavesDirectory
+            ? "tw-flex min-[360px]:tw-grid min-[360px]:tw-grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]"
+            : "tw-flex tw-justify-between"
         )}
       >
         <div
@@ -692,7 +696,6 @@ export default function AppHeader() {
         <div
           className={clsx(
             "tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2",
-            isWavesDirectory && "min-[360px]:tw-pl-[88px]",
             isInsideWave ? "tw-justify-start" : "tw-justify-center"
           )}
         >

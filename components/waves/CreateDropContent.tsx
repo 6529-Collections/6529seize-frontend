@@ -18,7 +18,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = (props) => {
     layoutProps.uploadingFiles.length > 0,
     layoutProps.submitting
   );
-  return <CreateDropLayout {...layoutProps} />;
+  return (
+    <CreateDropLayout
+      {...layoutProps}
+      autoFocus={props.autoFocus ?? false}
+      onAutoFocusRoot={props.onAutoFocusRoot}
+    />
+  );
 };
 
 export default memo(CreateDropContent);

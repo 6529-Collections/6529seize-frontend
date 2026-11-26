@@ -153,14 +153,17 @@ export default function UserPageCollectedFilters({
   };
 
   return (
-    <DropdownToolbar variant="compact" className="tw-relative tw-w-full">
+    <DropdownToolbar
+      variant="compact"
+      className="tw-relative -tw-mx-4 sm:-tw-mx-6 md:tw-mx-0 md:tw-w-full"
+    >
       <div
         ref={scrollContainerRef}
         className="tw-w-full tw-overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:tw-hidden"
       >
         <div
           ref={contentContainerRef}
-          className="tw-nowrap tw-flex tw-w-full tw-min-w-max tw-items-center tw-justify-between tw-gap-x-2 lg:tw-gap-x-3"
+          className="tw-nowrap tw-flex tw-w-max tw-min-w-full tw-items-center tw-gap-x-2 tw-px-4 md:tw-w-full md:tw-min-w-max md:tw-justify-between md:tw-px-0 lg:tw-gap-x-3"
         >
           <div className="tw-nowrap tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2 lg:tw-gap-x-3">
             {showTransfer && <TransferToggle />}
@@ -230,7 +233,7 @@ export default function UserPageCollectedFilters({
       </div>
       {canScrollLeft && (
         <>
-          <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-top-0 tw-z-10 tw-w-12 tw-bg-gradient-to-r tw-from-black tw-via-black/40 tw-to-black/0" />
+          <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-top-0 tw-z-10 tw-hidden tw-w-12 tw-bg-gradient-to-r tw-from-black tw-via-black/40 tw-to-black/0 md:tw-block" />
           <IconButton
             type="button"
             onClick={scrollLeft}
@@ -238,7 +241,7 @@ export default function UserPageCollectedFilters({
               "user.collected.filters.scrollLeft"
             )}
             layout="scroll-filter-left"
-            className="tw-left-0"
+            className="tw-left-0 tw-hidden md:tw-flex"
           >
             <FontAwesomeIcon
               icon={faChevronLeft}
@@ -249,7 +252,7 @@ export default function UserPageCollectedFilters({
       )}
       {canScrollRight && (
         <>
-          <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-right-0 tw-top-0 tw-z-10 tw-w-12 tw-bg-gradient-to-l tw-from-black tw-via-black/40 tw-to-black/0" />
+          <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-right-0 tw-top-0 tw-z-10 tw-hidden tw-w-12 tw-bg-gradient-to-l tw-from-black tw-via-black/40 tw-to-black/0 md:tw-block" />
           <IconButton
             type="button"
             onClick={scrollRight}
@@ -257,7 +260,7 @@ export default function UserPageCollectedFilters({
               "user.collected.filters.scrollRight"
             )}
             layout="scroll-filter-right"
-            className="tw-right-0"
+            className="tw-right-0 tw-hidden md:tw-flex"
           >
             <FontAwesomeIcon
               icon={faChevronRight}

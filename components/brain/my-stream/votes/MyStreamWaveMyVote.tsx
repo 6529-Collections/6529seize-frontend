@@ -230,7 +230,7 @@ function MyVoteVoters({
                   profile:
                     voter.profile.handle ?? voter.profile.primary_address,
                 })}
-                className={`tw-rounded-md focus-visible:tw-relative focus-visible:tw-z-10 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${mobile ? "tw-flex tw-size-11 tw-items-center tw-justify-center" : ""}`}
+                className={`tw-rounded-md focus-visible:tw-relative focus-visible:tw-z-10 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${mobile ? "tw-flex tw-h-11 tw-w-6 tw-shrink-0 tw-items-center tw-justify-center" : ""}`}
               >
                 {voter.profile.pfp ? (
                   <Image

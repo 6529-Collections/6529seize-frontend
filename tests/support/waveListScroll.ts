@@ -29,6 +29,31 @@ export async function installWaveListScrollFixture(
     },
   }));
   let savedPins = waves;
+  const pinRequests: string[] = [];
+  const overviewWaves = () =>
+    waves.map((wave) => ({
+      ...wave,
+      context_profile_context: {
+        ...wave.context_profile_context,
+        pinned: savedPins.some((pin) => pin.id === wave.id),
+      },
+    }));
+  await page.route(
+    /\/api\/waves\/00000000-0000-4000-8000-000000007\d{3}\/pins$/,
+    async (route) => {
+      const method = route.request().method();
+      const id = new URL(route.request().url()).pathname.split("/").at(-2);
+      const wave = waves.find((item) => item.id === id);
+      if (!wave || !["POST", "DELETE"].includes(method))
+        throw new Error("Unexpected pin request");
+      pinRequests.push(method);
+      if (method === "DELETE")
+        savedPins = savedPins.filter((pin) => pin.id !== id);
+      else if (!savedPins.some((pin) => pin.id === id))
+        savedPins = [...savedPins, wave];
+      await route.fulfill({ status: 204 });
+    }
+  );
   await page.route("**/api/v2/waves/pinned", async (route) => {
     if (route.request().method() === "GET") {
       await route.fulfill({ json: savedPins });
@@ -47,12 +72,12 @@ export async function installWaveListScrollFixture(
     await route.fulfill({ json: { wave_ids } });
   });
   await page.route("**/api/v2/waves?**", (route) =>
-    route.fulfill({ json: { data: waves, page: 1, next: false } })
+    route.fulfill({ json: { data: overviewWaves(), page: 1, next: false } })
   );
   await page.route(/\/api\/v2\/waves\/(?:joined|all)(?:\?|$)/, (route) =>
     route.fulfill({
       json: {
-        data: waves,
+        data: overviewWaves(),
         next_cursor: null,
         snapshot_expires_at: Date.now() + 900000,
       },
@@ -87,6 +112,7 @@ export async function installWaveListScrollFixture(
     }
   );
   return {
+    pinRequests,
     async incoming(index: number) {
       await expect.poll(() => sockets.length).toBeGreaterThan(0);
       for (const socket of sockets)

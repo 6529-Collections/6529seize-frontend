@@ -896,7 +896,10 @@ for (const platform of ["ios", "android"] as const) {
       checkingReturn = false;
       expect(returnRouteRequests).toBe(0);
       await page.getByLabel("More", { exact: true }).tap();
-      await page.getByRole("menuitem", { name: "Profile Waves Feed" }).tap();
+      await page
+        .getByRole("dialog", { name: "More", exact: true })
+        .getByRole("button", { name: "Profile Waves Feed", exact: true })
+        .tap();
       await expect(feedHeading).toBeVisible();
       await expect
         .poll(() => feed.evaluate((element) => element.scrollTop))

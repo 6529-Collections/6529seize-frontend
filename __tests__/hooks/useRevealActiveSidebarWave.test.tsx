@@ -8,7 +8,6 @@ const createWaveRow = (
   parentWaveId: string | null = null
 ): SidebarWaveTreeRow => ({
   key: parentWaveId === null ? waveId : `${parentWaveId}:${waveId}`,
-  rowType: "wave",
   wave: createMockMinimalWave({ id: waveId, parentWaveId }),
   depth: parentWaveId === null ? 0 : 1,
   parentWaveId,
@@ -16,7 +15,6 @@ const createWaveRow = (
   isLoadingSubwaves: false,
   canExpand: false,
   hasUnreadSubwaves: false,
-  knownSubwavesCount: null,
   unreadSubwaveDropsCount: 0,
   isFirstSubwave: false,
   isLastSubwave: false,

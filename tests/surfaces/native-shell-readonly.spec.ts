@@ -258,71 +258,95 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     });
     await expect(more).toBeEnabled();
     await expect(searchButton).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Create Wave", exact: true })
-    ).toBeVisible();
+    const createWave = page.getByRole("button", {
+      name: "Create wave",
+      exact: true,
+    });
+    await expect(createWave).toBeVisible();
     await expect(
       page.getByRole("button", { name: "Share page", exact: true })
     ).toHaveCount(0);
-    await more.click();
-    const menu = page.getByRole("menu");
-    await expect(
-      page.getByRole("menuitem", { name: "Search 6529", exact: true })
-    ).toHaveCount(0);
-    const feedItem = page.getByRole("menuitem", {
-      name: "Profile Waves Feed",
-      exact: true,
-    });
-    const shareItem = page.getByRole("menuitem", {
-      name: "Share page",
-      exact: true,
-    });
     for (const width of [320, 430]) {
       await page.setViewportSize({ width, height: 900 });
-      await expect(menu).toHaveCSS("width", "224px");
-      for (const item of [feedItem, shareItem]) {
-        await expect(item).toHaveCSS("font-size", "14px");
-        await expect(item).toHaveCSS("font-weight", "500");
-        await expect(item).toHaveCSS("text-decoration-line", "none");
+      const iconGeometry = await Promise.all(
+        [createWave, searchButton, more].map((button) =>
+          button.evaluate((element) => {
+            const icon = element.querySelector("svg");
+            const target = element.getBoundingClientRect();
+            const bounds = icon?.getBoundingClientRect();
+            return {
+              targetWidth: target.width,
+              targetHeight: target.height,
+              iconWidth: bounds?.width,
+              iconHeight: bounds?.height,
+              strokeWidth: icon?.getAttribute("stroke-width"),
+              centerY: target.y + target.height / 2,
+            };
+          })
+        )
+      );
+      for (const geometry of iconGeometry) {
+        expect(geometry).toMatchObject({
+          targetWidth: 44,
+          targetHeight: 44,
+          iconWidth: 20,
+          iconHeight: 20,
+          strokeWidth: "1.5",
+        });
+        expect(geometry.centerY).toBe(iconGeometry[0]?.centerY);
       }
-      const label = feedItem.getByText("Profile Waves Feed", { exact: true });
-      await expect(label).toHaveCSS("line-height", "20px");
-      await expect
-        .poll(async () => (await label.boundingBox())?.height)
-        .toBe(20);
-      const bounds = await menu.boundingBox();
-      expect(bounds).not.toBeNull();
-      expect(bounds!.x).toBeGreaterThanOrEqual(0);
-      expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width);
-      await more.click();
-      await expect(searchButton).toBeVisible();
       const titleBounds = await page
         .getByText("Waves", { exact: true })
         .boundingBox();
-      const searchBounds = await searchButton.boundingBox();
+      const createBounds = await createWave.boundingBox();
       expect(titleBounds).not.toBeNull();
-      expect(searchBounds).not.toBeNull();
+      expect(createBounds).not.toBeNull();
       expect(titleBounds!.x + titleBounds!.width).toBeLessThanOrEqual(
-        searchBounds!.x
+        createBounds!.x
       );
       await more.click();
+      const sheet = page.getByRole("dialog", { name: "More", exact: true });
+      await expect(
+        sheet.getByRole("heading", { name: "More", exact: true })
+      ).toBeVisible();
+      for (const name of ["Profile Waves Feed", "Share page"]) {
+        const action = sheet.getByRole("button", { name, exact: true });
+        await expect(action).toBeVisible();
+        const bounds = await action.boundingBox();
+        expect(bounds).not.toBeNull();
+        expect(bounds!.x).toBeGreaterThanOrEqual(0);
+        expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width);
+        await expect
+          .poll(async () => {
+            const settledBounds = await action.boundingBox();
+            return settledBounds
+              ? settledBounds.y + settledBounds.height
+              : Number.POSITIVE_INFINITY;
+          })
+          .toBeLessThanOrEqual(900);
+      }
+      await expect(
+        sheet.getByRole("button", { name: "Search 6529", exact: true })
+      ).toHaveCount(0);
+      await sheet.getByRole("button", { name: "Close", exact: true }).click();
+      await expect(sheet).toHaveCount(0);
+      await expect(more).toBeFocused();
     }
-    await page.screenshot({
-      path: testInfo.outputPath("waves-visible-search.png"),
-    });
-    await expect(
-      page.getByRole("menuitem", { name: "Profile Waves Feed", exact: true })
-    ).toHaveAttribute("href", "/waves?view=profile-feed");
-    await expect(
-      page.getByRole("menuitem", { name: "Share page", exact: true })
-    ).toBeVisible();
+    await page.screenshot({ path: testInfo.outputPath("waves-header.png") });
     await more.click();
+    await page
+      .getByRole("dialog", { name: "More", exact: true })
+      .getByRole("button", { name: "Profile Waves Feed", exact: true })
+      .click();
+    await expect(page).toHaveURL(/\/waves\?view=profile-feed$/);
+    await page.getByRole("button", { name: "Back", exact: true }).click();
+    await expect(page).toHaveURL(/\/waves$/);
     await searchButton.click();
     await expect(
       page.getByRole("combobox", { name: "Search 6529", exact: true })
     ).toBeVisible();
     await page.getByRole("button", { name: "Go back", exact: true }).click();
-    await expect(more).toBeVisible();
+    await expect(searchButton).toBeFocused();
     await expect(
       page.getByRole("combobox", { name: "Search 6529", exact: true })
     ).toHaveCount(0);

@@ -22,11 +22,11 @@ export async function checkConversationPreviews(
       .getByRole("list", { name: "Encrypted chats", exact: true })
       .getByRole("link")
       .filter({ hasText: "console.log('hi gelato3');" });
-    await expect(rows.first()).toBeVisible({ timeout: 75_000 });
-    const count = await rows.count();
-    expect(count).toBe(width === 1440 ? 2 : 1);
+    const count = width === 1440 ? 2 : 1;
+    await expect(rows).toHaveCount(count, { timeout: 75_000 });
     for (let index = 0; index < count; index += 1) {
       const row = rows.nth(index);
+      await expect(row).toBeVisible();
       await expect(row.getByText("Bold", { exact: true })).toHaveJSProperty(
         "tagName",
         "STRONG"
