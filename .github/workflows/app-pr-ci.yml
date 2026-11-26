@@ -409,6 +409,8 @@ jobs:
       matrix: ${{ fromJSON(needs.plan.outputs.core_playwright_matrix) }}
 
     env:
+      # These ephemeral dev servers never reuse their compiler disk cache.
+      NEXT_DEV_TURBOPACK_FS_CACHE: "0"
       API_ENDPOINT: "https://api.6529.io"
       WS_ENDPOINT: "wss://ws.6529.io"
       ALLOWLIST_API_ENDPOINT: "https://allowlist-api.6529.io"
