@@ -4459,7 +4459,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     const pin = details.getByRole("button", { name: "Pin wave", exact: true });
     await expect(pin).toHaveCSS("color", "rgb(206, 207, 212)");
     const mute = details.getByRole("button", {
-      name: "Mute wave",
+      name: "Open notification settings",
       exact: true,
     });
     await expect(mute).toHaveCSS("background-color", "rgb(38, 39, 43)");
@@ -7025,6 +7025,71 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expectNoHorizontalOverflow(page);
     });
   }
+  test("centres a subwave parent and title beside its avatar without a description", async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    await installCompetitionApi(page);
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(baseURL)}/api/waves/${WAVE}`
+    );
+    expect(response.ok()).toBe(true);
+    const wave = await response.json();
+    // Match the reported joined subwave; Join availability is covered separately.
+    wave.subscribed_actions = ["DROP_CREATED"];
+    wave.parent_wave = {
+      ...wave,
+      id: PROFILE,
+      name: "Parent wave",
+      pfp: null,
+      creator: wave.author,
+      description_drop: { contents: null, media: [] },
+    };
+    wave.description_drop.parts = [];
+    await page.route(`**/api/waves/${WAVE}`, (route) =>
+      route.fulfill({ json: wave })
+    );
+    await page.goto(`/waves/${WAVE}`);
+    const title = page.getByRole("button", {
+      name: `About ${wave.name}`,
+      exact: true,
+    });
+    const parent = page.getByRole("link", {
+      name: "Subwave of Parent wave",
+      exact: true,
+    });
+    for (const width of [320, 430, 651, 768, 1100]) {
+      await page.setViewportSize({ width, height: 900 });
+      await expect(title).toBeVisible();
+      await expect(parent).toHaveAttribute("href", `/waves/${PROFILE}`);
+      await title.click({ trial: true });
+      await parent.click({ trial: true });
+      await expect
+        .poll(() =>
+          title.evaluate((element) => {
+            const text = element.closest("h1")!.parentElement!.parentElement!;
+            const avatar = text.parentElement!.firstElementChild!;
+            const textBox = text.getBoundingClientRect();
+            const avatarBox = avatar.getBoundingClientRect();
+            return Math.abs(
+              textBox.y +
+                textBox.height / 2 -
+                avatarBox.y -
+                avatarBox.height / 2
+            );
+          })
+        )
+        .toBeLessThanOrEqual(1);
+      for (const target of [parent, title]) {
+        expect((await target.boundingBox())!.height).toBeGreaterThanOrEqual(24);
+      }
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath(`subwave-header-${width}.png`),
+      });
+    }
+  });
+
   test("keeps native wave identity compact without a description", async ({
     page,
   }, testInfo) => {

@@ -1,9 +1,7 @@
 "use client";
 
 import type { ApiWave } from "@/generated/models/ApiWave";
-import WaveMutedNotificationButton from "./wave-notification-settings/WaveMutedNotificationButton";
 import WaveNotificationPreferenceButtons from "./wave-notification-settings/WaveNotificationPreferenceButtons";
-import WaveNotificationRetryButton from "./wave-notification-settings/WaveNotificationRetryButton";
 import { useWaveNotificationSettings } from "./wave-notification-settings/useWaveNotificationSettings";
 
 interface WaveRatingProps {
@@ -16,45 +14,11 @@ export default function WaveNotificationSettings({
   compact = false,
 }: WaveRatingProps) {
   const settings = useWaveNotificationSettings(wave);
-  const controlsClassName = compact
-    ? "tw-flex tw-items-center tw-gap-x-1.5 tw-text-xs touch-only:tw-gap-x-3"
-    : "tw-grid tw-w-full tw-grid-cols-2 tw-gap-x-1.5 tw-text-xs";
-
-  if (!settings.following || settings.isMuted) {
-    return (
-      <WaveMutedNotificationButton
-        waveId={wave.id}
-        settings={settings}
-        compact={compact}
-      />
-    );
-  }
-
-  if (settings.preferencesUnavailable) {
-    return (
-      <div className={controlsClassName}>
-        <WaveNotificationRetryButton settings={settings} compact={compact} />
-        <WaveMutedNotificationButton
-          waveId={wave.id}
-          settings={settings}
-          compact={compact}
-        />
-      </div>
-    );
-  }
-
   return (
-    <div className={controlsClassName}>
-      <WaveNotificationPreferenceButtons
-        waveId={wave.id}
-        settings={settings}
-        compact={compact}
-      />
-      <WaveMutedNotificationButton
-        waveId={wave.id}
-        settings={settings}
-        compact={compact}
-      />
-    </div>
+    <WaveNotificationPreferenceButtons
+      waveId={wave.id}
+      settings={settings}
+      compact={compact}
+    />
   );
 }
