@@ -18,7 +18,7 @@ The control requires a connected profile handle and no proxy session.
 ## User Journey
 
 1. Open the bell menu.
-2. If joined, choose one level under `Notify me about`:
+2. If joined, choose one level:
    - `All messages`: every new post.
    - `@all and mentions`: mentions, `@all`, and `@contributors`.
    - `Mentions only`: mentions and replies to you.

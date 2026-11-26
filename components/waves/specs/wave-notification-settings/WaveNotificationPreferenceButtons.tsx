@@ -213,13 +213,7 @@ export default function WaveNotificationPreferenceButtons({
     >
       {settings.following && (
         <>
-          <li role="group" aria-labelledby={`${tooltipId}-heading`}>
-            <span
-              id={`${tooltipId}-heading`}
-              className="tw-block tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-text-iron-400"
-            >
-              {message("waves.notificationSettings.heading")}
-            </span>
+          <li role="group" aria-label={title}>
             <ul
               role="none"
               className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-0.5 tw-p-0"
