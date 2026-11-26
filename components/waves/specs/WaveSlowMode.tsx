@@ -102,6 +102,8 @@ export default function WaveSlowMode({
   return (
     <WaveSettingRow
       canEdit={canEdit}
+      dirty={value !== String(initialParts.value) || unit !== initialParts.unit}
+      busy={mutating}
       editIcon={display === "configuration" ? "gear" : "pencil"}
       editLabel={
         display === "configuration"

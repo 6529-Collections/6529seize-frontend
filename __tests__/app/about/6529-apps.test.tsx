@@ -4,7 +4,7 @@
 
 import AppsRoute, { metadata } from "@/app/about/6529-apps/page";
 import { MOBILE_APP_ANDROID, MOBILE_APP_IOS } from "@/constants/constants";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 jest.mock("@/components/about/AboutContentsDropdown", () => ({
   AboutContentsDropdown: () => <nav aria-label="About contents" />,
@@ -26,7 +26,7 @@ jest.mock("next/image", () => ({
 }));
 
 describe("6529 Apps page", () => {
-  it("shows mobile and desktop downloads together", () => {
+  it("shows mobile downloads and lets users reveal Classic downloads", () => {
     render(<AppsRoute />);
 
     expect(
@@ -48,7 +48,20 @@ describe("6529 Apps page", () => {
         name: "Download 6529 Mobile for Android from Google Play",
       })
     ).toHaveAttribute("href", MOBILE_APP_ANDROID);
-    expect(screen.getByText("Windows macOS Linux")).toBeInTheDocument();
+    const classic = screen.getByRole("button", { name: "6529 Desktop Classic" });
+    const downloads = screen.getByText("Windows macOS Linux");
+    const controlled = downloads.closest("#desktop-classic-downloads");
+    expect(classic).toHaveAttribute("aria-controls", "desktop-classic-downloads");
+    expect(classic).toHaveAttribute("aria-expanded", "false");
+    expect(controlled).toHaveAttribute("inert");
+
+    fireEvent.click(classic);
+    expect(classic).toHaveAttribute("aria-expanded", "true");
+    expect(controlled).not.toHaveAttribute("inert");
+
+    fireEvent.click(classic);
+    expect(classic).toHaveAttribute("aria-expanded", "false");
+    expect(controlled).toHaveAttribute("inert");
   });
 
   it("uses searchable app terms in metadata", () => {
@@ -57,7 +70,20 @@ describe("6529 Apps page", () => {
     expect(metadata.description).toContain("6529 Desktop");
   });
 
-  it("links the entire third section to the validator page", () => {
+  it("links the Desktop test release card to the download page", () => {
+    render(<AppsRoute />);
+
+    const desktopLink = screen.getByRole("link", { name: "6529 Desktop" });
+    expect(desktopLink).toHaveAttribute("href", "/desktop");
+    expect(desktopLink).toHaveAccessibleDescription(
+      "Test release for Windows and Apple silicon Macs."
+    );
+    expect(desktopLink).toContainElement(
+      screen.getByRole("heading", { level: 2, name: "6529 Desktop" })
+    );
+  });
+
+  it("lists the app cards in order and links the entire Validator card", () => {
     render(<AppsRoute />);
 
     const validatorLink = screen.getByRole("link", {
@@ -73,19 +99,18 @@ describe("6529 Apps page", () => {
     expect(validatorLink).toContainElement(
       screen.getByRole("heading", { level: 2, name: "6529 Validator" })
     );
-    expect(
-      screen
-        .getAllByRole("heading", { level: 2 })
-        .map((heading) => heading.textContent)
-    ).toEqual([
-      "6529 Mobile",
-      "6529 Desktop Classic",
-      "6529 Validator",
-      "6529 AI",
-    ]);
+    expect(screen.getAllByRole("heading", { level: 2 })).toEqual(
+      [
+        "6529 Mobile",
+        "6529 Desktop",
+        "6529 Desktop Classic",
+        "6529 Validator",
+        "6529 AI",
+      ].map((name) => screen.getByRole("heading", { level: 2, name }))
+    );
   });
 
-  it("links the entire fourth section to 6529 AI", () => {
+  it("links the entire 6529 AI card to its download page", () => {
     render(<AppsRoute />);
 
     const aiLink = screen.getByRole("link", { name: "6529 AI" });

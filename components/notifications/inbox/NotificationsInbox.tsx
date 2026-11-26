@@ -10,6 +10,7 @@ import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
+import PreferencesGearLink from "@/components/preferences/PreferencesGearLink";
 import {
   getExcludedNotificationCauses,
   isNotificationVisible,
@@ -92,6 +93,11 @@ export default function NotificationsInbox({
     if (unreadIds.length > 0) markRead.mutate(unreadIds);
     onClose();
   };
+  const keepFocusInInbox = (button: HTMLButtonElement) => {
+    if (button.ownerDocument.activeElement === button) {
+      scrollRegionRef.current?.focus({ preventScroll: true });
+    }
+  };
   let message: string | null = null;
   if (activeProfileProxy) message = t(locale, "notifications.inbox.proxy");
   else if (!handle) message = t(locale, "notifications.inbox.connect");
@@ -104,16 +110,25 @@ export default function NotificationsInbox({
   return (
     <>
       <div className="tw-flex tw-flex-none tw-items-center tw-justify-between tw-gap-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3">
-        <h2 className="tw-m-0 tw-text-base tw-font-semibold tw-text-white">
-          {t(locale, "notifications.inbox.title")}
-        </h2>
+        <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-1">
+          <h2 className="tw-m-0 tw-truncate tw-text-base tw-font-semibold tw-text-white">
+            {t(locale, "notifications.inbox.title")}
+          </h2>
+          <PreferencesGearLink
+            label={t(locale, "profilePreferences.notifications.linkLabel")}
+            onNavigate={onClose}
+          />
+        </div>
         <div className="tw-flex tw-items-center tw-gap-1">
           {handle && (
             <button
               type="button"
               className={ACTION_CLASS}
               disabled={markRead.isPending || !query.isSuccess}
-              onClick={() => markRead.mutate("all")}
+              onClick={(event) => {
+                keepFocusInInbox(event.currentTarget);
+                markRead.mutate("all");
+              }}
             >
               {t(
                 locale,
@@ -186,11 +201,7 @@ export default function NotificationsInbox({
               className={ACTION_CLASS}
               disabled={query.isFetchingNextPage}
               onClick={(event) => {
-                const button = event.currentTarget;
-                if (button.ownerDocument.activeElement === button) {
-                  // Keep focus in the inbox when pagination disables or removes the button.
-                  scrollRegionRef.current?.focus({ preventScroll: true });
-                }
+                keepFocusInInbox(event.currentTarget);
                 void query.fetchNextPage();
               }}
             >

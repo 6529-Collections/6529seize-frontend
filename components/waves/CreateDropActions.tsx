@@ -3,8 +3,6 @@
 import { DROP_UPLOAD_ACCEPT } from "@/services/uploads/mediaUploadMimeType";
 import { publicEnv } from "@/config/env";
 import { buildTooltipId } from "@/helpers/tooltip.helpers";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   PaperClipIcon,
   ArrowUpTrayIcon,
@@ -22,9 +20,19 @@ import MyStreamActionTooltip from "@/components/brain/my-stream/MyStreamActionTo
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { createDropGifPickerLoader } from "./CreateDropGifPickerLoader";
 import LazyCreateDropGifPicker from "./LazyCreateDropGifPicker";
 import StormButton from "./StormButton";
+import {
+  COMPOSER_ACTION_MOTION_TRANSITION,
+  COMPACT_COMPOSER_ACTION_SLOT_CLASS_NAME,
+  COMPACT_COMPOSER_ACTION_TRAY_CLASS_NAME,
+  CompactComposerActionButton,
+  CompactComposerActionToggle,
+  CompactComposerActionTrayContents,
+  getCompactComposerTrayMotion,
+} from "./CompactComposerActions";
 import {
   COMPOSER_ACTION_BUTTON_CLASS_NAME,
   COMPOSER_ACTION_IDLE_CLASS_NAME,
@@ -54,65 +62,6 @@ interface CreateDropActionsProps {
 // picker rarely waits on the network.
 const preloadGifPicker = createDropGifPickerLoader.preload;
 
-interface CompactActionButtonProps {
-  readonly label: string;
-  readonly icon: React.ReactNode;
-  readonly onClick: () => void;
-  readonly onPreload?: (() => void) | undefined;
-  readonly disabled?: boolean;
-  readonly pressed?: boolean;
-  readonly required?: boolean;
-}
-
-const getCompactActionSurfaceStyles = ({
-  pressed,
-  disabled,
-  required,
-}: {
-  readonly pressed: boolean | undefined;
-  readonly disabled: boolean;
-  readonly required: boolean;
-}) => {
-  if (pressed) {
-    return "tw-bg-primary-500/15 tw-text-primary-200";
-  }
-  if (disabled) {
-    return "tw-bg-iron-900 tw-text-iron-600";
-  }
-  if (required) {
-    return "tw-bg-amber-300/10 tw-text-amber-200";
-  }
-  return "tw-bg-iron-800 tw-text-iron-300 group-hover:tw-bg-iron-700 group-hover:tw-text-white";
-};
-
-const getCompactToggleLabel = ({
-  showOptions,
-  hideActionsLabel,
-  showActionsLabel,
-}: {
-  readonly showOptions: boolean;
-  readonly hideActionsLabel: string;
-  readonly showActionsLabel: string;
-}) => {
-  return showOptions ? hideActionsLabel : showActionsLabel;
-};
-
-const getCompactToggleStyles = ({
-  isActive,
-  isRequired,
-}: {
-  readonly isActive: boolean;
-  readonly isRequired: boolean;
-}) => {
-  if (isActive) {
-    return "tw-border-primary-400/20 tw-bg-primary-500/10 tw-text-primary-300";
-  }
-  if (isRequired) {
-    return "tw-border-amber-300/25 tw-bg-amber-300/10 tw-text-amber-200";
-  }
-  return "tw-border-white/10 tw-bg-iron-800 tw-text-iron-300 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-white";
-};
-
 const getPollActionStyles = ({
   isStormMode,
 }: {
@@ -123,42 +72,6 @@ const getPollActionStyles = ({
   }
   return `tw-cursor-pointer ${COMPOSER_ACTION_IDLE_CLASS_NAME}`;
 };
-
-const CompactActionButton: React.FC<CompactActionButtonProps> = ({
-  label,
-  icon,
-  onClick,
-  onPreload,
-  disabled = false,
-  pressed,
-  required = false,
-}) => (
-  <button
-    type="button"
-    onClick={onClick}
-    onPointerEnter={onPreload}
-    onFocus={onPreload}
-    disabled={disabled}
-    aria-pressed={pressed}
-    className={`tw-group tw-flex tw-w-11 tw-flex-none tw-flex-col tw-items-center tw-gap-1.5 tw-rounded-xl tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 ${
-      disabled
-        ? "tw-cursor-default tw-text-iron-600"
-        : "tw-cursor-pointer tw-text-iron-300 desktop-hover:hover:tw-text-white"
-    }`}
-  >
-    <span
-      className={`tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-transition desktop-hover:tw-size-9 ${getCompactActionSurfaceStyles(
-        { pressed, disabled, required }
-      )}`}
-      aria-hidden="true"
-    >
-      {icon}
-    </span>
-    <span className="tw-line-clamp-2 tw-w-11 tw-text-center tw-text-[11px] tw-font-medium tw-leading-4">
-      {label}
-    </span>
-  </button>
-);
 
 const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
   ({
@@ -184,6 +97,9 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
     const locale = useBrowserLocale();
     const actionTrayId = useId();
     const tooltipScopeId = useId();
+    // New polls move to the 6529 Network. A poll already in the draft stays,
+    // so it can be removed, and sending refuses it instead of dropping it.
+    const pollsPausedForMove = useWavesWritesPaused();
     const addGifLabel = t(locale, "waves.gifPicker.open");
     const showActionsLabel = t(locale, "waves.composer.actions.show");
     const hideActionsLabel = t(locale, "waves.composer.actions.hide");
@@ -261,16 +177,11 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
     }, [isUploadPickerOpen]);
 
     const shouldAnimateOptions = animateOptions && !prefersReducedMotion;
-    const optionMotionTransition = {
-      duration: 0.22,
-      ease: [0.22, 1, 0.36, 1] as const,
-    };
-
     const shellMotionProps = shouldAnimateOptions
       ? {
           initial: false,
           animate: { width: showOptions ? "auto" : "32px" },
-          transition: optionMotionTransition,
+          transition: COMPOSER_ACTION_MOTION_TRANSITION,
         }
       : {
           initial: false,
@@ -283,7 +194,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
           initial: { opacity: 0, x: -4 },
           animate: { opacity: 1, x: 0 },
           exit: { opacity: 0, x: -4 },
-          transition: optionMotionTransition,
+          transition: COMPOSER_ACTION_MOTION_TRANSITION,
         }
       : {
           initial: false,
@@ -296,7 +207,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
           initial: { opacity: 0, scale: 0.92 },
           animate: { opacity: 1, scale: 1 },
           exit: { opacity: 0, scale: 0.92 },
-          transition: optionMotionTransition,
+          transition: COMPOSER_ACTION_MOTION_TRANSITION,
         }
       : {
           initial: false,
@@ -304,35 +215,16 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
           transition: { duration: 0 },
         };
 
-    const compactTrayMotionProps = shouldAnimateOptions
-      ? {
-          initial: { opacity: 0, height: 0, y: 4 },
-          animate: { opacity: 1, height: "auto", y: 0 },
-          exit: { opacity: 0, height: 0, y: 4 },
-          transition: optionMotionTransition,
-        }
-      : {
-          initial: false,
-          animate: { opacity: 1, height: "auto", y: 0 },
-          exit: { opacity: 0, height: 0, y: 0 },
-          transition: { duration: 0 },
-        };
-
-    const isCompactToggleActive = showOptions;
+    const compactTrayMotionProps =
+      getCompactComposerTrayMotion(shouldAnimateOptions);
+    const compactToggleLabel = showOptions
+      ? hideActionsLabel
+      : showActionsLabel;
     const isCompactToggleRequired =
       (isDropMode && isRequiredMetadataMissing) || isRequiredMediaMissing;
-    const compactToggleLabel = getCompactToggleLabel({
-      showOptions,
-      hideActionsLabel,
-      showActionsLabel,
-    });
-    const compactToggleStyles = getCompactToggleStyles({
-      isActive: isCompactToggleActive,
-      isRequired: isCompactToggleRequired,
-    });
 
     const pollAction =
-      canCreatePoll && !isPollActive ? (
+      canCreatePoll && !isPollActive && !pollsPausedForMove ? (
         <>
           <button
             type="button"
@@ -361,7 +253,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
             <>
               <div
                 data-testid="drop-actions-compact-slot"
-                className="tw-col-start-1 tw-row-start-2 tw-mb-0.5 tw-size-10 tw-self-end desktop-hover:tw-mb-0 desktop-hover:tw-size-9 desktop-hover:tw-self-center"
+                className={`tw-row-start-2 ${COMPACT_COMPOSER_ACTION_SLOT_CLASS_NAME}`}
               >
                 {isPollActive ? (
                   <span
@@ -371,27 +263,15 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                     <ChartBarIcon className="tw-size-5" aria-hidden="true" />
                   </span>
                 ) : (
-                  <motion.button
-                    data-testid="drop-actions-toggle-motion"
-                    type="button"
+                  <CompactComposerActionToggle
+                    testId="drop-actions-toggle-motion"
+                    label={compactToggleLabel}
+                    trayId={actionTrayId}
+                    expanded={showOptions}
+                    shouldAnimate={shouldAnimateOptions}
+                    required={isCompactToggleRequired}
                     onClick={onSetShowIconsClick}
-                    aria-label={compactToggleLabel}
-                    aria-expanded={showOptions}
-                    aria-controls={actionTrayId}
-                    animate={{ rotate: showOptions ? 45 : 0 }}
-                    transition={
-                      shouldAnimateOptions
-                        ? optionMotionTransition
-                        : { duration: 0 }
-                    }
-                    className={`tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:tw-size-9 ${compactToggleStyles}`}
-                  >
-                    <FontAwesomeIcon
-                      icon={faPlus}
-                      aria-hidden="true"
-                      className="tw-size-4"
-                    />
-                  </motion.button>
+                  />
                 )}
               </div>
               <AnimatePresence initial={false}>
@@ -403,69 +283,67 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                     {...compactTrayMotionProps}
                     role="group"
                     aria-label={actionsLabel}
-                    className="tw-col-span-2 tw-col-start-2 tw-row-start-3 tw-overflow-hidden"
+                    className={`tw-row-start-3 ${COMPACT_COMPOSER_ACTION_TRAY_CLASS_NAME}`}
                   >
-                    <div aria-hidden="true" className="tw-h-2" />
-                    <div className="tw-rounded-2xl tw-border tw-border-white/10 tw-bg-iron-950/95 tw-p-2 tw-pl-0 tw-shadow-[0_12px_32px_rgba(0,0,0,0.28)]">
-                      <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-start tw-gap-6">
-                        {isDropMode && (
-                          <CompactActionButton
-                            label={metadataLabel}
-                            required={isRequiredMetadataMissing}
-                            onClick={() => runCompactAction(onAddMetadataClick)}
-                            icon={<CodeBracketIcon className="tw-size-5" />}
-                          />
-                        )}
-                        <CompactActionButton
-                          label={uploadLabel}
-                          required={isRequiredMediaMissing}
-                          onClick={() => runCompactAction(onUploadClick)}
-                          icon={<ArrowUpTrayIcon className="tw-size-5" />}
+                    <CompactComposerActionTrayContents>
+                      {isDropMode && (
+                        <CompactComposerActionButton
+                          label={metadataLabel}
+                          required={isRequiredMetadataMissing}
+                          onClick={() => runCompactAction(onAddMetadataClick)}
+                          icon={<CodeBracketIcon className="tw-size-5" />}
                         />
-                        <CompactActionButton
-                          label={gifLabel}
-                          onClick={() =>
-                            runCompactAction(() => setShowGifPicker(true))
-                          }
-                          onPreload={preloadGifPicker}
-                          icon={
-                            <span className="tw-text-[11px] tw-font-bold tw-tracking-[-0.02em]">
-                              GIF
-                            </span>
-                          }
+                      )}
+                      <CompactComposerActionButton
+                        label={uploadLabel}
+                        required={isRequiredMediaMissing}
+                        onClick={() => runCompactAction(onUploadClick)}
+                        icon={<ArrowUpTrayIcon className="tw-size-5" />}
+                      />
+                      <CompactComposerActionButton
+                        label={gifLabel}
+                        onClick={() =>
+                          runCompactAction(() => setShowGifPicker(true))
+                        }
+                        onPointerEnter={preloadGifPicker}
+                        onFocus={preloadGifPicker}
+                        icon={
+                          <span className="tw-text-[11px] tw-font-bold tw-tracking-[-0.02em]">
+                            GIF
+                          </span>
+                        }
+                      />
+                      {canCreatePoll && !pollsPausedForMove && (
+                        <CompactComposerActionButton
+                          label={pollLabel}
+                          disabled={isStormMode}
+                          onClick={() => runCompactAction(onTogglePoll)}
+                          icon={<ChartBarIcon className="tw-size-5" />}
                         />
-                        {canCreatePoll && (
-                          <CompactActionButton
-                            label={pollLabel}
-                            disabled={isStormMode}
-                            onClick={() => runCompactAction(onTogglePoll)}
-                            icon={<ChartBarIcon className="tw-size-5" />}
-                          />
-                        )}
-                        <CompactActionButton
-                          label={stormLabel}
-                          disabled={isStormMode || submitting}
-                          pressed={isStormMode}
-                          onClick={() => runCompactAction(breakIntoStorm)}
-                          icon={
-                            <svg
-                              className="tw-size-5"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M21 4H3M20 8L6 8M18 12L9 12M15 16L8 16M17 20H12"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                          }
-                        />
-                      </div>
-                    </div>
+                      )}
+                      <CompactComposerActionButton
+                        label={stormLabel}
+                        disabled={isStormMode || submitting}
+                        pressed={isStormMode}
+                        onClick={() => runCompactAction(breakIntoStorm)}
+                        icon={
+                          <svg
+                            className="tw-size-5"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M21 4H3M20 8L6 8M18 12L9 12M15 16L8 16M17 20H12"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        }
+                      />
+                    </CompactComposerActionTrayContents>
                   </motion.div>
                 )}
               </AnimatePresence>

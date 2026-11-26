@@ -12,6 +12,7 @@ swipe return to the feed at the saved reading position.
 ## Location in the Site
 
 - App header in app-layout routes.
+- Phone web wave header at `/waves/{waveId}`.
 - Create routes: `/waves/create`, `/messages/new`.
 - Active wave routes: `/waves/{waveId}` and `/messages/{waveId}`.
 - Profile Waves Feed: `/waves?view=profile-feed`.
@@ -92,6 +93,18 @@ swipe return to the feed at the saved reading position.
 - Reverse below the gesture threshold before release to cancel. A slow, short
   drag also stays in the conversation; a longer drag or quick flick returns to
   the list.
+- Returning to the Waves list with a right swipe moves the channel header,
+  including the wave name and Join action, with the content. The bottom
+  navigation stays in place.
+- In the iPhone app, swiping right from inside a direct message moves its
+  header and conversation together. Complete the swipe to return to Messages.
+- On iPhone and phone web, tapping Back from a wave or direct message slides
+  the complete conversation, including its header, to the right. The Waves
+  list, Messages list, or encrypted inbox stays still as it is revealed.
+  Opening a conversation from its list pairs this with a slide in from the right.
+  Reduced Motion skips this slide. A new interaction stops the slide, and
+  browser Back follows its own history target. Returns to Profile Waves Feed
+  keep their own transition.
 - Vertical gestures and touches that begin on sliders, editors, media controls,
   or horizontally scrollable content do not trigger Back.
 - Profile routes hide `Back` when there is no valid in-app target (for example
@@ -112,7 +125,8 @@ swipe return to the feed at the saved reading position.
 
 ## Limitations / Notes
 
-- This behavior is app-layout only.
+- The context-aware header rules apply in the app layout. Phone web also has a
+  Back chevron in the wave header.
 - `Back` is context-aware, not a strict browser-back wrapper.
 - The conversation swipe is an optional shortcut and never replaces the visible `Back`
   control.

@@ -51,7 +51,7 @@ function SidebarWaveTreeRowTransitionInner({
 
   return (
     <div
-      data-sidebar-wave-id={row.rowType === "wave" ? row.wave.id : undefined}
+      data-sidebar-wave-id={row.wave.id}
       data-sidebar-subwave-row-state={row.animationState}
       className={`tw-transition-[top,height,max-height,opacity,transform] ${transitionDurationClass} tw-ease-out motion-reduce:tw-transition-none ${
         row.depth === 1 && row.animationState !== "entered"

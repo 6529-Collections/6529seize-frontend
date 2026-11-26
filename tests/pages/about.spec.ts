@@ -102,8 +102,35 @@ test.describe("About Pages @smoke @medium @large", () => {
         });
       }
     );
-    await page.goto("/about/6529-apps", { waitUntil: "domcontentloaded" });
+    const classic = page.getByRole("button", { name: "6529 Desktop Classic" });
+    let releaseScripts = () => {};
+    const scriptsReady = new Promise<void>((resolve) => {
+      releaseScripts = resolve;
+    });
+    await page.route("**/_next/static/**", async (route) => {
+      if (route.request().resourceType() === "script") await scriptsReady;
+      await route.fallback();
+    });
+    try {
+      await page.goto("/about/6529-apps", { waitUntil: "commit" });
+      await expect(classic).toBeDisabled();
+    } finally {
+      releaseScripts();
+    }
     await waitForRouteReady(page);
+    await expect(classic).toBeEnabled();
+    await expect(classic).toHaveAttribute("aria-expanded", "false");
+    await expect(
+      page
+        .getByRole("region", { name: "6529 Desktop Classic" })
+        .locator("#desktop-classic-downloads")
+    ).toHaveCSS("height", "0px");
+    if (isMobile) {
+      await classic.tap();
+    } else {
+      await classic.press("Enter");
+    }
+    await expect(classic).toHaveAttribute("aria-expanded", "true");
     const mac = page.getByRole("group").filter({
       has: page.getByText("macOS", { exact: true }),
     });
@@ -194,6 +221,19 @@ test.describe("About Pages @smoke @medium @large", () => {
     await expectNoHorizontalOverflow(page);
     await page.setViewportSize({ width: 390, height: 844 });
     await expectNoHorizontalOverflow(page);
+
+    await classic.click();
+    await expect(classic).toHaveAttribute("aria-expanded", "false");
+    await classic.focus();
+    await page.keyboard.press("Tab");
+    await expect(page.getByRole("link", { name: "6529 Validator" })).toBeFocused();
+    await classic.click();
+    await expect(classic).toHaveAttribute("aria-expanded", "true");
+    if (isMobile) {
+      await expect(mac).not.toHaveAttribute("open");
+    } else {
+      await expect(mac).toHaveAttribute("open");
+    }
 
     const validator = page.getByRole("link", {
       name: "6529 Validator",

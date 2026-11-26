@@ -1,4 +1,11 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  act,
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+} from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import MyStreamWaveMyVoteInput from "@/components/brain/my-stream/votes/MyStreamWaveMyVoteInput";
 import { AuthContext } from "@/components/auth/Auth";
@@ -146,18 +153,19 @@ describe("MyStreamWaveMyVoteInput", () => {
     });
 
     const input = screen.getByRole("textbox") as HTMLInputElement;
-    const submitButton = screen.getByRole("button", { name: "Submit vote" });
 
     expect(input.value).toBe("-5");
-    expect(submitButton).toBeDisabled();
+    expect(
+      screen.queryByRole("button", { name: "Save vote" })
+    ).not.toBeInTheDocument();
     expect(input).toHaveAttribute("aria-invalid", "true");
-    expect(screen.getByRole("status")).toHaveTextContent("Minimum is 0 TDH.");
+    expect(screen.getByRole("alert")).toHaveTextContent("Minimum is 0 TDH.");
     expect(input).toHaveAccessibleDescription(
       "Max for wave 10 Minimum is 0 TDH."
     );
 
     fireEvent.blur(input);
-    fireEvent.keyDown(input, { key: "Enter" });
+    fireEvent.submit(input.closest("form")!);
 
     expect(input.value).toBe("-5");
     expect(input).toHaveAccessibleDescription(
@@ -177,8 +185,8 @@ describe("MyStreamWaveMyVoteInput", () => {
       { wrapper }
     );
     const input = screen.getByRole("textbox");
-    expect(input).not.toHaveAttribute("aria-invalid");
-    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(input).toHaveAttribute("aria-invalid", "false");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 
     rerender(
       <MyStreamWaveMyVoteInput
@@ -191,20 +199,23 @@ describe("MyStreamWaveMyVoteInput", () => {
 
     expect(input).toHaveValue("8");
     expect(input).toHaveAttribute("aria-invalid", "true");
-    expect(screen.getByRole("status")).toHaveTextContent(
+    expect(screen.getByRole("alert")).toHaveTextContent(
       "Max for wave is 5 TDH."
     );
     expect(input).toHaveAccessibleDescription(
       "Max for wave 5 Max for wave is 5 TDH."
     );
-    expect(screen.getByRole("button", { name: "Submit vote" })).toBeDisabled();
+    expect(
+      screen.queryByRole("button", { name: "Save vote" })
+    ).not.toBeInTheDocument();
 
     rerender(<MyStreamWaveMyVoteInput drop={dropWithRating} />);
 
     expect(input).toHaveValue("8");
-    expect(input).not.toHaveAttribute("aria-invalid");
+    expect(input).toHaveAttribute("aria-invalid", "false");
+    fireEvent.focus(input);
     expect(input).toHaveAccessibleDescription("Max for wave 10");
-    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     expect(auth.requestAuth).not.toHaveBeenCalled();
     expect(mutateAsync).not.toHaveBeenCalled();
   });
@@ -220,14 +231,17 @@ describe("MyStreamWaveMyVoteInput", () => {
     });
 
     const input = screen.getByRole("textbox") as HTMLInputElement;
-    const submitButton = screen.getByRole("button", { name: "Submit vote" });
+    const submitButton = () =>
+      screen.getByRole("button", { name: "Save vote" });
 
     fireEvent.change(input, { target: { value: "-" } });
 
     expect(input.value).toBe("-");
-    expect(submitButton).toBeDisabled();
+    expect(
+      screen.queryByRole("button", { name: "Save vote" })
+    ).not.toBeInTheDocument();
 
-    fireEvent.click(submitButton);
+    fireEvent.submit(input.closest("form")!);
 
     expect(auth.requestAuth).not.toHaveBeenCalled();
     expect(mutateAsync).not.toHaveBeenCalled();
@@ -235,9 +249,9 @@ describe("MyStreamWaveMyVoteInput", () => {
     fireEvent.change(input, { target: { value: "0" } });
 
     expect(input.value).toBe("0");
-    expect(submitButton).not.toBeDisabled();
+    expect(submitButton()).not.toBeDisabled();
 
-    fireEvent.click(submitButton);
+    fireEvent.click(submitButton());
 
     await waitFor(() => expect(auth.requestAuth).toHaveBeenCalled());
     expect(mutateAsync).toHaveBeenCalledWith({ rate: 0, previousRate: -5 });
@@ -254,14 +268,15 @@ describe("MyStreamWaveMyVoteInput", () => {
     });
 
     const input = screen.getByRole("textbox") as HTMLInputElement;
-    const submitButton = screen.getByRole("button", { name: "Submit vote" });
+    const submitButton = () =>
+      screen.getByRole("button", { name: "Save vote" });
 
     fireEvent.change(input, { target: { value: "0" } });
 
     expect(input.value).toBe("0");
-    expect(submitButton).not.toBeDisabled();
+    expect(submitButton()).not.toBeDisabled();
 
-    fireEvent.click(submitButton);
+    fireEvent.click(submitButton());
 
     await waitFor(() => expect(auth.requestAuth).toHaveBeenCalled());
     expect(mutateAsync).toHaveBeenCalledWith({ rate: 0, previousRate: -5 });
@@ -295,14 +310,15 @@ describe("MyStreamWaveMyVoteInput", () => {
     });
 
     const input = screen.getByRole("textbox") as HTMLInputElement;
-    const submitButton = screen.getByRole("button", { name: "Submit vote" });
+    const submitButton = () =>
+      screen.getByRole("button", { name: "Save vote" });
 
     fireEvent.change(input, { target: { value: "5" } });
 
     expect(input.value).toBe("10");
-    expect(submitButton).not.toBeDisabled();
+    expect(submitButton()).not.toBeDisabled();
 
-    fireEvent.click(submitButton);
+    fireEvent.click(submitButton());
 
     await waitFor(() => expect(auth.requestAuth).toHaveBeenCalled());
     expect(mutateAsync).toHaveBeenCalledWith({ rate: 10, previousRate: 20 });
@@ -316,7 +332,7 @@ describe("MyStreamWaveMyVoteInput", () => {
     fireEvent.blur(input);
 
     expect(input).toHaveValue("10");
-    expect(screen.getByRole("status")).toHaveTextContent(
+    expect(screen.getByRole("alert")).toHaveTextContent(
       "Max for wave is 10 TDH."
     );
     expect(input).toHaveAccessibleDescription(
@@ -325,10 +341,10 @@ describe("MyStreamWaveMyVoteInput", () => {
     expect(auth.requestAuth).not.toHaveBeenCalled();
     expect(mutateAsync).not.toHaveBeenCalled();
 
-    fireEvent.click(screen.getByRole("button", { name: "Submit vote" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
     await waitFor(() => expect(auth.requestAuth).toHaveBeenCalled());
     expect(mutateAsync).toHaveBeenCalledWith({ rate: 10, previousRate: 0 });
-    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
   it("clears retained limit feedback after a valid edit", () => {
@@ -337,15 +353,16 @@ describe("MyStreamWaveMyVoteInput", () => {
 
     fireEvent.change(input, { target: { value: "15" } });
     fireEvent.blur(input);
-    expect(screen.getByRole("status")).toHaveTextContent(
+    expect(screen.getByRole("alert")).toHaveTextContent(
       "Max for wave is 10 TDH."
     );
 
     fireEvent.change(input, { target: { value: "5" } });
 
     expect(input).toHaveValue("5");
+    fireEvent.focus(input);
     expect(input).toHaveAccessibleDescription("Max for wave 10");
-    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     expect(auth.requestAuth).not.toHaveBeenCalled();
     expect(mutateAsync).not.toHaveBeenCalled();
   });
@@ -359,15 +376,15 @@ describe("MyStreamWaveMyVoteInput", () => {
     });
 
     expect(input).toHaveValue("10");
-    expect(input).not.toHaveAttribute("aria-invalid");
-    expect(screen.getByRole("status")).toHaveTextContent(
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByRole("alert")).toHaveTextContent(
       "Max for wave is 10 TDH."
     );
 
     expect(auth.requestAuth).not.toHaveBeenCalled();
     expect(mutateAsync).not.toHaveBeenCalled();
 
-    fireEvent.keyDown(input, { key: "Enter" });
+    fireEvent.submit(input.closest("form")!);
 
     await waitFor(() =>
       expect(mutateAsync).toHaveBeenCalledWith({ rate: 10, previousRate: 0 })
@@ -383,7 +400,7 @@ describe("MyStreamWaveMyVoteInput", () => {
 
     fireEvent.change(input, { target: { value: "15" } });
 
-    expect(screen.getByRole("status")).toHaveTextContent(
+    expect(screen.getByRole("alert")).toHaveTextContent(
       "Max for wave is 10 TDH."
     );
 
@@ -397,18 +414,47 @@ describe("MyStreamWaveMyVoteInput", () => {
     );
 
     expect(input).toHaveValue("4");
+    fireEvent.focus(input);
     expect(input).toHaveAccessibleDescription("Max for wave 9");
-    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     expect(auth.requestAuth).not.toHaveBeenCalled();
     expect(mutateAsync).not.toHaveBeenCalled();
 
     fireEvent.change(input, { target: { value: "5" } });
-    fireEvent.keyDown(input, { key: "Enter" });
+    fireEvent.submit(input.closest("form")!);
 
     await waitFor(() =>
       expect(mutateAsync).toHaveBeenCalledWith({ rate: 5, previousRate: 4 })
     );
     expect(auth.requestAuth).toHaveBeenCalledTimes(1);
+  });
+
+  it("retains Enter focus and blocks edits and repeat submission while authentication is pending", async () => {
+    let finishAuth!: (result: { success: boolean }) => void;
+    auth.requestAuth.mockReturnValueOnce(
+      new Promise<{ success: boolean }>((resolve) => {
+        finishAuth = resolve;
+      })
+    );
+    const user = userEvent.setup();
+    render(<MyStreamWaveMyVoteInput drop={drop} />, { wrapper });
+    const input = screen.getByRole("textbox");
+    await user.clear(input);
+    await user.type(input, "5{Enter}");
+    expect(auth.requestAuth).toHaveBeenCalledTimes(1);
+    expect(input).toBeEnabled();
+    expect(input).toHaveAttribute("readonly");
+    expect(input).toHaveFocus();
+    await user.type(input, "9{Enter}");
+    expect(input).toHaveValue("5");
+    expect(auth.requestAuth).toHaveBeenCalledTimes(1);
+    expect(mutateAsync).not.toHaveBeenCalled();
+    await act(async () => finishAuth({ success: true }));
+    await waitFor(() =>
+      expect(mutateAsync).toHaveBeenCalledWith({ rate: 5, previousRate: 0 })
+    );
+    expect(input).toHaveFocus();
+    expect(input).not.toHaveAttribute("readonly");
   });
 
   it("does not submit when voting is closed", () => {
@@ -420,8 +466,10 @@ describe("MyStreamWaveMyVoteInput", () => {
     expect(input).toBeDisabled();
 
     fireEvent.change(input, { target: { value: "5" } });
-    fireEvent.keyDown(input, { key: "Enter" });
-    fireEvent.click(screen.getByRole("button", { name: "Submit vote" }));
+    fireEvent.submit(input.closest("form")!);
+    expect(
+      screen.queryByRole("button", { name: "Save vote" })
+    ).not.toBeInTheDocument();
 
     expect(auth.requestAuth).not.toHaveBeenCalled();
     expect(mutateAsync).not.toHaveBeenCalled();
@@ -436,7 +484,7 @@ describe("MyStreamWaveMyVoteInput", () => {
 
     const input = screen.getByRole("textbox");
     fireEvent.change(input, { target: { value: "5" } });
-    fireEvent.click(screen.getByRole("button", { name: "Submit vote" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
 
     await waitFor(() =>
       expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("5")
@@ -465,7 +513,7 @@ describe("MyStreamWaveMyVoteInput", () => {
 
     const input = screen.getByRole("textbox");
     fireEvent.change(input, { target: { value: "5" } });
-    fireEvent.click(screen.getByRole("button", { name: "Submit vote" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
 
     await waitFor(() => expect(auth.requestAuth).toHaveBeenCalled());
 
@@ -490,7 +538,7 @@ describe("MyStreamWaveMyVoteInput", () => {
 
     const input = screen.getByRole("textbox");
     fireEvent.change(input, { target: { value: "5" } });
-    fireEvent.click(screen.getByRole("button", { name: "Submit vote" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
 
     await waitFor(() =>
       expect(mutateAsync).toHaveBeenCalledWith({ rate: 5, previousRate: 0 })
@@ -523,7 +571,7 @@ describe("MyStreamWaveMyVoteInput", () => {
 
     const input = screen.getByRole("textbox");
     fireEvent.change(input, { target: { value: "4" } });
-    fireEvent.click(screen.getByRole("button", { name: "Submit vote" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
 
     await waitFor(() =>
       expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("4")
@@ -578,7 +626,7 @@ describe("MyStreamWaveMyVoteInput", () => {
 
     const input = screen.getByRole("textbox");
     fireEvent.change(input, { target: { value: "5" } });
-    fireEvent.click(screen.getByRole("button", { name: "Submit vote" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
 
     await waitFor(() => expectMaxVotes("10"));
     expect(screen.queryByText(/^Available/)).not.toBeInTheDocument();
@@ -633,7 +681,7 @@ describe("MyStreamWaveMyVoteInput", () => {
     fireEvent.change(screen.getByRole("textbox"), {
       target: { value: "5" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Submit vote" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
 
     await waitFor(() =>
       expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("5")
@@ -660,13 +708,13 @@ describe("MyStreamWaveMyVoteInput", () => {
 
     const input = screen.getByRole("textbox");
     fireEvent.change(input, { target: { value: "8" } });
-    fireEvent.click(screen.getByRole("button", { name: "Submit vote" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
     await waitFor(() =>
       expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("8")
     );
 
     fireEvent.change(input, { target: { value: "10" } });
-    fireEvent.click(screen.getByRole("button", { name: "Submit vote" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
     await waitFor(() =>
       expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("10")
     );

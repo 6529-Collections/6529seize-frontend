@@ -10,6 +10,7 @@ import {
   resetE2eeSandbox,
 } from "../support/e2ee/e2eeSandboxSession";
 import {
+  closeChatInfo,
   confirmDialog,
   enroll,
   enrollButton,
@@ -22,6 +23,7 @@ import {
   messageRow,
   notice,
   NO_BACKUP_WARNING,
+  openChatInfo,
   openConversation,
   openConversationFromList,
   sendMessage,
@@ -114,8 +116,10 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
     sessions.push(bobLaptop);
     await enroll(bobLaptop);
 
-    // Bob's phone adds his own new device when it reconciles the open chat,
-    // and tells him a new device can read his messages.
+    // Bob's phone adds his own new device in its background maintenance,
+    // which runs for every chat on the first sync after this page load
+    // (never because a chat was opened), and tells him a new device can
+    // read his messages.
     await openConversation(bobPhone.page, g);
     await expect(bobPhone.page.getByText(NEW_DEVICE_NOTICE)).toBeVisible({
       timeout: E2EE_SYNC_TIMEOUT_MS,
@@ -214,7 +218,7 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
     expect(bobLaptop.signatureCount()).toBe(1);
   });
 
-  test("reading a chat on one device clears its unread badge on the other (D175)", async ({
+  test("read badges and private pins sync across a profile's devices", async ({
     baseURL,
     browser,
   }, testInfo) => {
@@ -263,16 +267,48 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
     // would add it at once, so allow for that wait.
     await openConversationFromList(bobLaptop.page, "alice");
     await expectMessage(bobLaptop.page, "Read me on one device.");
+    const info = await openChatInfo(bobLaptop.page);
+    await info
+      .getByRole("button", { name: e2eeMessage("e2ee.info.pin") })
+      .click();
+    await expect(
+      info.getByRole("button", { name: e2eeMessage("e2ee.info.unpin") })
+    ).toBeVisible();
+    await closeChatInfo(bobLaptop.page);
     await hidePage(bobLaptop.page);
     await expect(unreadBadge(bobPhone.page, "alice")).toHaveCount(0, {
       timeout: SELF_GROUP_JOIN_TIMEOUT_MS,
     });
+    const pinned = conversationListRow(bobPhone.page, "alice").getByText(
+      e2eeMessage("e2ee.list.pinned"),
+      { exact: true }
+    );
+    await expect(pinned).toHaveCount(1, { timeout: E2EE_SYNC_TIMEOUT_MS });
 
     // A newer message stays unread on the phone.
     await sendMessage(alice.page, "And this one is new.");
     await expect(unreadBadge(bobPhone.page, "alice")).toHaveCount(1, {
       timeout: E2EE_SYNC_TIMEOUT_MS,
     });
+    await gotoPath(alice.page, ENCRYPTED_ROUTE);
+    await expect(conversationListRow(alice.page, "bob")).toBeVisible();
+    await expect(
+      conversationListRow(alice.page, "bob").getByText(
+        e2eeMessage("e2ee.list.pinned"),
+        { exact: true }
+      )
+    ).toHaveCount(0);
+
+    await openChatInfo(bobLaptop.page);
+    await info
+      .getByRole("button", { name: e2eeMessage("e2ee.info.unpin") })
+      .click();
+    await expect(
+      info.getByRole("button", { name: e2eeMessage("e2ee.info.pin") })
+    ).toBeVisible();
+    await closeChatInfo(bobLaptop.page);
+    await hidePage(bobLaptop.page);
+    await expect(pinned).toHaveCount(0, { timeout: E2EE_SYNC_TIMEOUT_MS });
   });
 
   test("Devices & security starts encrypted messages on a cold visit", async ({

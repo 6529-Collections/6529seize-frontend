@@ -8,6 +8,8 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import ProxyCreateAction from "../proxy/create-action/ProxyCreateAction";
 import CommonChangeAnimation from "@/components/utils/animation/CommonChangeAnimation";
 import { PROFILE_PROXY_AVAILABLE_ACTIONS } from "@/entities/IProxy";
+import { useIdentityEditingPaused } from "@/hooks/useIdentityMovePhase";
+import { isRatingProxyAction } from "@/lib/identity-move/editGuard";
 import Link from "next/link";
 import Button from "@/components/utils/button/Button";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
@@ -33,10 +35,12 @@ export default function ProxyListItem({
   const [isGrantor, setIsGrantor] = useState(getIsGrantor());
 
   const [viewType, setViewType] = useState(VIEW_TYPE.LIST);
+  const identityEditingPaused = useIdentityEditingPaused();
   const getCanAddNewAction = () => {
     const haveActionsLeftToAdd =
       PROFILE_PROXY_AVAILABLE_ACTIONS.filter(
         (action) =>
+          !(identityEditingPaused && isRatingProxyAction(action)) &&
           profileProxy.actions.filter((a) => a.action_type === action)
             .length === 0
       ).length > 0;
@@ -46,15 +50,11 @@ export default function ProxyListItem({
     );
   };
 
-  const [canAddNewAction, setCanAddNewAction] = useState(getCanAddNewAction());
+  const canAddNewAction = getCanAddNewAction();
 
   useEffect(() => {
     setIsGrantor(getIsGrantor());
   }, [profileProxy, connectedProfile]);
-
-  useEffect(() => {
-    setCanAddNewAction(getCanAddNewAction());
-  }, [isGrantor, isSelf, viewType, profileProxy]);
 
   const components: Record<VIEW_TYPE, JSX.Element> = {
     [VIEW_TYPE.LIST]: (

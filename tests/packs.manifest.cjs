@@ -21,6 +21,11 @@ const SMOKE_SPECS = [
   "tests/pages/the-memes.spec.ts",
 ];
 
+const LOCAL_SMOKE_SPECS = [
+  ...SMOKE_SPECS,
+  "tests/home/home-drop-fallback.spec.ts",
+];
+
 const STAGING_READONLY_ENV = {
   PLAYWRIGHT_BASE_URL: "https://staging.6529.io",
   PLAYWRIGHT_SKIP_WEB_SERVER: "1",
@@ -262,7 +267,7 @@ const PACKS = [
     ...localPack(
       "test:e2e:smoke",
       "Fast @smoke subset of home, about, and The Memes.",
-      SMOKE_SPECS,
+      LOCAL_SMOKE_SPECS,
       { grep: "@smoke", projects: [DESKTOP] }
     ),
     triggers: ["pr-ci", "manual"],
@@ -717,22 +722,18 @@ const PACKS = [
   localPack(
     "test:e2e:smoke:surface-matrix",
     "@smoke subset on desktop and mobile web shells.",
-    SMOKE_SPECS,
+    LOCAL_SMOKE_SPECS,
     { grep: "@smoke" }
   ),
   localPack(
     "test:e2e:surface-matrix",
     "Core surfaces on desktop and mobile web shells.",
-    ["tests/surfaces", ...SMOKE_SPECS]
+    ["tests/surfaces", ...LOCAL_SMOKE_SPECS]
   ),
   localPack(
     "test:e2e:browser-diversity",
     "Engine-diversity pass on Firefox and WebKit.",
-    [
-      "tests/surfaces",
-      "tests/home/home.spec.ts",
-      "tests/pages/the-memes.spec.ts",
-    ],
+    ["tests/surfaces", "tests/home", "tests/pages/the-memes.spec.ts"],
     { projects: ["web-desktop-firefox", "web-desktop-webkit"] }
   ),
   localPack(

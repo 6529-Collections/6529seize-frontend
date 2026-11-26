@@ -31,6 +31,7 @@ import {
   isCompetitionAccessError,
 } from "@/helpers/competition.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { t } from "@/i18n/messages";
 import { CompetitionState } from "./CompetitionState";
 import CompetitionAdmin from "./CompetitionAdmin";
@@ -69,6 +70,10 @@ export function NativeCompetitionContent({
   const { isApp } = useDeviceInfo();
   const { waveViewStyle } = useLayout();
   const locale = useBrowserLocale();
+  // Decision settings and entries move to the 6529 Network.
+  const wavesWritesPaused = useWavesWritesPaused();
+  // Entries open there at the switch-on.
+  const entriesPaused = useWavesWritesPaused("entries");
   const pathname = usePathname();
   const router = useRouter();
   const navigateTab = useWaveTabNavigation();
@@ -161,6 +166,7 @@ export function NativeCompetitionContent({
   );
   if (
     competition.permissions.administer &&
+    !wavesWritesPaused &&
     (competition.lifecycle === ApiCompetitionLifecycle.Draft ||
       (search.get("edit") === "1" &&
         competition.permissions.edit_rules_after_activity === true))
@@ -190,11 +196,14 @@ export function NativeCompetitionContent({
     <div
       ref={providedScrollContainer ? undefined : setScrollContainer}
       style={embedded && isApp ? waveViewStyle : undefined}
-      className={
+      className={clsx(
         embedded
           ? "tw-h-full tw-min-h-0 tw-space-y-5 tw-overflow-y-auto tw-p-4 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10 hover:tw-scrollbar-thumb-white/15"
-          : "tw-space-y-5"
-      }
+          : "tw-space-y-5",
+        embedded &&
+          isVotesView &&
+          "max-lg:tw-bg-iron-950 [.capacitor-native_&]:tw-bg-iron-950"
+      )}
     >
       {!embedded && (
         <div
@@ -228,6 +237,7 @@ export function NativeCompetitionContent({
             tab={tab}
             onCreateDrop={
               competition.permissions.submit &&
+              !entriesPaused &&
               competition.lifecycle === ApiCompetitionLifecycle.Published
                 ? () => setEntering((current) => !current)
                 : undefined

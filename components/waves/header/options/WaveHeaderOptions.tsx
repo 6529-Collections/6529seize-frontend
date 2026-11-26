@@ -11,6 +11,7 @@ import {
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { t } from "@/i18n/messages";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { useRef, type ReactNode } from "react";
@@ -41,6 +42,10 @@ export default function WaveHeaderOptions({
   const useSheetActions = panel.isInSheet || isMobileLayoutViewport;
   const popupRole = isMobileLayoutViewport ? "dialog" : "menu";
   const { requestDelete, completeMobileOptionsLeave } = useWaveDeleteFlow();
+  // Closing a wave moves to the 6529 Network with its other settings. Direct
+  // messages stay on this site.
+  const isDirectMessage = wave.chat.scope.group?.is_direct_message ?? false;
+  const wavesWritesPaused = useWavesWritesPaused() && !isDirectMessage;
 
   if (!showOwnerActions) {
     return null;
@@ -72,10 +77,12 @@ export default function WaveHeaderOptions({
           isMobile={useSheetActions}
           onSuccess={closeOptions}
         />
-        <WaveDelete
-          isMobile={useSheetActions}
-          onDeleteRequest={handleDeleteRequest}
-        />
+        {!wavesWritesPaused && (
+          <WaveDelete
+            isMobile={useSheetActions}
+            onDeleteRequest={handleDeleteRequest}
+          />
+        )}
       </div>
     </li>
   );

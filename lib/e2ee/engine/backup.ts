@@ -3,6 +3,7 @@ import { loadMessage, recountUnread, trimHistory } from "./history";
 import type { BackupHistory, BackupMessageRecord } from "../backup/format";
 import type { StoredGroup, StoredMessage } from "../records";
 import { checkpoint, ownDeviceKey, type EngineContext } from "./context";
+import type { ConversationPins } from "./conversation-pins";
 import { newRuntime } from "./groups";
 import type { GroupRuntime } from "./store";
 
@@ -58,6 +59,8 @@ export async function backupHistory(
   if (Object.keys(reads).length > 0) {
     out.reads = reads;
   }
+  const pins = Object.values(ctx.device?.conversationPins?.versions ?? {});
+  if (pins.length > 0) out.pins = pins;
   return out;
 }
 
@@ -121,7 +124,8 @@ function groupMessages(
  */
 export async function importBackupHistory(
   ctx: EngineContext,
-  history: BackupHistory
+  history: BackupHistory,
+  pins: ConversationPins
 ): Promise<{ conversations: number; messages: number }> {
   const records = new Map(
     history.groups.map((group) => [group.g.toLowerCase(), group])
@@ -176,6 +180,7 @@ export async function importBackupHistory(
     ctx,
     new Map([...reads].filter(([g]) => !restoredHere.has(g)))
   );
+  await pins.merge(history.pins ?? []);
   return { conversations, messages: imported };
 }
 

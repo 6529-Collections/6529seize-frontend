@@ -7,6 +7,13 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
+The Waves record covers touch-only row pinning: swipe right and release while
+armed, reverse below the threshold to cancel, or hold still for the single
+Pin/Unpin menu. It includes the All/Joined pin status mark, bottom-navigation
+clearance, pin-limit toast, top-level personal-view eligibility, and the existing
+thread-header alternative. Pinned reordering requires a brief hold followed by
+vertical movement; stationary holding opens the menu.
+
 The `waves.discovery` record covers plain-text description previews, retained
 media, visible Worth Checking Out edges and minimum artwork tint, full-height Active
 Votes artwork, wrapping metrics and neutral zero-submission status without a
@@ -28,15 +35,25 @@ from Profile Waves Feed to Waves. The mobile
 bottom-navigation record covers temporary section-tab hiding while composing in
 short landscape iPhone chat viewports.
 
+Live swipe-back to the Waves list moves the channel header and content together
+while the bottom navigation stays fixed. Cancelling restores the whole page;
+the existing return destination and feed reading-position behavior are preserved.
+The Back record also covers the complete conversation slide when tapping Back
+on iPhone or phone web, its stationary list destination, interruption and
+Reduced Motion. Profile Waves Feed returns retain their own transition.
+
 The signing, encrypted-messages and connection-sharing records cover the shared
 permission consent flow, separate or combined grants, shared server device names,
-renewal versus revocation, Desktop secure sharing's Coming soon gate, and exact
-local notification previews without an in-app cooldown. Composer help describes
-the shared rich-text editor, inline custom emojis, mobile Return/Send and keyboard
+renewal versus revocation, Desktop connection links and staging code redemption,
+and exact local notification previews without an in-app cooldown. Composer help
+describes the shared rich-text editor, inline custom emojis, mobile Return/Send and keyboard
 clearance, while encrypted GIF/Poll/Storm remain unavailable. Notification help
 keeps new-device history limitations explicit and names the environment-specific
 Mobile/Staging push body. Encrypted-messages help describes how the app sidebar
 closes before the sign-out dialog opens.
+
+The Apps page record explains how to open the collapsed 6529 Desktop Classic
+card and find the detected operating system's installers.
 
 The `media.video-player` record covers preview frames and the video-icon fallback
 for Additional Media and Promo Video in submission details. Additional Media
@@ -196,8 +213,14 @@ former `/competitions` links redirect permanently.
 
 The `waves.content-tabs` record describes steady tab rows with screen-reader
 loading announcements, section-specific loading, and destination-bound decision
-controls. It also explains that app tabs already in view keep their position
-when selected. It does not promise instant data or a loading screen on every switch.
+controls. It also explains the four primary tabs on phones and the More sheet for
+remaining sections, with the active section label and count. It does not
+promise instant data or a loading screen on every switch.
+
+The `waves.about-sections` record describes phone Configuration rows with their
+settings gear icons and row-wide tap targets. Phone curation and subwave forms
+have one title and a top-right X Close control; nested pages keep one Back arrow.
+Close and Back protect entered drafts, and saving keeps its existing controls.
 
 The `messages.encrypted-chats` record covers profile links in DM headers and
 introductions, sender names and avatars, desktop profile cards, level and public
@@ -364,6 +387,13 @@ and smaller-layout field menu. Keep these instructions aligned with the header.
 The drop-actions record covers current reactor names in desktop tooltips and
 Reactions dialogs, touch long press, live count updates, and closing and reopening
 details to retry a failed names request without reloading the thread.
+
+The Waves navigation record distinguishes the mobile web and native headers.
+Mobile web keeps its site header, feed icon and labeled `Create wave` button.
+The native list keeps the `Create wave` plus button, `Search 6529` and `More`
+visible in the header. The `More` sheet contains `Profile Waves Feed` and
+`Share page`; page sharing uses the existing native share sheet. Both surfaces
+use the same feed icon and action names.
 
 ## Problem Statement
 
@@ -1092,7 +1122,7 @@ preserving limits, errors, warnings, and the bottom criteria summary.
 
 Competition list corrections: My Votes includes only active nonzero votes; archived winner votes remain retained. Its help record explains Sort by: Your vote amount, Leaderboard position and Last voted, complete-list ordering, ties and missing data, browser persistence by competition and profile, reset-selection clearing and order refresh after successful votes. Winners paginate by win time newest first.
 
-Voting help records use **Explain vote** for public rationale replies in My Votes and voting dialogs. They distinguish sending a reply about a saved vote from posting one after a successful vote, and cover Slider / Numeric entry in competition submission popups. The My Votes record also describes compact phone and tablet rows, 16-pixel side padding, single-line titles and action labels, compact controls with unchanged labels on smaller rows, styled public-reply tooltips, controls that adapt to the available width, and Explain vote beside the amount control on tablet and desktop with the range hint underneath. Desktop controls stay to the right of the artwork and details.
+Voting help records use **Explain vote** for public rationale replies in My Votes and voting dialogs. The My Votes record describes shared desktop/mobile balance-first controls, Select / Done, loaded-row reset confirmation, rank beside the title, matching stats typography, grouped resting numbers, signed keyboard entry, changed-only Save, Enter submission and public rationale replies. Desktop uses bordered Explain vote and solid Save vote buttons; mobile explanations remain quiet text. Desktop range help remains visible; mobile help appears on focus or error. Mobile uses long-press selection and 56px cropped previews with full artwork on opening. Desktop fits votes on one row where space permits and keeps checkboxes visible at rest, supports selecting through row-background clicks, and aligns stats beneath the handle with its profile image. Reduced motion removes movement and scaling. The record keeps Slider / Numeric entry in submission popups distinct from My Votes.
 
 The `waves.reactions-voting` record describes the shared `Your vote` header,
 compact `Slider` / `Numeric` tabs, and signed amount/unit on the `Vote` action,
@@ -1146,3 +1176,6 @@ its existing filter visibility while fetching.
 Primary navigation knowledge includes the shared Join 6529 / Validator slot: newcomers
 see Join, signed-in profiles see Validator, and unresolved sessions reserve the
 slot across desktop, mobile web, native menus, and page search.
+
+The Wave list navigation record describes paired phone conversation entry and
+Back slides, including the complete header, a stationary list and Reduced Motion.

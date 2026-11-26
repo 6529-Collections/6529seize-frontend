@@ -1,5 +1,7 @@
 "use client";
 
+import { faThumbtack } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   BellIcon,
   BellSlashIcon,
@@ -12,6 +14,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { type FormEvent, useId, useState } from "react";
 import Button from "@/components/utils/button/Button";
+import { isE2eeReadSyncEnabled } from "@/config/e2eeReadSyncEnv";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
@@ -173,6 +176,65 @@ function MuteSetting({
         {t(locale, "e2ee.info.muteHelp")}
       </p>
     </section>
+  );
+}
+
+function PinSetting({
+  conversation,
+  engine,
+}: {
+  readonly conversation: E2eeConversation;
+  readonly engine: E2eeEngine;
+}) {
+  const locale = useBrowserLocale();
+  const helpId = useId();
+  const [pending, setPending] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const pinned = conversation.pinned === true;
+  const togglePin = async () => {
+    setPending(true);
+    setFailed(false);
+    try {
+      await engine.setConversationPinned(conversation.g, !pinned);
+    } catch {
+      setFailed(true);
+    } finally {
+      setPending(false);
+    }
+  };
+  return (
+    <div>
+      <Button
+        variant="secondary"
+        size="sm"
+        aria-describedby={helpId}
+        loading={pending}
+        onClick={() => void togglePin()}
+      >
+        <FontAwesomeIcon
+          aria-hidden="true"
+          icon={faThumbtack}
+          className="tw-size-4"
+        />
+        {t(locale, pinned ? "e2ee.info.unpin" : "e2ee.info.pin")}
+      </Button>
+      <p
+        id={helpId}
+        className="tw-mb-0 tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-400"
+      >
+        {t(
+          locale,
+          isE2eeReadSyncEnabled()
+            ? "e2ee.info.pinSyncHelp"
+            : "e2ee.info.pinLocalHelp"
+        )}
+      </p>
+      {failed ? (
+        <p role="alert" className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-rose-300">
+          {t(locale, "e2ee.info.pinFailed")}
+        </p>
+      ) : null}
+    </div>
   );
 }
 
@@ -432,6 +494,11 @@ export function E2eeConversationInfo({
       }
     >
       <div className="tw-flex tw-flex-col tw-gap-6">
+        <PinSetting
+          key={conversation.g}
+          conversation={conversation}
+          engine={engine}
+        />
         {canManage ? (
           <RenameForm engine={engine} conversation={conversation} />
         ) : null}

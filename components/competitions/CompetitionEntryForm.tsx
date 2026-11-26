@@ -14,7 +14,7 @@ import {
 } from "@/helpers/waves/identity-submission-metadata";
 import { ApiCompetitionLifecycle } from "@/generated/models/ApiCompetitionLifecycle";
 import { getMentionedGroupsFromText } from "@/helpers/waves/drop-group-mentions";
-import { useId, useRef, useState } from "react";
+import { useId, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
@@ -38,6 +38,18 @@ import { getCreateWaveDropRequest } from "@/components/waves/create-wave/service
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
 import type { ApiCreateCompetitionEntryRequest } from "@/generated/models/ApiCreateCompetitionEntryRequest";
+import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
+import { chainWriteFailure } from "@/components/chain-waves/chainWavesErrorMessage";
+import { chainIdentityPointer } from "@/components/chain-waves/chainIdentityPointer";
+import {
+  ChainEntryPendingError,
+  type ChainEntryStage,
+} from "@/lib/chain-waves/entryWriters";
+import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
+import {
+  invalidateChainEntryQueries,
+  useChainEntrySubmit,
+} from "@/components/chain-waves/useChainEntryWriters";
 import {
   createCompetitionEntry,
   invalidateCompetition,
@@ -48,10 +60,18 @@ import {
   isRejectedCompetitionCommand,
 } from "@/helpers/competition.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { t, type MessageKey } from "@/i18n/messages";
 import { COMPETITION_BUTTON, COMPETITION_INPUT } from "./CompetitionState";
 import { competitionSubmissionReceiptKey } from "@/helpers/competition-submission.helpers";
 import { getStructuredApiErrorCode } from "@/services/api/common-api";
+
+/** What the form shows while an entry is on its way to the 6529 Network. */
+const CHAIN_STAGE_LABEL: Record<ChainEntryStage, string> = {
+  preparing: "Getting your entry ready.",
+  wallet: "Waiting for your wallet.",
+  sending: "Sending to the 6529 Network.",
+};
 
 function getEntryReferences(
   snapshot: NonNullable<ReturnType<DropEditorHandles["getDropSnapshot"]>>,
@@ -99,6 +119,14 @@ export default function CompetitionEntryForm({
   const { connectedProfile, activeProfileProxy, requestAuth } = useAuth();
   const viewer = useCompetitionViewer();
   const locale = useBrowserLocale();
+  // Entries move to the 6529 Network: the form stays, sending waits until
+  // they open there at the switch-on.
+  const entriesPaused = useWavesWritesPaused("entries");
+  const submitChainEntry = useChainEntrySubmit(competition);
+  // The form follows 6529.io's permissions, a decision made on the 6529
+  // Network too. The chain's writer checks the chain's own rules (submit
+  // group, entries per author) before any prompt.
+  const canSubmitEntry = competition.permissions.submit && !entriesPaused;
   const router = useRouter();
   const client = useQueryClient();
   const sign = useCompetitionSignature();
@@ -116,6 +144,12 @@ export default function CompetitionEntryForm({
   const [canSubmit, setCanSubmit] = useState(false);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState<MessageKey | null>(null);
+  // What the 6529 Network said when it didn't take the entry.
+  const [chainFailure, setChainFailure] = useState<ReactNode>(null);
+  // An entry sent to the 6529 Network that wasn't final when the wait
+  // ended: it may still land, so the form offers no second send.
+  const [chainPending, setChainPending] = useState<string | null>(null);
+  const [chainStage, setChainStage] = useState<ChainEntryStage | null>(null);
   const failureDescription = failed ? errorId : undefined;
   const pending = useRef<{
     fingerprint: string;
@@ -161,7 +195,8 @@ export default function CompetitionEntryForm({
     metadataValid &&
     identityValid &&
     (!competition.participation.terms || terms) &&
-    competition.permissions.submit &&
+    canSubmitEntry &&
+    chainPending === null &&
     competition.lifecycle === ApiCompetitionLifecycle.Published;
   const submit = async () => {
     if (busy || !ready) return;
@@ -169,9 +204,63 @@ export default function CompetitionEntryForm({
     if (!snapshot || hasPendingInlineImageUploadDrop(snapshot)) return;
     setBusy(true);
     setFailed(null);
+    setChainFailure(null);
     const identity = { waveId: wave.id, competitionId: competition.id };
+    const buildDrop = async (): Promise<ApiCreateDropRequest> => {
+      const content = await getCreateWaveDropRequest(
+        snapshot,
+        ApiMediaUploadPurpose.DecisionEntry
+      );
+      return {
+        ...content,
+        ...getEntryReferences(
+          snapshot,
+          wave.wave.authenticated_user_eligible_for_admin
+        ),
+        title: title.trim() || (content.title ?? null),
+        metadata: [
+          ...content.metadata.filter(
+            (item) =>
+              (!identitySubmission ||
+                !isReservedIdentitySubmissionMetadataKey(item.data_key)) &&
+              !requirements.some(
+                (requirement) => requirement.name === item.data_key
+              )
+          ),
+          ...(identitySubmission && selectedIdentity
+            ? [
+                {
+                  data_key: IDENTITY_SUBMISSION_METADATA_KEY,
+                  data_value: selectedIdentity.value,
+                },
+              ]
+            : []),
+          ...requirements.map((item) => ({
+            data_key: item.name,
+            data_value: metadata[item.name] ?? "",
+          })),
+        ],
+        wave_id: wave.id,
+        drop_type: ApiDropType.Participatory,
+        signature: null,
+      };
+    };
     try {
+      // 6529.io keeps hosting the media, so its upload needs the sign-in.
       if (!(await requestAuth()).success) return;
+      if (submitChainEntry) {
+        // On the 6529 Network the consent and the entry carry the wallet's
+        // own signatures; the entry shows once 6529.io's index lists it.
+        await submitChainEntry({
+          request: await buildDrop(),
+          terms: null,
+          onStage: setChainStage,
+        });
+        await invalidateChainEntryQueries(client, wave.id);
+        onClose();
+        router.push(getCompetitionRoute(wave.id, competition.id));
+        return;
+      }
       const fingerprint = JSON.stringify(
         [
           snapshot,
@@ -195,43 +284,7 @@ export default function CompetitionEntryForm({
           ? pending.current.request
           : null;
       if (!request) {
-        const content = await getCreateWaveDropRequest(
-          snapshot,
-          ApiMediaUploadPurpose.DecisionEntry
-        );
-        const drop = {
-          ...content,
-          ...getEntryReferences(
-            snapshot,
-            wave.wave.authenticated_user_eligible_for_admin
-          ),
-          title: title.trim() || (content.title ?? null),
-          metadata: [
-            ...content.metadata.filter(
-              (item) =>
-                (!identitySubmission ||
-                  !isReservedIdentitySubmissionMetadataKey(item.data_key)) &&
-                !requirements.some(
-                  (requirement) => requirement.name === item.data_key
-                )
-            ),
-            ...(identitySubmission && selectedIdentity
-              ? [
-                  {
-                    data_key: IDENTITY_SUBMISSION_METADATA_KEY,
-                    data_value: selectedIdentity.value,
-                  },
-                ]
-              : []),
-            ...requirements.map((item) => ({
-              data_key: item.name,
-              data_value: metadata[item.name] ?? "",
-            })),
-          ],
-          wave_id: wave.id,
-          drop_type: ApiDropType.Participatory,
-          signature: null,
-        };
+        const drop = await buildDrop();
         request = {
           idempotency_key: newCompetitionRequestKey(),
           config_version: competition.config_version,
@@ -263,11 +316,26 @@ export default function CompetitionEntryForm({
         `${getCompetitionRoute(wave.id, competition.id)}?entry=${encodeURIComponent(entry.id)}`
       );
     } catch (error) {
+      if (error instanceof ChainEntryPendingError) {
+        setChainPending(error.message);
+        return;
+      }
+      // The wallet's prompt was declined: nothing was sent, nothing failed.
+      if (submitChainEntry && isUserRejectedSigningError(error)) return;
       if (isRejectedCompetitionCommand(error)) pending.current = null;
+      // The 6529 Network's reason in plain words, and that a refusal from a
+      // block still paid its fee.
+      if (submitChainEntry !== null) {
+        const reason =
+          chainIdentityPointer(locale, error) ??
+          chainWriteFailure(locale, error, "", "entry");
+        setChainFailure(reason === "" ? null : reason);
+      }
       setFailed(getEntryFailureKey(error));
       await invalidateCompetition(client, identity);
     } finally {
       setBusy(false);
+      setChainStage(null);
     }
   };
   if (!profile)
@@ -420,11 +488,27 @@ export default function CompetitionEntryForm({
       {failed && (
         <p id={errorId} role="alert" className="tw-text-sm tw-text-red">
           {t(locale, failed)}
+          {chainFailure !== null && <> {chainFailure}</>}
         </p>
       )}
-      {!competition.permissions.submit && (
+      {chainStage !== null && (
+        <p role="status" className="tw-m-0 tw-text-sm tw-text-iron-400">
+          {CHAIN_STAGE_LABEL[chainStage]}
+        </p>
+      )}
+      {chainPending !== null && (
+        <p role="status" className="tw-m-0 tw-text-sm tw-text-iron-300">
+          {chainPending}
+        </p>
+      )}
+      {!canSubmitEntry && (
         <output className="tw-block tw-text-sm tw-text-iron-400">
-          {t(locale, "competitions.submitClosed")}
+          {t(
+            locale,
+            competition.permissions.submit
+              ? "wavesMove.paused"
+              : "competitions.submitClosed"
+          )}
         </output>
       )}
       <div className="tw-flex tw-flex-wrap tw-gap-2">

@@ -39,6 +39,10 @@ export const ES_ES_MESSAGES = {
   "waves.historyGap.retry": "No se pudieron cargar los mensajes. Reintentar",
 
   "waves.myVotes.sort": "Ordenar por",
+  "waves.myVotes.select": "Seleccionar",
+  "waves.myVotes.yourVotesInCredit": "Tus votos en {credit}",
+  "waves.myVotes.maxRating": "{label} {value}",
+  "waves.myVotes.doneSelecting": "Listo",
   "waves.myVotes.sort.voteAmount": "Tu cantidad de votos",
   "waves.myVotes.sort.leaderboard": "Posición en la clasificación",
   "waves.myVotes.sort.lastVoted": "Último voto",
@@ -1306,6 +1310,16 @@ export const ES_ES_MESSAGES = {
   ...ES_ES_TRANSFER_MESSAGES,
   ...ES_ES_THE_MEMES_MINT_SUCCESS_MESSAGES,
   ...ES_ES_THE_MEMES_MINT_PROGRESS_MESSAGES,
+  "e2ee.list.pinned": "Fijado",
+  "e2ee.list.pinnedChat": "{title}, chat fijado",
+  "e2ee.list.pinChat": "Fijar {title} arriba",
+  "e2ee.info.pin": "Fijar arriba",
+  "e2ee.info.unpin": "Desfijar chat",
+  "e2ee.info.pinSyncHelp":
+    "Los chats fijados se sincronizan de forma privada con tus otros dispositivos de confianza.",
+  "e2ee.info.pinLocalHelp":
+    "Los chats fijados se guardan en este dispositivo hasta que esté disponible la sincronización cifrada.",
+  "e2ee.info.pinFailed": "No se pudo cambiar el pin. Inténtalo de nuevo.",
   "e2ee.message.taskChecked": "Tarea marcada",
   "e2ee.message.taskUnchecked": "Tarea sin marcar",
   "e2ee.message.imageLink": "Enlace de imagen",

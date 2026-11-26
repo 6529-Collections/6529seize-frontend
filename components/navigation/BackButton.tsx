@@ -1,5 +1,6 @@
 "use client";
 
+import { Capacitor } from "@capacitor/core";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useTransition } from "react";
@@ -10,6 +11,7 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import {
   getActiveWaveIdFromUrl,
+  getMessageIdFromPathname,
   getMessagesBaseRoute,
   isMessageComposePathname,
   getWavesBaseRoute,
@@ -21,12 +23,18 @@ import { useClosingDropId } from "@/hooks/useClosingDropId";
 import { useExitActiveWave } from "./useExitActiveWave";
 import { isCompetitionPathname } from "@/helpers/competition.helpers";
 import { getMissingWaveNavigationRoute } from "@/helpers/waves/missing-wave-navigation.helpers";
-import { isProfileWavesFeed } from "@/helpers/waves/profile-feed-navigation";
+import {
+  isProfileWavesFeed,
+  returnsToProfileWavesFeed,
+} from "@/helpers/waves/profile-feed-navigation";
+import { runPhoneChevronBackTransition } from "@/helpers/waves/wave-navigation-transition";
 
 export default function BackButton({
   returnTo,
+  className,
 }: {
   readonly returnTo?: string | null | undefined;
+  readonly className?: string | undefined;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -86,6 +94,19 @@ export default function BackButton({
 
   const { isDm } = useWave(wave);
 
+  const isMessageRoute =
+    Boolean(getMessageIdFromPathname(pathname)) ||
+    (pathname === getMessagesBaseRoute(isApp) && searchParams.has("wave"));
+  const isDirectMessage = isMessageRoute || isDm;
+  const isWaveListReturn =
+    (pathname === "/waves" || pathname.startsWith("/waves/")) &&
+    !isDirectMessage &&
+    !returnsToProfileWavesFeed(searchParams);
+  const shouldAnimateConversationBack =
+    isApp &&
+    Capacitor.getPlatform() === "ios" &&
+    (isMessageRoute || isWaveListReturn);
+
   const handleClick = () => {
     if (loading) return;
     if (information?.returnFromNavigation) {
@@ -124,7 +145,15 @@ export default function BackButton({
 
     // Inside a wave → go back to wave list
     if (waveId) {
-      exitActiveWave(isDm);
+      const leave = () => exitActiveWave(isDirectMessage);
+      if (shouldAnimateConversationBack) {
+        runPhoneChevronBackTransition(
+          getWaveHomeRoute({ isDirectMessage, isApp }),
+          leave
+        );
+      } else {
+        leave();
+      }
       return;
     }
 
@@ -148,7 +177,7 @@ export default function BackButton({
       aria-busy={loading}
       disabled={loading}
       onClick={handleClick}
-      className="tw-relative tw-flex tw-size-11 tw-touch-manipulation tw-items-center tw-justify-center tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-transition-colors tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 active:tw-bg-white/[0.08] disabled:tw-cursor-default disabled:tw-opacity-70 desktop-hover:hover:tw-bg-white/[0.06]"
+      className={`tw-relative tw-flex tw-size-11 tw-touch-manipulation tw-items-center tw-justify-center tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-transition-colors tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 active:tw-bg-white/[0.08] disabled:tw-cursor-default disabled:tw-opacity-70 desktop-hover:hover:tw-bg-white/[0.06] ${className ?? ""}`}
     >
       <ChevronLeftIcon
         strokeWidth={2}

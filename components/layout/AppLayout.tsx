@@ -3,7 +3,8 @@
 import dynamic from "next/dynamic";
 import type { CSSProperties, ReactNode } from "react";
 import { Suspense, useCallback, useMemo, useRef } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useParams, usePathname, useSearchParams } from "next/navigation";
+import { isUserProfilePage } from "../user/layout/userTabs.config";
 import BottomNavigation from "../navigation/BottomNavigation";
 import { getActiveViewFromUrl } from "../navigation/ViewContext";
 import BrainMobileWaves from "../brain/mobile/BrainMobileWaves";
@@ -124,10 +125,12 @@ function AppLayoutContent({ children }: Props) {
   const headerRef = useRef<HTMLDivElement | null>(null);
   const pullContentRef = useRef<HTMLDivElement | null>(null);
   const pathname = usePathname();
+  const params = useParams();
+  const hasProfileShell = isUserProfilePage(pathname, params["user"]);
   // This content-height wrapper is not a scrollport on collection pages.
   // Clip horizontally without trapping sticky descendants or document scrolling.
   const overflowClassName =
-    pathname === "/the-memes"
+    pathname === "/the-memes" || hasProfileShell
       ? "tw-overflow-x-clip"
       : "tw-overflow-y-auto tw-overflow-x-hidden";
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
@@ -144,7 +147,10 @@ function AppLayoutContent({ children }: Props) {
     waveParam,
     isApp && searchParams.get("view") === "profile-feed"
   );
-  const waveNavigationRef = useWaveNavigationTransition(waveNavigationScreen);
+  const waveNavigationRef = useWaveNavigationTransition(
+    waveNavigationScreen,
+    pathname
+  );
   const shouldHideBottomNavForRoute = hidesMobileBottomNavigation({
     pathname,
   });
@@ -185,9 +191,10 @@ function AppLayoutContent({ children }: Props) {
       }),
       [isNavVisible, routeLoadingHeaderReserve, shouldUseContentBottomClearance]
     );
+  // The iPhone chat composer already reserves the bottom safe area inside its height.
   const safeAreaClass =
     !isNavVisible && !isLayoutKeyboardVisible
-      ? "tw-pb-[env(safe-area-inset-bottom,0px)]"
+      ? "tw-pb-[env(safe-area-inset-bottom,0px)] has-[[data-ios-chat-composer]]:tw-pb-0"
       : "";
   let activeContent: ReactNode;
 
@@ -211,18 +218,20 @@ function AppLayoutContent({ children }: Props) {
           ref={pullContentRef}
           {...{ [PULL_TO_REFRESH_TRANSFORM_ROOT_ATTRIBUTE]: "true" }}
         >
-          <div ref={headerWrapperRef}>
-            <TouchDeviceHeader />
-          </div>
-          <div
-            ref={waveNavigationRef}
-            data-testid="wave-navigation-content"
-            data-wave-navigation-screen={waveNavigationScreen ?? undefined}
-          >
-            {activeContent}
-            {isNavVisible && !shouldUseContentBottomClearance && (
-              <div className="tw-h-[104px] tw-w-full" />
-            )}
+          <div data-wave-swipe-page>
+            <div ref={headerWrapperRef}>
+              <TouchDeviceHeader />
+            </div>
+            <div
+              ref={waveNavigationRef}
+              data-testid="wave-navigation-content"
+              data-wave-navigation-screen={waveNavigationScreen ?? undefined}
+            >
+              {activeContent}
+              {isNavVisible && !shouldUseContentBottomClearance && (
+                <div className="tw-h-[104px] tw-w-full" />
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -22,6 +22,7 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { newCompetitionRequestKey } from "@/helpers/competition.helpers";
 import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { t } from "@/i18n/messages";
 import {
   commonApiFetch,
@@ -67,12 +68,13 @@ export default function CompetitionAccess({
       ? null
       : {
           id: groupId,
-          name: groupQuery.data?.name ?? "",
           is_hidden: !groupQuery.data,
           is_direct_message: groupQuery.data?.is_direct_message ?? false,
         };
+  const wavesWritesPaused = useWavesWritesPaused();
   const editable =
     competition.permissions.administer &&
+    !wavesWritesPaused &&
     (competition.lifecycle === ApiCompetitionLifecycle.Draft ||
       competition.lifecycle === ApiCompetitionLifecycle.Published);
   const groupLabel = t(

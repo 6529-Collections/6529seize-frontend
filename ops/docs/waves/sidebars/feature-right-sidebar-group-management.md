@@ -99,8 +99,10 @@ Users can:
     rules to that curation.
     On mobile and in the tablet overlay, both forms use the information panel
     at the same height. Back discards the draft and returns to Configuration.
-    Close or a downward header swipe dismisses the panel. Successful saves
-    return to Configuration. Failed saves keep the draft open. On desktop,
+    Phone information stays full-screen; a rightward swipe also goes back.
+    Back from the main phone information view returns to the thread. Tablet
+    overlays also offer Close. Successful saves return to Configuration. Failed
+    saves keep the draft open. On desktop,
     curations open in dialogs.
 
 ## Common Scenarios
@@ -137,7 +139,8 @@ Users can:
 - Available group inspection is accessible to read-only wave viewers; it does
   not depend on wave edit permission. An authenticated private-group member or
   creator can inspect that group's criteria and members. Configuration shows
-  the current `1 user` or `X users` count instead of the generated group name.
+  the current `1 user` or `X users` count. The same count appears in the
+  link tooltip and screen-reader label for access and curation groups.
 - Eligible direct-message participants get the same member count and criteria
   summary for their DM access groups. The generated direct-message group name
   is not used as the visible value.

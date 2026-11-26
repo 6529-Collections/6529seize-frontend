@@ -1,6 +1,7 @@
 import { EN_US_ROOT_MESSAGES } from "@/i18n/messages/en-US";
 import { AI_DOWNLOAD_MESSAGES } from "@/i18n/namespaces/ai-download";
 import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/namespaces/artwork-documentation";
+import { CHAIN_IDENTITY_MESSAGES } from "@/i18n/namespaces/chain-identity";
 import { DESKTOP_DOWNLOAD_MESSAGES } from "@/i18n/namespaces/desktop-download";
 import { MUSEUM_MESSAGES } from "@/i18n/namespaces/museum";
 import { MUSEUM_ONCHAIN_MESSAGES } from "@/i18n/namespaces/museum-onchain";
@@ -9,6 +10,7 @@ import { NETWORK_TDH_CONSOLIDATION_MESSAGES } from "@/i18n/namespaces/network-td
 import { PROVENANCE_GOVERNANCE_MESSAGES } from "@/i18n/namespaces/provenance-governance";
 import { VALIDATOR_AUTHORIZE_MESSAGES } from "@/i18n/namespaces/validator-authorize";
 import { VALIDATOR_FILES_MESSAGES } from "@/i18n/namespaces/validator-files";
+import { WAVE_SIDEBAR_MESSAGES } from "@/i18n/namespaces/wave-sidebar";
 
 /**
  * The complete en-US source dictionary: the root dictionary plus every feature
@@ -25,6 +27,7 @@ export const EN_US_MESSAGES = {
   ...EN_US_ROOT_MESSAGES,
   ...AI_DOWNLOAD_MESSAGES,
   ...ARTWORK_DOCUMENTATION_MESSAGES,
+  ...CHAIN_IDENTITY_MESSAGES,
   ...DESKTOP_DOWNLOAD_MESSAGES,
   ...MUSEUM_MESSAGES,
   ...MUSEUM_ONCHAIN_MESSAGES,
@@ -33,6 +36,7 @@ export const EN_US_MESSAGES = {
   ...PROVENANCE_GOVERNANCE_MESSAGES,
   ...VALIDATOR_AUTHORIZE_MESSAGES,
   ...VALIDATOR_FILES_MESSAGES,
+  ...WAVE_SIDEBAR_MESSAGES,
 } as const;
 
 export type MessageKey = keyof typeof EN_US_MESSAGES;

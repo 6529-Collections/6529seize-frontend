@@ -12,6 +12,7 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import useLocalPreference from "@/hooks/useLocalPreference";
 import { useWavePollDrops } from "@/hooks/useWavePollDrops";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import type {
   WavePollsSort as WavePollsApiSort,
   WavePollsState,
@@ -23,6 +24,7 @@ import {
   CONNECTED_TAB_LIST_CLASSES,
   getConnectedTabButtonClasses,
 } from "@/components/utils/select/tabs/connectedTabStyles";
+import { getDropdownMenuMetrics } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 
 interface MyStreamWavePollsProps {
   readonly wave: ApiWave;
@@ -132,6 +134,7 @@ const MyStreamWavePolls: React.FC<MyStreamWavePollsProps> = ({
   onDropClick,
 }) => {
   const { leaderboardViewStyle } = useLayout();
+  const isPhone = useIsMobileLayoutViewport();
   const [stateFilter, setStateFilter] =
     useLocalPreference<WavePollsStateFilter>(
       `wavePollState_${wave.id}`,
@@ -237,7 +240,7 @@ const MyStreamWavePolls: React.FC<MyStreamWavePollsProps> = ({
         <div
           role="tablist"
           aria-label="Poll state"
-          className={`tw-flex tw-items-center ${CONNECTED_TAB_LIST_CLASSES}`}
+          className={`tw-inline-flex tw-w-fit tw-flex-none tw-items-center [&_[role=tab]]:tw-text-meta ${CONNECTED_TAB_LIST_CLASSES}`}
         >
           {STATE_FILTER_ITEMS.map((item) => (
             <button
@@ -249,6 +252,7 @@ const MyStreamWavePolls: React.FC<MyStreamWavePollsProps> = ({
               tabIndex={stateFilter === item.value ? 0 : -1}
               className={getConnectedTabButtonClasses({
                 isActive: stateFilter === item.value,
+                size: isPhone ? "sm" : "md",
               })}
               onClick={() => setStateFilter(item.value)}
             >
@@ -262,7 +266,15 @@ const MyStreamWavePolls: React.FC<MyStreamWavePollsProps> = ({
             activeItem={sort}
             filterLabel="Sort"
             setSelected={setSort}
-            size="sm"
+            variant={isPhone ? "compact" : "regular"}
+            size={isPhone ? undefined : "sm"}
+            metrics={{
+              ...getDropdownMenuMetrics(
+                isPhone ? "compact" : "regular",
+                isPhone ? undefined : "sm"
+              ),
+              text: "meta",
+            }}
             showFilterLabel={true}
           />
         </div>

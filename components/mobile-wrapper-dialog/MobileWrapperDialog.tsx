@@ -5,6 +5,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { Dialog, DialogPanel, TransitionChild } from "@headlessui/react";
 import clsx from "clsx";
+import { getMobileDialogContentClassNames } from "./mobileWrapperDialogContent";
 import {
   Fragment,
   useCallback,
@@ -17,6 +18,11 @@ import type { CSSProperties, ReactNode, RefObject } from "react";
 import MobileWrapperDialogCloseButton from "./MobileWrapperDialogCloseButton";
 import MobileWrapperDialogHeader from "./MobileWrapperDialogHeader";
 import { useMobileDialogDrag } from "./useMobileDialogDrag";
+import {
+  getMobileDialogContainerStyle,
+  getMobileDialogSurfaceStyle,
+  MOBILE_DIALOG_VIEWPORT_RESERVE,
+} from "./mobileDialogSizing";
 import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import { useLayoutViewportLock } from "@/components/brain/my-stream/layout/LayoutContext";
 import { observeFocusedField } from "@/helpers/focused-field-visibility";
@@ -24,24 +30,10 @@ import { observeFocusedField } from "@/helpers/focused-field-visibility";
 // Browser chrome can resize the viewport slightly without opening a keyboard.
 const BROWSER_KEYBOARD_MIN_INSET = 100;
 
-const MOBILE_DIALOG_KEYBOARD_INSET =
-  "var(--mobile-wrapper-dialog-keyboard-inset, 0px)";
-const MOBILE_DIALOG_VIEWPORT_RESERVE =
-  "var(--mobile-wrapper-dialog-viewport-reserve, 4rem)";
-const NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION =
-  "var(--native-keyboard-layout-transition-duration, 0ms)";
-const NATIVE_KEYBOARD_LAYOUT_TRANSITION_EASING =
-  "var(--native-keyboard-layout-transition-easing, ease-out)";
-// Animate layout offset with the surface height. A compositor transform can
-// outrun height layout on iOS, briefly pushing the sheet offscreen.
-const MOBILE_DIALOG_CONTAINER_STYLE: CSSProperties = {
-  bottom: MOBILE_DIALOG_KEYBOARD_INSET,
-  transition: `bottom ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_EASING}`,
-};
-
 type MobileWrapperDialogProps = {
   readonly id?: string | undefined;
   readonly title?: string | undefined;
+  readonly subtitle?: string | undefined;
   readonly ariaLabel?: string | undefined;
   readonly isOpen: boolean;
   readonly onClose: () => void;
@@ -55,6 +47,10 @@ type MobileWrapperDialogProps = {
   readonly noPadding?: boolean | undefined;
   readonly tall?: boolean | undefined;
   readonly fixedHeight?: boolean | undefined;
+  /** Start at half height and let the header grip expand to the usable viewport. */
+  readonly expandableHeight?: boolean | undefined;
+  /** Let an opted-in child own the dialog's single scrolling content area. */
+  readonly scrollableContent?: boolean | undefined;
   /** Also fit the software keyboard viewport in mobile browsers. */
   readonly fitVisualViewport?: boolean | undefined;
   /** Action-only sheets enter at their final position while the keyboard closes. */
@@ -81,11 +77,13 @@ type MobileWrapperDialogProps = {
    * intentional full-bleed surface that requires the shared floating control.
    */
   readonly showHeaderCloseButton?: boolean | undefined;
+  readonly showCloseButton?: boolean | undefined;
   readonly showHeaderDivider?: boolean | undefined;
   readonly headerCloseButtonClassName?: string | undefined;
   readonly surfaceClassName?: string | undefined;
   readonly titleClassName?: string | undefined;
   readonly focusTitleOnOpen?: boolean | undefined;
+  readonly initialFocusRef?: RefObject<HTMLElement | null> | undefined;
   readonly backLabel?: string | undefined;
   readonly closeLabel?: string | undefined;
   readonly dismissible?: boolean | undefined;
@@ -180,25 +178,6 @@ function getBottomPadding(
     : "calc(env(safe-area-inset-bottom,0px) + 1.5rem)";
 }
 
-function getDialogHeight({
-  tall,
-  isCapacitor,
-}: {
-  readonly tall?: boolean | undefined;
-  readonly isCapacitor: boolean;
-}): string {
-  const viewportHeight = "min(100vh, 100svh)";
-  const restingHeight =
-    tall && !isCapacitor
-      ? `calc(${viewportHeight} - 4rem)`
-      : `calc(${viewportHeight} - 10rem)`;
-  const keyboardAvailableHeight =
-    `max(0px, calc(${viewportHeight} - ${MOBILE_DIALOG_VIEWPORT_RESERVE} - ` +
-    `${MOBILE_DIALOG_KEYBOARD_INSET}))`;
-
-  return `min(var(--mobile-wrapper-dialog-resting-height, ${restingHeight}), var(--mobile-wrapper-dialog-available-height, ${keyboardAvailableHeight}))`;
-}
-
 function getBeforeLeaveProps(onBeforeLeave?: (() => void) | undefined) {
   return onBeforeLeave ? { beforeLeave: onBeforeLeave } : {};
 }
@@ -290,40 +269,6 @@ function getSurfaceClassNames({
   );
 }
 
-function getContentClassNames({
-  allowOverflow,
-  noPadding,
-  showScrollbar,
-  hasDragHandle,
-  tabletModal,
-}: {
-  readonly allowOverflow?: boolean | undefined;
-  readonly noPadding?: boolean | undefined;
-  readonly showScrollbar?: boolean | undefined;
-  readonly hasDragHandle: boolean;
-  readonly tabletModal?: boolean | undefined;
-}) {
-  let paddingClassName = "tw-py-0";
-  if (!noPadding) {
-    paddingClassName = clsx(
-      "tw-pb-6",
-      hasDragHandle ? "tw-pt-0" : "tw-pt-4",
-      hasDragHandle && tabletModal && "md:tw-pt-4"
-    );
-  }
-
-  return clsx(
-    "tw-flex tw-min-h-0 tw-flex-1 tw-scroll-py-3 tw-flex-col",
-    allowOverflow
-      ? "mobile-wrapper-dialog-overflow-content tw-overflow-visible"
-      : "tw-overflow-y-auto",
-    paddingClassName,
-    showScrollbar &&
-      !allowOverflow &&
-      "tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
-  );
-}
-
 function getPanelStyle({
   canDragToClose,
   dragOffset,
@@ -343,26 +288,6 @@ function getPanelStyle({
     transition: isDragging
       ? "none"
       : "transform 150ms cubic-bezier(0.22, 1, 0.36, 1)",
-  };
-}
-
-function getSurfaceStyle({
-  dialogHeight,
-  fixedHeight,
-  keyboardTransitionEasing = NATIVE_KEYBOARD_LAYOUT_TRANSITION_EASING,
-}: {
-  readonly dialogHeight: string;
-  readonly fixedHeight?: boolean | undefined;
-  readonly keyboardTransitionEasing?: string | undefined;
-}): CSSProperties {
-  const dimension = fixedHeight ? "height" : "max-height";
-  const size = fixedHeight
-    ? { height: dialogHeight }
-    : { maxHeight: dialogHeight };
-
-  return {
-    ...size,
-    transition: `${dimension} ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ${keyboardTransitionEasing}`,
   };
 }
 
@@ -417,12 +342,31 @@ function FloatingCloseButton({
 function DragHandle({
   show,
   tabletModal,
+  onToggleHeight,
+  resizeLabel,
 }: {
   readonly show?: boolean | undefined;
   readonly tabletModal?: boolean | undefined;
+  readonly onToggleHeight?: (() => void) | undefined;
+  readonly resizeLabel?: string | undefined;
 }) {
   if (!show) {
     return null;
+  }
+
+  const gripClassName = "tw-h-1 tw-w-10 tw-rounded-full tw-bg-iron-700";
+  if (onToggleHeight) {
+    return (
+      <button
+        type="button"
+        data-mobile-dialog-resize-handle
+        aria-label={resizeLabel}
+        onClick={onToggleHeight}
+        className="tw-mx-auto tw-flex tw-h-6 tw-w-14 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+      >
+        <span className={gripClassName} />
+      </button>
+    );
   }
 
   return (
@@ -433,7 +377,7 @@ function DragHandle({
         tabletModal && "md:tw-hidden"
       )}
     >
-      <div className="tw-h-1 tw-w-10 tw-rounded-full tw-bg-iron-700" />
+      <div className={gripClassName} />
     </div>
   );
 }
@@ -441,6 +385,7 @@ function DragHandle({
 export default function MobileWrapperDialog({
   id,
   title,
+  subtitle,
   ariaLabel,
   isOpen,
   onClose,
@@ -452,6 +397,8 @@ export default function MobileWrapperDialog({
   noPadding,
   tall,
   fixedHeight,
+  expandableHeight = false,
+  scrollableContent = true,
   fitVisualViewport = true,
   avoidKeyboard = true,
   keyboardTransitionEasing,
@@ -470,12 +417,14 @@ export default function MobileWrapperDialog({
   showDragHandle,
   enableDragToClose,
   showHeaderCloseButton = true,
+  showCloseButton = true,
   showHeaderDivider,
   headerCloseButtonClassName,
   surfaceClassName,
   footer,
   titleClassName,
   focusTitleOnOpen = false,
+  initialFocusRef,
   backLabel,
   closeLabel,
   dismissible = true,
@@ -499,11 +448,21 @@ export default function MobileWrapperDialog({
   const isMobileLayoutViewport = useIsMobileLayoutViewport();
   const isTouchDevice = useIsTouchDevice();
   const titleRef = useRef<HTMLElement>(null);
+  const dialogInitialFocusRef =
+    initialFocusRef ?? (focusTitleOnOpen ? titleRef : undefined);
   const dialogRef = useRef<HTMLDivElement>(null);
   const [dialogMount, setDialogMount] = useState<HTMLSpanElement | null>(null);
   const resolvedBackLabel = backLabel ?? t(locale, "common.back");
   const resolvedCloseLabel = closeLabel ?? t(locale, "common.close");
   const canDismiss = dismissible && !busy;
+  const canResize =
+    expandableHeight && canDismiss && (enableDragToClose ?? true);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const expand = useCallback(() => setIsExpanded(true), []);
+  const toggleHeight = () => setIsExpanded((expanded) => !expanded);
+  const resizeLabel = isExpanded
+    ? "common.collapseSheet"
+    : "common.expandSheet";
   const {
     canDragToClose,
     dragOffset,
@@ -516,15 +475,11 @@ export default function MobileWrapperDialog({
     enableDragToClose,
     tabletModal,
     onClose,
+    onExpand: canResize && !isExpanded ? expand : undefined,
     onAfterLeave,
   });
 
   const bottomPadding = getBottomPadding(noPadding, footer);
-  const dialogHeight = getDialogHeight({
-    tall,
-    isCapacitor,
-  });
-
   const panelClassNames = getPanelClassNames({
     isIos,
     tabletModal,
@@ -534,12 +489,12 @@ export default function MobileWrapperDialog({
   const dragPanelClassNames = getDragPanelClassNames(canDragToClose);
   const hasDragHandle =
     showDragHandle ?? (dismissible && (enableDragToClose ?? true));
-  const showTouchDragHandle = hasDragHandle && isTouchDevice;
+  const shouldShowDragHandle = hasDragHandle && (isTouchDevice || canResize);
   const containerClassNames = getContainerClassNames(tabletModal, desktopAlign);
   const slideTransition = getSlideTransition(tabletModal);
   const panelStyle = getPanelStyle({
     canDragToClose,
-    dragOffset,
+    dragOffset: Math.max(0, dragOffset),
     isDragging,
   });
   const surfaceClassNames = getSurfaceClassNames({
@@ -547,22 +502,27 @@ export default function MobileWrapperDialog({
     allowOverflow,
     tabletModal,
   });
-  const contentClassNames = getContentClassNames({
+  const contentClassNames = getMobileDialogContentClassNames({
     allowOverflow,
     noPadding,
     showScrollbar,
-    hasDragHandle: showTouchDragHandle,
+    hasDragHandle: shouldShowDragHandle,
     tabletModal,
+    scrollableContent,
   });
-  const surfaceStyle = getSurfaceStyle({
-    dialogHeight,
+  const surfaceStyle = getMobileDialogSurfaceStyle({
+    tall,
+    isCapacitor,
     fixedHeight,
     keyboardTransitionEasing,
+    resize: canResize ? { isExpanded, dragOffset, isDragging } : undefined,
   });
   const showDesktopHeaderCloseButton =
-    dismissible && !!tabletModal && !showHeaderCloseButton;
-  const showFloatingCloseButton = dismissible && !showHeaderCloseButton;
-  const showInlineHeaderCloseButton = dismissible && !!showHeaderCloseButton;
+    dismissible && showCloseButton && !!tabletModal && !showHeaderCloseButton;
+  const showFloatingCloseButton =
+    dismissible && showCloseButton && !showHeaderCloseButton;
+  const showInlineHeaderCloseButton =
+    dismissible && showCloseButton && !!showHeaderCloseButton;
   const shouldHideOnDesktopHover =
     hideOnDesktopHover && !isMobileLayoutViewport && !isTouchDevice;
   const dialogOpen = isOpen && dialogMount !== null;
@@ -630,7 +590,7 @@ export default function MobileWrapperDialog({
   );
 
   useEffect(() => {
-    if (!dialogOpen || !focusTitleOnOpen) {
+    if (!dialogOpen || !focusTitleOnOpen || initialFocusRef) {
       return;
     }
 
@@ -639,7 +599,7 @@ export default function MobileWrapperDialog({
     });
 
     return () => globalThis.cancelAnimationFrame(frame);
-  }, [focusTitleOnOpen, dialogOpen, title]);
+  }, [focusTitleOnOpen, initialFocusRef, dialogOpen, title]);
 
   if (shouldHideOnDesktopHover) {
     return null;
@@ -675,7 +635,32 @@ export default function MobileWrapperDialog({
           }
         }}
         aria-label={ariaLabel}
-        {...(focusTitleOnOpen ? { initialFocus: titleRef } : {})}
+        onFocusCapture={(event) => {
+          // Touch dialogs default to container focus. Only an explicit content
+          // target opts back into field focus for a user-opened composer.
+          if (
+            !dialogOpen ||
+            !initialFocusRef ||
+            event.target !== event.currentTarget
+          )
+            return;
+          const container = event.currentTarget;
+          // Let the dialog finish its touch-device fallback focus first.
+          queueMicrotask(() => {
+            const target = initialFocusRef.current;
+            if (
+              container.isConnected &&
+              document.activeElement === container &&
+              target &&
+              container.contains(target)
+            ) {
+              target.focus({ preventScroll: true });
+            }
+          });
+        }}
+        {...(dialogInitialFocusRef
+          ? { initialFocus: dialogInitialFocusRef }
+          : {})}
       >
         <MobileDialogOverlay
           onBeforeLeave={onBeforeLeave}
@@ -697,18 +682,12 @@ export default function MobileWrapperDialog({
             <div
               ref={fitVisualViewport ? fitBrowserViewport : undefined}
               className={containerClassNames}
-              style={
-                {
-                  ...MOBILE_DIALOG_CONTAINER_STYLE,
-                  ...(keyboardTransitionEasing && {
-                    transition: `bottom ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ${keyboardTransitionEasing}`,
-                  }),
-                  "--mobile-wrapper-dialog-top-offset": `${desktopTopOffset}vh`,
-                  ...(!avoidKeyboard && {
-                    "--mobile-wrapper-dialog-keyboard-inset": "0px",
-                  }),
-                } as CSSProperties
-              }
+              style={getMobileDialogContainerStyle({
+                keyboardTransitionEasing,
+                desktopTopOffset,
+                canResize,
+                avoidKeyboard,
+              })}
             >
               <TransitionChild
                 as={Fragment}
@@ -729,7 +708,13 @@ export default function MobileWrapperDialog({
                       closeLabel={resolvedCloseLabel}
                       disabled={busy}
                     />
-                    <div className={surfaceClassNames} style={surfaceStyle}>
+                    <div
+                      className={clsx(
+                        surfaceClassNames,
+                        canResize && "motion-reduce:!tw-transition-none"
+                      )}
+                      style={surfaceStyle}
+                    >
                       <div
                         ref={trackFocusedField}
                         data-keyboard-scroll-container
@@ -748,11 +733,18 @@ export default function MobileWrapperDialog({
                           }
                         >
                           <DragHandle
-                            show={showTouchDragHandle}
+                            show={shouldShowDragHandle}
                             tabletModal={tabletModal}
+                            onToggleHeight={
+                              canResize ? toggleHeight : undefined
+                            }
+                            resizeLabel={
+                              canResize ? t(locale, resizeLabel) : undefined
+                            }
                           />
                           <MobileWrapperDialogHeader
                             title={title}
+                            subtitle={subtitle}
                             showDesktopCloseButton={
                               showDesktopHeaderCloseButton
                             }

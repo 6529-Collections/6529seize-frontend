@@ -198,6 +198,9 @@ async function createDevice(ctx: EngineContext): Promise<StoredDevice> {
     : null;
   const device: StoredDevice = {
     ...(trust ? { trust } : {}),
+    ...(previous?.retired && previous.conversationPins
+      ? { conversationPins: previous.conversationPins }
+      : {}),
     profileId: ctx.profileId,
     deviceKey,
     wallet: grant.wallet,
@@ -380,7 +383,7 @@ async function discardPendingDevice(
   ctx.device = null;
   ctx.lastState = null;
   const groups = await ctx.storage.listGroups(ctx.profileId);
-  if (groups.length === 0 && !device.trust) {
+  if (groups.length === 0 && !device.trust && !device.conversationPins) {
     await clearStoredState(ctx);
     return;
   }

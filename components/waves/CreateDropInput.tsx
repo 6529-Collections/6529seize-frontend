@@ -10,6 +10,7 @@ import type { FocusEvent } from "react";
 import {
   forwardRef,
   useImperativeHandle,
+  useLayoutEffect,
   useCallback,
   useEffect,
   useId,
@@ -78,9 +79,25 @@ interface EditorCommandsPluginHandles {
 
 const EditorCommandsPlugin = forwardRef<
   EditorCommandsPluginHandles,
-  { readonly isApp: boolean }
->(({ isApp }, ref) => {
+  {
+    readonly isApp: boolean;
+    readonly autoFocus: boolean;
+    readonly onAutoFocusRoot?: ((root: HTMLElement | null) => void) | undefined;
+  }
+>(({ isApp, autoFocus, onAutoFocusRoot }, ref) => {
   const [editor] = useLexicalComposerContext();
+  const hasAutoFocused = useRef(false);
+
+  useLayoutEffect(() => {
+    if (!autoFocus) return;
+    return editor.registerRootListener((root) => {
+      onAutoFocusRoot?.(root);
+      if (!root || hasAutoFocused.current) return;
+      hasAutoFocused.current = true;
+      root.focus({ preventScroll: true });
+      editor.focus();
+    });
+  }, [autoFocus, onAutoFocusRoot, editor]);
 
   useImperativeHandle(
     ref,
@@ -172,6 +189,8 @@ function InitialMarkdownPlugin({
 const CreateDropInput = forwardRef<
   CreateDropInputHandles,
   {
+    readonly autoFocus?: boolean | undefined;
+    readonly onAutoFocusRoot?: ((root: HTMLElement | null) => void) | undefined;
     readonly waveId: string;
     readonly editorState: EditorState | null;
     /**
@@ -209,6 +228,8 @@ const CreateDropInput = forwardRef<
 >(
   (
     {
+      autoFocus = false,
+      onAutoFocusRoot,
       waveId,
       editorState,
       initialEditorStateJson,
@@ -410,6 +431,7 @@ const CreateDropInput = forwardRef<
             onEditorState={onEditorStateChange}
             transformers={CREATE_DROP_MARKDOWN_SHORTCUT_TRANSFORMERS}
             inputProps={{
+              ...(autoFocus ? { "data-autofocus": "" } : {}),
               ariaDescribedBy: showValidationError
                 ? validationHelperTextId
                 : undefined,
@@ -445,7 +467,12 @@ const CreateDropInput = forwardRef<
               onAttachmentFiles={onAttachmentFiles}
             />
             <ClearEditorPlugin ref={clearEditorRef} />
-            <EditorCommandsPlugin ref={editorCommandsRef} isApp={isCapacitor} />
+            <EditorCommandsPlugin
+              ref={editorCommandsRef}
+              isApp={isCapacitor}
+              autoFocus={autoFocus}
+              onAutoFocusRoot={onAutoFocusRoot}
+            />
             <EditablePlugin
               editable={preserveKeyboardOnSubmit || !submitting}
             />

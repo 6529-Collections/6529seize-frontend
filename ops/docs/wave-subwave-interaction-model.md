@@ -103,8 +103,9 @@ API returns enough parent-container metadata to do so.
 ## Unread And Activity
 
 - Root waves and subwaves carry independent unread counts.
-- Parent rows show the total unread count across visible subwaves that the
-  viewer follows and has not muted. Unfollowed subwaves do not contribute.
+- A small blue dot beside the collapsed chevron signals unread subwaves. Hover
+  over the chevron for the total across visible subwaves that the viewer follows
+  and has not muted. Unfollowed subwaves do not contribute.
 - The aggregate excludes the viewer's own drops and drops from muted profiles.
   Muting the parent or an individual subwave suppresses the applicable unread
   presentation.
@@ -136,7 +137,9 @@ API returns enough parent-container metadata to do so.
 
 ## Sidebar Expansion
 
-- The expand control is shown only on root rows with subwaves.
+- A chevron before a root wave's picture expands or collapses its subwaves.
+- Opening a parent from the sidebar also expands the subwave list.
+- Clicking the chevron changes the list without switching the open wave.
 - The control points right when child rows are not visible.
 - The control shows a loading state while child rows are being fetched.
 - The control points down only when child rows are visible.
@@ -144,9 +147,8 @@ API returns enough parent-container metadata to do so.
 - A direct-linked active subwave can temporarily surface the visible parent
   overview returned with the active-wave response, even when the parent is not
   followed, pinned, or present in the current sidebar page.
-- The active route overrides a previously persisted collapse for that parent,
-  reveals the parent while children load, and then reveals and highlights the
-  exact subwave row.
+- Opening a subwave reveals its parent while children load and highlights the
+  subwave row. You can collapse the list with the subwave still open.
 - In the activity section, the active route's parent tree stays ahead of the
   timestamp-sorted roots. Loading another page cannot insert roots above the
   expanded tree, so every sibling remains reachable without scroll chasing.

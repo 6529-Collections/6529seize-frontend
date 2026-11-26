@@ -13,6 +13,7 @@ import {
   normalizeWaveCustomRules,
 } from "@/helpers/waves/wave-metadata.helpers";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { useWaveMetadata } from "@/hooks/waves/useWaveMetadata";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -123,7 +124,9 @@ export default function WaveCustomRules({
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const isConfiguration = display === "configuration";
+  const wavesWritesPaused = useWavesWritesPaused();
   const canEdit =
+    !wavesWritesPaused &&
     !metadataQuery.isLoading &&
     !metadataQuery.isError &&
     canEditWave({ connectedProfile, activeProfileProxy, wave });
@@ -229,6 +232,8 @@ export default function WaveCustomRules({
   return (
     <WaveSettingRow
       canEdit={canEdit}
+      dirty={draft !== getWaveCustomRulesMetadataDraft(metadata)}
+      busy={isSaving}
       editIcon={isConfiguration ? "gear" : "pencil"}
       editLabel={t(locale, "waves.create.rules.guidelinesSettingsEditLabel")}
       label={

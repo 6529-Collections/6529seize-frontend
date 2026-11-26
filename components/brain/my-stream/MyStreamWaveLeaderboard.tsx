@@ -85,7 +85,7 @@ const isWaveLeaderboardSortPreference = (
   (isCurationWave && value === WaveDropsLeaderboardSort.PRICE);
 
 const stickyLeaderboardControlsClassName =
-  "tw-sticky tw-top-0 tw-z-30 tw-flex-none tw-bg-black tw-py-4";
+  "tw-sticky tw-top-0 tw-z-30 tw-flex-none tw-bg-black tw-py-4 max-md:tw-static max-md:tw-z-auto";
 const staticLeaderboardControlsClassName = "tw-flex-none tw-bg-black tw-py-4";
 
 interface LeaderboardControlsFrameProps {
@@ -110,7 +110,7 @@ const LeaderboardControlsFrame: React.FC<LeaderboardControlsFrameProps> = ({
       // Cover the full scroll viewport while the controls share a flex row.
       <span
         aria-hidden="true"
-        className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-top-0 tw-z-0 tw-w-[100cqw] tw-bg-black"
+        className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-top-0 tw-z-0 tw-hidden tw-w-[100cqw] tw-bg-black md:tw-block"
       />
     )}
     <div className="tw-relative tw-z-10">{children}</div>
@@ -567,7 +567,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
           />
         )}
 
-        {/* Sticky tabs/filters section */}
+        {/* Desktop controls can follow the list while it scrolls. */}
         {shouldDelayApprovalControlsSticky ? (
           <ApproveListStickyLeaderboardControls
             key={`${wave.id}:list`}

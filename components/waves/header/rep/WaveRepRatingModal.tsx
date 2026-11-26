@@ -15,15 +15,32 @@ import {
 } from "@/helpers/Helpers";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import {
+  chainWriteDetails,
+  chainWriteFailure,
+} from "@/components/chain-waves/chainWavesErrorMessage";
+import { chainIdentityPointer } from "@/components/chain-waves/chainIdentityPointer";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useWaveRepAllocation } from "@/hooks/useWaveRepAllocation";
+import {
+  useChainWavesActive,
+  useWavesWritesPaused,
+} from "@/hooks/useWavesMovePhase";
+import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWriters";
+import { isRepCategoryName } from "@/lib/chain/codec/rules";
+import { scheduleIndexRefresh } from "@/lib/chain-waves/optimistic";
+import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useContext, useEffect, useId, useRef, useState } from "react";
 
 const WAVE_REP_CATEGORY_PATTERN = /^[\p{L}\p{N}?!,.'() ]{1,100}$/u;
 const CATEGORY_SETTLE_DELAY_MS = 350;
+
+const categoryErrorFor = (category: string): string =>
+  WAVE_REP_CATEGORY_PATTERN.test(category)
+    ? "On the 6529 Network a category uses only letters A-Z, numbers, single spaces and & ' . - _, and starts with a letter or number."
+    : "Use 1-100 letters, numbers, spaces, apostrophes, or basic punctuation.";
 const WAVE_REP_MODAL_LOCALE = DEFAULT_LOCALE;
 
 function getInitialCategory(wave: ApiWave): string {
@@ -67,7 +84,12 @@ export default function WaveRepRatingModal({
     }
   }, [debouncedCategory]);
 
-  const categoryValid = WAVE_REP_CATEGORY_PATTERN.test(trimmedCategory);
+  // On the 6529 Network a category name is ASCII letters, digits, spaces
+  // and & ' . - _, starting with a letter or digit.
+  const chainActive = useChainWavesActive();
+  const categoryValid =
+    WAVE_REP_CATEGORY_PATTERN.test(trimmedCategory) &&
+    (!chainActive || isRepCategoryName(trimmedCategory));
   const categorySettled = trimmedCategory === settledCategory;
   const allocationReady = categoryValid && categorySettled && !isLoading;
 
@@ -93,13 +115,25 @@ export default function WaveRepRatingModal({
   const amountValid = amount >= minMaxValues.min && amount <= minMaxValues.max;
   const haveChanged = amount !== currentRating;
   const isProxyMode = Boolean(activeProfileProxy);
+  // Wave REP moves to the 6529 Network: the allocation stays readable.
+  const wavesWritesPaused = useWavesWritesPaused("waveRep");
   const isSaveDisabled =
-    isProxyMode || mutating || !allocationReady || !amountValid || !haveChanged;
+    wavesWritesPaused ||
+    isProxyMode ||
+    mutating ||
+    !allocationReady ||
+    !amountValid ||
+    !haveChanged;
   const canRemoveRating =
-    !isProxyMode && !mutating && allocationReady && currentRating !== 0;
+    !wavesWritesPaused &&
+    !isProxyMode &&
+    !mutating &&
+    allocationReady &&
+    currentRating !== 0;
   const hasNoAvailableWaveRep =
     allocationReady && availableWaveRep <= 0 && currentRating === 0;
 
+  const chainWriters = useChainWavesWriters();
   const mutation = useMutation({
     mutationFn: async ({
       amount,
@@ -108,57 +142,71 @@ export default function WaveRepRatingModal({
       readonly amount: number;
       readonly category: string;
     }) =>
-      await commonApiPost<ApiChangeWaveRepRating, void>({
-        endpoint: `waves/${wave.id}/rep/rating`,
-        body: {
-          amount,
-          category,
-        },
-      }),
+      chainWriters
+        ? await chainWriters.waveRating({ waveId: wave.id, category, amount })
+        : await commonApiPost<ApiChangeWaveRepRating, void>({
+            endpoint: `waves/${wave.id}/rep/rating`,
+            body: {
+              amount,
+              category,
+            },
+          }),
     onSuccess: () => {
       setToast({
         message: "Wave REP updated.",
         type: "success",
       });
-      queryClient.invalidateQueries({
-        queryKey: [QueryKey.WAVE_REP_RATING],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [QueryKey.WAVE_REP_CREDIT],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [QueryKey.WAVE_REP_OVERVIEW],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [QueryKey.WAVE_REP_CATEGORIES],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [QueryKey.WAVE_REP_CATEGORY_CONTRIBUTORS],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [QueryKey.WAVE_REP_LOGS],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [QueryKey.WAVE],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [QueryKey.WAVES_V2],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [QueryKey.WAVE_SUBWAVES],
-      });
+      const refresh = () =>
+        Promise.all(
+          [
+            QueryKey.WAVE_REP_RATING,
+            QueryKey.WAVE_REP_CREDIT,
+            QueryKey.WAVE_REP_OVERVIEW,
+            QueryKey.WAVE_REP_CATEGORIES,
+            QueryKey.WAVE_REP_CATEGORY_CONTRIBUTORS,
+            QueryKey.WAVE_REP_LOGS,
+            QueryKey.WAVE,
+            QueryKey.WAVES_V2,
+            QueryKey.WAVE_SUBWAVES,
+          ].map((key) => queryClient.invalidateQueries({ queryKey: [key] }))
+        );
+      // On the 6529 Network, 6529.io's index shows the change once it has
+      // read the block; a refetch now would show the old allocation.
+      if (chainWriters) {
+        scheduleIndexRefresh(refresh);
+      } else {
+        refresh().catch(() => undefined);
+      }
     },
     onError: (error) => {
+      // Cancelled at the wallet prompt: nothing was sent.
+      if (isUserRejectedSigningError(error)) {
+        return;
+      }
       setToast({
         type: "error",
         title: "Couldn't update Wave REP.",
-        description: "Please try again.",
-        details: getToastErrorDetails(error),
+        description:
+          chainIdentityPointer(DEFAULT_LOCALE, error) ??
+          chainWriteFailure(
+            DEFAULT_LOCALE,
+            error,
+            "Please try again.",
+            "rating"
+          ),
+        details: chainWriteDetails(error),
       });
     },
   });
 
   const saveRating = async (nextAmount: number) => {
+    if (wavesWritesPaused) {
+      setToast({
+        message: t(WAVE_REP_MODAL_LOCALE, "wavesMove.paused"),
+        type: "error",
+      });
+      return;
+    }
     if (isProxyMode) {
       setToast({
         message: "Wave REP can't be changed while acting as proxy.",
@@ -180,7 +228,10 @@ export default function WaveRepRatingModal({
     let mutationStarted = false;
     let shouldClose = false;
     try {
-      const { success } = await requestAuth();
+      // On the 6529 Network the rating carries its own signature.
+      const { success } = chainWriters
+        ? { success: true }
+        : await requestAuth();
       if (!success) {
         setToast({
           message: "Log in to continue.",
@@ -199,8 +250,13 @@ export default function WaveRepRatingModal({
         setToast({
           type: "error",
           title: "Couldn't verify your session.",
-          description: "Please try again.",
-          details: getToastErrorDetails(error),
+          description: chainWriteFailure(
+            DEFAULT_LOCALE,
+            error,
+            "Please try again.",
+            "rating"
+          ),
+          details: chainWriteDetails(error),
         });
       }
     } finally {
@@ -283,9 +339,7 @@ export default function WaveRepRatingModal({
                 categoryValid ? "tw-sr-only" : ""
               }`}
             >
-              {categoryValid
-                ? ""
-                : "Use 1-100 letters, numbers, spaces, apostrophes, or basic punctuation."}
+              {categoryValid ? "" : categoryErrorFor(trimmedCategory)}
             </p>
           </div>
 
@@ -322,6 +376,14 @@ export default function WaveRepRatingModal({
                 className="tw-mb-0 tw-mt-3 tw-rounded-lg tw-border tw-border-solid tw-border-amber-500/30 tw-bg-amber-500/10 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-amber-200"
               >
                 {t(WAVE_REP_MODAL_LOCALE, "waves.rep.modal.noAvailableCredit")}
+              </p>
+            )}
+            {wavesWritesPaused && (
+              <p
+                role="status"
+                className="tw-mb-0 tw-mt-3 tw-text-sm tw-text-iron-400"
+              >
+                {t(WAVE_REP_MODAL_LOCALE, "wavesMove.paused")}
               </p>
             )}
           </div>

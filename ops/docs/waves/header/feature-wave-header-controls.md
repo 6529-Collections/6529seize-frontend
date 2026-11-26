@@ -15,7 +15,7 @@ Users can:
 - Use the bell notification menu after following
 - Mute or unmute waves from the speaker-muted control
 - Open wave description from the info button
-- Open and close followers from the `Joined` count
+- Open Members from the `Joined` count on phones; desktop keeps its follower view
 - Pin or unpin the wave
 - Open the wave name link
 - Rename the wave and update the picture (when edit-eligible on non-DM waves)
@@ -33,28 +33,26 @@ the wave list, active thread header, right-sidebar `About`, and mobile `About`.
 These surfaces show the tile even when Announcements has a saved wave picture.
 
 In non-DM `About` headers, available Score, Quality, Hot, and Wave REP statistics
-use up to two compact columns, with each label beside its icon and value.
+use up to two compact columns, with labels and values aligned across each row.
+The underlined Score label opens score details.
 
 ## Entry Points
 
 1. Open an active wave, select the `Show right sidebar` icon in the desktop/tablet
-   header or `Wave details` on compact web, then select `About`.
+   header or `Wave details` in `More wave actions` on phones, then select `About`.
 2. Use the top-right control row (`Join` / `Joined`, notification controls).
 3. Use header controls near the wave title, avatar, and metadata.
 4. Open the owner options menu (`⋮`) when available.
 
-On phones, select the wave name to open `About`. Swipe down from the sheet's
-handle or header, use `Close`, tap outside, press Escape, or use the device’s
-Back action to return to the thread.
-The main `About` sheet has a Close control; Back controls inside subviews return
-to their parent view.
+On phones, select the wave name to open `About` as a full-screen
+view sliding in from the right. Use the top-left Back chevron, swipe right,
+press Escape, or use the device's Back action to return to the thread with its
+selected section and scroll position preserved. Vertical gestures scroll the
+information content. A short or cancelled horizontal swipe keeps the view open.
+The header shows `About` and the wave name. It has no Close control or drag
+handle. Back inside an editor returns to its parent information view.
 
 ## Conversation Header
-
-In the native app's compact header, the parent-wave link sits directly above
-the wave name beside the avatar. Long names truncate within the available space
-so they do not overlap the header actions. A hidden or absent description leaves
-no extra row in this identity block.
 
 At desktop and tablet widths (768px and above), the conversation header groups
 its avatar, parent-wave link, name, and a short one-line description preview into a compact
@@ -74,21 +72,30 @@ An active temporary time override keeps its zone indicator and undo control
 visible beside the main actions. Columns of 640–767px keep the description teaser
 with compact submission icons; wider columns restore the submission labels.
 
-On mobile web, the name stays centered beside the avatar and the available score
-stays visible. Narrow headers show the score as a small badge on the avatar,
-leaving more room for the name. `Join` keeps its white surface, text label,
-accessible name and plus icon. Search and `Wave details` stay directly visible
-beside `More wave actions`, with one-click access. The header remains on one row
-without horizontal scrolling. The avatar and title retain their regular sizes;
-very narrow columns use tighter utility spacing. Direct messages do not show a
-Wave Score.
+On phones, the conversation has one top bar with Back, the wave avatar and
+available score tucked beneath the avatar, the wave name, `Join` when available, and
+`More wave actions`. The wave name uses up to two lines, with an ellipsis only
+when it exceeds the second line. Tapping the avatar or name opens details. The
+header score has no phone popover; tap Score in details statistics for its
+breakdown and Learn more. The site menu and global search are on the Waves list.
+`More wave actions` stays open while the channel finishes loading its details.
+The sheet groups actions with thin dividers:
 
-In narrow Main Stage headers, `How to Submit` is inside `More wave actions` and
-opens the existing nomination and eligibility guidance in a sheet. Eligible
-submission actions remain directly visible. Wider headers retain the direct
-submission-help lock. Selecting the Wave name still opens `About`.
+1. Wave details, Search messages, and the existing sharing action.
+2. The available submission or `How to Submit` control, `Show times in UTC for now`,
+   and other existing view controls. The UTC action shows a checkmark when UTC is active;
+   selecting it again restores the saved time setting.
+3. `New subwave`, for eligible administrators.
 
-The top-right controls start with `Join` when the viewer has not joined the
+Creation keeps its existing permission checks and save flows. `+ Curation` at the
+end of the phone wave tab row opens the Create curation sheet directly for eligible
+administrators. New curation and New decision are not in More wave actions.
+New subwave is not repeated in the subwave bar. New decision stays in the Decisions
+view beside its filter chips as `+ Decision`. Both create actions use the shared
+text-action style at 13px on phones and align to the same right edge. Direct
+messages keep their own header and do not show Wave Score.
+
+On desktop and tablets the top-right controls start with `Join` when the viewer has not joined the
 wave, then Add REP for eligible viewers, followed by the
 create/submit action when available, search, `More wave actions`,
 and the right-sidebar toggle. Gallery/chat eligibility and the original action
@@ -105,17 +112,19 @@ the same hover-label styling as Profile Waves Feed.
 
 Unavailable submission actions show a lock icon at every width. Hover, focus,
 or select the lock to read the full restriction reason. The Memes `How to Submit`
-helper keeps its label when space allows and opens nomination guidance. In a
-narrow center column and on phones it uses a transparent, borderless lock icon,
-with `How to Submit` retained as its accessible name. The native app's nomination
-helper uses the same borderless treatment. Its lock matches Search and More's
-resting icon color and brightens on hover, since it opens guidance rather than
-acting as a disabled button. Other restricted submission controls
-keep their bordered surfaces.
-On the web, the Main Stage submit/help control sits before message search.
-Compact web keeps Search directly visible before More; narrow Main Stage
-headers move submission help into More.
+helper keeps its label when space allows and opens nomination guidance. On
+phones, choose `How to Submit` in `More wave actions`. The actions sheet closes
+before a bottom sheet opens with an X close control. Both Main Stage nomination
+guidance and other submission restrictions use this pattern, retaining their
+eligibility details and actions.
+On desktop and tablets, the Main Stage submit/help control sits before message
+search. A narrow center column uses a compact lock with the original
+accessible name. Other restricted controls keep their bordered surfaces.
 Add/Edit REP sits beside `Join` when both controls are shown.
+
+On supported phone wave channels, `More wave actions` also contains the
+`Boosted drops` display options: `Expanded`, `Compact`, and `Hidden`. The app
+and mobile web use the same device-local preference and mark the selected mode.
 
 ### Join Call to Action
 
@@ -173,18 +182,18 @@ Add/Edit REP sits beside `Join` when both controls are shown.
     links open `/waves/{waveId}`.
 11. Renaming the wave leaves decision titles and rules unchanged.
     If edit-eligible on a non-DM wave, select the name or its pencil in About to
-    rename; use the picture pencil to update the image. `Rename wave` fits its
-    name field and Save action inside the same
-    sheet, without the full About view's empty space. `Back`
-    returns to `About` and discards an unsaved name; `Close` dismisses the whole
-    panel. `Save` returns to `About` after the name is saved.
-    Picture editing also uses the same panel, with a compact upload form and one
-    `Close` control. `Back` discards a selected image and returns to About;
-    uploading and saving retain the existing image validation and update flow.
+    rename; use the picture pencil to update the image. `Rename wave` keeps its
+    name field and Save action in the same information view. `Back` returns to
+    `About` and discards an unsaved name. `Save` returns to `About` after the
+    name is saved. Picture editing also uses the same panel. `Back` discards a
+    selected image and returns to About; uploading and saving retain the existing
+    image validation and update flow. Tablet overlays also offer `Close` to
+    dismiss the whole panel.
 12. If author, open `⋮` for profile-wave actions and `Delete`. In the mobile
     sheet or tablet overlay, `Wave options` opens inside the same panel. The
-    mobile sheet fits the available actions and expands back to About's full view. Use
-    `Back` to return to `About`; `Close` dismisses the whole panel.
+    phone view stays full-screen. Use `Back` to return to `About`, then `Back`
+    again to return to the thread. Tablet overlays also offer `Close` to dismiss
+    the whole panel.
 13. For `Delete`, confirm in modal. Success redirects to `/waves`.
 
 ## Common Scenarios
@@ -193,9 +202,9 @@ Add/Edit REP sits beside `Join` when both controls are shown.
 - Open followers, then use `Back` or `Joined` again to return to `About`.
 - Pin active waves for faster return.
 - Rename a wave without leaving the thread (`Save` stays disabled until the name changes).
-- On phones, rename keeps one sheet with one Close control. Its Back control
-  returns to `About`; swiping down from the header dismisses the sheet.
-- Mobile Wave REP and picture editors use Close or a downward header swipe to
+- On phones, rename and picture editing stay in the full-screen information
+  view. Back or a rightward swipe returns to `About`.
+- Standalone mobile Wave REP editors use Close or a downward header swipe to
   dismiss; their desktop dialogs also offer Cancel.
 - On direct-message waves, the name link stays available but rename/picture
   pencils stay hidden.

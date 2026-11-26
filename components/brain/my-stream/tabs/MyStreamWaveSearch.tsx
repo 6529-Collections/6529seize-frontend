@@ -18,6 +18,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { isCompetitionPathname } from "@/helpers/competition.helpers";
 import { getWavePathRoute } from "@/helpers/navigation.helpers";
 import { MyStreamWaveTab } from "@/types/waves.types";
+import { CompactWaveActionsProvider } from "./CompactWaveActions";
 
 const WaveSearchContext = createContext<{
   open: () => void;
@@ -79,7 +80,9 @@ export function MyStreamWaveSearch({
 
   return (
     <WaveSearchContext.Provider value={searchContext}>
-      {children}
+      <CompactWaveActionsProvider returnFocusRef={trigger}>
+        {children}
+      </CompactWaveActionsProvider>
       <LazyWaveDropsSearchModal
         isOpen={openSearch === "wave"}
         onClose={closeSearch}

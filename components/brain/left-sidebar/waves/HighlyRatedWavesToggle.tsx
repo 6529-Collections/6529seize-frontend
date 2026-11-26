@@ -1,5 +1,6 @@
 "use client";
 
+import "@/i18n/namespaces/wave-sidebar";
 import type { MouseEvent } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
@@ -96,6 +97,7 @@ export function buildHighlyRatedWavePreviewItems({
   handleHover,
   hasTouchScreen,
   isDirectMessage,
+  onOpen,
   setActiveWave,
   waves,
 }: {
@@ -105,6 +107,7 @@ export function buildHighlyRatedWavePreviewItems({
   readonly handleHover: (waveId: string) => void;
   readonly hasTouchScreen: boolean;
   readonly isDirectMessage: boolean;
+  readonly onOpen: (waveId: string) => void;
   readonly setActiveWave: SetActiveWaveForPreview;
   readonly waves: readonly MinimalWave[];
 }): HighlyRatedWavePreviewItem[] {
@@ -120,6 +123,9 @@ export function buildHighlyRatedWavePreviewItems({
       event.preventDefault();
       handleHover(wave.id);
       const nextWaveId = wave.id === activeWaveId ? null : wave.id;
+      if (nextWaveId !== null) {
+        onOpen(nextWaveId);
+      }
       setActiveWave(nextWaveId, {
         isDirectMessage,
         divider: nextWaveId === null ? null : wave.firstUnreadDropSerialNo,
@@ -328,7 +334,7 @@ function HighlyRatedWavePreviewLink({
 
   return (
     <WaveScoreSummaryHoverCard
-      disabled={scoreDetailsDisabled}
+      disabled={scoreDetailsDisabled || isTouchPreview}
       closeOnContentClick
       stopClickPropagation
       summaryHeader={{

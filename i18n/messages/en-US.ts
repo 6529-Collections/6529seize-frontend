@@ -43,10 +43,12 @@ import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.en-US
 import pageMetadataMessages from "@/i18n/messages/pageMetadata.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
 import utcScheduleMessages from "@/i18n/messages/utcSchedule.en-US.json";
+import identityMoveMessages from "@/i18n/messages/identityMove.en-US.json";
 import displayTimeZoneMessages from "@/i18n/messages/displayTimeZone.en-US.json";
 import shareDropsImageMessages from "@/i18n/messages/shareDropsImage.en-US.json";
 import worldTimeZonesMessages from "@/i18n/messages/worldTimeZones.en-US.json";
 import wavesRightPanelMessages from "@/i18n/messages/wavesRightPanel.en-US.json";
+import wavesMoveMessages from "@/i18n/messages/wavesMove.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-connect";
 import { DEVICES_SECURITY_MESSAGES } from "@/i18n/messages/devices-security";
@@ -170,7 +172,7 @@ const USER_COLLECTED_STATS_MESSAGES = namespaceMessages(
 
 const USER_BRAIN_SIDEBAR_MESSAGES = objectMessages("user.brain.sidebar", {
   createdHeading: "Created Waves",
-  createdMobileHeading: "Created",
+  createdMobileHeading: "Created waves",
   recentlyActiveHeading: "Recently Active In",
   lastPost: "Last post {time}",
   noPostsByProfile: "No posts by this profile",
@@ -534,6 +536,7 @@ const WAVE_NAVIGATION_MESSAGES = objectMessages("wave.navigation", {
   loadingSection: "Loading section…",
   about: "About",
   waveSections: "Wave sections",
+  more: "More",
   appSections: "App sections",
   loadingSections: "Loading wave sections",
   fallbackCuration: "Curation",
@@ -672,6 +675,8 @@ const MEMES_SUBMISSION_MESSAGES = objectMessages("memes.submission", {
     "Read-only preview of how your submission may appear in different views.",
   "additionalInfo.description":
     "Complete the following details for distribution and storytelling purposes.",
+  "documentation.notLinked":
+    "Your notes aren't linked to this entry. Find them under My artwork documentation.",
 } as const);
 
 const MEMES_WAVE_FOOTER_MESSAGES = objectMessages("memes.waveFooter", {
@@ -983,6 +988,8 @@ const WAVE_MY_VOTES_MESSAGES = objectMessages("waves.myVotes", {
   votesGivenNow: "Votes given now",
   projectedAtDecision: "Projected vote count at result time",
   yourVotes: "Your votes",
+  yourVotesInCredit: "Your votes in {credit}",
+  maxRating: "{label} {value}",
   inCredit: "in {credit}",
   vote: "Vote",
   submitVote: "Submit vote",
@@ -993,6 +1000,8 @@ const WAVE_MY_VOTES_MESSAGES = objectMessages("waves.myVotes", {
   "limit.maximum": "{label} is {value} {credit}.",
   "limit.minimum": "Minimum is {value} {credit}.",
   selectAll: "Select all",
+  select: "Select",
+  doneSelecting: "Done",
   deselectAll: "Deselect all",
   resetVotes: "Reset votes",
   resetting: "Resetting…",
@@ -1479,67 +1488,17 @@ const FOLLOWERS_MESSAGES = objectMessages("followers", {
   "profile.avatarAlt": "{handle}'s profile image",
 } as const);
 
-const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
-  "pinControl.pinTooltip": "Pin",
-  "pinControl.unpinTooltip": "Unpin",
-  "pinControl.pinAriaLabel": "Pin wave",
-  "pinControl.unpinAriaLabel": "Unpin wave",
-  "pinControl.pinErrorTitle": "Couldn't pin this wave.",
-  "pinControl.unpinErrorTitle": "Couldn't unpin this wave.",
-  "pinControl.retryDescription": PLEASE_TRY_AGAIN,
-  "pinControl.limitMessage": "Maximum {count} pinned waves allowed",
-  "pinControl.limitTooltip":
-    "Max {count} pinned waves. Unpin another wave first.",
-  "pinControl.viewerChanged": "The active profile changed. Please try again.",
-  dragInstructions:
-    "While focused on the wave, press Space to pick it up. Use the arrow keys to move it, Space to drop, or Escape to cancel.",
-  dragStarted: "Picked up wave.",
-  dragPosition: "Position {position}.",
-  dragCancelled: "Reordering cancelled.",
-  pinsRetryLabel: "Retry loading pinned waves",
-  pinOrderSaved: "Pinned wave order saved.",
-  pinOrderSaveError: "Couldn’t save the pinned wave order. Please try again.",
-  pinsLoadError: "Couldn’t load pinned waves.",
-  highlyRated: "Worth Checking Out",
-  highlyRatedInfoTooltip: "Highly rated waves you don’t follow yet.",
-  "highlyRatedPreviewOpenAriaLabel.none": "Open {waveName}",
-  "highlyRatedPreviewOpenAriaLabel.withScore": "Open {waveName}, score {score}",
-  highlyRatedPreviewScore: "Score {score}",
-  pinned: "Pinned",
-  allWaves: "All Waves",
-  all: "All",
-  filterAriaLabel: "Wave list filter",
-  filterAll: "All",
-  filterJoined: "Joined",
-  joinedEmptyMessage: "No joined waves to display",
-  joinedLoadError: "Some joined waves could not be loaded.",
-  joinedRetry: "Retry",
-  joinedRetryLabel: "Retry loading joined waves",
-  joinedLoadMore: "Load more joined waves",
-  allLoadError: "Some waves could not be loaded.",
-  allRetryLabel: "Retry loading all waves",
-  allLoadMore: "Load more waves",
-  announcementWavesAriaLabel: "Announcement waves",
-  highlyRatedAriaLabel: "Worth checking out waves",
-  pinnedAriaLabel: "Pinned waves",
-  followingListAriaLabel: "Following waves list",
-  allRecentActivityAriaLabel: "All recent waves list",
-  allQualityRankedAriaLabel: "All quality-ranked waves list",
-  directMessagesAriaLabel: "Direct message conversations",
-  expandControlExpandAriaLabel: "Expand {waveName} subwaves",
-  expandControlCollapseAriaLabel: "Collapse {waveName} subwaves",
-  expandControlLoadingAriaLabel: "Loading {waveName} subwaves",
-  subwavesToggleView: "View subwaves",
-  subwavesToggleViewCountOne: "View {count} subwave",
-  subwavesToggleViewCountMany: "View {count} subwaves",
-  subwavesToggleHide: "Hide subwaves",
-  subwavesToggleLoading: "Loading subwaves",
-  subwavesToggleUnreadBadge: "{count} new",
-  subwavesToggleViewAriaLabel: "View {waveName} subwaves",
-  subwavesToggleViewCountOneAriaLabel: "View {count} subwave for {waveName}",
-  subwavesToggleViewCountManyAriaLabel: "View {count} subwaves for {waveName}",
-  subwavesToggleHideAriaLabel: "Hide {waveName} subwaves",
-  subwavesToggleLoadingAriaLabel: "Loading {waveName} subwaves",
+const PROFILE_FOLLOW_MESSAGES = objectMessages("profile.follow", {
+  sendDirectMessage: "Send direct message",
+  followBack: "Follow back",
+  mutualStatus: "You follow each other",
+  unfollow: "Unfollow",
+  unblock: "Unblock",
+  unblockProfile: "Unblock {handle}",
+  "error.follow": "Couldn't follow this profile.",
+  "error.unfollow": "Couldn't unfollow this profile.",
+  "error.authenticate": "Couldn't verify your sign-in.",
+  "error.retry": "Please try again.",
 } as const);
 
 const QUICK_DM_MESSAGES = objectMessages("quickDm", {
@@ -1667,6 +1626,25 @@ const WAVE_JOIN_MESSAGES = objectMessages("waves.join", {
 } as const);
 
 const WAVE_DROP_ELIGIBILITY_MESSAGES = objectMessages("waves.dropEligibility", {
+  howToSubmit: "How to Submit",
+  closed: "Submissions Closed",
+  openSoon: "Submissions Open Soon",
+  limitReached: "Submission Limit Reached",
+  unavailable: "Submission Unavailable",
+  closedAt: "Submissions closed on {date}",
+  closedReason: "Submissions are closed",
+  opensAt: "Submissions open on {date}",
+  opensSoonReason: "Submissions will open soon",
+  limitOneReason:
+    "You have already submitted the maximum allowed (1 submission)",
+  limitManyReason:
+    "You have already submitted the maximum allowed ({count} submissions)",
+  unavailableReason: "You cannot submit at this time",
+  submitMeme: "Submit Meme",
+  submitMemeClosingSoon: "Submit Meme (Closes Soon!)",
+  submitWorkToMemes: "Submit Work to The Memes",
+  submitWork: "Submit Work",
+  approvalLocked: "Approval controls are locked",
   loginRequired: "Please log in to make submissions",
   ended: "Submission period has ended",
 } as const);
@@ -2100,6 +2078,7 @@ const WAVE_CREATE_ACTIONS_MESSAGES = objectMessages("waves.create.actions", {
   complete: "Complete",
   create: "Create",
   createMenuHeader: "Create",
+  curation: "Curation",
   curationDescription: "Collect drops in a custom view",
   subwaveDescription: "Start a separate space within this wave",
   next: "Next",
@@ -2498,7 +2477,6 @@ const WAVE_STORM_COMPOSER_MESSAGES = objectMessages("waves.stormComposer", {
 
 const WAVE_CHAT_SETTINGS_MESSAGES = objectMessages("waves.chatSettings", {
   "access.public": "Public",
-  "access.inspectGroup": "Inspect {groupName} group criteria and members",
   "access.label": "Chat access",
   "access.privateGroup": "Private group",
   "access.unavailableGroup": "Group unavailable",
@@ -2999,6 +2977,8 @@ const COMMON_MESSAGES = objectMessages("common", {
   back: "Back",
   close: "Close",
   expandEditor: "Expand editor",
+  expandSheet: "Expand sheet",
+  collapseSheet: "Collapse sheet",
 } as const);
 
 const IDENTITY_FILTER_MESSAGES = objectMessages("identityFilter", {
@@ -3410,6 +3390,16 @@ export const EN_US_ROOT_MESSAGES = {
   // any page; the rest of its copy is @/i18n/namespaces/artwork-documentation.
   "artworkDocumentation.title": "Artwork documentation",
   "artworkDocumentation.myWorks": "My artwork documentation",
+  "waves.information.avatarLabel": "Open wave details",
+  "waves.information.members": "Members",
+  "waves.information.discardMessage": "Your unsaved changes will be lost.",
+  "waves.information.discardTitle": "Discard changes?",
+  "waves.information.turnOffChat": "Turn off chat?",
+  "waves.information.turnOffChatMessage":
+    "Members will no longer be able to send chat messages. You can turn chat back on here.",
+  "waves.information.turnOffChatAction": "Turn off chat",
+  "waves.information.choosePicture": "Choose photo",
+  "waves.information.picturePreview": "Wave picture preview",
   "waves.information.open": "About {name}",
   ...EN_SUBMISSION_DISCOVERY_MESSAGES,
   ...additionalActionMessages,
@@ -3652,6 +3642,7 @@ export const EN_US_ROOT_MESSAGES = {
     "You blocked @{handle}. Unblock them to start a new direct message.",
   "profilePreferences.dm.createRetry": PLEASE_TRY_AGAIN,
   "profilePreferences.notifications.heading": "Notifications",
+  "profilePreferences.notifications.linkLabel": "Notification preferences",
   "profilePreferences.notifications.description":
     "Choose between All and Essential notifications.",
   "profilePreferences.notifications.ALL.label": "All",
@@ -3922,6 +3913,7 @@ export const EN_US_ROOT_MESSAGES = {
   "headerShare.shareModal.backdropAriaLabel": "Dismiss share modal",
   "headerShare.connectModal.title": "Connect Device",
   "headerShare.connectModal.mobileTitle": "Connect 6529 Mobile",
+  "headerShare.connectModal.newDesktopTitle": "Connect 6529 Desktop",
   "headerShare.connectModal.desktopTitle": "Connect 6529 Desktop Classic",
   "headerShare.connectModal.chooseApp": "Which app are you connecting?",
   "headerShare.connectModal.only": "Connect only",
@@ -3943,8 +3935,9 @@ export const EN_US_ROOT_MESSAGES = {
   "headerShare.menu.qrTarget": "QR code target",
   "headerShare.menu.browser": "Browser",
   "headerShare.menu.app": "App",
-  "headerShare.menu.mobile": "6529 Mobile",
-  "headerShare.menu.desktop": "6529 Desktop Classic",
+  "headerShare.menu.mobile": "Mobile",
+  "headerShare.menu.desktop": "Desktop",
+  "headerShare.menu.desktopClassic": "Desktop Classic",
   "desktop.profiles.restoreError":
     "Your saved profiles could not be opened. You can browse signed out, or restart 6529 Desktop and allow access to the system keychain to restore them.",
   "desktop.profiles.restart": "Restart to restore profiles",
@@ -5611,8 +5604,11 @@ export const EN_US_ROOT_MESSAGES = {
   ...USER_PROFILE_HEADER_MESSAGES,
   ...USER_CIC_TYPE_MESSAGES,
   ...FOLLOWERS_MESSAGES,
-  ...WAVES_SIDEBAR_MESSAGES,
+  ...PROFILE_FOLLOW_MESSAGES,
+  "waves.sidebar.pinControl.viewerChanged":
+    "The active profile changed. Please try again.",
   ...wavesRightPanelMessages,
+  ...wavesMoveMessages,
   ...QUICK_DM_MESSAGES,
   ...NOTIFICATIONS_FOLLOW_BUTTON_MESSAGES,
   ...NOTIFICATIONS_WAVE_CREATED_MESSAGES,
@@ -5668,6 +5664,8 @@ export const EN_US_ROOT_MESSAGES = {
   ...WAVE_REP_DETAILS_MESSAGES,
   ...PROFILE_ACTIVITY_RATE_MESSAGES,
   "profileActivity.heading": "Activity Log",
+  "profileActivity.types": "Activity types",
+  "profileActivity.filterTypesLabel": "Filter activity types: {title}",
   "profileActivity.loading": "Loading activity log",
   "profileActivity.loadError": "Unable to load activity log.",
   "profileActivity.retry": "Retry",
@@ -5680,6 +5678,7 @@ export const EN_US_ROOT_MESSAGES = {
   ...pageMetadataMessages,
   ...toolsMessages,
   ...utcScheduleMessages,
+  ...identityMoveMessages,
   ...displayTimeZoneMessages,
   ...shareDropsImageMessages,
   ...worldTimeZonesMessages,

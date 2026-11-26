@@ -71,8 +71,11 @@ The profile header appears on profile routes under `/{user}` and shows:
    - subscription coverage remains a separate status and navigation surface:
      a subtle row beneath Preferences on desktop layouts, and a full-width
      subtle row below the identity block on smaller layouts
-   - other profile, signed-in viewer with handle, and target profile with
-     handle: follow/unfollow button
+   - Choose **Follow** to follow a profile. **Follow back** appears when that
+     profile already follows you.
+   - **Following** shows opposing arrows when you both follow each other.
+     Hover over or focus the button to see **You follow each other**. Select
+     **Following** to see the relationship and choose **Unfollow**.
    - **Profile actions → Artwork alerts** independently opts into new Main Stage
      artwork submissions by that artist; the menu shows On with a check mark when enabled.
      Signed-in viewers see it for profiles with an artist activity badge, or
@@ -81,7 +84,9 @@ The profile header appears on profile routes under `/{user}` and shows:
      hovering uses a background highlight. Keyboard navigation shows a focus ring,
      and Escape closes the menu and returns focus to its button.
      See [Artist Artwork Alerts](../../notifications/feature-artist-artwork-alerts.md).
+   - The profile's **More** button sits immediately to the right of Follow or Following.
    - **Direct Message** appears beside Follow or Following for another profile.
+     On mobile web and in the app, its 36px icon button matches the More button.
      It opens **New message** with that person selected. Opening the composer
      creates no chat. See [Starting a chat](../../encrypted-messages.md#starting-a-chat).
 
@@ -124,6 +129,10 @@ also offers a direct shortcut to add or edit an optional About statement.
 - Mobile profile banners retain their existing full-strength artwork and
   top-right owner controls. Desktop banners fade into the content surface at
   the bottom; only the profile picture crosses that boundary.
+- In the app, the standard app header stays above the banner, retaining Search,
+  Share page, and the usual Back or account-menu control. There is no separate
+  profile Back overlay. Owner Edit profile and Preferences stay at the banner's
+  top right, above the profile picture.
 - The subscription status can link directly to the relevant settings,
   upcoming-drops, or top-up section. The complete status row is the link, with
   its label, current state, and contextual action kept inline when space allows.
