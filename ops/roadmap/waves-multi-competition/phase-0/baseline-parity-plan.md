@@ -59,12 +59,12 @@ The concrete fictional IDs, timestamps, values, and expected assertions are in
   override, and reachable schema to the frozen snapshot.
 - Additive paths/fields are reviewed and snapshot-appended. Removal, narrowing,
   enum reduction, auth change, or required/null change fails.
-- Traverse the Express mount graph and compare 296 baseline GET route shapes,
-  auth classification, and OpenAPI linkage. A missing or stricter/looser route
-  fails.
-- Assert that the cited 183 OpenAPI operations, 296 runtime route shapes, 357
-  reachable schemas, and 113 runtime-only routes equal the machine manifests;
-  documentation/count drift fails CI.
+- Traverse the Express mount graph and compare the covered baseline GET route
+  shapes, auth classification, and OpenAPI linkage. A missing or stricter/looser
+  route fails.
+- Assert that the cited 183 OpenAPI operations, 288 runtime route shapes, 357
+  reachable schemas, and 105 runtime-only routes match the machine manifests.
+  Documentation/count drift fails CI.
 - Validate every canonical table identifier in the dependency inventory against
   `src/constants/db-tables.ts` before schema or adapter estimation consumes it.
 
