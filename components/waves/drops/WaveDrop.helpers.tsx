@@ -592,7 +592,6 @@ const getContentBlock = ({
   handleEditCancel,
   allowLongPress,
   handleLinkCardActionsActiveChange,
-  timestampLayout,
   inlineAuthorOnDesktop,
   isMdViewport,
   mediaImageScale,
@@ -633,7 +632,6 @@ const getContentBlock = ({
     actionId: string,
     active: boolean
   ) => void;
-  readonly timestampLayout: DropTimestampLayout;
   readonly inlineAuthorOnDesktop: boolean;
   /** See `WaveDropAuthorHeaderSlots`. */
   readonly isMdViewport: boolean | null;
@@ -662,7 +660,7 @@ const getContentBlock = ({
     >
       {showAuthorInfo && (
         <div
-          className={`${showStormPartIndicator ? "tw-grid tw-grid-cols-[auto_minmax(0,1fr)]" : "tw-flex"} tw-w-full tw-items-center tw-gap-x-2 ${timestampLayout === "stacked-compact" ? "" : "md:tw-items-start"} ${
+          className={`${showStormPartIndicator ? "tw-grid tw-grid-cols-[auto_minmax(0,1fr)]" : "tw-flex"} tw-w-full tw-items-center tw-gap-x-2 md:tw-items-start ${
             inlineAuthorOnDesktop
               ? ""
               : "md:tw-block md:tw-w-auto md:tw-flex-shrink-0"
@@ -690,6 +688,7 @@ const getContentBlock = ({
         </div>
       )}
       <div
+        data-wave-drop-content-column
         className={`tw-flex tw-w-full tw-flex-col ${
           showAuthorInfo && !inlineAuthorOnDesktop
             ? "md:tw-max-w-[calc(100%-3.5rem)]"

@@ -601,7 +601,6 @@ const WaveDropInner = ({
     drop,
     showAuthorInfo,
     authorHeader,
-    timestampLayout,
     showStormPartIndicator:
       showAuthorInfo &&
       isStorm &&
