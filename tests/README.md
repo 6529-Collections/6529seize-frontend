@@ -69,6 +69,12 @@ exclude Validator after results settle and still navigate through Join 6529.
 Member search results are covered by the focused search unit tests, alongside
 the member navigation scenarios in the session recovery sandbox.
 
+Homepage layout and homepage-based search checks use a synthetic mint newer
+than the server-rendered live selection, with its roots and artwork fulfilled
+locally. This lets the existing client fixture settle without stale mint data
+leaving live interactive artwork in the page. Sidebar storage init scripts run
+only in the top frame so sandboxed artwork frames retain their storage isolation.
+
 The profile pages sandbox also checks Collected personal actions against its
 isolated API. Anonymous and visitor profiles omit the entire action row. Owners
 retain action alignment, browser/native Back, filter and focus restoration;

@@ -2152,7 +2152,9 @@ test("collapsed sidebar fits full rows when a desktop update appears @smoke @med
   );
   await page.setViewportSize({ width: 1440, height: 600 });
   await page.addInitScript(() => {
-    globalThis.sessionStorage.setItem("sidebarCollapsed", "true");
+    if (globalThis.top === globalThis.window) {
+      globalThis.sessionStorage.setItem("sidebarCollapsed", "true");
+    }
   });
   let releaseVersion!: () => void;
   const versionReady = new Promise<void>((resolve) => {
@@ -2464,7 +2466,9 @@ for (const { width, stored, expectedWidth } of [
     );
     await page.setViewportSize({ width, height: 900 });
     await page.addInitScript((value) => {
-      globalThis.sessionStorage.setItem("sidebarCollapsed", value);
+      if (globalThis.top === globalThis.window) {
+        globalThis.sessionStorage.setItem("sidebarCollapsed", value);
+      }
     }, stored);
     const hydration = await gateSidebarHydration(page);
     const sidebar = page.getByLabel("Primary sidebar", { exact: true });
