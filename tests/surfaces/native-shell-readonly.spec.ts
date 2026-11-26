@@ -258,71 +258,95 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     });
     await expect(more).toBeEnabled();
     await expect(searchButton).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Create Wave", exact: true })
-    ).toBeVisible();
+    const createWave = page.getByRole("button", {
+      name: "Create wave",
+      exact: true,
+    });
+    await expect(createWave).toBeVisible();
     await expect(
       page.getByRole("button", { name: "Share page", exact: true })
     ).toHaveCount(0);
-    await more.click();
-    const menu = page.getByRole("menu");
-    await expect(
-      page.getByRole("menuitem", { name: "Search 6529", exact: true })
-    ).toHaveCount(0);
-    const feedItem = page.getByRole("menuitem", {
-      name: "Profile Waves Feed",
-      exact: true,
-    });
-    const shareItem = page.getByRole("menuitem", {
-      name: "Share page",
-      exact: true,
-    });
     for (const width of [320, 430]) {
       await page.setViewportSize({ width, height: 900 });
-      await expect(menu).toHaveCSS("width", "224px");
-      for (const item of [feedItem, shareItem]) {
-        await expect(item).toHaveCSS("font-size", "14px");
-        await expect(item).toHaveCSS("font-weight", "500");
-        await expect(item).toHaveCSS("text-decoration-line", "none");
+      const iconGeometry = await Promise.all(
+        [createWave, searchButton, more].map((button) =>
+          button.evaluate((element) => {
+            const icon = element.querySelector("svg");
+            const target = element.getBoundingClientRect();
+            const bounds = icon?.getBoundingClientRect();
+            return {
+              targetWidth: target.width,
+              targetHeight: target.height,
+              iconWidth: bounds?.width,
+              iconHeight: bounds?.height,
+              strokeWidth: icon?.getAttribute("stroke-width"),
+              centerY: target.y + target.height / 2,
+            };
+          })
+        )
+      );
+      for (const geometry of iconGeometry) {
+        expect(geometry).toMatchObject({
+          targetWidth: 44,
+          targetHeight: 44,
+          iconWidth: 20,
+          iconHeight: 20,
+          strokeWidth: "1.5",
+        });
+        expect(geometry.centerY).toBe(iconGeometry[0]?.centerY);
       }
-      const label = feedItem.getByText("Profile Waves Feed", { exact: true });
-      await expect(label).toHaveCSS("line-height", "20px");
-      await expect
-        .poll(async () => (await label.boundingBox())?.height)
-        .toBe(20);
-      const bounds = await menu.boundingBox();
-      expect(bounds).not.toBeNull();
-      expect(bounds!.x).toBeGreaterThanOrEqual(0);
-      expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width);
-      await more.click();
-      await expect(searchButton).toBeVisible();
       const titleBounds = await page
         .getByText("Waves", { exact: true })
         .boundingBox();
-      const searchBounds = await searchButton.boundingBox();
+      const createBounds = await createWave.boundingBox();
       expect(titleBounds).not.toBeNull();
-      expect(searchBounds).not.toBeNull();
+      expect(createBounds).not.toBeNull();
       expect(titleBounds!.x + titleBounds!.width).toBeLessThanOrEqual(
-        searchBounds!.x
+        createBounds!.x
       );
       await more.click();
+      const sheet = page.getByRole("dialog", { name: "More", exact: true });
+      await expect(
+        sheet.getByRole("heading", { name: "More", exact: true })
+      ).toBeVisible();
+      for (const name of ["Profile Waves Feed", "Share page"]) {
+        const action = sheet.getByRole("button", { name, exact: true });
+        await expect(action).toBeVisible();
+        const bounds = await action.boundingBox();
+        expect(bounds).not.toBeNull();
+        expect(bounds!.x).toBeGreaterThanOrEqual(0);
+        expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width);
+        await expect
+          .poll(async () => {
+            const settledBounds = await action.boundingBox();
+            return settledBounds
+              ? settledBounds.y + settledBounds.height
+              : Number.POSITIVE_INFINITY;
+          })
+          .toBeLessThanOrEqual(900);
+      }
+      await expect(
+        sheet.getByRole("button", { name: "Search 6529", exact: true })
+      ).toHaveCount(0);
+      await sheet.getByRole("button", { name: "Close", exact: true }).click();
+      await expect(sheet).toHaveCount(0);
+      await expect(more).toBeFocused();
     }
-    await page.screenshot({
-      path: testInfo.outputPath("waves-visible-search.png"),
-    });
-    await expect(
-      page.getByRole("menuitem", { name: "Profile Waves Feed", exact: true })
-    ).toHaveAttribute("href", "/waves?view=profile-feed");
-    await expect(
-      page.getByRole("menuitem", { name: "Share page", exact: true })
-    ).toBeVisible();
+    await page.screenshot({ path: testInfo.outputPath("waves-header.png") });
     await more.click();
+    await page
+      .getByRole("dialog", { name: "More", exact: true })
+      .getByRole("button", { name: "Profile Waves Feed", exact: true })
+      .click();
+    await expect(page).toHaveURL(/\/waves\?view=profile-feed$/);
+    await page.getByRole("button", { name: "Back", exact: true }).click();
+    await expect(page).toHaveURL(/\/waves$/);
     await searchButton.click();
     await expect(
       page.getByRole("combobox", { name: "Search 6529", exact: true })
     ).toBeVisible();
     await page.getByRole("button", { name: "Go back", exact: true }).click();
-    await expect(more).toBeVisible();
+    await expect(searchButton).toBeFocused();
     await expect(
       page.getByRole("combobox", { name: "Search 6529", exact: true })
     ).toHaveCount(0);
@@ -553,9 +577,9 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       const waveLink = waveList.getByRole("link").first();
       await expect(waveLink).toBeVisible();
 
-      const waitForMotion = (snapshots = false) =>
-        page.waitForFunction((useSnapshots) => {
-          const animations = useSnapshots
+      const waitForMotion = (snapshot: "old" | "new" | null = null) =>
+        page.waitForFunction((snapshotSide) => {
+          const animations = snapshotSide
             ? document
                 .getAnimations()
                 .filter(
@@ -566,12 +590,12 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
             : (document
                 .querySelector("[data-wave-navigation-screen]")
                 ?.getAnimations() ?? []);
-          const animation = useSnapshots
+          const animation = snapshotSide
             ? animations.find(
                 (item) =>
                   item.effect instanceof KeyframeEffect &&
                   item.effect.pseudoElement ===
-                    "::view-transition-new(wave-navigation)"
+                    `::view-transition-${snapshotSide}(wave-navigation)`
               )
             : animations[0];
           if (!animation || animation.playState !== "running") return null;
@@ -584,15 +608,23 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
           }
           return {
             transform: frames[0]?.["transform"],
+            endTransform: frames.at(-1)?.["transform"],
             duration: effect.getTiming().duration,
-            outgoingVisible: animations.some(
-              (item) =>
-                item.effect instanceof KeyframeEffect &&
-                item.effect.pseudoElement ===
-                  "::view-transition-old(wave-navigation)"
-            ),
+            outgoingVisible:
+              (document.documentElement.dataset["waveNavigationTransition"] ===
+                "conversation-entry" &&
+                getComputedStyle(
+                  document.documentElement,
+                  "::view-transition-old(root)"
+                ).display !== "none") ||
+              animations.some(
+                (item) =>
+                  item.effect instanceof KeyframeEffect &&
+                  item.effect.pseudoElement ===
+                    "::view-transition-old(wave-navigation)"
+              ),
           };
-        }, snapshots);
+        }, snapshot);
       const finishMotion = () =>
         page.evaluate(() => {
           for (const animation of document.getAnimations()) {
@@ -625,7 +657,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
           };
         });
       const headerGeometry = await readHeaderGeometry();
-      const opening = reducedMotion ? null : waitForMotion(true);
+      const opening = reducedMotion ? null : waitForMotion("new");
       // Read the clicked destination at activation: live activity can reorder rows.
       const clickedDestination = page.evaluate(
         () =>
@@ -654,7 +686,8 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       );
       if (opening) {
         expect(await (await opening).jsonValue()).toEqual({
-          transform: "scale(0.98)",
+          transform: "translateX(100%)",
+          endTransform: "translateX(0px)",
           duration: 260,
           outgoingVisible: true,
         });
@@ -695,6 +728,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       if (returning) {
         expect(await (await returning).jsonValue()).toEqual({
           transform: "scale(1.02)",
+          endTransform: "none",
           duration: 240,
           outgoingVisible: false,
         });
@@ -708,17 +742,17 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
         page.getByRole("button", { name: "Find a wave…", exact: true })
       ).toBeVisible();
       if (!reducedMotion) {
-        const reopened = waitForMotion(true);
+        const reopened = waitForMotion("new");
         await waveLink.click();
         await reopened;
         await finishMotion();
         await expect(page.locator("html")).not.toHaveAttribute(
           "data-wave-navigation-transition"
         );
-        const closing = waitForMotion(true);
+        const closing = waitForMotion("old");
         await page.getByRole("button", { name: "Back", exact: true }).click();
-        expect(await (await closing).jsonValue()).toEqual({
-          transform: "scale(1)",
+        expect(await (await closing).jsonValue()).toMatchObject({
+          endTransform: "translateX(100%)",
           duration: 260,
           outgoingVisible: true,
         });

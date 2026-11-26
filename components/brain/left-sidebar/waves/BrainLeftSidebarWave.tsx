@@ -24,6 +24,10 @@ import BrainLeftSidebarWavePin from "./BrainLeftSidebarWavePin";
 import { PinnedWaveLinkContext } from "./PinnedWaveLinkContext";
 import { AnnouncementWaveIcon } from "./SidebarIconTile";
 import {
+  SidebarSubwavesToggle,
+  type SidebarSubwaveRowProps,
+} from "./SidebarSubwavesToggle";
+import {
   SidebarParentSubwaveConnector,
   SidebarSubwaveConnector,
 } from "./SidebarSubwaveConnector";
@@ -34,20 +38,16 @@ import {
 } from "./sidebarWaveRowLayout";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 import { hasUnreadWaveDrops } from "./sidebarWaveListUtils";
+import { SidebarWaveTouchActions } from "./SidebarWaveTouchActions";
 
-interface BrainLeftSidebarWaveProps {
+interface BrainLeftSidebarWaveProps extends SidebarSubwaveRowProps {
   readonly scoreDetailsDisabled?: boolean | undefined;
   readonly isAnnouncement?: boolean | undefined;
   readonly wave: MinimalWave;
   readonly onHover: (waveId: string) => void;
   readonly showPin?: boolean | undefined;
   readonly isDirectMessage?: boolean | undefined;
-  readonly depth?: 0 | 1 | undefined;
-  readonly canExpand?: boolean | undefined;
-  readonly hasUnreadSubwaves?: boolean | undefined;
-  readonly isLastSubwave?: boolean | undefined;
-  readonly showSubwaveConnector?: boolean | undefined;
-  readonly onPrefetchSubwaves?: ((waveId: string) => void) | undefined;
+  readonly onExpandSubwaves?: ((waveId: string) => void) | undefined;
 }
 
 const getPresentNumber = (value: number | null): number | null => {
@@ -113,9 +113,14 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   depth = 0,
   canExpand = false,
   hasUnreadSubwaves = false,
+  subwavesExpanded = false,
+  subwavesLoading = false,
+  unreadSubwaveDropsCount = 0,
   isLastSubwave = false,
   showSubwaveConnector = false,
+  onExpandSubwaves,
   onPrefetchSubwaves,
+  onToggleSubwaves,
 }) => {
   const pinnedLinkProps = useContext(PinnedWaveLinkContext);
   const { activeWave } = useMyStream();
@@ -194,6 +199,9 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
       cancelHoverIntent();
       onWaveHover();
       const nextWaveId = wave.id === activeWaveId ? null : wave.id;
+      if (nextWaveId !== null) {
+        onExpandSubwaves?.(nextWaveId);
+      }
       setActiveWave(nextWaveId, {
         isDirectMessage,
         divider: nextWaveId !== null ? firstUnreadDropSerialNo : null,
@@ -204,6 +212,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
       activeWaveId,
       cancelHoverIntent,
       isDirectMessage,
+      onExpandSubwaves,
       onWaveHover,
       wave.id,
       firstUnreadDropSerialNo,
@@ -226,7 +235,9 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   } = getSidebarWaveRowLayoutClasses({
     isChildRow,
     isAnnouncement,
-    variant: "app",
+    isDirectMessage: isDirectMessage && !canExpand,
+    hasSubwaveToggle: onToggleSubwaves !== undefined,
+    variant: isApp ? "native" : "app",
   });
   const {
     avatarSizeClasses,
@@ -245,149 +256,164 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
     });
 
   return (
-    <div
-      {...(!hasTouchScreen && {
-        onMouseEnter: handleRowMouseEnter,
-        onMouseLeave: cancelHoverIntent,
-      })}
-      className={`tw-group tw-relative tw-flex tw-items-center ${rowHeightClasses} ${rowGapClasses} ${rowPaddingClasses} ${rowVerticalPaddingClasses} tw-transition-colors tw-duration-200 tw-ease-out ${
-        isActive
-          ? "tw-bg-iron-700/50 desktop-hover:hover:tw-bg-iron-700/70"
-          : "desktop-hover:hover:tw-bg-iron-900/80"
-      }`}
+    <SidebarWaveTouchActions
+      enabled={shouldShowPinButton && !isDirectMessage}
+      waveId={wave.id}
+      isPinned={!!wave.isPinned}
     >
-      {!isChildRow && showSubwaveConnector && (
-        <SidebarParentSubwaveConnector
-          guideLineOffsetClasses={SIDEBAR_SUBWAVE_GUIDE_LINE_OFFSET_CLASSES}
-        />
-      )}
-      {isChildRow && (
-        <SidebarSubwaveConnector
-          guideLineOffsetClasses={guideLineOffsetClasses}
-          isLastSubwave={isLastSubwave}
-        />
-      )}
       <div
-        className={`tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-transition-colors tw-duration-200 tw-ease-out ${nameClasses}`}
+        {...(!hasTouchScreen && {
+          onMouseEnter: handleRowMouseEnter,
+          onMouseLeave: cancelHoverIntent,
+        })}
+        className={`tw-group tw-relative tw-flex tw-items-center ${rowHeightClasses} ${rowGapClasses} ${rowPaddingClasses} ${rowVerticalPaddingClasses} tw-transition-colors tw-duration-200 tw-ease-out ${
+          isActive
+            ? "tw-bg-iron-700/50 desktop-hover:hover:tw-bg-iron-700/70"
+            : "desktop-hover:hover:tw-bg-iron-900/80"
+        }`}
       >
+        {onToggleSubwaves && (
+          <SidebarSubwavesToggle
+            isExpanded={subwavesExpanded}
+            isLoading={subwavesLoading}
+            onClick={() => onToggleSubwaves(wave.id)}
+            parentWaveName={wave.name}
+            unreadDropsCount={unreadSubwaveDropsCount}
+          />
+        )}
+        {!isChildRow && showSubwaveConnector && (
+          <SidebarParentSubwaveConnector
+            guideLineOffsetClasses={SIDEBAR_SUBWAVE_GUIDE_LINE_OFFSET_CLASSES}
+          />
+        )}
+        {isChildRow && (
+          <SidebarSubwaveConnector
+            guideLineOffsetClasses={guideLineOffsetClasses}
+            isLastSubwave={isLastSubwave}
+          />
+        )}
         <div
-          aria-hidden="true"
-          data-testid="sidebar-wave-avatar"
-          className="tw-relative tw-flex-shrink-0"
+          className={`tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-transition-colors tw-duration-200 tw-ease-out ${nameClasses}`}
         >
           <div
-            className={`tw-relative ${avatarSizeClasses} ${
-              isAnnouncement ? "tw-rounded-lg" : "tw-rounded-full"
-            } tw-transition tw-duration-300 desktop-hover:group-hover:tw-brightness-110 ${
-              isAnnouncement ? "" : getAvatarRingClasses()
-            } ${
-              isAnnouncement || isActive || haveNewDrops
-                ? "tw-opacity-100"
-                : "tw-opacity-80 desktop-hover:group-hover:tw-opacity-100"
-            }`}
+            aria-hidden="true"
+            data-testid="sidebar-wave-avatar"
+            className={`tw-relative tw-flex-shrink-0 ${onToggleSubwaves ? "touch-only:tw-self-center" : ""}`}
           >
-            {isAnnouncement ? (
-              <AnnouncementWaveIcon />
-            ) : (
-              <WavePicture
-                name={wave.name}
-                picture={wave.picture}
-                contributors={wave.contributors}
-              />
-            )}
-            {isDropWave && (
-              <div className={dropBadgeClasses}>
-                <svg
-                  className={DROP_ICON_CLASSES}
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 576 512"
-                >
-                  <path
-                    fill="currentColor"
-                    d="M400 0L176 0c-26.5 0-48.1 21.8-47.1 48.2c.2 5.3 .4 10.6 .7 15.8L24 64C10.7 64 0 74.7 0 88c0 92.6 33.5 157 78.5 200.7c44.3 43.1 98.3 64.8 138.1 75.8c23.4 6.5 39.4 26 39.4 45.6c0 20.9-17 37.9-37.9 37.9L192 448c-17.7 0-32 14.3-32 32s14.3 32 32 32l192 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-26.1 0C337 448 320 431 320 410.1c0-19.6 15.9-39.2 39.4-45.6c39.9-11 93.9-32.7 138.2-75.8C542.5 245 576 180.6 576 88c0-13.3-10.7-24-24-24L446.4 64c.3-5.2 .5-10.4 .7-15.8C448.1 21.8 426.5 0 400 0zM48.9 112l84.4 0c9.1 90.1 29.2 150.3 51.9 190.6c-24.9-11-50.8-26.5-73.2-48.3c-32-31.1-58-76-63-142.3zM464.1 254.3c-22.4 21.8-48.3 37.3-73.2 48.3c22.7-40.3 42.8-100.5 51.9-190.6l84.4 0c-5.1 66.3-31.1 111.2-63 142.3z"
-                  />
-                </svg>
-              </div>
-            )}
-            {!isActive && haveNewDrops && !wave.isMuted && (
-              <div className={UNREAD_BADGE_CLASSES}>
-                {unreadCount > 99 ? "99+" : unreadCount}
-              </div>
-            )}
-            {wave.isMuted && (
-              <div className={MUTED_BADGE_CLASSES}>
-                <FontAwesomeSvgIcon
-                  icon={faBellSlash}
-                  className={MUTED_ICON_CLASSES}
-                />
-              </div>
-            )}
-          </div>
-          {hasUnreadSubwaves && !canExpand && (
-            <span
-              aria-hidden="true"
-              className="tw-absolute tw-right-[-3px] tw-top-[-3px] tw-size-2.5 tw-rounded-full tw-border tw-border-solid tw-border-iron-950 tw-bg-primary-400"
-            />
-          )}
-        </div>
-        <div className="tw-min-w-0 tw-flex-1">
-          <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
             <div
-              className={`tw-flex tw-min-w-0 tw-flex-1 tw-flex-col ${contentGapClasses}`}
+              className={`tw-relative ${avatarSizeClasses} ${
+                isAnnouncement ? "tw-rounded-lg" : "tw-rounded-full"
+              } tw-transition tw-duration-300 desktop-hover:group-hover:tw-brightness-110 ${
+                isAnnouncement ? "" : getAvatarRingClasses()
+              } ${
+                isAnnouncement || isActive || haveNewDrops
+                  ? "tw-opacity-100"
+                  : "tw-opacity-80 desktop-hover:group-hover:tw-opacity-100"
+              }`}
             >
-              <div className="-tw-mt-0.5 tw-flex tw-min-w-0 tw-items-center tw-gap-1.5">
-                <Link
-                  {...pinnedLinkProps}
-                  href={href}
-                  prefetch={false}
-                  onClick={handleWaveClick}
-                  className={`tw-static tw-block tw-min-w-0 tw-flex-shrink tw-no-underline before:tw-absolute before:tw-inset-0 before:tw-z-[5] before:tw-content-[''] focus-visible:tw-outline-none focus-visible:before:tw-ring-2 focus-visible:before:tw-ring-inset focus-visible:before:tw-ring-primary-400 ${nameClasses}`}
-                >
-                  <span
-                    className={`tw-relative tw-z-[6] tw-block tw-truncate ${titleTextClasses} ${weightClass} tw-leading-tight`}
+              {isAnnouncement ? (
+                <AnnouncementWaveIcon />
+              ) : (
+                <WavePicture
+                  name={wave.name}
+                  picture={wave.picture}
+                  contributors={wave.contributors}
+                />
+              )}
+              {isDropWave && (
+                <div className={dropBadgeClasses}>
+                  <svg
+                    className={DROP_ICON_CLASSES}
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 576 512"
                   >
-                    {formattedWaveName}
-                  </span>
-                </Link>
-              </div>
-              {shouldShowDropTime && (
-                <div
-                  className={`tw-inline-flex tw-min-w-0 tw-items-center tw-whitespace-nowrap ${timestampTextClasses} tw-font-normal tw-leading-tight tw-transition-colors tw-duration-200 ${
-                    isActive
-                      ? "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-400"
-                      : "tw-text-iron-500 desktop-hover:group-hover:tw-text-iron-500"
-                  }`}
-                >
-                  <BrainLeftSidebarWaveDropTime time={latestDropTimestamp} />
+                    <path
+                      fill="currentColor"
+                      d="M400 0L176 0c-26.5 0-48.1 21.8-47.1 48.2c.2 5.3 .4 10.6 .7 15.8L24 64C10.7 64 0 74.7 0 88c0 92.6 33.5 157 78.5 200.7c44.3 43.1 98.3 64.8 138.1 75.8c23.4 6.5 39.4 26 39.4 45.6c0 20.9-17 37.9-37.9 37.9L192 448c-17.7 0-32 14.3-32 32s14.3 32 32 32l192 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-26.1 0C337 448 320 431 320 410.1c0-19.6 15.9-39.2 39.4-45.6c39.9-11 93.9-32.7 138.2-75.8C542.5 245 576 180.6 576 88c0-13.3-10.7-24-24-24L446.4 64c.3-5.2 .5-10.4 .7-15.8C448.1 21.8 426.5 0 400 0zM48.9 112l84.4 0c9.1 90.1 29.2 150.3 51.9 190.6c-24.9-11-50.8-26.5-73.2-48.3c-32-31.1-58-76-63-142.3zM464.1 254.3c-22.4 21.8-48.3 37.3-73.2 48.3c22.7-40.3 42.8-100.5 51.9-190.6l84.4 0c-5.1 66.3-31.1 111.2-63 142.3z"
+                    />
+                  </svg>
+                </div>
+              )}
+              {!isActive && haveNewDrops && !wave.isMuted && (
+                <div className={UNREAD_BADGE_CLASSES}>
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </div>
+              )}
+              {wave.isMuted && (
+                <div className={MUTED_BADGE_CLASSES}>
+                  <FontAwesomeSvgIcon
+                    icon={faBellSlash}
+                    className={MUTED_ICON_CLASSES}
+                  />
                 </div>
               )}
             </div>
-            {(hasSummaryScore || shouldShowPinButton) && (
-              <div className="tw-relative tw-z-10 tw-ml-auto tw-flex tw-shrink-0 tw-items-center tw-gap-0.5">
-                {shouldShowPinButton && (
-                  <BrainLeftSidebarWavePin
-                    waveId={wave.id}
-                    isPinned={!!wave.isPinned}
-                    compact
-                    className="tw-shrink-0"
-                  />
-                )}
-                {hasSummaryScore && (
-                  <WaveTrustSignals
-                    scoreDetailsDisabled={scoreDetailsDisabled}
-                    waveRep={wave.waveRep}
-                    waveScore={wave.waveScore}
-                    variant="sidebar-inline"
-                    mode="summary"
-                  />
+            {hasUnreadSubwaves && !canExpand && (
+              <span
+                aria-hidden="true"
+                className="tw-absolute tw-right-[-3px] tw-top-[-3px] tw-size-2.5 tw-rounded-full tw-border tw-border-solid tw-border-iron-950 tw-bg-primary-400"
+              />
+            )}
+          </div>
+          <div className="tw-min-w-0 tw-flex-1">
+            <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
+              <div
+                className={`tw-flex tw-min-w-0 tw-flex-1 tw-flex-col ${contentGapClasses}`}
+              >
+                <div className="-tw-mt-0.5 tw-flex tw-min-w-0 tw-items-center tw-gap-1.5">
+                  <Link
+                    {...pinnedLinkProps}
+                    href={href}
+                    prefetch={false}
+                    onClick={handleWaveClick}
+                    className={`tw-static tw-block tw-min-w-0 tw-flex-shrink tw-no-underline before:tw-absolute before:tw-inset-0 before:tw-z-[5] before:tw-content-[''] focus-visible:tw-outline-none focus-visible:before:tw-ring-2 focus-visible:before:tw-ring-inset focus-visible:before:tw-ring-primary-400 ${nameClasses}`}
+                  >
+                    <span
+                      className={`tw-relative tw-z-[6] tw-block tw-truncate ${titleTextClasses} ${weightClass} tw-leading-tight`}
+                    >
+                      {formattedWaveName}
+                    </span>
+                  </Link>
+                </div>
+                {shouldShowDropTime && (
+                  <div
+                    className={`tw-inline-flex tw-min-w-0 tw-items-center tw-whitespace-nowrap ${timestampTextClasses} tw-font-normal tw-leading-tight tw-transition-colors tw-duration-200 ${
+                      isActive
+                        ? "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-400"
+                        : "tw-text-iron-500 desktop-hover:group-hover:tw-text-iron-500"
+                    }`}
+                  >
+                    <BrainLeftSidebarWaveDropTime time={latestDropTimestamp} />
+                  </div>
                 )}
               </div>
-            )}
+              {(hasSummaryScore || shouldShowPinButton) && (
+                <div className="tw-relative tw-z-10 tw-ml-auto tw-flex tw-shrink-0 tw-items-center tw-gap-0.5">
+                  {shouldShowPinButton && (
+                    <BrainLeftSidebarWavePin
+                      waveId={wave.id}
+                      isPinned={!!wave.isPinned}
+                      compact
+                      className="tw-shrink-0"
+                    />
+                  )}
+                  {hasSummaryScore && (
+                    <WaveTrustSignals
+                      scoreDetailsDisabled={scoreDetailsDisabled}
+                      waveRep={wave.waveRep}
+                      waveScore={wave.waveScore}
+                      variant="sidebar-inline"
+                      mode="summary"
+                    />
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </SidebarWaveTouchActions>
   );
 };
 

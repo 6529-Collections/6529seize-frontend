@@ -50,6 +50,8 @@ export interface UploadingFile {
 }
 
 export interface CreateDropContentProps {
+  readonly autoFocus?: boolean | undefined;
+  readonly onAutoFocusRoot?: ((root: HTMLElement | null) => void) | undefined;
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
   readonly onReplyTargetUnavailable?: (() => void) | undefined;

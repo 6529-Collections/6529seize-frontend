@@ -82,24 +82,6 @@ const buildMainMetrics = (
   const memeSets =
     validSeasonSets.length > 0 ? Math.min(...validSeasonSets) : 0;
 
-  if (collectedStats.nextgen_balance) {
-    metrics.push({
-      id: "nextgen",
-      label: translate(locale, "user.collected.stats.metrics.nextGen"),
-      val: formatMetricValue(collectedStats.nextgen_balance, locale),
-      collection: CollectedCollectionType.NEXTGEN,
-    });
-  }
-
-  if (memeSets > 0) {
-    metrics.push({
-      id: "memes_sets",
-      label: translate(locale, "user.collected.stats.metrics.memeSets"),
-      val: formatMetricValue(memeSets, locale),
-      collection: CollectedCollectionType.MEMES,
-    });
-  }
-
   if (collectedStats.memes_balance) {
     const uniqueSub =
       collectedStats.unique_memes === collectedStats.memes_balance
@@ -114,6 +96,24 @@ const buildMainMetrics = (
       val: formatMetricValue(collectedStats.memes_balance, locale),
       collection: CollectedCollectionType.MEMES,
       ...(uniqueSub ? { sub: uniqueSub } : {}),
+    });
+  }
+
+  if (memeSets > 0) {
+    metrics.push({
+      id: "memes_sets",
+      label: translate(locale, "user.collected.stats.metrics.memeSets"),
+      val: formatMetricValue(memeSets, locale),
+      collection: CollectedCollectionType.MEMES,
+    });
+  }
+
+  if (collectedStats.nextgen_balance) {
+    metrics.push({
+      id: "nextgen",
+      label: translate(locale, "user.collected.stats.metrics.nextGen"),
+      val: formatMetricValue(collectedStats.nextgen_balance, locale),
+      collection: CollectedCollectionType.NEXTGEN,
     });
   }
 

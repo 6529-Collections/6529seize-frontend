@@ -84,7 +84,9 @@ The profile header appears on profile routes under `/{user}` and shows:
      hovering uses a background highlight. Keyboard navigation shows a focus ring,
      and Escape closes the menu and returns focus to its button.
      See [Artist Artwork Alerts](../../notifications/feature-artist-artwork-alerts.md).
+   - The profile's **More** button sits immediately to the right of Follow or Following.
    - **Direct Message** appears beside Follow or Following for another profile.
+     On mobile web and in the app, its 36px icon button matches the More button.
      It opens **New message** with that person selected. Opening the composer
      creates no chat. See [Starting a chat](../../encrypted-messages.md#starting-a-chat).
 
@@ -127,6 +129,10 @@ also offers a direct shortcut to add or edit an optional About statement.
 - Mobile profile banners retain their existing full-strength artwork and
   top-right owner controls. Desktop banners fade into the content surface at
   the bottom; only the profile picture crosses that boundary.
+- In the app, the standard app header stays above the banner, retaining Search,
+  Share page, and the usual Back or account-menu control. There is no separate
+  profile Back overlay. Owner Edit profile and Preferences stay at the banner's
+  top right, above the profile picture.
 - The subscription status can link directly to the relevant settings,
   upcoming-drops, or top-up section. The complete status row is the link, with
   its label, current state, and contextual action kept inline when space allows.

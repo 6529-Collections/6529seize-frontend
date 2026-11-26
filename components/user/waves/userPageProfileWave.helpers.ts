@@ -14,6 +14,8 @@ import {
   isWaveDirectMessage,
 } from "@/helpers/waves/wave.helpers";
 import type { CreateWaveConfig } from "@/types/waves.types";
+import { formatNumber } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
 
 type ApiErrorLike = {
   readonly status?: number | undefined;
@@ -225,13 +227,16 @@ export const getProfileCurationTitle = (
   return trimmedTitle.length > 0 ? trimmedTitle : "Curation";
 };
 
-export const getOfficialWaveMetadataLabel = (wave: ApiWave): string => {
+export const getOfficialWaveMetadataLabel = (
+  wave: ApiWave,
+  locale?: SupportedLocale
+): string => {
   const sourcePostLabel =
     wave.metrics.drops_count === 1 ? "source post" : "source posts";
 
   return [
-    `${wave.metrics.drops_count} ${sourcePostLabel}`,
-    `${wave.metrics.subscribers_count} joined`,
+    `${locale ? formatNumber(locale, wave.metrics.drops_count) : wave.metrics.drops_count} ${sourcePostLabel}`,
+    `${locale ? formatNumber(locale, wave.metrics.subscribers_count) : wave.metrics.subscribers_count} joined`,
   ].join(" • ");
 };
 

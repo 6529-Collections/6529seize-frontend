@@ -409,6 +409,40 @@ describe("UserPageCollectedStats", () => {
     expect(screen.getByText("26/39 to set 2")).toBeInTheDocument();
   });
 
+  it("orders summary values before labels and places Details after Seasons", () => {
+    renderWithQueryClient(
+      <UserPageCollectedStats
+        profile={profile}
+        activeAddress={null}
+        initialStatsData={buildInitialStatsData({
+          initialCollectedStats: {
+            ...collectedStats,
+            gradients_balance: 3,
+            seasons: collectedStats.seasons.map((season) => ({
+              ...season,
+              sets_held: 1,
+            })),
+          },
+        })}
+      />
+    );
+    const metrics = screen.getByText("Memes").parentElement!.parentElement!;
+    expect(
+      Array.from(metrics.children).map((metric) => metric.textContent)
+    ).toEqual([
+      "x3,107Memes·unique x465",
+      "x1Meme Sets",
+      "x62NextGen",
+      "x3Gradients",
+      "x1.76Boost",
+    ]);
+    const details = screen.getByRole("button", { name: "Details" });
+    expect(
+      screen.getByText("Seasons").compareDocumentPosition(details) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
   it("formats collected summary metrics and season details with the active locale", () => {
     renderWithQueryClient(
       <UserPageCollectedStats

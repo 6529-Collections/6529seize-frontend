@@ -1,179 +1,110 @@
-import Button from "@/components/utils/button/Button";
-import { ChartBarIcon } from "@heroicons/react/24/outline";
+import { ChartBarIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import type { CollectedCollectionType } from "@/entities/IProfile";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t as translate } from "@/i18n/messages";
 import type { CollectedHeaderMetric } from "../types";
-import { useCallback, useEffect, useRef, useState } from "react";
 
 interface CollectedStatsHeaderProps {
   readonly metrics: CollectedHeaderMetric[];
   readonly activeCollection: CollectedCollectionType | null;
-  readonly isDetailsOpen: boolean;
-  readonly detailsId: string;
-  readonly locale?: SupportedLocale | undefined;
-  readonly onToggleDetails: () => void;
   readonly onCollectionShortcut?:
     | ((collection: CollectedCollectionType) => void)
     | undefined;
 }
 
+const METRIC_CLASSES =
+  "tw-group tw-flex tw-items-baseline tw-gap-1 tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-left focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500";
+
 export function CollectedStatsHeader({
   metrics,
   activeCollection,
+  onCollectionShortcut,
+}: Readonly<CollectedStatsHeaderProps>) {
+  return (
+    <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-4 tw-gap-y-1 md:tw-gap-x-6">
+      {metrics.map((metric) => {
+        const collection = metric.collection;
+        const isInteractive =
+          collection !== undefined && onCollectionShortcut !== undefined;
+        const isSelected =
+          collection !== undefined && collection === activeCollection;
+        const content = (
+          <>
+            <span
+              className={`tw-text-sm tw-font-semibold tw-leading-5 ${isSelected ? "tw-text-white" : "tw-text-iron-100"}`}
+            >
+              {metric.val}
+            </span>
+            <span
+              className={`tw-text-sm tw-font-normal tw-leading-5 ${isSelected ? "tw-text-iron-200" : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"}`}
+            >
+              {metric.label}
+            </span>
+            {metric.sub && (
+              <>
+                <span aria-hidden="true" className="tw-text-iron-600">
+                  ·
+                </span>
+                <span className="tw-text-sm tw-leading-5 tw-text-iron-500">
+                  {metric.sub}
+                </span>
+              </>
+            )}
+          </>
+        );
+        return isInteractive ? (
+          <button
+            key={metric.id}
+            type="button"
+            aria-pressed={isSelected}
+            onClick={() => onCollectionShortcut(collection)}
+            className={METRIC_CLASSES}
+          >
+            {content}
+          </button>
+        ) : (
+          <div key={metric.id} className={METRIC_CLASSES}>
+            {content}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+export function CollectedStatsDetailsToggle({
   isDetailsOpen,
   detailsId,
   locale = DEFAULT_LOCALE,
   onToggleDetails,
-  onCollectionShortcut,
-}: Readonly<CollectedStatsHeaderProps>) {
-  const detailsLabel = translate(locale, "user.collected.stats.details.show");
-  const hideDetailsLabel = translate(
-    locale,
-    "user.collected.stats.details.hide"
-  );
-  const detailsButtonLabel = isDetailsOpen ? hideDetailsLabel : detailsLabel;
-  const metricsScrollRef = useRef<HTMLDivElement>(null);
-  const [showEndFade, setShowEndFade] = useState(false);
-  const updateEndFade = useCallback(() => {
-    const node = metricsScrollRef.current;
-    if (node !== null) {
-      setShowEndFade(node.scrollLeft + node.clientWidth < node.scrollWidth - 1);
-    }
-  }, []);
-
-  useEffect(() => {
-    const frameId = globalThis.requestAnimationFrame(updateEndFade);
-    globalThis.addEventListener("resize", updateEndFade);
-    return () => {
-      globalThis.cancelAnimationFrame(frameId);
-      globalThis.removeEventListener("resize", updateEndFade);
-    };
-  }, [metrics, detailsButtonLabel, updateEndFade]);
-
+}: {
+  readonly isDetailsOpen: boolean;
+  readonly detailsId: string;
+  readonly locale?: SupportedLocale | undefined;
+  readonly onToggleDetails: () => void;
+}) {
   return (
-    <div className="tw-flex tw-items-center tw-gap-4 md:tw-items-start md:tw-justify-between">
-      <div className="tw-relative tw-min-w-0 tw-flex-1">
-        {metrics.length > 0 && (
-          <div
-            ref={metricsScrollRef}
-            onScroll={updateEndFade}
-            className="tw-no-scrollbar tw-overflow-x-auto tw-overflow-y-hidden tw-py-1 md:tw-overflow-visible md:tw-py-0"
-          >
-            <div className="tw-flex tw-w-max tw-flex-nowrap tw-items-center tw-gap-4 tw-pr-1 md:tw-w-auto md:tw-flex-wrap md:tw-gap-6 md:tw-pr-0">
-              {metrics.map((metric, index) => {
-                const metricCollection = metric.collection;
-                const isInteractive =
-                  metricCollection !== undefined &&
-                  onCollectionShortcut !== undefined;
-                const isSelected =
-                  metricCollection !== undefined &&
-                  metricCollection === activeCollection;
-                let labelToneClass: string | undefined;
-                let valueToneClass: string | undefined;
-                let subToneClass: string | undefined;
-
-                if (isSelected) {
-                  labelToneClass = "tw-text-iron-300";
-                  valueToneClass = "tw-text-white";
-                  subToneClass = "tw-text-iron-400";
-                } else if (isInteractive) {
-                  labelToneClass = "group-hover:tw-text-iron-300";
-                  valueToneClass = "group-hover:tw-text-white";
-                  subToneClass = "group-hover:tw-text-iron-400";
-                }
-                const metricContent = (
-                  <>
-                    <span
-                      className={[
-                        "tw-mb-0.5 tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-400",
-                        labelToneClass,
-                      ]
-                        .filter(Boolean)
-                        .join(" ")}
-                    >
-                      {metric.label}
-                    </span>
-                    <div className="tw-flex tw-items-baseline tw-gap-1.5">
-                      <span
-                        className={[
-                          "tw-text-[15px] tw-font-semibold tw-text-iron-100",
-                          valueToneClass,
-                        ]
-                          .filter(Boolean)
-                          .join(" ")}
-                      >
-                        {metric.val}
-                      </span>
-                      {metric.sub && (
-                        <span
-                          className={[
-                            "tw-text-[10px] tw-font-medium tw-text-iron-500",
-                            subToneClass,
-                          ]
-                            .filter(Boolean)
-                            .join(" ")}
-                        >
-                          {metric.sub}
-                        </span>
-                      )}
-                    </div>
-                  </>
-                );
-
-                return (
-                  <div
-                    key={metric.id}
-                    className="tw-flex tw-flex-none tw-items-center tw-gap-4 md:tw-gap-6"
-                  >
-                    {isInteractive ? (
-                      <button
-                        type="button"
-                        aria-pressed={isSelected}
-                        onClick={() => onCollectionShortcut(metricCollection)}
-                        className={[
-                          "tw-group tw-flex tw-flex-col tw-rounded-lg tw-border tw-border-solid tw-px-2.5 tw-py-1.5 tw-text-left tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500",
-                          isSelected
-                            ? "tw-border-iron-700 tw-bg-iron-950/80"
-                            : "tw-border-transparent tw-bg-transparent hover:tw-border-iron-800 hover:tw-bg-iron-950/60",
-                        ].join(" ")}
-                      >
-                        {metricContent}
-                      </button>
-                    ) : (
-                      <div className="tw-flex tw-flex-col">{metricContent}</div>
-                    )}
-                    {index < metrics.length - 1 && (
-                      <div className="tw-hidden tw-h-6 tw-w-px tw-bg-iron-800 sm:tw-block" />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+    <button
+      type="button"
+      data-profile-action={isDetailsOpen ? "Hide details" : "Details"}
+      aria-expanded={isDetailsOpen}
+      aria-controls={detailsId}
+      onClick={onToggleDetails}
+      className="tw-flex tw-h-11 tw-w-full tw-items-center tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-transparent tw-px-3 tw-text-sm tw-font-medium tw-text-iron-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 desktop-hover:hover:tw-text-iron-100 md:tw-px-5"
+    >
+      <ChartBarIcon aria-hidden="true" className="tw-size-4 tw-text-iron-400" />
+      <span>
+        {translate(
+          locale,
+          isDetailsOpen
+            ? "user.collected.stats.details.hide"
+            : "user.collected.stats.details.show"
         )}
-        {showEndFade && metrics.length > 0 && (
-          <div
-            aria-hidden="true"
-            className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-w-10 tw-bg-gradient-to-r tw-from-transparent tw-via-black/70 tw-to-black md:tw-hidden"
-          />
-        )}
-      </div>
-
-      <Button
-        data-profile-action={isDetailsOpen ? "Hide details" : "Details"}
-        variant={isDetailsOpen ? "primary" : "tertiary"}
-        size="sm"
-        aria-expanded={isDetailsOpen}
-        aria-controls={detailsId}
-        onClick={onToggleDetails}
-        className="!tw-font-medium !tw-text-iron-300 !tw-shadow-none aria-expanded:!tw-border-iron-600 aria-expanded:!tw-bg-iron-800 aria-expanded:!tw-text-iron-50 desktop-hover:hover:!tw-text-iron-100 desktop-hover:aria-expanded:hover:!tw-bg-iron-700"
-      >
-        <span className="-tw-ml-1 tw-inline-flex tw-h-4 tw-w-4 tw-flex-shrink-0">
-          <ChartBarIcon aria-hidden="true" className="tw-h-full tw-w-full" />
-        </span>
-        <span>{detailsButtonLabel}</span>
-      </Button>
-    </div>
+      </span>
+      <ChevronDownIcon
+        aria-hidden="true"
+        className={`tw-ml-auto tw-size-4 tw-text-iron-400 tw-transition-transform tw-duration-200 ${isDetailsOpen ? "tw-rotate-180" : ""}`}
+      />
+    </button>
   );
 }

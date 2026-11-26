@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { StrictMode, useCallback, useEffect, useRef } from "react";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import {
   LayoutProvider,
@@ -77,6 +77,31 @@ function TestComponent() {
   );
 }
 
+function NavigationRegistrationProbe({
+  visible,
+}: {
+  readonly visible: boolean;
+}) {
+  const { registerRef, spaces } = useLayout();
+  const setNavRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (node) {
+        node.getBoundingClientRect = () => ({ height: 80 }) as DOMRect;
+      }
+      registerRef("mobileNav", node);
+    },
+    [registerRef]
+  );
+  return (
+    <>
+      {visible && <div ref={setNavRef} />}
+      <output data-testid="registered-nav-height">
+        {spaces.mobileNavSpace}
+      </output>
+    </>
+  );
+}
+
 function MobileWavesTestComponent() {
   const { registerRef, mobileWavesViewStyle } = useLayout();
   const headerRef = useRef<HTMLDivElement>(null);
@@ -108,12 +133,14 @@ function MobileWavesTestComponent() {
 }
 
 function FallbackStyleComponent() {
-  const { contentContainerStyle, waveViewStyle } = useLayout();
+  const { contentContainerStyle, waveViewStyle, myVotesViewStyle } =
+    useLayout();
 
   return (
     <>
       <div data-testid="content-container" style={contentContainerStyle} />
       <div data-testid="wave-view" style={waveViewStyle} />
+      <div data-testid="my-votes-view" style={myVotesViewStyle} />
     </>
   );
 }
@@ -138,6 +165,55 @@ function ViewportLockTestComponent({ isOpen }: { readonly isOpen: boolean }) {
 }
 
 describe("LayoutProvider", () => {
+  it.each([true, false])(
+    "gives the final vote keyboard clearance only in the app (%s)",
+    (isCapacitor) => {
+      mockCapacitorValues = { isCapacitor, isAndroid: isCapacitor };
+      render(
+        <LayoutProvider>
+          <FallbackStyleComponent />
+        </LayoutProvider>
+      );
+      const { style } = screen.getByTestId("my-votes-view");
+      expect(style.height.includes("--native-keyboard-inset-bottom")).toBe(
+        isCapacitor
+      );
+      expect(style.maxHeight).toBe(style.height);
+    }
+  );
+
+  it("updates changed registrations before animation frames without warnings in StrictMode", () => {
+    const originalRequestAnimationFrame = global.requestAnimationFrame;
+    global.requestAnimationFrame = jest.fn(() => 1);
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    const view = (visible: boolean) => (
+      <StrictMode>
+        <LayoutProvider>
+          <NavigationRegistrationProbe visible={visible} />
+        </LayoutProvider>
+      </StrictMode>
+    );
+    try {
+      const { rerender, unmount } = render(view(true));
+      expect(screen.getByTestId("registered-nav-height")).toHaveTextContent(
+        /^80$/u
+      );
+      for (const visible of [false, true, false, true]) {
+        rerender(view(visible));
+        expect(screen.getByTestId("registered-nav-height")).toHaveTextContent(
+          visible ? /^80$/u : /^0$/u
+        );
+      }
+      unmount();
+      expect(consoleError).not.toHaveBeenCalled();
+    } finally {
+      consoleError.mockRestore();
+      global.requestAnimationFrame = originalRequestAnimationFrame;
+    }
+  });
+
   it("provides viewport-sized fallback styles before measurement completes", () => {
     const originalRequestAnimationFrame = global.requestAnimationFrame;
     global.requestAnimationFrame = jest.fn(

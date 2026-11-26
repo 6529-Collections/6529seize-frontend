@@ -1,6 +1,7 @@
 "use client";
 
 import { WaveScoreSummaryHoverCard } from "@/components/waves/WaveTrustSignals";
+import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { formatInteger, formatNumber } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -174,7 +175,7 @@ export default function WaveHeaderTrustStats({
                 >
                   <button
                     type="button"
-                    className="tw-min-h-11 tw-rounded tw-border-0 tw-bg-transparent tw-p-0 tw-font-[inherit] tw-text-inherit tw-underline tw-decoration-iron-600 tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                    className={`${COMPACT_ACTION_TOUCH_TARGET_CLASS} tw-rounded tw-border-0 tw-bg-transparent tw-p-0 tw-font-[inherit] tw-text-[13px] tw-leading-5 tw-text-inherit tw-underline tw-decoration-iron-600 tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400`}
                   >
                     {stat.label}
                   </button>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Squares2X2Icon } from "@heroicons/react/24/outline";
+import ProfileWavesFeedIcon from "@/components/common/icons/ProfileWavesFeedIcon";
 import ShareArrowIcon from "@/components/common/icons/ShareArrowIcon";
 import type { CompactMenuItem } from "@/components/compact-menu";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -29,7 +29,7 @@ export default function WavesHeaderMoreMenu({
       label: t(locale, "waves.mobile.profileFeed.title"),
       href: PROFILE_WAVES_FEED_HREF,
       onSelect: () => setPosition(PROFILE_WAVES_FEED_SCROLL_KEY, 0),
-      icon: <Squares2X2Icon aria-hidden="true" className="tw-size-4" />,
+      icon: <ProfileWavesFeedIcon />,
     },
   ];
   if (showPageShareAction) {
@@ -42,5 +42,11 @@ export default function WavesHeaderMoreMenu({
       deferUntilClosed: true,
     });
   }
-  return <HeaderSearchButton wave={null} additionalMenuItems={items} />;
+  return (
+    <HeaderSearchButton
+      wave={null}
+      additionalMenuItems={items}
+      morePresentation="sheet"
+    />
+  );
 }

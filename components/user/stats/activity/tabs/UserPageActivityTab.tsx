@@ -4,6 +4,7 @@ import { t, type MessageKey } from "@/i18n/messages";
 import { USER_PAGE_ACTIVITY_TAB } from "../activity.types";
 import { getActivityPanelId, getActivityTabId } from "./activity-tabs.helpers";
 import { getConnectedTabButtonClasses } from "@/components/utils/select/tabs/connectedTabStyles";
+import { getPillTabClasses } from "@/components/common/pillTabStyles";
 
 type ActivityTabMessageKey = Extract<
   MessageKey,
@@ -26,15 +27,19 @@ export default function UserPageActivityTab({
   setActiveTab,
   locale,
   onKeyDown,
+  compact = false,
 }: {
   readonly tab: USER_PAGE_ACTIVITY_TAB;
   readonly activeTab: USER_PAGE_ACTIVITY_TAB;
   readonly setActiveTab: (tab: USER_PAGE_ACTIVITY_TAB) => void;
   readonly locale: SupportedLocale;
   readonly onKeyDown: KeyboardEventHandler<HTMLButtonElement>;
+  readonly compact?: boolean | undefined;
 }) {
   const isActive = tab === activeTab;
-  const className = `${getConnectedTabButtonClasses({ isActive, fill: true })} sm:tw-flex-none`;
+  const className = compact
+    ? getPillTabClasses({ active: isActive })
+    : `${getConnectedTabButtonClasses({ isActive, fill: true })} sm:tw-flex-none`;
 
   return (
     <button

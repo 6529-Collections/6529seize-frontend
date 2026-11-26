@@ -1,11 +1,16 @@
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
 import {
   CollectedCollectionType,
   type CollectedCard,
 } from "@/entities/IProfile";
 import { expectPersonalCollectedActionsAbsent } from "./profileReadonlyHelpers";
 import { expectUrlState } from "../support/urlState";
-import { isCapacitorSimulationProject } from "../support/surfaceSimulation";
+import {
+  installSurfaceSimulation,
+  isCapacitorSimulationProject,
+} from "../support/surfaceSimulation";
 import {
   expect,
   expectAxeClean,
@@ -14,6 +19,7 @@ import {
 } from "../testHelpers";
 import {
   getSandboxApiOrigin,
+  hideNextDevOverlay,
   LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
   useLocalSandboxMutationGuard,
 } from "../support/localSandbox";
@@ -163,6 +169,9 @@ async function installHostedWalletReads(page: Page) {
       json: Array.isArray(payload) ? payload.map(respond) : respond(payload),
     });
   });
+  await page.route("https://rpc.walletconnect.org/v1/identity/**", (route) =>
+    route.fulfill({ json: { name: null, avatar: null } })
+  );
 }
 
 async function finishHostedWalletInitialization(
@@ -182,13 +191,17 @@ async function finishHostedWalletInitialization(
 
 async function openOwnProfile(page: Page, expectOwnerAction = true) {
   // Exercise account-menu navigation; the direct-load test covers cold hydration.
+  const activate = (control: Locator) =>
+    test.info().project.use.hasTouch ? control.tap() : control.click();
   const profileLoaded = page.waitForResponse((response) =>
     new URL(response.url()).pathname.endsWith(`/identities/${WALLET}`)
   );
   await page.goto("/about");
   await profileLoaded;
   if ((page.viewportSize()?.width ?? 0) < 1024) {
-    await page.getByRole("button", { name: "Open menu", exact: true }).click();
+    await activate(
+      page.getByRole("button", { name: "Open menu", exact: true })
+    );
   }
   const nativeProfile = page.getByRole("link", {
     name: /^Open .+ profile$/,
@@ -198,10 +211,10 @@ async function openOwnProfile(page: Page, expectOwnerAction = true) {
     exact: true,
   });
   await expect(nativeProfile.or(accountMenu)).toBeVisible();
-  if (await nativeProfile.isVisible()) await nativeProfile.click();
+  if (await nativeProfile.isVisible()) await activate(nativeProfile);
   else {
     await accountMenu.press("Enter");
-    await page.getByRole("link", { name: "Profile", exact: true }).click();
+    await activate(page.getByRole("link", { name: "Profile", exact: true }));
   }
   await page.waitForURL(/\/playwright$/, {
     timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
@@ -285,6 +298,1005 @@ test.describe("Profile editing @auth @medium @local-only", () => {
         route.fulfill({ json: { count: 0, data: [], next: null, page: 1 } })
     );
   });
+
+  test("profile Curation menus group actions without changing permissions or desktop styling", async ({
+    page,
+    baseURL,
+    hasTouch,
+  }, testInfo) => {
+    await hideNextDevOverlay(page.context());
+    await seedSession(page);
+    await installHostedWalletReads(page);
+    const api = getSandboxApiOrigin(baseURL);
+    const waveId = "00000000-0000-4000-8000-000000000529";
+    const curationId = "profile-curation-sheet";
+    const curationName =
+      "Sheet review Curation with a very long name that must stay on one subtitle line without squeezing its close button";
+    await page.route("**/api/drops?**", (route) => route.fulfill({ json: [] }));
+    await page.route("**/api//drops?**", (route) =>
+      route.fulfill({ json: [] })
+    );
+    const feedResponse = await page.request.get(
+      `${api}/api/v2/waves/${waveId}/drops`
+    );
+    const feed = (await feedResponse.json()) as { drops: ApiDropV2[] };
+    const sample = feed.drops[0]!;
+    expect(sample).toBeTruthy();
+    const posts = [
+      {
+        ...sample,
+        id: "00000000-0000-4000-8000-000000000541",
+        content: "Owner Curation sample post",
+      },
+      {
+        ...sample,
+        id: "00000000-0000-4000-8000-000000000542",
+        content: "Other Curation sample post",
+        author: {
+          ...sample.author,
+          id: "other-curation-author",
+          handle: "following-artist-0",
+          primary_address: "0x0000000000000000000000000000000000000530",
+        },
+      },
+    ];
+    await page.route("**/api/profiles/*/wave", (route) =>
+      route.fulfill({
+        json: { profile_wave_id: waveId, profile_curation_id: curationId },
+      })
+    );
+    await page.route(`${api}/api/waves/${waveId}/curations`, (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: curationId,
+            name: curationName,
+            wave_id: waveId,
+            group_id: null,
+            created_at: 1,
+            updated_at: 1,
+            priority_order: 1,
+          },
+        ],
+      })
+    );
+    await page.route(`**/v2/waves/${waveId}/curations/*/drops?**`, (route) =>
+      route.fulfill({ json: { data: posts, page: 1, next: false } })
+    );
+    await page.route("**/drops/*/curations", (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: curationId,
+            drop_included: true,
+            authenticated_user_can_curate: true,
+            drop_priority_order: 1,
+          },
+        ],
+      })
+    );
+    await finishHostedWalletInitialization(page, () =>
+      page.goto("/playwright/curations")
+    );
+    const mobile = testInfo.project.name !== "web-desktop-chromium";
+    const manage = page.getByRole("button", {
+      name: mobile ? "Manage" : "Curation options",
+      exact: true,
+    });
+    await expect(
+      page.getByText("Owner Curation sample post", { exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByText("Other Curation sample post", { exact: true })
+    ).toBeVisible();
+    const activate = (control: Locator) =>
+      hasTouch ? control.tap() : control.click();
+    await activate(manage);
+    const menu = page.getByRole(mobile ? "dialog" : "menu", {
+      name: mobile ? "Manage" : "Curation options",
+      exact: true,
+    });
+    const manageLabels = [
+      "Edit Curation",
+      "Organize posts",
+      "Choose another Curation",
+      "Use another source Wave",
+      "Hide from profile",
+      "Delete Curation",
+    ];
+    await expect(
+      menu.getByRole(mobile ? "button" : "menuitem", {
+        name: "Organize posts",
+        exact: true,
+      })
+    ).toBeVisible();
+    const labels = (
+      await menu.getByRole(mobile ? "button" : "menuitem").allTextContents()
+    )
+      .map((text) => text.trim())
+      .filter((text) => text && text !== "Close");
+    expect(labels).toEqual(manageLabels);
+    const sections = menu.getByText(/^(This Curation|Shown on profile)$/);
+    await expect(sections).toHaveText(["This Curation", "Shown on profile"]);
+    await expect(menu.getByRole("separator")).toHaveCount(1);
+    for (const name of manageLabels) {
+      const action = menu.getByRole(mobile ? "button" : "menuitem", {
+        name,
+        exact: true,
+      });
+      await expect(action).toBeEnabled();
+      await expect(action).toHaveCSS("font-size", mobile ? "15px" : "16px");
+      const icon = menu
+        .getByRole(mobile ? "button" : "menuitem", { name, exact: true })
+        .locator("svg");
+      await expect(icon).toHaveCount(mobile ? 1 : 0);
+      if (mobile) {
+        await expect(action).toHaveCSS("min-height", "48px");
+        await expect(action).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+        await expect(action).toHaveCSS("border-radius", "12px");
+        await expect(icon).toHaveCSS("width", "20px");
+      }
+    }
+    if (mobile) {
+      await expect(sections.first()).toHaveCSS("font-size", "11px");
+      const editIcon = await menu
+        .getByRole("button", { name: "Edit Curation", exact: true })
+        .locator("svg")
+        .boundingBox();
+      const sectionBox = await sections.first().boundingBox();
+      expect(Math.abs(sectionBox!.x - editIcon!.x)).toBeLessThanOrEqual(1);
+      const remove = menu.getByRole("button", {
+        name: "Delete Curation",
+        exact: true,
+      });
+      expect(
+        await menu
+          .getByRole("button", { name: "Delete Curation", exact: true })
+          .locator("svg")
+          .evaluate((node) => getComputedStyle(node).color)
+      ).toBe(await remove.evaluate((node) => getComputedStyle(node).color));
+      await page.screenshot({
+        path: testInfo.outputPath("profile-curation-manage-sheet.png"),
+        animations: "disabled",
+        scale: "css",
+      });
+      await activate(menu.getByRole("button", { name: "Close", exact: true }));
+    } else await page.keyboard.press("Escape");
+    await expect(manage).toBeFocused();
+
+    for (const [content, author] of [
+      ["Owner Curation sample post", true],
+      ["Other Curation sample post", false],
+    ] as const) {
+      const card = page
+        .getByRole("article")
+        .filter({ has: page.getByText(content, { exact: true }) });
+      const trigger = card.getByRole("button", {
+        name: "Post actions",
+        exact: true,
+      });
+      await activate(trigger);
+      const actions = page.getByRole(mobile ? "dialog" : "menu", {
+        name: "Post actions",
+        exact: true,
+      });
+      const expected = [
+        "Open original Wave",
+        ...(author ? ["Edit post"] : []),
+        "Remove from Curation",
+      ];
+      expect(
+        (
+          await actions
+            .getByRole(mobile ? "button" : "menuitem")
+            .allTextContents()
+        )
+          .map((text) => text.trim())
+          .filter((text) => text && text !== "Close")
+      ).toEqual(expected);
+      await expect(actions.getByRole("separator")).toHaveCount(1);
+      for (const name of expected) {
+        const action = actions.getByRole(mobile ? "button" : "menuitem", {
+          name,
+          exact: true,
+        });
+        await expect(action).toHaveCSS("font-size", mobile ? "15px" : "16px");
+        await expect(
+          actions
+            .getByRole(mobile ? "button" : "menuitem", { name, exact: true })
+            .locator("svg")
+        ).toHaveCount(mobile ? 1 : 0);
+      }
+      if (mobile) {
+        await page.screenshot({
+          path: testInfo.outputPath(
+            `profile-curation-post-${author ? "author" : "visitor"}-sheet.png`
+          ),
+          animations: "disabled",
+          scale: "css",
+        });
+        await activate(
+          actions.getByRole("button", { name: "Close", exact: true })
+        );
+      } else await page.keyboard.press("Escape");
+      await expect(trigger).toBeFocused();
+    }
+    await expectNoHorizontalOverflow(page);
+    const addPost = page.getByRole("button", { name: "Add post", exact: true });
+    await activate(addPost);
+    const composer = page.getByRole("dialog", {
+      name: mobile ? "Add post" : `Add post to ${curationName}`,
+      exact: true,
+    });
+    await expect(
+      composer.getByRole("heading", {
+        name: mobile ? "Add post" : `Add post to ${curationName}`,
+        exact: true,
+      })
+    ).toBeVisible();
+    if (mobile) {
+      await expect(
+        composer.getByText(`to ${curationName}`, { exact: true })
+      ).toBeVisible();
+      await expect(
+        composer.getByText(`to ${curationName}`, { exact: true })
+      ).toHaveCSS("text-overflow", "ellipsis");
+      await expect(
+        composer.getByText(`to ${curationName}`, { exact: true })
+      ).toHaveCSS("white-space", "nowrap");
+      await expect(composer.getByRole("textbox")).toBeFocused();
+      const header = await composer.evaluate((dialog) => {
+        const title = dialog.querySelector("h2")!;
+        const block = title.parentElement!.getBoundingClientRect();
+        const close = dialog
+          .querySelector('button[aria-label="Close"]')!
+          .getBoundingClientRect();
+        return { block: block.toJSON(), close: close.toJSON() };
+      });
+      expect(
+        Math.abs(
+          header.block.y +
+            header.block.height / 2 -
+            (header.close.y + header.close.height / 2)
+        )
+      ).toBeLessThan(1);
+      expect(header.close.x).toBeGreaterThan(
+        header.block.x + header.block.width
+      );
+      await page.screenshot({
+        path: testInfo.outputPath("profile-curation-add-post-sheet.png"),
+        animations: "disabled",
+        scale: "css",
+      });
+      if (isCapacitorSimulationProject(testInfo.project.name)) {
+        await expect
+          .poll(() =>
+            page.evaluate(() =>
+              (
+                globalThis as typeof globalThis & {
+                  __playwrightKeyboardListeners?: string[];
+                }
+              ).__playwrightKeyboardListeners?.includes("keyboardDidShow")
+            )
+          )
+          .toBe(true);
+        for (const eventName of ["keyboardWillShow", "keyboardDidShow"]) {
+          await page.evaluate(
+            (eventName) =>
+              globalThis.dispatchEvent(
+                new CustomEvent(`playwright:${eventName}`, {
+                  detail: { keyboardHeight: 300 },
+                })
+              ),
+            eventName
+          );
+        }
+        await expect
+          .poll(async () =>
+            Math.abs(
+              (await page
+                .getByRole("dialog", { name: "Add post", exact: true })
+                .locator(".mobile-wrapper-dialog")
+                .boundingBox())!.y +
+                (await page
+                  .getByRole("dialog", { name: "Add post", exact: true })
+                  .locator(".mobile-wrapper-dialog")
+                  .boundingBox())!.height -
+                ((page.viewportSize()?.height ?? 0) - 300)
+            )
+          )
+          .toBeLessThanOrEqual(2);
+        for (const eventName of ["keyboardWillHide", "keyboardDidHide"]) {
+          await page.evaluate(
+            (eventName) =>
+              globalThis.dispatchEvent(
+                new CustomEvent(`playwright:${eventName}`, {
+                  detail: { keyboardHeight: 0 },
+                })
+              ),
+            eventName
+          );
+        }
+      }
+    }
+    await activate(
+      composer.getByRole("button", { name: "Close", exact: true })
+    );
+    await expect(addPost).toBeFocused();
+    if (!mobile) {
+      // A narrow desktop browser has no touch drag handle to supply top space.
+      for (const width of [390, 768]) {
+        await page.setViewportSize({ width, height: 844 });
+        await activate(addPost);
+        const compactComposer = page.getByRole("dialog", {
+          name: "Add post",
+          exact: true,
+        });
+        await expect(compactComposer.getByRole("textbox")).toBeFocused();
+        const gaps = await compactComposer.evaluate((dialog) => {
+          const top = dialog
+            .querySelector(".mobile-wrapper-dialog")!
+            .getBoundingClientRect().top;
+          return {
+            title:
+              dialog.querySelector("h2")!.getBoundingClientRect().top - top,
+            close:
+              dialog
+                .querySelector('button[aria-label="Close"]')!
+                .getBoundingClientRect().top - top,
+          };
+        });
+        expect(gaps.title).toBeGreaterThanOrEqual(16);
+        expect(gaps.close).toBeGreaterThanOrEqual(16);
+        await page.screenshot({
+          path: testInfo.outputPath(
+            `profile-curation-add-post-no-touch-${width}.png`
+          ),
+          animations: "disabled",
+          scale: "css",
+        });
+        await compactComposer
+          .getByRole("button", { name: "Close", exact: true })
+          .click();
+        await expect(addPost).toBeFocused();
+      }
+    }
+  });
+
+  test("profile More sits after Follow with standard app navigation", async ({
+    page,
+  }, testInfo) => {
+    await hideNextDevOverlay(page.context());
+    await seedSession(page);
+    await installHostedWalletReads(page);
+    await finishHostedWalletInitialization(page, () =>
+      page.goto("/following-artist-0")
+    );
+    const header = page
+      .getByRole("main")
+      .last()
+      .locator('section[aria-labelledby="profile-heading"]');
+    const follow = header.getByRole("button", {
+      name: /^Follow(?: back|ing)?$/,
+    });
+    const more = header.getByRole("button", {
+      name: "Profile actions",
+      exact: true,
+    });
+    await expect(more).toBeVisible();
+    const [followBox, moreBox, dmBox] = await Promise.all([
+      follow.boundingBox(),
+      more.boundingBox(),
+      header
+        .getByRole("button", { name: "Send direct message", exact: true })
+        .boundingBox(),
+    ]);
+    expect(dmBox!.x + dmBox!.width).toBeLessThanOrEqual(followBox!.x);
+    expect(moreBox!.x).toBeGreaterThanOrEqual(followBox!.x + followBox!.width);
+    expect(Math.abs(moreBox!.y - followBox!.y)).toBeLessThanOrEqual(1);
+    expect(
+      await page.evaluate(
+        () => document.querySelectorAll("[data-profile-top-bar]").length
+      )
+    ).toBe(0);
+    if (isCapacitorSimulationProject(testInfo.project.name)) {
+      await expect(
+        page.getByRole("button", { name: "Search 6529", exact: true })
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Share page", exact: true })
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: /^Open menu/ })
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Back", exact: true })
+      ).toHaveCount(0);
+    }
+    await page.screenshot({
+      path: testInfo.outputPath("profile-inline-more.png"),
+      animations: "disabled",
+      scale: "css",
+    });
+    if (testInfo.project.use.hasTouch) await more.tap();
+    else await more.click();
+    await expect(
+      page
+        .getByRole("menuitem", { name: "Mute notifications", exact: true })
+        .or(
+          page
+            .getByRole("dialog", { name: "Profile actions", exact: true })
+            .getByRole("button", { name: "Mute notifications", exact: true })
+        )
+    ).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(more).toBeFocused();
+    await expectNoHorizontalOverflow(page);
+  });
+
+  for (const profile of ["playwright", "following-artist-0"]) {
+    test(`native profile keeps standard header and inline actions with iPhone safe areas for ${profile}`, async ({
+      page,
+      baseURL,
+      browserName,
+    }, testInfo) => {
+      test.skip(
+        browserName !== "chromium",
+        "Safe-area environment overrides require Chromium CDP."
+      );
+      await page.setViewportSize({ width: 430, height: 932 });
+      await installSurfaceSimulation(
+        page.context(),
+        "capacitor-ios-sim",
+        baseURL
+      );
+      await seedSession(page);
+      await installHostedWalletReads(page);
+      const cdp = await page.context().newCDPSession(page);
+      await cdp.send("Emulation.setSafeAreaInsetsOverride", {
+        insets: { top: 59 },
+      });
+      await page.goto(`/${profile}`);
+      expect(
+        await page.evaluate(
+          () => document.querySelectorAll("[data-profile-top-bar]").length
+        )
+      ).toBe(0);
+      await expect(
+        page.getByRole("button", { name: /^Open menu/ })
+      ).toBeVisible();
+      const search = page.getByRole("button", {
+        name: "Search 6529",
+        exact: true,
+      });
+      await expect(search).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Share page", exact: true })
+      ).toBeVisible();
+      const banner = page.getByRole("main").locator("[data-profile-banner]");
+      const avatar = page.getByRole("main").locator("[data-profile-avatar]");
+      for (const top of [59, 62, 0]) {
+        await cdp.send("Emulation.setSafeAreaInsetsOverride", {
+          insets: { top },
+        });
+        await expect
+          .poll(async () => {
+            const [buttonBox, bannerBox] = await Promise.all([
+              search.boundingBox(),
+              banner.boundingBox(),
+            ]);
+            return buttonBox && bannerBox
+              ? bannerBox.y - buttonBox.y - buttonBox.height
+              : -1;
+          })
+          .toBeGreaterThanOrEqual(0);
+        const [buttonBox, bannerBox, avatarBox] = await Promise.all([
+          search.boundingBox(),
+          banner.boundingBox(),
+          avatar.boundingBox(),
+        ]);
+        if (!buttonBox || !bannerBox || !avatarBox)
+          throw new Error("Missing native profile header geometry");
+        expect(buttonBox.y).toBeGreaterThanOrEqual(top);
+        expect(avatarBox.y).toBeGreaterThan(bannerBox.y);
+        if (profile === "playwright") {
+          const edit = await page
+            .getByRole("button", { name: "Edit profile", exact: true })
+            .boundingBox();
+          const preferences = await page
+            .getByRole("link", { name: "Preferences", exact: true })
+            .boundingBox();
+          expect(edit!.y).toBeGreaterThanOrEqual(bannerBox.y);
+          expect(edit!.y + edit!.height).toBeLessThan(avatarBox.y);
+          expect(preferences!.x).toBeGreaterThan(edit!.x);
+        } else {
+          const follow = await page
+            .getByRole("button", {
+              name: /^Follow(?: back|ing)?$/,
+              exact: true,
+            })
+            .boundingBox();
+          const more = page.getByRole("button", {
+            name: "Profile actions",
+            exact: true,
+          });
+          const moreBox = await more.boundingBox();
+          expect(moreBox!.x).toBeGreaterThanOrEqual(follow!.x + follow!.width);
+          expect(Math.abs(moreBox!.y - follow!.y)).toBeLessThanOrEqual(1);
+          if (top === 59) {
+            await more.click();
+            const sheet = page.getByRole("dialog", {
+              name: "Profile actions",
+              exact: true,
+            });
+            await expect(
+              sheet.getByRole("button", {
+                name: "Mute notifications",
+                exact: true,
+              })
+            ).toBeVisible();
+            await expect(
+              sheet.getByRole("button", { name: "Block profile", exact: true })
+            ).toBeVisible();
+            await sheet
+              .getByRole("button", { name: "Close", exact: true })
+              .click();
+            await expect(more).toBeFocused();
+          }
+        }
+        if (top === 59)
+          await page.screenshot({
+            path: testInfo.outputPath("native-profile-safe-area.png"),
+          });
+        await expectNoHorizontalOverflow(page);
+      }
+      await cdp.detach();
+    });
+  }
+
+  for (const profile of ["playwright", "following-artist-0"]) {
+    test(`Brain wave rows scroll independently on ${profile === "playwright" ? "the owner's" : "a visitor's"} profile`, async ({
+      page,
+    }, testInfo) => {
+      await seedSession(page);
+      await installHostedWalletReads(page);
+      await page.route("**/drops?**", (route) => route.fulfill({ json: [] }));
+      const createdNames = [
+        "Created wave with a long name",
+        "Second created wave",
+      ];
+      const recentNames = Array.from(
+        { length: 5 },
+        (_, index) => `Recent wave ${index + 1} with a long name`
+      );
+      await page.route("**/v2/waves/profile-activity/**", (route) => {
+        const isCreated =
+          new URL(route.request().url()).searchParams.get("activity_type") ===
+          "CREATED";
+        return route.fulfill({
+          json: {
+            data: (isCreated ? createdNames : recentNames).map(
+              (name, index) => ({
+                wave_id: `00000000-0000-4000-8000-00000000000${index + 1}`,
+                wave_name: name,
+                wave_picture: null,
+                is_private: false,
+                total_drops_count: 12,
+                latest_post_timestamp: 1713744000000,
+              })
+            ),
+            next_cursor: null,
+          },
+        });
+      });
+      await page.goto(`/${profile}/brain`);
+      const mobileStrip = page.getByTestId("brain-sidebar-mobile-strip");
+      const desktop = page.getByTestId("brain-sidebar-desktop");
+      if (testInfo.project.name === "web-desktop-chromium") {
+        await expect(desktop).toBeVisible();
+        await expect(mobileStrip).toBeHidden();
+        await expect(desktop.getByRole("link")).toHaveText([
+          ...createdNames.map((name) => new RegExp(name)),
+          ...recentNames.map((name) => new RegExp(name)),
+        ]);
+        await page.screenshot({
+          path: testInfo.outputPath(`brain-wave-rows-${profile}.png`),
+          fullPage: true,
+          animations: "disabled",
+          scale: "css",
+        });
+        return;
+      }
+
+      const created = page.getByTestId("brain-created-waves-mobile");
+      const recent = page.getByTestId("brain-recent-waves-mobile");
+      await expect(created.getByRole("link")).toHaveText([createdNames[0]!]);
+      await expect(recent.getByRole("link")).toHaveText(recentNames);
+      await expect(desktop).toBeHidden();
+      const widths = isCapacitorSimulationProject(testInfo.project.name)
+        ? [390]
+        : [320, 390, 768];
+      for (const width of widths) {
+        await page.setViewportSize({ width, height: 1000 });
+        const shell = await page
+          .getByRole("main")
+          .filter({ has: mobileStrip })
+          .last()
+          .boundingBox();
+        const createdBox = await created.boundingBox();
+        const recentBox = await recent.boundingBox();
+        expect(recentBox!.y).toBeGreaterThan(
+          createdBox!.y + createdBox!.height
+        );
+        for (const row of [created, recent]) {
+          const rowBox = await row.boundingBox();
+          const firstChip = await row.getByRole("link").first().boundingBox();
+          expect(Math.abs(rowBox!.x - shell!.x)).toBeLessThanOrEqual(1);
+          expect(
+            Math.abs(rowBox!.x + rowBox!.width - shell!.x - shell!.width)
+          ).toBeLessThanOrEqual(1);
+          expect(firstChip!.x - rowBox!.x).toBe(16);
+        }
+        const heading = mobileStrip.getByText("Recently Active In", {
+          exact: true,
+        });
+        const headingX = (await heading.boundingBox())!.x;
+        await recent.getByRole("link").first().focus();
+        await recent.getByRole("link").last().focus();
+        expect(
+          await recent.evaluate((node) => node.scrollLeft)
+        ).toBeGreaterThan(0);
+        expect(await created.evaluate((node) => node.scrollLeft)).toBe(0);
+        expect((await heading.boundingBox())!.x).toBe(headingX);
+        await expect(recent.getByRole("link").last()).toBeInViewport();
+        await recent.evaluate((node) => {
+          node.scrollLeft = 0;
+        });
+        await expectNoHorizontalOverflow(page);
+      }
+      await page.screenshot({
+        path: testInfo.outputPath(`brain-wave-rows-${profile}.png`),
+        fullPage: true,
+        animations: "disabled",
+        scale: "css",
+      });
+    });
+  }
+
+  for (const profile of ["playwright", "following-artist-0"]) {
+    test(`Curation profile layout preserves ${profile === "playwright" ? "owner" : "visitor"} controls and empty copy`, async ({
+      page,
+      baseURL,
+    }, testInfo) => {
+      await hideNextDevOverlay(page.context());
+      await seedSession(page);
+      await installHostedWalletReads(page);
+      const api = getSandboxApiOrigin(baseURL);
+      const waveId = "00000000-0000-4000-8000-000000000529";
+      const waveResponse = await page.request.get(`${api}/api/waves/${waveId}`);
+      const wave = (await waveResponse.json()) as ApiWave;
+      wave.name = "A source Wave with a long name";
+      wave.picture = "/6529.svg";
+      wave.metrics.drops_count = 12345;
+      wave.metrics.subscribers_count = 6789;
+      const title = "A long collection title that wraps beside owner actions";
+      let curationName = title;
+      let connected = true;
+      await page.route("**/api/profiles/*/wave", (route) =>
+        route.fulfill({
+          json: {
+            profile_wave_id: connected ? waveId : null,
+            profile_curation_id: connected ? "profile-curation" : null,
+          },
+        })
+      );
+      await page.route(`${api}/api/waves/${waveId}`, (route) =>
+        route.fulfill({ json: wave })
+      );
+      await page.route(`${api}/api/waves/${waveId}/curations`, (route) =>
+        route.fulfill({
+          json: [
+            {
+              id: "profile-curation",
+              name: curationName,
+              wave_id: waveId,
+              group_id: null,
+              created_at: 1,
+              updated_at: 1,
+              priority_order: 1,
+            },
+          ],
+        })
+      );
+      await page.route(`**/v2/waves/${waveId}/curations/*/drops?**`, (route) =>
+        route.fulfill({ json: { data: [], page: 1, next: false } })
+      );
+      await page.route(`${api}/api/waves?**`, (route) =>
+        route.fulfill({ json: [] })
+      );
+      await finishHostedWalletInitialization(page, () =>
+        page.goto(`/${profile}/curations`)
+      );
+      const heading = page.getByRole("heading", { name: title, exact: true });
+      await expect(heading).toBeVisible();
+      const mobile = testInfo.project.name !== "web-desktop-chromium";
+      const owner = profile === "playwright";
+      const source = page.getByRole("button", {
+        name: `Open source Wave ${wave.name}`,
+        exact: true,
+      });
+      const manage = page.getByRole("button", {
+        name: mobile ? "Manage" : "Curation options",
+        exact: true,
+      });
+      const add = page.getByRole("button", { name: "Add post", exact: true });
+      await expect(source).toBeVisible();
+      await expect(manage).toHaveCount(owner ? 1 : 0);
+      await expect(add).toHaveCount(owner ? 1 : 0);
+      const firstPost = page.getByRole("button", {
+        name: "Add your first post",
+        exact: true,
+      });
+      await expect(firstPost).toHaveCount(owner ? 1 : 0);
+      if (owner)
+        await expect(firstPost).toHaveCSS("height", mobile ? "44px" : "40px");
+      if (mobile) {
+        await expect(
+          page.getByText("12,345 source posts • 6,789 joined", { exact: true })
+        ).toBeVisible();
+        await expect(
+          page.getByText("Source Wave:", { exact: true })
+        ).toBeVisible();
+        const stats = page.getByText("12,345 source posts • 6,789 joined", {
+          exact: true,
+        });
+        expect(await stats.textContent()).toContain("\u00a0•\u00a0");
+        await expect(source.getByText(wave.name, { exact: true })).toHaveCSS(
+          "white-space",
+          "nowrap"
+        );
+        await expect(source.getByText(wave.name, { exact: true })).toHaveCSS(
+          "text-overflow",
+          "ellipsis"
+        );
+        const widths = isCapacitorSimulationProject(testInfo.project.name)
+          ? [390]
+          : [320, 390, 768];
+        for (const width of widths) {
+          await page.setViewportSize({ width, height: 1000 });
+          const headingBox = await heading.boundingBox();
+          const headingTextBox = await page
+            .getByRole("heading", { name: title, exact: true })
+            .locator("span")
+            .boundingBox();
+          const sourceBox = await source.boundingBox();
+          await expect(heading).toHaveCSS("font-size", "18px");
+          expect(sourceBox!.y).toBeGreaterThan(
+            headingBox!.y + headingBox!.height
+          );
+          if (owner) {
+            await expect(manage).toHaveCSS("width", "36px");
+            await expect(manage).toHaveCSS("height", "36px");
+            await expect(manage).toHaveText("");
+            await expect(add).toHaveCSS("height", "36px");
+            await expect(add).toHaveCSS("font-size", "13px");
+            const manageBox = await manage.boundingBox();
+            const addBox = await add.boundingBox();
+            const statsBox = await stats.boundingBox();
+            const sectionsBox = await page
+              .getByRole("navigation", { name: "Profile sections" })
+              .boundingBox();
+            expect(Math.abs(headingBox!.y - manageBox!.y)).toBeLessThanOrEqual(
+              1
+            );
+            expect(
+              headingTextBox!.x + headingTextBox!.width
+            ).toBeLessThanOrEqual(manageBox!.x);
+            expect(
+              Math.abs(
+                manageBox!.x +
+                  manageBox!.width -
+                  sectionsBox!.x -
+                  sectionsBox!.width
+              )
+            ).toBeLessThanOrEqual(1);
+            expect(statsBox!.y).toBeGreaterThanOrEqual(
+              sourceBox!.y + sourceBox!.height
+            );
+            expect(statsBox!.x + statsBox!.width).toBeLessThanOrEqual(
+              addBox!.x
+            );
+            expect(
+              Math.abs(
+                statsBox!.y +
+                  statsBox!.height / 2 -
+                  addBox!.y -
+                  addBox!.height / 2
+              )
+            ).toBeLessThanOrEqual(1);
+            expect(
+              Math.abs(
+                addBox!.x + addBox!.width - sectionsBox!.x - sectionsBox!.width
+              )
+            ).toBeLessThanOrEqual(1);
+          } else {
+            const sectionsBox = await page
+              .getByRole("navigation", { name: "Profile sections" })
+              .boundingBox();
+            expect(headingTextBox!.width).toBeCloseTo(sectionsBox!.width, 0);
+          }
+          await expectNoHorizontalOverflow(page);
+        }
+        if (owner) {
+          await manage.click();
+          const sheet = page.getByRole("dialog", {
+            name: "Manage",
+            exact: true,
+          });
+          await expect(
+            sheet.getByRole("heading", { name: "Manage", exact: true })
+          ).toBeVisible();
+          await page.screenshot({
+            path: testInfo.outputPath(`curation-manage-${profile}.png`),
+            animations: "disabled",
+            scale: "css",
+          });
+          await sheet
+            .getByRole("button", { name: "Close", exact: true })
+            .click();
+          await expect(manage).toBeFocused();
+        }
+      } else {
+        await expect(
+          page.getByText("12345 source posts • 6789 joined", { exact: true })
+        ).toBeVisible();
+        if (owner) await expect(manage).toContainText("Manage");
+      }
+      await page.screenshot({
+        path: testInfo.outputPath(`curation-${profile}.png`),
+        fullPage: true,
+        animations: "disabled",
+        scale: "css",
+      });
+      await page
+        .getByRole("heading", { name: title, exact: true })
+        .locator("..")
+        .screenshot({
+          path: testInfo.outputPath(`curation-header-${profile}.png`),
+          animations: "disabled",
+          scale: "css",
+        });
+      if (owner && mobile) {
+        curationName = "Art";
+        await finishHostedWalletInitialization(page, () => page.reload());
+        const shortHeading = page.getByRole("heading", {
+          name: "Art",
+          exact: true,
+        });
+        await expect(shortHeading).toBeVisible();
+        for (const width of [320, 390, 768]) {
+          await page.setViewportSize({ width, height: 1000 });
+          const headingBox = await shortHeading.boundingBox();
+          const headingTextBox = await page
+            .getByRole("heading", { name: "Art", exact: true })
+            .locator("span")
+            .boundingBox();
+          const manageBox = await manage.boundingBox();
+          expect(Math.abs(headingBox!.y - manageBox!.y)).toBeLessThanOrEqual(1);
+          expect(headingTextBox!.x + headingTextBox!.width).toBeLessThanOrEqual(
+            manageBox!.x
+          );
+          await expectNoHorizontalOverflow(page);
+        }
+        await page.setViewportSize({ width: 390, height: 1000 });
+        await page
+          .getByRole("heading", { name: "Art", exact: true })
+          .locator("..")
+          .screenshot({
+            path: testInfo.outputPath(`curation-short-header-${profile}.png`),
+            animations: "disabled",
+            scale: "css",
+          });
+      }
+      let curationGradient: string | undefined;
+      if (!owner) {
+        await page.route(`${api}/api/waves/${waveId}/curations`, (route) =>
+          route.fulfill({ json: [] })
+        );
+        await finishHostedWalletInitialization(page, () => page.reload());
+        const noCurations = page
+          .getByRole("heading", { name: "No Curations yet", exact: true })
+          .locator("xpath=ancestor::section");
+        const gradient = page
+          .getByRole("heading", { name: "No Curations yet", exact: true })
+          .locator("xpath=ancestor::section")
+          .locator(':scope > [aria-hidden="true"]')
+          .first();
+        await expect(gradient).toBeVisible();
+        curationGradient = await gradient.evaluate(
+          (element) => getComputedStyle(element).backgroundImage
+        );
+        expect(curationGradient).toContain("radial-gradient");
+        await noCurations.screenshot({
+          path: testInfo.outputPath("curation-no-curations.png"),
+          animations: "disabled",
+          scale: "css",
+        });
+      }
+      connected = false;
+      await finishHostedWalletInitialization(page, () => page.reload());
+      const emptyTitle = owner ? "Create a Curation" : "No featured wave yet";
+      const emptyHeading = page.getByRole("heading", {
+        name: emptyTitle,
+        exact: true,
+      });
+      await expect(emptyHeading).toBeVisible();
+      const emptyGradient = page
+        .getByRole("heading", { name: emptyTitle, exact: true })
+        .locator("xpath=ancestor::section")
+        .locator(':scope > [aria-hidden="true"]')
+        .first();
+      await expect(emptyGradient).toBeVisible();
+      await expect(emptyGradient).toHaveCSS(
+        "background-image",
+        /radial-gradient/
+      );
+      if (curationGradient)
+        await expect(emptyGradient).toHaveCSS(
+          "background-image",
+          curationGradient
+        );
+      await expect(
+        page.getByText(
+          owner
+            ? "Create a collection of posts to feature on your profile."
+            : "This profile hasn't selected a featured wave for Curation yet.",
+          { exact: true }
+        )
+      ).toBeVisible();
+      if (mobile) {
+        await expect(emptyHeading).toHaveCSS("font-size", "17px");
+        await expect(emptyHeading).toHaveCSS("font-weight", "600");
+        await expect(
+          page
+            .getByRole("heading", { name: emptyTitle, exact: true })
+            .locator("..")
+            .getByRole("paragraph")
+        ).toHaveCSS("font-size", "14px");
+        const panel = page
+          .getByRole("heading", { name: emptyTitle, exact: true })
+          .locator("xpath=ancestor::section");
+        await expect(panel).toHaveCSS("border-radius", "12px");
+        if (owner) {
+          const create = page.getByRole("button", {
+            name: "Create Curation",
+            exact: true,
+          });
+          const advanced = page.getByRole("link", {
+            name: "Advanced Wave setup",
+            exact: true,
+          });
+          await expect(create).toHaveCount(1);
+          await expect(create).toHaveCSS("height", "44px");
+          await expect(advanced).toHaveCSS(
+            "background-color",
+            "rgba(0, 0, 0, 0)"
+          );
+          const createBox = await create.boundingBox();
+          const advancedBox = await advanced.boundingBox();
+          expect(advancedBox!.y).toBeGreaterThanOrEqual(
+            createBox!.y + createBox!.height
+          );
+        }
+      }
+      await page.screenshot({
+        path: testInfo.outputPath(`curation-empty-${profile}.png`),
+        fullPage: true,
+        animations: "disabled",
+        scale: "css",
+      });
+    });
+  }
 
   test("Guided welcome arrives once, respects motion preferences and preserves focus", async ({
     page,
@@ -578,8 +1590,14 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       await expect(eligibility).toBeVisible();
       await eligibility.hover();
       await expect(eligibility).toBeVisible();
+      // The hover card can cover the heading on a narrow mouse viewport.
+      // Click the visible guide label to retain the outside-click contract.
       await page
-        .getByRole("heading", { name: "Your profile is ready" })
+        .getByRole("region", {
+          name: "Getting started with your identity",
+          exact: true,
+        })
+        .getByText("Getting started", { exact: true })
         .click();
       await expect(eligibility).toHaveCount(0);
     }
@@ -697,14 +1715,18 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     await seedSession(page);
     await installStatements(page, getSandboxApiOrigin(baseURL));
     await installHostedWalletReads(page);
-    await page.goto("/playwright");
+    await finishHostedWalletInitialization(page, () =>
+      page.goto("/playwright")
+    );
     const edit = page.getByRole("button", {
       name: "Edit profile",
       exact: true,
     });
     const tabs = page.getByRole("navigation", { name: "Profile sections" });
     for (const load of ["direct", "reload"]) {
-      if (load === "reload") await page.reload();
+      if (load === "reload") {
+        await finishHostedWalletInitialization(page, () => page.reload());
+      }
       await expect(edit).toBeVisible({
         timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
       });
@@ -712,6 +1734,30 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       await expect(
         page.getByRole("link", { name: "Preferences", exact: true })
       ).toBeVisible();
+      if ((page.viewportSize()?.width ?? 0) < 1024) {
+        const preferences = page.getByRole("link", {
+          name: "Preferences",
+          exact: true,
+        });
+        const heading = page.getByRole("heading", {
+          name: "playwright",
+          exact: true,
+        });
+        const [editBox, preferencesBox, headingBox] = await Promise.all([
+          edit.boundingBox(),
+          preferences.boundingBox(),
+          heading.boundingBox(),
+        ]);
+        if (!editBox || !preferencesBox || !headingBox) {
+          throw new Error("Owner header controls must have visible bounds");
+        }
+        expect(editBox.y + editBox.height).toBeLessThan(headingBox.y);
+        expect(Math.abs(editBox.y - preferencesBox.y)).toBeLessThanOrEqual(4);
+        expect(preferencesBox.x).toBeGreaterThan(editBox.x);
+        expect(preferencesBox.x + preferencesBox.width).toBeGreaterThan(
+          (page.viewportSize()?.width ?? 0) - 64
+        );
+      }
       await expect(
         tabs.getByRole("link", { name: "Brain", exact: true })
       ).toBeVisible();
@@ -933,11 +1979,44 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     await expectNoHorizontalOverflow(page);
   });
 
+  test("keeps a narrow profile editor draft when the viewport widens", async ({
+    page,
+    hasTouch,
+  }) => {
+    await seedSession(page);
+    await openOwnProfile(page);
+    await page.setViewportSize({ width: 600, height: 900 });
+    const activate = (control: Locator) =>
+      hasTouch ? control.tap() : control.click();
+    await activate(
+      page.getByRole("button", { name: "Edit profile", exact: true })
+    );
+    await activate(page.getByRole("button", { name: "About", exact: true }));
+    const input = page.getByRole("textbox", {
+      name: "About statement",
+      exact: true,
+    });
+    await input.fill("Unsaved narrow editor draft");
+    for (const width of [1024, 600, 1024]) {
+      await page.setViewportSize({ width, height: 900 });
+      await expect(input).toBeVisible();
+      await expect(input).toHaveValue("Unsaved narrow editor draft");
+    }
+    await page.keyboard.press("Escape");
+    await expect(input).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "Edit profile", exact: true })
+    ).toBeFocused();
+  });
+
   test("opens all fields on wide touch and hybrid screens", async ({
     page,
     isMobile,
     browserName,
+    hasTouch,
   }, testInfo) => {
+    const activate = (control: Locator) =>
+      hasTouch ? control.tap() : control.click();
     if (!isMobile)
       await page.addInitScript(() => {
         Object.defineProperty(navigator, "maxTouchPoints", {
@@ -961,14 +2040,14 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       expect((await preferences.boundingBox())?.height).toBeGreaterThanOrEqual(
         44
       );
-      await edit.click();
-      await page.getByRole("button", { name: "About", exact: true }).click();
+      await activate(edit);
+      await activate(page.getByRole("button", { name: "About", exact: true }));
       const back = page.getByRole("button", { name: "Back", exact: true });
       expect((await back.boundingBox())?.height).toBeGreaterThanOrEqual(44);
-      await back.click();
+      await activate(back);
       const close = page.getByRole("button", { name: "Close", exact: true });
       expect((await close.boundingBox())?.height).toBeGreaterThanOrEqual(44);
-      await close.click();
+      await activate(close);
     }
     await page.setViewportSize({ width: 1024, height: 900 });
     if (isMobile) {
@@ -977,7 +2056,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
         44
       );
     }
-    await edit.click();
+    await activate(edit);
     if (isMobile) {
       const close = page.getByRole("button", { name: "Close", exact: true });
       expect((await close.boundingBox())?.height).toBeGreaterThanOrEqual(44);
@@ -1014,10 +2093,12 @@ test.describe("Profile editing @auth @medium @local-only", () => {
           { once: true }
         );
       });
-      await page
+      const labelControl = page
         .getByLabel(name, { exact: true })
-        .locator("../..")
-        .click({ position: { x: 2, y: 2 } });
+        .locator("../..");
+      const position = { x: 2, y: 2 };
+      if (hasTouch) await labelControl.tap({ position });
+      else await labelControl.click({ position });
       await expect(input).toHaveAttribute("data-picker-activated", "true");
     }
     if (!isMobile) {
@@ -1086,9 +2167,9 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     await page.screenshot({
       path: testInfo.outputPath("profile-color-keyboard-focus.png"),
     });
-    await page
-      .getByRole("heading", { name: "Profile picture", exact: true })
-      .click();
+    await activate(
+      page.getByRole("heading", { name: "Profile picture", exact: true })
+    );
     await expect(
       page
         .getByRole("dialog", { name: "Edit profile", exact: true })
@@ -1100,7 +2181,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     const classification = page.getByRole("button", {
       name: /^Profile classification /,
     });
-    await classification.click();
+    await activate(classification);
     await expect(
       page
         .getByRole("dialog", { name: "Edit profile", exact: true })
@@ -1122,7 +2203,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     await page.screenshot({
       path: testInfo.outputPath("profile-classification-overlay.png"),
     });
-    await classification.click();
+    await activate(classification);
     await expect(
       page
         .getByRole("dialog", { name: "Edit profile", exact: true })
@@ -1133,7 +2214,12 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     await page
       .getByRole("textbox", { name: "About statement", exact: true })
       .fill("Unsaved touch QA draft");
-    await page.getByRole("button", { name: "Cancel", exact: true }).click();
+    for (const width of [800, 1024, 800]) {
+      await page.setViewportSize({ width, height: 900 });
+      await expect(aboutInput).toBeVisible();
+      await expect(aboutInput).toHaveValue("Unsaved touch QA draft");
+    }
+    await activate(page.getByRole("button", { name: "Cancel", exact: true }));
     const discardDialog = page.getByRole("dialog", {
       name: "Discard your changes?",
       exact: true,
@@ -1175,7 +2261,11 @@ test.describe("Profile editing @auth @medium @local-only", () => {
         44
       );
     }
-    await discard.click();
+    await activate(discard);
+    await expect(aboutInput).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "Edit profile", exact: true })
+    ).toBeFocused();
     await expectNoHorizontalOverflow(page);
   });
 
@@ -1719,6 +2809,59 @@ async function installCollectedArtwork(page: Page) {
   );
 }
 
+async function installCollectedTransferWallet(page: Page) {
+  // Selection requires a connected wallet as well as the seeded profile session.
+  // This isolated provider cannot sign or submit any transaction.
+  await page.addInitScript((address) => {
+    const events = new EventTarget();
+    const provider = {
+      async request({ method }: { method: string }) {
+        switch (method) {
+          case "eth_accounts":
+          case "eth_requestAccounts":
+            return [address];
+          case "eth_chainId":
+            return "0x1";
+          case "net_version":
+            return "1";
+          case "eth_getBalance":
+            return "0x0";
+          default:
+            throw new Error(
+              `Unsupported layout-fixture wallet method: ${method}`
+            );
+        }
+      },
+      on(event: string, listener: EventListener) {
+        events.addEventListener(event, listener);
+      },
+      removeListener(event: string, listener: EventListener) {
+        events.removeEventListener(event, listener);
+      },
+    };
+    const announce = () =>
+      globalThis.dispatchEvent(
+        new CustomEvent("eip6963:announceProvider", {
+          detail: {
+            info: {
+              uuid: "00000000-0000-4000-8000-000000000529",
+              name: "Profile layout QA wallet",
+              icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E",
+              rdns: "io.6529.profile-layout-qa",
+            },
+            provider,
+          },
+        })
+      );
+    Object.defineProperty(globalThis, "ethereum", {
+      value: provider,
+      configurable: true,
+    });
+    globalThis.addEventListener("eip6963:requestProvider", announce);
+    announce();
+  }, WALLET);
+}
+
 async function openOwnCollected(page: Page) {
   await openOwnProfile(page);
   await page
@@ -1775,6 +2918,319 @@ test.describe("Collected personal actions @auth @medium @local-only", () => {
       });
     });
   }
+
+  test("Collected design keeps wrapped metrics, bottom Details and sticky swipe filters", async ({
+    page,
+    baseURL,
+    hasTouch,
+    request,
+  }, testInfo) => {
+    const activate = (control: Locator) =>
+      hasTouch ? control.tap() : control.click();
+    await hideNextDevOverlay(page.context());
+    await seedSession(page);
+    await installCollectedArtwork(page);
+    const api = getSandboxApiOrigin(baseURL);
+    expect(
+      (await request.post(`${api}/__composer-sandbox/collected-stats`)).ok()
+    ).toBe(true);
+    const mobile = (page.viewportSize()?.width ?? 0) < 768;
+    if (!mobile) await installCollectedTransferWallet(page);
+    const summary = page
+      .getByRole("main")
+      .last()
+      .locator('[data-profile-section="Collection summary"]');
+    const filters = page
+      .getByRole("main")
+      .last()
+      .locator('[data-profile-section="Filters"]');
+    try {
+      await finishHostedWalletInitialization(page, () =>
+        page.goto("/playwright/collected?details=closed")
+      );
+      const metricRow = page
+        .getByRole("main")
+        .last()
+        .locator('[data-profile-section="Collection summary"]')
+        .locator('[data-profile-section-anchor="Collection summary"]')
+        .locator(":scope > div");
+      await expect(
+        page
+          .getByRole("main")
+          .last()
+          .locator('[data-profile-section="Collection summary"]')
+          .locator('[data-profile-section-anchor="Collection summary"]')
+          .locator(":scope > div > *")
+      ).toHaveText([
+        "x5,764Memes·unique x578",
+        "x1Meme Sets",
+        "x62NextGen",
+        "x3Gradients",
+        "x1.76Boost",
+      ]);
+      const memes = summary.getByRole("button", { name: /Memes.*unique/ });
+      await expect(memes.getByText("x5,764", { exact: true })).toHaveText(
+        "x5,764"
+      );
+      await expect(memes.getByText("Memes", { exact: true })).toHaveCSS(
+        "text-transform",
+        "none"
+      );
+      await expect(metricRow).toHaveCSS("flex-wrap", "wrap");
+      expect(
+        await metricRow.evaluate((el) => el.scrollWidth - el.clientWidth)
+      ).toBeLessThanOrEqual(1);
+      const details = summary.getByRole("button", {
+        name: "Details",
+        exact: true,
+      });
+      const seasons = summary.getByText("Seasons", { exact: true });
+      const positions = await summary.evaluate((el) => {
+        const season = Array.from(el.querySelectorAll("*")).find(
+          (node) => node.textContent === "Seasons"
+        );
+        const toggle = el.querySelector('[data-profile-action="Details"]');
+        return Boolean(
+          season &&
+          toggle &&
+          season.compareDocumentPosition(toggle) &
+            Node.DOCUMENT_POSITION_FOLLOWING
+        );
+      });
+      expect(positions).toBe(true);
+      await expect(seasons).toBeVisible();
+      await expect(details).toHaveCSS(
+        "width",
+        `${await summary.evaluate((el) => el.clientWidth)}px`
+      );
+      await activate(details);
+      const hide = summary.getByRole("button", {
+        name: "Hide Details",
+        exact: true,
+      });
+      await expect(hide).toHaveAttribute("aria-expanded", "true");
+      await expect(
+        page
+          .getByRole("main")
+          .last()
+          .locator(`[id="${await hide.getAttribute("aria-controls")}"]`)
+      ).toBeVisible();
+      await activate(hide);
+      await expect(details).toHaveAttribute("aria-expanded", "false");
+      for (const [label, collection] of [
+        ["NextGen", "nextgen"],
+        ["Gradients", "gradients"],
+        ["Memes", "memes"],
+      ]) {
+        await activate(
+          summary.getByRole("button", { name: new RegExp(label!) }).first()
+        );
+        await expectUrlState(
+          page,
+          (url) => url.searchParams.get("collection") === collection
+        );
+      }
+      await expect(memes).toHaveAttribute("aria-pressed", "true");
+      await expect(memes.getByText("Memes", { exact: true })).toHaveCSS(
+        "color",
+        "rgb(236, 236, 238)"
+      );
+      const firstCard = page
+        .getByRole("list", { name: "Collected cards", exact: true })
+        .locator("li")
+        .first();
+      await expect(firstCard).toBeVisible();
+      const cardOrder = await firstCard
+        .getByRole("heading", { level: 3 })
+        .evaluate((name) => {
+          const content = name.parentElement!.parentElement!;
+          return Array.from(content.children).map((child) => child.textContent);
+        });
+      expect(cardOrder[0]).toBe("The Memes");
+      expect(cardOrder[1]).toContain("Season 1 artwork 1");
+      expect(cardOrder[2]).toBe("#1");
+      expect(cardOrder[3]).toContain("TDH");
+      await expect(firstCard.getByText("#1", { exact: true })).toHaveCSS(
+        "font-variant-numeric",
+        "normal"
+      );
+      await expect(firstCard.getByText("Rank 1", { exact: true })).toHaveCSS(
+        "background-color",
+        "rgba(0, 0, 0, 0)"
+      );
+      if (mobile) {
+        const scrollRow = page
+          .getByRole("main")
+          .last()
+          .locator('[data-profile-section="Filters"]')
+          .locator('[class*="tw-overflow-x-auto"]');
+        const bounds = await scrollRow.boundingBox();
+        const shell = await page.getByRole("main").last().boundingBox();
+        expect(Math.abs(bounds!.x - shell!.x)).toBeLessThanOrEqual(1);
+        expect(
+          Math.abs(bounds!.x + bounds!.width - shell!.x - shell!.width)
+        ).toBeLessThanOrEqual(1);
+        await expect(
+          filters.getByRole("button", {
+            name: "Scroll filters right",
+            exact: true,
+          })
+        ).toBeHidden();
+        await expect(
+          filters.getByRole("button", {
+            name: "Scroll filters left",
+            exact: true,
+          })
+        ).toBeHidden();
+        const gap = await scrollRow.evaluate((row) => {
+          const content = row.firstElementChild!;
+          const first = content.children[0]!.getBoundingClientRect();
+          const address = content.children[1]!.getBoundingClientRect();
+          return {
+            gap: address.x - first.right,
+            expected: Number.parseFloat(getComputedStyle(content).columnGap),
+          };
+        });
+        expect(gap.gap).toBeCloseTo(gap.expected, 0);
+        await page
+          .getByRole("list", { name: "Collected cards", exact: true })
+          .locator("li")
+          .last()
+          .scrollIntoViewIfNeeded();
+        const sticky = await filters.evaluate((el) => {
+          const tabs = document
+            .querySelector("[data-profile-tabs-scroll]")!
+            .closest("nav")!;
+          return {
+            filterTop: el.getBoundingClientRect().top,
+            tabsBottom: tabs.getBoundingClientRect().bottom,
+            position: getComputedStyle(el).position,
+          };
+        });
+        expect(sticky.position).toBe("sticky");
+        expect(
+          Math.abs(sticky.filterTop - sticky.tabsBottom)
+        ).toBeLessThanOrEqual(1);
+        await scrollRow.evaluate((row) => {
+          row.scrollLeft = row.scrollWidth;
+        });
+        await expectNoHorizontalOverflow(page);
+        await page.screenshot({
+          path: testInfo.outputPath("collected-sticky-filters.png"),
+          animations: "disabled",
+          scale: "css",
+        });
+        await scrollRow.evaluate((row) => {
+          row.scrollLeft = 0;
+        });
+      } else await expect(filters).toHaveCSS("position", "static");
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await expect(memes).toBeVisible();
+      await page.screenshot({
+        path: testInfo.outputPath("collected-design.png"),
+        fullPage: true,
+        animations: "disabled",
+        scale: "css",
+      });
+      const chooseFilter = async (label: string, option: string) => {
+        if (
+          (page.viewportSize()?.width ?? 0) >= 1024 &&
+          label !== "Collection"
+        ) {
+          await activate(
+            filters
+              .getByRole("tablist", { name: label, exact: true })
+              .getByRole("tab", { name: option, exact: true })
+          );
+        } else {
+          await activate(
+            filters.getByRole("button", { name: new RegExp(`^${label}:`) })
+          );
+          await activate(
+            page.getByRole("menuitem", { name: option, exact: true })
+          );
+        }
+      };
+      for (const [label, collection] of [
+        ["Meme Lab", "memelab"],
+        ["All Collections", null],
+        ["The Memes", "memes"],
+      ] as const) {
+        await chooseFilter("Collection", label);
+        await expectUrlState(
+          page,
+          (url) => url.searchParams.get("collection") === collection
+        );
+      }
+      await chooseFilter("Sort By", "Rank");
+      await expectUrlState(
+        page,
+        (url) => url.searchParams.get("sort-by") === "rank"
+      );
+      await page.route("**/api/xtdh/tokens?**", (route) =>
+        route.fulfill({ json: { data: [], page: 1, next: false, count: 0 } })
+      );
+      await page.route("**/api/xtdh/collections?**", (route) =>
+        route.fulfill({ json: { data: [], page: 1, next: false, count: 0 } })
+      );
+      await chooseFilter("View", "Network");
+      await expectUrlState(
+        page,
+        (url) => url.searchParams.get("collection") === "network"
+      );
+      await expect(summary.getByText("Memes", { exact: true })).toBeVisible();
+      await expect(
+        filters.getByRole("button", { name: /^Address:/ })
+      ).toHaveCount(0);
+      await chooseFilter("View", "Native");
+      await expectUrlState(
+        page,
+        (url) => url.searchParams.get("collection") === null
+      );
+      await expect(
+        filters.getByRole("button", { name: /^Address:/ })
+      ).toBeVisible();
+      if (!mobile) {
+        await filters
+          .getByRole("button", { name: "Transfer", exact: true })
+          .click();
+        await expect(
+          filters.getByRole("button", { name: "Exit Transfer", exact: true })
+        ).toBeVisible();
+        await expect(
+          firstCard.getByRole("button", {
+            name: "Select NFT for transfer",
+            exact: true,
+          })
+        ).toBeVisible();
+        await firstCard
+          .getByRole("button", { name: "Select NFT for transfer", exact: true })
+          .click();
+        await expect(
+          firstCard.getByRole("button", {
+            name: "Decrease quantity",
+            exact: true,
+          })
+        ).toBeVisible();
+        await expect(firstCard.getByText("#1", { exact: true })).toBeVisible();
+        await filters
+          .getByRole("button", { name: "Exit Transfer", exact: true })
+          .click();
+      }
+      // A profile with only Boost still has a usable summary and Details toggle.
+      expect(
+        (await request.delete(`${api}/__composer-sandbox/collected-stats`)).ok()
+      ).toBe(true);
+      await page.goto("/following-artist-0/collected?details=closed");
+      await expect(summary.getByText("Boost", { exact: true })).toBeVisible();
+      await expect(summary.getByText("Memes", { exact: true })).toHaveCount(0);
+      await expect(
+        summary.getByRole("button", { name: "Details", exact: true })
+      ).toBeVisible();
+    } finally {
+      await request.delete(`${api}/__composer-sandbox/collected-stats`);
+    }
+  });
 
   test("keeps owner action alignment, filters and Back restoration", async ({
     page,

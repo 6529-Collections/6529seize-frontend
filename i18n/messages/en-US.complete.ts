@@ -10,6 +10,7 @@ import { NETWORK_TDH_CONSOLIDATION_MESSAGES } from "@/i18n/namespaces/network-td
 import { PROVENANCE_GOVERNANCE_MESSAGES } from "@/i18n/namespaces/provenance-governance";
 import { VALIDATOR_AUTHORIZE_MESSAGES } from "@/i18n/namespaces/validator-authorize";
 import { VALIDATOR_FILES_MESSAGES } from "@/i18n/namespaces/validator-files";
+import { WAVE_SIDEBAR_MESSAGES } from "@/i18n/namespaces/wave-sidebar";
 
 /**
  * The complete en-US source dictionary: the root dictionary plus every feature
@@ -35,6 +36,7 @@ export const EN_US_MESSAGES = {
   ...PROVENANCE_GOVERNANCE_MESSAGES,
   ...VALIDATOR_AUTHORIZE_MESSAGES,
   ...VALIDATOR_FILES_MESSAGES,
+  ...WAVE_SIDEBAR_MESSAGES,
 } as const;
 
 export type MessageKey = keyof typeof EN_US_MESSAGES;

@@ -8,8 +8,8 @@ If the target is already loaded, chat scrolls to it.
 If not, chat loads history around that serial and retries.
 
 The target drop gets a temporary highlight.
-When `serialNo` parses as a valid number, chat treats `serialNo` and `divider`
-as one-time setup values and removes them from the URL without reopening chat.
+A valid `serialNo` starts a jump and clears the one-time URL values without reopening chat.
+A `divider` alone sets the unread position for the visit.
 The selected post stays in view as loading finishes or new messages arrive.
 Scrolling, interacting with chat, or starting another jump releases that position.
 
@@ -18,7 +18,7 @@ Scrolling, interacting with chat, or starting another jump releases that positio
 - `/waves/{waveId}`
 - `/messages/{waveId}`
 - Thread query values: `serialNo` and `divider`
-- `divider` is applied only when `serialNo` is valid
+- `serialNo` selects a message and `divider` sets the unread position
 
 ## Entry Points
 
@@ -83,8 +83,6 @@ Scrolling, interacting with chat, or starting another jump releases that positio
 - Serial jump is a navigation aid, not a persistent filtered mode.
 - Target highlight is temporary.
 - Jump completion depends on the target serial existing in accessible history.
-- URL-triggered jump params are one-time setup values only when `serialNo`
-  parses successfully.
 
 ## Related Pages
 

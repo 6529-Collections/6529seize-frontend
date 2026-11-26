@@ -15,12 +15,13 @@ describe("CompactMenu focus", () => {
         onOpenChange={onOpenChange}
         items={[
           { id: "first", label: "First" },
-          { id: "second", label: "Second" },
+          { id: "second", label: "Second", separatorBefore: true },
         ]}
       />
     );
 
     await user.click(screen.getByRole("button", { name: "Options" }));
+    expect(screen.getByRole("separator")).toBeInTheDocument();
     expect(onOpenChange).toHaveBeenLastCalledWith(true);
     await waitFor(() =>
       expect(screen.getByRole("menuitem", { name: "Second" })).toHaveFocus()

@@ -33,7 +33,8 @@ the wave list, active thread header, right-sidebar `About`, and mobile `About`.
 These surfaces show the tile even when Announcements has a saved wave picture.
 
 In non-DM `About` headers, available Score, Quality, Hot, and Wave REP statistics
-use up to two compact columns, with each label beside its icon and value.
+use up to two compact columns, with labels and values aligned across each row.
+The underlined Score label opens score details.
 
 ## Entry Points
 

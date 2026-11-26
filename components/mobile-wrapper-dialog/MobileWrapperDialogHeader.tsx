@@ -1,4 +1,4 @@
-import { DialogTitle } from "@headlessui/react";
+import { Description, DialogTitle } from "@headlessui/react";
 import clsx from "clsx";
 import type { ReactNode, Ref } from "react";
 import MobileWrapperDialogBackButton from "./MobileWrapperDialogBackButton";
@@ -6,6 +6,7 @@ import MobileWrapperDialogCloseButton from "./MobileWrapperDialogCloseButton";
 
 export default function MobileWrapperDialogHeader({
   title,
+  subtitle,
   variant = "default",
   showDesktopCloseButton,
   onClose,
@@ -23,6 +24,7 @@ export default function MobileWrapperDialogHeader({
   disabled = false,
 }: {
   readonly title: string | undefined;
+  readonly subtitle?: string | undefined;
   readonly variant?: "default" | "minimal" | undefined;
   readonly showDesktopCloseButton: boolean;
   readonly onClose: () => void;
@@ -44,7 +46,7 @@ export default function MobileWrapperDialogHeader({
   return (
     <div
       className={clsx(
-        "tw-px-4 sm:tw-px-6",
+        subtitle ? "tw-px-4" : "tw-px-4 sm:tw-px-6",
         hasHeaderDivider && "tw-pb-4",
         className
       )}
@@ -64,7 +66,12 @@ export default function MobileWrapperDialogHeader({
               disabled={disabled}
             />
           )}
-          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-3">
+          <div
+            className={clsx(
+              "tw-flex tw-min-w-0 tw-flex-1",
+              subtitle ? "tw-flex-col" : "tw-items-center tw-gap-3"
+            )}
+          >
             {title && (
               <DialogTitle
                 ref={titleRef}
@@ -79,6 +86,11 @@ export default function MobileWrapperDialogHeader({
               >
                 {title}
               </DialogTitle>
+            )}
+            {subtitle && (
+              <Description className="tw-mb-0 tw-mt-0.5 tw-truncate tw-text-meta tw-leading-5 tw-text-iron-400">
+                {subtitle}
+              </Description>
             )}
             {titleActions !== undefined && titleActions !== null && (
               <div className="tw-flex tw-shrink-0 tw-items-center">
