@@ -46,6 +46,7 @@ import {
   openGifPicker,
 } from "../support/e2ee/giphyFixture";
 import { checkEncryptedPoll } from "../support/e2ee/polls";
+import { expectPinBeforeTimestamp } from "../support/e2ee/pinLayout";
 
 /** A valid 1x1 RGBA PNG (raster images are the only inline type). */
 const PIXEL_PNG_BASE64 =
@@ -593,6 +594,26 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
       "ready"
     );
     await expectMessage(bob.page, incoming);
+    await gotoPath(alice.page, "/messages");
+    const nativeRow = alice.page
+      .getByRole("list", { name: "Encrypted chats" })
+      .getByRole("listitem")
+      .filter({
+        has: alice.page.getByRole("button", {
+          name: "Pin bob to top",
+          exact: true,
+        }),
+      });
+    await expect(nativeRow).toBeVisible();
+    const timeBox = await expectPinBeforeTimestamp(nativeRow);
+    await nativeRow.screenshot({
+      path: testInfo.outputPath("encrypted-row-pin-and-time.png"),
+    });
+    await alice.page.touchscreen.tap(
+      timeBox.x + timeBox.width / 2,
+      timeBox.y + timeBox.height / 2
+    );
+    await expectMessage(alice.page, incoming);
     expect(
       await alice.page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth
@@ -1201,10 +1222,13 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     await expectMessage(bob.page, "An earlier encrypted message");
     await gotoPath(alice.page, ENCRYPTED_ROUTE);
     const row = conversationListRow(alice.page, "bob");
-    const pin = alice.page
+    const pinName = { name: "Pin bob to top", exact: true };
+    const inboxRow = alice.page
       .getByRole("list", { name: "Encrypted chats" })
       .last()
-      .getByRole("button", { name: "Pin bob to top", exact: true });
+      .getByRole("listitem")
+      .filter({ has: alice.page.getByRole("button", pinName) });
+    const pin = inboxRow.getByRole("button", pinName);
     const mobile = isMobileWebProject(testInfo.project.name);
     if (mobile) {
       await expect(pin).toHaveCSS("opacity", "1");
@@ -1218,6 +1242,7 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
       await pin.click();
     }
     await expect(pin).toHaveAttribute("aria-pressed", "true");
+    await expectPinBeforeTimestamp(inboxRow);
     await expect(alice.page).toHaveURL(new RegExp(`${ENCRYPTED_ROUTE}$`, "u"));
     await row.click();
     await expect(alice.page).toHaveURL(oldUrl);
