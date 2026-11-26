@@ -1007,16 +1007,20 @@ for (const platform of ["ios", "android"] as const) {
           )
         )
         .toBeGreaterThan(64);
-      await feed.evaluate((element) => element.scrollTo({ top: 64 }));
       const discover = page.getByRole("link", {
         name: "Discover Waves",
         exact: true,
       });
-      await discover.click({ trial: true });
-      const readingPosition = await feed.evaluate(
-        (element) => element.scrollTop
-      );
-      expect(readingPosition).toBeGreaterThan(0);
+      let readingPosition = 0;
+      // Establish a real reading position after the virtualized layout settles.
+      await expect
+        .poll(async () => {
+          await feed.evaluate((element) => element.scrollTo({ top: 64 }));
+          await discover.click({ trial: true });
+          readingPosition = await feed.evaluate((element) => element.scrollTop);
+          return readingPosition;
+        })
+        .toBeGreaterThan(0);
       await discover.tap();
       await expect(page).toHaveURL(/\/discover\?returnTo=/, {
         timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
@@ -1318,6 +1322,11 @@ test.describe("phone chevron Back", () => {
           ? /Local Composer Sandbox Wave/u
           : /Sandbox Direct Message/u;
       const conversation = `${destination}/${destination === "/waves" ? WAVE : DM}`;
+      if (surface === "web") {
+        // Production serves compiled routes. Keep the setup Back check's 5s
+        // navigation budget independent of first-use dev compilation.
+        expect((await page.request.get(destination)).ok()).toBe(true);
+      }
       await page.goto(conversation, { waitUntil: "domcontentloaded" });
       await expect(
         page.getByRole("textbox", { name: "Write a message" }).last()
