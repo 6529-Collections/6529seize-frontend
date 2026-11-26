@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from "react";
-import { isAddress, parseEther } from "viem";
+import { getAddress, isAddress, parseEther } from "viem";
 import type {
   useSendTransaction,
   useWaitForTransactionReceipt,
@@ -67,6 +67,8 @@ interface UseLaunchClaimWritesParams {
   payArtistAmountWei: bigint | null;
   payArtistResolvedAddressTrimmed: string;
   payArtistAddressValid: boolean;
+  executeManual: (write: () => void, label?: string) => Promise<void>;
+  executePayment: (write: () => void, label?: string) => Promise<void>;
   runConnectedAction: RunConnectedAction;
 }
 
@@ -90,6 +92,8 @@ export function useLaunchClaimWrites({
   payArtistAmountWei,
   payArtistResolvedAddressTrimmed,
   payArtistAddressValid,
+  executeManual,
+  executePayment,
   runConnectedAction,
 }: Readonly<UseLaunchClaimWritesParams>) {
   const {
@@ -115,6 +119,26 @@ export function useLaunchClaimWrites({
     pendingMintingClaimActionRef,
     pendingPayArtistMintingClaimActionRef,
   } = state;
+  const runManual = useCallback(
+    async (
+      write: () => void,
+      actionLabel: string,
+      category: string = actionLabel
+    ) => {
+      try {
+        await executeManual(write, category);
+      } catch (error) {
+        pendingMintingClaimActionRef.current = null;
+        setClaimTxModal((prev) => ({
+          status: "error",
+          message: getErrorMessage(error, "Failed to submit transaction"),
+          actionLabel,
+          airdrop: prev?.airdrop,
+        }));
+      }
+    },
+    [executeManual, pendingMintingClaimActionRef, setClaimTxModal]
+  );
 
   const runClaimWriteForPhase = useCallback(
     ({
@@ -225,22 +249,17 @@ export function useLaunchClaimWrites({
           actionLabel,
         });
         pendingMintingClaimActionRef.current = null;
-        try {
-          claimWrite.writeContract({
-            address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
-            abi: MEMES_MANIFOLD_PROXY_ABI,
-            chainId: forgeMintingChain.id,
-            functionName,
-            args: [forgeMintingContract, BigInt(claimId), claimParameters],
-          });
-        } catch (error) {
-          pendingMintingClaimActionRef.current = null;
-          setClaimTxModal({
-            status: "error",
-            message: getErrorMessage(error, FAILED_SUBMIT_TRANSACTION_MESSAGE),
-            actionLabel,
-          });
-        }
+        void runManual(
+          () =>
+            claimWrite.writeContract({
+              address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
+              abi: MEMES_MANIFOLD_PROXY_ABI,
+              chainId: forgeMintingChain.id,
+              functionName,
+              args: [forgeMintingContract, BigInt(claimId), claimParameters],
+            }),
+          actionLabel
+        );
       });
     },
     [
@@ -250,6 +269,7 @@ export function useLaunchClaimWrites({
       phasePricesEth,
       isInitialized,
       claimWrite,
+      runManual,
       forgeMintingChain.id,
       forgeMintingContract,
       claimId,
@@ -263,6 +283,7 @@ export function useLaunchClaimWrites({
       entries,
       actionLabel,
       mintingClaimAction,
+      manualCategory,
     }: {
       entries: Array<Partial<PhaseAirdrop>> | null;
       actionLabel:
@@ -271,6 +292,7 @@ export function useLaunchClaimWrites({
         | "Airdrop Subscriptions"
         | "Airdrop to Research";
       mintingClaimAction?: string | null;
+      manualCategory?: string;
     }) => {
       if (!isInitialized) {
         setToast({
@@ -318,31 +340,41 @@ export function useLaunchClaimWrites({
         setClaimTxModal({
           status: "confirm_wallet",
           actionLabel,
+          airdrop: {
+            quantity: amounts
+              .reduce((sum, amount) => sum + amount, 0n)
+              .toString(),
+            walletCount: new Set(
+              recipients.map((wallet) => wallet.toLowerCase())
+            ).size,
+          },
         });
         pendingMintingClaimActionRef.current = mintingClaimAction ?? null;
 
-        try {
-          claimWrite.writeContract({
-            address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
-            abi: MEMES_MANIFOLD_PROXY_ABI,
-            chainId: forgeMintingChain.id,
-            functionName: "airdrop",
-            args: [forgeMintingContract, BigInt(claimId), recipients, amounts],
-          });
-        } catch (error) {
-          pendingMintingClaimActionRef.current = null;
-          setClaimTxModal({
-            status: "error",
-            message: getErrorMessage(error, FAILED_SUBMIT_TRANSACTION_MESSAGE),
-            actionLabel,
-          });
-        }
+        void runManual(
+          () =>
+            claimWrite.writeContract({
+              address: MANIFOLD_LAZY_CLAIM_CONTRACT as `0x${string}`,
+              abi: MEMES_MANIFOLD_PROXY_ABI,
+              chainId: forgeMintingChain.id,
+              functionName: "airdrop",
+              args: [
+                forgeMintingContract,
+                BigInt(claimId),
+                recipients,
+                amounts,
+              ],
+            }),
+          actionLabel,
+          manualCategory ?? mintingClaimAction ?? actionLabel
+        );
       });
     },
     [
       isInitialized,
       setToast,
       claimWrite,
+      runManual,
       forgeMintingChain.id,
       forgeMintingContract,
       claimId,
@@ -446,20 +478,28 @@ export function useLaunchClaimWrites({
           mintingClaimAction ?? null;
         payArtistWrite.reset();
 
-        try {
-          payArtistWrite.sendTransaction({
-            chainId: forgeMintingChain.id,
-            to: resolvedAddress,
-            value: amountWei,
-          });
-        } catch (error) {
-          pendingPayArtistMintingClaimActionRef.current = null;
-          setPayArtistTxModal({
-            status: "error",
-            message: getErrorMessage(error, FAILED_SUBMIT_TRANSACTION_MESSAGE),
-            actionLabel: "Pay Artist",
-          });
+        async function submitPayment() {
+          try {
+            await executePayment(() => {
+              payArtistWrite.sendTransaction({
+                chainId: forgeMintingChain.id,
+                to: getAddress(resolvedAddress),
+                value: amountWei,
+              });
+            }, "PAY_ARTIST");
+          } catch (error) {
+            pendingPayArtistMintingClaimActionRef.current = null;
+            setPayArtistTxModal({
+              status: "error",
+              message: getErrorMessage(
+                error,
+                FAILED_SUBMIT_TRANSACTION_MESSAGE
+              ),
+              actionLabel: "Pay Artist",
+            });
+          }
         }
+        void submitPayment();
       });
     },
     [
@@ -473,6 +513,7 @@ export function useLaunchClaimWrites({
       payArtistWrite,
       forgeMintingChain.id,
       runConnectedAction,
+      executePayment,
     ]
   );
 
@@ -575,6 +616,7 @@ export function useLaunchClaimWrites({
     if (claimWrite.error) {
       pendingMintingClaimActionRef.current = null;
       setClaimTxModal((prev) => ({
+        airdrop: prev?.airdrop,
         status: "error",
         message: getErrorMessage(
           claimWrite.error,
@@ -605,6 +647,7 @@ export function useLaunchClaimWrites({
     const txHash = claimWrite.data;
     if (!txHash) return;
     setClaimTxModal((prev) => ({
+      airdrop: prev?.airdrop,
       status: "submitted",
       message: prev?.message,
       txHash,
@@ -632,6 +675,7 @@ export function useLaunchClaimWrites({
     pendingMintingClaimActionRef.current = null;
     refetchOnChainClaim().catch(() => undefined);
     setClaimTxModal((prev) => ({
+      airdrop: prev?.airdrop,
       status: "success",
       txHash,
       actionLabel: prev?.actionLabel,
@@ -681,6 +725,7 @@ export function useLaunchClaimWrites({
     handledClaimWriteErrorTxHashRef.current = txHash;
     pendingMintingClaimActionRef.current = null;
     setClaimTxModal((prev) => ({
+      airdrop: prev?.airdrop,
       status: "error",
       txHash,
       message: getErrorMessage(waitClaimWrite.error, "Transaction failed"),

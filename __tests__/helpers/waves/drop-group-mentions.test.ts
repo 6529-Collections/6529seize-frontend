@@ -6,6 +6,21 @@ import {
 } from "@/helpers/waves/drop-group-mentions";
 
 describe("drop group mentions", () => {
+  it("recognizes the configured Drop Forge alert group without requiring broadcast privileges", () => {
+    expect(
+      getMentionedGroupsFromText("failure @DropForgeOps", false)
+    ).toEqual([ApiDropGroupMention.Drops6529]);
+    expect(getMentionedGroupsFromText("@dropforgeopsextra", false)).toEqual([]);
+    expect(getMentionedGroupsFromText("@drops6529", false)).toEqual([]);
+    expect(
+      markGroupMentionTokens({
+        content: "@dropforgeops",
+        group: ApiDropGroupMention.Drops6529,
+        marker: "**",
+      })
+    ).toBe("**@dropforgeops**");
+  });
+
   it("does not infer group mentions from raw part content", () => {
     const parts: Array<{
       readonly content: string;
