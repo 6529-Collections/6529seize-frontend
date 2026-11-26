@@ -5,9 +5,6 @@ import {
   useWaveRowTouchGestures,
 } from "@/hooks/useWaveRowTouchGestures";
 
-const WAVE_ROW_LONG_PRESS_MS = 450;
-
-const onLongPress = jest.fn();
 const onTogglePin = jest.fn();
 const onSwipe = jest.fn();
 const onNavigate = jest.fn();
@@ -24,7 +21,6 @@ function Harness({
     enabled,
     scope,
     rowRef,
-    onLongPress,
     onTogglePin,
     onSwipe,
   });
@@ -127,56 +123,45 @@ it("toggles only once when crossing the threshold repeatedly", () => {
   expect(onTogglePin).toHaveBeenCalledTimes(1);
 });
 
-it.each(["hold", "move", "release"])(
+it.each(["first move", "next move", "release"])(
   "cancels when disabled before %s",
   (phase) => {
     const view = render(<Harness />);
     const wave = screen.getByRole("link");
     pointer(wave, "pointerdown");
-    if (phase !== "hold") pointer(wave, "pointermove", 180);
+    if (phase !== "first move") pointer(wave, "pointermove", 180);
     view.rerender(<Harness enabled={false} />);
-    if (phase === "move") pointer(wave, "pointermove", 190);
-    act(() => {
-      jest.advanceTimersByTime(600);
-    });
+    if (phase !== "release") pointer(wave, "pointermove", 190);
     pointer(wave, "pointerup", 190);
-    expect(onLongPress).not.toHaveBeenCalled();
     expect(onTogglePin).not.toHaveBeenCalled();
-    if (phase !== "hold") expect(onSwipe).toHaveBeenLastCalledWith(0, true);
+    if (phase === "first move") expect(onSwipe).not.toHaveBeenCalled();
+    else expect(onSwipe).toHaveBeenLastCalledWith(0, true);
   }
 );
 
-it("keeps vertical scrolling out of both gestures for the entire touch", () => {
+it("keeps vertical scrolling out of pin swipes for the entire touch", () => {
   render(<Harness />);
   const wave = screen.getByRole("link");
   pointer(wave, "pointerdown");
   pointer(wave, "pointermove", 103, 120);
   pointer(wave, "pointermove", 200, 140);
-  act(() => {
-    jest.advanceTimersByTime(600);
-  });
   pointer(wave, "pointerup", 200, 140);
-  expect(onLongPress).not.toHaveBeenCalled();
   expect(onTogglePin).not.toHaveBeenCalled();
   expect(onSwipe).not.toHaveBeenCalled();
 });
 
-it("opens the menu after a stationary hold, without pinning or navigating", () => {
+it("leaves a stationary touch release to the row", () => {
   render(<Harness />);
   const wave = screen.getByRole("link");
   pointer(wave, "pointerdown");
   act(() => {
-    jest.advanceTimersByTime(WAVE_ROW_LONG_PRESS_MS - 1);
-  });
-  expect(onLongPress).not.toHaveBeenCalled();
-  act(() => {
-    jest.advanceTimersByTime(1);
+    jest.advanceTimersByTime(600);
   });
   pointer(wave, "pointerup");
   fireEvent.click(wave, { detail: 1 });
-  expect(onLongPress).toHaveBeenCalledTimes(1);
   expect(onTogglePin).not.toHaveBeenCalled();
-  expect(onNavigate).not.toHaveBeenCalled();
+  expect(onSwipe).not.toHaveBeenCalled();
+  expect(onNavigate).toHaveBeenCalledTimes(1);
 });
 
 it.each(["pointercancel", "second finger", "blur"])(
@@ -193,11 +178,8 @@ it.each(["pointercancel", "second finger", "blur"])(
       });
     } else pointer(wave, "pointercancel");
     pointer(wave, "pointerup", 180);
-    act(() => {
-      jest.advanceTimersByTime(600);
-    });
     expect(onTogglePin).not.toHaveBeenCalled();
-    expect(onLongPress).not.toHaveBeenCalled();
+    expect(onSwipe).toHaveBeenLastCalledWith(0, true);
   }
 );
 
@@ -215,30 +197,27 @@ it("leaves mouse, controls, anonymous/disabled rows, and the screen edge alone",
   }
   view.rerender(<Harness enabled={false} />);
   pointer(wave, "pointerdown");
-  act(() => {
-    jest.advanceTimersByTime(600);
-  });
+  pointer(wave, "pointermove", 200);
   pointer(wave, "pointerup", 200);
   expect(onTogglePin).not.toHaveBeenCalled();
-  expect(onLongPress).not.toHaveBeenCalled();
+  expect(onSwipe).not.toHaveBeenCalled();
 });
 
-it("cancels a pending hold when its viewer or row changes or unmounts", () => {
-  const view = render(<Harness />);
-  const wave = screen.getByRole("link");
-  pointer(wave, "pointerdown");
-  view.rerender(<Harness scope="other-viewer" />);
-  act(() => {
-    jest.advanceTimersByTime(600);
-  });
-  expect(onLongPress).not.toHaveBeenCalled();
-  pointer(wave, "pointerdown");
-  view.unmount();
-  act(() => {
-    jest.advanceTimersByTime(600);
-  });
-  expect(onLongPress).not.toHaveBeenCalled();
-});
+it.each(["scope change", "unmount"])(
+  "cancels an active swipe on %s",
+  (reason) => {
+    const view = render(<Harness />);
+    const wave = screen.getByRole("link");
+    pointer(wave, "pointerdown");
+    pointer(wave, "pointermove", 180);
+    if (reason === "scope change")
+      view.rerender(<Harness scope="other-viewer" />);
+    else view.unmount();
+    pointer(document, "pointerup", 180);
+    expect(onSwipe).toHaveBeenLastCalledWith(0, true);
+    expect(onTogglePin).not.toHaveBeenCalled();
+  }
+);
 
 it("adds resistance beyond the threshold", () => {
   expect(resistedWavePinDistance(64)).toBe(64);

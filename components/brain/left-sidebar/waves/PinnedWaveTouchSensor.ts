@@ -5,7 +5,7 @@ interface Options {
   readonly delay: number;
 }
 
-/** A stationary hold belongs to the row menu, not the reorder sensor. */
+/** Vertical movement after a hold starts reordering. Quick swipes can scroll or pin. */
 export class PinnedWaveTouchSensor {
   autoScrollEnabled = true;
   private readonly props: SensorProps<Options>;
@@ -38,14 +38,6 @@ export class PinnedWaveTouchSensor {
   }
 
   private readonly move = (event: TouchEvent) => {
-    const target = this.props.event.target;
-    if (
-      target instanceof Element &&
-      target.closest('[data-wave-menu-open="true"]')
-    ) {
-      this.cancel();
-      return;
-    }
     const touch = event.touches[0];
     if (
       !touch ||
