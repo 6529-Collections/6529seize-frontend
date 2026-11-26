@@ -3,8 +3,9 @@
 ## Overview
 
 One bell menu controls wave notification levels and mute. The bell stays in the
-same place when muted and changes to a bell-slash with the existing rose-toned
-muted-control colours. The unmuted bell stays neutral.
+same place: it rings for `All messages`, stays plain for either mention level,
+and shows a slash when muted with the existing rose-toned muted-control colours.
+The unmuted bell stays neutral.
 
 ## Location in the Site
 

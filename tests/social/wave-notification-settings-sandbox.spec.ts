@@ -342,6 +342,9 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
       await expect(
         choices.getByRole("menuitemradio", { name: ALL })
       ).toBeChecked();
+      await page.screenshot({
+        path: testInfo.outputPath(`notification-all-messages-${surface}.png`),
+      });
       await choices.getByRole("menuitemradio", { name: BROADCAST }).tap();
       await expect(choices).toHaveCount(0);
       await expect(bell).toBeFocused();
