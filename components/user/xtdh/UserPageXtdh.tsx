@@ -129,7 +129,7 @@ export default function UserPageXtdh({ profile }: UserPageXtdhProps) {
 
   return (
     <div
-      className="tailwind-scope tw-group/profile-xtdh tw-flex tw-flex-col tw-gap-6"
+      className="tailwind-scope tw-group/profile-xtdh tw-flex tw-flex-col tw-gap-6 max-md:[&_dt]:tw-tracking-normal"
       data-typography="profile"
     >
       <UserXtdhTestModeBanner />
