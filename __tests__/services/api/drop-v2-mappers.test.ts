@@ -1,9 +1,11 @@
 import type { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
 import {
+  createFallbackWaveMin,
   mapApiWaveOverviewToApiWaveMin,
   mapIdentityOverviewToProfileMin,
 } from "@/services/api/drop-v2-mappers";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
+import { waveMoveSignal } from "@/lib/waves-move/scope";
 
 type ApiWaveOverviewWithVoteRestrictions = ApiWaveOverview & {
   readonly forbid_negative_votes?: boolean;
@@ -34,6 +36,17 @@ const createWaveOverview = (
 });
 
 describe("mapApiWaveOverviewToApiWaveMin", () => {
+  it("preserves the API move signal and leaves it unspecified for fallback waves", () => {
+    const overview = createWaveOverview();
+    const movingWave = { ...overview, stays_on_site: false };
+
+    expect(waveMoveSignal(mapApiWaveOverviewToApiWaveMin(movingWave))).toBe(
+      true
+    );
+    expect(waveMoveSignal(mapApiWaveOverviewToApiWaveMin(overview))).toBeNull();
+    expect(waveMoveSignal(createFallbackWaveMin(overview.id))).toBeNull();
+  });
+
   it("preserves the anonymous author marker when adapting V2 drop identities", () => {
     const profile = mapIdentityOverviewToProfileMin({
       id: "anonymous-entry-profile",
