@@ -15687,7 +15687,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await preset.click();
     await expect(name).toHaveValue("Art");
     await expect(name).toBeFocused();
-    const presetRow = preset.locator("..");
+    const presetRow = curation
+      .getByRole("button", { name: "Art", exact: true })
+      .locator("..");
     if (page.viewportSize()!.width < 768) {
       await name.press("Tab");
       await expect(presetRow.getByRole("button").first()).toBeFocused();
