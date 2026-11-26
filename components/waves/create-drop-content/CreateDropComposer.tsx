@@ -25,6 +25,8 @@ interface CreateDropComposerProps extends CreateDropLayoutProps {
 }
 
 export default function CreateDropComposer({
+  autoFocus = false,
+  onAutoFocusRoot,
   activeDrop,
   submitting,
   wave,
@@ -170,6 +172,8 @@ export default function CreateDropComposer({
           onGifDrop={onGifDrop}
         />
         <CreateDropInput
+          autoFocus={autoFocus}
+          onAutoFocusRoot={onAutoFocusRoot}
           waveId={wave.id}
           key={dropEditorRefreshKey}
           ref={createDropInputRef}

@@ -112,6 +112,10 @@ function applyEffectiveAppPrCiPlan(plan) {
       file.startsWith("components/user/rep/") ||
       file.startsWith("components/user/user-page-header/about/") ||
       file === "components/user/user-page-header/UserPageHeaderClient.tsx" ||
+      file === "components/user/brain/UserPageBrainSidebarMobileStrip.tsx" ||
+      file.startsWith("components/user/waves/") ||
+      file === "components/waves/WaveChip.tsx" ||
+      file === "components/utils/button/iconButtonLayouts.ts" ||
       file.startsWith(
         "components/user/user-page-header/UserPageHeaderEditProfile"
       ) ||
@@ -206,6 +210,14 @@ function applyEffectiveAppPrCiPlan(plan) {
         "tests/social/mobile-gestures-sandbox.spec.ts",
         "hooks/useAndroidBackLayer.ts",
         "hooks/useHorizontalSwipe.ts",
+        "hooks/useWaveRowTouchGestures.ts",
+        "hooks/useSidebarWavePin.ts",
+        "components/brain/left-sidebar/waves/SidebarWaveTouchActions.tsx",
+        "components/brain/left-sidebar/waves/PinnedWaveTouchSensor.ts",
+        "components/brain/left-sidebar/waves/SidebarPinnedWaves.tsx",
+        "components/brain/left-sidebar/waves/BrainLeftSidebarWave.tsx",
+        "components/brain/left-sidebar/web/WebBrainLeftSidebarWave/index.tsx",
+        "components/brain/left-sidebar/web/WebBrainLeftSidebarWave/subcomponents/ExpandedWave.tsx",
         "hooks/useLongPressClickSuppression.ts",
         "hooks/useSwipeToReply.ts",
         "helpers/waves/drop-reply-eligibility.ts",
@@ -273,6 +285,7 @@ function applyEffectiveAppPrCiPlan(plan) {
         "__tests__/components/waves/drops/ArtistActiveSubmissionContent.test.tsx",
         "components/utils/tooltip/BodyPortalTooltip.tsx",
         "components/waves/header/WaveJoinCta.tsx",
+        "components/waves/header/WaveHeaderTrustStats.tsx",
         "components/brain/left-sidebar/waves/BrainLeftSidebarWavePin.tsx",
         "tests/packs.manifest.cjs",
         "openapi.yaml",

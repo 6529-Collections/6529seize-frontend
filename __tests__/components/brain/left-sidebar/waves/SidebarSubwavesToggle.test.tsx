@@ -6,16 +6,12 @@ const renderToggle = (
   props: Partial<ComponentProps<typeof SidebarSubwavesToggle>> = {}
 ) => {
   const onClick = jest.fn();
-
   render(
     <SidebarSubwavesToggle
       isExpanded={false}
       isLoading={false}
-      knownSubwavesCount={null}
-      layoutVariant="app"
       onClick={onClick}
       parentWaveName="Parent Wave"
-      showConnector={false}
       unreadDropsCount={0}
       {...props}
     />
@@ -25,113 +21,61 @@ const renderToggle = (
 };
 
 describe("SidebarSubwavesToggle", () => {
-  it("renders the collapsed unknown-count label and handles clicks", () => {
+  it("shows a right-pointing chevron in the collapsed state", () => {
     const { onClick } = renderToggle();
-
     const button = screen.getByRole("button", {
-      name: "View Parent Wave subwaves",
+      name: "Expand Parent Wave subwaves",
+      expanded: false,
     });
 
-    expect(button).toHaveAttribute("aria-expanded", "false");
-    expect(screen.getByText("View subwaves")).toBeInTheDocument();
+    expect(button).toHaveTextContent(/^$/);
+    expect(button.querySelector("svg")).not.toHaveClass("tw-rotate-90");
+    expect(button.querySelector(".tw-bg-primary-400")).toBeNull();
+    expect(button).toHaveClass("touch-only:tw-size-11");
+    expect(button).toHaveClass("focus-visible:tw-outline-primary-400");
 
     fireEvent.click(button);
-
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
-  it("renders known subwave count and unread badge", () => {
-    renderToggle({
-      knownSubwavesCount: 2,
-      unreadDropsCount: 5,
-    });
-
-    expect(
-      screen.getByRole("button", {
-        name: "View 2 subwaves for Parent Wave",
-      })
-    ).toBeInTheDocument();
-    expect(screen.getByText("View 2 subwaves")).toBeInTheDocument();
-    expect(screen.getByText("5 new")).toBeInTheDocument();
-  });
-
-  it("uses a subtle iron surface while matching unread badge styling", () => {
-    renderToggle({
-      knownSubwavesCount: 2,
-      unreadDropsCount: 5,
-    });
-
+  it("shows an unnumbered dot for unread collapsed subwaves and keeps the count on hover", () => {
+    renderToggle({ unreadDropsCount: 101 });
     const button = screen.getByRole("button", {
-      name: "View 2 subwaves for Parent Wave",
+      name: "Expand Parent Wave subwaves",
     });
-    const unreadBadge = screen.getByText("5 new");
-    const wrapper = button.parentElement;
 
-    expect(wrapper).toHaveClass("tw-pl-[74px]");
-    expect(wrapper).toHaveClass("md:tw-pl-[70px]");
-    expect(wrapper).toHaveClass("tw-pr-5");
-    expect(wrapper).toHaveClass("tw-min-h-[42px]");
-    expect(wrapper).toHaveClass("tw-pb-2");
-    expect(wrapper).not.toHaveClass("tw-px-5");
-    expect(button).not.toHaveClass("tw-h-8");
-    expect(button).toHaveClass("tw-rounded-lg");
-    expect(button).toHaveClass("tw-border-iron-700/80");
-    expect(button).toHaveClass("tw-bg-iron-950");
-    expect(button).toHaveClass("tw-px-2.5");
-    expect(button).toHaveClass("tw-py-1");
-    expect(button).toHaveClass("tw-text-xs");
-    expect(button).toHaveClass("tw-font-medium");
-    expect(button).toHaveClass("tw-text-iron-300");
-    expect(button).not.toHaveClass(
-      "tw-shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]"
-    );
-    expect(button).toHaveClass("desktop-hover:hover:tw-border-iron-650");
-    expect(button).toHaveClass("desktop-hover:hover:tw-bg-iron-900");
-    expect(button).toHaveClass("desktop-hover:hover:tw-text-white");
-    expect(button).toHaveClass("focus-visible:tw-outline-primary-400");
-    expect(button).not.toHaveClass("tw-bg-primary-500/10");
-    expect(unreadBadge).toHaveClass("tw-h-[18px]");
-    expect(unreadBadge).toHaveClass("tw-min-w-[18px]");
-    expect(unreadBadge).toHaveClass("tw-rounded-full");
-    expect(unreadBadge).toHaveClass("tw-bg-primary-500");
-    expect(unreadBadge).toHaveClass("tw-text-[10px]");
-    expect(unreadBadge).not.toHaveClass(
-      "tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
-    );
+    const dot = button.querySelector(".tw-bg-primary-400");
+    expect(dot).toHaveClass("tw-size-1.5", "tw-rounded-full");
+    expect(dot).toBeEmptyDOMElement();
+    expect(button).toHaveAttribute("title", "99+ new in subwaves");
+    expect(button).toHaveAccessibleDescription("99+ new in subwaves");
+    expect(screen.getByText("99+ new in subwaves")).toHaveClass("tw-sr-only");
+    expect(screen.queryByText("99+", { exact: true })).not.toBeInTheDocument();
   });
 
-  it("renders the loading state", () => {
+  it("keeps the busy control focusable while loading", () => {
     const { onClick } = renderToggle({ isLoading: true });
-
     const button = screen.getByRole("button", {
       name: "Loading Parent Wave subwaves",
     });
 
     expect(button).toHaveAttribute("aria-busy", "true");
-    expect(button).toBeDisabled();
-    expect(screen.getByText("Loading subwaves")).toBeInTheDocument();
-
+    expect(button).toHaveAttribute("aria-disabled", "true");
+    expect(button).toBeEnabled();
     fireEvent.click(button);
-
     expect(onClick).not.toHaveBeenCalled();
   });
 
-  it("renders the expanded state", () => {
-    renderToggle({ isExpanded: true, knownSubwavesCount: 1 });
-
+  it("points down and can collapse when the list is expanded", () => {
+    const { onClick } = renderToggle({ isExpanded: true, unreadDropsCount: 3 });
     const button = screen.getByRole("button", {
-      name: "Hide Parent Wave subwaves",
+      name: "Collapse Parent Wave subwaves",
+      expanded: true,
     });
-    const wrapper = button.parentElement;
 
-    expect(button).toHaveAttribute("aria-expanded", "true");
-    expect(wrapper).toHaveClass("tw-min-h-[38px]");
-    expect(wrapper).toHaveClass("tw-pb-1");
-    expect(
-      screen.getByRole("button", {
-        name: "Hide Parent Wave subwaves",
-      })
-    ).toBeInTheDocument();
-    expect(screen.getByText("Hide subwaves")).toBeInTheDocument();
+    expect(button.querySelector("svg")).toHaveClass("tw-rotate-90");
+    expect(button.querySelector(".tw-bg-primary-400")).toBeNull();
+    fireEvent.click(button);
+    expect(onClick).toHaveBeenCalledTimes(1);
   });
 });

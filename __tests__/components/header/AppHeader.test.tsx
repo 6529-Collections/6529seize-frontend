@@ -38,12 +38,15 @@ jest.mock("@/components/header/header-search/HeaderSearchButton", () => ({
   default: ({
     wave,
     additionalMenuItems,
+    morePresentation,
   }: {
     wave: { id: string } | null;
     additionalMenuItems?: { id: string; href?: string }[];
+    morePresentation?: string;
   }) => (
     <div
       data-testid="search"
+      data-more-presentation={morePresentation}
       data-wave-id={wave?.id ?? ""}
       data-menu-items={additionalMenuItems?.map((item) => item.id).join(",")}
       data-profile-feed-href={
@@ -1294,6 +1297,10 @@ describe("AppHeader", () => {
       expect(screen.getByTestId("search")).toHaveAttribute(
         "data-menu-items",
         "profile-feed,share-page"
+      );
+      expect(screen.getByTestId("search")).toHaveAttribute(
+        "data-more-presentation",
+        "sheet"
       );
       expect(screen.getByTestId("search")).toHaveAttribute(
         "data-profile-feed-href",

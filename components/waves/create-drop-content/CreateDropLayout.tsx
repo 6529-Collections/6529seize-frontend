@@ -40,6 +40,8 @@ const TermsSignatureFlow = dynamic(
 );
 
 export interface CreateDropLayoutProps {
+  readonly autoFocus?: boolean | undefined;
+  readonly onAutoFocusRoot?: ((root: HTMLElement | null) => void) | undefined;
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
   readonly dropId: string | null;

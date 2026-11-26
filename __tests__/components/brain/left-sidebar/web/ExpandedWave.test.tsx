@@ -109,7 +109,7 @@ describe("ExpandedWave", () => {
     expect(
       screen.queryByRole("button", { name: "Expand Chat Wave subwaves" })
     ).not.toBeInTheDocument();
-    expect(row).toHaveClass("tw-px-5");
+    expect(row).toHaveClass("tw-pl-8", "touch-only:tw-pl-12");
     expect(row).toHaveClass("tw-gap-x-4");
     expect(row).toHaveClass("tw-items-center");
     expect(row).not.toHaveClass("tw-items-start");
@@ -138,7 +138,7 @@ describe("ExpandedWave", () => {
       screen.queryByRole("button", { name: "Expand Chat Wave subwaves" })
     ).not.toBeInTheDocument();
     expect(getWaveRow().querySelector(".tw-bg-primary-400")).toBeNull();
-    expect(getWaveRow()).toHaveClass("tw-px-5");
+    expect(getWaveRow()).toHaveClass("tw-pl-8", "touch-only:tw-pl-12");
     expect(getWaveRow()).toHaveClass("tw-gap-x-4");
     expect(getWaveRow()).toHaveClass("tw-items-center");
     expect(getWaveRow()).not.toHaveClass("tw-items-start");
@@ -197,8 +197,8 @@ describe("ExpandedWave", () => {
     expect(
       screen.queryByRole("button", { name: "Expand Chat Wave subwaves" })
     ).not.toBeInTheDocument();
-    expect(getWaveRow()).toHaveClass("tw-pl-[74px]");
-    expect(getWaveRow()).toHaveClass("md:tw-pl-[66px]");
+    expect(getWaveRow()).toHaveClass("tw-pl-[86px]");
+    expect(getWaveRow()).toHaveClass("md:tw-pl-[78px]");
     expect(screen.getByTestId("wave-picture").parentElement).toHaveClass(
       "tw-size-7"
     );
@@ -207,7 +207,7 @@ describe("ExpandedWave", () => {
       '[class~="tw-top-1/2"][class~="tw-bottom-0"]'
     );
     expect(elbow).not.toBeNull();
-    expect(elbow).toHaveClass("tw-left-9");
+    expect(elbow).toHaveClass("tw-left-12");
     expect(elbow).not.toHaveClass("md:tw-left-11");
     expect(elbow).toHaveClass("tw-top-0");
     expect(elbow).toHaveClass("tw-h-1/2");

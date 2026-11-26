@@ -7,7 +7,7 @@ This is the canonical owner for Waves and Messages list-row metadata.
 - row name labels and tooltip rules
 - `Last drop` visibility, timestamp source, and refresh behavior
 - live unread/new-drop behavior that updates row badges and divider jumps
-- aggregate unread badges on parent rows with subwaves
+- unread activity indicators on parent rows with subwaves
 
 Legacy tooltip-only links should resolve here.
 
@@ -80,9 +80,9 @@ the line stays hidden.
 
 ### Parent Subwave Unread Count
 
-- A parent row with subwaves can show a `new` badge beside the expand/collapse
-  control.
-- The badge totals unread drops across visible subwaves that you follow and
+- A small blue dot beside the collapsed chevron signals unread subwaves. Hover
+  over the chevron to see the total.
+- The total counts unread drops across visible subwaves that you follow and
   have not muted. Subwaves you have not joined or followed do not count.
 - The total excludes your own drops and drops from muted profiles.
 - Muting the parent hides the aggregate. Muting an individual subwave removes

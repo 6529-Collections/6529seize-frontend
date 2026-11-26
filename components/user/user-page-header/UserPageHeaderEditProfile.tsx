@@ -39,11 +39,13 @@ export default function UserPageHeaderEditProfile({
   statement,
   defaultBanner1,
   defaultBanner2,
+  onRestoreFocus,
 }: Readonly<{
   profile: ApiIdentity;
   statement: CicStatement | null;
   defaultBanner1: string;
   defaultBanner2: string;
+  onRestoreFocus?: () => void;
 }>) {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const viewRef = useRef<HTMLDivElement>(null);
@@ -104,7 +106,9 @@ export default function UserPageHeaderEditProfile({
   const finishDialogLeave = () => {
     setActiveTarget(null);
     setIsEditorBusy(false);
-    globalThis.requestAnimationFrame(() => triggerRef.current?.focus());
+    globalThis.requestAnimationFrame(
+      onRestoreFocus ?? (() => triggerRef.current?.focus())
+    );
   };
 
   useEffect(() => {
@@ -141,6 +145,7 @@ export default function UserPageHeaderEditProfile({
     <>
       <Button
         ref={triggerRef}
+        data-profile-edit-trigger
         variant="tertiary"
         size={null}
         onClick={openMenu}
