@@ -335,25 +335,35 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
   return (
     <div className="tw-flex tw-min-h-full tw-flex-col tw-gap-6 tw-p-4 tw-@container/rep md:tw-gap-5">
       <section aria-label={detailText("waves.rep.details.summary.title")}>
-        <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-900/40">
-          <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-3 tw-px-3 tw-py-2.5">
+        <div className="tw-flex tw-flex-col tw-gap-1">
+          <div className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-rounded-lg tw-bg-white/[0.04] tw-px-3 tw-py-2.5">
             <div className="tw-min-w-0">
-              <p className="tw-m-0 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-500">
+              <p className="tw-mb-0.5 tw-mt-0 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-500">
                 {detailText("waves.rep.details.summary.total")}
               </p>
-              <p className="tw-m-0 tw-text-xs tw-leading-4 tw-text-iron-500">
-                {getContributorCountLabel(summary.contributorCount)}
+              <p
+                className={`tw-m-0 tw-text-sm tw-font-medium tw-leading-5 ${getRepTextClass(
+                  summary.totalRep
+                )}`}
+              >
+                {formatSignedRep(summary.totalRep)}
               </p>
             </div>
-            <span
-              className={`tw-text-sm tw-font-medium tw-leading-5 ${getRepTextClass(
-                summary.totalRep
-              )}`}
-            >
-              {formatSignedRep(summary.totalRep)}
+            <span className="tw-text-right tw-text-[13px] tw-leading-[18px] tw-text-iron-500">
+              {getContributorCountLabel(summary.contributorCount)}
             </span>
           </div>
-          <div className="tw-grid tw-grid-cols-1 tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/[0.06] tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] @[18rem]/rep:tw-grid-cols-3 @[18rem]/rep:tw-divide-x @[18rem]/rep:tw-divide-y-0">
+          <div className="tw-grid tw-grid-cols-1 tw-gap-1 @[18rem]/rep:tw-grid-cols-3">
+            <SummaryStat
+              label={detailText("waves.rep.details.summary.positive")}
+              value={formatSignedRep(summary.positiveRep)}
+              toneClassName={getRepTextClass(summary.positiveRep)}
+            />
+            <SummaryStat
+              label={detailText("waves.rep.details.summary.negative")}
+              value={formatSignedRep(summary.negativeRep)}
+              toneClassName={getRepTextClass(summary.negativeRep)}
+            />
             <SummaryStat
               label={detailText("waves.rep.details.summary.yourRep")}
               value={
@@ -364,16 +374,6 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
               toneClassName={getRepTextClass(
                 summary.authenticatedUserContribution ?? 0
               )}
-            />
-            <SummaryStat
-              label={detailText("waves.rep.details.summary.positive")}
-              value={formatSignedRep(summary.positiveRep)}
-              toneClassName={getRepTextClass(summary.positiveRep)}
-            />
-            <SummaryStat
-              label={detailText("waves.rep.details.summary.negative")}
-              value={formatSignedRep(summary.negativeRep)}
-              toneClassName={getRepTextClass(summary.negativeRep)}
             />
           </div>
         </div>
@@ -669,7 +669,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
           )}
 
           {logs.length > 0 && (
-            <div className="tw--mx-2 tw-flex tw-flex-col">
+            <div className="tw-flex tw-flex-col">
               {logs.map((log) => (
                 <LogRow key={log.id} log={log} />
               ))}

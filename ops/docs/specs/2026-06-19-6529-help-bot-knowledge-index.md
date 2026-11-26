@@ -60,8 +60,9 @@ for Additional Media and Promo Video in submission details. Additional Media
 keeps original video downloads deferred until Play; Promo Video retains metadata
 preloading.
 
-The `waves.about-sections` record describes the REP summary card, category search
-and contributors, and the activity rows with signed changes, rating transitions,
+The `waves.about-sections` record describes the widest Total summary block,
+followed by separate Positive, Negative and Your REP blocks, category search and
+contributors, and the activity rows with signed changes, rating transitions,
 timestamps and optional reasons.
 
 The `waves.native-competitions` record covers optional anonymous submissions,

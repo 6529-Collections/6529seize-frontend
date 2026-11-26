@@ -16346,12 +16346,23 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     });
   }
 
-  test("keeps Wave REP readable and aligned across panel widths", async ({
+  test("keeps Wave information readable and aligned across About REP and Configuration", async ({
     page,
   }, testInfo) => {
     const sandbox = await installCompetitionApi(page);
     sandbox.onlyCompetition("alpha");
-    await sandbox.legacyPrimary("alpha");
+    const wave = await sandbox.legacyPrimary("alpha");
+    wave.description_drop.moderation = { status: "VISIBLE", can_view: true };
+    wave.wave_score = {
+      visibility_score: 96,
+      quality_score: 95,
+      hotness_score: 98,
+      rep_sort_score: 85,
+    };
+    wave.wave_rep = {
+      total_rep: 42,
+      authenticated_user_contribution: 0,
+    };
     const contributor = {
       contribution: 47,
       profile: {
@@ -16418,6 +16429,37 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     );
     await page.goto(`/waves/${WAVE}?tab=chat`);
     const information = await openWaveInformation(page);
+    const aboutContent = information
+      .getByTestId("wave-creation-date")
+      .locator("..");
+    await aboutContent.scrollIntoViewIfNeeded();
+    const contentBounds = await aboutContent.boundingBox();
+    expect(contentBounds).not.toBeNull();
+    const tabsBounds = await information.getByRole("tablist").boundingBox();
+    expect(tabsBounds!.x).toBeCloseTo(contentBounds!.x, 0);
+    const statsBounds = await information
+      .getByLabel("Wave trust stats", { exact: true })
+      .locator(":scope > div")
+      .first()
+      .boundingBox();
+    expect(statsBounds!.x).toBeCloseTo(contentBounds!.x, 0);
+    const pinned = information.getByRole("region", {
+      name: "Pinned drop",
+      exact: true,
+    });
+    const pinnedAvatar = pinned
+      .getByRole("link", { name: /^View .+'s profile$/ })
+      .first();
+    await expect(pinnedAvatar).toHaveCSS("width", "32px");
+    await expect(pinnedAvatar).toHaveCSS("height", "32px");
+    const avatarBounds = await pinnedAvatar.boundingBox();
+    expect(avatarBounds!.x).toBeCloseTo(contentBounds!.x, 0);
+    await expect(
+      pinned.getByRole("link", { name: "playwright", exact: true })
+    ).toHaveCSS("font-size", "14px");
+    await information.screenshot({
+      path: testInfo.outputPath("about-compact-pinned-post.png"),
+    });
     await information.getByRole("tab", { name: "REP", exact: true }).click();
     const summary = information.getByRole("region", {
       name: "Wave REP",
@@ -16451,6 +16493,8 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     );
     const searchBounds = await search.boundingBox();
     expect(searchBounds).not.toBeNull();
+    expect(searchBounds!.x).toBeCloseTo(contentBounds!.x, 0);
+    expect(searchBounds!.width).toBeCloseTo(contentBounds!.width, 0);
     const contributors = information.getByRole("region", {
       name: "All contributors by Wave REP",
       exact: true,
@@ -16498,6 +16542,48 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       "font-size",
       "13px"
     );
+    const total = summary
+      .getByText("Total", { exact: true })
+      .locator("..")
+      .locator("..");
+    await expect(total).toHaveCSS("border-radius", "8px");
+    await expect(total).toHaveCSS("border-width", "0px");
+    await expect(total.getByText("+42", { exact: true })).toHaveCSS(
+      "font-size",
+      "14px"
+    );
+    await expect(total.getByText("2 contributors", { exact: true })).toHaveCSS(
+      "font-size",
+      "13px"
+    );
+    const totalLayout = await total.evaluate((block) => {
+      const [content, count] = Array.from(block.children);
+      const [label, value] = Array.from(content!.children);
+      return {
+        valueBelowLabel:
+          value!.getBoundingClientRect().top >=
+          label!.getBoundingClientRect().bottom,
+        countOnRight:
+          count!.getBoundingClientRect().left >
+          content!.getBoundingClientRect().right,
+      };
+    });
+    expect(totalLayout).toEqual({ valueBelowLabel: true, countOnRight: true });
+    const stats = summary
+      .getByText("Your REP", { exact: true })
+      .locator("..")
+      .locator("..");
+    const statAppearance = await stats.evaluate((grid) =>
+      Array.from(grid.children).map((tile) => ({
+        label: tile.firstElementChild?.textContent?.trim(),
+        radius: getComputedStyle(tile).borderRadius,
+      }))
+    );
+    expect(statAppearance).toEqual([
+      { label: "Positive", radius: "8px" },
+      { label: "Negative", radius: "8px" },
+      { label: "Your REP", radius: "8px" },
+    ]);
     await information.screenshot({
       path: testInfo.outputPath("rep-contributors.png"),
     });
@@ -16506,10 +16592,6 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await summary.evaluate((section) => {
       section.parentElement!.style.width = "272px";
     });
-    const stats = summary
-      .getByText("Your REP", { exact: true })
-      .locator("..")
-      .locator("..");
     await expect(stats).toHaveCSS("grid-template-columns", /^\S+$/);
     await information.screenshot({
       path: testInfo.outputPath("rep-narrow-summary.png"),
@@ -16530,6 +16612,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       .getByRole("link", { name: "playwright", exact: true })
       .locator("..")
       .locator("..");
+    const activityBounds = await positive.boundingBox();
+    expect(activityBounds!.x).toBeCloseTo(contentBounds!.x, 0);
+    expect(activityBounds!.width).toBeCloseTo(contentBounds!.width, 0);
     await expect(positive.getByText("+21", { exact: true })).toHaveCSS(
       "font-size",
       "14px"
@@ -16566,6 +16651,45 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await activity.scrollIntoViewIfNeeded();
     await information.screenshot({
       path: testInfo.outputPath("rep-activity.png"),
+    });
+    await information
+      .getByRole("tab", { name: "Configuration", exact: true })
+      .click();
+    await expect(
+      information.getByRole("heading", { name: "Chat", exact: true })
+    ).toBeVisible();
+    const configurationInsets = await information
+      .getByRole("heading", { level: 2 })
+      .evaluateAll((headings) =>
+        headings.flatMap((heading) => {
+          const section = heading.closest("section");
+          // The mobile panel title sits outside the content sections.
+          if (!section) return [];
+          const block = section.getBoundingClientRect();
+          return Array.from(section.children)
+            .map((child) => child.getBoundingClientRect())
+            .filter((child) => child.width > 0)
+            .map((child) => ({
+              left: child.left - block.left,
+              right: block.right - child.right,
+            }));
+        })
+      );
+    expect(configurationInsets.length).toBeGreaterThan(0);
+    for (const inset of configurationInsets) {
+      expect(inset.left).toBeCloseTo(16, 0);
+      expect(inset.right).toBeCloseTo(16, 0);
+    }
+    const deleteBounds = await information
+      .getByRole("button", {
+        name: "Delete all my messages from this wave",
+        exact: true,
+      })
+      .boundingBox();
+    expect(deleteBounds!.x).toBeCloseTo(contentBounds!.x, 0);
+    expect(deleteBounds!.width).toBeCloseTo(contentBounds!.width, 0);
+    await information.screenshot({
+      path: testInfo.outputPath("configuration-block-padding.png"),
     });
     await expectNoHorizontalOverflow(page);
   });

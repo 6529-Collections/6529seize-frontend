@@ -20,7 +20,7 @@ export default function WavePanelSection({
         <h2 className={WAVE_PANEL_SECTION_HEADING_CLASS_NAME}>{title}</h2>
         {titleAccessory}
       </div>
-      <div className="tw--mx-2 tw-mt-2 tw-flex tw-flex-col tw-gap-y-0.5">
+      <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-y-0.5">
         {children}
       </div>
     </section>

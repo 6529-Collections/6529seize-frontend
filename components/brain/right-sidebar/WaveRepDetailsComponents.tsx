@@ -116,13 +116,13 @@ export function SummaryStat({
   readonly toneClassName?: string | undefined;
 }) {
   return (
-    <div className="tw-min-w-0 tw-px-3 tw-pb-2.5 tw-pt-2">
-      <p className="tw-mb-0.5 tw-mt-0 tw-text-[13px] tw-leading-[18px] tw-text-iron-500">
+    <div className="tw-min-w-0 tw-rounded-lg tw-bg-white/[0.04] tw-px-3 tw-pb-2.5 tw-pt-2">
+      <p className="tw-mb-0.5 tw-mt-0 tw-text-[13px] tw-font-normal tw-leading-[18px] tw-text-iron-500">
         {label}
       </p>
       <p
         title={value}
-        className={`tw-mb-0 tw-mt-0 tw-break-all tw-text-[13px] tw-font-medium tw-leading-[18px] ${toneClassName}`}
+        className={`tw-m-0 tw-break-all tw-text-[13px] tw-font-medium tw-leading-[18px] ${toneClassName}`}
       >
         {value}
       </p>

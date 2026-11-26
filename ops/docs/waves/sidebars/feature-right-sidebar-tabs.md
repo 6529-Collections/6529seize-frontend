@@ -15,7 +15,8 @@ decision routes.
 
 Select the wave name to open **About**. On phones the conversation avatar opens the same view; its score badge is display-only. Select **Score** in About statistics for the breakdown and **Learn more**. Desktop also provides **Show right
 sidebar**. About includes the creator, creation date, share control, and current
-pinned drop with its content and media. Eligible viewers can add or edit REP.
+pinned drop with its content and media. The pinned post uses a compact avatar,
+author name, and timestamp. Eligible viewers can add or edit REP.
 Pinned storms keep their reactions clearly separated from the part navigation.
 
 Header search, clock, and sidebar toggles use transparent, borderless icon
@@ -38,11 +39,11 @@ Pin and mute use matching compact dark button surfaces.
 
 - The section order is About, REP, Configuration. Desktop and mobile use the
   same compact pill styling for these sections.
-- In REP, Total and the contributor count share one summary card with Your REP,
-  Positive, and Negative below. Activity puts each rater and signed change above
-  the category, previous and new ratings, and time. Contributors and Activity
-  use pill buttons. Category search filters categories; select one to view its
-  contributors.
+- In REP, Total and the contributor count share the widest summary block, with
+  Positive, Negative, and Your REP in separate blocks below. Activity puts each
+  rater and signed change above the category, previous and new ratings, and time.
+  Contributors and Activity use pill buttons. Category search filters categories;
+  select one to view its contributors.
 - Configuration owns wave access, chat availability, links, slow mode, replies,
   curation management, chat history deletion and personal display preferences.
 - Chat setting rows use spacing without individual divider lines; section
