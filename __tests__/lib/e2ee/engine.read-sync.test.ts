@@ -6,6 +6,7 @@
  */
 import type { E2eeApiClient } from "@/lib/e2ee/api";
 import { base64ToBytes } from "@/lib/e2ee/bytes";
+import type { ConversationPinRank } from "@/lib/e2ee/conversation-pins";
 import type { EngineContext } from "@/lib/e2ee/engine/context";
 import { createConversation } from "@/lib/e2ee/engine/membership";
 import type { ReadSync } from "@/lib/e2ee/engine/read-sync";
@@ -159,6 +160,91 @@ describe("E2EE engine: read-state sync (D175, P60)", () => {
     const newcomer = await addSyncDevice(world, alice, { readSync: false });
     await settle(world);
     expect(newcomer.engine.getConversation(g)?.pinned).toBe(true);
+    expect(newcomer.engine.getConversation(g)?.pinPosition).toBe(0);
+  });
+
+  it("syncs pinned order to another device and puts new pins and re-pins last", async () => {
+    const world = await createWorld();
+    const { bob, laptop, phone, g } = await aliceWithTwoDevices(world);
+    const group = await laptop.engine.createConversation({
+      profileIds: [bob.profileId],
+      kind: "group",
+    });
+    await settle(world);
+    await laptop.engine.setConversationPinned(g, true);
+    await laptop.engine.setConversationPinned(group, true);
+    const positions = (device: TestDevice) =>
+      [g, group].map(
+        (chat) => device.engine.getConversation(chat)?.pinPosition
+      );
+    await settle(world);
+    expect(positions(phone)).toEqual([0, 1]);
+
+    await laptop.engine.moveConversationPin(
+      `group:${group}`,
+      `dm:${bob.profileId}`
+    );
+    expect(positions(laptop)).toEqual([1, 0]);
+    await settle(world);
+    expect(positions(phone)).toEqual([1, 0]);
+    expect(positions(bob.primary)).toEqual([undefined, undefined]);
+
+    await Promise.all([
+      laptop.engine.moveConversationPin(
+        `dm:${bob.profileId}`,
+        `group:${group}`
+      ),
+      phone.engine.setConversationPinned(g, false),
+    ]);
+    await settle(world);
+    expect(laptop.engine.getConversation(g)?.pinned).toBeUndefined();
+    expect(phone.engine.getConversation(g)?.pinned).toBeUndefined();
+    await phone.engine.setConversationPinned(g, true);
+    await settle(world);
+    expect(positions(laptop)).toEqual([1, 0]);
+  });
+
+  it("settles on one order when two devices reorder the same pins concurrently", async () => {
+    const world = await createWorld();
+    const { bob, laptop, phone, g } = await aliceWithTwoDevices(world);
+    const createGroup = () =>
+      laptop.engine.createConversation({
+        profileIds: [bob.profileId],
+        kind: "group",
+      });
+    const first = await createGroup();
+    const second = await createGroup();
+    const chats = [g, first, second];
+    await settle(world);
+    for (const chat of chats)
+      await laptop.engine.setConversationPinned(chat, true);
+    await settle(world);
+
+    const positions = (device: TestDevice) =>
+      chats.map((chat) => device.engine.getConversation(chat)?.pinPosition);
+    await Promise.all([
+      laptop.engine.moveConversationPin(
+        `group:${second}`,
+        `dm:${bob.profileId}`
+      ),
+      phone.engine.moveConversationPin(`group:${first}`, `dm:${bob.profileId}`),
+    ]);
+    const competing = [positions(laptop), positions(phone)];
+    expect(competing).toEqual([
+      [1, 2, 0],
+      [1, 0, 2],
+    ]);
+    const dmThread = `dm:${bob.profileId}`;
+    const rank = (device: TestDevice) =>
+      contextOf(device).device?.conversationPins?.ranks?.[dmThread];
+    const laptopRank = rank(laptop);
+    const phoneRank = rank(phone);
+    if (!laptopRank || !phoneRank) throw new Error("missing pin order");
+    expect(laptopRank[1]).toBe(phoneRank[1]);
+    const expected = laptopRank[2] > phoneRank[2] ? competing[0] : competing[1];
+    await settle(world);
+    expect(positions(laptop)).toEqual(expected);
+    expect(positions(phone)).toEqual(expected);
   });
 
   it("shares a received pin with a new device while local apply is delayed", async () => {
@@ -235,6 +321,55 @@ describe("E2EE engine: read-state sync (D175, P60)", () => {
 
     expect(ctx.timers.has("read-sync:send")).toBe(true);
     await waitUntil(() => !pins.hasPending());
+  });
+
+  it("keeps a newer reorder pending while acknowledging an older flush", async () => {
+    const world = await createWorld();
+    const { bob, laptop, phone, g } = await aliceWithTwoDevices(world);
+    const group = await laptop.engine.createConversation({
+      profileIds: [bob.profileId],
+      kind: "group",
+    });
+    await settle(world);
+    await laptop.engine.setConversationPinned(g, true);
+    await laptop.engine.setConversationPinned(group, true);
+    await settle(world);
+
+    const ctx = contextOf(laptop);
+    ctx.timers.cancel("poll");
+    const { pins } = ctx.readSync as ReadSync;
+    const acknowledge = pins.acknowledge.bind(pins);
+    const started = Promise.withResolvers<void>();
+    const finish = Promise.withResolvers<void>();
+    jest.spyOn(pins, "acknowledge").mockImplementationOnce(async (batch) => {
+      started.resolve();
+      await finish.promise;
+      await acknowledge(batch);
+    });
+    const move = () =>
+      laptop.engine.moveConversationPin(
+        `group:${group}`,
+        `dm:${bob.profileId}`
+      );
+
+    await move();
+    const flushing = laptop.engine.flushReadSync();
+    await started.promise;
+    let latest: readonly ConversationPinRank[] | undefined;
+    try {
+      await move();
+      latest = pins.pending()?.ranks;
+      expect(latest).toHaveLength(2);
+    } finally {
+      finish.resolve();
+    }
+    await flushing;
+    expect(pins.pending()?.ranks).toEqual(latest);
+    await laptop.engine.flushReadSync();
+    expect(pins.pending()).toBeNull();
+    await settle(world);
+    expect(phone.engine.getConversation(g)?.pinPosition).toBe(0);
+    expect(phone.engine.getConversation(group)?.pinPosition).toBe(1);
   });
 
   it("holds queued pin updates while a self group contains a locally untrusted wallet", async () => {
