@@ -2,7 +2,9 @@ import { act, render, screen, waitFor } from "@testing-library/react";
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import userEvent from "@testing-library/user-event";
-import WaveDropReplyThread from "@/components/waves/drops/reply-threads/WaveDropReplyThread";
+import WaveDropReplyThread, {
+  type RenderThreadReply,
+} from "@/components/waves/drops/reply-threads/WaveDropReplyThread";
 import {
   useExpandedReplyThreadsStore,
   WaveReplyThreadsProvider,
@@ -69,12 +71,18 @@ function Harness({
   simulateSend = false,
   simulateLink = false,
   waveConfig = wave,
+  renderReply = ({ reply, previousReply }) => (
+    <p>
+      {reply.id} after {previousReply?.id ?? "start"}
+    </p>
+  ),
 }: {
   readonly drop: ExtendedDrop;
   readonly enabled?: boolean;
   readonly simulateSend?: boolean;
   readonly simulateLink?: boolean;
   readonly waveConfig?: ApiWave;
+  readonly renderReply?: RenderThreadReply;
 }) {
   const store = useExpandedReplyThreadsStore();
   const [queryClient] = useState(() => new QueryClient());
@@ -104,14 +112,7 @@ function Harness({
         wave={waveConfig}
         store={store}
       >
-        <WaveDropReplyThread
-          drop={drop}
-          renderReply={({ reply, previousReply }) => (
-            <p>
-              {reply.id} after {previousReply?.id ?? "start"}
-            </p>
-          )}
-        />
+        <WaveDropReplyThread drop={drop} renderReply={renderReply} />
       </WaveReplyThreadsProvider>
     </QueryClientProvider>
   );
@@ -179,6 +180,52 @@ describe("WaveDropReplyThread", () => {
     const [linked, other] = screen.getAllByRole("listitem");
     expect(linked?.firstElementChild).toHaveClass("tw-bg-[#263d68]");
     expect(other?.firstElementChild).not.toHaveClass("tw-bg-[#263d68]");
+  });
+
+  it("gives replies the loaded wave's admin delete flags", async () => {
+    const adminWave = {
+      ...wave,
+      wave: {
+        authenticated_user_eligible_for_admin: true,
+        admin_drop_deletion_enabled: true,
+      },
+    } as ApiWave;
+    const feedWave = {
+      id: "wave-1",
+      authenticated_user_admin: false,
+      admin_drop_deletion_enabled: false,
+    } as ExtendedDrop["wave"];
+    const linkedReply = makeDrop("reply-1", 11, { wave: feedWave });
+    const streamReply = makeDrop("reply-2", 12, {
+      wave: feedWave,
+      reply_to: { drop_id: "root", drop_part_id: 1, is_deleted: false },
+    });
+    mockWaveMessages.mockReturnValue({ drops: [streamReply] });
+    useDropMessagesMock.mockReturnValue({
+      drops: [linkedReply],
+      isFetching: false,
+      hasNextPage: false,
+      isFetchingNextPage: false,
+      fetchNextPage: jest.fn(),
+    });
+    const user = userEvent.setup();
+    render(
+      <Harness
+        drop={makeDrop("root", 10, { replies_count: 2 })}
+        waveConfig={adminWave}
+        renderReply={({ reply }) => (
+          <p>{`${reply.id} admin ${String(reply.wave.authenticated_user_admin)} delete ${String(reply.wave.admin_drop_deletion_enabled)}`}</p>
+        )}
+      />
+    );
+    await user.click(screen.getByRole("button", { name: "Show 2 replies" }));
+
+    expect(
+      screen.getByText("reply-1 admin true delete true")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("reply-2 admin true delete true")
+    ).toBeInTheDocument();
   });
 
   it("opens the thread oldest first and fetches only while open", async () => {
