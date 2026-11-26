@@ -34,9 +34,9 @@ The control requires a connected profile handle and no proxy session.
   `Unmute` remains available.
 - Before joining, the same bell menu offers only Mute/Unmute. Muting does not
   join or leave a wave.
-- On phones, the choices open inside the existing `About` information view.
-  Selecting a choice, Back, the phone's Back action, or Escape returns to
-  `About` and restores focus to the bell. Returning preserves its content and
+- On smaller screens, the choices use the site's standard picker sheet over
+  `About`. Selecting a choice, closing the picker, tapping its backdrop, or
+  pressing Escape restores focus to the bell. About keeps its content and
   scroll position.
 - Desktop and tablet sidebars show an anchored menu. Arrow keys move between
   enabled choices; Home and End reach the first and last actions. Escape returns

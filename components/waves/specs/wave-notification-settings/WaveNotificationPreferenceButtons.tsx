@@ -6,7 +6,9 @@ import {
 import IconButton from "@/components/utils/button/IconButton";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import MyStreamActionTooltip from "@/components/brain/my-stream/MyStreamActionTooltip";
-import { useWaveInformationPanel } from "@/components/brain/mobile/WaveInformationPanelContext";
+import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import {
   ArrowPathIcon,
@@ -23,8 +25,7 @@ import type {
   KeyboardEvent,
   SVGProps,
 } from "react";
-import { Fragment, useId } from "react";
-import { createPortal } from "react-dom";
+import { Fragment, useId, useRef, useState } from "react";
 import { waveNotificationSettingsMessage as message } from "./waveNotificationSettings.messages";
 import type { WaveNotificationSettingsState } from "./useWaveNotificationSettings";
 import type { NotificationLevel } from "./waveNotificationSettings.helpers";
@@ -168,8 +169,11 @@ export default function WaveNotificationPreferenceButtons({
   compact = false,
 }: WaveNotificationPreferenceButtonsProps) {
   const title = message("waves.notificationSettings.trigger.tooltip");
-  const sheet = useWaveInformationPanel(title);
-  const mobile = sheet.isInSheet;
+  const mobile = useIsMobileLayoutViewport();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const menuRef = useRef<HTMLUListElement>(null);
+  const closeMobile = () => setMobileOpen(false);
+  useAndroidBackLayer(mobile && mobileOpen, menuRef, closeMobile);
   const instanceId = useId();
   const tooltipId = `wave-notification-actions-${waveId}-${instanceId}`;
   const busy = settings.muteLoading || settings.loadingTarget !== null;
@@ -179,8 +183,8 @@ export default function WaveNotificationPreferenceButtons({
       id={`${tooltipId}-trigger`}
       type="button"
       aria-busy={busy}
-      onClick={(event) => {
-        if (mobile) sheet.open(event.currentTarget);
+      onClick={() => {
+        if (mobile) setMobileOpen(true);
       }}
       data-tooltip-id={tooltipId}
       data-tooltip-content={title}
@@ -189,9 +193,9 @@ export default function WaveNotificationPreferenceButtons({
       aria-label={message("waves.notificationSettings.trigger.ariaLabel")}
       {...(mobile
         ? {
-            "aria-haspopup": "menu" as const,
-            "aria-expanded": sheet.isOpen,
-            "aria-controls": sheet.contentId,
+            "aria-haspopup": "dialog" as const,
+            "aria-expanded": mobileOpen,
+            "aria-controls": mobileOpen ? `${tooltipId}-menu` : undefined,
           }
         : {})}
     >
@@ -200,10 +204,12 @@ export default function WaveNotificationPreferenceButtons({
   );
   const choices = (close: () => void) => (
     <ul
+      ref={mobile ? menuRef : undefined}
+      id={mobile ? `${tooltipId}-menu` : undefined}
       role={mobile ? "menu" : "none"}
       aria-label={mobile ? title : undefined}
       onKeyDown={mobile ? onSheetMenuKeyDown : undefined}
-      className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-0.5 tw-px-2"
+      className={`tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-0.5 ${mobile ? "tw-p-0" : "tw-px-2"}`}
     >
       {settings.following && (
         <>
@@ -297,9 +303,15 @@ export default function WaveNotificationPreferenceButtons({
       {mobile ? (
         <>
           {trigger}
-          {sheet.isOpen &&
-            sheet.container &&
-            createPortal(choices(sheet.close), sheet.container)}
+          <CommonDropdownItemsMobileWrapper
+            isOpen={mobileOpen}
+            setOpen={setMobileOpen}
+            label={title}
+            hideOnDesktopHover={false}
+            zIndexClassName="tw-z-[11000]"
+          >
+            <li role="none">{choices(closeMobile)}</li>
+          </CommonDropdownItemsMobileWrapper>
         </>
       ) : (
         <Menu>

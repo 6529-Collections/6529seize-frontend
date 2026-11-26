@@ -7,6 +7,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import { useWaveNotificationSubscription } from "@/hooks/useWaveNotificationSubscription";
 import { commonApiPost, commonApiDelete } from "@/services/api/common-api";
+import { WaveInformationPanelContext } from "@/components/brain/mobile/WaveInformationPanelContext";
 
 jest.mock("@/hooks/useWaveNotificationSubscription", () => ({
   useWaveNotificationSubscription: jest.fn(),
@@ -31,9 +32,9 @@ const refetch = jest.fn();
 const mockSubscription = jest.mocked(useWaveNotificationSubscription);
 const mockPost = jest.mocked(commonApiPost);
 const mockDelete = jest.mocked(commonApiDelete);
-const ALL = "Receive notifications for all messages";
-const BROADCAST = "Receive @all and @contributors notifications";
-const MENTIONS = "Receive mentions-only notifications";
+const ALL = "All messages";
+const BROADCAST = "@all and mentions";
+const MENTIONS = "Mentions only";
 const groups = [ApiDropGroupMention.All];
 
 function TestAuthProvider({ children }: { readonly children: ReactNode }) {
@@ -138,6 +139,28 @@ describe("WaveNotificationSettings", () => {
       }
     }
   );
+
+  it("keeps the desktop dropdown inside About without opening a subview", async () => {
+    const openSubview = jest.fn();
+    render(
+      <WaveInformationPanelContext.Provider
+        value={{
+          view: "about",
+          contentId: "about-subview",
+          container: null,
+          open: openSubview,
+          back: jest.fn(),
+        }}
+      >
+        <TestAuthProvider>
+          <WaveNotificationSettings wave={wave} />
+        </TestAuthProvider>
+      </WaveInformationPanelContext.Provider>
+    );
+    await openMenu();
+    expect(screen.getByRole("menu")).toBeVisible();
+    expect(openSubview).not.toHaveBeenCalled();
+  });
 
   it.each([
     [false, [], ALL, true, groups],
@@ -263,8 +286,10 @@ describe("WaveNotificationSettings", () => {
     } as unknown as ReturnType<typeof useWaveNotificationSubscription>);
     renderComponent();
     await openMenu();
-    for (const item of screen.getAllByRole("menuitemradio"))
+    for (const item of screen.getAllByRole("menuitemradio")) {
       expect(item).toBeDisabled();
+      expect(item).toHaveAttribute("aria-checked", "false");
+    }
     await userEvent.click(choice(ALL));
     expect(mockPost).not.toHaveBeenCalled();
     await userEvent.click(screen.getByRole("menuitem", { name: "Mute wave" }));

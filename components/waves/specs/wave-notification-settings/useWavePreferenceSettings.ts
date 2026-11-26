@@ -27,11 +27,13 @@ export function useWavePreferenceSettings(wave: ApiWave) {
     isPending: preferencesPending = false,
   } = useWaveNotificationSubscription(wave);
 
-  let notificationLevel: NotificationLevel = MENTIONS_ONLY;
+  let notificationLevel: NotificationLevel | null = data ? MENTIONS_ONLY : null;
   if (data?.subscribed) {
     notificationLevel = ALL_MESSAGES;
   } else if (
-    data?.enabled_group_notifications?.includes(BROADCAST_MENTION_PREFERENCE)
+    (data?.enabled_group_notifications ?? []).includes(
+      BROADCAST_MENTION_PREFERENCE
+    )
   ) {
     notificationLevel = "broadcast-mentions";
   }

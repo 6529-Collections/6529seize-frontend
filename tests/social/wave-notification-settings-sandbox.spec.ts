@@ -8,9 +8,9 @@ import { installSurfaceSimulation } from "../support/surfaceSimulation";
 
 const WAVE = "00000000-0000-4000-8000-000000000529";
 const TITLE = "Local Composer Sandbox Wave";
-const BROADCAST = "Receive @all and @contributors notifications";
-const ALL = "Receive notifications for all messages";
-const MENTIONS = "Receive mentions-only notifications";
+const BROADCAST = "@all and mentions";
+const ALL = "All messages";
+const MENTIONS = "Mentions only";
 
 async function installPreferences(
   page: Page,
@@ -190,19 +190,20 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
       ).toBeFocused();
       await page.keyboard.press("Home");
       await expect(allMessages).toBeFocused();
+      // Reuse the common picker sheet over About, without changing its page.
       await expect(page.getByRole("dialog")).toHaveCount(1);
-      expect(
-        await choices
-          .getByRole("heading", { name: "Notification settings", exact: true })
-          .evaluate(
-            (heading) =>
-              heading
-                .closest("[data-mobile-navigation-view]")
-                ?.getBoundingClientRect().height
-          )
-      ).toBeCloseTo(originalHeight ?? 0, 0);
+      await expect(
+        page.getByRole("dialog", {
+          name: `About ${TITLE}`,
+          exact: true,
+          includeHidden: true,
+        })
+      ).toHaveCount(1);
       await expect(
         choices.getByRole("button", { name: "Back", exact: true })
+      ).toHaveCount(0);
+      await expect(
+        choices.getByRole("button", { name: "Close panel", exact: true })
       ).toBeVisible();
       await expect(choices.getByRole("menuitemradio")).toHaveCount(3);
       await expect(page.getByRole("tooltip")).toHaveCount(0);
@@ -225,32 +226,39 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
                 ?.getBoundingClientRect().height
           )
       ).toBeCloseTo(originalHeight ?? 0, 0);
+      if (surface === "android") {
+        await bell.tap();
+        await page.waitForFunction(() => {
+          const runtime = globalThis as typeof globalThis & {
+            __playwrightAppListeners?: string[];
+          };
+          return runtime.__playwrightAppListeners?.includes("backButton");
+        });
+        await page.evaluate(() =>
+          globalThis.dispatchEvent(
+            new CustomEvent("playwright:backButton", {
+              detail: { canGoBack: true },
+              cancelable: true,
+            })
+          )
+        );
+        await expect(choices).toHaveCount(0);
+        await expect(about).toBeVisible();
+        await expect(bell).toBeFocused();
+      }
       await bell.tap();
-      await page.goBack();
-      await expect(choices).toHaveCount(0);
-      await expect(
-        about.getByRole("heading", { name: `About ${TITLE}`, exact: true })
-      ).toBeVisible();
-      await expect(bell).toBeFocused();
-      await bell.tap();
-      await choices.getByRole("button", { name: "Back", exact: true }).tap();
-      await expect(choices).toHaveCount(0);
-      await expect(bell).toBeFocused();
-      await bell.tap();
-      await expect(
-        choices.getByRole("button", { name: "Close", exact: true })
-      ).toHaveCount(0);
-      await choices.getByRole("button", { name: "Back", exact: true }).tap();
+      await choices
+        .getByRole("button", { name: "Close panel", exact: true })
+        .tap();
       await expect(choices).toHaveCount(0);
       await about.getByRole("button", { name: "Back", exact: true }).tap();
       await expect(about).toHaveCount(0);
       await openAbout(page);
       await bell.tap();
       await choices.getByRole("menuitemradio").first().click({ trial: true });
-      // Full-screen information has no backdrop to dismiss by tapping outside.
+      // The shared picker dismisses through its backdrop and keeps About open.
       await page.touchscreen.tap(page.viewportSize()!.width - 8, 12);
-      await expect(choices).toBeVisible();
-      await choices.getByRole("button", { name: "Back", exact: true }).tap();
+      await expect(choices).toHaveCount(0);
       await expect(bell).toBeFocused();
       await bell.tap();
       api.delayUpdate();
@@ -267,6 +275,8 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
         choices.getByRole("menuitemradio", { name: ALL })
       ).toBeChecked();
       await choices.getByRole("menuitemradio", { name: BROADCAST }).tap();
+      await expect(choices).toHaveCount(0);
+      await expect(bell).toBeFocused();
       await expect(bell).toBeEnabled();
       await bell.tap();
       await expect(
@@ -416,9 +426,15 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
         name: "Open notification settings",
       });
       await bell.tap();
-      // Both touch layouts keep notification preferences inside their information panel.
+      // The common picker overlays the existing information panel on touch layouts.
       const choiceRole = "menuitemradio";
       await expect(page.getByRole("dialog")).toHaveCount(1);
+      await expect(
+        page.getByRole("button", {
+          name: "Open notification settings",
+          includeHidden: true,
+        })
+      ).toHaveCount(1);
       await expectReachable(page, choiceRole);
       const choice = page.getByRole(choiceRole, { name: BROADCAST });
       const box = await choice.boundingBox();
@@ -471,6 +487,10 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
     await retry.tap();
     await expect(page.getByRole("menuitemradio", { name: ALL })).toBeEnabled();
     await page.keyboard.press("Escape");
+    await expect(
+      page.getByRole("dialog", { name: "Notification settings", exact: true })
+    ).toHaveCount(0);
+    await expect(bell).toBeFocused();
     await expect(bell).toBeEnabled();
     api.failUpdate();
     await bell.tap();

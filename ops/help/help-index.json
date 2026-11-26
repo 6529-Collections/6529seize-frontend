@@ -7890,7 +7890,7 @@
       ],
       "facts": [
         "The neutral bell opens notification settings for a connected non-proxy profile before or after joining. Muting changes it to a bell-slash in the same place.",
-        "On phone layouts, notification choices open inside the same About information view. Selecting a level or Mute/Unmute, Back, the phone’s Back action, or Escape returns to About and restores focus to the bell. Returning preserves its content and scroll position.",
+        "On smaller screens, notification choices use the site's standard picker sheet over About. Selecting a level or Mute/Unmute, closing the picker, tapping its backdrop, or pressing Escape restores focus to the bell. About keeps its content and scroll position.",
         "Desktop and tablet sidebars use an anchored notification menu with arrow-key navigation and Escape to return to the bell.",
         "Joined waves show Notify me about with exactly one selected level: All messages (Every new post), @all and mentions (Mentions, @all, @contributors), or Mentions only (Mentions and replies to you).",
         "Direct mentions, replies and quotes remain eligible at every level, subject to profile preferences. Mute suppresses wave alerts, including direct mentions.",

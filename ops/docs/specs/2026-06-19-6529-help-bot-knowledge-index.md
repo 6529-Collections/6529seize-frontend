@@ -356,7 +356,8 @@ help-index sync and consumed by the existing backend loader.
 
 The `waves.notification-controls` record describes one neutral bell menu with
 three single-choice levels and Mute/Unmute, disabled saved levels while muted,
-Retry inside the menu, the phone About subview and anchored desktop/tablet menu.
+Retry inside the menu, the shared picker sheet on smaller screens and anchored
+desktop/tablet menu.
 Muted wave rows use an icon-only iron bell-slash on the avatar, separate from
 scores and numbers; unread counts stay hidden and muted waves sort last.
 
