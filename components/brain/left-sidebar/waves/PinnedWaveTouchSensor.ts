@@ -5,6 +5,8 @@ interface Options {
   readonly delay: number;
 }
 
+const DRAG_DISTANCE = 8;
+
 /** Vertical movement after a hold starts reordering. Quick swipes can scroll or pin. */
 export class PinnedWaveTouchSensor {
   autoScrollEnabled = true;
@@ -50,19 +52,22 @@ export class PinnedWaveTouchSensor {
     const dx = Math.abs(touch.clientX - this.initial.x);
     const dy = Math.abs(touch.clientY - this.initial.y);
     if (!this.activated) {
-      if (Math.max(dx, dy) < 8) return;
       if (
         performance.now() - this.started < this.props.options.delay ||
         dx >= dy
       ) {
-        this.cancel();
+        if (Math.max(dx, dy) >= DRAG_DISTANCE) this.cancel();
         return;
       }
       if (dy < dx * 1.5 || !event.cancelable) return;
+      // Claim the first vertical move after a hold before native scrolling starts.
+      event.preventDefault();
+      if (dy < DRAG_DISTANCE) return;
       this.activated = true;
       this.props.onStart(this.initial);
+    } else if (event.cancelable) {
+      event.preventDefault();
     }
-    if (event.cancelable) event.preventDefault();
     this.props.onMove({ x: touch.clientX, y: touch.clientY });
   };
 

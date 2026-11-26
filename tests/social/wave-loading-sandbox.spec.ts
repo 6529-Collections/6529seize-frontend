@@ -56,6 +56,7 @@ for (const surface of [
       test.skip(!isMobile, "Native shell simulation needs phone input.");
       await installSurfaceSimulation(page.context(), surface, baseURL);
     }
+    await hideNextDevOverlay(page.context());
     await installWaveListScrollFixture(page, baseURL);
     await page.goto("/waves", { waitUntil: "domcontentloaded" });
     await page
@@ -66,6 +67,7 @@ for (const surface of [
     const list = page
       .getByRole("region", { name: "Pinned", exact: true })
       .filter({ visible: true });
+    const firstTwo = list.getByRole("link", { name: /^Scroll wave [01]$/ });
     const first = list.getByRole("link", {
       name: "Scroll wave 0",
       exact: true,
@@ -79,84 +81,57 @@ for (const surface of [
     ).toHaveCount(0);
     await expect(first).toBeInViewport();
     await expect(second).toBeInViewport();
+    await expect(firstTwo).toHaveText(["Scroll wave 0", "Scroll wave 1"]);
+    await expect(first).toHaveAttribute("draggable", "false");
+    await expect(first).toHaveCSS("-webkit-user-drag", "none");
     const saved = page.waitForResponse(
       (response) =>
         response.url().endsWith("/api/v2/waves/pinned") &&
         response.request().method() === "PUT"
     );
     if (isMobile) {
-      const session = await page.context().newCDPSession(page);
-      const scroll = await sidebarScrollMetrics(list);
-      const swipeX = Math.round(scroll.x);
-      const swipeY = Math.round(scroll.y);
-      await session.send("Input.dispatchTouchEvent", {
-        type: "touchStart",
-        touchPoints: [{ x: swipeX, y: swipeY }],
-      });
-      for (const distance of [25, 50, 75, 100]) {
-        await session.send("Input.dispatchTouchEvent", {
-          type: "touchMove",
-          touchPoints: [{ x: swipeX, y: swipeY - distance }],
-        });
-      }
-      await session.send("Input.dispatchTouchEvent", {
-        type: "touchEnd",
-        touchPoints: [],
-      });
-      await expect
-        .poll(async () => (await sidebarScrollMetrics(list)).top)
-        .toBeGreaterThan(scroll.top);
-      await expect(
-        list.getByRole("link", { name: /^Scroll wave [01]$/ })
-      ).toHaveText(["Scroll wave 0", "Scroll wave 1"]);
-      await first.scrollIntoViewIfNeeded();
-      await sidebarScrollMetrics(list, 0);
-
+      const gesture = await startWaveRowTouch(page, first);
       const box = await first.boundingBox();
       const target = await second.boundingBox();
       if (!box || !target) throw new Error("Missing pinned wave rows");
-      const x = Math.round(box.x + box.width * 0.75);
-      const y = Math.round(box.y + box.height / 2);
-      const endY = Math.round(target.y + target.height / 2);
-      await session.send("Input.dispatchTouchEvent", {
-        type: "touchStart",
-        touchPoints: [{ x, y }],
-      });
+      const distance = target.y + target.height / 2 - (box.y + box.height / 2);
       await page.waitForTimeout(LONG_WAVE_ROW_HOLD_MS);
       await expect(
         page.getByRole("dialog", { name: /^(Pin|Unpin) wave$/ })
       ).toHaveCount(0);
+      await gesture.move(0, 4);
       for (let step = 1; step <= 8; step++) {
-        await session.send("Input.dispatchTouchEvent", {
-          type: "touchMove",
-          touchPoints: [{ x, y: Math.round(y + ((endY - y) * step) / 8) }],
-        });
+        await gesture.move(0, Math.round((distance * step) / 8));
         if (step === 2) {
           await expect(
             list.getByText("Position 1.", { exact: true })
           ).toBeAttached();
         }
       }
-      await session.send("Input.dispatchTouchEvent", {
-        type: "touchEnd",
-        touchPoints: [],
-      });
-      await session.detach();
+      await gesture.release();
     } else {
       await first.dragTo(second, { steps: 8 });
     }
     expect((await saved).ok()).toBe(true);
-    await expect(
-      list.getByRole("link", { name: /^Scroll wave [01]$/ })
-    ).toHaveText(["Scroll wave 1", "Scroll wave 0"]);
+    await expect(firstTwo).toHaveText(["Scroll wave 1", "Scroll wave 0"]);
 
     await page.reload({ waitUntil: "domcontentloaded" });
-    await expect(
-      list.getByRole("link", { name: /^Scroll wave [01]$/ })
-    ).toHaveText(["Scroll wave 1", "Scroll wave 0"]);
+    await expect(firstTwo).toHaveText(["Scroll wave 1", "Scroll wave 0"], {
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
     await expect(page).toHaveURL(/\/waves$/);
 
     if (isMobile) {
+      const scroll = await sidebarScrollMetrics(list);
+      const quickSwipe = await startWaveRowTouch(page, second);
+      for (const distance of [25, 50, 75, 100]) {
+        await quickSwipe.move(0, -distance);
+      }
+      await quickSwipe.release();
+      await expect
+        .poll(async () => (await sidebarScrollMetrics(list)).top)
+        .toBeGreaterThan(scroll.top);
+      await expect(firstTwo).toHaveText(["Scroll wave 1", "Scroll wave 0"]);
       await first.tap();
     } else {
       await first.click();
