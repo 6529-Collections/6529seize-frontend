@@ -191,8 +191,8 @@ export default function WaveNotificationPreferenceButtons({
       }}
       data-tooltip-id={tooltipId}
       data-tooltip-content={title}
-      layout={compact ? "notification-mute" : "notification-wide"}
-      variant="ghost"
+      layout={compact ? "notification-mute" : "notification-mute-wide"}
+      variant={settings.isMuted ? "selected" : "ghost"}
       aria-label={message("waves.notificationSettings.trigger.ariaLabel")}
       {...(mobile
         ? {
@@ -320,7 +320,7 @@ export default function WaveNotificationPreferenceButtons({
                 id={`${tooltipId}-menu`}
                 anchor={{ to: "bottom end", gap: 8, padding: 16 }}
                 modal={false}
-                className={`tailwind-scope tw-z-[1020] tw-w-[290px] tw-max-w-[calc(100vw-2rem)] tw-py-1 focus:tw-outline-none ${DROPDOWN_PANEL_SURFACE_CLASSES}`}
+                className={`tailwind-scope tw-z-[1020] tw-w-max tw-min-w-[290px] tw-max-w-[calc(100vw-2rem)] tw-py-1 focus:tw-outline-none ${DROPDOWN_PANEL_SURFACE_CLASSES}`}
               >
                 {choices(close)}
               </MenuItems>

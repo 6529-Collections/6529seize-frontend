@@ -8,7 +8,7 @@ import { installSurfaceSimulation } from "../support/surfaceSimulation";
 
 const WAVE = "00000000-0000-4000-8000-000000000529";
 const TITLE = "Local Composer Sandbox Wave";
-const BROADCAST = "@all and mentions";
+const BROADCAST = "Mentions and @all";
 const ALL = "All messages";
 const MENTIONS = "Mentions only";
 
@@ -319,6 +319,7 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
       .getByRole("menuitem", { name: "Mute wave", exact: true })
       .click();
     await expect(bell).toHaveAttribute("aria-busy", "false");
+    await expect(bell).toHaveCSS("color", "rgb(249, 112, 102)");
     await expect(bell).toBeFocused();
     await bell.click({ trial: true });
     expect(await bell.boundingBox()).toEqual(initialBox);
@@ -341,6 +342,7 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
     });
     await unmute.click();
     await expect(bell).toHaveAttribute("aria-busy", "false");
+    await expect(bell).not.toHaveCSS("color", "rgb(249, 112, 102)");
     await expect(bell).toBeFocused();
     await bell.click({ trial: true });
     expect(await bell.boundingBox()).toEqual(initialBox);
@@ -379,6 +381,23 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
       await page.keyboard.press("Enter");
       const menu = page.getByRole("menu");
       await expect(menu).toBeVisible();
+      const broadcastChoice = menu.getByRole("menuitemradio", {
+        name: BROADCAST,
+      });
+      await expect(broadcastChoice).toHaveAccessibleDescription(
+        "Your mentions and replies, plus @all and @contributors"
+      );
+      const subtitle = broadcastChoice.getByText(
+        "Your mentions and replies, plus @all and @contributors",
+        { exact: true }
+      );
+      expect(
+        await subtitle.evaluate(
+          (element) =>
+            element.getBoundingClientRect().height /
+            Number.parseFloat(getComputedStyle(element).lineHeight)
+        )
+      ).toBe(1);
       await expect(bell).toHaveAttribute("aria-expanded", "true");
       await expect(bell).toHaveAttribute(
         "aria-controls",

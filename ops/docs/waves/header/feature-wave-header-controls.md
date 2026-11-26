@@ -167,7 +167,7 @@ and mobile web use the same device-local preference and mark the selected mode.
 1. Open a wave you have not joined and select `Join` in the conversation
    header, or open `About` in an active wave.
 2. In `About`, select `Join` to follow (or `Joined` to unfollow).
-3. Open the bell menu to choose `All messages`, `@all and mentions`, or
+3. Open the bell menu to choose `All messages`, `Mentions and @all`, or
    `Mentions only` after joining.
 4. Use `Mute` / `Unmute` in the same menu before or after joining.
 5. Use the info button to open the wave description panel.

@@ -33,7 +33,7 @@ const mockSubscription = jest.mocked(useWaveNotificationSubscription);
 const mockPost = jest.mocked(commonApiPost);
 const mockDelete = jest.mocked(commonApiDelete);
 const ALL = "All messages";
-const BROADCAST = "@all and mentions";
+const BROADCAST = "Mentions and @all";
 const MENTIONS = "Mentions only";
 const groups = [ApiDropGroupMention.All];
 
@@ -110,9 +110,9 @@ describe("WaveNotificationSettings", () => {
     expect(screen.queryByText("Notify me about")).not.toBeInTheDocument();
     expect(screen.getByText("Every new post")).toBeInTheDocument();
     expect(
-      screen.getByText("Mentions, @all, @contributors")
+      screen.getByText("Your mentions and replies, plus @all and @contributors")
     ).toBeInTheDocument();
-    expect(screen.getByText("Mentions and replies to you")).toBeInTheDocument();
+    expect(screen.getByText("Your mentions and replies")).toBeInTheDocument();
     expect(screen.getByRole("menuitem", { name: "Mute wave" })).toBeEnabled();
     expect(
       screen.getByRole("menuitem", { name: "Mute wave" })
@@ -259,24 +259,31 @@ describe("WaveNotificationSettings", () => {
     expect(refetch).not.toHaveBeenCalled();
   });
 
-  it("keeps the selected level visible but disabled while muted", async () => {
-    setPreferences(true, []);
-    renderComponent({ ...wave, metrics: { ...wave.metrics, muted: true } });
-    await openMenu();
-    expect(choice(ALL)).toHaveAttribute("aria-checked", "true");
-    for (const item of screen.getAllByRole("menuitemradio"))
-      expect(item).toBeDisabled();
-    const unmute = screen.getByRole("menuitem", { name: "Unmute wave" });
-    expect(unmute).toBeEnabled();
-    await userEvent.click(choice(BROADCAST));
-    expect(mockPost).not.toHaveBeenCalled();
-    await userEvent.click(unmute);
-    expect(mockDelete).toHaveBeenCalledWith({
-      endpoint: "waves/wave-123/mute",
-    });
-    expect(mockInvalidate).toHaveBeenCalledTimes(4);
-    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
-  });
+  it.each([false, true])(
+    "keeps the muted colour and disabled saved level (compact: %s)",
+    async (compact) => {
+      setPreferences(true, []);
+      renderComponent(
+        { ...wave, metrics: { ...wave.metrics, muted: true } },
+        compact
+      );
+      const trigger = await openMenu();
+      expect(trigger).toHaveClass("tw-text-error", "tw-bg-error/10");
+      expect(choice(ALL)).toHaveAttribute("aria-checked", "true");
+      for (const item of screen.getAllByRole("menuitemradio"))
+        expect(item).toBeDisabled();
+      const unmute = screen.getByRole("menuitem", { name: "Unmute wave" });
+      expect(unmute).toBeEnabled();
+      await userEvent.click(choice(BROADCAST));
+      expect(mockPost).not.toHaveBeenCalled();
+      await userEvent.click(unmute);
+      expect(mockDelete).toHaveBeenCalledWith({
+        endpoint: "waves/wave-123/mute",
+      });
+      expect(mockInvalidate).toHaveBeenCalledTimes(4);
+      expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+    }
+  );
 
   it("keeps mute available while preferences load", async () => {
     mockSubscription.mockReturnValue({

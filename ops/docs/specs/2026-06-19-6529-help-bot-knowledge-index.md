@@ -354,7 +354,8 @@ fixtures do not ship as page data.
 These remain frontend-owned facts published through the existing
 help-index sync and consumed by the existing backend loader.
 
-The `waves.notification-controls` record describes one neutral bell menu with
+The `waves.notification-controls` record describes one bell menu, neutral when
+unmuted and rose-toned when muted, with
 three single-choice levels and Mute/Unmute, disabled saved levels while muted,
 Retry inside the menu, the shared picker sheet on smaller screens and anchored
 desktop/tablet menu.

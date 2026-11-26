@@ -3,7 +3,8 @@
 ## Overview
 
 One bell menu controls wave notification levels and mute. The bell stays in the
-same place when muted and changes to a bell-slash.
+same place when muted and changes to a bell-slash with the existing rose-toned
+muted-control colours. The unmuted bell stays neutral.
 
 ## Location in the Site
 
@@ -20,8 +21,8 @@ The control requires a connected profile handle and no proxy session.
 1. Open the bell menu.
 2. If joined, choose one level:
    - `All messages`: every new post.
-   - `@all and mentions`: mentions, `@all`, and `@contributors`.
-   - `Mentions only`: mentions and replies to you.
+   - `Mentions and @all`: your mentions and replies, plus `@all` and `@contributors`.
+   - `Mentions only`: your mentions and replies.
 3. Choose `Mute` to stop wave alerts, or `Unmute` to restore the saved level.
 4. Choosing a level or Mute/Unmute closes the menu.
 
