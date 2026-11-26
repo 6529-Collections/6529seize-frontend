@@ -392,6 +392,10 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
       baseURL
     );
     await gotoCreateWave(page);
+    // Measure the loaded app header, not its taller dynamic-import placeholder.
+    await expect(
+      page.getByRole("button", { name: "Share page", exact: true })
+    ).toBeVisible();
     const flow = page
       .getByLabel(/Wave Name/)
       .locator("xpath=ancestor::*[@data-flow-title]/div[1]");
