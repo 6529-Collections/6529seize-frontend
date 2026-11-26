@@ -47,6 +47,10 @@ View-specific query keys:
 ## Shared Header Behavior
 
 - The stats header shows `Generating`, `Inbound`, `Outbound`, `Net`, and `Granted rate`.
+- Below medium widths, the stats form one compact summary card with Net first and
+  Generating, Inbound, and Outbound in rows. Desktop retains its summary layout.
+- Granted and Received use text buttons without a background. Below medium
+  widths, the buttons use compact text; desktop uses larger text.
 - First load shows skeleton cards.
 - Fetch failure shows inline error text and `Retry`.
 - In owner mode, the `Outbound` card is a quick action that switches to `Granted` and scrolls to `Create New Grant`.
@@ -59,6 +63,7 @@ View-specific query keys:
 
 Owner-only actions:
 
+- use `+ Grant` beside the Granted/Received switch to open the existing create form,
 - create a grant,
 - stop or revoke grants in `Pending` or `Granted` status,
 - use the `Outbound` quick action in the stats header.
@@ -82,6 +87,13 @@ Owner-only actions:
 
 - xTDH is in test/demo mode. Data can reset after the test period.
 - The `Outbound` quick action is hidden outside owner mode.
+- The owner shortcut keeps its Outbound name and uses the existing Create New
+  Grant heading as its screen-reader description.
+- Localization is partial: stats, the grant heading and owner action names use
+  message keys, with missing translations falling back to `en-US`. Remaining
+  filter/status labels, grant-form copy, confirmations and received controls
+  retain English copy. Profile UI maintainers own migrating these remaining
+  strings and their accessible names together in a later localization pass.
 
 ## Related Pages
 
