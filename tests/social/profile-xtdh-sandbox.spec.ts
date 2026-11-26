@@ -211,7 +211,16 @@ test.describe("Profile xTDH compact design @auth @medium @local-only", () => {
     await card
       .getByRole("button", { name: "Hide 2 tokens", exact: true })
       .click();
-    for (const action of ["Stop Grant", "Revoke Grant"]) {
+    for (const [action, message] of [
+      [
+        "Stop Grant",
+        "This grant will be stopped immediately. All previously granted TDH will remain untouched.",
+      ],
+      [
+        "Revoke Grant",
+        "This grant will be revoked. All granted TDH will be removed as if the grant never existed.",
+      ],
+    ] as const) {
       if (isMobile) {
         await card
           .getByRole("button", { name: "Grant actions", exact: true })
@@ -223,11 +232,22 @@ test.describe("Profile xTDH compact design @auth @medium @local-only", () => {
       } else {
         await card.getByRole("button", { name: action, exact: true }).click();
       }
-      const confirmation = page.getByRole("dialog", {
-        name: action,
-        exact: true,
-      });
+      // The existing shared confirmation has no dialog role. Scope to its
+      // unchanged message and controls without changing the product markup.
+      const confirmation = page
+        .locator("div")
+        .filter({ has: page.getByText(message, { exact: true }) })
+        .filter({
+          has: page.getByRole("button", { name: "Cancel", exact: true }),
+        })
+        .last();
       await expect(confirmation).toBeVisible();
+      await expect(
+        confirmation.locator("p").filter({ hasText: action })
+      ).toHaveText(action);
+      await expect(
+        confirmation.getByText(message, { exact: true })
+      ).toBeVisible();
       await expect(
         confirmation.getByRole("button", { name: action, exact: true })
       ).toBeEnabled();
