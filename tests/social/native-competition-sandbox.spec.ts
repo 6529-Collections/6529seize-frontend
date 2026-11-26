@@ -11701,6 +11701,83 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     }
   });
 
+  for (const outcome of ["success", "unavailable"] as const) {
+    test(`retains Archive confirmation while draft configuration becomes ${outcome}`, async ({
+      page,
+    }) => {
+      const sandbox = await installCompetitionApi(page);
+      sandbox.setCompetition("alpha", { lifecycle: "DRAFT" });
+      let release = () => {};
+      const ready = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      await page.route(
+        `**/api/v3/waves/${WAVE}/competitions/alpha/configuration`,
+        async (route) => {
+          await ready;
+          if (outcome === "unavailable") {
+            await route.fulfill({
+              status: 503,
+              json: { error: "Unavailable" },
+            });
+          } else {
+            await route.fallback();
+          }
+        }
+      );
+      await page.goto(`${ROOT}/alpha?edit=1`);
+      const archive = page.getByRole("button", {
+        name: "Archive",
+        exact: true,
+      });
+      await archive.click();
+      const confirmation = page.getByRole("dialog", {
+        name: "Archive: Parallel Alpha",
+        exact: true,
+      });
+      const input = confirmation.getByRole("textbox", {
+        name: "Decision name to confirm archival",
+        exact: true,
+      });
+      await input.fill("Parallel");
+      release();
+      if (outcome === "success") {
+        await expect(
+          page.getByRole("textbox", {
+            name: "Decision name",
+            exact: true,
+            includeHidden: true,
+          })
+        ).toHaveValue("Parallel Alpha");
+      } else {
+        await expect(
+          page.getByRole("button", {
+            name: "Try again",
+            exact: true,
+            includeHidden: true,
+          })
+        ).toBeAttached();
+      }
+      await expect(input).toBeVisible();
+      await expect(input).toHaveValue("Parallel");
+      await expect(input).toBeFocused();
+      await expect(
+        confirmation.getByRole("button", { name: "Confirm", exact: true })
+      ).toBeDisabled();
+      await input.fill("Parallel Alpha");
+      await expect(
+        confirmation.getByRole("button", { name: "Confirm", exact: true })
+      ).toBeEnabled();
+      await confirmation
+        .getByRole("button", { name: "Go back", exact: true })
+        .click();
+      await expect(confirmation).toHaveCount(0);
+      await expect(archive).toBeVisible();
+      await expect(archive).toBeFocused();
+      expect(sandbox.requests).toEqual([]);
+    });
+  }
+
   test("saves and resumes a native draft through the existing configuration controls", async ({
     page,
   }) => {
@@ -12295,7 +12372,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           await page
             .getByRole("menuitem", { name: label, exact: true })
             .click();
-          await expect(more).toHaveText(label);
+          await expect(
+            collection.getByRole("tab", { name: label, exact: true })
+          ).toHaveAttribute("aria-selected", "true");
+          await expect(more).toHaveText("More");
           await expect(more).toBeFocused();
         } else {
           const tab = collection.getByRole("tab", { name: label, exact: true });
@@ -12311,12 +12391,14 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         animations: "disabled",
         style: "nextjs-portal { visibility: hidden; }",
       });
-      await active.click();
+      await selectCompetitionFilter(page, "Active and upcoming");
       await expectNoHorizontalOverflow(page);
     }
     await collection.getByRole("tab", { name: "Drafts", exact: true }).click();
     await page.setViewportSize({ width: 767, height: 844 });
-    await expect(more).toHaveText("Drafts");
+    await expect(
+      collection.getByRole("tab", { name: "Drafts", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
     await expect(
       collection.getByRole("tabpanel", { name: "Drafts", exact: true })
     ).toBeVisible();
@@ -12442,17 +12524,21 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         exact: true,
       });
       await expect(competitionAction).toBeInViewport({ ratio: 1 });
-      const filterBounds = await active.boundingBox();
-      const actionBounds = await competitionAction.boundingBox();
-      expect(filterBounds).not.toBeNull();
-      expect(actionBounds).not.toBeNull();
-      expect(
-        Math.abs(
-          filterBounds!.y +
-            filterBounds!.height / 2 -
-            (actionBounds!.y + actionBounds!.height / 2)
-        )
-      ).toBeLessThanOrEqual(1);
+      const alignment = await active.evaluate((element) => {
+        const row = element.closest("[data-competition-filters-scroll]")
+          ?.parentElement?.parentElement;
+        const action = row?.querySelector("a");
+        if (!action) throw new Error("Missing decision creation action");
+        // Read both positions in one frame while the native header settles.
+        const filterBounds = element.getBoundingClientRect();
+        const actionBounds = action.getBoundingClientRect();
+        return Math.abs(
+          filterBounds.y +
+            filterBounds.height / 2 -
+            (actionBounds.y + actionBounds.height / 2)
+        );
+      });
+      expect(alignment).toBeLessThanOrEqual(1);
       await collectionMore.scrollIntoViewIfNeeded();
       await expect(collectionMore).toBeInViewport({ ratio: 1 });
       await expect(rightFade).toHaveCount(0);
@@ -12473,10 +12559,19 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await page
         .getByRole("menuitem", { name: "Completed", exact: true })
         .tap();
-      await expect(collectionMore).toHaveText("Completed");
+      await expect(
+        collection.getByRole("tab", { name: "Completed", exact: true })
+      ).toHaveAttribute("aria-selected", "true");
       await expect(
         collection.getByRole("tabpanel", { name: "Completed", exact: true })
       ).toBeVisible();
+      await expect(
+        collection.getByRole("tab", { name: "Completed", exact: true })
+      ).toBeInViewport({ ratio: 1 });
+      // Keep exercising overflow with the longer selected label on a phone.
+      await page.setViewportSize({ width: 320, height: 800 });
+      await selectCompetitionFilter(page, "Active and upcoming");
+      await expect(active).toHaveAttribute("aria-selected", "true");
       await expect
         .poll(() =>
           filtersScroller.evaluate(
@@ -12486,7 +12581,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         .toBeGreaterThan(0);
       await expect
         .poll(async () => {
-          const pill = await collectionMore.boundingBox();
+          const pill = await active.boundingBox();
           const row = await filtersScroller.boundingBox();
           return Boolean(
             pill &&
@@ -12498,13 +12593,17 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         .toBe(true);
       await expect(rightFade).toHaveCount(0);
       await page.screenshot({
-        path: testInfo.outputPath("completed-filter-in-view.png"),
+        path: testInfo.outputPath("selected-filter-in-view.png"),
         animations: "disabled",
         style: "nextjs-portal { visibility: hidden; }",
       });
+      await collectionMore.scrollIntoViewIfNeeded();
+      await expect(collectionMore).toBeInViewport({ ratio: 1 });
       await collectionMore.press("Enter");
       await page.getByRole("menuitem", { name: "Drafts", exact: true }).tap();
-      await expect(collectionMore).toHaveText("Drafts");
+      await expect(
+        collection.getByRole("tab", { name: "Drafts", exact: true })
+      ).toHaveAttribute("aria-selected", "true");
       await expect(collectionMore).toHaveAttribute("aria-expanded", "false");
       if (viewport) await page.setViewportSize(viewport);
     } else {
@@ -12516,7 +12615,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await expect(
       collection.getByRole("tabpanel", { name: "Drafts", exact: true })
     ).toBeVisible();
-    await active.click();
+    await selectCompetitionFilter(page, "Active and upcoming");
     await page.screenshot({
       path: testInfo.outputPath("competition-collection-tabs.png"),
       animations: "disabled",
@@ -15587,6 +15686,17 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     const preset = curation.getByRole("button", { name: "Art", exact: true });
     await preset.click();
     await expect(name).toHaveValue("Art");
+    await expect(name).toBeFocused();
+    const presetRow = preset.locator("..");
+    if (page.viewportSize()!.width < 768) {
+      await name.press("Tab");
+      await expect(presetRow.getByRole("button").first()).toBeFocused();
+      await page.keyboard.press("Shift+Tab");
+    } else {
+      await name.press("Shift+Tab");
+      await expect(presetRow.getByRole("button").last()).toBeFocused();
+      await page.keyboard.press("Tab");
+    }
     await expect(name).toBeFocused();
     const summary = curation.getByText("Advanced permissions", { exact: true });
     const details = curation

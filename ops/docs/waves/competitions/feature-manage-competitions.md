@@ -21,10 +21,10 @@ Below 768px it opens the setup editor in a bottom sheet with its own title,
 Close control and fixed navigation actions. Wider screens keep the inline
 editor. The action is not in **More wave actions**.
 
-Below 768px, web collection filters use the app's existing **More** menu for
-**Completed**, **Drafts** when permitted, and **All**. The menu shows the selected
-choice; dismissing it keeps the selection. Wider web views show all available
-filters directly.
+In the app and web views below 768px, the selected collection filter stays
+visible beside **More**. The menu contains the other permitted filters, including
+**Completed**, **Drafts** for administrators, and **All**. Dismissing it keeps the
+selection. Wider web views show all available filters directly.
 
 Creating a wave opens its shared
 chat without creating a decision. Wave administrators can add decisions

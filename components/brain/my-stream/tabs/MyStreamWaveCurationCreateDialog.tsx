@@ -147,9 +147,11 @@ const getSubmitButtonLabel = (
 function CurationNameField({
   name,
   onChange,
+  isPhone,
 }: {
   readonly name: string;
   readonly onChange: (name: string) => void;
+  readonly isPhone: boolean;
 }) {
   const inputId = useId();
   const nameInputRef = useRef<HTMLInputElement>(null);
@@ -174,6 +176,49 @@ function CurationNameField({
     onChange(event.target.value);
   };
 
+  const presets = (
+    <div
+      key="presets"
+      className="tw-no-scrollbar tw-order-3 -tw-mx-4 tw-mt-3 tw-flex tw-flex-nowrap tw-gap-2 tw-overflow-x-auto tw-px-4 sm:-tw-mx-6 sm:tw-px-6 md:tw-order-none md:tw-mx-0 md:tw-mt-0 md:tw-flex-wrap md:tw-gap-2.5 md:tw-overflow-visible md:tw-px-0"
+    >
+      {CURATION_NAME_PRESETS.map((key) => {
+        const preset = t(locale, key);
+        const isSelected = preset.toLocaleLowerCase(locale) === normalizedName;
+
+        return (
+          <button
+            key={key}
+            type="button"
+            onClick={() => handlePresetSelect(preset)}
+            aria-pressed={isSelected}
+            className={clsx(
+              "tw-inline-flex tw-h-8 tw-shrink-0 tw-appearance-none tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-px-2.5 tw-py-0 tw-text-meta tw-font-medium tw-shadow-none tw-transition-all tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 md:tw-h-auto md:tw-px-4 md:tw-py-2 md:tw-text-sm md:tw-shadow-sm md:group-data-[profile-typography=true]/curation-dialog:tw-text-meta",
+              isSelected
+                ? "tw-border-white/20 tw-bg-iron-800 tw-text-iron-100"
+                : "tw-border-white/10 tw-bg-iron-900 tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50"
+            )}
+          >
+            {preset}
+          </button>
+        );
+      })}
+    </div>
+  );
+  const nameInput = (
+    <div key="input" className="tw-relative tw-w-full sm:tw-max-w-[260px]">
+      <input
+        ref={nameInputRef}
+        id={inputId}
+        type="text"
+        value={name}
+        onChange={handleNameChange}
+        maxLength={50}
+        autoComplete="off"
+        placeholder={t(locale, "profileCuration.editor.namePlaceholder")}
+        className="tw-form-input tw-block tw-h-12 tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-0 tw-text-base tw-font-normal tw-text-iron-100 tw-caret-primary-400 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-base placeholder:tw-text-iron-500 hover:tw-ring-iron-650 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 md:tw-h-auto md:tw-py-3 md:tw-text-sm md:tw-font-medium md:placeholder:tw-text-sm md:group-data-[profile-typography=true]/curation-dialog:tw-text-base md:group-data-[profile-typography=true]/curation-dialog:tw-font-normal md:group-data-[profile-typography=true]/curation-dialog:placeholder:tw-text-base md:desktop-hover:group-data-[profile-typography=true]/curation-dialog:tw-text-sm md:desktop-hover:group-data-[profile-typography=true]/curation-dialog:placeholder:tw-text-sm"
+      />
+    </div>
+  );
   return (
     <div className="tw-flex tw-flex-col md:tw-gap-4">
       <label
@@ -182,43 +227,7 @@ function CurationNameField({
       >
         {t(locale, "profileCuration.editor.name")}
       </label>
-      <div className="tw-no-scrollbar tw-order-3 -tw-mx-4 tw-mt-3 tw-flex tw-flex-nowrap tw-gap-2 tw-overflow-x-auto tw-px-4 sm:-tw-mx-6 sm:tw-px-6 md:tw-order-none md:tw-mx-0 md:tw-mt-0 md:tw-flex-wrap md:tw-gap-2.5 md:tw-overflow-visible md:tw-px-0">
-        {CURATION_NAME_PRESETS.map((key) => {
-          const preset = t(locale, key);
-          const isSelected =
-            preset.toLocaleLowerCase(locale) === normalizedName;
-
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => handlePresetSelect(preset)}
-              aria-pressed={isSelected}
-              className={clsx(
-                "tw-inline-flex tw-h-8 tw-shrink-0 tw-appearance-none tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-px-2.5 tw-py-0 tw-text-meta tw-font-medium tw-shadow-none tw-transition-all tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 md:tw-h-auto md:tw-px-4 md:tw-py-2 md:tw-text-sm md:tw-shadow-sm md:group-data-[profile-typography=true]/curation-dialog:tw-text-meta",
-                isSelected
-                  ? "tw-border-white/20 tw-bg-iron-800 tw-text-iron-100"
-                  : "tw-border-white/10 tw-bg-iron-900 tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50"
-              )}
-            >
-              {preset}
-            </button>
-          );
-        })}
-      </div>
-      <div className="tw-relative tw-w-full sm:tw-max-w-[260px]">
-        <input
-          ref={nameInputRef}
-          id={inputId}
-          type="text"
-          value={name}
-          onChange={handleNameChange}
-          maxLength={50}
-          autoComplete="off"
-          placeholder={t(locale, "profileCuration.editor.namePlaceholder")}
-          className="tw-form-input tw-block tw-h-12 tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-0 tw-text-base tw-font-normal tw-text-iron-100 tw-caret-primary-400 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-base placeholder:tw-text-iron-500 hover:tw-ring-iron-650 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 md:tw-h-auto md:tw-py-3 md:tw-text-sm md:tw-font-medium md:placeholder:tw-text-sm md:group-data-[profile-typography=true]/curation-dialog:tw-text-base md:group-data-[profile-typography=true]/curation-dialog:tw-font-normal md:group-data-[profile-typography=true]/curation-dialog:placeholder:tw-text-base md:desktop-hover:group-data-[profile-typography=true]/curation-dialog:tw-text-sm md:desktop-hover:group-data-[profile-typography=true]/curation-dialog:placeholder:tw-text-sm"
-        />
-      </div>
+      {isPhone ? [nameInput, presets] : [presets, nameInput]}
     </div>
   );
 }
@@ -425,7 +434,7 @@ export default function MyStreamWaveCurationCreateDialog({
         className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
       >
         <div className="tw-flex tw-flex-col tw-gap-7 tw-px-4 tw-pb-6 tw-pt-5 sm:tw-px-6 md:tw-gap-8 md:tw-py-6">
-          <CurationNameField name={name} onChange={setName} />
+          <CurationNameField name={name} onChange={setName} isPhone={isPhone} />
 
           {permissionMode === "profile" ? (
             <details

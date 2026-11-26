@@ -219,6 +219,12 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
     const selected = filters.find((value) => value === key);
     if (selected) setFilter(selected);
   };
+  const displayTabOptions = useCompactFilters
+    ? [
+        ...tabOptions.filter((option) => option.key === filter),
+        ...tabOptions.filter((option) => option.key !== filter),
+      ]
+    : tabOptions;
   return (
     <>
       <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-3 tw-bg-iron-950 tw-px-4 tw-py-1.5 md:tw-px-6">
@@ -226,13 +232,13 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
           <div
             ref={filtersScrollerRef}
             data-competition-filters-scroll
-            className={`tw-scroll-px-10 tw-overflow-x-auto ${useCompactFilters ? "tw-no-scrollbar tw-overscroll-x-contain" : "tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500"}`}
+            className={`tw-overflow-x-auto ${useCompactFilters ? "tw-no-scrollbar tw-scroll-px-0 tw-overscroll-x-contain" : "tw-scroll-px-10 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500"}`}
           >
             <div className="tw-w-max tw-pr-px [&_button]:tw-text-meta [&_button]:tw-font-medium">
               <TabToggleWithOverflow
                 variant="compactPills"
                 maxVisibleTabs={useCompactFilters ? 1 : tabOptions.length}
-                options={tabOptions}
+                options={displayTabOptions}
                 activeKey={filter}
                 onSelect={selectFilter}
               />

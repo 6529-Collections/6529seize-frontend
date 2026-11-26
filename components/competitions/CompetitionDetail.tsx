@@ -9,7 +9,7 @@ import { WaveLeaderboardCurationDropModal } from "@/components/waves/leaderboard
 import { ApiCompetitionLifecycle } from "@/generated/models/ApiCompetitionLifecycle";
 import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
 import { getApproveWaveTabLabelsFromMetadata } from "@/helpers/waves/wave-metadata.helpers";
-import { useMemo, useState, type RefObject } from "react";
+import { useMemo, useState, type ReactNode, type RefObject } from "react";
 import { WaveDisplayMetadataContext } from "@/contexts/WaveDisplayMetadataContext";
 import { TabToggle } from "@/components/common/TabToggle";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
@@ -170,30 +170,34 @@ export function NativeCompetitionContent({
     (competition.lifecycle === ApiCompetitionLifecycle.Draft ||
       (search.get("edit") === "1" &&
         competition.permissions.edit_rules_after_activity === true))
-  )
+  ) {
+    const renderEditor = (actions?: ReactNode) => (
+      <CompetitionDraftEditor
+        actions={actions}
+        wave={wave}
+        competition={competition}
+        onClose={() => {
+          const params = new URLSearchParams(search.toString());
+          params.delete("edit");
+          params.set("tab", "rules");
+          router.replace(
+            competition.lifecycle === ApiCompetitionLifecycle.Draft
+              ? getCompetitionsRoute(wave.id)
+              : `${pathname}?${params.toString()}`
+          );
+        }}
+      />
+    );
     return (
       <div className="tw-flex tw-min-h-full tw-flex-1 tw-flex-col tw-gap-5">
-        <CompetitionDraftEditor
-          actions={
-            competition.lifecycle === ApiCompetitionLifecycle.Draft && (
-              <CompetitionAdmin archiveOnly />
-            )
-          }
-          wave={wave}
-          competition={competition}
-          onClose={() => {
-            const params = new URLSearchParams(search.toString());
-            params.delete("edit");
-            params.set("tab", "rules");
-            router.replace(
-              competition.lifecycle === ApiCompetitionLifecycle.Draft
-                ? getCompetitionsRoute(wave.id)
-                : `${pathname}?${params.toString()}`
-            );
-          }}
-        />
+        {competition.lifecycle === ApiCompetitionLifecycle.Draft ? (
+          <CompetitionAdmin archiveOnly renderActions={renderEditor} />
+        ) : (
+          renderEditor()
+        )}
       </div>
     );
+  }
   return (
     <div
       ref={providedScrollContainer ? undefined : setScrollContainer}
