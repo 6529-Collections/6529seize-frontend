@@ -16449,6 +16449,18 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       "font-size",
       "14px"
     );
+    const searchBounds = await search.boundingBox();
+    expect(searchBounds).not.toBeNull();
+    const contributors = information.getByRole("region", {
+      name: "All contributors by Wave REP",
+      exact: true,
+    });
+    for (const row of [quality, contributors.getByRole("link").first()]) {
+      const rowBounds = await row.boundingBox();
+      expect(rowBounds).not.toBeNull();
+      expect(rowBounds!.x).toBeCloseTo(searchBounds!.x, 0);
+      expect(rowBounds!.width).toBeCloseTo(searchBounds!.width, 0);
+    }
     await search.fill("missing");
     await expect(
       categories.getByText("No matching categories", { exact: true })
@@ -16477,7 +16489,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           sectionHeading.getBoundingClientRect().left
         );
       });
-    expect(rowAlignment).toBe(0);
+    expect(rowAlignment).toBe(8);
     await expect(summary.getByText("Total", { exact: true })).toHaveCSS(
       "font-size",
       "14px"

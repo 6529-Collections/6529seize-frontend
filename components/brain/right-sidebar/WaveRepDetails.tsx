@@ -400,7 +400,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
 
         {categoryViewState.showList && (
           <>
-            <div className="tw--mx-2 tw-mt-2 tw-flex tw-flex-col tw-gap-0.5">
+            <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-0.5">
               <CategoryRow
                 label={detailText("waves.rep.details.categories.all")}
                 totalRep={summary.totalRep}
@@ -576,7 +576,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
             )}
 
           {!isShowingPreviousContributors && contributors.length > 0 && (
-            <div className="tw--mx-2 tw-flex tw-flex-col">
+            <div className="tw-flex tw-flex-col">
               {contributors.map((contributor) => (
                 <ContributorRow
                   key={`${contributor.profile.id}-${selectedCategory ?? "all"}`}
