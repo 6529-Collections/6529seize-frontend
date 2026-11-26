@@ -409,6 +409,9 @@ jobs:
       matrix: ${{ fromJSON(needs.plan.outputs.core_playwright_matrix) }}
 
     env:
+      # These ephemeral dev servers never reuse their compiler disk cache.
+      NEXT_DEV_TURBOPACK_FS_CACHE: "0"
+      NATIVE_SHARED_POST_CASE: "shared post loads only its surroundings and fills the rest as the reader scrolls down"
       API_ENDPOINT: "https://api.6529.io"
       WS_ENDPOINT: "wss://ws.6529.io"
       ALLOWLIST_API_ENDPOINT: "https://allowlist-api.6529.io"
@@ -508,13 +511,25 @@ jobs:
         run: ./bin/6529 run test:e2e:artwork-documentation-sandbox
 
       - name: Run native competition browser regression pack
+        id: native_competition
         if: matrix.lane == 'playwright-native-competition'
         env:
           NEXT_DEV_TURBOPACK_FS_CACHE: "0"
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/native-competition"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/native-competition"
           NATIVE_COMPETITION_SHARD: "${{ matrix.shard }}/4"
-        run: ./bin/6529 run test:e2e:native-competition-sandbox --shard="$NATIVE_COMPETITION_SHARD"
+        # The isolated case below uses a fresh fixture server after the shards.
+        run: ./bin/6529 run test:e2e:native-competition-sandbox --shard="$NATIVE_COMPETITION_SHARD" --grep-invert="$NATIVE_SHARED_POST_CASE"
+
+      - name: Run shared-post history with a fresh fixture server
+        if: >-
+          matrix.lane == 'playwright-native-competition' &&
+          matrix.shard == '4' &&
+          (success() || steps.native_competition.outcome == 'failure')
+        env:
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/native-shared-post"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/native-shared-post"
+        run: ./bin/6529 run test:e2e:native-competition-sandbox --grep="$NATIVE_SHARED_POST_CASE"
 
       - name: Run submission artwork browser regression pack
         if: matrix.lane == 'playwright-submission-artwork'
@@ -1522,6 +1537,8 @@ jobs:
         env:
           MUSEUM_PROJECT: ${{ matrix.museum_project }}
           NODE_ENV: "development"
+          # Isolated CI dev servers do not reuse their filesystem caches.
+          NEXT_DEV_TURBOPACK_FS_CACHE: "0"
           PLAYWRIGHT_READONLY: "1"
           MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ steps.museum_publication.outputs.source_commit }}
           MUSEUM_PUBLICATION_TEST_COMMIT: ${{ steps.museum_publication.outputs.catalog_commit }}

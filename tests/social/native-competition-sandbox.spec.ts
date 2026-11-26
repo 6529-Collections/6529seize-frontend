@@ -757,6 +757,7 @@ async function expectWaveSectionOffered(
 ) {
   const direct = waveSectionButton(page, name, app);
   const more = phoneWaveMore(page);
+  if (available) await expect(direct.or(more).first()).toBeVisible();
   if (await more.isVisible()) {
     await more.click();
     const sheet = phoneWaveSections(page);

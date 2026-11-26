@@ -52,7 +52,16 @@ test.describe("About Pages @smoke @medium @large", () => {
   test("shows direct desktop downloads and independent macOS 12 recovery", async ({
     page,
     isMobile,
+    baseURL,
   }) => {
+    if (
+      baseURL &&
+      ["localhost", "127.0.0.1", "[::1]"].includes(new URL(baseURL).hostname)
+    ) {
+      // Prepare the dev route before measuring navigation from the card.
+      const ready = await page.request.get("/validator");
+      expect(ready.ok()).toBe(true);
+    }
     const legacyMirrorUrl = "https://arweave.net/" + "a".repeat(43);
     await page.addInitScript(() => {
       Object.defineProperty(navigator, "userAgentData", {
