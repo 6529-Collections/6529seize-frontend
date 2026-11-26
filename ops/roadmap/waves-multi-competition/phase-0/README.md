@@ -15,9 +15,8 @@ GET snapshots remain historical evidence, not a current feature inventory.
 See the [production assessment](../native-delivery/production-status-2026-10-01.md)
 for current implementation and open acceptance gates.
 
-The permanent compatibility boundary is every externally reachable GET route
-mounted at this baseline. The machine-readable census contains 296 runtime
-route shapes: all 183 OpenAPI GET operations and 113 additional runtime-only
+The machine-readable compatibility census retains 288 GET route shapes from
+this baseline, including all 183 OpenAPI GET operations and 105 runtime-only
 routes. Existing `RANK` and `APPROVE` waves always project their immutable
 original competition. Native multi-competition hubs always project as
 contract-valid chat waves to legacy GET clients. Mutation support is governed
@@ -29,9 +28,7 @@ manifest keeps one route per line, so future contract drift is reviewable at
 path, operation, schema, and route level.
 
 The [accepted operational retirements](./public-get-compatibility-manifest.md#accepted-operational-retirements)
-record the removed deployment UI and earlier V1 operational routes. These
-explicit exceptions leave the frozen JSON evidence and every unrelated GET
-contract intact.
+record the Release Bus V1 routes excluded from the runtime census.
 
 ## Evidence Index
 
