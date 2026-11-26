@@ -1,6 +1,7 @@
 import CheckActions from "@/app/content-moderation/checks/CheckActions";
 import { ApiModerationAction } from "@/generated/models/ApiModerationAction";
 import { ApiModerationCheckDetailActionEffectEnum } from "@/generated/models/ApiModerationCheckDetail";
+import { ApiModerationCheckSubjectTypeEnum } from "@/generated/models/ApiModerationCheck";
 import { applyModerationAction } from "@/services/api/moderation-checks-api";
 import {
   QueryClient,
@@ -15,6 +16,19 @@ import { checkFixture } from "./check.fixture";
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
+}));
+let mockWavesMovePhase = "none";
+const mockWaves: Record<string, { stays_on_site: boolean }> = {
+  "moving-wave": { stays_on_site: false },
+  "staying-wave": { stays_on_site: true },
+};
+jest.mock("@/hooks/useWaveData", () => ({
+  useWaveData: ({ waveId }: { waveId: string | null }) => ({
+    data: waveId === null ? undefined : mockWaves[waveId],
+  }),
+}));
+jest.mock("@/hooks/useWavesMovePhase", () => ({
+  useWavesMovePhase: () => mockWavesMovePhase,
 }));
 jest.mock("@/services/api/moderation-checks-api", () => ({
   applyModerationAction: jest.fn(),
@@ -34,7 +48,92 @@ function setup(detail = checkFixture()) {
   return { client, saved, reload, ...mounted };
 }
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockWavesMovePhase = "none";
+});
+
+it("says a hide doesn't reach the 6529 Network's relays once waves moved", async () => {
+  const user = userEvent.setup();
+  const line =
+    "Hiding a post here doesn't remove it from the 6529 Network's relays yet.";
+  const base = checkFixture({
+    allowed_actions: [ApiModerationAction.Allow, ApiModerationAction.Remove],
+  });
+  const postIn = (waveId: string) => ({
+    ...base,
+    check: {
+      ...base.check,
+      subject_type: ApiModerationCheckSubjectTypeEnum.Drop,
+      scope: { ...base.check.scope, wave_id: waveId },
+    },
+  });
+  const detail = postIn("moving-wave");
+  const before = setup(detail);
+  await user.selectOptions(
+    screen.getByRole("combobox"),
+    ApiModerationAction.Remove
+  );
+  expect(screen.queryByText(line)).toBeNull();
+  before.unmount();
+
+  mockWavesMovePhase = "moved";
+  setup(detail);
+  await user.selectOptions(
+    screen.getByRole("combobox"),
+    ApiModerationAction.Allow
+  );
+  expect(screen.queryByText(line)).toBeNull();
+  await user.selectOptions(
+    screen.getByRole("combobox"),
+    ApiModerationAction.Remove
+  );
+  expect(screen.getByText(line)).toBeInTheDocument();
+});
+
+it("says nothing of relays for a post in a wave that stays", async () => {
+  const user = userEvent.setup();
+  mockWavesMovePhase = "moved";
+  const base = checkFixture({
+    allowed_actions: [ApiModerationAction.Allow, ApiModerationAction.Remove],
+  });
+  setup({
+    ...base,
+    check: {
+      ...base.check,
+      subject_type: ApiModerationCheckSubjectTypeEnum.Drop,
+      scope: { ...base.check.scope, wave_id: "staying-wave" },
+    },
+  });
+  await user.selectOptions(
+    screen.getByRole("combobox"),
+    ApiModerationAction.Remove
+  );
+  expect(
+    screen.queryByText(
+      "Hiding a post here doesn't remove it from the 6529 Network's relays yet."
+    )
+  ).toBeNull();
+});
+
+it("says nothing of relays for a check that isn't about a post", async () => {
+  const user = userEvent.setup();
+  mockWavesMovePhase = "moved";
+  setup(
+    checkFixture({
+      allowed_actions: [ApiModerationAction.Allow, ApiModerationAction.Remove],
+    })
+  );
+  await user.selectOptions(
+    screen.getByRole("combobox"),
+    ApiModerationAction.Remove
+  );
+  expect(
+    screen.queryByText(
+      "Hiding a post here doesn't remove it from the 6529 Network's relays yet."
+    )
+  ).toBeNull();
+});
 
 it("explains distinct allow scopes", () => {
   const first = setup();

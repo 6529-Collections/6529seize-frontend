@@ -6,18 +6,25 @@ import {
 } from "@/components/waves/drops/WaveDropMobileMenuContext";
 import { useWaveDropMobileMenuController } from "@/components/waves/drops/useWaveDropMobileMenuController";
 import type { QuickCurationAction } from "@/hooks/drops/useCanShowDropCurationsAction";
+import {
+  useWavesMoveScope,
+  WavesMoveScope,
+} from "@/components/waves-move/WavesMoveScope";
 
 const menuRender = jest.fn();
 
 jest.mock("@/components/waves/drops/WaveDropMobileMenu", () => ({
   __esModule: true,
-  default: (props: any) => {
+  default: function MockMenu(props: any) {
     menuRender(props);
+    // The scope the menu reads, as its pause and lines do.
+    const scope = useWavesMoveScope();
     return (
       <div
         data-testid="shared-menu"
         data-drop-id={props.drop.id}
         data-open={String(props.isOpen)}
+        data-waves-move-scope={scope}
       >
         <button
           type="button"
@@ -29,19 +36,24 @@ jest.mock("@/components/waves/drops/WaveDropMobileMenu", () => ({
   },
 }));
 
-const createDrop = (id: string) =>
+const createDrop = (id: string, staysOnSite?: boolean) =>
   ({
     id,
     author: { handle: "alice" },
-    wave: { id: "wave" },
+    wave:
+      staysOnSite === undefined
+        ? { id: "wave" }
+        : { id: "wave", stays_on_site: staysOnSite },
   }) as any;
 
 function OpenMenuButton({
   dropId,
   onOpenChange,
+  staysOnSite,
 }: {
   readonly dropId: string;
   readonly onOpenChange?: ((open: boolean) => void) | undefined;
+  readonly staysOnSite?: boolean | undefined;
 }) {
   const mobileMenu = useWaveDropMobileMenu();
 
@@ -51,7 +63,7 @@ function OpenMenuButton({
       data-testid={`open-${dropId}`}
       onClick={() =>
         mobileMenu?.open({
-          drop: createDrop(dropId),
+          drop: createDrop(dropId, staysOnSite),
           longPressTriggered: false,
           showReplyAndQuote: true,
           onOpenChange,
@@ -92,6 +104,31 @@ describe("WaveDropMobileMenuProvider", () => {
   beforeEach(() => {
     menuRender.mockClear();
   });
+
+  it.each([
+    [true, "moves", "stays"],
+    [false, "stays", "moves"],
+  ] as const)(
+    "gives the menu its drop's own wave scope (stays_on_site %s inside a wave that %s)",
+    async (staysOnSite, around, expected) => {
+      render(
+        <WavesMoveScope
+          wave={{ id: "outer", stays_on_site: around === "stays" }}
+          waveId="outer"
+        >
+          <WaveDropMobileMenuProvider>
+            <OpenMenuButton dropId="drop-a" staysOnSite={staysOnSite} />
+          </WaveDropMobileMenuProvider>
+        </WavesMoveScope>
+      );
+
+      fireEvent.click(screen.getByTestId("open-drop-a"));
+      expect(await screen.findByTestId("shared-menu")).toHaveAttribute(
+        "data-waves-move-scope",
+        expected
+      );
+    }
+  );
 
   it("uses one shared menu host for different drops", async () => {
     const onDropAOpenChange = jest.fn();

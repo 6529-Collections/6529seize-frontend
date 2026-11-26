@@ -36,4 +36,22 @@ describe("CreateWaveInlineGroupHeader", () => {
     expect(screen.queryByText("Before editing")).not.toBeInTheDocument();
     expect(screen.getByText("Public")).toBeInTheDocument();
   });
+
+  it("says when a group made on the 6529 Network still has its placeholder name", () => {
+    render(
+      <CreateWaveInlineGroupHeader
+        currentGroupLabel="Group 0xab12ab12"
+        currentGroupNamePending
+        showCurrentGroupTitle={false}
+        unsavedGroupDescription={null}
+        unsavedGroupSummary={null}
+      />
+    );
+
+    expect(
+      screen.getByText(
+        "This group's name shows here once 6529.io has read it from the 6529 Network."
+      )
+    ).toBeInTheDocument();
+  });
 });

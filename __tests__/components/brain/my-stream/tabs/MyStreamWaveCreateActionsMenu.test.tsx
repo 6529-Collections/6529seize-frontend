@@ -112,15 +112,36 @@ describe("MyStreamWaveCreateActionsMenu", () => {
     });
   });
 
-  it("offers no new subwave while new waves are paused for the move", () => {
+  it("keeps new subwave and says why it can't open while new waves are paused for the move", () => {
     mockCreationPaused = true;
+    const setToast = jest.fn();
+    mockedUseAuth.mockReturnValue({
+      connectedProfile: { handle: "alice" },
+      activeProfileProxy: null,
+      setToast,
+    });
     const { result } = renderHook(() =>
       useWaveCreateMenuActions({ wave: createWave(), mobile: false })
     );
-    expect(result.current.items.map(({ id }) => id)).not.toContain(
-      "create-subwave"
+    const subwave = result.current.items.find(
+      ({ id }) => id === "create-subwave"
     );
-    expect(result.current.items.length).toBeGreaterThan(0);
+    if (!subwave || !("onSelect" in subwave) || !subwave.onSelect) {
+      throw new Error("expected the new subwave item");
+    }
+    subwave.onSelect();
+    expect(setToast).toHaveBeenCalledWith({
+      message:
+        "New waves aren't open yet while waves move to the 6529 Network.",
+      type: "warning",
+    });
+    render(<>{subwave.label}</>);
+    expect(
+      screen.getByText(
+        "New waves aren't open yet while waves move to the 6529 Network."
+      )
+    ).toBeInTheDocument();
+    expect(result.current.items.length).toBeGreaterThan(1);
   });
 
   it("keeps subwave permission independent when curation creation moves to the tab row", () => {

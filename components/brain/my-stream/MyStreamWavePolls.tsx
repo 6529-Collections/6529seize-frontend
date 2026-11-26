@@ -12,6 +12,9 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import useLocalPreference from "@/hooks/useLocalPreference";
 import { useWavePollDrops } from "@/hooks/useWavePollDrops";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useWaveMovedToChain } from "@/hooks/useWavesMovePhase";
+import { t } from "@/i18n/messages";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import type {
   WavePollsSort as WavePollsApiSort,
@@ -135,6 +138,8 @@ const MyStreamWavePolls: React.FC<MyStreamWavePollsProps> = ({
 }) => {
   const { leaderboardViewStyle } = useLayout();
   const isPhone = useIsMobileLayoutViewport();
+  const locale = useBrowserLocale();
+  const movedToChain = useWaveMovedToChain(wave);
   const [stateFilter, setStateFilter] =
     useLocalPreference<WavePollsStateFilter>(
       `wavePollState_${wave.id}`,
@@ -280,6 +285,11 @@ const MyStreamWavePolls: React.FC<MyStreamWavePollsProps> = ({
         </div>
       </div>
 
+      {movedToChain && (
+        <p className="tw-m-0 tw-text-sm tw-text-iron-400">
+          {t(locale, "wavesMove.chainPolls")}
+        </p>
+      )}
       {content}
     </div>
   );

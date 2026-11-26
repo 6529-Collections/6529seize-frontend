@@ -1,6 +1,15 @@
 import type { TypeOptions } from "react-toastify";
 
 import { sanitizeErrorForUser } from "@/utils/error-sanitizer";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+
+/**
+ * 6529.io's API refuses a change in a wave that moved to the 6529 Network
+ * with code WAVES_ON_CHAIN and this wording, meant for API clients.
+ */
+const WAVES_ON_CHAIN_WORDING =
+  "this change is made there now, not through this route";
 
 const DEFAULT_TOAST_AUTO_CLOSE_MS = 3000;
 const ERROR_TOAST_AUTO_CLOSE_MS = 8000;
@@ -236,6 +245,19 @@ export const getFriendlyToastContent = ({
   }
 
   const lowerMessage = message.toLowerCase();
+
+  // A change refused because its wave moved to the 6529 Network: the
+  // site's own line, not the wording for API clients.
+  if (lowerMessage.includes(WAVES_ON_CHAIN_WORDING)) {
+    return { title: t(DEFAULT_LOCALE, "wavesMove.onChainRefused") };
+  }
+
+  // Other sentences about the 6529 Network (a change it refused) are
+  // already plain words: never a connection problem or a cancelled wallet
+  // prompt.
+  if (lowerMessage.includes("6529 network")) {
+    return { title: normalized };
+  }
 
   if (message.trim().toLowerCase() === "unauthorized") {
     return {
