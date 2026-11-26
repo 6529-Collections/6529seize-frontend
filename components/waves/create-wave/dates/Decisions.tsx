@@ -8,7 +8,10 @@ import SubsequentDecisions from "./SubsequentDecisions";
 import { calculateDecisionTimes } from "../services/waveDecisionService";
 import CommonSwitch from "@/components/utils/switch/CommonSwitch";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
-import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
+import {
+  CREATE_WAVE_FORM_STYLES,
+  DECISION_EDITOR_MOBILE_STYLES,
+} from "../utils/createWaveFormStyles";
 import CreateWaveAdvancedSection from "../utils/CreateWaveAdvancedSection";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, tRich } from "@/i18n/messages";
@@ -150,6 +153,8 @@ export default function Decisions({
   return (
     <div className="tw-space-y-4">
       <CollapsibleCard
+        headerClassName={DECISION_EDITOR_MOBILE_STYLES.disclosureHeader}
+        titleClassName={DECISION_EDITOR_MOBILE_STYLES.heading}
         title={
           <span className="tw-text-iron-100">
             {t(locale, "waves.create.dates.rank.announcements.title")}
@@ -164,7 +169,9 @@ export default function Decisions({
           />
         }
       >
-        <div className="tw-px-5 tw-pb-1 tw-pt-2">
+        <div
+          className={`tw-px-5 tw-pb-1 tw-pt-2 ${DECISION_EDITOR_MOBILE_STYLES.panelInlinePadding}`}
+        >
           {hasRankFutureDateError && (
             <div
               role="alert"
@@ -249,7 +256,9 @@ export default function Decisions({
             </p>
           </div>
         </div>
-        <div className="tw-grid tw-grid-cols-1 tw-gap-x-10 tw-gap-y-6 tw-px-5 tw-pb-5 md:tw-grid-cols-2">
+        <div
+          className={`tw-grid tw-grid-cols-1 tw-gap-x-10 tw-gap-y-6 tw-px-5 tw-pb-5 md:tw-grid-cols-2 ${DECISION_EDITOR_MOBILE_STYLES.panelInlinePadding}`}
+        >
           <DecisionsFirst
             firstDecisionTime={dates.firstDecisionTime}
             setFirstDecisionTime={(time) =>
@@ -266,7 +275,9 @@ export default function Decisions({
         hasError={hasAdvancedError}
         variant="filled"
       >
-        <div className="tw-space-y-6 tw-p-5">
+        <div
+          className={`tw-space-y-6 tw-p-5 ${DECISION_EDITOR_MOBILE_STYLES.panelPadding}`}
+        >
           <SubsequentDecisions
             firstDecisionTime={dates.firstDecisionTime}
             subsequentDecisions={dates.subsequentDecisions}

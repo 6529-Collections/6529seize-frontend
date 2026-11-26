@@ -24,6 +24,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import CreateWaveAdvancedSection from "../utils/CreateWaveAdvancedSection";
 import CreateWaveStepHeader from "../utils/CreateWaveStepHeader";
+import { DECISION_EDITOR_MOBILE_STYLES } from "../utils/createWaveFormStyles";
 
 const VOTING_TYPES_ORDER: Record<ApiWaveCreditType, number | undefined> = {
   [ApiWaveCreditType.TdhPlusXtdh]: 0,
@@ -114,9 +115,11 @@ function CreditScopePreview({
   return (
     <div
       aria-hidden="true"
-      className="tw-mb-2 tw-h-16 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/70 tw-p-2 sm:tw-mb-3 sm:tw-h-20 sm:tw-p-2.5"
+      className={`tw-mb-2 tw-h-16 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/70 tw-p-2 sm:tw-mb-3 sm:tw-h-20 sm:tw-p-2.5 ${DECISION_EDITOR_MOBILE_STYLES.preview}`}
     >
-      <div className="tw-flex tw-h-full tw-flex-col tw-items-center tw-justify-center">
+      <div
+        className={`tw-flex tw-h-full tw-flex-col tw-items-center tw-justify-center ${DECISION_EDITOR_MOBILE_STYLES.previewContent}`}
+      >
         <div className="tw-grid tw-h-3 tw-w-full tw-max-w-36 tw-grid-cols-3 tw-gap-1.5 sm:tw-gap-2">
           {scope === ApiWaveCreditScope.Wave ? (
             <span className="tw-col-span-3 tw-flex tw-justify-center">
@@ -199,10 +202,14 @@ function CreateWaveCreditScopeSelect({
 
   return (
     <fieldset className="tw-mt-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-px-0 tw-pb-0 tw-pt-6">
-      <legend className="tw-mb-3 tw-mt-0 tw-block tw-pr-4 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100">
+      <legend
+        className={`tw-mb-3 tw-mt-0 tw-block tw-pr-4 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100 ${DECISION_EDITOR_MOBILE_STYLES.heading}`}
+      >
         {t(locale, "waves.create.voting.scope.legend")}
       </legend>
-      <div className="tw-grid tw-grid-cols-2 tw-gap-3">
+      <div
+        className={`tw-grid tw-grid-cols-2 tw-gap-3 ${DECISION_EDITOR_MOBILE_STYLES.optionGrid}`}
+      >
         {creditScopeOptions.map((option) => {
           const isSelected = creditScope === option.scope;
           return (
@@ -212,13 +219,15 @@ function CreateWaveCreditScopeSelect({
                 isSelected
                   ? "tw-border-primary-500/60 tw-bg-iron-900 tw-shadow-inner"
                   : "tw-border-white/5 tw-bg-iron-900/60 hover:tw-border-white/10 hover:tw-bg-iron-900"
-              }`}
+              } ${DECISION_EDITOR_MOBILE_STYLES.optionCard}`}
             >
               <CreditScopePreview
                 scope={option.scope}
                 isSelected={isSelected}
               />
-              <div className="tw-flex tw-items-start tw-gap-2 sm:tw-gap-3">
+              <div
+                className={`tw-flex tw-items-start tw-gap-2 sm:tw-gap-3 ${DECISION_EDITOR_MOBILE_STYLES.optionContent}`}
+              >
                 <input
                   id={`create-wave-credit-scope-${option.scope}`}
                   type="radio"
@@ -234,7 +243,7 @@ function CreateWaveCreditScopeSelect({
                     isSelected
                       ? "tw-border-primary-400 tw-bg-primary-500/10"
                       : "tw-border-iron-600 tw-bg-transparent group-hover:tw-border-iron-500"
-                  }`}
+                  } ${DECISION_EDITOR_MOBILE_STYLES.optionRadio}`}
                 >
                   <span
                     className={`tw-size-2 tw-rounded-full tw-bg-primary-400 tw-transition tw-duration-200 ${
@@ -242,20 +251,22 @@ function CreateWaveCreditScopeSelect({
                     }`}
                   />
                 </span>
-                <span className="tw-min-w-0 tw-whitespace-normal">
+                <span
+                  className={`tw-min-w-0 tw-whitespace-normal ${DECISION_EDITOR_MOBILE_STYLES.optionText}`}
+                >
                   <span
                     className={`tw-flex tw-min-h-4 tw-items-center tw-text-sm tw-font-semibold ${
                       isSelected
                         ? "tw-text-white"
                         : "tw-text-iron-300 group-hover:tw-text-white"
-                    }`}
+                    } ${DECISION_EDITOR_MOBILE_STYLES.optionTitle}`}
                   >
                     {option.label}
                   </span>
                   <span
                     className={`tw-mt-1 tw-block tw-min-h-8 tw-text-xs tw-font-normal tw-leading-4 ${
                       isSelected ? "tw-text-iron-300" : "tw-text-iron-400"
-                    }`}
+                    } ${DECISION_EDITOR_MOBILE_STYLES.helper}`}
                   >
                     {option.description}
                   </span>
@@ -426,7 +437,7 @@ export default function CreateWaveVoting({
                     selectedType === votingType
                       ? "tw-text-white"
                       : "tw-text-iron-300 group-hover:tw-text-white"
-                  }`}
+                  } ${DECISION_EDITOR_MOBILE_STYLES.optionTitle}`}
                 >
                   {getCreateWaveVotingLabel(votingType)}
                 </span>
@@ -488,7 +499,9 @@ export default function CreateWaveVoting({
             hasError={hasAdvancedError}
             variant="filled"
           >
-            <div className="tw-space-y-3 tw-p-5">
+            <div
+              className={`tw-space-y-3 tw-p-5 ${DECISION_EDITOR_MOBILE_STYLES.panelPadding}`}
+            >
               <MaxVotesPerIdentityInput
                 value={maxVotesPerIdentityPerDrop}
                 errors={errors}
@@ -498,6 +511,7 @@ export default function CreateWaveVoting({
               {waveType === ApiWaveType.Approve ? (
                 <>
                   <TimeWeightedVoting
+                    decisionEditor={isCompetition}
                     config={timeWeighted}
                     errorMessage={timeWeightedErrorMessage}
                     onChange={onTimeWeightedChange}
@@ -520,6 +534,7 @@ export default function CreateWaveVoting({
                   )}
 
                   <NegativeVotingToggle
+                    decisionEditor={isCompetition}
                     allowNegativeVotes={allowNegativeVotes}
                     onChange={onAllowNegativeVotesChange}
                     isDisabled={lockVotingCredits}
@@ -528,11 +543,13 @@ export default function CreateWaveVoting({
               ) : (
                 <>
                   <NegativeVotingToggle
+                    decisionEditor={isCompetition}
                     allowNegativeVotes={allowNegativeVotes}
                     onChange={onAllowNegativeVotesChange}
                     isDisabled={lockVotingCredits}
                   />
                   <TimeWeightedVoting
+                    decisionEditor={isCompetition}
                     config={timeWeighted}
                     errorMessage={timeWeightedErrorMessage}
                     onChange={onTimeWeightedChange}
