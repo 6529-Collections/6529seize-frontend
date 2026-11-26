@@ -13327,6 +13327,45 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     }
   });
 
+  test("keeps phone web decision type options on the sheet surface", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-mobile-chromium",
+      "The sheet surface is specific to the phone viewport."
+    );
+    await page.setViewportSize({ width: 498, height: 844 });
+    await installCompetitionApi(page);
+    await page.goto(`${ROOT}/new`);
+    const trigger = page.getByRole("combobox", {
+      name: "Decision type",
+      exact: true,
+    });
+    await trigger.click();
+    const sheet = page.getByRole("dialog", {
+      name: "Decision type",
+      exact: true,
+    });
+    const choices = sheet.getByRole("listbox", {
+      name: "Decision type",
+      exact: true,
+    });
+    await expect(choices).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+    await expect(
+      choices.getByRole("option", { name: "Rank", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
+    await page.screenshot({
+      path: testInfo.outputPath("phone-web-decision-type-surface.png"),
+      animations: "disabled",
+      style: "nextjs-portal { visibility: hidden; }",
+    });
+    await choices.getByRole("option", { name: "Approve", exact: true }).click();
+    await expect(sheet).toBeHidden();
+    await expect(trigger).toHaveText("Approve");
+    await expect(trigger).toBeFocused();
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("uses the shared competition type dropdown and app bottom sheet", async ({
     page,
   }, testInfo) => {
@@ -13386,6 +13425,8 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       exact: true,
     });
     await expect(choices).toBeVisible();
+    if (app)
+      await expect(choices).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
     await expect(
       choices.getByRole("option", { name: "Rank", exact: true })
     ).toHaveAttribute("aria-selected", "true");
