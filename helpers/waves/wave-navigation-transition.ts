@@ -1,6 +1,6 @@
 import { Capacitor } from "@capacitor/core";
 import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
-import { runPhoneNavigationMotion } from "@/lib/motion/phone-navigation";
+import { runPhoneNavigationMotion } from "@/lib/motion/phone-navigation-registry";
 import { spring } from "framer-motion";
 import { MOTION_SPRINGS } from "@/lib/motion/springs";
 
@@ -25,12 +25,23 @@ export function isForwardWaveNavigation(
   return screen === "wave" || (screen === "feed" && previous === "list");
 }
 
+function getPhoneMotionDirection(target: TransitionTarget): "forward" | "back" {
+  if (typeof target !== "string") return target.direction ?? "back";
+  if (target === "wave") return "forward";
+  const opensFeed =
+    target === "feed" &&
+    globalThis.location.pathname === "/waves" &&
+    !new URLSearchParams(globalThis.location.search).has("wave");
+  return opensFeed ? "forward" : "back";
+}
+
 export function usesFadeOnlyWaveEntry(screen: WaveScreen) {
   return screen === "wave" && Capacitor.getPlatform() === "ios";
 }
 
 let activeTransition: {
   readonly target: TransitionTarget;
+  readonly sourcePathname: string;
   readonly committed: () => void;
   readonly skip: () => void;
   readonly contentReady: () => void;
@@ -39,6 +50,7 @@ let navigatingWithoutAdditionalMotion = false;
 let swipeHandoffPending = false;
 
 function setConversationSpring(root: HTMLElement) {
+  // Clip the near-invisible spring tail so browser snapshots are released promptly.
   const generator = spring({
     ...MOTION_SPRINGS.spatial.default,
     keyframes: [0, 1],
@@ -119,6 +131,13 @@ export function commitWaveNavigationTransition(
     typeof target === "string"
       ? screen === target
       : pathname === target.pathname;
+  // Responsive hydration can acknowledge the outgoing page before capture runs.
+  if (
+    !reachedTarget &&
+    typeof target !== "string" &&
+    pathname === activeTransition.sourcePathname
+  )
+    return false;
   if (!reachedTarget) activeTransition.skip();
   else activeTransition.committed();
   return true;
@@ -163,16 +182,9 @@ export function runWaveNavigationTransition(
     navigate();
     return false;
   }
-  const forward =
-    typeof target === "string"
-      ? target === "wave" ||
-        (target === "feed" &&
-          globalThis.location.pathname === "/waves" &&
-          !new URLSearchParams(globalThis.location.search).has("wave"))
-      : target.direction === "forward";
   if (
     !swipe &&
-    runPhoneNavigationMotion(forward ? "forward" : "back", () =>
+    runPhoneNavigationMotion(getPhoneMotionDirection(target), () =>
       navigateWithoutAdditionalMotion(navigate)
     )
   )
@@ -199,6 +211,7 @@ export function runWaveNavigationTransition(
 
   activeTransition?.skip();
   const root = document.documentElement;
+  const sourcePathname = globalThis.location.pathname;
   if (capturesWholePage) setConversationSpring(root);
   let contentPending = target === "feed";
   let shellCommitted = false;
@@ -282,6 +295,7 @@ export function runWaveNavigationTransition(
   };
   const pending = {
     target,
+    sourcePathname,
     committed: () => {
       if (enteringConversation && !stopped) {
         namedSurface =

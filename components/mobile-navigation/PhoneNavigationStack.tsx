@@ -26,11 +26,11 @@ import {
   type PhoneNavigationRoute,
 } from "@/helpers/waves/phone-navigation-route";
 import { PULL_TO_REFRESH_TRANSFORM_ROOT_ATTRIBUTE } from "@/helpers/pull-to-refresh.helpers";
+import { createPhoneNavigationMotion } from "@/lib/motion/phone-navigation";
 import {
-  createPhoneNavigationMotion,
   registerPhoneNavigationMotion,
   type PhoneNavigationMotion,
-} from "@/lib/motion/phone-navigation";
+} from "@/lib/motion/phone-navigation-registry";
 import { useNativeKeyboard } from "@/hooks/useNativeKeyboard";
 import { useEditingDrop } from "@/contexts/EditingDropContext";
 
@@ -140,12 +140,12 @@ export default function PhoneNavigationStack({
   ]);
   const required =
     route.screen === "conversation" ? route.destination : route.screen;
-  if (required && !retained.includes(required))
-    setRetained([...retained, required]);
   const screens =
     required && !retained.includes(required)
       ? [...retained, required]
       : retained;
+  // A new underlay must mount in the same commit as its entering page.
+  if (screens !== retained) setRetained(screens);
   useLayoutEffect(() => {
     const controller = createPhoneNavigationMotion(() => {
       const active = current.current;

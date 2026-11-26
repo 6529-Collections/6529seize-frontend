@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import PhoneNavigationStack from "@/components/mobile-navigation/PhoneNavigationStack";
 import { getPhoneNavigationRoute } from "@/helpers/waves/phone-navigation-route";
 import type { CSSProperties, ReactNode } from "react";
 import { Suspense, useCallback, useMemo, useRef } from "react";
@@ -36,9 +37,6 @@ const TouchDeviceHeader = dynamic(() => import("../header/AppHeader"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
 });
-const PhoneNavigationStack = dynamic(
-  () => import("../mobile-navigation/PhoneNavigationStack")
-);
 
 interface Props {
   readonly children: ReactNode;

@@ -435,9 +435,9 @@ const getFloatingActivePillStyle = ({
   };
 };
 
-const BottomNavigationFallback: React.FC<BottomNavigationProps> = ({
-  hidden = false,
-}) => {
+const BottomNavigationFallback: React.FC<
+  Pick<BottomNavigationProps, "hidden">
+> = ({ hidden = false }) => {
   const isTabletViewport = useMediaQuery(TABLET_DOCK_QUERY);
   const { isAndroid } = useCapacitor();
 

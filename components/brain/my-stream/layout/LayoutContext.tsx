@@ -539,23 +539,26 @@ export function PhoneListLayoutProvider({
   const { isCapacitor } = useCapacitor();
   const header = useRef<HTMLDivElement | null>(null);
   const [headerHeight, setHeaderHeight] = useState(64);
+  const measureHeader = useCallback(() => {
+    const height = header.current?.getBoundingClientRect().height ?? 0;
+    if (height > 0) setHeaderHeight(height);
+  }, []);
   const registerRef = useCallback(
     (type: LayoutRefType, element: HTMLDivElement | null) => {
+      // Lists have no Wave/About tab bars; their refs belong to the outer page.
       if (type !== "header") return;
       header.current = element;
-      if (element) setHeaderHeight(element.getBoundingClientRect().height);
+      measureHeader();
     },
-    []
+    [measureHeader]
   );
   useLayoutEffect(() => {
     if (!active || !header.current) return;
     const element = header.current;
-    const observer = new ResizeObserver(() =>
-      setHeaderHeight(element.getBoundingClientRect().height)
-    );
+    const observer = new ResizeObserver(measureHeader);
     observer.observe(element);
     return () => observer.disconnect();
-  }, [active]);
+  }, [active, measureHeader]);
   const value = useMemo(() => {
     const spaces = {
       ...defaultSpaces,

@@ -112,7 +112,10 @@ export async function waitForRouteReady(
     timeout,
   });
   await page.locator("body").waitFor({ state: "attached", timeout });
-  await expect(page.locator(readySelector).first()).toBeVisible({ timeout });
+  // Native navigation can retain an inactive main before the visible page.
+  await expect(
+    page.locator(readySelector).filter({ visible: true }).first()
+  ).toBeVisible({ timeout });
 }
 
 export async function expectNoHorizontalOverflow(

@@ -22,27 +22,36 @@ export function useExitActiveWave() {
 
   return useCallback(
     (isDirectMessage: boolean) => {
+      const pathname = globalThis.location.pathname;
       const search = new URLSearchParams(globalThis.location.search);
       const returnToFeed =
         isApp &&
         !isDirectMessage &&
-        !isProfileWavesFeed(globalThis.location.pathname, search) &&
+        !isProfileWavesFeed(pathname, search) &&
         returnsToProfileWavesFeed(search);
       const destination = returnToFeed
         ? PROFILE_WAVES_FEED_HREF
         : getWaveHomeRoute({ isDirectMessage, isApp });
-      runPhoneChevronBackTransition(
-        returnToFeed ? "/waves" : destination,
-        () => {
-          clearLastVisited(isDirectMessage ? "dm" : "wave");
-          if (setActiveWave)
-            setActiveWave(
-              null,
-              returnToFeed ? { profileFeed: true } : { isDirectMessage }
-            );
-          else router.push(destination, { scroll: false });
-        }
-      );
+      const navigate = () => {
+        clearLastVisited(isDirectMessage ? "dm" : "wave");
+        if (setActiveWave)
+          setActiveWave(
+            null,
+            returnToFeed ? { profileFeed: true } : { isDirectMessage }
+          );
+        else router.push(destination, { scroll: false });
+      };
+      if (
+        pathname === "/waves" ||
+        pathname.startsWith("/waves/") ||
+        pathname === "/messages" ||
+        pathname.startsWith("/messages/")
+      )
+        runPhoneChevronBackTransition(
+          returnToFeed ? "/waves" : destination,
+          navigate
+        );
+      else navigate();
     },
     [clearLastVisited, setActiveWave, isApp, router]
   );

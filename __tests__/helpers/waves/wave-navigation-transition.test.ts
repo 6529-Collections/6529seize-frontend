@@ -403,6 +403,25 @@ describe("phone chevron Back", () => {
     expect(page?.style.viewTransitionName).toBe("");
   });
 
+  it("keeps the first Back navigation when hydration acknowledges the outgoing page", async () => {
+    const previousUrl = location.href;
+    history.replaceState(null, "", "/messages/current");
+    try {
+      const navigate = jest.fn();
+      runPhoneChevronBackTransition("/messages", navigate);
+      expect(commitWaveNavigationTransition(null, "/messages/current")).toBe(
+        false
+      );
+      await Promise.resolve();
+      expect(navigate).toHaveBeenCalledTimes(1);
+      expect(commitWaveNavigationTransition(null, "/messages")).toBe(true);
+      await updateDone;
+      expect(skip).not.toHaveBeenCalled();
+    } finally {
+      history.replaceState(null, "", previousUrl);
+    }
+  });
+
   it("uses the stable phone web page without requiring an app content surface", async () => {
     document.body.innerHTML =
       "<div data-phone-wave-page><header>Wave name and Join</header>Channel</div>";

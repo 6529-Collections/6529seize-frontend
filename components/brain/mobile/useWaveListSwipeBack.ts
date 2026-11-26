@@ -8,7 +8,7 @@ import { MOTION_SPRINGS } from "@/lib/motion/springs";
 import {
   beginPhoneBackGesture,
   type PhoneBackGesture,
-} from "@/lib/motion/phone-navigation";
+} from "@/lib/motion/phone-navigation-registry";
 import {
   navigateAfterWaveSwipe,
   runWaveNavigationTransition,

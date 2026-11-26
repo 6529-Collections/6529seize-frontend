@@ -4,7 +4,7 @@ import { createContext, useContext } from "react";
 import type { ReadonlyURLSearchParams } from "next/navigation";
 
 /** A retained list keeps its own route and stops background-only work. */
-export interface PhoneNavigationScreen {
+interface PhoneNavigationScreen {
   readonly pathname: string;
   readonly searchParams: ReadonlyURLSearchParams;
   readonly active: boolean;

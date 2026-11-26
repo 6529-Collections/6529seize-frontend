@@ -20,16 +20,16 @@ const BrainLeftSidebarWaveDropTime: React.FC<
   useEffect(() => {
     if (!visible) return;
 
-    const handleFocus = () => {
+    const refreshIfVisible = () => {
       if (document.visibilityState === "visible") setNow(Date.now());
     };
 
-    document.addEventListener("visibilitychange", handleFocus);
-    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", refreshIfVisible);
+    window.addEventListener("focus", refreshIfVisible);
 
     return () => {
-      document.removeEventListener("visibilitychange", handleFocus);
-      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", refreshIfVisible);
+      window.removeEventListener("focus", refreshIfVisible);
     };
   }, [visible]);
 

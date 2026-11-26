@@ -1,10 +1,16 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import CommunityCurations from "@/components/community-curations/CommunityCurations";
+import { PhoneNavigationScreenContext } from "@/contexts/PhoneNavigationScreenContext";
+import { ReadonlyURLSearchParams } from "next/navigation";
 
 const mockUseCommunityCurationsDrops = jest.fn();
 const mockCommitWaveNavigationContent = jest.fn();
 let mockIsApp = false;
 let mockRestoreScrollOffset = () => true;
+const mockGetPosition = jest.fn(() => 240);
+jest.mock("@/contexts/ScrollPositionContext", () => ({
+  useScrollPositionContext: () => ({ getPosition: mockGetPosition }),
+}));
 
 jest.mock("@/helpers/waves/wave-navigation-transition", () => ({
   commitWaveNavigationContent: (...args: unknown[]) =>
@@ -67,6 +73,7 @@ describe("CommunityCurations", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockIsApp = false;
+    mockGetPosition.mockReturnValue(240);
     mockUseCommunityCurationsDrops.mockReturnValue(loadingState);
   });
 
@@ -165,5 +172,25 @@ describe("CommunityCurations", () => {
     render(<CommunityCurations />);
     expect(screen.getByTestId("profile-feed-masonry")).toBeInTheDocument();
     expect(mockCommitWaveNavigationContent).toHaveBeenCalledWith("feed");
+  });
+
+  it("applies a fresh Feed entry reset to the same retained scrollport", () => {
+    const screen = {
+      pathname: "/waves",
+      searchParams: new ReadonlyURLSearchParams("view=profile-feed"),
+    };
+    const view = (active: boolean) => (
+      <PhoneNavigationScreenContext.Provider value={{ ...screen, active }}>
+        <CommunityCurations />
+      </PhoneNavigationScreenContext.Provider>
+    );
+    const { container, rerender } = render(view(true));
+    const feed = container.querySelector("section");
+    rerender(view(false));
+    scrollTo.mockClear();
+    mockGetPosition.mockReturnValue(0);
+    rerender(view(true));
+    expect(container.querySelector("section")).toBe(feed);
+    expect(scrollTo).toHaveBeenCalledWith({ top: 0 });
   });
 });

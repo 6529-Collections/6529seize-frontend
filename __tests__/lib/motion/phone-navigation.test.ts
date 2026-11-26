@@ -142,6 +142,30 @@ it("crossfades with reduced motion without translating, dimming or shadow", () =
   motion.dispose();
 });
 
+it.each(["chevron", "gesture"] as const)(
+  "lets a superseding %s finish Back exactly once",
+  (method) => {
+    const { motion } = setup();
+    const first = jest.fn();
+    const second = jest.fn();
+    motion.transition("back", first);
+    const old = options();
+    old.onUpdate?.(140);
+    if (method === "gesture") {
+      const caught = motion.begin();
+      caught?.move(120);
+      caught?.end(true, 500, second);
+    } else motion.transition("back", second);
+    old.onComplete?.();
+    expect(first).not.toHaveBeenCalled();
+    options().onUpdate?.(399.8);
+    options().onComplete?.();
+    expect(second).toHaveBeenCalledTimes(1);
+    motion.commit(false);
+    motion.dispose();
+  }
+);
+
 it("honors reduced-motion changes during a drag and removes its listener on disposal", () => {
   const { motion, page, destination, dim } = setup();
   const removeListener = jest.spyOn(motionPreference, "removeEventListener");
