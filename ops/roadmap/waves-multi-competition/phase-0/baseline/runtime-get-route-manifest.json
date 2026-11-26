@@ -1,7 +1,7 @@
 {
   "baseline": {
     "captured_on": "2026-07-20",
-    "scope": "Externally reachable HTTP GET routes from the roadmap Phase 0 baseline, with approved retirements reflected in this inventory. This includes authenticated operational GETs and raw contract endpoints. The interactive Swagger UI serves as documentation.",
+    "scope": "Externally reachable HTTP GET routes observed at source_backend_revision for roadmap Phase 0. Counts describe the retained inventory after the approved eight-record amendment in backend PR #2625. The inventory includes authenticated operational GETs and raw contract endpoints. The interactive Swagger UI serves as documentation.",
     "permanent_compatibility": [
       "path",
       "parameters",

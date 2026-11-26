@@ -29,6 +29,11 @@ The Simple Release Bus V1 removal in backend PR #1831 retired
 `/deploy/release-trains`, and `/deploy/release-trains/:id`. The backend
 runtime census excludes those historical records from compatibility checks.
 
+[Backend PR #2625](https://github.com/6529-Collections/6529seize-backend/pull/2625)
+approves removal of eight operational GET records from the retained inventory.
+Three of those records were for routes already retired in
+[backend PR #1965](https://github.com/6529-Collections/6529seize-backend/pull/1965).
+
 ## Machine-Readable Census
 
 The complete contract is split into two checked-in snapshots:
@@ -44,10 +49,10 @@ The complete contract is split into two checked-in snapshots:
    evidence, and linkage to the OpenAPI operation. All 183 OpenAPI operations
    link to a runtime route. The manifest includes 105 runtime-only routes.
 
-Both snapshots record the inspected backend source revision. The OpenAPI
-snapshot uses stable two-space JSON; the runtime manifest keeps one complete
-route record per line. Structural contract changes remain reviewable without
-making the package exceed automated-review limits.
+The snapshots record the original backend source revision. The runtime counts
+reflect the retained inventory after the approved amendment. The OpenAPI
+snapshot uses stable two-space JSON. The runtime manifest keeps one complete
+route record per line.
 
 The runtime-only set includes public aliases, legacy data reads, authenticated
 operational reads, health/raw-contract endpoints, and route-only APIs. They
