@@ -3,7 +3,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
 const MOBILE_EDITOR_ACTION =
-  "max-md:tw-h-11 max-md:tw-flex-1 max-md:tw-rounded-xl max-md:tw-px-2 max-md:tw-text-[15px]";
+  "max-md:tw-h-11 max-md:tw-rounded-xl max-md:tw-px-4 max-md:tw-text-[15px]";
 
 /** Presentation for the decision editor's existing navigation and save actions. */
 export default function CompetitionDraftEditorFooter({
@@ -32,7 +32,7 @@ export default function CompetitionDraftEditorFooter({
   readonly onSave: () => void;
 }) {
   return (
-    <div className="tw-sticky tw-bottom-0 tw-z-20 tw-mt-auto tw-flex tw-flex-nowrap tw-items-center tw-justify-end tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-bg-iron-950 tw-px-4 tw-pb-[max(0.75rem,env(safe-area-inset-bottom))] tw-pt-3 md:tw-flex-wrap md:tw-border-white/10 md:tw-bg-black md:tw-px-0 md:tw-py-4 md:tw-pb-[max(1rem,env(safe-area-inset-bottom))]">
+    <div className="tw-sticky tw-bottom-0 tw-z-20 tw-mt-auto tw-flex tw-flex-nowrap tw-items-center tw-justify-end tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-bg-iron-950 tw-px-4 tw-pb-3 tw-pt-3 max-md:tw-shrink-0 md:tw-flex-wrap md:tw-border-white/10 md:tw-bg-black md:tw-px-0 md:tw-py-4 md:tw-pb-[max(1rem,env(safe-area-inset-bottom))]">
       <Button
         type="button"
         variant="ghost"

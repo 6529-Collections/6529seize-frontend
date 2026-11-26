@@ -17,8 +17,9 @@ On phones, **+ Decision** is the shared text action at the right end of the
 Decisions filter row, at 13px with a 44px touch area. It aligns with **+ Curation**
 at the end of the wave tab row. The chips scroll beside it without edge fades. The action remains visible
 when the list is empty and requires the existing decision creation permission.
-It opens the same setup editor as desktop **+ Decision** and is not in
-**More wave actions**.
+Below 768px it opens the setup editor in a bottom sheet with its own title,
+Close control and fixed navigation actions. Wider screens keep the inline
+editor. The action is not in **More wave actions**.
 
 Creating a wave opens its shared
 chat without creating a decision. Wave administrators can add decisions

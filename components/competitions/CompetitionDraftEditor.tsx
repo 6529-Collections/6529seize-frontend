@@ -56,6 +56,7 @@ import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import CompetitionDraftEditorFooter from "./CompetitionDraftEditorFooter";
+import CompetitionDraftEditorLayout from "./CompetitionDraftEditorLayout";
 import { CompetitionState, COMPETITION_BUTTON } from "./CompetitionState";
 
 const EDITOR_INPUT =
@@ -149,6 +150,10 @@ function DraftForm({
   const conflictCopyKey = useRef<string | null>(null);
   const formRef = useRef<HTMLElement>(null);
   useKeyboardFocusScroll(formRef);
+  const [displaySettingsOpen, setDisplaySettingsOpen] = useState(false);
+  if (step !== CreateWaveStep.OVERVIEW && displaySettingsOpen) {
+    setDisplaySettingsOpen(false);
+  }
   const [saveErrorFocusRequest, setSaveErrorFocusRequest] = useState(0);
   const votingErrors = getCreateWaveValidationErrors({
     config,
@@ -460,6 +465,8 @@ function DraftForm({
         )}
         <CreateWaveDisplaySettings
           isCompetition
+          advancedOpen={displaySettingsOpen}
+          onAdvancedOpenChange={setDisplaySettingsOpen}
           waveType={config.overview.type}
           display={config.display}
           errors={controller.errors}
@@ -538,38 +545,41 @@ function DraftForm({
       />
     );
   const saveStatus = getSaveStatus(locale, persistence);
+  const footer = (
+    <CompetitionDraftEditorFooter
+      locale={locale}
+      index={index}
+      stepCount={steps.length}
+      published={published}
+      busy={busy}
+      conflict={displayedError === "conflict"}
+      onClose={() => {
+        void close();
+      }}
+      onPrevious={() => move("backward")}
+      onNext={() => move("forward")}
+      onPublish={() => {
+        void publish();
+      }}
+      onSave={() => {
+        if (validateVotingForSave()) void close(true);
+      }}
+    />
+  );
   return (
-    <section
-      ref={formRef}
-      className="tw-mx-auto tw-flex tw-w-full tw-max-w-[680px] tw-flex-1 tw-flex-col tw-gap-6 max-md:[&_:is(p,span).tw-font-normal.tw-text-iron-300]:tw-text-meta max-md:[&_:is(p,span).tw-font-normal.tw-text-iron-300]:tw-leading-[18px] max-md:[&_:is(p,span).tw-font-normal.tw-text-iron-300]:tw-text-iron-400 max-md:[&_:is(p,span,div,output).tw-text-iron-400]:tw-text-meta max-md:[&_:is(p,span,div,output).tw-text-iron-400]:tw-font-normal max-md:[&_:is(p,span,div,output).tw-text-iron-400]:tw-leading-[18px]"
-      aria-labelledby="competition-draft-title"
-      aria-describedby={rulesLockedNoteId(lockedRules)}
+    <CompetitionDraftEditorLayout
+      contentRef={formRef}
+      title={t(locale, published ? "competitions.edit" : "competitions.new")}
+      saveStatus={saveStatus}
+      steps={steps}
+      index={index}
+      busy={busy}
+      onClose={() => {
+        void close();
+      }}
+      describedBy={rulesLockedNoteId(lockedRules)}
+      footer={footer}
     >
-      <div>
-        <div className="tw-flex tw-flex-col tw-gap-1 md:tw-flex-row md:tw-flex-wrap md:tw-items-center md:tw-justify-between md:tw-gap-3">
-          <h1
-            id="competition-draft-title"
-            className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-title tw-text-iron-50 sm:tw-text-[28px] sm:tw-leading-[34px]"
-          >
-            {t(locale, published ? "competitions.edit" : "competitions.new")}
-          </h1>
-          <output className="tw-text-meta tw-leading-[18px] tw-text-iron-500 md:tw-text-xs md:tw-text-iron-400">
-            {saveStatus}
-          </output>
-        </div>
-        <div
-          aria-hidden="true"
-          data-testid="competition-step-progress"
-          className="tw-mt-3 tw-flex tw-gap-1 md:tw-hidden"
-        >
-          {steps.map((value, stepIndex) => (
-            <span
-              key={value}
-              className={`tw-h-[3px] tw-flex-1 tw-rounded-full ${stepIndex <= index ? "tw-bg-iron-100" : "tw-bg-white/10"}`}
-            />
-          ))}
-        </div>
-      </div>
       <p className="tw-m-0 tw-text-sm tw-text-iron-400">
         {t(locale, "competitions.overlap")}
       </p>
@@ -642,26 +652,7 @@ function DraftForm({
           {t(locale, "competitions.reload")}
         </button>
       )}
-      <CompetitionDraftEditorFooter
-        locale={locale}
-        index={index}
-        stepCount={steps.length}
-        published={published}
-        busy={busy}
-        conflict={displayedError === "conflict"}
-        onClose={() => {
-          void close();
-        }}
-        onPrevious={() => move("backward")}
-        onNext={() => move("forward")}
-        onPublish={() => {
-          void publish();
-        }}
-        onSave={() => {
-          if (validateVotingForSave()) void close(true);
-        }}
-      />
-    </section>
+    </CompetitionDraftEditorLayout>
   );
 }
 

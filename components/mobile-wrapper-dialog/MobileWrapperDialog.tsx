@@ -32,6 +32,7 @@ const BROWSER_KEYBOARD_MIN_INSET = 100;
 
 type MobileWrapperDialogProps = {
   readonly id?: string | undefined;
+  readonly className?: string | undefined;
   readonly title?: string | undefined;
   readonly ariaLabel?: string | undefined;
   readonly isOpen: boolean;
@@ -382,6 +383,7 @@ function DragHandle({
 
 export default function MobileWrapperDialog({
   id,
+  className,
   title,
   ariaLabel,
   isOpen,
@@ -611,7 +613,11 @@ export default function MobileWrapperDialog({
         as="div"
         open={dialogOpen}
         unmount={!keepMounted}
-        className={clsx("tailwind-scope tw-absolute", zIndexClassName)}
+        className={clsx(
+          "tailwind-scope tw-absolute",
+          zIndexClassName,
+          className
+        )}
         onClose={handleClose}
         onKeyDown={(event) => {
           // Headless UI blurs focus before calling onClose for Escape. Keep

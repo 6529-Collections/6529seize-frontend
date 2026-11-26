@@ -3044,17 +3044,18 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         if (mode === "perpetual")
           await page.getByText("Perpetual Ranking", { exact: true }).click();
         const steps = mode === "perpetual" ? 7 : 8;
-        const editor = page.getByRole("region", {
-          name: "New decision",
-          exact: true,
-        });
+        const editor = page.getByRole(
+          testInfo.project.name === "web-mobile-chromium" ? "dialog" : "region",
+          {
+            name: "New decision",
+            exact: true,
+          }
+        );
         for (const reopened of [false, true]) {
           if (reopened) {
-            const issuesBadge = page.getByRole("button", {
-              name: "Collapse issues badge",
-              exact: true,
+            await page.addStyleTag({
+              content: "nextjs-portal { visibility: hidden; }",
             });
-            if (await issuesBadge.isVisible()) await issuesBadge.click();
 
             await page
               .getByRole("button", { name: "Close editor", exact: true })
@@ -3090,11 +3091,12 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
             await expectNoHorizontalOverflow(page);
             if (testInfo.project.name === "web-mobile-chromium")
               await expect(action).toHaveCSS("height", "44px");
-            await editor.screenshot({
+            await page.screenshot({
               path: testInfo.outputPath(
                 `${reopened ? "reopened" : "new"}-${mode}-step-${step}.png`
               ),
               animations: "disabled",
+              style: "nextjs-portal { visibility: hidden; }",
             });
             if (step < steps - 1) await action.click();
           }
@@ -3102,6 +3104,73 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       });
     }
   }
+
+  test("uses the decision sheet below md and preserves drafts when its header closes", async ({
+    page,
+  }, testInfo) => {
+    await installCompetitionApi(page);
+    for (const width of [767, 768]) {
+      await page.setViewportSize({ width, height: 844 });
+      await page.goto(`${ROOT}/new`);
+      await dismissNextDevTools(page);
+      const name = page.getByRole("textbox", {
+        name: "Decision name",
+        exact: true,
+      });
+      await expect(name).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: "New decision", exact: true })
+      ).toHaveCount(1);
+      const sheet = page.getByRole("dialog", {
+        name: "New decision",
+        exact: true,
+      });
+      if (width < 768) {
+        await expect(
+          sheet.getByRole("button", { name: "Close", exact: true })
+        ).toBeVisible();
+        const panel = page
+          .getByRole("dialog", { name: "New decision", exact: true })
+          .locator(".mobile-wrapper-dialog");
+        await expect
+          .poll(async () => {
+            const bounds = await panel.boundingBox();
+            return bounds && Math.round(bounds.y + bounds.height);
+          })
+          .toBe(844);
+        const bounds = await panel.boundingBox();
+        expect(bounds!.width).toBeCloseTo(width, 0);
+        expect(bounds!.y).toBeGreaterThan(0);
+        await expect(
+          sheet.getByRole("button", { name: "Next", exact: true })
+        ).toBeInViewport({ ratio: 1 });
+      } else {
+        await expect(sheet).toHaveCount(0);
+        await expect(
+          page.getByRole("region", { name: "New decision", exact: true })
+        ).toBeVisible();
+      }
+      await name.fill(`Sheet draft ${width}`);
+      await page.screenshot({
+        path: testInfo.outputPath(`decision-presentation-${width}.png`),
+        animations: "disabled",
+      });
+      await page
+        .getByRole("button", {
+          name: width < 768 ? "Close" : "Close editor",
+          exact: true,
+        })
+        .click();
+      await expect(page).toHaveURL(ROOT);
+      await page.goto(`${ROOT}/draft`);
+      await expect(name).toHaveValue(`Sheet draft ${width}`);
+      await page
+        .getByRole("button", { name: "Close editor", exact: true })
+        .click();
+      await expect(page).toHaveURL(ROOT);
+      await expectNoHorizontalOverflow(page);
+    }
+  });
 
   test("defaults anonymity off and includes an enabled choice in the saved competition draft", async ({
     page,
@@ -12604,9 +12673,21 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await expect(name).toHaveValue("Footer layout draft");
       }
       for (const progress of [0, 0.5, 1]) {
+        await name.evaluate((element, fraction) => {
+          let container = element.parentElement;
+          while (
+            container &&
+            !/(auto|scroll)/.test(getComputedStyle(container).overflowY)
+          ) {
+            container = container.parentElement;
+          }
+          if (!container) throw new Error("Draft scroll container missing");
+          container.scrollTop =
+            fraction * (container.scrollHeight - container.clientHeight);
+        }, progress);
         await expect
           .poll(() =>
-            footer.evaluate((element, fraction) => {
+            footer.evaluate((element) => {
               let container = element.parentElement;
               while (
                 container &&
@@ -12615,13 +12696,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
                 container = container.parentElement;
               }
               if (!container) throw new Error("Draft scroll container missing");
-              container.scrollTop =
-                fraction * (container.scrollHeight - container.clientHeight);
               return Math.abs(
                 container.getBoundingClientRect().bottom -
                   element.getBoundingClientRect().bottom
               );
-            }, progress)
+            })
           )
           .toBeLessThanOrEqual(1);
         await expect(
@@ -12665,6 +12744,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await page.goto(`${ROOT}/draft`);
         await expect(name).toHaveValue("Appearance layout draft");
       }
+      await expect
+        .poll(() =>
+          footer.evaluate((element) => element.getBoundingClientRect().bottom)
+        )
+        .toBeCloseTo(800, 0);
       const restingBottom = await footer.evaluate(
         (element) => element.getBoundingClientRect().bottom
       );
@@ -12811,6 +12895,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await expect(name).toHaveValue("Keyboard layout draft");
       }
       await expect(name).toBeVisible({ timeout: 30000 });
+      await expect
+        .poll(() =>
+          footer.evaluate((element) => element.getBoundingClientRect().bottom)
+        )
+        .toBeCloseTo(page.viewportSize()!.height, 0);
       const restingBottom = await footer.evaluate(
         (element) => element.getBoundingClientRect().bottom
       );
@@ -13117,6 +13206,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await expect(
           page.getByRole("button", { name: "Next", exact: true })
         ).toHaveCSS("height", "44px");
+        await expect(
+          page.getByRole("button", { name: "Next", exact: true })
+        ).toHaveCSS("flex-grow", "0");
         const limit = page.getByRole("spinbutton", {
           name: "Maximum proposal preview characters",
           exact: true,
@@ -13125,6 +13217,12 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           name: "Image on summary card",
           exact: true,
         });
+        await expect(limit).toHaveCSS("width", "80px");
+        await expect(
+          page
+            .getByRole("button", { name: "Appearance and labels", exact: true })
+            .locator("..")
+        ).not.toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
         expect(
           await limit.evaluate((element) => {
             const row = element.parentElement!.parentElement!;

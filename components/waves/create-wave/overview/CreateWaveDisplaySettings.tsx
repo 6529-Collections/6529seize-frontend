@@ -131,6 +131,8 @@ export default function CreateWaveDisplaySettings({
   waveType,
   embedded = false,
   isCompetition = false,
+  advancedOpen,
+  onAdvancedOpenChange,
 }: {
   readonly display: CreateWaveDisplayConfig;
   readonly errors: readonly CREATE_WAVE_VALIDATION_ERROR[];
@@ -138,6 +140,8 @@ export default function CreateWaveDisplaySettings({
   readonly waveType: ApiWaveType;
   readonly embedded?: boolean;
   readonly isCompetition?: boolean;
+  readonly advancedOpen?: boolean | undefined;
+  readonly onAdvancedOpenChange?: ((open: boolean) => void) | undefined;
 }) {
   const optionStyles = getCreateWaveOptionStyles(isCompetition);
   const locale = useBrowserLocale();
@@ -242,7 +246,7 @@ export default function CreateWaveDisplaySettings({
   };
 
   const compactInputSize = isCompetition
-    ? "tw-h-9 tw-w-10 tw-px-1 tw-py-1 min-[361px]:tw-w-14 min-[361px]:tw-px-3 md:tw-w-20"
+    ? "tw-h-9 tw-w-20 tw-px-2 tw-py-1 md:tw-px-3"
     : "tw-h-9 tw-w-20 tw-px-3 tw-py-1";
 
   const inputClasses = ({
@@ -271,7 +275,7 @@ export default function CreateWaveDisplaySettings({
 
   const content = (
     <div
-      className={`tw-space-y-4 tw-p-5 ${isCompetition ? "max-md:tw-p-4" : ""}`}
+      className={`tw-space-y-4 ${isCompetition ? "tw-px-3 tw-py-4 md:tw-p-5" : "tw-p-5"}`}
     >
       <h3
         className={`${CREATE_WAVE_FORM_STYLES.sectionTitle} ${isCompetition ? "max-md:tw-mb-3 max-md:tw-text-[15px] max-md:tw-leading-5 max-md:tw-text-iron-50" : ""}`}
@@ -442,7 +446,7 @@ export default function CreateWaveDisplaySettings({
                   >
                     <label
                       htmlFor="create-wave-proposal-card-excerpt-length"
-                      className={`tw-whitespace-nowrap tw-font-medium tw-text-iron-300 ${isCompetition ? "tw-text-meta min-[361px]:tw-text-sm" : "tw-text-sm"}`}
+                      className={`tw-font-medium tw-text-iron-300 ${isCompetition ? "tw-min-w-0 tw-text-meta min-[361px]:tw-text-sm md:tw-whitespace-nowrap" : "tw-whitespace-nowrap tw-text-sm"}`}
                     >
                       {t(locale, "waves.proposalCard.excerptLabel")}
                     </label>
@@ -635,6 +639,8 @@ export default function CreateWaveDisplaySettings({
       isCustomized={isDisplaySettingsCustomized}
       hasError={hasDisplaySettingsError}
       variant="filled"
+      open={advancedOpen}
+      onOpenChange={onAdvancedOpenChange}
     >
       {content}
     </CreateWaveAdvancedSection>
