@@ -12,8 +12,7 @@ Users can:
 - Share or copy a non-DM wave link
 - Join from the conversation header when not yet a member
 - Follow or unfollow (`Join` / `Joined`) from `About`
-- Use the bell notification menu after following
-- Mute or unmute waves from the speaker-muted control
+- Choose a notification level, mute, or unmute from the bell menu
 - Open wave description from the info button
 - Open Members from the `Joined` count on phones; desktop keeps its follower view
 - Pin or unpin the wave
@@ -67,6 +66,10 @@ its avatar, parent-wave link, name, and a short one-line description preview int
 identity block. The small shield and number beside the name show Wave Score
 when available. Hover, click, or use the keyboard to open its details card and
 `Learn more` link. No score space is left for waves without a score or for DMs.
+
+When the description preview is hidden, a subwave's parent link and name form
+a compact stack centred beside the avatar. The parent link and the wave name
+remain separate actions.
 
 When the center column becomes narrow, including when a sidebar is open, the
 name and score stay together on one line. The description teaser remains visible
@@ -176,10 +179,9 @@ and mobile web use the same device-local preference and mark the selected mode.
 1. Open a wave you have not joined and select `Join` in the conversation
    header, or open `About` in an active wave.
 2. In `About`, select `Join` to follow (or `Joined` to unfollow).
-3. If followed, open the bell button to choose `@ALL` mention notifications
-   or `Notify for all messages`.
-4. Use the speaker-muted button to mute the wave before or after joining, or
-   unmute it when the wave is already muted.
+3. Open the bell menu to choose `All messages`, `Mentions and @all`, or
+   `Mentions only` after joining.
+4. Use `Mute` / `Unmute` in the same menu before or after joining.
 5. Use the info button to open the wave description panel.
 6. Close description with outside click, `Escape`, or the info button.
 7. Select `Joined` count to toggle between about content and followers.
@@ -225,10 +227,9 @@ and mobile web use the same device-local preference and mark the selected mode.
   pin, edit, or owner controls. Signed-out visitors still see the header `Join`,
   which starts signing in instead of joining.
 - Leaving from `About` brings the header `Join` back.
-- The bell notification menu renders only when the wave is followed; the
-  speaker-muted control can render before joining.
-- When muted, the bell notification menu is replaced by a speaker-muted `Muted`
-  control that unmutes the wave.
+- Before joining, the bell menu offers only Mute/Unmute.
+- When muted, the bell becomes a bell-slash in the same place. Joined waves keep
+  their saved level checked but disabled, with `Unmute` available.
 - Direct-message waves never show rename or picture-edit pencils, even when the
   connected user would otherwise pass `canEditWave`.
 - Pin attempts beyond 20 are blocked and show an error toast.

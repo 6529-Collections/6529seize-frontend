@@ -166,6 +166,8 @@ function MyStreamWaveHeaderIdentity({
   const locale = useBrowserLocale();
   const isAnnouncement = seizeSettings?.isAnnouncementsWave(wave.id) ?? false;
   const identityOffset = wave.parent_wave ? "md:-tw-mt-2" : "md:-tw-mt-1.5";
+  const titleHeightClass =
+    isPhoneWave && !wave.parent_wave ? "tw-min-h-11" : "tw-min-h-6";
   const score = !isDirectMessage ? (
     <WaveTrustSignals
       waveRep={wave.wave_rep}
@@ -219,7 +221,7 @@ function MyStreamWaveHeaderIdentity({
           className="tw-shrink-0 tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
         >
           <div
-            className={`tw-relative tw-size-9 tw-flex-shrink-0 ${showDescriptionPreview || wave.parent_wave ? "tw-self-start" : ""} ${
+            className={`tw-relative tw-size-9 tw-flex-shrink-0 ${showDescriptionPreview ? "tw-self-start" : ""} ${
               isAnnouncement
                 ? "tw-rounded-lg"
                 : "tw-rounded-full tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950"
@@ -239,7 +241,7 @@ function MyStreamWaveHeaderIdentity({
         </button>
       ) : (
         <div
-          className={`tw-relative tw-size-9 tw-flex-shrink-0 ${showDescriptionPreview || wave.parent_wave ? "tw-self-start" : ""} ${
+          className={`tw-relative tw-size-9 tw-flex-shrink-0 ${showDescriptionPreview ? "tw-self-start" : ""} ${
             isAnnouncement
               ? "tw-rounded-lg"
               : "tw-rounded-full tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950"
@@ -287,7 +289,7 @@ function MyStreamWaveHeaderIdentity({
               aria-label={t(locale, "waves.information.open", {
                 name: wave.name,
               })}
-              className={`tw-max-w-full tw-rounded tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-sm tw-font-medium tw-text-inherit focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${isPhoneWave ? "tw-flex tw-min-h-11 tw-items-center tw-leading-tight" : "tw-block tw-min-h-6 tw-truncate tw-leading-6"}`}
+              className={`tw-max-w-full tw-rounded tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-sm tw-font-medium tw-text-inherit focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${titleHeightClass} ${isPhoneWave ? "tw-flex tw-items-center tw-leading-tight" : "tw-block tw-truncate tw-leading-6"}`}
             >
               {isPhoneWave ? (
                 <span className="tw-line-clamp-2 tw-min-w-0 tw-break-words tw-leading-[18px]">

@@ -2362,7 +2362,12 @@
         "NextGen mints still read delegations from NFTDelegation, not from the 6529 Network."
       ],
       "canonical_path": "/{user}",
-      "related_paths": ["/{user}", "/{user}/proxy", "/network", "/safe-collecting"],
+      "related_paths": [
+        "/{user}",
+        "/{user}/proxy",
+        "/network",
+        "/safe-collecting"
+      ],
       "tags": ["profiles", "rep", "proxy"],
       "source_refs": [
         "ops/docs/profiles/feature-identity-move-to-6529-network.md",
@@ -7730,9 +7735,9 @@
         "Wave-name mentions are typed with # plus at least 2 characters and submit as tracked mentioned_waves metadata.",
         "The broadcast mentions @all and @contributors are available only to the Wave creator and profiles in the Admins scope.",
         "Before sending a new message with @all, a confirmation shows the current notification audience count. Choose Send with @all to send or Keep editing to preserve the draft. Counting errors require retrying; edits do not rebroadcast or prompt.",
-        "The case-insensitive @contributors mention targets profiles with Chat access that joined the Wave and enabled Broadcast mentions, while @admins targets the Wave creator and profiles in the Admins scope.",
-        "When Wave Chat access is Public, joined Wave followers with Broadcast mentions enabled are the bounded @contributors audience because there is no finite Chat-access group; muted followers and the author are excluded.",
-        "The Broadcast mentions notification preference controls both @all and @contributors, while All messages continues to notify a joined profile about every message.",
+        "The case-insensitive @contributors mention targets profiles with Chat access that joined the Wave and selected 'Mentions and @all' or 'All messages', while @admins targets the Wave creator and profiles in the Admins scope.",
+        "When Wave Chat access is Public, joined Wave followers with 'Mentions and @all' or 'All messages' selected are the bounded @contributors audience because there is no finite Chat-access group; muted followers and the author are excluded.",
+        "Both 'Mentions and @all' and 'All messages' enable @all and @contributors notifications. Mentions only opts out of both broadcasts; All messages notifies a joined profile about every message.",
         "The @devs6529 mention targets configured 6529 developer profiles that can view the Wave.",
         "The @dropforgeops shortcut alerts configured Drop Forge operators who can view the Wave. Automated reports from the staging profile @drops6529 carry a post signature in Drop Forge Ops. The profile can also be mentioned directly.",
         "Any profile with Chat access can invoke @admins or @devs6529 by typing the complete token directly or selecting it from suggestions; the backend filters recipients by Wave access.",
@@ -8103,6 +8108,7 @@
         "Unavailable submission actions use a lock icon. Hover, focus, or select the lock for the existing restriction reason. On phones, choose the available submission action or How to Submit from More wave actions. The Main Stage helper opens the existing nomination and eligibility guidance. On wider screens, submission controls and Add/Edit REP keep their normal placement.",
         "When the desktop or tablet center column is narrow, the Wave name and score stay on one line, Add/Edit REP keeps its text label, and submission actions use compact icons. The description teaser remains visible while the center header is at least 640px wide; below that width it is hidden and the name and score are centered beside the avatar. Join keeps its label. Search, More wave actions and the sidebar toggle stay visible; the eligible gallery/chat action and existing time choices are inside More, with their original icons. An active temporary time override keeps its zone indicator and undo control visible. Select the wave name for the full description in About. Widening the column restores the labels and teaser. On phones, one bar holds Back, the wave picture with its available score tucked beneath it, the wave name, Join when available, and More wave actions. The phone wave name wraps up to two lines and uses an ellipsis only beyond the second line. The site menu and global search are on the Waves list. More wave actions contains Wave details, message search, time display, sharing and actions you are eligible to use. Press the wave name to open Wave Information as a full-screen phone view sliding in from the right. Use the top-left Back chevron, swipe right, Escape, or the device Back action to return to the same thread section and scroll position. Short or cancelled swipes keep the view open; vertical gestures scroll the content. There is no Close icon or drag handle. Back in an editor returns to its parent information view. Direct messages do not show a Wave Score.",
         "Wave picture edit and link sharing are separate header features.",
+        "When a subwave's description preview is hidden, its parent link and wave name form a compact stack centered beside the avatar. The parent link and wave name remain separate actions.",
         "Owners can select the three-dot Open options button in About for profile-wave actions and Delete. In phone information and the tablet overlay, Wave options opens inside the same panel. Phone information stays full-screen. Back returns to About; Back from About returns to the thread. Tablet panels also offer Close. Delete requires confirmation; cancelling it returns to Wave options.",
         "A wave you have not joined shows a Join button first in the conversation header's top-right controls.",
         "Eligible authors and administrators can select the wave name or Edit wave name in About to rename it inside the existing information panel. On phones, Rename wave stays in the full-screen information view. Back or a rightward swipe returns to About and discards an unsaved name; Save returns after saving. Back from About returns to the thread. Tablet overlays also offer Close. Save stays disabled until the name changes. Direct messages and proxy sessions do not offer rename.",
@@ -8139,7 +8145,7 @@
         "The header Join is not shown for direct messages, proxy sessions, or connected wallets whose profile has not loaded.",
         "A subwave is joined separately from its parent wave.",
         "The Joined count in About and its follower list include followers who can currently access the wave and, for subwaves, its parent. Followers who lose access are hidden without losing their subscription and return if they qualify again. Losing posting or voting permission alone does not hide someone who can still read the wave.",
-        "Joined waves offer the bell notification menu; muting is separate from joining."
+        "The bell menu offers Mute/Unmute before or after joining. Joined waves also offer a single notification level."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
@@ -8161,8 +8167,9 @@
         "mute wave",
         "unmute wave",
         "bell button",
-        "speaker muted",
-        "speaker mute button",
+        "muted bell",
+        "notification levels",
+        "mentions only",
         "all message notifications",
         "broadcast mentions",
         "@all notifications",
@@ -8182,14 +8189,15 @@
         "contributors"
       ],
       "facts": [
-        "The bell button opens wave notification preferences after a connected non-proxy profile has joined the wave.",
-        "On phone layouts, notification choices open as a subview inside the same About sheet, which shrinks to fit the two options. Selecting an option, Back, the phone’s Back action, or Escape returns to About and restores focus to the bell. Close or tapping outside dismisses the whole sheet. Returning to About restores its full height, content, and scroll position.",
+        "The neutral bell opens notification settings for a connected non-proxy profile before or after joining. Muting changes it to a bell-slash with the existing rose-toned muted-control colours in the same place.",
+        "On smaller screens, notification choices use the site's standard picker sheet over About. Selecting a level or Mute/Unmute, closing the picker, tapping its backdrop, or pressing Escape restores focus to the bell. About keeps its content and scroll position.",
         "Desktop and tablet sidebars use an anchored notification menu with arrow-key navigation and Escape to return to the bell.",
-        "The notification menu has a Broadcast mentions option with an @ icon; it controls notifications for both @all and @contributors and preserves other group preferences such as @dropforgeops.",
-        "The notification menu has an All messages option for every-message notifications.",
-        "The speaker control mutes waves before or after joining.",
-        "When a wave is muted, the red speaker-muted Muted control unmutes it.",
-        "Muted waves suppress unread indicators and realtime unread accumulation but can still be opened manually.",
+        "Joined waves show exactly one selected level: All messages (Every new post), Mentions and @all (Includes @contributors), or Mentions only (Your mentions and replies).",
+        "Direct mentions, replies and quotes remain eligible at every level, subject to profile preferences. Mute suppresses wave alerts, including direct mentions.",
+        "Mute/Unmute is in the bell menu, with a No alerts hint. Before joining, it is the only option.",
+        "Muted waves keep their saved level checked and visible but disabled; Unmute remains active. If preferences are unavailable, Retry replaces the levels inside the menu.",
+        "Muted waves show an icon-only neutral iron bell-slash on the avatar, separate from the score and any number. They hide unread counts, sort last, and suppress realtime unread accumulation but can still be opened manually.",
+        "Changing a notification level preserves other group preferences such as @dropforgeops.",
         "When a muted wave is open, new drops still appear live while typing indicators remain disabled."
       ],
       "canonical_path": "/waves",
