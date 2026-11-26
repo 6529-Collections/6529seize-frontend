@@ -20,16 +20,18 @@ export function getDecisionValidationFeedback(
   locale: SupportedLocale,
   errors: readonly CREATE_WAVE_VALIDATION_ERROR[],
   invalid: boolean,
-  feedbackId: string
+  feedbackId: string,
+  isPhone: boolean
 ) {
-  return (
-    errors.length > 0 &&
-    invalid && (
-      <p id={feedbackId} role="alert" className="tw-m-0 tw-text-red">
-        {t(locale, "competitions.required")}
-      </p>
-    )
+  const feedback = errors.length > 0 && invalid && (
+    <p id={feedbackId} role="alert" className="tw-m-0 tw-text-red">
+      {t(locale, "competitions.required")}
+    </p>
   );
+  return {
+    body: isPhone ? false : feedback,
+    footer: isPhone ? feedback : false,
+  } as const;
 }
 
 export function DecisionNameField({

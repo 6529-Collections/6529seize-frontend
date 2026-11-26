@@ -560,7 +560,8 @@ function DraftForm({
     locale,
     visibleErrors,
     invalid,
-    validationFeedbackId
+    validationFeedbackId,
+    isPhone
   );
   const footer = (
     <CompetitionDraftEditorFooter
@@ -570,7 +571,7 @@ function DraftForm({
       published={published}
       busy={busy}
       conflict={displayedError === "conflict"}
-      validationFeedback={isPhone ? validationFeedback : false}
+      validationFeedback={validationFeedback.footer}
       onClose={() => {
         void close();
       }}
@@ -621,7 +622,7 @@ function DraftForm({
         )}
       </fieldset>
       <div className="tw-contents max-md:tw-hidden">
-        {!isPhone && validationFeedback}
+        {validationFeedback.body}
       </div>
       {displayedError && (
         <p role="alert" className="tw-m-0 tw-text-red">
