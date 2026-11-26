@@ -39,18 +39,19 @@ Wave creators and admins can also use the broadcast mentions `@all` and
 ## Common Scenarios
 
 - `@contributors` notifies profiles with Chat access that joined the Wave and
-  selected `Mentions and @all` or `All messages`.
+  enabled broadcast notifications through `Mentions and @all`.
 - If Chat access is **Public**, there is no finite Chat-access group to expand.
-  In that case, joined Wave followers who selected `Mentions and @all` or
-  `All messages` are the bounded `@contributors` audience; muted followers and
+  In that case, joined Wave followers with broadcast notifications enabled
+  are the bounded `@contributors` audience; muted followers and
   the author are still excluded from notifications.
 - `@admins` notifies the Wave creator and profiles in the `Admins` scope.
 - `@devs6529` notifies the platform-configured 6529 developer profiles that
   can view the Wave.
-- Both `Mentions and @all` and `All messages` enable `@all` and
+- `Mentions and @all` enables `@all` and
   `@contributors` notifications. `Mentions only` opts out of both broadcasts.
-- `All messages` notifies a joined profile about every message. Mute suppresses
-  notifications at every level.
+- `All messages` notifies a joined profile about every message and keeps the
+  saved broadcast preference unchanged. Mute suppresses notifications at every
+  level.
 
 ## Edge Cases
 

@@ -28,6 +28,8 @@ The control requires a connected profile handle and no proxy session.
 4. Choosing a level or Mute/Unmute closes the menu.
 
 Changing a level preserves independently configured group alert preferences.
+`All messages` also keeps the saved broadcast preference. `Mentions and @all`
+enables both broadcasts; `Mentions only` disables them.
 
 ## Common Scenarios
 
