@@ -667,9 +667,14 @@ for (const platform of ["ios", "android"] as const) {
               browser.__feedReturnPaints?.push(currentPaint);
               readyForReturn = false;
             }
-            if (currentPaint)
+          }
+          if (currentPaint) {
+            // The destination becomes active only when the Back motion commits.
+            if (underlay?.getAttribute("aria-hidden") === "false")
+              currentPaint = undefined;
+            else
               currentPaint.outgoingChatPreserved &&= Boolean(
-                chat.querySelector("[data-wave-drop-content]")
+                chat?.querySelector("[data-wave-drop-content]")
               );
           }
           requestAnimationFrame(sample);
