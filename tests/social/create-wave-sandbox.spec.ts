@@ -1887,7 +1887,8 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
     await expect(page).toHaveURL(
       new RegExp(`/waves/${CREATED_COMPETITION_WAVE_ID}/decisions$`)
     );
-    await page.getByRole("tab", { name: "Drafts", exact: true }).click();
+    await page.getByRole("button", { name: "More tabs", exact: true }).click();
+    await page.getByRole("menuitem", { name: "Drafts", exact: true }).click();
     await page
       .getByRole("link")
       .filter({
