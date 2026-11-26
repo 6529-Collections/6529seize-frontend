@@ -51,8 +51,6 @@ interface NotificationMenuItemProps {
   readonly icon: ComponentType<SVGProps<SVGSVGElement>>;
   readonly label: string;
   readonly ariaLabel: string;
-  readonly description?: string;
-  readonly hint?: string;
   readonly checked?: boolean;
   readonly disabled: boolean;
   readonly loading: boolean;
@@ -64,25 +62,17 @@ function NotificationMenuItem({
   icon: Icon,
   label,
   ariaLabel,
-  description,
-  hint,
   checked,
   disabled,
   loading,
   onSelect,
 }: NotificationMenuItemProps) {
-  const descriptionId = useId();
-  const hintId = `${descriptionId}-hint`;
-  const describedBy =
-    [description && descriptionId, hint && hintId].filter(Boolean).join(" ") ||
-    undefined;
   const button = (
     <NotificationButton
       type="button"
       disabled={disabled}
       aria-checked={checked}
       aria-label={ariaLabel}
-      aria-describedby={describedBy}
       aria-busy={loading}
       onKeyDown={mobile ? onMobileMenuKeyDown : undefined}
       onClick={(event) => {
@@ -92,22 +82,9 @@ function NotificationMenuItem({
       className={`tw-flex tw-w-full tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-px-3 tw-py-2 tw-text-left tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 [[role=menu]:focus-visible_&]:data-[focus]:tw-ring-2 [[role=menu]:focus-visible_&]:data-[focus]:tw-ring-inset [[role=menu]:focus-visible_&]:data-[focus]:tw-ring-iron-400 ${mobile ? "tw-min-h-12" : ""} ${getDropdownOptionStateClasses(checked === true)}`}
     >
       <Icon className="tw-size-4 tw-flex-shrink-0" aria-hidden="true" />
-      <span className="tw-min-w-0 tw-flex-1">
-        <span className="tw-block tw-text-sm tw-font-medium">{label}</span>
-        {description && (
-          <span
-            id={descriptionId}
-            className="tw-block tw-text-xs tw-leading-5 tw-text-iron-400"
-          >
-            {description}
-          </span>
-        )}
+      <span className="tw-min-w-0 tw-flex-1 tw-text-sm tw-font-medium">
+        {label}
       </span>
-      {hint && (
-        <span id={hintId} className="tw-text-xs tw-text-iron-400">
-          {hint}
-        </span>
-      )}
       {loading ? (
         <Spinner dimension={12} />
       ) : (
@@ -248,9 +225,6 @@ export default function WaveNotificationPreferenceButtons({
                     ariaLabel={message(
                       `waves.notificationSettings.${key}.ariaLabel`
                     )}
-                    description={message(
-                      `waves.notificationSettings.${key}.description`
-                    )}
                     checked={settings.notificationLevel === level}
                     disabled={
                       settings.isMuted ||
@@ -285,7 +259,6 @@ export default function WaveNotificationPreferenceButtons({
             ? "waves.notificationSettings.mute.unmuteAriaLabel"
             : "waves.notificationSettings.mute.ariaLabel"
         )}
-        hint={message("waves.notificationSettings.mute.hint")}
         disabled={busy}
         loading={settings.muteLoading}
         onSelect={() => {

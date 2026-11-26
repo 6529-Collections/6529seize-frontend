@@ -20,7 +20,7 @@ The control requires a connected profile handle and no proxy session.
 ## User Journey
 
 1. Open the bell menu.
-2. If joined, choose one level:
+2. If joined, choose one level. Rows show labels only, without descriptions:
    - `All messages`: every new post.
    - `Mentions and @all`: includes `@contributors`.
    - `Mentions only`: your mentions and replies.

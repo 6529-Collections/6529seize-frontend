@@ -356,7 +356,8 @@ help-index sync and consumed by the existing backend loader.
 
 The `waves.notification-controls` record describes one bell menu, neutral when
 unmuted and rose-toned when muted, with
-three single-choice levels and Mute/Unmute, disabled saved levels while muted,
+three label-only single-choice levels and Mute/Unmute below a divider, no row
+descriptions or hints, disabled saved levels while muted,
 Retry inside the menu, the shared picker sheet on smaller screens and anchored
 desktop/tablet menu.
 Muted wave rows use an icon-only iron bell-slash on the avatar, separate from
