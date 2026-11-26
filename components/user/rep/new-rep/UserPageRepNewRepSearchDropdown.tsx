@@ -1,11 +1,46 @@
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
-import {
-  isMemesNomineeLookalike,
-  MEMES_NOMINEE_CATEGORY,
-} from "@/helpers/waves/memes-nomination";
+import { MEMES_NOMINEE_CATEGORY } from "@/helpers/waves/memes-nomination";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { RepSearchState } from "./rep-search-types";
+
+function CategoryName({
+  category,
+  search,
+}: {
+  readonly category: string;
+  readonly search: string;
+}) {
+  const query = search.normalize("NFKC").toLowerCase().replace(/\s/gu, "");
+  if (!query) return category;
+
+  let normalized = "";
+  let offset = 0;
+  const positions: { start: number; end: number }[] = [];
+  for (const character of category) {
+    const part = character.normalize("NFKC").toLowerCase().replace(/\s/gu, "");
+    normalized += part;
+    for (let index = 0; index < part.length; index++) {
+      positions.push({ start: offset, end: offset + character.length });
+    }
+    offset += character.length;
+  }
+
+  const match = normalized.indexOf(query);
+  const start = positions[match]?.start;
+  const end = positions[match + query.length - 1]?.end;
+  if (start === undefined || end === undefined) return category;
+
+  return (
+    <>
+      {category.slice(0, start)}
+      <span className="tw-opacity-80 md:tw-opacity-100">
+        {category.slice(start, end)}
+      </span>
+      {category.slice(end)}
+    </>
+  );
+}
 
 export default function UserPageRepNewRepSearchDropdown({
   categories,
@@ -13,12 +48,18 @@ export default function UserPageRepNewRepSearchDropdown({
   state,
   minSearchLength,
   maxSearchLength,
+  search = "",
+  activeIndex = 0,
+  optionIdPrefix = "rep-category-option-",
 }: {
   readonly categories: string[];
   readonly onRepSelect: (rep: string) => void;
   readonly state: RepSearchState;
   readonly minSearchLength: number;
   readonly maxSearchLength: number;
+  readonly search?: string;
+  readonly activeIndex?: number;
+  readonly optionIdPrefix?: string;
 }) {
   const locale = useBrowserLocale();
 
@@ -56,41 +97,40 @@ export default function UserPageRepNewRepSearchDropdown({
   }
 
   return (
-    <div className="tw-flex tw-max-h-80 tw-flex-wrap tw-gap-2 tw-overflow-y-auto tw-p-1">
-      {categories.map((category) => {
+    <div className="tw-flex tw-flex-wrap tw-gap-2 tw-p-1">
+      {categories.map((category, index) => {
         const isMemesSubmissionCategory = category === MEMES_NOMINEE_CATEGORY;
-        const isNonQualifyingLookalike = isMemesNomineeLookalike(category);
-        let categoryAppearance =
-          "tw-border-iron-700/60 tw-bg-transparent tw-text-iron-200 hover:tw-border-iron-600 hover:tw-bg-iron-800/60";
-        if (isMemesSubmissionCategory) {
-          categoryAppearance =
-            "tw-border-emerald-500/30 tw-bg-emerald-500/10 tw-text-white hover:tw-border-emerald-500/50 hover:tw-bg-emerald-500/15";
-        } else if (isNonQualifyingLookalike) {
-          categoryAppearance =
-            "tw-border-iron-700/60 tw-bg-transparent tw-text-iron-300 hover:tw-border-iron-600 hover:tw-bg-iron-800/60";
-        }
+        const categoryAppearance =
+          activeIndex === index
+            ? "tw-bg-iron-800/60 forced-colors:tw-bg-[Highlight] forced-colors:tw-text-[HighlightText] forced-colors:hover:tw-bg-[Highlight] forced-colors:[forced-color-adjust:none]"
+            : "tw-bg-transparent";
 
         // Safari can blur the search before the suggestion click fires.
         return (
           <button
             key={category}
             type="button"
+            role="option"
+            id={`${optionIdPrefix}${index}`}
+            aria-label={
+              isMemesSubmissionCategory
+                ? `${category} ${t(locale, "rep.categories.grant.submissionBadge")}`
+                : category
+            }
+            aria-selected={activeIndex === index}
+            tabIndex={-1}
             onMouseDown={(event) => event.preventDefault()}
             onClick={(event) => {
               event.stopPropagation();
               onRepSelect(category);
             }}
-            className={`tw-flex tw-max-w-full tw-cursor-pointer tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-rounded-lg tw-border tw-border-solid tw-min-h-8 tw-px-2.5 tw-py-1 tw-text-left tw-text-xs tw-font-normal tw-leading-5 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none ${categoryAppearance}`}
+            className={`tw-flex tw-min-h-8 tw-w-auto tw-max-w-full tw-cursor-pointer tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/60 tw-px-2.5 tw-py-1 tw-text-left tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-200 tw-transition-colors tw-duration-150 hover:tw-border-iron-600 hover:tw-bg-iron-800/60 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none ${categoryAppearance}`}
           >
-            <span
-              className={`tw-min-w-0 tw-max-w-full tw-break-words ${
-                isMemesSubmissionCategory ? "tw-font-medium" : ""
-              }`}
-            >
-              {category}
+            <span className="tw-min-w-0 tw-max-w-full tw-break-words">
+              <CategoryName category={category} search={search} />
             </span>
             {isMemesSubmissionCategory && (
-              <span className="tw-whitespace-nowrap tw-text-[11px] tw-font-normal tw-leading-5 tw-text-emerald-300">
+              <span className="tw-whitespace-nowrap tw-text-[11px] tw-font-normal tw-leading-5 tw-text-emerald-300 forced-colors:tw-text-inherit">
                 {t(locale, "rep.categories.grant.submissionBadge")}
               </span>
             )}

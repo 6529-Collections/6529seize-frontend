@@ -320,7 +320,7 @@ export const PriceActions: React.FC<PriceActionsProps> = ({
       aria-expanded={isPriceFiltersOpen}
       aria-controls={`leaderboard-price-panel-${waveId}`}
       onClick={onTogglePriceFilters}
-      className={`tw-inline-flex tw-h-9 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-text-xs tw-font-semibold tw-transition ${
+      className={`tw-inline-flex tw-h-9 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-text-meta tw-font-medium tw-transition ${
         isCompactActions
           ? "tw-w-9 tw-justify-center tw-px-0"
           : "tw-gap-2 tw-px-3.5"
@@ -394,7 +394,7 @@ export const MeasurementProbes: React.FC<MeasurementProbesProps> = ({
       {sortItems.map((item) => (
         <div
           key={item.key}
-          className="tw-flex tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-px-3 tw-py-2.5 tw-text-xs tw-font-semibold"
+          className="tw-flex tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-px-3 tw-py-2.5 tw-text-meta tw-font-medium"
         >
           {item.label}
         </div>
@@ -403,7 +403,7 @@ export const MeasurementProbes: React.FC<MeasurementProbesProps> = ({
 
     <div
       ref={sortDropdownProbeRef}
-      className="tailwind-scope tw-inline-flex tw-whitespace-nowrap tw-rounded-lg tw-py-2.5 tw-pl-2 tw-pr-6 tw-text-xs tw-font-semibold tw-ring-1 tw-ring-inset tw-ring-iron-700"
+      className="tailwind-scope tw-inline-flex tw-whitespace-nowrap tw-rounded-lg tw-py-2.5 tw-pl-2 tw-pr-6 tw-text-meta tw-font-medium tw-ring-1 tw-ring-inset tw-ring-iron-700"
     >
       {activeSortLabel}
     </div>
@@ -414,7 +414,7 @@ export const MeasurementProbes: React.FC<MeasurementProbesProps> = ({
           ref={actionsFullProbeRef}
           className="tw-inline-flex tw-items-center tw-gap-2"
         >
-          <div className="tw-inline-flex tw-h-9 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-3.5 tw-text-xs tw-font-semibold tw-text-iron-200">
+          <div className="tw-inline-flex tw-h-9 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-3.5 tw-text-meta tw-font-medium tw-text-iron-200">
             <AdjustmentsHorizontalIcon className="tw-size-4 tw-flex-shrink-0" />
             <span>Filters</span>
           </div>

@@ -17,6 +17,7 @@ import WaveDropContent from "@/components/waves/drops/WaveDropContent";
 import WaveDropAuthorPfp from "@/components/waves/drops/WaveDropAuthorPfp";
 import WaveDropMetadata from "@/components/waves/drops/WaveDropMetadata";
 import WaveDropReply from "@/components/waves/drops/WaveDropReply";
+import { WavesMoveScope } from "@/components/waves-move/WavesMoveScope";
 import { ImageScale } from "@/helpers/image.helpers";
 import { areSameProfileIdentity } from "@/helpers/ProfileHelpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -27,7 +28,12 @@ import { useDropCurationMembershipMutation } from "@/hooks/drops/useDropCuration
 import { useNavigateToDropWave } from "@/hooks/useNavigateToDropWave";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { t } from "@/i18n/messages";
-import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
+import {
+  ChatBubbleOvalLeftIcon,
+  EllipsisVerticalIcon,
+  MinusCircleIcon,
+  PencilSquareIcon,
+} from "@heroicons/react/24/outline";
 import {
   MasonryScroller,
   useContainerPosition,
@@ -209,6 +215,9 @@ function CurationMasonryActions({
   const menuItems: CompactMenuItem[] = [
     {
       id: "open",
+      icon: isMobileLayoutViewport ? (
+        <ChatBubbleOvalLeftIcon aria-hidden="true" className="tw-size-5" />
+      ) : undefined,
       label: t(locale, "profileCuration.actions.openOriginal"),
       onSelect: () => navigateToDropWave(drop),
     },
@@ -216,6 +225,9 @@ function CurationMasonryActions({
       ? [
           {
             id: "edit",
+            icon: isMobileLayoutViewport ? (
+              <PencilSquareIcon aria-hidden="true" className="tw-size-5" />
+            ) : undefined,
             label: t(locale, "profileCuration.actions.editPost"),
             onSelect: () => navigateToDropWave(drop, { edit: true }),
           },
@@ -223,6 +235,11 @@ function CurationMasonryActions({
       : []),
     {
       id: "remove",
+      separatorBefore: true,
+      icon: isMobileLayoutViewport ? (
+        <MinusCircleIcon aria-hidden="true" className="tw-size-5" />
+      ) : undefined,
+      iconClassName: "tw-size-5 tw-flex-none tw-text-red",
       label: t(locale, "profileCuration.actions.remove"),
       onSelect: () => setIsRemoveOpen(true),
       className: "tw-text-red desktop-hover:hover:tw-text-red",
@@ -312,18 +329,21 @@ function UserPageProfileWaveMasonryCard({
   const actions = canManageActiveCuration ? (
     <CurationMasonryActions drop={drop} curationId={curationId} />
   ) : null;
+  // The drop's own wave scopes the move's pause and lines inside it.
   const dropContent = (
-    <WaveDropContent
-      drop={drop}
-      activePartIndex={activePartIndex}
-      setActivePartIndex={setActivePartIndex}
-      onQuoteClick={navigateToDropWave}
-      onLongPress={() => {}}
-      setLongPressTriggered={(_triggered: boolean) => {}}
-      onDropContentClick={navigateToDropWave}
-      mediaImageScale={ImageScale.AUTOx1080}
-      fullWidthMedia={true}
-    />
+    <WavesMoveScope wave={drop.wave} waveId={drop.wave.id} dropId={drop.id}>
+      <WaveDropContent
+        drop={drop}
+        activePartIndex={activePartIndex}
+        setActivePartIndex={setActivePartIndex}
+        onQuoteClick={navigateToDropWave}
+        onLongPress={() => {}}
+        setLongPressTriggered={(_triggered: boolean) => {}}
+        onDropContentClick={navigateToDropWave}
+        mediaImageScale={ImageScale.AUTOx1080}
+        fullWidthMedia={true}
+      />
+    </WavesMoveScope>
   );
 
   if (layout.usesDefaultDropRenderer) {

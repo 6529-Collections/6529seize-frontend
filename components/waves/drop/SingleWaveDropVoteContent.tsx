@@ -18,6 +18,7 @@ import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import { useSingleWaveDropVoteState } from "./useSingleWaveDropVoteState";
 import { useSingleWaveDropVoteRationale } from "./useSingleWaveDropVoteRationale";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useChainWavesActive } from "@/hooks/useWavesMovePhase";
 import { t } from "@/i18n/messages";
 import { VotePanel } from "@/components/voting/VotePanel";
 import { VoteModeControl } from "@/components/voting/VoteModeControl";
@@ -192,8 +193,12 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
       .voting_credit_scope ?? ApiWaveCreditScope.Wave;
 
   const submitRef = useRef<SingleWaveDropVoteSubmitHandles | null>(null);
+  // On the 6529 Network the vote is confirmed before the dialog closes, so
+  // it is applied here as on the confirmation path.
+  const chainWavesActive = useChainWavesActive();
   const isBackgroundSubmission =
-    submissionMode === SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH;
+    submissionMode === SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH &&
+    !chainWavesActive;
   const handleSubmitVoteApplied = (updatedDrop: ApiDrop) => {
     if (!isBackgroundSubmission) {
       handleVoteApplied(updatedDrop);

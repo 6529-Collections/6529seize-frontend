@@ -12,6 +12,9 @@ jest.mock("@/hooks/waves/useWaveDecisions", () => ({
   FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE: 2000,
   useWaveDecisions: jest.fn(),
 }));
+jest.mock("@/hooks/useWavesMovePhase", () => ({
+  useWavesWritesPaused: jest.fn(() => false),
+}));
 
 const useWaveDecisionsMock = useWaveDecisions as jest.Mock;
 
@@ -74,6 +77,21 @@ describe("useApprovalWaveStatus", () => {
   afterEach(() => {
     jest.useRealTimers();
     jest.clearAllMocks();
+  });
+
+  it("locks the controls without closing while votes move to the 6529 Network", () => {
+    const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
+    wavesMove.useWavesWritesPaused.mockReturnValue(true);
+    try {
+      const wave = createWave({ votingEnd: 2000 });
+      const { result } = renderHook(() => useApprovalWaveStatus({ wave }));
+
+      expect(result.current.closeStatus).toBeNull();
+      expect(result.current.isVotingClosed).toBe(false);
+      expect(result.current.isVotingControlsLocked).toBe(true);
+    } finally {
+      wavesMove.useWavesWritesPaused.mockReturnValue(false);
+    }
   });
 
   it("starts open for a future end time and closes after the timeout", () => {

@@ -6,6 +6,7 @@ import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import React from "react";
 import { useWaveFeatureUsage } from "@/hooks/useWaveFeatureUsage";
 import { waveFeatureAttributes } from "@/services/analytics/waveFeatureUsage";
+import { getDropdownMenuMetrics } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 
 import {
   CONNECTED_TAB_LIST_CLASSES,
@@ -193,7 +194,7 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
         role="tablist"
         ref={featureUsageRef}
         aria-label="Sort options"
-        className={`tw-box-border tw-flex tw-h-[38px] tw-flex-shrink-0 tw-items-center ${CONNECTED_TAB_LIST_CLASSES} ${isMainStage ? "" : "tw-backdrop-blur"}`}
+        className={`tw-box-border tw-flex tw-h-[38px] tw-flex-shrink-0 tw-items-center [&_[role=tab]]:tw-text-meta ${CONNECTED_TAB_LIST_CLASSES} ${isMainStage ? "" : "tw-backdrop-blur"}`}
       >
         {items.map((item) => (
           <button
@@ -240,6 +241,7 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
           );
         }}
         variant="compact"
+        metrics={{ ...getDropdownMenuMetrics("compact"), text: "meta" }}
         presentation="toolbar"
         showFilterLabel={false}
         buttonDataAttributes={waveFeatureAttributes("leaderboard_sort", "menu")}

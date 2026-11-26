@@ -7,6 +7,7 @@ export interface CompactMenuActionItem {
   readonly label: ReactNode;
   readonly icon?: ReactNode | undefined;
   readonly iconClassName?: string | undefined;
+  readonly separatorBefore?: boolean | undefined;
   readonly href?: string | undefined;
   readonly onSelect?: (() => void) | undefined;
   /** Mobile sheets defer dialog-opening actions until the sheet has closed. */
@@ -14,6 +15,8 @@ export interface CompactMenuActionItem {
   readonly disabled?: boolean | undefined;
   readonly className?: string | undefined;
   readonly active?: boolean | undefined;
+  /** Optional toggle state, rendered as a checkmark in phone wave actions. */
+  readonly checked?: boolean | undefined;
   readonly "data-testid"?: string | undefined;
   readonly role?: string | undefined;
   readonly ariaSelected?: boolean | undefined;

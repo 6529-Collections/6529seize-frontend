@@ -69,7 +69,8 @@ sent as encrypted attachments. Their search and previews connect publicly to GIP
 
 ### Polls
 
-In supported builds, select **Create poll** in an encrypted DM or group chat.
+In supported builds, select **Create poll** on desktop, or open **+** and select
+**Poll** on mobile, in an encrypted DM or group chat.
 Enter a question and two to ten choices in the inline composer. Choose
 **Single** or **Multiple**, then select **Post poll**.
 
@@ -106,9 +107,21 @@ links and images do not open or load separately. Long previews end with an
 ellipsis. Custom emojis render inline at a compact size, while code keeps emoji
 shortcodes literal.
 
-The emoji button sits inside the right edge of the message input, with attachments
-on the left and Send on the right. It uses the regular composer’s desktop emoji
-popover and mobile slide panel. Encrypted emoji choices remain private and do not
+Use the pin icon on a chat row in the encrypted inbox or sidebar to keep the
+chat above unpinned chats. When a row shows a timestamp, the pin sits just to
+its left. On desktop, hover the row or tab to the icon. On a touchscreen,
+tap the icon. Select the filled pin to unpin the chat. **Chat info**
+also has **Pin to top** and **Unpin chat**. Your pin follows the direct
+conversation when it continues in a new encryption session. Pins sync privately
+to your other trusted devices after they connect. If encrypted sync is off, the
+pin is saved on this device until sync is available.
+
+On mobile web and in the app, open **+** beside the message input for **Attach**,
+**Poll** when available, and **GIF**. The tray opens below the input and closes
+when you pick an action, start typing, or tap outside it. On desktop, these
+actions sit to the left of the input. The emoji button sits inside the right
+edge of the input and Send sits beside it. The emoji button uses the regular
+composer’s desktop popover and mobile slide panel. Encrypted emoji choices remain private and do not
 update ordinary reaction history. Selecting an emoji preserves the draft and
 inserts it at the caret. On desktop, the Send tooltip explains Enter to send and
 Shift+Enter for a new line. Mobile web and the app use the Send button; Return
@@ -698,8 +711,9 @@ restore it on a new device.
   recovery code**.
 - What is backed up: messages you have on this device (text, edits,
   deletions, reactions, notices), the chat names and members needed to show
-  them, and references to attachments with their keys. Never the device's
-  encryption state; a new device always joins chats as a new device.
+  them, references to attachments with their keys, and the pins saved on
+  this device. A fresh device restores this inbox state with the backup
+  and joins chats using its own encryption keys.
 - Backups are incremental: after a change the device uploads only what
   changed, about 30 seconds later. **Back up now** uploads immediately and
   then shows "Backup is up to date." in the status line for a few seconds.
@@ -935,16 +949,16 @@ without images**. Images and files too large for one encrypted attachment
 ## Setup through connection sharing
 
 In the browser account menu, open **Connect Device**. Confirm the avatar,
-handle and full wallet address, then select **6529 Mobile** or **6529 Desktop
-Classic**.
+handle and full wallet address, then select **6529 Mobile**, **6529 Desktop**,
+or **6529 Desktop Classic**.
 Choose **Connect only** for an additional signed-in app session, or
 **Connect with Post Signing & DM Encryption** to approve those permissions too.
 The source browser does not need encryption enabled on itself to approve the
 receiving app. Proxy sessions cannot authorize secure setup.
 
-Desktop connection links require 6529 Desktop Classic v0.4.1 or later. For
-secure setup, approve the wallet signature in the browser, then select **Open in
-6529 Desktop Classic** to open the private link.
+For desktop secure setup, approve the wallet signature in the browser and open
+the private link in the selected app. **6529 Desktop** uses a connection code
+from 6529.io. **6529 Desktop Classic** requires v0.4.1 or later for secure setup.
 
 For Mobile secure setup, approve the wallet signature in the browser, then scan
 one QR or open its private link in the receiving app. The regular **Scan QR Code**

@@ -1575,7 +1575,7 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     ).toHaveAttribute("aria-selected", "true");
     await expect(page.getByRole("tab", { name: "Card Activity" })).toHaveCSS(
       "font-size",
-      "12px"
+      "13px"
     );
     await expect(page.getByRole("tab", { name: "Card Activity" })).toHaveCSS(
       "border-radius",

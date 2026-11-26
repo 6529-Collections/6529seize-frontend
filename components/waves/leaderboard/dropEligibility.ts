@@ -7,6 +7,7 @@ interface LeaderboardParticipation {
   readonly hasReachedLimit?: boolean | undefined;
   readonly status?: SubmissionStatus | undefined;
   readonly canSubmitNow?: boolean | undefined;
+  readonly isPausedForMove?: boolean | undefined;
 }
 
 interface WaveDropEligibilityInput {
@@ -37,6 +38,19 @@ export const getWaveDropEligibility = ({
     return {
       canCreateDrop: false,
       restrictionMessage: t(DEFAULT_LOCALE, "waves.dropEligibility.ended"),
+      restrictionLink: null,
+    };
+  }
+
+  // Entries move to the 6529 Network. A window not yet open still says so;
+  // otherwise the pause is the reason for everyone.
+  if (participation?.isPausedForMove) {
+    return {
+      canCreateDrop: false,
+      restrictionMessage:
+        participation.status === SubmissionStatus.NOT_STARTED
+          ? "Submissions haven't started yet"
+          : t(DEFAULT_LOCALE, "wavesMove.paused"),
       restrictionLink: null,
     };
   }

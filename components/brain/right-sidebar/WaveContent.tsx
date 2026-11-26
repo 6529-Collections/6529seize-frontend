@@ -1,5 +1,10 @@
 "use client";
 
+import { createPortal } from "react-dom";
+import { useWaveInformationPanel } from "@/components/brain/mobile/WaveInformationPanelContext";
+import WaveFollowersList from "@/components/waves/followers/WaveFollowersList";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import React, { type JSX } from "react";
 import clsx from "clsx";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -14,6 +19,7 @@ import BrainRightSidebarConfiguration from "./BrainRightSidebarConfiguration";
 import { Mode, SidebarTab } from "./BrainRightSidebarTypes";
 import WaveRepDetails from "./WaveRepDetails";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
+import { WavesMoveScope } from "@/components/waves-move/WavesMoveScope";
 
 interface WaveContentProps {
   readonly scrollRef?: React.Ref<HTMLDivElement> | undefined;
@@ -97,8 +103,14 @@ export const WaveContent: React.FC<WaveContentProps> = ({
   aboutTabLabel,
   showTabs = true,
 }) => {
-  const onFollowersClick = () =>
-    setMode(mode === Mode.FOLLOWERS ? Mode.CONTENT : Mode.FOLLOWERS);
+  const members = useWaveInformationPanel(
+    t(DEFAULT_LOCALE, "waves.information.members"),
+    "wave-members"
+  );
+  const onFollowersClick = () => {
+    if (members.isPhone) members.open();
+    else setMode(mode === Mode.FOLLOWERS ? Mode.CONTENT : Mode.FOLLOWERS);
+  };
 
   const visibleTabLimit = maxVisibleTabs;
 
@@ -131,6 +143,10 @@ export const WaveContent: React.FC<WaveContentProps> = ({
 
   return (
     <div className="tw-flex tw-h-full tw-min-h-0 tw-min-w-0 tw-flex-col tw-overflow-hidden tw-bg-iron-950">
+      {members.isPhone &&
+        members.isOpen &&
+        members.container &&
+        createPortal(<WaveFollowersList wave={wave} />, members.container)}
       {showTabs && (
         <WaveContentTabs
           activeTab={activeSidebarTab}
@@ -144,7 +160,9 @@ export const WaveContent: React.FC<WaveContentProps> = ({
         ref={scrollRef}
         className="tw-min-h-0 tw-min-w-0 tw-flex-1 tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-x-none tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300"
       >
-        {activeSidebarComponent}
+        <WavesMoveScope wave={wave} waveId={wave.id}>
+          {activeSidebarComponent}
+        </WavesMoveScope>
       </div>
     </div>
   );

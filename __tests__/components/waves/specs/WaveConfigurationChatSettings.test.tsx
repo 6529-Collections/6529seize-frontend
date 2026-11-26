@@ -1,4 +1,6 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { WaveInformationPanelContext } from "@/components/brain/mobile/WaveInformationPanelContext";
+import WaveChatReplies from "@/components/waves/specs/WaveChatReplies";
 import WaveDisableLinks from "@/components/waves/specs/WaveDisableLinks";
 import WaveChatStatus from "@/components/waves/specs/WaveChatStatus";
 import WaveSlowMode from "@/components/waves/specs/WaveSlowMode";
@@ -98,4 +100,52 @@ describe("Configuration chat settings", () => {
       screen.queryByRole("button", { name: "Edit slow mode" })
     ).not.toBeInTheDocument();
   });
+});
+
+it("saves both phone reply switches independently without replacing the other option", () => {
+  const saveChatUpdate = jest.fn();
+  useWaveSettingUpdaterMock.mockReturnValue({
+    canEdit: true,
+    mutating: false,
+    saveChatUpdate,
+    setToast: jest.fn(),
+  });
+  const wave = makeWave();
+  wave.chat.replies = {
+    open: false,
+    collapsed: true,
+    authenticated_user_eligible: true,
+    authenticated_user_can_delete: false,
+  };
+  render(
+    <WaveInformationPanelContext.Provider
+      value={{
+        isPhone: true,
+        view: "about",
+        contentId: "editors",
+        container: null,
+        open: jest.fn(),
+        back: jest.fn(),
+      }}
+    >
+      <WaveChatReplies wave={wave} />
+    </WaveInformationPanelContext.Provider>
+  );
+  fireEvent.click(
+    screen.getByRole("switch", {
+      name: "Anyone who can see this wave can reply",
+    })
+  );
+  expect(saveChatUpdate.mock.calls[0][1](wave.chat).replies).toEqual({
+    open: true,
+    collapsed: true,
+  });
+  fireEvent.click(
+    screen.getByRole("switch", { name: "Collapse replies under each drop" })
+  );
+  expect(saveChatUpdate.mock.calls[1][1](wave.chat).replies).toEqual({
+    open: false,
+    collapsed: false,
+  });
+  expect(screen.queryByRole("button", { name: "Save" })).toBeNull();
 });

@@ -6,19 +6,10 @@ import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent, DragEvent } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 
-const ACCEPTED_FORMATS = [
-  "image/jpeg",
-  "image/jpg",
-  "image/png",
-  "image/gif",
-  "image/webp",
-];
-
-const ACCEPTED_FORMATS_DISPLAY = ACCEPTED_FORMATS.map(
+import { WAVE_IMAGE_TYPES, getWaveImageFileError } from "./wave-image-file";
+const ACCEPTED_FORMATS_DISPLAY = WAVE_IMAGE_TYPES.map(
   (format) => `.${format.replace("image/", "")}`
 ).join(", ");
-
-const FILE_SIZE_LIMIT = 10485760;
 
 const getFirstFile = (
   files: FileList | readonly File[] | null | undefined
@@ -46,19 +37,9 @@ export default function CreateWaveImageInput({
   const { setToast } = useContext(AuthContext);
   const inputRef = useRef<HTMLInputElement>(null);
   const onFileChange = (file: File) => {
-    if (ACCEPTED_FORMATS.indexOf(file.type) === -1) {
-      setToast({
-        type: "error",
-        message: "This file type is not supported.",
-      });
-    } else if (file.size > FILE_SIZE_LIMIT) {
-      setToast({
-        type: "error",
-        message: "Use a file smaller than 10 MB.",
-      });
-    } else {
-      setFile(file);
-    }
+    const message = getWaveImageFileError(file);
+    if (message !== null) setToast({ type: "error", message });
+    else setFile(file);
   };
 
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
@@ -168,9 +149,12 @@ export default function CreateWaveImageInput({
             <div className="tw-mt-2 tw-flex tw-flex-col tw-items-center tw-gap-y-1">
               <p className="tw-m-0 tw-text-xs tw-font-normal tw-text-iron-400 sm:tw-text-sm">
                 <span className="tw-font-medium tw-text-white">
-                  Click to upload
+                  <span className="touch-only:tw-hidden">Click to upload</span>
+                  <span className="tw-hidden touch-only:tw-inline">
+                    Choose photo
+                  </span>
                 </span>{" "}
-                or drag and drop
+                <span className="touch-only:tw-hidden">or drag and drop</span>
               </p>
               <p className="tw-m-0 tw-text-xs tw-font-normal tw-text-iron-400">
                 JPEG, JPG, PNG, GIF, WEBP

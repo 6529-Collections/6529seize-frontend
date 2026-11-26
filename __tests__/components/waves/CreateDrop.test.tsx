@@ -5,6 +5,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useKeyPressEvent } from "react-use";
@@ -27,6 +28,12 @@ import {
   DropSize,
 } from "@/helpers/waves/drop.helpers";
 import { fetchWaveMetadata } from "@/services/api/waves-v2-api";
+import { ChainEntryPendingError } from "@/lib/chain-waves/entryWriters";
+import { ChainOperationError } from "@/lib/chain-identity/operation";
+import {
+  AppToastContent,
+  type AppToastInput,
+} from "@/components/utils/toast/AppToast";
 
 const mockReportDropSubmissionFailure = jest.fn();
 jest.mock("@/utils/monitoring/dropSubmissionMonitoring", () => ({
@@ -37,6 +44,15 @@ jest.mock("@/utils/monitoring/dropSubmissionMonitoring", () => ({
 const mockSetQueryData = jest.fn();
 const mockInvalidateQueries = jest.fn(() => Promise.resolve());
 const mockProcessDropRemoved = jest.fn();
+const mockSenderOnError = jest.fn();
+const mockRemoveTemporaryThreadReply = jest.fn();
+jest.mock("@/components/waves/drops/reply-threads/pending-replies", () => ({
+  ...jest.requireActual(
+    "@/components/waves/drops/reply-threads/pending-replies"
+  ),
+  removeTemporaryThreadReply: (...args: unknown[]) =>
+    mockRemoveTemporaryThreadReply(...args),
+}));
 const mockRefreshWaveMessages = jest.fn();
 const mockProcessIncomingDrop = jest.fn();
 const mockApplyOptimisticDropUpdate = jest.fn();
@@ -78,7 +94,23 @@ jest.mock("@tanstack/react-query", () => {
     },
   };
 });
+const mockChainEntrySubmit = jest.fn();
+const mockInvalidateChainEntryQueries = jest.fn(() => Promise.resolve());
+let mockChainEntriesActive = false;
+jest.mock("@/components/chain-waves/useChainEntryWriters", () => ({
+  useChainEntrySubmit: () =>
+    mockChainEntriesActive ? mockChainEntrySubmit : null,
+  invalidateChainEntryQueries: (...args: unknown[]) =>
+    mockInvalidateChainEntryQueries(...(args as [])),
+}));
 jest.mock("@/hooks/useWave", () => ({ useWave: jest.fn() }));
+jest.mock("@/lib/chain-identity/active", () => ({
+  ...jest.requireActual("@/lib/chain-identity/active"),
+  isChainIdentityActive: jest.fn(() => false),
+}));
+jest.mock("@/hooks/useWavesMovePhase", () => ({
+  useWavesWritesPaused: jest.fn(() => false),
+}));
 jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
   getStructuredApiErrorCode: (error: unknown) => {
@@ -113,6 +145,8 @@ jest.mock("@/components/waves/CreateDropStormParts", () => () => (
 ));
 const PREFILL_URL =
   "https://opensea.io/item/ethereum/0x1234567890abcdef1234567890abcdef12345678/123";
+/** What submitDrop answered the composer's optimistic drop, in order. */
+const mockComposerAnswers: Array<boolean | Promise<boolean>> = [];
 
 jest.mock("@/components/waves/CreateDropContent", () => (props: any) => (
   <div>
@@ -156,17 +190,43 @@ jest.mock("@/components/waves/CreateDropContent", () => (props: any) => (
         props.submitDrop({
           drop: {
             wave_id: props.wave.id,
-            drop_type: props.isDropMode ? "PARTICIPATORY" : "CHAT",
-            parts: [
-              {
-                content: "Moderation test message",
-                media: [],
-                quoted_drop: null,
-              },
-            ],
+            drop_type: "CHAT",
+            title: null,
+            parts: [{ content: "Pick one", media: [], quoted_drop: null }],
+            poll: { options: ["A", "B"] },
+            referenced_nfts: [],
+            mentioned_users: [],
+            mentioned_waves: [],
+            metadata: [],
+            signature: null,
+            is_safe_signature: false,
+            signer_address: "",
           },
-          dropId: "temp-rejected-drop",
+          dropId: null,
         } as unknown as DropMutationBody)
+      }
+    >
+      submit chat poll
+    </button>
+    <button
+      onClick={() =>
+        mockComposerAnswers.push(
+          props.submitDrop({
+            drop: {
+              wave_id: props.wave.id,
+              drop_type: props.isDropMode ? "PARTICIPATORY" : "CHAT",
+              parts: [
+                {
+                  content: "Moderation test message",
+                  media: [],
+                  quoted_drop: null,
+                },
+              ],
+            },
+            dropId: "temp-rejected-drop",
+            keepsDraftWhenRefused: true,
+          } as unknown as DropMutationBody)
+        )
       }
     >
       submit optimistic drop
@@ -198,6 +258,32 @@ jest.mock("@/components/waves/CreateCurationDropContent", () => ({
         }
       >
         submit curation
+      </button>
+      <button
+        onClick={() =>
+          props.submitDrop({
+            drop: { wave_id: props.wave.id, drop_type: "PARTICIPATORY" },
+            dropId: "optimistic-curation",
+            onError: mockSenderOnError,
+          })
+        }
+      >
+        submit shown curation
+      </button>
+      <button
+        onClick={() =>
+          props.submitDrop({
+            drop: {
+              wave_id: props.wave.id,
+              drop_type: "PARTICIPATORY",
+              reply_to: { drop_id: "parent-1", drop_part_id: 1 },
+            },
+            dropId: "optimistic-reply",
+            onError: mockSenderOnError,
+          })
+        }
+      >
+        submit shown curation reply
       </button>
       <div data-testid="initial-url">{props.initialUrl ?? ""}</div>
     </div>
@@ -285,6 +371,7 @@ const mockPendingPosts = () => {
 describe("CreateDrop", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockComposerAnswers.length = 0;
     mockUseRealMutation = false;
     mockUseCompetitionEntrySubmit.mockImplementation(
       () => mockSubmitCompetitionEntry
@@ -1271,6 +1358,657 @@ describe("CreateDrop", () => {
     } finally {
       blurSpy.mockRestore();
     }
+  });
+
+  it("refuses an entry while entries move to the 6529 Network", async () => {
+    const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
+    wavesMove.useWavesWritesPaused.mockReturnValue(true);
+    const setToast = jest.fn();
+    try {
+      render(
+        <AuthContext.Provider value={{ setToast } as any}>
+          <ReactQueryWrapperContext.Provider
+            value={{ waitAndInvalidateDrops: jest.fn() } as any}
+          >
+            <CreateDrop
+              activeDrop={null}
+              onCancelReplyQuote={() => {}}
+              onDropAddedToQueue={jest.fn()}
+              wave={wave}
+              dropId={null}
+              fixedDropMode={"PARTICIPATION" as any}
+              privileges={{ chatRestriction: null } as any}
+            />
+          </ReactQueryWrapperContext.Provider>
+        </AuthContext.Provider>
+      );
+
+      fireEvent.click(screen.getByText("submit current mode"));
+
+      await waitFor(() =>
+        expect(setToast).toHaveBeenCalledWith({
+          message: "Paused for the move to the 6529 Network.",
+          type: "error",
+        })
+      );
+      expect(commonApiPostMock).not.toHaveBeenCalled();
+    } finally {
+      wavesMove.useWavesWritesPaused.mockReturnValue(false);
+    }
+  });
+
+  it("refuses a chat post with a poll while polls move to the 6529 Network", async () => {
+    const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
+    wavesMove.useWavesWritesPaused.mockReturnValue(true);
+    const setToast = jest.fn();
+    try {
+      render(
+        <AuthContext.Provider value={{ setToast } as any}>
+          <ReactQueryWrapperContext.Provider
+            value={{ waitAndInvalidateDrops: jest.fn() } as any}
+          >
+            <CreateDrop
+              activeDrop={null}
+              onCancelReplyQuote={() => {}}
+              onDropAddedToQueue={jest.fn()}
+              wave={wave}
+              dropId={null}
+              fixedDropMode={"CHAT" as any}
+              privileges={{ chatRestriction: null } as any}
+            />
+          </ReactQueryWrapperContext.Provider>
+        </AuthContext.Provider>
+      );
+
+      fireEvent.click(screen.getByText("submit chat poll"));
+
+      await waitFor(() =>
+        expect(setToast).toHaveBeenCalledWith({
+          message: "Paused for the move to the 6529 Network.",
+          type: "error",
+        })
+      );
+      expect(commonApiPostMock).not.toHaveBeenCalled();
+    } finally {
+      wavesMove.useWavesWritesPaused.mockReturnValue(false);
+    }
+  });
+
+  it("keeps chat posts going while entries move to the 6529 Network", async () => {
+    const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
+    wavesMove.useWavesWritesPaused.mockReturnValue(true);
+    try {
+      render(
+        <AuthContext.Provider value={{ setToast: jest.fn() } as any}>
+          <ReactQueryWrapperContext.Provider
+            value={{ waitAndInvalidateDrops: jest.fn() } as any}
+          >
+            <CreateDrop
+              activeDrop={null}
+              onCancelReplyQuote={() => {}}
+              onDropAddedToQueue={jest.fn()}
+              wave={wave}
+              dropId={null}
+              fixedDropMode={"CHAT" as any}
+              privileges={{ chatRestriction: null } as any}
+            />
+          </ReactQueryWrapperContext.Provider>
+        </AuthContext.Provider>
+      );
+
+      fireEvent.click(screen.getByText("submit current mode"));
+
+      await waitFor(() => expect(commonApiPostMock).toHaveBeenCalled());
+      expect(commonApiPostMock.mock.calls[0][0].body.drop_type).toBe("CHAT");
+    } finally {
+      wavesMove.useWavesWritesPaused.mockReturnValue(false);
+    }
+  });
+
+  it("takes back an entry a sender already showed when the move refuses it", async () => {
+    jest.useFakeTimers();
+    const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
+    wavesMove.useWavesWritesPaused.mockReturnValue(true);
+    const setToast = jest.fn();
+    useWaveMock.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: true,
+    } as any);
+    try {
+      render(
+        <AuthContext.Provider value={{ setToast } as any}>
+          <ReactQueryWrapperContext.Provider
+            value={{ waitAndInvalidateDrops: jest.fn() } as any}
+          >
+            <CreateDrop
+              activeDrop={null}
+              onCancelReplyQuote={() => {}}
+              onDropAddedToQueue={jest.fn()}
+              wave={wave}
+              dropId={null}
+              fixedDropMode={"PARTICIPATION" as any}
+              privileges={{ chatRestriction: null } as any}
+            />
+          </ReactQueryWrapperContext.Provider>
+        </AuthContext.Provider>
+      );
+      fireEvent.click(screen.getByText("submit shown curation"));
+      act(() => {
+        jest.runOnlyPendingTimers();
+      });
+      expect(mockProcessDropRemoved).toHaveBeenCalledWith(
+        wave.id,
+        "optimistic-curation"
+      );
+      expect(mockSenderOnError).toHaveBeenCalledTimes(1);
+      expect(mockRemoveTemporaryThreadReply).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByText("submit shown curation reply"));
+      act(() => {
+        jest.runOnlyPendingTimers();
+      });
+      expect(mockRemoveTemporaryThreadReply).toHaveBeenCalledWith(
+        expect.anything(),
+        wave.id,
+        "optimistic-reply"
+      );
+      expect(mockProcessDropRemoved).toHaveBeenCalledWith(
+        wave.id,
+        "optimistic-reply"
+      );
+      expect(setToast).toHaveBeenCalledWith({
+        message: "Paused for the move to the 6529 Network.",
+        type: "error",
+      });
+      expect(commonApiPostMock).not.toHaveBeenCalled();
+    } finally {
+      wavesMove.useWavesWritesPaused.mockReturnValue(false);
+      jest.useRealTimers();
+    }
+  });
+
+  it("opens a submitter's composer outside drop mode at the freeze, so no entry or proposal opens", async () => {
+    const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
+    const setToast = jest.fn();
+    const submitterWave = {
+      ...wave,
+      chat: { authenticated_user_eligible: false },
+    };
+    const tree = () => (
+      <AuthContext.Provider value={{ setToast } as any}>
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={jest.fn()}
+            wave={submitterWave}
+            dropId={null}
+            fixedDropMode={"BOTH" as any}
+            privileges={{ chatRestriction: null } as any}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+    try {
+      const { rerender } = render(tree());
+      expect(screen.getByTestId("is-drop-mode")).toHaveTextContent("true");
+
+      wavesMove.useWavesWritesPaused.mockReturnValue(true);
+      rerender(tree());
+      expect(screen.getByTestId("is-drop-mode")).toHaveTextContent("false");
+    } finally {
+      wavesMove.useWavesWritesPaused.mockReturnValue(false);
+    }
+  });
+
+  describe("on the 6529 Network", () => {
+    /** The toast as 6529.io shows it, through its own toast helpers. */
+    const shownToast = (toast: AppToastInput) =>
+      render(<AppToastContent toast={toast} />).container;
+    const SANITIZED = /Network error|Wallet error|Please try again/;
+
+    const renderComposer = (
+      fixedDropMode: DropMode,
+      setToast: jest.Mock = jest.fn(),
+      onAllDropsAdded: jest.Mock = jest.fn()
+    ) =>
+      render(
+        <AuthContext.Provider value={{ setToast } as any}>
+          <ReactQueryWrapperContext.Provider
+            value={{ waitAndInvalidateDrops: jest.fn() } as any}
+          >
+            <CreateDrop
+              activeDrop={null}
+              onCancelReplyQuote={() => {}}
+              onDropAddedToQueue={jest.fn()}
+              onAllDropsAdded={onAllDropsAdded}
+              wave={{
+                ...wave,
+                participation: { ...wave.participation, terms: "Terms" },
+              }}
+              dropId={null}
+              fixedDropMode={fixedDropMode}
+              privileges={{ chatRestriction: null } as any}
+            />
+          </ReactQueryWrapperContext.Provider>
+        </AuthContext.Provider>
+      );
+
+    beforeEach(() => {
+      mockChainEntriesActive = true;
+      mockChainEntrySubmit.mockResolvedValue({ entryId: "0xentry" });
+    });
+
+    afterEach(() => {
+      mockChainEntriesActive = false;
+    });
+
+    it("sends an entry there instead of to 6529.io, then drops the optimistic row", async () => {
+      const setToast = jest.fn();
+      const onAllDropsAdded = jest.fn();
+      renderComposer(DropMode.PARTICIPATION, setToast, onAllDropsAdded);
+
+      fireEvent.click(screen.getByText("submit optimistic drop"));
+
+      await waitFor(() =>
+        expect(setToast).toHaveBeenCalledWith({
+          message:
+            "Entry sent to the 6529 Network. It shows here once 6529.io lists it.",
+          type: "success",
+        })
+      );
+      expect(mockChainEntrySubmit).toHaveBeenCalledWith({
+        request: expect.objectContaining({
+          wave_id: "1",
+          drop_type: "PARTICIPATORY",
+        }),
+        terms: "Terms",
+        onStage: expect.any(Function),
+      });
+      expect(commonApiPostMock).not.toHaveBeenCalled();
+      expect(mockSubmitCompetitionEntry).not.toHaveBeenCalled();
+      expect(onAllDropsAdded).toHaveBeenCalled();
+      await waitFor(() =>
+        expect(mockProcessDropRemoved).toHaveBeenCalledWith(
+          "1",
+          "temp-rejected-drop"
+        )
+      );
+      expect(mockInvalidateChainEntryQueries).toHaveBeenCalledWith(
+        expect.anything(),
+        "1"
+      );
+    });
+
+    it("says why the 6529 Network didn't take an entry", async () => {
+      const setToast = jest.fn();
+      mockChainEntrySubmit.mockRejectedValue(
+        new ChainOperationError(
+          "rejected",
+          "This decision isn't on the 6529 Network."
+        )
+      );
+      renderComposer(DropMode.PARTICIPATION, setToast);
+
+      fireEvent.click(screen.getByText("submit optimistic drop"));
+
+      await waitFor(() =>
+        expect(setToast).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: "error",
+            title: "Couldn't send this entry to the 6529 Network.",
+            description:
+              "This decision isn't on the 6529 Network. Nothing was sent. Your entry is still here.",
+          })
+        )
+      );
+      const toast = shownToast(setToast.mock.calls[0][0]);
+      expect(toast).toHaveTextContent(
+        "This decision isn't on the 6529 Network."
+      );
+      expect(toast).not.toHaveTextContent(SANITIZED);
+      await waitFor(() =>
+        expect(mockProcessDropRemoved).toHaveBeenCalledWith(
+          "1",
+          "temp-rejected-drop"
+        )
+      );
+      expect(commonApiPostMock).not.toHaveBeenCalled();
+    });
+
+    it("keeps chat on 6529.io", async () => {
+      renderComposer(DropMode.CHAT);
+
+      fireEvent.click(screen.getByText("submit current mode"));
+
+      await waitFor(() => expect(commonApiPostMock).toHaveBeenCalled());
+      expect(mockChainEntrySubmit).not.toHaveBeenCalled();
+    });
+
+    it("sends one entry at a time and says where it stands", async () => {
+      const setToast = jest.fn();
+      let finish!: () => void;
+      mockChainEntrySubmit.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            finish = () => resolve({ entryId: "0xentry" });
+          })
+      );
+      renderComposer(DropMode.PARTICIPATION, setToast);
+
+      fireEvent.click(screen.getByText("submit optimistic drop"));
+      expect(await screen.findByRole("status")).toHaveTextContent(
+        "Getting your entry ready."
+      );
+      expect(screen.getByRole("status")).not.toHaveTextContent("Sending");
+      const { onStage } = mockChainEntrySubmit.mock.calls[0][0];
+      act(() => onStage("wallet"));
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "Waiting for your wallet."
+      );
+      act(() => onStage("sending"));
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "Sending to the 6529 Network."
+      );
+      // On its way: the composer may clear its draft now.
+      await expect(mockComposerAnswers[0]).resolves.toBe(true);
+
+      fireEvent.click(screen.getByText("submit optimistic drop"));
+      await waitFor(() =>
+        expect(setToast).toHaveBeenCalledWith({
+          message:
+            "Your entry is still on its way. Wait for it before you send another.",
+          type: "error",
+        })
+      );
+      expect(mockChainEntrySubmit).toHaveBeenCalledTimes(1);
+
+      await act(async () => finish());
+      await waitFor(() =>
+        expect(screen.queryByRole("status")).not.toBeInTheDocument()
+      );
+      mockChainEntrySubmit.mockResolvedValue({ entryId: "0xentry2" });
+      fireEvent.click(screen.getByText("submit optimistic drop"));
+      await waitFor(() =>
+        expect(mockChainEntrySubmit).toHaveBeenCalledTimes(2)
+      );
+    });
+
+    it("says an entry that isn't final yet was sent, with no failure", async () => {
+      const setToast = jest.fn();
+      const onAllDropsAdded = jest.fn();
+      const message =
+        "Your entry was sent to the 6529 Network but isn't final yet.";
+      mockChainEntrySubmit.mockRejectedValue(
+        new ChainEntryPendingError(message, null)
+      );
+      renderComposer(DropMode.PARTICIPATION, setToast, onAllDropsAdded);
+
+      fireEvent.click(screen.getByText("submit optimistic drop"));
+
+      await waitFor(() =>
+        expect(setToast).toHaveBeenCalledWith({ message, type: "warning" })
+      );
+      expect(setToast).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: "error" })
+      );
+      expect(onAllDropsAdded).toHaveBeenCalled();
+    });
+
+    it("keeps the draft and shows nothing when the wallet prompt is declined", async () => {
+      const setToast = jest.fn();
+      mockChainEntrySubmit.mockImplementation(
+        async ({ onStage }: { onStage: (stage: string) => void }) => {
+          onStage("wallet");
+          throw Object.assign(new Error("User rejected"), { code: 4001 });
+        }
+      );
+      renderComposer(DropMode.PARTICIPATION, setToast);
+
+      fireEvent.click(screen.getByText("submit optimistic drop"));
+
+      // Nothing went out, so the composer keeps the entry.
+      await expect(mockComposerAnswers[0]).resolves.toBe(false);
+      await waitFor(() =>
+        expect(mockProcessDropRemoved).toHaveBeenCalledWith(
+          "1",
+          "temp-rejected-drop"
+        )
+      );
+      expect(setToast).not.toHaveBeenCalled();
+    });
+
+    it("keeps the draft and says nothing was sent when the network refuses before sending", async () => {
+      const setToast = jest.fn();
+      const { chainGateway } = jest.requireActual(
+        "@/lib/chain-identity/gateway"
+      );
+      const { identityOfWallet } = jest.requireActual(
+        "@/lib/chain-waves/signing"
+      );
+      // No identity, and no identity page to send the wallet to yet.
+      const lookup = jest
+        .spyOn(chainGateway, "getIdentityByWallet")
+        .mockResolvedValue(null);
+      mockChainEntrySubmit.mockImplementation(() =>
+        identityOfWallet(`0x${"12".repeat(20)}`)
+      );
+      renderComposer(DropMode.PARTICIPATION, setToast);
+
+      fireEvent.click(screen.getByText("submit optimistic drop"));
+
+      await expect(mockComposerAnswers[0]).resolves.toBe(false);
+      await waitFor(() =>
+        expect(setToast).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: "error",
+            title: "Couldn't send this entry to the 6529 Network.",
+          })
+        )
+      );
+      const toast = shownToast(setToast.mock.calls[0][0]);
+      expect(toast).toHaveTextContent(
+        "This wallet has no identity on the 6529 Network yet. Nothing was sent. Your entry is still here."
+      );
+      expect(toast).not.toHaveTextContent(SANITIZED);
+      expect(
+        within(toast).queryByRole("link", { name: "your identity page" })
+      ).not.toBeInTheDocument();
+      lookup.mockRestore();
+    });
+
+    it("points a wallet with no identity to the identity page once it takes changes", async () => {
+      const setToast = jest.fn();
+      const { isChainIdentityActive } = jest.requireMock(
+        "@/lib/chain-identity/active"
+      );
+      const { chainGateway } = jest.requireActual(
+        "@/lib/chain-identity/gateway"
+      );
+      const { identityOfWallet } = jest.requireActual(
+        "@/lib/chain-waves/signing"
+      );
+      isChainIdentityActive.mockReturnValue(true);
+      const lookup = jest
+        .spyOn(chainGateway, "getIdentityByWallet")
+        .mockResolvedValue(null);
+      mockChainEntrySubmit.mockImplementation(() =>
+        identityOfWallet(`0x${"12".repeat(20)}`)
+      );
+      try {
+        renderComposer(DropMode.PARTICIPATION, setToast);
+
+        fireEvent.click(screen.getByText("submit optimistic drop"));
+
+        await expect(mockComposerAnswers[0]).resolves.toBe(false);
+        await waitFor(() => expect(setToast).toHaveBeenCalled());
+        const toast = shownToast(setToast.mock.calls[0][0]);
+        expect(toast).toHaveTextContent(
+          "This wallet has no identity on the 6529 Network yet. Set one up on your identity page. Nothing was sent. Your entry is still here."
+        );
+        expect(
+          within(toast).getByRole("link", { name: "your identity page" })
+        ).toHaveAttribute("href", "/network/identity");
+      } finally {
+        isChainIdentityActive.mockReturnValue(false);
+        lookup.mockRestore();
+      }
+    });
+
+    it("says a block's refusal charged the fee, without claiming nothing was sent", async () => {
+      const setToast = jest.fn();
+      mockChainEntrySubmit.mockImplementation(
+        async ({ onStage }: { onStage: (stage: string) => void }) => {
+          onStage("sending");
+          throw new ChainOperationError(
+            "failed",
+            "The 6529 Network refused this change: NOT_ELIGIBLE.",
+            "NOT_ELIGIBLE"
+          );
+        }
+      );
+      renderComposer(DropMode.PARTICIPATION, setToast);
+
+      fireEvent.click(screen.getByText("submit optimistic drop"));
+
+      await expect(mockComposerAnswers[0]).resolves.toBe(true);
+      await waitFor(() =>
+        expect(setToast).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: "error",
+            title: "Couldn't send this entry to the 6529 Network.",
+          })
+        )
+      );
+      expect(setToast.mock.calls[0][0].details).toBeUndefined();
+      const toast = shownToast(setToast.mock.calls[0][0]);
+      expect(toast).toHaveTextContent(
+        "The change didn't go through, and its fee was still charged. You can't enter this decision."
+      );
+      expect(toast).not.toHaveTextContent("Nothing was sent");
+      expect(toast).not.toHaveTextContent(SANITIZED);
+    });
+
+    it("says an entry a sender already cleared wasn't saved when its prompt is declined", async () => {
+      const setToast = jest.fn();
+      useWaveMock.mockReturnValue({
+        isMemesWave: false,
+        isCurationWave: true,
+      } as any);
+      mockChainEntrySubmit.mockRejectedValue(
+        Object.assign(new Error("User rejected"), { code: 4001 })
+      );
+      renderComposer(DropMode.PARTICIPATION, setToast);
+
+      fireEvent.click(screen.getByText("submit shown curation"));
+
+      await waitFor(() =>
+        expect(setToast).toHaveBeenCalledWith({
+          message: "Nothing was sent. Your entry is not saved.",
+          type: "warning",
+        })
+      );
+      await waitFor(() =>
+        expect(mockProcessDropRemoved).toHaveBeenCalledWith(
+          "1",
+          "optimistic-curation"
+        )
+      );
+    });
+
+    it("takes back a shown entry it refuses while another is on its way", async () => {
+      jest.useFakeTimers();
+      const setToast = jest.fn();
+      useWaveMock.mockReturnValue({
+        isMemesWave: false,
+        isCurationWave: true,
+      } as any);
+      mockChainEntrySubmit.mockImplementation(() => new Promise(() => {}));
+      try {
+        renderComposer(DropMode.PARTICIPATION, setToast);
+        fireEvent.click(screen.getByText("submit curation"));
+        expect(mockChainEntrySubmit).toHaveBeenCalledTimes(1);
+
+        fireEvent.click(screen.getByText("submit shown curation reply"));
+        act(() => {
+          jest.runOnlyPendingTimers();
+        });
+
+        expect(mockChainEntrySubmit).toHaveBeenCalledTimes(1);
+        expect(setToast).toHaveBeenCalledWith({
+          message:
+            "Your entry is still on its way. Wait for it before you send another.",
+          type: "error",
+        });
+        expect(mockRemoveTemporaryThreadReply).toHaveBeenCalledWith(
+          expect.anything(),
+          wave.id,
+          "optimistic-reply"
+        );
+        expect(mockProcessDropRemoved).toHaveBeenCalledWith(
+          wave.id,
+          "optimistic-reply"
+        );
+        expect(mockSenderOnError).toHaveBeenCalledTimes(1);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it("keeps new polls paused until they open there", async () => {
+      const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
+      wavesMove.useWavesWritesPaused.mockImplementation(
+        (kind?: string) => kind === undefined
+      );
+      const setToast = jest.fn();
+      try {
+        renderComposer(DropMode.CHAT, setToast);
+
+        fireEvent.click(screen.getByText("submit chat poll"));
+
+        await waitFor(() =>
+          expect(setToast).toHaveBeenCalledWith({
+            message: "Paused for the move to the 6529 Network.",
+            type: "error",
+          })
+        );
+        expect(commonApiPostMock).not.toHaveBeenCalled();
+        expect(mockChainEntrySubmit).not.toHaveBeenCalled();
+      } finally {
+        wavesMove.useWavesWritesPaused.mockImplementation(() => false);
+      }
+    });
+
+    it("sends an entry after the switch-on while new polls stay paused", async () => {
+      const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
+      wavesMove.useWavesWritesPaused.mockImplementation(
+        (kind?: string) => kind === undefined
+      );
+      const setToast = jest.fn();
+      try {
+        renderComposer(DropMode.PARTICIPATION, setToast);
+
+        fireEvent.click(screen.getByText("submit optimistic drop"));
+
+        await waitFor(() =>
+          expect(mockChainEntrySubmit).toHaveBeenCalledWith(
+            expect.objectContaining({
+              request: expect.objectContaining({
+                drop_type: "PARTICIPATORY",
+              }),
+            })
+          )
+        );
+        expect(setToast).not.toHaveBeenCalledWith({
+          message: "Paused for the move to the 6529 Network.",
+          type: "error",
+        });
+      } finally {
+        wavesMove.useWavesWritesPaused.mockImplementation(() => false);
+      }
+    });
   });
 
   it("starts local slow mode cooldown after a chat drop", async () => {

@@ -92,14 +92,14 @@ function WaveConfigurationCurationRow({
   const group = groupQuery.isError ? undefined : groupQuery.data;
 
   return (
-    <div className="tw-grid tw-min-h-9 tw-w-full tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)_2.75rem] tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-2 tw-py-1.5 tw-text-sm sm:tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)_1.75rem]">
+    <div className="tw-relative tw-grid tw-min-h-9 tw-w-full tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)_2.75rem] tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-2 tw-py-1.5 tw-text-sm sm:tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)_1.75rem] [&_a]:tw-relative [&_a]:tw-z-10">
       <span className="tw-min-w-0 tw-break-words tw-py-0.5 tw-font-normal tw-leading-5 tw-text-iron-500">
         {curation.name}
       </span>
       <div className="tw-flex tw-min-w-0 tw-justify-end tw-text-right">
         {group ? (
           <WaveGroupMembersScope
-            group={{ id: group.id, name: group.name, is_hidden: false }}
+            group={{ id: group.id, is_hidden: false }}
             groupDetails={group}
           />
         ) : (
@@ -113,6 +113,7 @@ function WaveConfigurationCurationRow({
         )}
       </div>
       <MyStreamWaveCurationTabMenu
+        mobileSheet
         wave={wave}
         curation={curation}
         onDeleted={onDeleted}
@@ -139,7 +140,9 @@ function WaveConfigurationCurationsAuthorizedContent({
   const locale = useBrowserLocale();
   const viewer = useProfileQueryViewer();
   const createPanel = useWaveInformationPanel(
-    t(locale, "profileCuration.editor.createTitle")
+    t(locale, "profileCuration.editor.createTitle"),
+    undefined,
+    "modal"
   );
   const curationsQuery = useWaveCurations({ waveId: wave.id });
   const curations = curationsQuery.data ?? [];
@@ -237,6 +240,7 @@ function WaveConfigurationCurationsAuthorizedContent({
 
       {createPanel.isOpen && (
         <MyStreamWaveCurationCreateDialog
+          mobileSheet
           wave={wave}
           isOpen
           onClose={createPanel.close}

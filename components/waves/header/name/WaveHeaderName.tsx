@@ -7,6 +7,7 @@ import { useContext, useRef } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import WaveHeaderNameEdit from "./WaveHeaderNameEdit";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { getWavePathRoute } from "@/helpers/navigation.helpers";
 import WaveParentNavigation from "../WaveParentNavigation";
 import {
@@ -33,7 +34,9 @@ export default function WaveHeaderName({
   );
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const isDirectMessage = wave.chat.scope.group?.is_direct_message ?? false;
+  const wavesWritesPaused = useWavesWritesPaused();
   const showEdit =
+    !wavesWritesPaused &&
     !isDirectMessage &&
     canEditWave({ connectedProfile, activeProfileProxy, wave });
 

@@ -1,2 +1,5 @@
-export const WAVE_HEADER_TEXT_ACTION_SURFACE_CLASSES =
-  "tw-inline-flex tw-h-8 tw-items-center tw-gap-2 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-text-xs tw-font-semibold tw-text-iron-300 tw-transition-colors group-focus-visible:tw-outline group-focus-visible:tw-outline-2 group-focus-visible:tw-outline-offset-2 group-focus-visible:tw-outline-primary-300 desktop-hover:group-hover:tw-bg-iron-900 desktop-hover:group-hover:tw-text-white group-active:tw-bg-iron-900 motion-reduce:tw-transition-none";
+const TEXT_ACTION_SURFACE_CLASSES =
+  "tw-inline-flex tw-h-8 tw-items-center tw-gap-2 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-text-iron-300 tw-transition-colors group-focus-visible:tw-outline group-focus-visible:tw-outline-2 group-focus-visible:tw-outline-offset-2 group-focus-visible:tw-outline-primary-300 desktop-hover:group-hover:tw-bg-iron-900 desktop-hover:group-hover:tw-text-white group-active:tw-bg-iron-900 motion-reduce:tw-transition-none";
+
+export const WAVE_HEADER_TEXT_ACTION_SURFACE_CLASSES = `${TEXT_ACTION_SURFACE_CLASSES} tw-text-xs tw-font-semibold`;
+export const WAVE_HEADER_MOBILE_TEXT_ACTION_SURFACE_CLASSES = `${TEXT_ACTION_SURFACE_CLASSES} tw-text-meta tw-font-medium`;

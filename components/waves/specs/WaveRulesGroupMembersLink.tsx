@@ -16,21 +16,17 @@ import { WaveInformationPanelContext } from "@/components/brain/mobile/WaveInfor
 
 export default function WaveRulesGroupMembersLink({
   groupId,
-  groupName,
   groupDetails,
-  href,
-  linkLabel,
+  showCountTooltip = true,
 }: {
   readonly groupId: string;
-  /** Existing Wave Rules links use this for their group-name tooltip. */
-  readonly groupName?: string | undefined;
   /** The complete saved group response, including its criteria payload. */
   readonly groupDetails?: ApiGroupFull | undefined;
-  readonly href: string;
-  readonly linkLabel?: string | undefined;
+  readonly showCountTooltip?: boolean;
 }) {
   const locale = useBrowserLocale();
   const criteriaId = useId();
+  const href = `/network?page=1&group=${encodeURIComponent(groupId)}`;
   const informationPanel = useContext(WaveInformationPanelContext);
   const {
     data: members,
@@ -98,9 +94,9 @@ export default function WaveRulesGroupMembersLink({
     <Link
       href={href}
       onNavigate={() => informationPanel?.prepareNavigation?.(href)}
-      aria-label={linkLabel ? `${linkLabel}: ${countLabel}` : countLabel}
+      aria-label={countLabel}
       aria-describedby={criteriaId}
-      title={groupName}
+      title={showCountTooltip ? countLabel : undefined}
       className="tw-inline-flex tw-min-h-11 tw-max-w-full tw-cursor-pointer tw-flex-col tw-items-end tw-justify-center tw-gap-0.5 tw-break-words tw-rounded-md tw-text-right tw-text-iron-50 tw-no-underline tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-300 sm:tw-min-h-9"
     >
       <span className="tw-inline-flex tw-underline tw-underline-offset-2">

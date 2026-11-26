@@ -26,6 +26,9 @@ diagnostics.
 - Understand the Safe Collecting landing page (wallet roles, setup paths,
   your setup, common tasks, all tools):
   [Safe Collecting](feature-safe-collecting.md)
+- Understand the notice that NFTDelegation stops counting for 6529 when
+  delegations and consolidations move to the 6529 Network:
+  [Identities Move to the 6529 Network](../profiles/feature-identity-move-to-6529-network.md#delegation-center-and-nextgen)
 - Understand section routing, menu behavior, query carry/clear rules, or HTML
   fallback:
   [Delegation Center Layout and Section Navigation](feature-delegation-center-layout-and-section-navigation.md)

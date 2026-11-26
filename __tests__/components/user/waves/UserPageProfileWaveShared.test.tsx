@@ -28,7 +28,7 @@ describe("OfficialWaveSummary", () => {
     expect(screen.getAllByRole("button", { name: "Add post" })).toHaveLength(1);
   });
 
-  it("keeps Manage and Add post together in the owner controls", () => {
+  it("keeps both owner actions in the shared header", () => {
     renderSummary({
       onAddPost: jest.fn(),
       manageCurationControl: <button type="button">Manage</button>,
@@ -37,7 +37,9 @@ describe("OfficialWaveSummary", () => {
     const manageButton = screen.getByRole("button", { name: "Manage" });
     const addPostButton = screen.getByRole("button", { name: "Add post" });
 
-    expect(manageButton.parentElement).toBe(addPostButton.parentElement);
+    expect(manageButton.parentElement?.parentElement).toBe(
+      addPostButton.parentElement?.parentElement
+    );
   });
 
   it("leads with the Curation name and keeps the source Wave contextual", () => {
@@ -45,7 +47,7 @@ describe("OfficialWaveSummary", () => {
 
     expect(screen.getByRole("heading", { name: "Art" })).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Open source Wave Daily" })
+      screen.getAllByRole("button", { name: "Open source Wave Daily" })[0]
     ).toBeInTheDocument();
   });
 

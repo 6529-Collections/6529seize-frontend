@@ -16,16 +16,14 @@
 ## Entry Points
 
 - Open a wave or DM thread with unread metadata.
-- Open a serial-target link with `serialNo` and optional `divider`.
+- Open a wave from a sidebar link that includes an unread position.
 - Use `Mark as unread` on a drop.
 
 ## URL Rules
 
-- `serialNo={n}` is required for URL-driven unread setup.
-- `divider={n}` is used only when `serialNo` is valid.
-- If `divider` is missing or invalid during valid `serialNo` setup, chat uses current unread metadata.
-- After valid `serialNo` setup starts, chat removes `serialNo` and `divider` from the URL.
-- `divider` without a valid `serialNo` is ignored.
+- `divider={n}` sets the unread position for the visit. It works on sidebar links and links that also target a message with `serialNo={n}`.
+- If `divider` is missing or invalid, chat uses the first available unread position.
+- Chat clears the one-time URL values after setup. Opening a link with only `divider` keeps chat at its usual entry position.
 
 ## User Journey
 
@@ -43,7 +41,7 @@
 - If the divider target is not loaded yet, unread control can still appear while history loads.
 - Manual dismiss is available from desktop close button and swipe-right gesture.
 - Escape dismiss works unless focus is inside an element using `role="dialog"`.
-- Manual dismiss and auto-dismiss clear only the current boundary. A later boundary update can show controls again.
+- The unread position survives reloading the same wave visit. A dismissal lasts for that visit, including through a reload. Use `Mark as unread` to set a new position.
 - Standalone unread and pending labels cap at `99+`.
 - In stacked mode, controls switch to compact icon-first buttons.
 
@@ -51,7 +49,6 @@
 
 - If unread jump stalls on long history, wait for load, then retry control.
 - If unread control was dismissed accidentally, use `Mark as unread` to set a new boundary.
-- If unread boundary looks stale, refresh thread to resync unread metadata.
 
 ## Limitations / Notes
 

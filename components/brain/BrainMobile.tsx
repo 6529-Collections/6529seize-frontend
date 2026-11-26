@@ -1,4 +1,5 @@
 "use client";
+import { Capacitor } from "@capacitor/core";
 import { closeDropInCurrentUrl } from "@/helpers/waves/close-drop.helpers";
 import { useWaveCompetitionsTab } from "@/hooks/competitions/useWaveCompetitionsTab";
 import {
@@ -27,6 +28,7 @@ import React, {
   useSyncExternalStore,
 } from "react";
 import {
+  AnimatePresence,
   LazyMotion,
   domAnimation,
   m,
@@ -68,6 +70,7 @@ import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
 import MobileWaveSubwavesBar from "./mobile/MobileWaveSubwavesBar";
 import BrainMobileViewContent from "./mobile/BrainMobileViewContent";
+import { WavesMoveScope } from "@/components/waves-move/WavesMoveScope";
 import { BrainView } from "./mobile/brainMobileViews";
 import { BrainMobileSubmissionRulesContext } from "./mobile/BrainMobileSubmissionRulesContext";
 import { useBrainMobileActiveView } from "./mobile/useBrainMobileActiveView";
@@ -109,6 +112,18 @@ const getRestoredWaveView = (
   >["currentWaveView"]
 ): BrainView | null =>
   isApp && currentWaveView?.waveId === waveId ? currentWaveView.view : null;
+
+// The views that show the open wave take its part in the move to the 6529
+// Network; the waves list, the profile feed, messages and notifications
+// show drops from many waves, each in its own.
+const VIEWS_OF_OTHER_WAVES: ReadonlySet<BrainView> = new Set([
+  BrainView.WAVES,
+  BrainView.PROFILE_FEED,
+  BrainView.MESSAGES,
+  BrainView.NOTIFICATIONS,
+]);
+const isOpenWaveView = (view: BrainView): boolean =>
+  !VIEWS_OF_OTHER_WAVES.has(view);
 
 function getWaveTab(view: BrainView): MyStreamWaveTab | undefined {
   const tab =
@@ -413,6 +428,8 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     : "list";
   const swipeBackHandlers = useWaveListSwipeBack({
     enabled: canSwipeBackToWaves,
+    edgeSwipeBack: hasWave && !isDirectMessage,
+    includeHeader: isDirectMessage && Capacitor.getPlatform() === "ios",
     scope: waveId ?? (isProfileFeed ? "profile-feed" : "root"),
     onIntentStart: handleSwipeBackIntent,
     onSwipeBack: handleSwipeBackToWaves,
@@ -509,15 +526,17 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
         aria-hidden={!!effectiveDropId}
         inert={effectiveDropId ? true : undefined}
       >
-        {wave &&
-          information?.request?.overlay &&
-          information.request.waveId === wave.id && (
-            <WaveInformationSheet
-              key={information.request.id}
-              wave={wave}
-              onClose={information.close}
-            />
-          )}
+        <AnimatePresence>
+          {wave &&
+            information?.request?.overlay &&
+            information.request.waveId === wave.id && (
+              <WaveInformationSheet
+                key={information.request.id}
+                wave={wave}
+                onClose={information.close}
+              />
+            )}
+        </AnimatePresence>
         {(hasWave || !isApp) && (
           <BrainMobileTabs
             activeView={activeView}
@@ -567,27 +586,32 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
             }
             className="tw-relative tw-min-w-0 tw-flex-1"
           >
-            <BrainMobileViewContent
-              activeView={activeView}
-              activeWaveId={waveId}
-              activeAboutTab={activeAboutTab}
-              onAboutTabChange={onAboutTabChange}
-              isCurationWave={isCurationWave}
-              isMemesWave={isMemesWave}
-              isRankWave={isRankWave}
-              isApproveWave={isApproveWave}
-              hasPolls={hasPolls}
-              onDropClick={onDropClick}
-              onOpenQuickVote={quickVote.openQuickVote}
-              onPrefetchQuickVote={quickVote.prefetchQuickVote}
+            <WavesMoveScope
               wave={wave}
+              waveId={isOpenWaveView(activeView) ? wave?.id : undefined}
             >
-              <BrainMobileSubmissionRulesContext.Provider
-                value={viewSubmissionRules}
+              <BrainMobileViewContent
+                activeView={activeView}
+                activeWaveId={waveId}
+                activeAboutTab={activeAboutTab}
+                onAboutTabChange={onAboutTabChange}
+                isCurationWave={isCurationWave}
+                isMemesWave={isMemesWave}
+                isRankWave={isRankWave}
+                isApproveWave={isApproveWave}
+                hasPolls={hasPolls}
+                onDropClick={onDropClick}
+                onOpenQuickVote={quickVote.openQuickVote}
+                onPrefetchQuickVote={quickVote.prefetchQuickVote}
+                wave={wave}
               >
-                {children}
-              </BrainMobileSubmissionRulesContext.Provider>
-            </BrainMobileViewContent>
+                <BrainMobileSubmissionRulesContext.Provider
+                  value={viewSubmissionRules}
+                >
+                  {children}
+                </BrainMobileSubmissionRulesContext.Provider>
+              </BrainMobileViewContent>
+            </WavesMoveScope>
           </m.div>
         </LazyMotion>
       </div>

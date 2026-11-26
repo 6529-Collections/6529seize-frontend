@@ -1,9 +1,13 @@
+"use client";
+
 import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { RateMatter } from "@/types/enums";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import UserPageRateWrapper from "../../utils/rate/UserPageRateWrapper";
 import UserPageRepNewRep from "./UserPageRepNewRep";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 export default function GrantRepDialog({
   profile,
@@ -16,9 +20,10 @@ export default function GrantRepDialog({
   readonly isOpen: boolean;
   readonly onClose: () => void;
 }) {
+  const locale = useBrowserLocale();
   return (
     <MobileWrapperDialog
-      title="Grant Rep"
+      title={t(locale, "rep.categories.grant.actions.grant")}
       isOpen={isOpen}
       onClose={onClose}
       tabletModal
@@ -26,6 +31,8 @@ export default function GrantRepDialog({
       maxWidthClass="md:tw-max-w-md"
       headerClassName="tw-mb-5"
       headerVariant="minimal"
+      scrollableContent={false}
+      surfaceClassName="tw-bg-iron-950 md:[--mobile-wrapper-dialog-resting-height:80dvh]"
     >
       <UserPageRateWrapper profile={profile} type={RateMatter.REP}>
         <UserPageRepNewRep

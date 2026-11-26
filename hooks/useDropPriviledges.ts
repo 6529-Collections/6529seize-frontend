@@ -17,6 +17,7 @@ export enum SubmissionRestriction {
   NOT_STARTED = "NOT_STARTED",
   ENDED = "ENDED",
   MAX_DROPS_REACHED = "MAX_DROPS_REACHED",
+  PAUSED_FOR_MOVE = "PAUSED_FOR_MOVE",
 }
 
 export enum ChatRestriction {
@@ -41,6 +42,8 @@ interface DropPrivilegesInput {
   readonly submissionEnds: number | null;
   readonly maxDropsCount: number | null;
   readonly identityDropsCount: number | null;
+  /** Entries are paused for the move to the 6529 Network. */
+  readonly submissionsPaused?: boolean | undefined;
   readonly onSlowModeCooldownExpired?: (() => void) | undefined;
 }
 
@@ -62,6 +65,7 @@ export function useDropPrivileges({
   submissionEnds,
   maxDropsCount,
   identityDropsCount,
+  submissionsPaused = false,
   onSlowModeCooldownExpired,
 }: DropPrivilegesInput): DropPrivileges {
   const [slowModeClockTick, setSlowModeClockTick] = useState(0);
@@ -159,6 +163,9 @@ export function useDropPrivileges({
       submissionRestriction = SubmissionRestriction.NOT_STARTED;
     } else if (submissionStatus === SubmissionStatus.ENDED) {
       submissionRestriction = SubmissionRestriction.ENDED;
+    } else if (submissionsPaused) {
+      // After the wave's own reasons: a closed or full window still says so.
+      submissionRestriction = SubmissionRestriction.PAUSED_FOR_MOVE;
     }
 
     let chatRestriction: ChatRestriction | null = null;
@@ -190,6 +197,7 @@ export function useDropPrivileges({
     submissionEnds,
     maxDropsCount,
     identityDropsCount,
+    submissionsPaused,
     slowModeClockTick,
   ]);
 }

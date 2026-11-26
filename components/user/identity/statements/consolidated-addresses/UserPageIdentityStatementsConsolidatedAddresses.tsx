@@ -19,6 +19,7 @@ import { AnimatePresence } from "framer-motion";
 import UserPageIdentityStatementsConsolidatedAddressesItem from "./UserPageIdentityStatementsConsolidatedAddressesItem";
 import { useConsolidationPolicy } from "@/hooks/useConsolidationPolicy";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useIdentityEditingPaused } from "@/hooks/useIdentityMovePhase";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { DelegationCenterSection } from "@/types/enums";
@@ -81,7 +82,13 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
   const { limits } = useConsolidationPolicy();
   const { address } = useSeizeConnectContext();
   const { activeProfileProxy } = useContext(AuthContext);
-  const canEdit = amIUser({ profile, address }) && !activeProfileProxy;
+  // Setting the primary wallet and adding a wallet register on NFTDelegation,
+  // which stops counting for 6529 at the move to the 6529 Network.
+  const identityEditingPaused = useIdentityEditingPaused();
+  const canEdit =
+    amIUser({ profile, address }) &&
+    !activeProfileProxy &&
+    !identityEditingPaused;
   const primaryAddress = getPrimaryAddress(profile);
   const walletCount = profile.wallets?.length ?? 0;
   const atWalletLimit = !!limits && walletCount >= limits.maxWallets;

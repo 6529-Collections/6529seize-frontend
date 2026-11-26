@@ -64,27 +64,29 @@ describe("WaveRulesGroupMembersLink", () => {
     });
   });
 
-  it("shows the user count without changing the group destination", async () => {
-    renderWithQueryClient(
-      <WaveRulesGroupMembersLink
-        groupId="group-1"
-        groupName="Generated group name"
-        href="/network?page=1&group=group-1"
-        linkLabel="Inspect Generated group name group criteria and members"
-      />
-    );
+  it.each([
+    { count: 1, label: "1 user" },
+    { count: 365, label: "365 users" },
+  ])("uses $label in the link and tooltip", async ({ count, label }) => {
+    jest.mocked(fetchSavedGroupMembersPage).mockResolvedValue({
+      count,
+      page: 1,
+      next: false,
+      data: [],
+    });
+    renderWithQueryClient(<WaveRulesGroupMembersLink groupId="group-1" />);
 
-    await screen.findByText("365 users");
+    await screen.findByText(label);
     const criteria = await screen.findByText(
       "REP at least 12, NIC from punk6529 at least 3, 4 explicitly included users, and 1 explicitly excluded user"
     );
     expect(criteria).toHaveAttribute("aria-live", "polite");
     const link = screen.getByRole("link", {
-      name: "Inspect Generated group name group criteria and members: 365 users",
+      name: label,
     });
-    expect(link).toHaveTextContent("365 users");
+    expect(link).toHaveTextContent(label);
     expect(link).toHaveAttribute("href", "/network?page=1&group=group-1");
-    expect(link).toHaveAttribute("title", "Generated group name");
+    expect(link).toHaveAttribute("title", label);
     expect(fetchSavedGroupMembersPage).toHaveBeenCalledWith(
       expect.objectContaining({
         groupId: "group-1",
@@ -106,21 +108,11 @@ describe("WaveRulesGroupMembersLink", () => {
       .mockReturnValueOnce(nextMembers.promise);
 
     const { rerender } = renderWithQueryClient(
-      <WaveRulesGroupMembersLink
-        groupId="group-1"
-        groupName="First group"
-        href="/network?page=1&group=group-1"
-      />
+      <WaveRulesGroupMembersLink groupId="group-1" />
     );
     await screen.findByText("365 users");
 
-    rerender(
-      <WaveRulesGroupMembersLink
-        groupId="group-2"
-        groupName="Second group"
-        href="/network?page=1&group=group-2"
-      />
-    );
+    rerender(<WaveRulesGroupMembersLink groupId="group-2" />);
 
     expect(screen.queryByText("365 users")).not.toBeInTheDocument();
 

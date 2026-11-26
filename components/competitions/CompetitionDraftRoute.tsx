@@ -11,6 +11,9 @@ import CompetitionDraftEditor from "./CompetitionDraftEditor";
 import CompetitionBackLink from "./CompetitionBackLink";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 export default function CompetitionDraftRoute({
   waveId,
@@ -20,7 +23,11 @@ export default function CompetitionDraftRoute({
   const router = useRouter();
   const { isApp } = useDeviceInfo();
   const { waveViewStyle } = useLayout();
+  const locale = useBrowserLocale();
   const hub = useCompetitionHub(waveId);
+  // New decisions move to the 6529 Network. The wave above already shows
+  // the notice, so the page says only that this is paused.
+  const wavesWritesPaused = useWavesWritesPaused();
   const wave = useWaveData({
     waveId,
     onWaveNotFound: () => undefined,
@@ -32,6 +39,12 @@ export default function CompetitionDraftRoute({
     (!(hub.data && wave.data) && (hub.isError || wave.isError))
   )
     content = <CompetitionState error />;
+  else if (hub.data && wave.data && wavesWritesPaused)
+    content = (
+      <p role="status" className="tw-m-0 tw-text-sm tw-text-iron-300">
+        {t(locale, "wavesMove.paused")}
+      </p>
+    );
   else if (hub.data && wave.data)
     content = hub.data.permissions.create_competition ? (
       <CompetitionDraftEditor

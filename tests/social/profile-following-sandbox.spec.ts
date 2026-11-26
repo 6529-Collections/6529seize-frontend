@@ -280,6 +280,21 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
     ).toBe(true);
     await loadProfile(true);
     const alert = await openAlerts("Off");
+    if (mobile) {
+      await expect(alert).toHaveCSS("font-size", "15px");
+      const block = page.getByRole("button", {
+        name: "Block profile",
+        exact: true,
+      });
+      await expect(
+        page
+          .getByRole("button", { name: "Block profile", exact: true })
+          .locator("svg")
+      ).toHaveCSS(
+        "color",
+        await block.evaluate((element) => getComputedStyle(element).color)
+      );
+    }
     if (!mobile) {
       await alert.hover();
       await expect(alert).toHaveCSS("box-shadow", "none");
@@ -323,7 +338,9 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
       path: testInfo.outputPath("artwork-alerts-profile-header.png"),
     });
     await page.getByRole("button", { name: "Follow", exact: true }).click();
-    await page.getByRole("button", { name: "Unfollow", exact: true }).click();
+    await page.getByRole("button", { name: "Following", exact: true }).click();
+    expect(followWrites).toBe(1);
+    await page.getByRole("menuitem", { name: "Unfollow", exact: true }).click();
     await expect(
       page.getByRole("button", { name: "Follow", exact: true })
     ).toBeVisible();
@@ -392,6 +409,7 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
             actions: following.some((target) => target.handle === handle)
               ? ["DROP_CREATED"]
               : [],
+            follows_viewer: handle === "following-artist-100",
           },
         });
       }
@@ -462,7 +480,16 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
       .getByRole("listitem")
       .filter({ hasText: "following-artist-100" });
     await lastRow
-      .getByRole("button", { name: "Unfollow", exact: true })
+      .getByRole("button", { name: "Following", exact: true })
+      .click();
+    const followMenu = page.getByRole("menu", {
+      name: "Following",
+      exact: true,
+    });
+    await expect(followMenu.getByText("You follow each other")).toBeVisible();
+    await expect(lastRow).toBeVisible();
+    await followMenu
+      .getByRole("menuitem", { name: "Unfollow", exact: true })
       .click();
     await expect(list.getByRole("listitem")).toHaveCount(100);
     await expect(lastRow).toHaveCount(0);
@@ -571,7 +598,7 @@ test.describe("Own profile Following sandbox @auth @medium @local-only", () => {
         .toBeLessThanOrEqual(360);
       await expect(panel).toBeInViewport();
       const button = dialog.getByRole("listitem").first().getByRole("button", {
-        name: "Unfollow",
+        name: "Following",
         exact: true,
       });
       await expect(button).toBeEnabled();

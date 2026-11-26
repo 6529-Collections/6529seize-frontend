@@ -153,7 +153,7 @@ export function buildCreateWaveReview({
           rows: section.rows
             .filter((row) => !sharedRows.has(row.id))
             .map((row) => {
-              if (row.id === "credit-scope")
+              if (row.id === "credit-scope" && row.value !== undefined)
                 return {
                   ...row,
                   value: t(

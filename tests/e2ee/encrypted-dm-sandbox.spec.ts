@@ -17,6 +17,7 @@ import {
   resetE2eeSandbox,
 } from "../support/e2ee/e2eeSandboxSession";
 import {
+  closeChatInfo,
   composer,
   conversationListRow,
   enroll,
@@ -26,6 +27,8 @@ import {
   expectMessage,
   gotoPath,
   messageRow,
+  openChatInfo,
+  openComposerActions,
   openConversationFromList,
   openMessageActions,
   sendMessage,
@@ -43,6 +46,7 @@ import {
   openGifPicker,
 } from "../support/e2ee/giphyFixture";
 import { checkEncryptedPoll } from "../support/e2ee/polls";
+import { expectPinBeforeTimestamp } from "../support/e2ee/pinLayout";
 
 /** A valid 1x1 RGBA PNG (raster images are the only inline type). */
 const PIXEL_PNG_BASE64 =
@@ -98,6 +102,46 @@ async function dragEncryptedMessage(
     });
     await client.detach();
   };
+}
+
+async function tapEncryptedBackAndExpectSlide(page: Page) {
+  const back = page.getByRole("link", { name: "Back to encrypted messages" });
+  await expect(back).toHaveCount(1);
+  await expect(
+    page.getByRole("button", { name: /^(Back|Go back)$/u })
+  ).toHaveCount(0);
+  await page.evaluate(() => {
+    const root = document.documentElement;
+    const start = document.startViewTransition.bind(document);
+    document.startViewTransition = (update) => {
+      const transition = start(update);
+      const entering =
+        root.dataset["waveNavigationTransition"] === "conversation-entry";
+      if (
+        root.dataset["waveNavigationTransition"] === "chevron-back" ||
+        entering
+      ) {
+        const marker = entering
+          ? "testEncryptedEntrySlide"
+          : "testEncryptedBackSlide";
+        void transition.ready.then(
+          () => {
+            root.dataset[marker] = "ready";
+          },
+          () => {
+            root.dataset[marker] = "skipped";
+          }
+        );
+      }
+      return transition;
+    };
+  });
+  await back.tap();
+  await expect(page).toHaveURL(new RegExp(`${ENCRYPTED_ROUTE}$`, "u"));
+  await expect(page.locator("html")).toHaveAttribute(
+    "data-test-encrypted-back-slide",
+    "ready"
+  );
 }
 
 /**
@@ -394,7 +438,7 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
       await expect(retry).toHaveCount(0);
       await expect(
         phone.page.getByRole("link", { name: "Check device setup" })
-      ).toHaveAttribute("href", "/messages/encrypted/devices");
+      ).toHaveAttribute("href", "/preferences?tab=security");
       const checked = phone.page.waitForResponse(
         (response) =>
           response.ok() &&
@@ -534,10 +578,42 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     await expect(bobRow).toBeVisible();
     await bobRow.click();
     await expectMessage(alice.page, incoming);
-    await alice.page
-      .getByRole("link", { name: "Back to encrypted messages" })
-      .click();
+    await tapEncryptedBackAndExpectSlide(alice.page);
     await expect(bobRow).toBeVisible();
+    await tapEncryptedBackAndExpectSlide(bob.page);
+    await expect(conversationListRow(bob.page, "alice")).toBeVisible();
+    await bobRow.tap();
+    await expect(alice.page.locator("html")).toHaveAttribute(
+      "data-test-encrypted-entry-slide",
+      "ready"
+    );
+    await expectMessage(alice.page, incoming);
+    await conversationListRow(bob.page, "alice").tap();
+    await expect(bob.page.locator("html")).toHaveAttribute(
+      "data-test-encrypted-entry-slide",
+      "ready"
+    );
+    await expectMessage(bob.page, incoming);
+    await gotoPath(alice.page, "/messages");
+    const nativeRow = alice.page
+      .getByRole("list", { name: "Encrypted chats" })
+      .getByRole("listitem")
+      .filter({
+        has: alice.page.getByRole("button", {
+          name: "Pin bob to top",
+          exact: true,
+        }),
+      });
+    await expect(nativeRow).toBeVisible();
+    const timeBox = await expectPinBeforeTimestamp(nativeRow);
+    await nativeRow.screenshot({
+      path: testInfo.outputPath("encrypted-row-pin-and-time.png"),
+    });
+    await alice.page.touchscreen.tap(
+      timeBox.x + timeBox.width / 2,
+      timeBox.y + timeBox.height / 2
+    );
+    await expectMessage(alice.page, incoming);
     expect(
       await alice.page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth
@@ -861,10 +937,31 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
       fullPage: true,
     });
     if (!isMobileWebProject(testInfo.project.name)) {
+      await alice.page.route(
+        (url) => url.pathname.endsWith("/identities/bob/subscriptions"),
+        (route) =>
+          route.fulfill({
+            json: { actions: ["DROP_CREATED"], follows_viewer: true },
+          })
+      );
       await headerName.focus();
+      const hoverCard = alice.page.getByRole("dialog", {
+        name: "User profile for bob",
+      });
+      await expect(hoverCard).toBeVisible();
+      const following = hoverCard.getByRole("button", {
+        name: "Following",
+        exact: true,
+      });
+      await following.click();
+      const followMenu = hoverCard.getByRole("menu");
+      await expect(followMenu.getByText("You follow each other")).toBeVisible();
       await expect(
-        alice.page.getByRole("dialog", { name: "User profile for bob" })
-      ).toBeVisible();
+        followMenu.getByRole("menuitem", { name: "Unfollow" })
+      ).toBeInViewport();
+      await alice.page.keyboard.press("Escape");
+      await expect(followMenu).toHaveCount(0);
+      await expect(following).toBeFocused();
       await alice.page.keyboard.press("Escape");
     }
     await headerName.click();
@@ -1019,6 +1116,7 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     // Story 9: the image is encrypted in the browser and uploaded as a blob.
     const caption = "Here is the picture.";
     const pickedName = "picked-pixel.png";
+    await openComposerActions(alice.page);
     const chooser = alice.page.waitForEvent("filechooser");
     await alice.page
       .getByRole("button", { name: "Attach files", exact: true })
@@ -1122,11 +1220,38 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     await sendMessage(alice.page, "An earlier encrypted message");
     await openConversationFromList(bob.page, "alice");
     await expectMessage(bob.page, "An earlier encrypted message");
-    await alice.page
-      .getByRole("button", { name: "Chat info", exact: true })
-      .click();
-    await alice.page
-      .getByRole("dialog", { name: "Chat info", exact: true })
+    await gotoPath(alice.page, ENCRYPTED_ROUTE);
+    const row = conversationListRow(alice.page, "bob");
+    const pinName = { name: "Pin bob to top", exact: true };
+    const inboxRow = alice.page
+      .getByRole("list", { name: "Encrypted chats" })
+      .last()
+      .getByRole("listitem")
+      .filter({ has: alice.page.getByRole("button", pinName) });
+    const pin = inboxRow.getByRole("button", pinName);
+    const mobile = isMobileWebProject(testInfo.project.name);
+    if (mobile) {
+      await expect(pin).toHaveCSS("opacity", "1");
+      await expect(pin).toHaveCSS("width", "44px");
+      await pin.tap();
+    } else {
+      await alice.page.mouse.move(0, 0);
+      await expect(pin).toHaveCSS("opacity", "0");
+      await row.hover();
+      await expect(pin).toHaveCSS("opacity", "1");
+      await pin.click();
+    }
+    await expect(pin).toHaveAttribute("aria-pressed", "true");
+    await expectPinBeforeTimestamp(inboxRow);
+    await expect(alice.page).toHaveURL(new RegExp(`${ENCRYPTED_ROUTE}$`, "u"));
+    await row.click();
+    await expect(alice.page).toHaveURL(oldUrl);
+    const settings = await openChatInfo(alice.page);
+    await expect(
+      settings.getByRole("button", { name: "Unpin chat" })
+    ).toBeVisible();
+    await closeChatInfo(alice.page);
+    await (await openChatInfo(alice.page))
       .getByRole("button", { name: "Leave chat", exact: true })
       .click();
     await alice.page
@@ -1145,8 +1270,20 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     const freshUrl = alice.page.url();
     await sendMessage(alice.page, "A fresh encrypted message");
     await gotoPath(alice.page, ENCRYPTED_ROUTE);
-    const row = conversationListRow(alice.page, "bob");
     await expect(row).toHaveCount(1);
+    await expect(row.getByText("Pinned", { exact: true })).toHaveCount(1);
+    if (mobile) {
+      await pin.tap();
+    } else {
+      await alice.page.mouse.move(0, 0);
+      await row.focus();
+      await alice.page.keyboard.press("Tab");
+      await expect(pin).toBeFocused();
+      await alice.page.keyboard.press("Space");
+      await expect(pin).toHaveCSS("opacity", "1");
+    }
+    await expect(pin).toHaveAttribute("aria-pressed", "false");
+    await expect(alice.page).toHaveURL(new RegExp(`${ENCRYPTED_ROUTE}$`, "u"));
     await row.click();
     await expect(alice.page).toHaveURL(freshUrl);
     const history = alice.page.getByRole("combobox", {

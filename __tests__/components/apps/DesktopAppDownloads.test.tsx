@@ -76,7 +76,7 @@ describe("DesktopAppDownloads", () => {
     expect(screen.queryByText("Latest")).not.toBeInTheDocument();
     expect(
       screen.getByRole("link", {
-        name: "Download 6529 Desktop for macOS, version 0.3.16, Apple silicon",
+        name: "Download 6529 Desktop Classic for macOS, version 0.3.16, Apple silicon",
       })
     ).toHaveAttribute("href", "https://example.com/current.dmg");
     expect(screen.getByText("Arweave mirror · Coming soon")).toBeVisible();
@@ -128,7 +128,7 @@ describe("DesktopAppDownloads", () => {
   it("tracks native open mutations without waiting for toggle events", async () => {
     render(<DesktopAppDownloads />);
     const download = screen.getByRole("link", {
-      name: "Download 6529 Desktop for macOS, version 0.3.16, Apple silicon",
+      name: "Download 6529 Desktop Classic for macOS, version 0.3.16, Apple silicon",
     });
     const disclosure = download.closest("details")!;
     disclosure.removeAttribute("open");

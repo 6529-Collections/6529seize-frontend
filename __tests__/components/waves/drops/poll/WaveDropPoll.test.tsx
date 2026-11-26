@@ -51,6 +51,14 @@ jest.mock("@/services/api/wave-drops-v2-api", () => ({
   fetchDropPollOptionVotersV2: jest.fn(),
 }));
 
+jest.mock("@/hooks/useWavesMovePhase", () => ({
+  useWavesWritesPaused: jest.fn(() => false),
+  usePollClosedByMove: jest.fn(() => null),
+}));
+jest.mock("@/components/chain-waves/useChainWavesWriters", () => ({
+  useChainWavesWriters: jest.fn(() => null),
+}));
+
 const voteDropPollV2Mock = voteDropPollV2 as jest.MockedFunction<
   typeof voteDropPollV2
 >;
@@ -174,6 +182,47 @@ describe("WaveDropPoll", () => {
       screen.getByRole("button", { name: "View results" })
     ).toBeInTheDocument();
     expect(voteDropPollV2Mock).not.toHaveBeenCalled();
+  });
+
+  it("shows results with the paused line while ballots move to the 6529 Network", () => {
+    const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
+    wavesMove.useWavesWritesPaused.mockReturnValue(true);
+    try {
+      renderPoll(createPoll());
+
+      expect(screen.queryByRole("radio", { name: "First" })).toBeNull();
+      expect(screen.getByText("2 votes")).toBeInTheDocument();
+      expect(
+        screen.getByText("Paused for the move to the 6529 Network.")
+      ).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Vote" })).toBeNull();
+      expect(voteDropPollV2Mock).not.toHaveBeenCalled();
+    } finally {
+      wavesMove.useWavesWritesPaused.mockReturnValue(false);
+    }
+  });
+
+  it("sends the ballot to the 6529 Network once waves have moved there", async () => {
+    const writers = jest.requireMock(
+      "@/components/chain-waves/useChainWavesWriters"
+    );
+    const pollBallot = jest.fn().mockResolvedValue(undefined);
+    writers.useChainWavesWriters.mockReturnValue({ pollBallot });
+    try {
+      renderPoll(createPoll());
+      await userEvent.click(screen.getByRole("radio", { name: "Second" }));
+
+      await waitFor(() =>
+        expect(pollBallot).toHaveBeenCalledWith({
+          pollId: "poll-1",
+          optionNumbers: [2],
+        })
+      );
+      expect(mockRequestAuth).not.toHaveBeenCalled();
+      expect(voteDropPollV2Mock).not.toHaveBeenCalled();
+    } finally {
+      writers.useChainWavesWriters.mockReturnValue(null);
+    }
   });
 
   it("keeps unrestricted polls voteable when the viewer cannot chat", () => {
@@ -358,6 +407,37 @@ describe("WaveDropPoll", () => {
     expect(
       screen.queryByRole("button", { name: "Submit vote" })
     ).not.toBeInTheDocument();
+  });
+
+  it("shows a poll still open when its wave moved as closed then, with no vote", () => {
+    const wavesMove = jest.requireMock("@/hooks/useWavesMovePhase");
+    const freezeAt = Date.now() - 60 * 60_000;
+    // After the switch-on, in a wave that moved: paused, and closed by the move.
+    wavesMove.useWavesWritesPaused.mockReturnValue(true);
+    wavesMove.usePollClosedByMove.mockReturnValue(freezeAt);
+    try {
+      // 6529.io's copy still shows it open, closing later.
+      const poll = createPoll();
+      renderPoll(poll);
+
+      expect(wavesMove.usePollClosedByMove.mock.calls[0][0]).toEqual(poll);
+      expect(screen.getByText(/^Closed /)).toBeInTheDocument();
+      expect(screen.queryByText(/^Closes /)).toBeNull();
+      expect(
+        screen.getByText(
+          "This poll closed when the wave moved to the 6529 Network."
+        )
+      ).toBeInTheDocument();
+      expect(screen.queryByRole("radio", { name: "First" })).toBeNull();
+      expect(screen.queryByRole("button", { name: "Vote" })).toBeNull();
+      expect(
+        screen.queryByText("Paused for the move to the 6529 Network.")
+      ).toBeNull();
+      expect(voteDropPollV2Mock).not.toHaveBeenCalled();
+    } finally {
+      wavesMove.useWavesWritesPaused.mockReturnValue(false);
+      wavesMove.usePollClosedByMove.mockReturnValue(null);
+    }
   });
 
   it("keeps closed polls in results view only", () => {

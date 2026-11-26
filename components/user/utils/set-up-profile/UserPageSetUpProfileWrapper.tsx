@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
+import { useIdentityEditingPaused } from "@/hooks/useIdentityMovePhase";
 
 import UserPageSetUpProfile from "./UserPageSetUpProfile";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -16,9 +17,11 @@ export default function UserPageSetUpProfileWrapper({
 }) {
   const { address } = useSeizeConnectContext();
   const hasHydrated = useHasHydrated();
+  const identityEditingPaused = useIdentityEditingPaused();
 
   const getShowSetUpProfile = () => {
     if (!address) return false;
+    if (identityEditingPaused) return false;
     if (!profile) return false;
     if (profile.handle) return false;
     return !!profile.wallets?.find((w) =>

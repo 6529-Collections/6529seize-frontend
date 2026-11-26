@@ -43,6 +43,9 @@ jest.mock("framer-motion", () => {
 
   return {
     domAnimation: {},
+    AnimatePresence: ({ children }: { readonly children: React.ReactNode }) => (
+      <>{children}</>
+    ),
     LazyMotion: ({ children }: { children: React.ReactNode }) => (
       <>{children}</>
     ),

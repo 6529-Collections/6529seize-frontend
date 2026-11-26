@@ -33,6 +33,7 @@ import { ChatRestriction } from "@/hooks/useDropPriviledges";
 import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import { useUnreadDividerOptional } from "@/contexts/wave/UnreadDividerContext";
 import { useWave } from "@/hooks/useWave";
+import { useWavesMoveDropGuard } from "./useWavesMoveDropGuard";
 import {
   resolveWaveSubmissionExperience,
   WaveSubmissionExperience,
@@ -59,6 +60,9 @@ import { reportDropSubmissionFailure } from "@/utils/monitoring/dropSubmissionMo
 import { removeTemporaryThreadReply } from "./drops/reply-threads/pending-replies";
 import { acceptCreatedDrop } from "./create-drop-content/accept-created-drop";
 import { useDeviceSigningPrewarm } from "@/hooks/device-signing/useDeviceSigningPrewarm";
+import { useChainEntrySender } from "./create-drop-content/useChainEntrySender";
+import { ChainEntryStageLine } from "./create-drop-content/ChainEntryStageLine";
+import { useDropEnqueue } from "./create-drop-content/useDropEnqueue";
 
 export default function CreateDrop({
   activeDrop,
@@ -83,6 +87,8 @@ export default function CreateDrop({
   identityPickerPlacement = "modal",
   forceStandardDropComposer = false,
   focusOnInitialActiveDrop = false,
+  autoFocus = false,
+  onAutoFocusRoot,
   initialMarkdown = null,
   initialMarkdownKey = null,
 }: CreateDropProps) {
@@ -123,8 +129,15 @@ export default function CreateDrop({
   });
   const { markChatSubmitted, requestGuidelinesAgreement } = guidelinesAgreement;
   const { isMemesWave, isCurationWave, isQuorumWave } = useWave(wave);
+  const { entriesPausedForMove, refuseDropMode, refusePausedDrop } =
+    useWavesMoveDropGuard(processDropRemoved);
   const nativeCompetition = presentationCompetition(wave);
   const submitCompetitionEntry = useCompetitionEntrySubmit(nativeCompetition);
+  const { stage: chainEntryStage, send: sendChainEntry } = useChainEntrySender({
+    competition: nativeCompetition,
+    terms: wave.participation.terms ?? null,
+    onAllDropsAdded,
+  });
   const resolvedSubmissionExperience = resolveWaveSubmissionExperience({
     isMemesWave,
     isCurationWave,
@@ -145,6 +158,7 @@ export default function CreateDrop({
       return true;
     }
     if (canUseChatComposer) return false;
+    if (entriesPausedForMove) return false; // chat while the move pauses entries
     if (wave.participation.authenticated_user_eligible) return true;
     if (activeDrop) return false;
     return false;
@@ -202,6 +216,8 @@ export default function CreateDrop({
         return false;
       }
 
+      if (newIsDropMode && refuseDropMode()) return false;
+
       if (!newIsDropMode && !canUseChatComposer) {
         setToast({
           message: "You are not eligible to chat in this wave",
@@ -212,7 +228,7 @@ export default function CreateDrop({
 
       return true;
     },
-    [canUseChatComposer, fixedDropMode, setToast, wave]
+    [canUseChatComposer, fixedDropMode, refuseDropMode, setToast, wave]
   );
 
   const onDropModeChange = useCallback(
@@ -598,7 +614,9 @@ export default function CreateDrop({
     waitAndInvalidateDrops,
   ]);
 
-  const enqueueDrop = useCallback(
+  // A chat post or a 6529.io entry joins the send queue; false when slow
+  // mode refuses it.
+  const queueDrop = useCallback(
     (dropRequest: DropMutationBody): boolean => {
       const slowModeChatReservation = reserveSlowModeChatQueueSlot(
         dropRequest.drop
@@ -623,39 +641,24 @@ export default function CreateDrop({
 
       // Process immediately - avoids state update timing issues
       inFlightProcessNextDropRef.current = processNextDrop();
-
-      // Clear unread divider when user sends a message
-      if (unreadDividerContext) {
-        unreadDividerContext.setUnreadDividerSerialNo(null);
-      }
-
-      // Trigger UI updates
-      onDropAddedToQueue();
-
-      if (dropRequest.drop.drop_type === ApiDropType.Chat) {
-        markChatSubmitted();
-      }
-
-      // Explicitly blur any focused input to close keyboard for drop flows.
-      if (
-        dropRequest.drop.drop_type !== ApiDropType.Chat &&
-        document.activeElement instanceof HTMLElement
-      ) {
-        document.activeElement.blur();
-      }
-
       return true;
     },
     [
-      markChatSubmitted,
       nativeCompetition,
-      onDropAddedToQueue,
       processNextDrop,
       reserveSlowModeChatQueueSlot,
       submitCompetitionEntry,
-      unreadDividerContext,
     ]
   );
+
+  const enqueueDrop = useDropEnqueue({
+    refusePausedDrop,
+    sendChainEntry,
+    queueDrop,
+    onDropAddedToQueue,
+    markChatSubmitted,
+    unreadDividerContext,
+  });
 
   const submitWithGuidelines = useWaveGuidelinesSubmission({
     enqueueDrop,
@@ -775,6 +778,8 @@ export default function CreateDrop({
         wave={wave}
         submissionExperience={submissionExperience}
         focusOnInitialActiveDrop={focusOnInitialActiveDrop}
+        autoFocus={autoFocus}
+        onAutoFocusRoot={onAutoFocusRoot}
       />
     );
   }
@@ -782,6 +787,7 @@ export default function CreateDrop({
   return (
     <>
       {dropComposerContent}
+      <ChainEntryStageLine stage={chainEntryStage} />
       <CreateDropSubmissionDialogs
         allMention={allMention}
         guidelinesAgreement={guidelinesAgreement}

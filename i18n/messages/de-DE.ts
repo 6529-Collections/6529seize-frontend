@@ -42,6 +42,10 @@ export const DE_DE_MESSAGES = {
     "Nachrichten konnten nicht geladen werden. Erneut versuchen",
 
   "waves.myVotes.sort": "Sortieren nach",
+  "waves.myVotes.select": "Auswählen",
+  "waves.myVotes.yourVotesInCredit": "Deine Stimmen in {credit}",
+  "waves.myVotes.maxRating": "{label} {value}",
+  "waves.myVotes.doneSelecting": "Fertig",
   "waves.myVotes.sort.voteAmount": "Deine Stimmenzahl",
   "waves.myVotes.sort.leaderboard": "Ranglistenposition",
   "waves.myVotes.sort.lastVoted": "Zuletzt abgestimmt",
@@ -1308,6 +1312,17 @@ export const DE_DE_MESSAGES = {
   ...DE_DE_TRANSFER_MESSAGES,
   ...DE_DE_THE_MEMES_MINT_SUCCESS_MESSAGES,
   ...DE_DE_THE_MEMES_MINT_PROGRESS_MESSAGES,
+  "e2ee.list.pinned": "Angeheftet",
+  "e2ee.list.pinnedChat": "{title}, angehefteter Chat",
+  "e2ee.list.pinChat": "{title} oben anheften",
+  "e2ee.info.pin": "Oben anheften",
+  "e2ee.info.unpin": "Anheftung aufheben",
+  "e2ee.info.pinSyncHelp":
+    "Angeheftete Chats werden privat mit deinen anderen vertrauenswürdigen Geräten synchronisiert.",
+  "e2ee.info.pinLocalHelp":
+    "Angeheftete Chats bleiben auf diesem Gerät, bis die verschlüsselte Synchronisierung verfügbar ist.",
+  "e2ee.info.pinFailed":
+    "Die Anheftung konnte nicht geändert werden. Versuch es erneut.",
   "e2ee.message.taskChecked": "Markierte Aufgabe",
   "e2ee.message.taskUnchecked": "Nicht markierte Aufgabe",
   "e2ee.message.imageLink": "Bildlink",
