@@ -709,11 +709,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
 
   async importBackupHistory(history: BackupHistory) {
     this.requireReady();
-    const result = await this.ctx.queue.run(() =>
-      importBackupHistory(this.ctx, history, this.readSync.pins)
-    );
-    await resolveProfiles(this.ctx, memberProfileIds(this.ctx));
-    return result;
+    return importBackupHistory(this.ctx, history, this.readSync.pins);
   }
 
   // -- devices ----------------------------------------------------------------

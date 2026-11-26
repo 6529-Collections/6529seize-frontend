@@ -6,6 +6,7 @@
  */
 import type { E2eeApiClient } from "@/lib/e2ee/api";
 import { base64ToBytes } from "@/lib/e2ee/bytes";
+import type { ConversationPinRank } from "@/lib/e2ee/conversation-pins";
 import type { EngineContext } from "@/lib/e2ee/engine/context";
 import { createConversation } from "@/lib/e2ee/engine/membership";
 import type { ReadSync } from "@/lib/e2ee/engine/read-sync";
@@ -233,9 +234,17 @@ describe("E2EE engine: read-state sync (D175, P60)", () => {
       [1, 2, 0],
       [1, 0, 2],
     ]);
+    const dmThread = `dm:${bob.profileId}`;
+    const rank = (device: TestDevice) =>
+      contextOf(device).device?.conversationPins?.ranks?.[dmThread];
+    const laptopRank = rank(laptop);
+    const phoneRank = rank(phone);
+    if (!laptopRank || !phoneRank) throw new Error("missing pin order");
+    expect(laptopRank[1]).toBe(phoneRank[1]);
+    const expected = laptopRank[2] > phoneRank[2] ? competing[0] : competing[1];
     await settle(world);
-    expect(positions(phone)).toEqual(positions(laptop));
-    expect(competing).toContainEqual(positions(laptop));
+    expect(positions(laptop)).toEqual(expected);
+    expect(positions(phone)).toEqual(expected);
   });
 
   it("shares a received pin with a new device while local apply is delayed", async () => {
@@ -312,6 +321,55 @@ describe("E2EE engine: read-state sync (D175, P60)", () => {
 
     expect(ctx.timers.has("read-sync:send")).toBe(true);
     await waitUntil(() => !pins.hasPending());
+  });
+
+  it("keeps a newer reorder pending while acknowledging an older flush", async () => {
+    const world = await createWorld();
+    const { bob, laptop, phone, g } = await aliceWithTwoDevices(world);
+    const group = await laptop.engine.createConversation({
+      profileIds: [bob.profileId],
+      kind: "group",
+    });
+    await settle(world);
+    await laptop.engine.setConversationPinned(g, true);
+    await laptop.engine.setConversationPinned(group, true);
+    await settle(world);
+
+    const ctx = contextOf(laptop);
+    ctx.timers.cancel("poll");
+    const { pins } = ctx.readSync as ReadSync;
+    const acknowledge = pins.acknowledge.bind(pins);
+    const started = Promise.withResolvers<void>();
+    const finish = Promise.withResolvers<void>();
+    jest.spyOn(pins, "acknowledge").mockImplementationOnce(async (batch) => {
+      started.resolve();
+      await finish.promise;
+      await acknowledge(batch);
+    });
+    const move = () =>
+      laptop.engine.moveConversationPin(
+        `group:${group}`,
+        `dm:${bob.profileId}`
+      );
+
+    await move();
+    const flushing = laptop.engine.flushReadSync();
+    await started.promise;
+    let latest: readonly ConversationPinRank[] | undefined;
+    try {
+      await move();
+      latest = pins.pending()?.ranks;
+      expect(latest).toHaveLength(2);
+    } finally {
+      finish.resolve();
+    }
+    await flushing;
+    expect(pins.pending()?.ranks).toEqual(latest);
+    await laptop.engine.flushReadSync();
+    expect(pins.pending()).toBeNull();
+    await settle(world);
+    expect(phone.engine.getConversation(g)?.pinPosition).toBe(0);
+    expect(phone.engine.getConversation(group)?.pinPosition).toBe(1);
   });
 
   it("holds queued pin updates while a self group contains a locally untrusted wallet", async () => {

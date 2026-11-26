@@ -51,6 +51,7 @@ function rankOrder(
   ranks: PinRankVersions,
   replaceAll: boolean
 ): ConversationPinRank[] {
+  // A shared revision and random ID make concurrent reorders choose one winner.
   const revision =
     Object.values(ranks).reduce(
       (current, rank) => Math.max(current, rank[1]),
@@ -333,9 +334,11 @@ export class ConversationPins {
         (thread) => !sentIds.has(state.versions[thread]?.[2] ?? "")
       );
       const pendingRanks = state.unsentRanks ?? [];
-      const unsentRanks = pendingRanks.filter(
-        (thread) => sentRanks.get(thread) !== state.ranks?.[thread]?.[2]
-      );
+      // A newer reorder can replace a rank while this batch is in flight.
+      const unsentRanks = pendingRanks.filter((thread) => {
+        const current = state.ranks?.[thread];
+        return current !== undefined && current[2] !== sentRanks.get(thread);
+      });
       if (
         unsent.length !== state.unsent.length ||
         unsentRanks.length !== pendingRanks.length
