@@ -166,8 +166,10 @@ function MyStreamWaveHeaderIdentity({
   const locale = useBrowserLocale();
   const isAnnouncement = seizeSettings?.isAnnouncementsWave(wave.id) ?? false;
   const identityOffset = wave.parent_wave ? "md:-tw-mt-2" : "md:-tw-mt-1.5";
-  const titleHeightClass =
-    isPhoneWave && !wave.parent_wave ? "tw-min-h-11" : "tw-min-h-6";
+  let titleHeightClass = "tw-min-h-6";
+  // Reserve both title lines so loading a subwave cannot move the header.
+  if (isPhoneWave)
+    titleHeightClass = wave.parent_wave ? "tw-min-h-9" : "tw-min-h-11";
   const score = !isDirectMessage ? (
     <WaveTrustSignals
       waveRep={wave.wave_rep}
