@@ -152,9 +152,10 @@ test.describe("The Memes Page @smoke @medium @large", () => {
       name: "Volume: 7 Days",
       exact: true,
     });
-    await expect(page).toHaveURL(/sort=volume_days_7/);
     await expect(selectedVolume).toHaveAttribute("aria-pressed", "true");
     await expect(selectedVolume).toHaveAttribute("aria-expanded", "false");
+    // App Router can commit the URL after the sorting controls have updated.
+    await expect(page).toHaveURL(/sort=volume_days_7/, { timeout: 20_000 });
     for (const width of [390, 1024, 1440]) {
       await page.setViewportSize({ width, height: 900 });
       await expect(selectedVolume).toHaveCSS(
