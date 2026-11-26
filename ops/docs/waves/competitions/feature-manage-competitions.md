@@ -44,8 +44,10 @@ The **Decisions** tab follows the selected decision's **Settings** tab and prece
    full height.
    On phones, a segmented progress line follows the steps available for this
    decision. On/off settings use switches, and the navigation actions stay at
-   the bottom while you scroll. **Text preview limit** and **Image on summary
-   card** share one group under **Appearance and labels**.
+   the bottom while you scroll. If **Next** finds incomplete required settings,
+   the validation message appears above the phone navigation actions.
+   **Text preview limit** and **Image on summary card** share one group under
+   **Appearance and labels**.
 3. Changes save automatically. Incomplete settings are retained on this device;
    valid drafts sync to the server and are visible to wave administrators.
    Opening a draft returns directly to the setup wizard with saved settings

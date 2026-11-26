@@ -552,6 +552,11 @@ function DraftForm({
       />
     );
   const saveStatus = getSaveStatus(locale, persistence);
+  const validationFeedback = visibleErrors.length > 0 && invalid && (
+    <p role="alert" className="tw-m-0 tw-text-red">
+      {t(locale, "competitions.required")}
+    </p>
+  );
   const footer = (
     <CompetitionDraftEditorFooter
       locale={locale}
@@ -560,6 +565,7 @@ function DraftForm({
       published={published}
       busy={busy}
       conflict={displayedError === "conflict"}
+      validationFeedback={validationFeedback}
       onClose={() => {
         void close();
       }}
@@ -608,11 +614,7 @@ function DraftForm({
           </div>
         )}
       </fieldset>
-      {visibleErrors.length > 0 && invalid && (
-        <p role="alert" className="tw-m-0 tw-text-red">
-          {t(locale, "competitions.required")}
-        </p>
-      )}
+      <div className="tw-contents max-md:tw-hidden">{validationFeedback}</div>
       {displayedError && (
         <p role="alert" className="tw-m-0 tw-text-red">
           {t(

@@ -13327,6 +13327,61 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     }
   });
 
+  test("keeps decision validation feedback visible above phone navigation", async ({
+    page,
+  }, testInfo) => {
+    await installCompetitionApi(page);
+    const widths =
+      testInfo.project.name === "web-mobile-chromium"
+        ? [498, 320, 768]
+        : [1280];
+    for (const width of widths) {
+      await page.setViewportSize({ width, height: width === 320 ? 560 : 844 });
+      await page.goto(`${ROOT}/new`);
+      const name = page.getByRole("textbox", {
+        name: "Decision name",
+        exact: true,
+      });
+      await name.fill("");
+      const next = page.getByRole("button", { name: "Next", exact: true });
+      const footer = page
+        .getByRole("button", { name: "Next", exact: true })
+        .locator("..");
+      await next.click();
+      const message = page.getByRole("alert").filter({
+        hasText: "Complete the required fields before continuing.",
+      });
+      await expect(message).toHaveCount(1);
+      await expect(message).toBeVisible();
+      if (width < 768) {
+        await expect(message).toBeInViewport({ ratio: 1 });
+        await expect(next).toBeInViewport({ ratio: 1 });
+        await expect(footer).toContainText(
+          "Complete the required fields before continuing."
+        );
+        const messageBounds = await message.boundingBox();
+        const actionBounds = await next.boundingBox();
+        expect(messageBounds!.y + messageBounds!.height).toBeLessThanOrEqual(
+          actionBounds!.y - 8
+        );
+      } else {
+        await expect(footer.getByRole("alert")).toHaveCount(0);
+      }
+      await page.screenshot({
+        path: testInfo.outputPath(`decision-validation-${width}px.png`),
+        animations: "disabled",
+        style: "nextjs-portal { visibility: hidden; }",
+      });
+      await name.fill("Validation placement draft");
+      await expect(message).toHaveCount(0);
+      await next.click();
+      await expect(
+        page.getByRole("group", { name: "Who can drop", exact: true })
+      ).toBeVisible();
+      await expectNoHorizontalOverflow(page);
+    }
+  });
+
   test("keeps phone web decision type options on the sheet surface", async ({
     page,
   }, testInfo) => {
