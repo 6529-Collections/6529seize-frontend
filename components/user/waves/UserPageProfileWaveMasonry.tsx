@@ -52,6 +52,7 @@ import ContentModerationDropGate from "@/components/content-moderation/ContentMo
 import { useWavesMovePhase } from "@/hooks/useWavesMovePhase";
 import { isWavesWritePausedPhase } from "@/lib/waves-move/schedule";
 import { waveMoveSignal } from "@/lib/waves-move/scope";
+import { editPostRefusal } from "@/components/brain/my-stream/editPostRequest";
 
 interface UserPageProfileWaveMasonryProps {
   readonly order: CurationOrder;
@@ -211,17 +212,20 @@ function CurationMasonryActions({
       dropId: drop.id,
       waveId: drop.wave.id,
     });
-  // A post with a poll can't be edited while its own wave moves to the
-  // 6529 Network, so the menu doesn't offer it.
-  const pollEditLocked =
-    isWavesWritePausedPhase(useWavesMovePhase()) &&
-    waveMoveSignal(drop.wave) === true &&
-    !!drop.poll;
+  // The menu offers "Edit post" only where the link opens the editor: the
+  // author's own chat post and, while its own wave moves to the 6529
+  // Network, not one with a poll.
+  const movePhase = useWavesMovePhase();
   const canEdit =
-    !activeProfileProxy &&
-    !pollEditLocked &&
-    drop.drop_type !== ApiDropType.Participatory &&
-    areSameProfileIdentity({ left: drop.author, right: connectedProfile });
+    editPostRefusal({
+      post: drop,
+      waveId: drop.wave.id,
+      isProxy: !!activeProfileProxy,
+      connectedProfile,
+      pollEditsPaused:
+        isWavesWritePausedPhase(movePhase) &&
+        waveMoveSignal(drop.wave) === true,
+    }) === null;
   const menuItems: CompactMenuItem[] = [
     {
       id: "open",

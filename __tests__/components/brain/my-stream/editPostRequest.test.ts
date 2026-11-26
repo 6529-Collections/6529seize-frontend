@@ -43,6 +43,17 @@ describe("editPostRefusal", () => {
     expect(refusal(post(), { pollEditsPaused: true })).toBeNull();
   });
 
+  it("says a winning entry can't be edited here, paused or not", () => {
+    const winner = post({ drop_type: ApiDropType.Winner });
+    expect(refusal(winner)).toBe("profileCuration.actions.winnerNotEditable");
+    expect(refusal(winner, { pollEditsPaused: true })).toBe(
+      "profileCuration.actions.winnerNotEditable"
+    );
+    expect(refusal(post({ drop_type: ApiDropType.Winner, poll: {} }))).toBe(
+      "profileCuration.actions.winnerNotEditable"
+    );
+  });
+
   it("leaves someone else's post, an entry, a proxy and another wave to the author line", () => {
     expect(refusal(post({ author: { id: "p2", handle: "you" } }))).toBe(
       "profileCuration.actions.authorOnly"
@@ -50,6 +61,11 @@ describe("editPostRefusal", () => {
     expect(refusal(post({ drop_type: ApiDropType.Participatory }))).toBe(
       "profileCuration.actions.authorOnly"
     );
+    expect(
+      refusal(post({ drop_type: ApiDropType.Participatory }), {
+        pollEditsPaused: true,
+      })
+    ).toBe("profileCuration.actions.authorOnly");
     expect(refusal(post(), { isProxy: true })).toBe(
       "profileCuration.actions.authorOnly"
     );

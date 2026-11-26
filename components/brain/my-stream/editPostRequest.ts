@@ -6,8 +6,10 @@ import type { MessageKey } from "@/i18n/messages";
 /**
  * Why a profile curation's "Edit post" link can't open the editor in this
  * wave, as the toast that says so, or null when it can: only the author
- * edits their own post here, and a post with a poll can't be edited while
- * its wave moves to the 6529 Network.
+ * edits their own post here; the wave page has an editor for chat posts
+ * only, so a winning entry can't be edited here; and a post with a poll
+ * can't be edited while its wave moves to the 6529 Network. The curation
+ * menu offers the link only when this is null.
  */
 export function editPostRefusal({
   post,
@@ -31,6 +33,9 @@ export function editPostRefusal({
     areSameProfileIdentity({ left: post.author, right: connectedProfile });
   if (!canEdit) {
     return "profileCuration.actions.authorOnly";
+  }
+  if (post.drop_type !== ApiDropType.Chat) {
+    return "profileCuration.actions.winnerNotEditable";
   }
   return pollEditsPaused && post.poll ? "wavesMove.pollPostLocked" : null;
 }
