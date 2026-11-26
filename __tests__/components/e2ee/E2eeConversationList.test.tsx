@@ -1,4 +1,11 @@
-import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import type { ReactNode } from "react";
 import { E2eeRenewalBanner } from "@/components/e2ee/gate/E2eeRenewalBanner";
 import { E2eeConversationListPage } from "@/components/e2ee/list/E2eeConversationListPage";
@@ -163,7 +170,7 @@ describe("encrypted conversation list", () => {
     { name: "sidebar", Component: E2eeMessagesSection },
   ])(
     "formats Markdown in $name previews without nested links or resources",
-    ({ Component }) => {
+    async ({ Component }) => {
       const chats = [
         conversation({
           lastMessage: message({
@@ -181,7 +188,7 @@ describe("encrypted conversation list", () => {
         </E2eeTestProvider>
       );
       const row = within(
-        screen.getByRole("list", { name: "Encrypted chats" })
+        await screen.findByRole("list", { name: "Encrypted chats" })
       ).getByRole("link");
       expect(row).toHaveTextContent(
         "You: Bold italic struck Link console.log('hi'); first second Photo"
@@ -201,7 +208,7 @@ describe("encrypted conversation list", () => {
   it.each([
     { name: "inbox", Component: E2eeConversationListPage },
     { name: "sidebar", Component: E2eeMessagesSection },
-  ])("renders compact custom emojis in $name previews", ({ Component }) => {
+  ])("renders compact emojis in $name previews", async ({ Component }) => {
     const chats = [
       conversation({
         lastMessage: message({
@@ -219,7 +226,7 @@ describe("encrypted conversation list", () => {
       </E2eeTestProvider>
     );
     const row = within(
-      screen.getByRole("list", { name: "Encrypted chats" })
+      await screen.findByRole("list", { name: "Encrypted chats" })
     ).getByRole("link");
     const emoji = within(row).getByRole("img", { name: ":gm:" });
     expect(emoji).toHaveAttribute("src", emojiSource);
@@ -273,6 +280,35 @@ describe("encrypted conversation list", () => {
     expect(realRow).not.toHaveTextContent("bob");
   });
 
+  it.each([E2eeConversationListPage, E2eeMessagesSection])(
+    "keeps an older pinned chat above newer chats in %p",
+    async (List) => {
+      const chatList = [
+        conversation({ updatedAt: 100_000 }),
+        conversation({
+          g: DM_G,
+          name: "Pinned earlier",
+          pinned: true,
+          updatedAt: 0,
+        }),
+      ];
+      render(
+        <E2eeTestProvider
+          value={contextFor(createFakeE2eeEngine({ conversations: chatList }))}
+        >
+          <List />
+        </E2eeTestProvider>
+      );
+      const rows = within(
+        await screen.findByRole("list", { name: "Encrypted chats" })
+      ).getAllByRole("link");
+      expect(rows[0]).toHaveAttribute("href", `/messages/encrypted/${DM_G}`);
+      expect(
+        within(rows[0]!).getByText("Pinned", { exact: true })
+      ).toBeInTheDocument();
+    }
+  );
+
   it("marks a chat muted on this device and leaves it out of the badge", () => {
     setE2eeChatMuted(SELF_ID, GROUP_G, true);
     const engine = createFakeE2eeEngine({ conversations });
@@ -295,7 +331,7 @@ describe("encrypted conversation list", () => {
     expect(summaries.at(-1)).toMatchObject({ unread: 0, hasUnread: false });
   });
 
-  it("shows one DM row for ended and concurrent chats, preserving unread counts and the active history", () => {
+  it("shows one DM row for ended and concurrent chats, preserving unread counts and the active history", async () => {
     const pair = {
       kind: "dm" as const,
       admins: [SELF_ID, ALICE_ID],
@@ -325,8 +361,11 @@ describe("encrypted conversation list", () => {
         <E2eeMessagesSection />
       </E2eeTestProvider>
     );
-    const lists = screen.getAllByRole("list", { name: "Encrypted chats" });
-    expect(lists).toHaveLength(2);
+    const lists = await waitFor(() => {
+      const rendered = screen.getAllByRole("list", { name: "Encrypted chats" });
+      expect(rendered).toHaveLength(2);
+      return rendered;
+    });
     const [inbox, sidebar] = lists;
     for (const [list, href] of [
       [inbox!, `/messages/encrypted/${currentG}`],
@@ -528,7 +567,7 @@ describe("E2eeMessagesSection", () => {
 
   it.each([false, true])(
     "links the selected chat back to the inbox (collapsed: %s)",
-    (collapsed) => {
+    async (collapsed) => {
       mockPathname.mockReturnValue(`/messages/encrypted/${GROUP_G}`);
       render(
         <E2eeTestProvider
@@ -538,7 +577,7 @@ describe("E2eeMessagesSection", () => {
         </E2eeTestProvider>
       );
       const list = within(
-        screen.getByRole("list", { name: "Encrypted chats" })
+        await screen.findByRole("list", { name: "Encrypted chats" })
       );
       expect(list.getByRole("link", { current: "page" })).toHaveAttribute(
         "href",

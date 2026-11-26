@@ -1,5 +1,10 @@
 import { utf8Decode, utf8Encode } from "../bytes";
 import {
+  isConversationPin,
+  mergeConversationPins,
+  type ConversationPin,
+} from "../conversation-pins";
+import {
   isPollRoster,
   isValidPollBallot,
   parsePollDefinition,
@@ -14,8 +19,8 @@ import { BackupError } from "./errors";
  * backup v2; the chunk header with its hash-chain link is in crypto.ts).
  * Only what is needed to display past history: conversation metadata and
  * member list, messages with their display fields, attachment references
- * with their keys, and the report evidence (body + signature). Never MLS
- * state, ratchets or keys of the device.
+ * with their keys, report evidence (body + signature), and inbox state.
+ * MLS state, ratchets and the device's keys stay on the device.
  */
 
 interface BackupMember {
@@ -51,6 +56,7 @@ export interface BackupSegment {
   messages: BackupMessageRecord[];
   /** Added after v2 shipped; older decoders ignore the key. */
   reads?: BackupReadRecord[];
+  pins?: ConversationPin[];
 }
 
 /** What the engine hands to the backup module (copies, never live state). */
@@ -59,6 +65,8 @@ export interface BackupHistory {
   messages: BackupMessageRecord[];
   /** Read positions by chat handle (absent: none known). */
   reads?: Record<string, number>;
+  /** Latest pin or unpin per thread. */
+  pins?: ConversationPin[];
 }
 
 export const messageKey = (g: string, id: string): string => `${g}|${id}`;
@@ -87,6 +95,7 @@ export interface EncodedSegment {
   groups: BackupGroupRecord[];
   messages: BackupMessageRecord[];
   reads: BackupReadRecord[];
+  pins: ConversationPin[];
 }
 
 /** Greedy packing of records into segments of at most `maxBytes` JSON. */
@@ -99,14 +108,15 @@ export function packSegments(
   let groups: BackupGroupRecord[] = [];
   let messages: BackupMessageRecord[] = [];
   let reads: BackupReadRecord[] = [];
-  // Fixed overhead of `{"v":2,"at":…,"groups":[],"messages":[],"reads":[]}`.
+  let pins: ConversationPin[] = [];
+  // Reserve enough overhead for a segment containing every record type.
   const base = utf8Encode(
-    JSON.stringify({ v: 2, at, groups: [], messages: [], reads: [] })
+    JSON.stringify({ v: 2, at, groups: [], messages: [], reads: [], pins: [] })
   ).length;
   let size = base;
 
   const flush = () => {
-    if (groups.length === 0 && messages.length === 0 && reads.length === 0) {
+    if (groups.length + messages.length + reads.length + pins.length === 0) {
       return;
     }
     const segment: BackupSegment = {
@@ -115,16 +125,19 @@ export function packSegments(
       groups,
       messages,
       ...(reads.length > 0 ? { reads } : {}),
+      ...(pins.length > 0 ? { pins } : {}),
     };
     out.push({
       json: utf8Encode(JSON.stringify(segment)),
       groups,
       messages,
       reads,
+      pins,
     });
     groups = [];
     messages = [];
     reads = [];
+    pins = [];
     size = base;
   };
 
@@ -149,6 +162,9 @@ export function packSegments(
   }
   for (const read of Object.entries(history.reads ?? {})) {
     add(utf8Encode(JSON.stringify(read)).length, () => reads.push(read));
+  }
+  for (const pin of history.pins ?? []) {
+    add(utf8Encode(JSON.stringify(pin)).length, () => pins.push(pin));
   }
   flush();
   return out;
@@ -326,12 +342,16 @@ export function decodeSegment(json: Uint8Array): BackupSegment {
   const reads = Array.isArray(parsed["reads"])
     ? parsed["reads"].filter(isReadRecord)
     : [];
+  const pins = Array.isArray(parsed["pins"])
+    ? parsed["pins"].filter(isConversationPin)
+    : [];
   return {
     v: 2,
     at: isNumber(parsed["at"]) ? parsed["at"] : 0,
     groups: parsed["groups"].filter(isGroupRecord),
     messages: parsed["messages"].filter(isMessageRecord),
     ...(reads.length > 0 ? { reads } : {}),
+    ...(pins.length > 0 ? { pins } : {}),
   };
 }
 
@@ -348,6 +368,7 @@ export function mergeSegments(
   const groups = new Map<string, BackupGroupRecord>();
   const messages = new Map<string, BackupMessageRecord>();
   const reads: Record<string, number> = {};
+  let pins: Readonly<Record<string, ConversationPin>> = {};
   for (const segment of segments) {
     for (const group of segment.groups) {
       groups.set(group.g.toLowerCase(), group);
@@ -359,10 +380,13 @@ export function mergeSegments(
       const key = g.toLowerCase();
       reads[key] = Math.max(reads[key] ?? 0, seq);
     }
+    pins = mergeConversationPins(pins, segment.pins ?? []);
   }
+  const pinVersions = Object.values(pins);
   return {
     groups: [...groups.values()],
     messages: [...messages.values()],
     ...(Object.keys(reads).length > 0 ? { reads } : {}),
+    ...(pinVersions.length > 0 ? { pins: pinVersions } : {}),
   };
 }
