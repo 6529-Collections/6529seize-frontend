@@ -53,6 +53,9 @@ Shared tab routing and owner-mode rules are documented in:
   - search by collection name,
   - sort by `xTDH` or `xTDH Rate`,
   - `Load More` pagination.
+- Profile collections appear as separate cards. Below medium widths, search and
+  sort share one row, collection details use two columns, and a chevron marks
+  cards that open tokens. The global `/xtdh` layout is unchanged.
 - Collection cards without a contract are disabled and do not open token
   drill-down.
 - Selected collection is URL-backed with `xtdh_received_contract`.

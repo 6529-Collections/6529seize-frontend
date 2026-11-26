@@ -17,6 +17,7 @@ import { XtdhCollectionTokensPanel } from "./collection-tokens";
 
 interface XtdhReceivedSectionProps {
   readonly profileId: string | null;
+  readonly variant?: "default" | "profile";
   readonly pageSize?: number | undefined;
   readonly requireIdentity?: boolean | undefined;
 }
@@ -26,6 +27,7 @@ const DEBOUNCE_DELAY = 300;
 
 export default function XtdhReceivedSection({
   profileId,
+  variant = "default",
   pageSize = DEFAULT_PAGE_SIZE,
   requireIdentity = true,
 }: Readonly<XtdhReceivedSectionProps>): ReactElement {
@@ -130,6 +132,7 @@ export default function XtdhReceivedSection({
             collections.length > 0 ||
             searchTerm) && (
             <XtdhCollectionsControls
+              variant={variant}
               activeSortField={activeSortField}
               activeSortDirection={activeSortDirection}
               onSortChange={handleSortChange}
@@ -139,6 +142,7 @@ export default function XtdhReceivedSection({
             />
           )}
           <XtdhCollectionsList
+            variant={variant}
             isEnabled={isEnabled}
             isLoading={isLoading}
             isError={isError}

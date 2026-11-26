@@ -39,7 +39,7 @@ export default function MintingTodaySubscriptionRow(
     width: 80,
     height: 113,
     className:
-      "tw-h-[68px] tw-w-12 tw-rounded-[3px] tw-object-contain tw-shadow-sm sm:tw-h-[113px] sm:tw-w-20",
+      "tw-h-[68px] tw-w-12 tw-rounded-[3px] tw-object-contain tw-shadow-sm md:tw-h-[113px] md:tw-w-20",
     onError: () => setFailedSource(source),
   };
   let artwork;

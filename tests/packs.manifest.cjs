@@ -627,6 +627,7 @@ const PACKS = [
         "tests/social/profile-following-sandbox.spec.ts",
         "tests/social/profile-rep-edit-sandbox.spec.ts",
         "tests/social/profile-about-sandbox.spec.ts",
+        "tests/social/profile-xtdh-sandbox.spec.ts",
       ],
       {
         ...AUTH_SANDBOX_ENV,

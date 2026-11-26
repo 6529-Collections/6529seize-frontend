@@ -13,20 +13,27 @@ export function StatusBadge({
   validFrom?: number | string | null | undefined;
   validTo?: number | string | null | undefined;
 }>) {
-  const { badgeClassName, icon, label } = getStatusVisuals(status, validFrom, validTo);
+  const { badgeClassName, icon, label } = getStatusVisuals(
+    status,
+    validFrom,
+    validTo
+  );
 
   return (
     <output
       aria-label={`${label} grant status`}
       className={clsx(
-        "tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-full tw-px-2.5 tw-py-1 tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-wide",
+        "tw-inline-flex tw-items-center tw-gap-1.5 tw-bg-transparent tw-p-0 tw-text-xs tw-font-medium",
         badgeClassName
       )}
     >
       <FontAwesomeIcon
         icon={icon}
         aria-hidden="true"
-        className={clsx("tw-leading-none", icon === faCircle ? "tw-size-2" : "tw-size-3")}
+        className={clsx(
+          "tw-leading-none",
+          icon === faCircle ? "tw-size-2" : "tw-size-3"
+        )}
       />
       <span>{label}</span>
     </output>
