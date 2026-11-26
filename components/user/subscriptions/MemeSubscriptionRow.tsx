@@ -16,7 +16,6 @@ import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger, formatUtcDate } from "@/i18n/format";
 import { t } from "@/i18n/messages";
-import { commonApiPost } from "@/services/api/common-api";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
@@ -36,6 +35,10 @@ import SubscriptionHeaderLinks, {
 } from "./SubscriptionHeaderLinks";
 import UserPageSubscriptionsToggle from "./UserPageSubscriptionsToggle";
 import { useSubscriptionAllocationStatus } from "./useSubscriptionAllocationStatus";
+import {
+  postSubscriptionChange,
+  subscriptionSigningToast,
+} from "./subscriptionChangeRequest";
 
 const SUBSCRIPTION_COUNT_SELECT_CLASS = `${getEmbeddedDropdownClasses({ height: 40, y: 0, left: 12, right: 20, text: "sm", leading: "none" })} tw-w-12 [color-scheme:dark] disabled:tw-text-iron-500`;
 
@@ -223,11 +226,17 @@ export default function MemeSubscriptionRow(
       }
 
       const subscribe = !subscribed;
-      const response = await commonApiPost<SubscribeBody, SubscribeBody>({
+      const response = await postSubscriptionChange<SubscribeBody>({
         endpoint: `subscriptions/${props.profileKey}/subscription`,
         body: {
           contract: props.subscription.contract,
           token_id: props.subscription.token_id,
+          subscribed: subscribe,
+        } satisfies SubscribeBody,
+        change: {
+          type: "subs.card",
+          contract: props.subscription.contract,
+          tokenId: props.subscription.token_id,
           subscribed: subscribe,
         },
       });
@@ -247,15 +256,17 @@ export default function MemeSubscriptionRow(
         ],
       });
     } catch (e: unknown) {
-      setToast({
-        type: "error",
-        title: "Couldn't update this subscription.",
-        description: "Please try again.",
-        details: getToastErrorDetails(
-          e,
-          "Could not change token subscription."
-        ),
-      });
+      setToast(
+        subscriptionSigningToast(e, locale) ?? {
+          type: "error",
+          title: "Couldn't update this subscription.",
+          description: "Please try again.",
+          details: getToastErrorDetails(
+            e,
+            "Could not change token subscription."
+          ),
+        }
+      );
       return;
     } finally {
       setIsSubmitting(false);
@@ -282,17 +293,21 @@ export default function MemeSubscriptionRow(
         return;
       }
 
-      const response = await commonApiPost<
-        UpdateSubscriptionCountBody,
-        UpdateSubscriptionCountBody
-      >({
-        endpoint: `subscriptions/${props.profileKey}/subscription-count`,
-        body: {
-          contract: props.subscription.contract,
-          token_id: props.subscription.token_id,
-          count: value,
-        },
-      });
+      const response =
+        await postSubscriptionChange<UpdateSubscriptionCountBody>({
+          endpoint: `subscriptions/${props.profileKey}/subscription-count`,
+          body: {
+            contract: props.subscription.contract,
+            token_id: props.subscription.token_id,
+            count: value,
+          } satisfies UpdateSubscriptionCountBody,
+          change: {
+            type: "subs.count",
+            contract: props.subscription.contract,
+            tokenId: props.subscription.token_id,
+            count: value,
+          },
+        });
       const responseCount = response.count;
       setSelectedCount(responseCount);
       setToast({
@@ -309,15 +324,17 @@ export default function MemeSubscriptionRow(
       });
     } catch (e: unknown) {
       setSelectedCount(subscribedCount);
-      setToast({
-        type: "error",
-        title: "Couldn't update subscription count.",
-        description: "Please try again.",
-        details: getToastErrorDetails(
-          e,
-          "Could not update subscription count."
-        ),
-      });
+      setToast(
+        subscriptionSigningToast(e, locale) ?? {
+          type: "error",
+          title: "Couldn't update subscription count.",
+          description: "Please try again.",
+          details: getToastErrorDetails(
+            e,
+            "Could not update subscription count."
+          ),
+        }
+      );
       return;
     } finally {
       setIsSubmitting(false);

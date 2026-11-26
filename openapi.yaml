@@ -3330,10 +3330,10 @@ paths:
       summary: The stream owner each wallet's records use
       description: >-
         For each wallet, the owner that names it in signed records: its
-        principal id at the latest finalized height, or the wallet itself
-        while it is bound to no principal. Clients use it for the targets of
-        follows, mutes, blocks, artwork alerts and mention shortcuts. 1 to 50
-        wallets. 503 while the chain gateway is unavailable.
+        principal id at the latest finalized height, or the wallet itself while
+        it is bound to no principal. Clients use it for the targets of follows,
+        mutes, blocks, artwork alerts and mention shortcuts. 1 to 50 wallets.
+        503 while the chain gateway is unavailable.
       operationId: getSignedRecordsOwners
       security:
         - {}
@@ -19787,6 +19787,20 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-6529-signed-records
+          in: header
+          required: false
+          description: >-
+            The change as one signed record: base64url of the UTF-8 JSON array
+            of one signed record event, a kind 9 RECORD in the owner's ps stream
+            (the principal, or the wallet while it is bound to none) of type
+            subs.mode, subs.all-editions, subs.card or subs.count, stating the
+            same change as the body and signed with the signed-in wallet's
+            device key. After the switch to identities a change needs it; before
+            it, the change is made unsigned and a record sent with it is only
+            compared in shadow.
+          schema:
+            type: string
       requestBody:
         required: true
         content:
@@ -19801,9 +19815,24 @@ paths:
               schema:
                 $ref: "#/components/schemas/SubscriptionModeResponse"
         "400":
-          description: Not enough balance
+          description: >-
+            Not enough balance. A signed record that does not verify or does not
+            state the request gets INVALID_SIGNED_RECORD, with the reason in
+            `reason`.
         "403":
           description: User can only change subscription mode for their own consolidation
+        "409":
+          description: >-
+            Subscription changes are signed now and none was sent
+            (SIGNED_RECORD_REQUIRED); a newer change to this choice is already
+            saved (STALE_SIGNED_RECORD); or the key's wallets belong to more
+            than one identity.
+        "503":
+          description: >-
+            Subscription changes are paused for a few minutes, or the anchor
+            height or the wallet binding needed to check a signed record is
+            unavailable (ANCHOR_UNAVAILABLE, BINDING_UNAVAILABLE). Try again
+            shortly.
   /subscriptions/{consolidation_key}/subscribe-all-editions:
     post:
       tags:
@@ -19820,6 +19849,20 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-6529-signed-records
+          in: header
+          required: false
+          description: >-
+            The change as one signed record: base64url of the UTF-8 JSON array
+            of one signed record event, a kind 9 RECORD in the owner's ps stream
+            (the principal, or the wallet while it is bound to none) of type
+            subs.mode, subs.all-editions, subs.card or subs.count, stating the
+            same change as the body and signed with the signed-in wallet's
+            device key. After the switch to identities a change needs it; before
+            it, the change is made unsigned and a record sent with it is only
+            compared in shadow.
+          schema:
+            type: string
       requestBody:
         required: true
         content:
@@ -19833,8 +19876,24 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SubscribeAllEditionsResponse"
+        "400":
+          description: >-
+            A signed record that does not verify or does not state the request
+            gets INVALID_SIGNED_RECORD, with the reason in `reason`.
         "403":
           description: User can only change subscription mode for their own consolidation
+        "409":
+          description: >-
+            Subscription changes are signed now and none was sent
+            (SIGNED_RECORD_REQUIRED); a newer change to this choice is already
+            saved (STALE_SIGNED_RECORD); or the key's wallets belong to more
+            than one identity.
+        "503":
+          description: >-
+            Subscription changes are paused for a few minutes, or the anchor
+            height or the wallet binding needed to check a signed record is
+            unavailable (ANCHOR_UNAVAILABLE, BINDING_UNAVAILABLE). Try again
+            shortly.
   /subscriptions/{consolidation_key}/subscription:
     post:
       tags:
@@ -19851,6 +19910,20 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-6529-signed-records
+          in: header
+          required: false
+          description: >-
+            The change as one signed record: base64url of the UTF-8 JSON array
+            of one signed record event, a kind 9 RECORD in the owner's ps stream
+            (the principal, or the wallet while it is bound to none) of type
+            subs.mode, subs.all-editions, subs.card or subs.count, stating the
+            same change as the body and signed with the signed-in wallet's
+            device key. After the switch to identities a change needs it; before
+            it, the change is made unsigned and a record sent with it is only
+            compared in shadow.
+          schema:
+            type: string
       requestBody:
         required: true
         content:
@@ -19865,9 +19938,24 @@ paths:
               schema:
                 $ref: "#/components/schemas/SubscriptionResponse"
         "400":
-          description: Not enough balance or NFT already released
+          description: >-
+            Not enough balance or NFT already released. A signed record that
+            does not verify or does not state the request gets
+            INVALID_SIGNED_RECORD, with the reason in `reason`.
         "403":
           description: User can only change subscription mode for their own consolidation
+        "409":
+          description: >-
+            Subscription changes are signed now and none was sent
+            (SIGNED_RECORD_REQUIRED); a newer change to this choice is already
+            saved (STALE_SIGNED_RECORD); or the key's wallets belong to more
+            than one identity.
+        "503":
+          description: >-
+            Subscription changes are paused for a few minutes, or the anchor
+            height or the wallet binding needed to check a signed record is
+            unavailable (ANCHOR_UNAVAILABLE, BINDING_UNAVAILABLE). Try again
+            shortly.
   /subscriptions/{consolidation_key}/subscription-count:
     post:
       tags:
@@ -19884,6 +19972,20 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-6529-signed-records
+          in: header
+          required: false
+          description: >-
+            The change as one signed record: base64url of the UTF-8 JSON array
+            of one signed record event, a kind 9 RECORD in the owner's ps stream
+            (the principal, or the wallet while it is bound to none) of type
+            subs.mode, subs.all-editions, subs.card or subs.count, stating the
+            same change as the body and signed with the signed-in wallet's
+            device key. After the switch to identities a change needs it; before
+            it, the change is made unsigned and a record sent with it is only
+            compared in shadow.
+          schema:
+            type: string
       requestBody:
         required: true
         content:
@@ -19898,9 +20000,24 @@ paths:
               schema:
                 $ref: "#/components/schemas/SubscriptionCountResponse"
         "400":
-          description: Not enough balance, NFT already released, or exceeds eligibility
+          description: >-
+            Not enough balance, NFT already released, or exceeds eligibility. A
+            signed record that does not verify or does not state the request
+            gets INVALID_SIGNED_RECORD, with the reason in `reason`.
         "403":
           description: User can only change subscription mode for their own consolidation
+        "409":
+          description: >-
+            Subscription changes are signed now and none was sent
+            (SIGNED_RECORD_REQUIRED); a newer change to this choice is already
+            saved (STALE_SIGNED_RECORD); or the key's wallets belong to more
+            than one identity.
+        "503":
+          description: >-
+            Subscription changes are paused for a few minutes, or the anchor
+            height or the wallet binding needed to check a signed record is
+            unavailable (ANCHOR_UNAVAILABLE, BINDING_UNAVAILABLE). Try again
+            shortly.
   /identity-subscriptions/outgoing/{target_type}:
     get:
       tags:
@@ -33384,55 +33501,6 @@ components:
           type: integer
           format: int64
           nullable: true
-    ApiSignedRecordsOwner:
-      type: object
-      required:
-        - wallet
-        - owner
-      properties:
-        wallet:
-          type: string
-          description: Lowercase wallet.
-        owner:
-          type: string
-          description: Its principal id, or the wallet while it is bound to none.
-    ApiSignedRecordsOwners:
-      type: object
-      required:
-        - anchor
-        - owners
-      properties:
-        anchor:
-          type: integer
-          format: int64
-          description: The finalized height the owners were read at.
-        owners:
-          type: array
-          items:
-            $ref: "#/components/schemas/ApiSignedRecordsOwner"
-    ApiSignedRecordsAnchor:
-      type: object
-      required:
-        - anchor
-        - head_height
-        - finalized_time
-        - max_anchor_lag
-      properties:
-        anchor:
-          type: integer
-          format: int64
-          description: The latest finalized height; sign it as the record's anchor.
-        head_height:
-          type: integer
-          format: int64
-        finalized_time:
-          type: integer
-          format: int64
-          description: The finalized block's slot start, epoch milliseconds.
-        max_anchor_lag:
-          type: integer
-          format: int64
-          description: How many heights behind the finalized head a submitted anchor may be.
     ApiDeviceGrantProof:
       type: object
       allOf:
@@ -44566,6 +44634,57 @@ components:
           nullable: true
           minLength: 1
           maxLength: 50
+    ApiSignedRecordsAnchor:
+      type: object
+      required:
+        - anchor
+        - head_height
+        - finalized_time
+        - max_anchor_lag
+      properties:
+        anchor:
+          type: integer
+          format: int64
+          description: The latest finalized height; sign it as the record's anchor.
+        head_height:
+          type: integer
+          format: int64
+        finalized_time:
+          type: integer
+          format: int64
+          description: The finalized block's slot start, epoch milliseconds.
+        max_anchor_lag:
+          type: integer
+          format: int64
+          description: >-
+            How many heights behind the finalized head a submitted anchor may
+            be.
+    ApiSignedRecordsOwner:
+      type: object
+      required:
+        - wallet
+        - owner
+      properties:
+        wallet:
+          type: string
+          description: Lowercase wallet.
+        owner:
+          type: string
+          description: Its principal id, or the wallet while it is bound to none.
+    ApiSignedRecordsOwners:
+      type: object
+      required:
+        - anchor
+        - owners
+      properties:
+        anchor:
+          type: integer
+          format: int64
+          description: The finalized height the owners were read at.
+        owners:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiSignedRecordsOwner"
     ApiStartMultipartMediaUploadResponse:
       required:
         - upload_id

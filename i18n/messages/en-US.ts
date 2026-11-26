@@ -4643,6 +4643,13 @@ export const EN_US_ROOT_MESSAGES = {
   "subscriptions.settings.allDescription":
     "You will receive all editions you are eligible for",
   "subscriptions.settings.oneDescription": "You will receive only one edition",
+  "subscriptions.signing.failedTitle": "Couldn't sign this change.",
+  "subscriptions.signing.failedDescription":
+    "Nothing was changed. Try again in a moment.",
+  "subscriptions.signing.requiredTitle": "Subscription changes are signed now.",
+  "subscriptions.signing.requiredDescription":
+    "Turn on signed posts in this browser, then make the change again.",
+  "subscriptions.signing.requiredAction": "Turn on signed posts",
   "subscriptions.topUp.ios": "Top-up on 6529.io",
   "subscriptions.topUp.remaining": "Remaining {period} {number}",
   "subscriptions.topUp.other": "Other",
