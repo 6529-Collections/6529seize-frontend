@@ -190,8 +190,8 @@ On the web and Android, the tab appears after the page loads.
    inline. On phones it opens the full list in the shared bottom sheet; Close,
    Escape or Show Less returns to the three-row preview and restores focus.
    Below 768px, mobile web and the native app share a 48px leading column:
-   artwork for Minting Today, or an unboxed short month above the day when
-   artwork is absent. Rows show the name first and the weekday and season beneath
+   artwork for Minting Today, or a short month above the day inside a thin border
+   when artwork is absent. Rows show the name first and the weekday and season beneath
    it, without repeating the month and day. Tap, hover or focus the date column
    to read the full date, including its year. Minting Today keeps its existing
    label and tooltip. Controls sit beside the name; owner controls move below
@@ -345,8 +345,8 @@ On the web and Android, the tab appears after the page loads.
   - shows first 3 rows by default; `Show More` expands the list
   - desktop rows lead with the UTC date, retaining the abbreviated weekday and
     month plus the year, or `Minting Today` with its existing tooltip
-  - below 768px, web and native rows show the name first, with an unboxed
-    month/day column and the weekday and season beneath the name. The column
+  - below 768px, web and native rows show the name first, with a bordered
+    month/day box and the weekday and season beneath the name. The column
     reveals the full date on hover, focus or tap. Minting Today retains its
     artwork, label and tooltip
   - every row shows its season beside the date or `Minting Today`, including

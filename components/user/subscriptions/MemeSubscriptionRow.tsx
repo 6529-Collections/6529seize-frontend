@@ -548,7 +548,7 @@ export default function MemeSubscriptionRow(
               aria-label={fullDate}
               aria-describedby={dateTooltipId}
               data-tooltip-id={dateTooltipId}
-              className="tw-flex tw-min-h-11 tw-w-12 tw-flex-none tw-flex-col tw-items-center tw-justify-center tw-gap-px tw-rounded-sm tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 md:tw-hidden"
+              className="tw-flex tw-min-h-11 tw-w-12 tw-flex-none tw-flex-col tw-items-center tw-justify-center tw-gap-px tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 md:tw-hidden"
             >
               <span
                 aria-hidden="true"
