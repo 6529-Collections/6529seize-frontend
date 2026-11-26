@@ -22,7 +22,7 @@ const BrainRightSidebarContent: React.FC<BrainRightSidebarContentProps> = ({
   return (
     <section
       aria-label={waveRightPanelText("waves.sidebar.rightPanel.pinnedDrop")}
-      className="tw-min-w-0 tw-px-2 tw-pb-4 tw-pt-4"
+      className="tw-min-w-0 tw-py-4 [&_[data-wave-drop-author-avatar]]:tw-size-8 md:[&_[data-wave-drop-author-avatar]]:tw-mt-1 [&_[data-wave-drop-author-name]]:tw-text-sm md:[&_[data-wave-drop-content-column]]:tw-max-w-[calc(100%-2.75rem)]"
     >
       <Drop
         drop={{

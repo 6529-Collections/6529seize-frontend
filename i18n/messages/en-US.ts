@@ -2768,6 +2768,7 @@ const WAVE_REP_DETAILS_MESSAGES = objectMessages("waves.rep.details", {
   "activity.title": "Wave REP activity",
   "activity.description": "Recent edits across all categories",
   "activity.unknownRater": "Unknown",
+  "activity.to": "to",
   "activity.error": "Could not load Wave REP activity.",
   "activity.empty": "No Wave REP activity yet.",
   "activity.loadMoreError": "Could not load more activity.",

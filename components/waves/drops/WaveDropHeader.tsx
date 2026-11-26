@@ -89,6 +89,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
               className={`tw-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 ${timestampLayout === "stacked" ? identityRowHeightClass : ""}`}
             >
               <p
+                data-wave-drop-author-name
                 data-wave-typography="preserve"
                 className={`tw-m-0 tw-min-w-0 tw-max-w-full tw-font-semibold tw-leading-5 [overflow-wrap:anywhere] ${compact ? "tw-text-sm" : "tw-text-md"}`}
               >
