@@ -578,7 +578,7 @@ describe("WaveRepDetails", () => {
     fireEvent.click(screen.getByRole("button", { name: "Activity" }));
 
     expect(await screen.findByText("Wave REP activity")).toBeInTheDocument();
-    expect(await screen.findByText("(+20)")).toBeInTheDocument();
+    expect(await screen.findByText("+20")).toBeInTheDocument();
     expect(screen.queryByText("User Edit")).toBeNull();
     expect(commonApiFetchMock).toHaveBeenCalledWith(
       expect.objectContaining({

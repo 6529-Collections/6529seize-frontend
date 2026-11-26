@@ -38,8 +38,9 @@ Pin and mute use matching compact dark button surfaces.
 
 - The section order is About, REP, Configuration. Desktop and mobile use the
   same compact pill styling for these sections.
-- In REP, summary labels and values use matching text sizes, and Your REP,
-  Positive, and Negative sit in separate subtle cells. Contributors and Activity
+- In REP, Total and the contributor count share one summary card with Your REP,
+  Positive, and Negative below. Activity puts each rater and signed change above
+  the category, previous and new ratings, and time. Contributors and Activity
   use pill buttons. Category search filters categories; select one to view its
   contributors.
 - Configuration owns wave access, chat availability, links, slow mode, replies,

@@ -10,7 +10,10 @@ import { formatAddress, getTimeAgo } from "@/helpers/Helpers";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowRightIcon,
+  MagnifyingGlassIcon,
+} from "@heroicons/react/24/outline";
 import Link from "next/link";
 
 const WAVE_REP_DETAILS_LOCALE = DEFAULT_LOCALE;
@@ -113,13 +116,13 @@ export function SummaryStat({
   readonly toneClassName?: string | undefined;
 }) {
   return (
-    <div className="tw-min-w-0 tw-rounded-lg tw-bg-iron-800/35 tw-px-2.5 tw-py-2">
-      <p className="tw-mb-2 tw-mt-0 tw-text-[13px] tw-font-normal tw-normal-case tw-leading-5 tw-tracking-normal tw-text-iron-500">
+    <div className="tw-min-w-0 tw-px-3 tw-pb-2.5 tw-pt-2">
+      <p className="tw-mb-0.5 tw-mt-0 tw-text-[13px] tw-leading-[18px] tw-text-iron-500">
         {label}
       </p>
       <p
         title={value}
-        className={`tw-mb-0 tw-mt-0 tw-break-all tw-text-[13px] tw-font-semibold tw-normal-nums ${toneClassName}`}
+        className={`tw-mb-0 tw-mt-0 tw-break-all tw-text-[13px] tw-font-medium tw-leading-[18px] ${toneClassName}`}
       >
         {value}
       </p>
@@ -149,22 +152,22 @@ export function CategoryRow({
       aria-pressed={selected}
       title={label}
       onClick={onClick}
-      className={`tw-relative tw-grid tw-min-h-11 tw-w-full tw-cursor-pointer tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-3 tw-border-0 tw-py-2 tw-pl-3 tw-pr-1 tw-text-left tw-transition before:tw-pointer-events-none before:tw-absolute before:tw-inset-y-0 before:tw-left-0 before:tw-w-0.5 before:tw-content-[''] focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 ${
+      className={`tw-grid tw-min-h-[52px] tw-w-full tw-cursor-pointer tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 tw-px-2 tw-py-2 tw-text-left tw-transition focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 md:tw-min-h-11 md:tw-py-1.5 ${
         selected
-          ? "tw-bg-white/[0.045] before:tw-bg-primary-400"
-          : "tw-bg-transparent before:tw-bg-transparent hover:tw-bg-white/[0.025]"
+          ? "tw-bg-white/[0.06]"
+          : "tw-bg-transparent hover:tw-bg-white/[0.025]"
       }`}
     >
       <span className="tw-min-w-0">
-        <span className="tw-block tw-break-words tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-100">
+        <span className="tw-block tw-break-words tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-50">
           {label}
         </span>
-        <span className="tw-mt-0.5 tw-block tw-text-[0.6875rem] tw-font-normal tw-leading-4 tw-text-iron-500">
+        <span className="tw-mt-0 tw-block tw-text-xs tw-leading-4 tw-text-iron-500">
           {getContributorCountLabel(contributorCount)}
         </span>
       </span>
       <span
-        className={`tw-whitespace-nowrap tw-text-xs tw-font-medium ${getRepTextClass(
+        className={`tw-whitespace-nowrap tw-text-sm tw-font-medium ${getRepTextClass(
           totalRep
         )}`}
       >
@@ -195,7 +198,7 @@ export function CategorySearch({
         placeholder={detailText(
           "waves.rep.details.categories.searchPlaceholder"
         )}
-        className="tw-h-10 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-650 tw-bg-iron-900 tw-py-2 tw-pl-9 tw-pr-3 tw-text-[13px] tw-font-medium tw-text-iron-100 tw-outline-none tw-transition-colors placeholder:tw-text-iron-400 focus:tw-border-primary-400 focus:tw-ring-2 focus:tw-ring-primary-400/30 desktop-hover:hover:tw-bg-iron-800"
+        className="tw-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-py-2 tw-pl-10 tw-pr-3 tw-text-base tw-font-normal tw-text-iron-100 tw-outline-none tw-transition-colors placeholder:tw-text-base placeholder:tw-text-iron-500 focus:tw-border-primary-400 focus:tw-ring-2 focus:tw-ring-primary-400/30 desktop-hover:hover:tw-bg-iron-800 md:tw-h-10 md:tw-pl-9 md:tw-text-sm md:placeholder:tw-text-sm"
       />
     </div>
   );
@@ -212,7 +215,7 @@ export function ContributorRow({
   return (
     <Link
       href={getProfileHref(contributor.profile)}
-      className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-3 tw-border-0 tw-px-1 tw-py-2.5 tw-no-underline tw-transition hover:tw-bg-white/[0.025] focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
+      className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border-0 tw-px-2 tw-py-2.5 tw-no-underline tw-transition hover:tw-bg-white/[0.025] focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 md:tw-py-2"
     >
       <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
         <ProfileAvatar
@@ -227,12 +230,12 @@ export function ContributorRow({
             </span>
           }
         />
-        <p className="tw-m-0 tw-min-w-0 tw--translate-y-px tw-truncate tw-text-sm tw-font-medium tw-leading-none tw-text-white">
+        <p className="tw-m-0 tw-min-w-0 tw--translate-y-px tw-truncate tw-text-sm tw-font-medium tw-leading-none tw-text-iron-50">
           {display}
         </p>
       </div>
       <span
-        className={`tw-flex-shrink-0 tw--translate-y-px tw-text-sm tw-font-semibold tw-leading-none ${contributionClass}`}
+        className={`tw-flex-shrink-0 tw--translate-y-px tw-text-sm tw-font-medium tw-leading-none ${contributionClass}`}
       >
         {formatSignedRep(contributor.contribution)}
       </span>
@@ -259,47 +262,61 @@ export function LogRow({
   const visibleReason = getVisibleReason(log.contents.change_reason);
 
   return (
-    <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-px-1 tw-py-2.5">
-      <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
-        <div className="tw-min-w-0">
-          {raterHref ? (
-            <Link
-              data-wave-typography="preserve"
-              href={raterHref}
-              className="tw-block tw-truncate tw-text-sm tw-font-semibold tw-text-white tw-no-underline hover:tw-text-iron-300"
-            >
-              {rater}
-            </Link>
-          ) : (
-            <span
-              data-wave-typography="preserve"
-              className="tw-block tw-truncate tw-text-sm tw-font-semibold tw-text-iron-400"
-            >
-              {rater}
-            </span>
-          )}
-          <p className="tw-mb-0 tw-mt-1 tw-flex tw-flex-wrap tw-gap-x-2 tw-gap-y-1 tw-text-xs tw-text-iron-400">
-            <span className={oldRatingClass}>
-              {formatSignedRep(log.contents.old_rating)}
-            </span>
-            <span aria-hidden="true">-&gt;</span>
-            <span className={newRatingClass}>
-              {formatSignedRep(log.contents.new_rating)}
-            </span>
-            <span className={changeClass}>({formatSignedRep(change)})</span>
-            {log.contents.rating_category && (
-              <span>{log.contents.rating_category}</span>
-            )}
-          </p>
-        </div>
-        {createdAtLabel && (
-          <span className="tw-flex-shrink-0 tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-500">
-            {createdAtLabel}
+    <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-gap-x-3 tw-gap-y-0.5 tw-rounded-lg tw-px-2 tw-py-2.5 md:tw-py-2">
+      <div className="tw-min-w-0">
+        {raterHref ? (
+          <Link
+            data-wave-typography="preserve"
+            href={raterHref}
+            className="tw-block tw-truncate tw-text-sm tw-font-medium tw-text-iron-50 tw-no-underline hover:tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          >
+            {rater}
+          </Link>
+        ) : (
+          <span className="tw-block tw-truncate tw-text-sm tw-font-medium tw-text-iron-400">
+            {rater}
           </span>
         )}
       </div>
+      <span
+        className={`tw-text-right tw-text-sm tw-font-medium ${changeClass}`}
+      >
+        {formatSignedRep(change)}
+      </span>
+      <p className="tw-m-0 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-1 tw-gap-y-0.5 tw-text-xs tw-text-iron-400">
+        {log.contents.rating_category && (
+          <>
+            <span className="tw-min-w-0 tw-break-words">
+              {log.contents.rating_category}
+            </span>
+            <span aria-hidden="true" className="tw-text-iron-600">
+              ·
+            </span>
+          </>
+        )}
+        <span className="tw-inline-flex tw-items-center tw-gap-1">
+          <span className={oldRatingClass}>
+            {formatSignedRep(log.contents.old_rating)}
+          </span>
+          <ArrowRightIcon
+            aria-hidden="true"
+            className="tw-size-3 tw-text-iron-500"
+          />
+          <span className="tw-sr-only">
+            {detailText("waves.rep.details.activity.to")}
+          </span>
+          <span className={newRatingClass}>
+            {formatSignedRep(log.contents.new_rating)}
+          </span>
+        </span>
+      </p>
+      {createdAtLabel && (
+        <span className="tw-whitespace-nowrap tw-text-right tw-text-xs tw-text-iron-500">
+          {createdAtLabel}
+        </span>
+      )}
       {visibleReason && (
-        <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-text-iron-500">
+        <p className="tw-col-span-2 tw-m-0 tw-text-xs tw-text-iron-500">
           {visibleReason}
         </p>
       )}

@@ -29,6 +29,7 @@ interface WaveSettingRowProps {
   readonly editIcon?: "gear" | "pencil" | undefined;
   readonly editLabel: string;
   readonly label: string;
+  readonly phoneLabelClassName?: string | undefined;
   readonly onOpen: () => void;
   readonly renderEditor: (controls: {
     readonly closeEditor: () => void;
@@ -73,6 +74,7 @@ export default function WaveSettingRow({
   editIcon = "pencil",
   editLabel,
   label,
+  phoneLabelClassName,
   onOpen,
   renderEditor,
   showContentDivider = true,
@@ -340,7 +342,11 @@ export default function WaveSettingRow({
           aria-expanded={isEditorOpen}
           className="tw-flex tw-min-h-12 tw-w-full tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-py-2 tw-text-left tw-text-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
         >
-          <span className="tw-min-w-0 tw-flex-1 tw-text-iron-300">{label}</span>
+          <span
+            className={`tw-min-w-0 tw-flex-1 ${phoneLabelClassName ?? "tw-text-iron-300"}`}
+          >
+            {label}
+          </span>
           <span className="tw-min-w-0 tw-break-words tw-text-right tw-font-medium tw-text-iron-50">
             {valueLabel}
           </span>

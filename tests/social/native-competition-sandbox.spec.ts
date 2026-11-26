@@ -16346,6 +16346,218 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     });
   }
 
+  test("keeps Wave REP readable and aligned across panel widths", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page);
+    sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha");
+    const contributor = {
+      contribution: 47,
+      profile: {
+        id: PROFILE,
+        handle: "playwright",
+        primary_address: "0x0000000000000000000000000000000000000529",
+        pfp: null,
+      },
+    };
+    await page.route(`**/waves/${WAVE}/rep/overview**`, (route) =>
+      route.fulfill({
+        json: {
+          total_rep: 42,
+          positive_rep: 47,
+          negative_rep: -5,
+          authenticated_user_contribution: 0,
+          contributor_count: 2,
+          contributors: { data: [contributor], page: 1, next: false },
+        },
+      })
+    );
+    await page.route(`**/waves/${WAVE}/rep/categories**`, (route) =>
+      route.fulfill({
+        json: {
+          data: route.request().url().includes("/contributors")
+            ? [contributor]
+            : [{ category: "quality", total_rep: 42, contributor_count: 2 }],
+          page: 1,
+          next: false,
+        },
+      })
+    );
+    await page.route(`**/api/profile-logs?**`, (route) =>
+      route.fulfill({
+        json: {
+          data: [
+            {
+              id: "rep-positive",
+              profile_handle: "playwright",
+              created_at: new Date(Date.now() - 60_000).toISOString(),
+              contents: {
+                old_rating: 10,
+                new_rating: 31,
+                rating_category: "quality",
+                change_reason: "USER_EDIT",
+              },
+            },
+            {
+              id: "rep-negative",
+              profile_handle: null,
+              created_at: new Date(Date.now() - 120_000).toISOString(),
+              contents: {
+                old_rating: 31,
+                new_rating: -5,
+                rating_category: null,
+                change_reason: "LOST_TDH",
+              },
+            },
+          ],
+          page: 1,
+          next: false,
+        },
+      })
+    );
+    await page.goto(`/waves/${WAVE}?tab=chat`);
+    const information = await openWaveInformation(page);
+    await information.getByRole("tab", { name: "REP", exact: true }).click();
+    const summary = information.getByRole("region", {
+      name: "Wave REP",
+      exact: true,
+    });
+    const categories = information.getByRole("region", {
+      name: "Categories",
+      exact: true,
+    });
+    const heading = categories.getByRole("heading", {
+      name: "Categories",
+      exact: true,
+    });
+    await expect(heading).toHaveCSS("font-size", "11px");
+    await expect(heading).toHaveCSS("font-weight", "600");
+    await expect(heading).toHaveCSS("text-transform", "uppercase");
+    const phone = page.viewportSize()!.width < 768;
+    const search = categories.getByRole("searchbox", {
+      name: "Search Wave REP categories",
+    });
+    await expect(search).toHaveCSS("font-size", phone ? "16px" : "14px");
+    await expect(search).toHaveCSS("height", phone ? "44px" : "40px");
+    const quality = categories.getByRole("button", {
+      name: /^Show contributors in quality,/,
+    });
+    await expect(quality).toHaveCSS("min-height", phone ? "52px" : "44px");
+    await expect(quality).toHaveCSS("border-radius", "8px");
+    await expect(quality.getByText("quality", { exact: true })).toHaveCSS(
+      "font-size",
+      "14px"
+    );
+    await search.fill("missing");
+    await expect(
+      categories.getByText("No matching categories", { exact: true })
+    ).toBeVisible();
+    await search.fill("");
+    await quality.press("Space");
+    await expect(quality).toBeFocused();
+    await expect(quality).toHaveAttribute("aria-pressed", "true");
+    await expect(
+      information.getByRole("heading", {
+        name: "Contributors in quality",
+        exact: true,
+      })
+    ).toBeVisible();
+    await categories
+      .getByRole("button", { name: /^Show all contributors,/ })
+      .press("Enter");
+    await quality.focus();
+    await expect(quality).not.toHaveCSS("box-shadow", "none");
+    const rowAlignment = await quality
+      .getByText("quality", { exact: true })
+      .evaluate((name) => {
+        const sectionHeading = name.closest("section")!.querySelector("h2")!;
+        return (
+          name.getBoundingClientRect().left -
+          sectionHeading.getBoundingClientRect().left
+        );
+      });
+    expect(rowAlignment).toBe(0);
+    await expect(summary.getByText("Total", { exact: true })).toHaveCSS(
+      "font-size",
+      "14px"
+    );
+    await expect(summary.getByText("0", { exact: true })).toHaveCSS(
+      "font-size",
+      "13px"
+    );
+    await information.screenshot({
+      path: testInfo.outputPath("rep-contributors.png"),
+    });
+
+    // The sidebar's container query must also work below the three-column threshold.
+    await summary.evaluate((section) => {
+      section.parentElement!.style.width = "272px";
+    });
+    const stats = summary
+      .getByText("Your REP", { exact: true })
+      .locator("..")
+      .locator("..");
+    await expect(stats).toHaveCSS("grid-template-columns", /^\S+$/);
+    await information.screenshot({
+      path: testInfo.outputPath("rep-narrow-summary.png"),
+    });
+    await summary.evaluate((section) => {
+      section.parentElement!.style.removeProperty("width");
+    });
+    await expect(stats).toHaveCSS("grid-template-columns", /^\S+ \S+ \S+$/);
+
+    await information
+      .getByRole("button", { name: "Activity", exact: true })
+      .click();
+    const activity = information.getByRole("region", {
+      name: "Wave REP activity",
+      exact: true,
+    });
+    const positive = activity
+      .getByRole("link", { name: "playwright", exact: true })
+      .locator("..")
+      .locator("..");
+    await expect(positive.getByText("+21", { exact: true })).toHaveCSS(
+      "font-size",
+      "14px"
+    );
+    await expect(positive.getByText("quality", { exact: true })).toHaveCSS(
+      "font-size",
+      "12px"
+    );
+    await expect(positive).toContainText("to");
+    await expect(positive.getByText("(+21)", { exact: true })).toHaveCount(0);
+    const negative = activity
+      .getByText("Unknown", { exact: true })
+      .locator("..")
+      .locator("..");
+    await expect(negative.getByRole("link")).toHaveCount(0);
+    await expect(negative.getByText("-36", { exact: true })).toBeVisible();
+    await expect(negative.getByText("Lost TDH", { exact: true })).toBeVisible();
+    await expect(negative).toHaveCSS("border-bottom-width", "0px");
+    const geometry = await positive.evaluate((row) => {
+      const [rater, change, ratings, time] = Array.from(row.children).map(
+        (child) => child.getBoundingClientRect()
+      );
+      return {
+        firstLine: rater!.top === change!.top,
+        secondLine: ratings!.top === time!.top,
+        rightEdge: change!.right === time!.right,
+      };
+    });
+    expect(geometry).toEqual({
+      firstLine: true,
+      secondLine: true,
+      rightEdge: true,
+    });
+    await activity.scrollIntoViewIfNeeded();
+    await information.screenshot({
+      path: testInfo.outputPath("rep-activity.png"),
+    });
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("keeps wave Configuration in the information panel and competition appearance in Settings", async ({
     page,
   }) => {
@@ -16406,6 +16618,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await expect(
       information.getByRole("heading", { name: "Chat", exact: true })
     ).toBeVisible();
+    await expect(information.getByText("Slow mode", { exact: true })).toHaveCSS(
+      "color",
+      "rgb(132, 132, 144)"
+    );
     await expect(
       information.getByRole("tab", { name: "Voters", exact: true })
     ).toHaveCount(0);
