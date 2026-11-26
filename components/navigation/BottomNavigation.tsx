@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname, useSearchParams } from "next/navigation";
+import { usePhoneNavigationScreen } from "@/contexts/PhoneNavigationScreenContext";
 import React, {
   Suspense,
   useCallback,
@@ -98,6 +99,7 @@ const items: NavItemData[] = [
 ];
 
 interface BottomNavigationProps {
+  readonly paused?: boolean | undefined;
   readonly hidden?: boolean | undefined;
   readonly preserveMeasurementWhileHidden?: boolean | undefined;
 }
@@ -194,10 +196,12 @@ const getTrackedScrollTarget = ({
 
 const useCompactDock = ({
   hidden,
+  paused = false,
   resetKey,
   reverseScrollDirection,
 }: {
   readonly hidden: boolean;
+  readonly paused?: boolean | undefined;
   readonly resetKey: string;
   readonly reverseScrollDirection: boolean;
 }) => {
@@ -233,7 +237,7 @@ const useCompactDock = ({
   }, [resetKey]);
 
   useEffect(() => {
-    if (hidden) {
+    if (hidden || paused) {
       return undefined;
     }
 
@@ -319,7 +323,7 @@ const useCompactDock = ({
       }
       pendingScrollTargetsRef.current.clear();
     };
-  }, [hidden, reverseScrollDirection, setCompact]);
+  }, [hidden, paused, reverseScrollDirection, setCompact]);
 
   return hidden ? false : compact;
 };
@@ -431,9 +435,9 @@ const getFloatingActivePillStyle = ({
   };
 };
 
-const BottomNavigationFallback: React.FC<BottomNavigationProps> = ({
-  hidden = false,
-}) => {
+const BottomNavigationFallback: React.FC<
+  Pick<BottomNavigationProps, "hidden">
+> = ({ hidden = false }) => {
   const isTabletViewport = useMediaQuery(TABLET_DOCK_QUERY);
   const { isAndroid } = useCapacitor();
 
@@ -461,6 +465,7 @@ const BottomNavigationResolvedContent: React.FC<
   BottomNavigationResolvedContentProps
 > = ({
   hidden = false,
+  paused = false,
   preserveMeasurementWhileHidden = false,
   pathname,
   routeStateKey,
@@ -471,7 +476,9 @@ const BottomNavigationResolvedContent: React.FC<
   const { connectedProfile } = useAuth();
   const { address } = useSeizeConnectContext();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
-  const searchParams = useSearchParams();
+  const currentSearchParams = useSearchParams();
+  const retainedScreen = usePhoneNavigationScreen();
+  const searchParams = retainedScreen?.searchParams ?? currentSearchParams;
 
   const mobileNavRef = useRef<HTMLDivElement | null>(null);
   const waveIdFromQuery = getActiveWaveIdFromUrl({ pathname, searchParams });
@@ -484,6 +491,7 @@ const BottomNavigationResolvedContent: React.FC<
   });
   const compact = useCompactDock({
     hidden,
+    paused,
     resetKey: routeStateKey,
     reverseScrollDirection,
   });
@@ -594,17 +602,22 @@ const BottomNavigationResolvedContent: React.FC<
 
 const BottomNavigationContent: React.FC<BottomNavigationProps> = ({
   hidden = false,
+  paused = false,
   preserveMeasurementWhileHidden = false,
 }) => {
-  const pathname = usePathname();
+  const currentPathname = usePathname();
+  const retainedScreen = usePhoneNavigationScreen();
+  const pathname = retainedScreen?.pathname ?? currentPathname;
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
-  const searchParams = useSearchParams();
+  const currentSearchParams = useSearchParams();
+  const searchParams = retainedScreen?.searchParams ?? currentSearchParams;
   const activeView = searchParams.get("view");
   const routeStateKey = `${pathname}:${activeView ?? ""}`;
 
   return (
     <BottomNavigationResolvedContent
       hidden={hidden}
+      paused={paused}
       preserveMeasurementWhileHidden={preserveMeasurementWhileHidden}
       pathname={pathname}
       routeStateKey={routeStateKey}
@@ -614,6 +627,7 @@ const BottomNavigationContent: React.FC<BottomNavigationProps> = ({
 
 const BottomNavigation: React.FC<BottomNavigationProps> = ({
   hidden = false,
+  paused = false,
   preserveMeasurementWhileHidden = false,
 }) => (
   <div
@@ -623,6 +637,7 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({
     <Suspense fallback={<BottomNavigationFallback hidden={hidden} />}>
       <BottomNavigationContent
         hidden={hidden}
+        paused={paused}
         preserveMeasurementWhileHidden={preserveMeasurementWhileHidden}
       />
     </Suspense>

@@ -2151,7 +2151,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
             type: "touchStart",
             touchPoints: [{ x: 16, y }],
           });
-          for (const x of [32, 64, 100, 156]) {
+          for (const x of [32, 64, 100, 196]) {
             await page.evaluate(
               () =>
                 new Promise<void>((resolve) =>
@@ -13542,14 +13542,16 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await expect(name).toHaveValue("Keyboard layout draft");
       }
       await expect(name).toBeVisible({ timeout: 30000 });
+      await expect(footer).toBeInViewport();
+      let restingBottom = 0;
+      // Capture the rendered viewport baseline in the poll that validates it.
       await expect
-        .poll(() =>
-          footer.evaluate((element) => element.getBoundingClientRect().bottom)
-        )
+        .poll(async () => {
+          const bounds = await footer.boundingBox();
+          restingBottom = bounds ? bounds.y + bounds.height : 0;
+          return restingBottom;
+        })
         .toBeCloseTo(page.viewportSize()!.height, 0);
-      const restingBottom = await footer.evaluate(
-        (element) => element.getBoundingClientRect().bottom
-      );
       for (const label of ["Decision name", "Description"]) {
         const field = page.getByLabel(label, { exact: true });
         expect(

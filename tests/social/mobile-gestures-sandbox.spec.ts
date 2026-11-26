@@ -1,3 +1,7 @@
+import {
+  expectNativeNavigation,
+  sampleNativeNavigation,
+} from "../support/nativePhoneNavigation";
 import type { ApiWaveDropsFeedV2 } from "@/generated/models/ApiWaveDropsFeedV2";
 import { devices, type Locator, type Page } from "@playwright/test";
 import {
@@ -32,10 +36,8 @@ interface TouchOffset {
 interface FeedReturnPaint {
   readonly scrollTop: number;
   readonly readableCard: boolean;
-  readonly coveredWhilePreparing?: boolean;
   readonly outgoingChatPreserved?: boolean;
   readonly readingCardTop?: number | undefined;
-  readonly error?: string;
 }
 
 async function touchDrag(
@@ -52,7 +54,20 @@ async function touchDrag(
   await target.click({ trial: true });
   const box = await target.boundingBox();
   if (!box) throw new Error("Swipe target must be visible");
-  const x = Math.max(50, Math.min(300, box.x + box.width * 0.65));
+  const rightwardDistance =
+    typeof movement === "number"
+      ? Math.max(0, movement)
+      : Math.max(0, ...movement.map((offset) => offset.x));
+  const viewportWidth = page.viewportSize()?.width ?? box.x + box.width;
+  const x = Math.max(
+    50,
+    box.x + 1,
+    Math.min(
+      300,
+      box.x + box.width * 0.65,
+      viewportWidth - rightwardDistance - 8
+    )
+  );
   const y = box.y + box.height / 2;
   const client = await page.context().newCDPSession(page);
   await client.send("Input.dispatchTouchEvent", {
@@ -468,7 +483,7 @@ for (const platform of ["ios", "android"] as const) {
           )
           .toEqual(["", "", "", ""]);
 
-        const committed = await touchDrag(page, surface, 130);
+        const committed = await touchDrag(page, surface, 240);
         await committed.release();
         await expect(page).toHaveURL(/\/messages$/u);
         await expectNoHorizontalOverflow(page);
@@ -545,7 +560,8 @@ for (const platform of ["ios", "android"] as const) {
           return start(...args);
         };
       });
-      const committed = await touchDrag(page, row, 130);
+      // Slow drags now require half the viewport; short flicks are checked separately.
+      const committed = await touchDrag(page, row, 240);
       await committed.release();
       await expect(page).toHaveURL(/\/waves$/);
       await expect(
@@ -604,116 +620,61 @@ for (const platform of ["ios", "android"] as const) {
           __feedReturnPaints?: FeedReturnPaint[];
         };
         browser.__feedReturnPaints = [];
-        const start = document.startViewTransition.bind(document);
-        document.startViewTransition = (...args) => {
-          const returningToFeed =
-            document
-              .querySelector("[data-wave-navigation-screen]")
-              ?.getAttribute("data-wave-navigation-screen") === "wave";
-          let outgoingChatPreserved = true;
-          const checkOutgoingChat = () => {
-            const surface = document.querySelector(
-              '[data-wave-navigation-screen="wave"]'
-            );
-            if (surface && !surface.querySelector("[data-wave-drop-content]"))
-              outgoingChatPreserved = false;
-          };
-          const outgoingObserver = new MutationObserver(checkOutgoingChat);
-          if (returningToFeed) {
-            checkOutgoingChat();
-            const update = args[0];
-            if (typeof update === "function") {
-              args[0] = () => {
-                checkOutgoingChat();
-                return update();
-              };
+        let readyForReturn = false;
+        let currentPaint:
+          | { -readonly [K in keyof FeedReturnPaint]: FeedReturnPaint[K] }
+          | undefined;
+        const sample = () => {
+          const chat = document.querySelector<HTMLElement>(
+            '[data-phone-navigation-screen="conversation"]'
+          );
+          const underlay = document.querySelector<HTMLElement>(
+            '[data-phone-navigation-screen="feed"]'
+          );
+          const feed = underlay?.querySelector("main section");
+          if (chat && underlay && feed) {
+            const visible =
+              getComputedStyle(underlay).visibility === "visible" &&
+              Number(getComputedStyle(underlay).opacity) > 0;
+            const x = chat.getBoundingClientRect().x;
+            if (!visible && x < 0.5) {
+              readyForReturn = true;
+              currentPaint = undefined;
             }
-            outgoingObserver.observe(document.documentElement, {
-              childList: true,
-              subtree: true,
-              attributes: true,
-              attributeFilter: ["data-wave-navigation-screen"],
-            });
-          }
-          const transition = start(...args);
-          void transition.ready.then(
-            async () => {
-              outgoingObserver.disconnect();
-              if (
-                !returningToFeed ||
-                document
-                  .querySelector("[data-wave-navigation-screen]")
-                  ?.getAttribute("data-wave-navigation-screen") !== "feed"
-              )
-                return;
-              // The new representation stays live while the old snapshot is
-              // paused above it. Check the first exposed frame, and verify that
-              // preparation never exposes the unmeasured Feed underneath.
-              let coveredWhilePreparing = true;
-              while (
-                document.documentElement.hasAttribute(
-                  "data-wave-navigation-content-pending"
-                )
-              ) {
-                const old = getComputedStyle(
-                  document.documentElement,
-                  "::view-transition-old(wave-navigation)"
-                );
-                const incoming = getComputedStyle(
-                  document.documentElement,
-                  "::view-transition-new(wave-navigation)"
-                );
-                coveredWhilePreparing &&=
-                  old.animationPlayState === "paused" &&
-                  old.opacity === "1" &&
-                  incoming.visibility === "hidden";
-                await new Promise<void>((resolve) =>
-                  requestAnimationFrame(() => resolve())
-                );
-              }
-              const feed = document.querySelector(
-                '[data-testid="wave-swipe-surface"] section'
-              );
-              const viewport = feed?.getBoundingClientRect();
-              const readableCard = Array.from(
-                feed?.querySelectorAll("article") ?? []
-              ).some((card) => {
-                const rect = card.getBoundingClientRect();
-                return (
-                  viewport &&
-                  rect.bottom > viewport.top &&
-                  rect.top < viewport.bottom &&
-                  getComputedStyle(card).visibility !== "hidden"
-                );
-              });
-              browser.__feedReturnPaints?.push({
-                scrollTop: feed?.scrollTop ?? 0,
-                readableCard,
-                coveredWhilePreparing,
-                outgoingChatPreserved,
-                readingCardTop: Array.from(
-                  feed?.querySelectorAll("article") ?? []
-                )
+            if (visible && readyForReturn && x > 0.5) {
+              // Assert the first real exposed frame instead of a browser snapshot.
+              const viewport = feed.getBoundingClientRect();
+              const cards = Array.from(feed.querySelectorAll("article"));
+              currentPaint = {
+                scrollTop: feed.scrollTop,
+                readableCard: cards.some((card) => {
+                  const rect = card.getBoundingClientRect();
+                  return (
+                    rect.bottom > viewport.top &&
+                    rect.top < viewport.bottom &&
+                    getComputedStyle(card).visibility !== "hidden"
+                  );
+                }),
+                outgoingChatPreserved: true,
+                readingCardTop: cards
                   .find((card) =>
                     card.textContent?.includes(
                       "Profile feed gesture fixture 6."
                     )
                   )
                   ?.getBoundingClientRect().top,
-              });
-            },
-            (error: unknown) => {
-              outgoingObserver.disconnect();
-              if (returningToFeed)
-                browser.__feedReturnPaints?.push({
-                  scrollTop: -1,
-                  readableCard: false,
-                  error: String(error),
-                });
+              };
+              browser.__feedReturnPaints?.push(currentPaint);
+              readyForReturn = false;
             }
-          );
-          return transition;
+            if (currentPaint)
+              currentPaint.outgoingChatPreserved &&= Boolean(
+                chat.querySelector("[data-wave-drop-content]")
+              );
+          }
+          requestAnimationFrame(sample);
         };
+        requestAnimationFrame(sample);
       });
       let checkingReturn = false;
       let returnRouteRequests = 0;
@@ -749,7 +710,7 @@ for (const platform of ["ios", "android"] as const) {
       await expect(grid).toBeVisible();
       await feed.evaluate((element) => element.scrollTo({ top: 800 }));
       await expect(post).toBeVisible();
-      await post.scrollIntoViewIfNeeded();
+      await post.tap({ trial: true });
       await expect(post).toBeInViewport();
       await expect(grid).toHaveCSS("pointer-events", "auto");
       await expect(page).toHaveURL(/\/waves\?view=profile-feed$/);
@@ -789,7 +750,7 @@ for (const platform of ["ios", "android"] as const) {
                   exact: true,
                 })
             : post;
-        await tapTarget.scrollIntoViewIfNeeded();
+        await tapTarget.tap({ trial: true });
         const readingPosition = await feed.evaluate(
           (element) => element.scrollTop
         );
@@ -822,7 +783,7 @@ for (const platform of ["ios", "android"] as const) {
             .getByTestId("wave-swipe-surface")
             .locator("[data-wave-drop-id][data-reply-enabled=true]")
             .first();
-          const back = await touchDrag(page, row, 130);
+          const back = await touchDrag(page, row, 240);
           await back.release();
         } else {
           await page.getByRole("button", { name: "Back", exact: true }).tap();
@@ -863,7 +824,6 @@ for (const platform of ["ios", "android"] as const) {
           );
           expect(paint, JSON.stringify(paint)).toMatchObject({
             readableCard: true,
-            coveredWhilePreparing: true,
             outgoingChatPreserved: true,
           });
           expect(
@@ -883,7 +843,7 @@ for (const platform of ["ios", "android"] as const) {
 
       await page.emulateMedia({ reducedMotion: "reduce" });
       checkingReturn = true;
-      const exit = await touchDrag(page, post, 130);
+      const exit = await touchDrag(page, post, 240);
       await exit.release();
       await expect(page).toHaveURL(/\/waves$/);
       await expect(
@@ -956,7 +916,7 @@ for (const platform of ["ios", "android"] as const) {
       await feed.evaluate((element) => element.scrollTo({ top: 1600 }));
       const post = page.getByText("Compact feed post 10.", { exact: true });
       await expect(post).toBeVisible();
-      await post.scrollIntoViewIfNeeded();
+      await post.tap({ trial: true });
       for (let visit = 0; visit < 3; visit += 1) {
         await expect(page.locator("html")).not.toHaveAttribute(
           "data-wave-navigation-transition"
@@ -1047,16 +1007,20 @@ for (const platform of ["ios", "android"] as const) {
           )
         )
         .toBeGreaterThan(64);
-      await feed.evaluate((element) => element.scrollTo({ top: 64 }));
       const discover = page.getByRole("link", {
         name: "Discover Waves",
         exact: true,
       });
-      await discover.click({ trial: true });
-      const readingPosition = await feed.evaluate(
-        (element) => element.scrollTop
-      );
-      expect(readingPosition).toBeGreaterThan(0);
+      let readingPosition = 0;
+      // Establish a real reading position after the virtualized layout settles.
+      await expect
+        .poll(async () => {
+          await feed.evaluate((element) => element.scrollTo({ top: 64 }));
+          await discover.click({ trial: true });
+          readingPosition = await feed.evaluate((element) => element.scrollTop);
+          return readingPosition;
+        })
+        .toBeGreaterThan(0);
       await discover.tap();
       await expect(page).toHaveURL(/\/discover\?returnTo=/, {
         timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
@@ -1098,8 +1062,7 @@ for (const platform of ["ios", "android"] as const) {
           await openWave(page);
           const row = page
             .getByTestId("wave-swipe-surface")
-            .locator("[data-wave-drop-id][data-reply-enabled=true]")
-            .first();
+            .getByText("Gesture fixture message one", { exact: true });
           const vertical = await touchDrag(page, row, [
             { x: 4, y: -24 },
             { x: 8, y: -48 },
@@ -1113,6 +1076,8 @@ for (const platform of ["ios", "android"] as const) {
             { x: 48, y: 21 },
             { x: 78, y: 29 },
             { x: 110, y: 34 },
+            { x: 170, y: 38 },
+            { x: 240, y: 42 },
           ]);
           await curved.release();
           await expect(page).toHaveURL(/\/waves$/);
@@ -1327,8 +1292,10 @@ test.describe("phone chevron Back", () => {
   });
   for (const [surface, destination] of [
     ["ios", "/waves"],
+    ["android", "/waves"],
     ["web", "/waves"],
     ["ios", "/messages"],
+    ["android", "/messages"],
     ["web", "/messages"],
   ] as const) {
     test(`phone ${surface} opens ${destination} with the complete conversation sliding over its list`, async ({
@@ -1342,8 +1309,12 @@ test.describe("phone chevron Back", () => {
         ),
         "Phone entry is checked in Chromium and WebKit with touch input."
       );
-      if (surface === "ios")
-        await installSurfaceSimulation(context, "capacitor-ios-sim", baseURL);
+      if (surface !== "web")
+        await installSurfaceSimulation(
+          context,
+          `capacitor-${surface}-sim`,
+          baseURL
+        );
       await hideNextDevOverlay(context);
       await installMessageFixture(page, baseURL);
       const name =
@@ -1351,6 +1322,11 @@ test.describe("phone chevron Back", () => {
           ? /Local Composer Sandbox Wave/u
           : /Sandbox Direct Message/u;
       const conversation = `${destination}/${destination === "/waves" ? WAVE : DM}`;
+      if (surface === "web") {
+        // Production serves compiled routes. Keep the setup Back check's 5s
+        // navigation budget independent of first-use dev compilation.
+        expect((await page.request.get(destination)).ok()).toBe(true);
+      }
       await page.goto(conversation, { waitUntil: "domcontentloaded" });
       await expect(
         page.getByRole("textbox", { name: "Write a message" }).last()
@@ -1361,6 +1337,29 @@ test.describe("phone chevron Back", () => {
       await expect(page).toHaveURL(new RegExp(`${destination}$`, "u"));
       const row = page.getByRole("link", { name }).first();
       await expect(row).toBeVisible();
+      if (surface !== "web") {
+        const retainedList = page
+          .getByRole("main", { includeHidden: true })
+          .locator(
+            `xpath=ancestor::*[@data-phone-navigation-screen="${destination === "/waves" ? "waves" : "messages"}"]`
+          );
+        const source = await retainedList.elementHandle();
+        if (!source) throw new Error("Missing native source screen");
+        const frames = sampleNativeNavigation(page, destination, true);
+        await row.tap();
+        expectNativeNavigation(await frames);
+        expect(await source.evaluate((element) => element.isConnected)).toBe(
+          true
+        );
+        // Discovery descendants explicitly use visibility:visible. The retained
+        // screen must suppress the whole subtree once the chat has settled.
+        await expect(retainedList).toHaveCSS("opacity", "0");
+        await expect(page).toHaveURL(new RegExp(`${conversation}$`, "u"));
+        await source.dispose();
+        await expectNoHorizontalOverflow(page);
+        await expectNoUnsafeSandboxMutations(baseURL);
+        return;
+      }
       await page.evaluate(() => {
         const root = document.documentElement;
         const start = document.startViewTransition.bind(document);
@@ -1434,7 +1433,7 @@ test.describe("phone chevron Back", () => {
       expect(entry).toMatchObject({
         listDisplay: "block",
         listOpacity: 1,
-        listAnimation: "none",
+        listAnimation: "wave-underlay-forward",
         includesHeader: true,
       });
       await page.screenshot({
@@ -1467,8 +1466,12 @@ test.describe("phone chevron Back", () => {
         ),
         "Phone viewport navigation acceptance in Chromium and WebKit."
       );
-      if (surface === "ios") {
-        await installSurfaceSimulation(context, "capacitor-ios-sim", baseURL);
+      if (surface !== "web") {
+        await installSurfaceSimulation(
+          context,
+          `capacitor-${surface}-sim`,
+          baseURL
+        );
       }
       await hideNextDevOverlay(context);
       await page.setViewportSize({ width: 412, height: 840 });
@@ -1489,7 +1492,7 @@ test.describe("phone chevron Back", () => {
           (route) => route.fulfill({ json: { data: [wave], next: false } })
         );
       }
-      const backName = surface === "ios" ? "Back" : "Go back";
+      const backName = surface !== "web" ? "Back" : "Go back";
       // Enter directly, with no preceding list history entry.
       await page.goto(conversation, { waitUntil: "domcontentloaded" });
       await waitForRouteReady(page);
@@ -1521,6 +1524,22 @@ test.describe("phone chevron Back", () => {
         page.getByRole("textbox", { name: "Write a message" }).last()
       ).toBeVisible();
       await expect(backControl).toBeVisible();
+      if (surface !== "web") {
+        const frames = sampleNativeNavigation(page, destination, false);
+        await backControl.tap();
+        expectNativeNavigation(await frames);
+        await expect(page).toHaveURL(new RegExp(`${destination}$`, "u"));
+        await expect(listControl).toBeVisible();
+        await page.goBack();
+        await expect(backControl).toBeVisible();
+        await page.emulateMedia({ reducedMotion: "reduce" });
+        await backControl.tap();
+        await expect(page).toHaveURL(new RegExp(`${destination}$`, "u"));
+        await expect(listControl).toBeVisible();
+        await expectNoHorizontalOverflow(page);
+        await expectNoUnsafeSandboxMutations(baseURL);
+        return;
+      }
       await page.evaluate((label) => {
         const root = document.documentElement;
         const start = document.startViewTransition.bind(document);
@@ -1612,7 +1631,7 @@ test.describe("phone chevron Back", () => {
       expect(motion.x).toBeGreaterThan(0);
       expect(motion.x).toBeLessThanOrEqual(412);
       expect(motion.opacity).toBe(1);
-      expect(motion.incomingAnimation).toBe("none");
+      expect(motion.incomingAnimation).toBe("wave-underlay-back");
       await expect(listControl).toBeVisible();
       await expect(root).not.toHaveAttribute("data-wave-navigation-transition");
       await expectNoHorizontalOverflow(page);
@@ -1625,7 +1644,7 @@ test.describe("phone chevron Back", () => {
       await page.emulateMedia({ reducedMotion: "reduce" });
       await page.getByRole("button", { name: backName, exact: true }).tap();
       await expect(page).toHaveURL(new RegExp(`${destination}$`, "u"));
-      await expect(root).toHaveAttribute("data-test-chevron-captures", "1");
+      await expect(root).toHaveAttribute("data-test-chevron-captures", "2");
       await expect(root).not.toHaveAttribute("data-wave-navigation-transition");
       await expectNoUnsafeSandboxMutations(baseURL);
     });

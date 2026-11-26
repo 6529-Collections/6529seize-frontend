@@ -1,37 +1,41 @@
-import { useEffect, useEffectEvent, useState, type RefObject } from "react";
+import {
+  useEffectEvent,
+  useLayoutEffect,
+  useState,
+  type RefObject,
+} from "react";
 import { useScrollPositionContext } from "@/contexts/ScrollPositionContext";
+import { usePhoneNavigationScreenActive } from "@/contexts/PhoneNavigationScreenContext";
 
 export function usePersistentScrollOffset(
   scrollKey: string,
   scrollContainerRef: RefObject<HTMLElement | null>
 ): number {
   const { getPosition, setPosition } = useScrollPositionContext();
+  const screenActive = usePhoneNavigationScreenActive();
   const [initialOffset] = useState(() => getPosition(scrollKey));
 
-  const persistScrollPosition = useEffectEvent(() => {
-    const container = scrollContainerRef.current;
-    if (!container) {
-      return;
-    }
+  const persistScrollPosition = useEffectEvent((container: HTMLElement) => {
     setPosition(scrollKey, container.scrollTop);
   });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const container = scrollContainerRef.current;
-    if (!container) {
+    if (!container || !screenActive) {
       return;
     }
 
     const handleScroll = () => {
-      persistScrollPosition();
+      persistScrollPosition(container);
     };
 
     container.addEventListener("scroll", handleScroll);
     return () => {
-      persistScrollPosition();
+      // Save while the scrollport is still attached; detached nodes can report zero.
+      persistScrollPosition(container);
       container.removeEventListener("scroll", handleScroll);
     };
-  }, [persistScrollPosition, scrollKey]);
+  }, [screenActive, scrollContainerRef, scrollKey]);
 
   return initialOffset;
 }

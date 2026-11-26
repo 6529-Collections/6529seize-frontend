@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useEffectEvent, useSyncExternalStore } from "react";
+import { useEffect, useEffectEvent, useRef, useSyncExternalStore } from "react";
+import { usePhoneNavigationScreenActive } from "@/contexts/PhoneNavigationScreenContext";
 import {
   getNativeAppActivity,
   subscribeNativeAppActivity,
@@ -59,11 +60,13 @@ function subscribePageVisibility(subscriber: () => void): () => void {
 
 /** Whether the page is shown (and, in the native app, the app is active). */
 export function usePageVisible(): boolean {
-  return useSyncExternalStore(
+  const screenActive = usePhoneNavigationScreenActive();
+  const visible = useSyncExternalStore(
     subscribePageVisibility,
     getPageVisible,
     getServerPageVisible
   );
+  return screenActive && visible;
 }
 
 /**
@@ -77,9 +80,12 @@ export function useVisibleInterval(
   delayMs: number | null
 ): void {
   const onTick = useEffectEvent(callback);
+  const screenActive = usePhoneNavigationScreenActive();
+  const screenWasInactive = useRef(!screenActive);
 
   useEffect(() => {
-    if (delayMs === null) {
+    if (!screenActive || delayMs === null) {
+      if (!screenActive) screenWasInactive.current = true;
       return;
     }
 
@@ -95,12 +101,17 @@ export function useVisibleInterval(
       if (!getPageVisible()) {
         stop();
       } else if (intervalId === undefined) {
+        screenWasInactive.current = false;
         onTick();
         start();
       }
     };
 
     if (getPageVisible()) {
+      if (screenWasInactive.current) {
+        screenWasInactive.current = false;
+        onTick();
+      }
       start();
     }
     const unsubscribe = subscribePageVisibility(syncWithVisibility);
@@ -108,5 +119,5 @@ export function useVisibleInterval(
       unsubscribe();
       stop();
     };
-  }, [delayMs]);
+  }, [delayMs, screenActive]);
 }

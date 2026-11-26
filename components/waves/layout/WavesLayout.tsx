@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
+import { usePhoneNavigationScreen } from "@/contexts/PhoneNavigationScreenContext";
 import { isCompetitionPathname } from "@/helpers/competition.helpers";
 import { getWaveIdFromPathname } from "@/helpers/navigation.helpers";
 import { useEffect, type ReactNode } from "react";
@@ -143,7 +144,9 @@ function getWavesContent({
 // Main layout content that uses the Layout context
 function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   const { contentState } = useAuthenticatedContent();
-  const pathname = usePathname();
+  const currentPathname = usePathname();
+  const retainedScreen = usePhoneNavigationScreen();
+  const pathname = retainedScreen?.pathname ?? currentPathname;
   const isWaveView = Boolean(getWaveIdFromPathname(pathname));
   const hasRouteWave = isWaveView && !isCompetitionPathname(pathname);
   const { isApp } = useDeviceInfo();
@@ -205,14 +208,14 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!hasVisibleLaunchContent) {
+    if (retainedScreen?.active === false || !hasVisibleLaunchContent) {
       return;
     }
 
     markMobileLaunchStep("waves_first_content_visible");
     markMobileLaunchStep("route_first_useful_content");
     scheduleMobileLaunchFlush("waves_content_visible", 250);
-  }, [hasVisibleLaunchContent]);
+  }, [hasVisibleLaunchContent, retainedScreen?.active]);
 
   useEffect(() => {
     if (!isResolvedWavesContentState(contentState)) {

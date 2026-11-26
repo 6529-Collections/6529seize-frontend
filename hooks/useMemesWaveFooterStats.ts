@@ -15,6 +15,7 @@ import {
 import { useMemesQuickVoteContext } from "@/hooks/useMemesQuickVoteContext";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import { useQuery } from "@tanstack/react-query";
+import { usePhoneNavigationScreenActive } from "@/contexts/PhoneNavigationScreenContext";
 
 export type MemesWaveFooterStats = MemesQuickVoteStats & {
   readonly isAvailable: boolean;
@@ -31,6 +32,7 @@ const EMPTY_STATS: MemesWaveFooterStats = {
 };
 
 export const useMemesWaveFooterStats = (): MemesWaveFooterStats => {
+  const screenActive = usePhoneNavigationScreenActive();
   const { contextProfile, isEnabled, memesWaveId, proxyId } =
     useMemesQuickVoteContext();
   const waveId =
@@ -45,7 +47,7 @@ export const useMemesWaveFooterStats = (): MemesWaveFooterStats => {
       skip: 0,
       waveId,
     }),
-    enabled: isEnabled && waveId !== null,
+    enabled: screenActive && isEnabled && waveId !== null,
     queryFn: ({ signal }) =>
       fetchMemesQuickVoteUndiscoveredDrop({
         skip: 0,
