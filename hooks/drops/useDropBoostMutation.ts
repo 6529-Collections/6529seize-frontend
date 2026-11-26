@@ -12,6 +12,7 @@ import {
 } from "@/services/api/common-api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useRef } from "react";
+import { canReplyFromSession } from "@/helpers/waves/drop-reply-eligibility";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 interface BoostMutationParams {
@@ -27,7 +28,9 @@ interface UseDropBoostMutationReturn {
 }
 
 export const useDropBoostMutation = (): UseDropBoostMutationReturn => {
-  const { setToast, connectedProfile } = useAuth();
+  const auth = useAuth();
+  const { setToast, connectedProfile } = auth;
+  const hasProfileSession = canReplyFromSession(auth);
   const myStreamContext = useMyStreamActionsOptional();
   const queryClient = useQueryClient();
   const rollbackRef = useRef<(() => void) | null>(null);
@@ -140,6 +143,8 @@ export const useDropBoostMutation = (): UseDropBoostMutationReturn => {
         return;
       }
 
+      if (!hasProfileSession) return;
+
       // Prevent boosting if already pending for this drop
       if (pendingDropIdRef.current === drop.id) {
         return;
@@ -152,12 +157,12 @@ export const useDropBoostMutation = (): UseDropBoostMutationReturn => {
 
       mutation.mutate({ drop, action: "boost" });
     },
-    [connectedProfile, mutation, setToast]
+    [connectedProfile, hasProfileSession, mutation, setToast]
   );
 
   const unboostDrop = useCallback(
     (drop: ExtendedDrop) => {
-      if (!connectedProfile) {
+      if (!hasProfileSession) {
         return;
       }
 
@@ -168,7 +173,7 @@ export const useDropBoostMutation = (): UseDropBoostMutationReturn => {
 
       mutation.mutate({ drop, action: "unboost" });
     },
-    [connectedProfile, mutation]
+    [hasProfileSession, mutation]
   );
 
   const toggleBoost = useCallback(

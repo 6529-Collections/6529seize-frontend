@@ -33,6 +33,7 @@ import {
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { ChainEntryPendingError } from "@/lib/chain-waves/entryWriters";
 import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
+import { useProfileActionSession } from "@/hooks/useProfileActionSession";
 
 export default function DropsListItemDeleteDropModal({
   drop,
@@ -45,7 +46,10 @@ export default function DropsListItemDeleteDropModal({
   readonly closeModal: () => void;
   readonly onDropDeleted?: (() => void) | undefined;
 }) {
-  const { requestAuth, setToast } = useContext(AuthContext);
+  const auth = useContext(AuthContext);
+  const { requestAuth, setToast } = auth;
+  const { hasProfileSession: hasDeleteSession, isSessionActive } =
+    useProfileActionSession(auth);
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
   const { processDropRemoved } = useMyStreamActions();
   const queryClient = useQueryClient();
@@ -114,7 +118,7 @@ export default function DropsListItemDeleteDropModal({
   });
 
   const onDelete = async () => {
-    if (mutating) {
+    if (!hasDeleteSession || mutating) {
       return;
     }
     setMutating(true);
@@ -122,7 +126,7 @@ export default function DropsListItemDeleteDropModal({
     const { success } = chainWithdrawal
       ? { success: true }
       : await requestAuth();
-    if (!success) {
+    if (!success || !isSessionActive()) {
       setMutating(false);
       return;
     }
@@ -137,7 +141,9 @@ export default function DropsListItemDeleteDropModal({
   const dismissDelete = () => {
     if (!mutating) closeModal();
   };
-  useAndroidBackLayer(true, dialogRef, dismissDelete);
+  useAndroidBackLayer(hasDeleteSession, dialogRef, dismissDelete);
+
+  if (!hasDeleteSession) return null;
 
   return createPortal(
     <Transition appear show as={Fragment}>

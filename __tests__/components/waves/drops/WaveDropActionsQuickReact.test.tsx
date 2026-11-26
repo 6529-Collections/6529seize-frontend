@@ -42,6 +42,7 @@ beforeEach(() => {
   mockFindCustomEmoji.mockReset();
   mockedUseDropReaction.mockReturnValue({
     canReact: true,
+    hasReactionSession: true,
     react: jest.fn(async () => undefined),
   });
 });
@@ -49,7 +50,11 @@ beforeEach(() => {
 it("reports an enabled mobile quick reaction without waiting for the request", () => {
   const react = jest.fn(() => new Promise<void>(() => undefined));
   const onReactionStarted = jest.fn();
-  mockedUseDropReaction.mockReturnValue({ canReact: true, react });
+  mockedUseDropReaction.mockReturnValue({
+    canReact: true,
+    hasReactionSession: true,
+    react,
+  });
 
   render(
     <WaveDropActionsQuickReact
@@ -71,7 +76,11 @@ it("reports an enabled mobile quick reaction without waiting for the request", (
 it("does nothing when mobile quick reactions are disabled", () => {
   const react = jest.fn();
   const onReactionStarted = jest.fn();
-  mockedUseDropReaction.mockReturnValue({ canReact: false, react });
+  mockedUseDropReaction.mockReturnValue({
+    canReact: false,
+    hasReactionSession: true,
+    react,
+  });
 
   render(
     <WaveDropActionsQuickReact
@@ -88,6 +97,33 @@ it("does nothing when mobile quick reactions are disabled", () => {
   expect(react).not.toHaveBeenCalled();
   expect(onReactionStarted).not.toHaveBeenCalled();
 });
+
+it.each([false, true])(
+  "hides quick reactions without an eligible session (mobile=%s)",
+  (isMobile) => {
+    const react = jest.fn();
+    const onReactionStarted = jest.fn();
+    mockedUseDropReaction.mockReturnValue({
+      canReact: false,
+      hasReactionSession: false,
+      react,
+    });
+
+    render(
+      <WaveDropActionsQuickReact
+        drop={drop}
+        isMobile={isMobile}
+        onReactionStarted={onReactionStarted}
+      />
+    );
+
+    expect(
+      screen.queryByRole("button", { name: /^React with / })
+    ).not.toBeInTheDocument();
+    expect(react).not.toHaveBeenCalled();
+    expect(onReactionStarted).not.toHaveBeenCalled();
+  }
+);
 
 const nativeEmoji = (id: string, native: string) => ({
   id,

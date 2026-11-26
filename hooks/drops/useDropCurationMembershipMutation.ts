@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
+import { canReplyFromSession } from "@/helpers/waves/drop-reply-eligibility";
 import {
   QueryKey,
   ReactQueryWrapperContext,
@@ -183,7 +184,9 @@ export function useDropCurationMembershipMutation({
 }) {
   const queryClient = useQueryClient();
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
-  const { setToast } = useAuth();
+  const auth = useAuth();
+  const { setToast } = auth;
+  const hasProfileSession = canReplyFromSession(auth);
 
   const mutation = useMutation<
     void,
@@ -312,12 +315,19 @@ export function useDropCurationMembershipMutation({
       curationId: string,
       action: DropCurationMembershipAction,
       options?: DropCurationMembershipMutationOptions
-    ) => mutation.mutate({ curationId, action, options }),
+    ) => {
+      if (hasProfileSession) mutation.mutate({ curationId, action, options });
+    },
     updateMembershipAsync: (
       curationId: string,
       action: DropCurationMembershipAction,
       options?: DropCurationMembershipMutationOptions
-    ) => mutation.mutateAsync({ curationId, action, options }),
+    ) =>
+      hasProfileSession
+        ? mutation.mutateAsync({ curationId, action, options })
+        : Promise.reject(
+            new Error("Sign in as your own profile to curate drops.")
+          ),
     isPending: mutation.isPending,
     pendingCurationId: mutation.isPending
       ? mutation.variables.curationId

@@ -5,6 +5,14 @@ import {
   type QueryKey as TanstackQueryKey,
 } from "@tanstack/react-query";
 import React from "react";
+const mockSession = {
+  connectedProfile: { handle: "admin" },
+  isAuthenticated: true,
+  isDirectProfileSession: true,
+  fetchingProfile: false,
+  activeProfileProxy: null,
+};
+jest.mock("@/components/auth/Auth", () => ({ useAuth: () => mockSession }));
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { commonApiPost } from "@/services/api/common-api";
@@ -144,6 +152,8 @@ const createMockWave = (overrides: Partial<ApiWave> = {}): ApiWave =>
 
 describe("useSetWavePinnedDrop", () => {
   beforeEach(() => {
+    mockSession.isAuthenticated = true;
+    mockSession.isDirectProfileSession = true;
     jest.clearAllMocks();
   });
 

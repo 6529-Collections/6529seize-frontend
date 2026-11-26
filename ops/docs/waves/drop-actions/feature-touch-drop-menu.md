@@ -87,13 +87,23 @@ available in the long-press menu.
 
 ## Availability Rules
 
+- Reply, reaction changes, Edit, Delete, Boost, pinning, reply placement,
+  voting/rating, curation changes, Mark as unread, and author-controlled link
+  previews require an authenticated session for your own profile. Their action
+  controls are hidden or non-interactive while signed out, using a proxy role,
+  or loading a profile. Existing wave permissions and timing rules still apply.
+- Reaction counts remain readable. Private bookmarks keep the signed-in owner's
+  collection while proxying. Report/Hide retains its own authentication flow.
 - `Open drop` is hidden for chat drops.
 - `Mark as unread` is hidden on your own drops and when no profile is
   connected.
-- `Set as pinned drop` requires a connected non-proxy wave-admin session.
-- `Edit Message` requires connected non-proxy author context.
-- `Delete` requires connected non-proxy author context, or a connected
-  non-proxy wave admin when admin drop deletion is enabled.
+- `Set as pinned drop` requires an authenticated own-profile wave-admin session.
+- `Edit Message` requires authenticated own-profile author context.
+- `Delete` requires an authenticated session for your own profile. It is hidden
+  while signed out, using a proxy role, or loading a profile, on desktop and
+  touch. Authors, wave admins with admin deletion enabled, and permitted
+  open-reply moderators keep their existing deletion permissions. If the
+  session becomes unavailable during confirmation, deletion does not start.
 - `Edit Message` is hidden for participatory drops.
 - Temporary drops (`temp-*`) show a reduced menu:
   - `Reply` and `Copy link` are disabled.

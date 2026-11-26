@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
+import { canReplyFromSession } from "@/helpers/waves/drop-reply-eligibility";
 import { useMyStreamActionsOptional } from "@/contexts/wave/MyStreamContext";
 import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -23,7 +24,9 @@ export default function WaveDropReplyCollapseAction({
   readonly mobile?: boolean;
 }) {
   const locale = useBrowserLocale();
-  const { connectedProfile, activeProfileProxy, setToast } = useAuth();
+  const auth = useAuth();
+  const { connectedProfile, setToast } = auth;
+  const hasProfileSession = canReplyFromSession(auth);
   const threads = useWaveReplyThreads();
   const stream = useMyStreamActionsOptional();
   const chatScroll = useWaveChatScrollOptional();
@@ -62,7 +65,7 @@ export default function WaveDropReplyCollapseAction({
   if (
     threads.waveId !== waveId ||
     threads.collapseAll ||
-    activeProfileProxy ||
+    !hasProfileSession ||
     connectedProfile?.id !== drop.author.id ||
     drop.id.startsWith("temp-") ||
     drop.drop_type !== ApiDropType.Chat ||
@@ -78,6 +81,7 @@ export default function WaveDropReplyCollapseAction({
       disabled={mutation.isPending}
       onClick={(event) => {
         event.stopPropagation();
+        if (mutation.isPending) return;
         mutation.mutate(!drop.collapse_replies);
       }}
       className={

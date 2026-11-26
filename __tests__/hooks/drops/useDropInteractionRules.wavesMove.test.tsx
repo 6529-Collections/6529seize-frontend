@@ -17,7 +17,16 @@ const paused = useWavesWritesPaused as jest.Mock;
 const wrapper =
   (value: any) =>
   ({ children }: any) => (
-    <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+    <AuthContext.Provider
+      value={{
+        isAuthenticated: true,
+        isDirectProfileSession: true,
+        fetchingProfile: false,
+        ...value,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
   );
 
 const me = wrapper({

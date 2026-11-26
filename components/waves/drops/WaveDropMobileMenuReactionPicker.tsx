@@ -15,7 +15,7 @@ export default function WaveDropMobileMenuReactionPicker({
   readonly onDismiss: () => void;
   readonly onReactionSuccess: () => void;
 }) {
-  const { react } = useDropReaction(drop, {
+  const { react, hasReactionSession } = useDropReaction(drop, {
     source: "picker",
     onSuccess: onReactionSuccess,
   });
@@ -24,6 +24,8 @@ export default function WaveDropMobileMenuReactionPicker({
     void react(`:${emoji.id ?? ""}:`);
     onDismiss();
   };
+
+  if (!hasReactionSession) return null;
 
   return (
     <div

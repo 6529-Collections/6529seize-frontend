@@ -50,8 +50,8 @@ current pinned drop below the wave header.
 
 ## Edge Cases
 
-- The action is hidden unless the current session is a connected, non-proxy
-  wave admin with a profile handle.
+- The action is hidden unless the current session is an authenticated
+  own-profile wave admin with a profile handle and profile loading has finished.
 - Logged-out users, proxy sessions, non-admin authors, and other non-admin
   members do not see this action.
 - Temporary drops (`temp-*`) cannot be set as the pinned drop.

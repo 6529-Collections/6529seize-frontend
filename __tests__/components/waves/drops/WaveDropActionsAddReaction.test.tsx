@@ -1,4 +1,5 @@
 import React from "react";
+import { useAuth } from "@/components/auth/Auth";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import WaveDropActionsAddReaction from "@/components/waves/drops/WaveDropActionsAddReaction";
@@ -45,6 +46,10 @@ jest.mock("@/contexts/wave/WaveEligibilityContext", () => ({
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(() => ({
     setToast: setToastMock,
+    isAuthenticated: true,
+    isDirectProfileSession: true,
+    fetchingProfile: false,
+    activeProfileProxy: null,
     connectedProfile: {
       id: "identity-1",
       handle: "user",
@@ -139,6 +144,8 @@ const baseDrop = {
 } as unknown as ExtendedDrop;
 
 const mockDrop = baseDrop;
+const mockUseAuth = jest.mocked(useAuth);
+const defaultAuth = mockUseAuth();
 const tempDrop = {
   ...baseDrop,
   id: "temp-001",
@@ -151,15 +158,61 @@ const renderWithQueryClient = (ui: React.ReactElement) => {
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
 
-  return render(
-    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
-  );
+  return render(ui, {
+    wrapper: ({ children }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    ),
+  });
 };
 
 describe("WaveDropActionsAddReaction", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseAuth.mockReturnValue(defaultAuth);
     mockGetEligibility.mockReturnValue(null);
+  });
+
+  describe.each([false, true])("session visibility (mobile=%s)", (isMobile) => {
+    it.each([
+      ["signed out", { isAuthenticated: false, connectedProfile: null }],
+      ["proxy role", { isDirectProfileSession: false }],
+    ])("hides the picker control when %s", (_state, overrides) => {
+      mockUseAuth.mockReturnValue({ ...defaultAuth, ...overrides });
+      const onMobilePickerOpen = jest.fn();
+      renderWithQueryClient(
+        <WaveDropActionsAddReaction
+          drop={mockDrop}
+          isMobile={isMobile}
+          onMobilePickerOpen={onMobilePickerOpen}
+        />
+      );
+
+      expect(
+        screen.queryByRole("button", { name: /add reaction/i })
+      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId("mock-picker")).not.toBeInTheDocument();
+      expect(onMobilePickerOpen).not.toHaveBeenCalled();
+      expect(commonApi.commonApiPost).not.toHaveBeenCalled();
+    });
+
+    it("hides an open picker when the session signs out", async () => {
+      const { rerender } = renderWithQueryClient(
+        <WaveDropActionsAddReaction drop={mockDrop} isMobile={isMobile} />
+      );
+      fireEvent.click(screen.getByRole("button", { name: /add reaction/i }));
+      expect(await screen.findByTestId("mock-picker")).toBeInTheDocument();
+
+      mockUseAuth.mockReturnValue({ ...defaultAuth, isAuthenticated: false });
+      rerender(
+        <WaveDropActionsAddReaction drop={mockDrop} isMobile={isMobile} />
+      );
+
+      expect(
+        screen.queryByRole("button", { name: /add reaction/i })
+      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId("mock-picker")).not.toBeInTheDocument();
+      expect(commonApi.commonApiPost).not.toHaveBeenCalled();
+    });
   });
 
   it("renders desktop button", () => {

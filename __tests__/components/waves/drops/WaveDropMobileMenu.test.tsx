@@ -9,7 +9,7 @@ import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useCapacitor from "@/hooks/useCapacitor";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { useState, type ComponentProps } from "react";
 import userEvent from "@testing-library/user-event";
 
@@ -131,6 +131,13 @@ const unauthenticatedAuth: AuthProviderValue = {
   setActiveProfileProxy: jest.fn(() => Promise.resolve(false)),
 };
 
+const authenticatedAuth = {
+  ...unauthenticatedAuth,
+  connectedProfile: { id: "profile-1", handle: "alice" },
+  isAuthenticated: true,
+  isDirectProfileSession: true,
+} as AuthProviderValue;
+
 const dropFixture = {
   id: "1",
   serial_no: 1,
@@ -241,9 +248,7 @@ test("releases the native modal before handing reply focus to the composer", asy
   function Menu() {
     const [open, setOpen] = useState(true);
     return (
-      <AuthContext.Provider
-        value={{ connectedProfile: { handle: "alice" } } as AuthProviderValue}
-      >
+      <AuthContext.Provider value={authenticatedAuth}>
         <button type="button" onClick={() => setOpen(true)}>
           Open actions
         </button>
@@ -292,6 +297,8 @@ test("shows the confirmed curation removal immediately without unrelated mobile 
         {
           ...unauthenticatedAuth,
           connectedProfile: { handle: "curator" },
+          isAuthenticated: true,
+          isDirectProfileSession: true,
         } as AuthProviderValue
       }
     >
@@ -543,7 +550,7 @@ test("does not show pinned-drop action in the mobile menu for non-admins", () =>
   expect(screen.queryByTestId("set-pinned-drop")).toBeNull();
 });
 
-test("shows full menu when a profile handle is present", () => {
+test("shows the full menu for an authenticated non-proxy profile", () => {
   const drop = {
     id: "1",
     serial_no: 1,
@@ -553,14 +560,7 @@ test("shows full menu when a profile handle is present", () => {
   } as any;
 
   render(
-    <AuthContext.Provider
-      value={
-        {
-          connectedProfile: { handle: "alice" },
-          activeProfileProxy: null,
-        } as any
-      }
-    >
+    <AuthContext.Provider value={authenticatedAuth}>
       <WaveDropMobileMenu
         drop={drop}
         isOpen
@@ -580,6 +580,71 @@ test("shows full menu when a profile handle is present", () => {
   expect(screen.getByTestId("boost")).toBeInTheDocument();
   expect(screen.getByTestId("open")).toBeInTheDocument();
   expect(screen.getByTestId("delete")).toBeInTheDocument();
+});
+
+test.each<[string, Partial<AuthProviderValue>]>([
+  ["signed out", { connectedProfile: null, isAuthenticated: false }],
+  ["a loaded but unauthenticated profile", { isAuthenticated: false }],
+  ["a proxy-role session", { isDirectProfileSession: false }],
+  [
+    "an active proxy",
+    {
+      activeProfileProxy: { id: "proxy-1" } as NonNullable<
+        AuthProviderValue["activeProfileProxy"]
+      >,
+    },
+  ],
+  ["a profile check in progress", { fetchingProfile: true }],
+])("keeps copying available without Reply for %s", async (_name, overrides) => {
+  const onReply = jest.fn();
+  render(
+    <AuthContext.Provider value={{ ...authenticatedAuth, ...overrides }}>
+      <WaveDropMobileMenu
+        drop={dropFixture}
+        isOpen
+        showReplyAndQuote
+        longPressTriggered={false}
+        setOpen={jest.fn()}
+        onReply={onReply}
+        onAddReaction={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+
+  expect(screen.getByTestId("wrapper")).toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "Reply" })).toBeNull();
+  const copyText = screen.getByRole("button", {
+    name: "Copy text",
+  });
+  const copyLink = screen.getByRole("button", {
+    name: "Copy link",
+  });
+  await userEvent.click(copyText);
+  await userEvent.click(copyLink);
+  expect(writeText).toHaveBeenCalledTimes(2);
+  expect(onReply).not.toHaveBeenCalled();
+});
+
+test("starts an allowed reply once after touch down and click", () => {
+  const onReply = jest.fn();
+  render(
+    <AuthContext.Provider value={authenticatedAuth}>
+      <WaveDropMobileMenu
+        drop={dropFixture}
+        isOpen
+        showReplyAndQuote
+        longPressTriggered={false}
+        setOpen={jest.fn()}
+        onReply={onReply}
+        onAddReaction={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+  const reply = screen.getByRole("button", { name: "Reply" });
+  fireEvent.pointerDown(reply, { pointerType: "touch" });
+  expect(onReply).not.toHaveBeenCalled();
+  fireEvent.click(reply);
+  expect(onReply).toHaveBeenCalledTimes(1);
 });
 
 test("does not hide the native drop action sheet when desktop hover CSS is active", () => {

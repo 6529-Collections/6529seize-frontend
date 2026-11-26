@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { AuthContext } from "@/components/auth/Auth";
+import type { AuthContextType } from "@/components/auth/authTypes";
 import WaveDropActionsReply from "@/components/waves/drops/WaveDropActionsReply";
 import {
   useWaveEligibility,
@@ -57,9 +58,11 @@ describe("WaveDropActionsReply", () => {
   const renderReply = ({
     drop = baseDrop,
     eligibility,
+    auth = {},
   }: {
     readonly drop?: any;
     readonly eligibility?: any;
+    readonly auth?: Partial<AuthContextType>;
   } = {}) => {
     const onReply = jest.fn();
     const setToast = jest.fn();
@@ -69,6 +72,12 @@ describe("WaveDropActionsReply", () => {
         value={
           {
             setToast,
+            connectedProfile: { id: "profile-1", handle: "alice" },
+            isAuthenticated: true,
+            isDirectProfileSession: true,
+            activeProfileProxy: null,
+            fetchingProfile: false,
+            ...auth,
           } as any
         }
       >
@@ -95,6 +104,26 @@ describe("WaveDropActionsReply", () => {
     expect(btn).not.toBeDisabled();
     await user.click(btn);
     expect(onReply).toHaveBeenCalled();
+  });
+
+  it.each<[string, Partial<AuthContextType>]>([
+    ["signed out", { connectedProfile: null, isAuthenticated: false }],
+    ["an unauthenticated loaded profile", { isAuthenticated: false }],
+    ["a proxy-role session", { isDirectProfileSession: false }],
+    [
+      "an active proxy",
+      {
+        activeProfileProxy: { id: "proxy-1" } as NonNullable<
+          AuthContextType["activeProfileProxy"]
+        >,
+      },
+    ],
+    ["a profile check in progress", { fetchingProfile: true }],
+  ])("hides desktop Reply for %s", (_name, auth) => {
+    const { onReply, setToast } = renderReply({ auth });
+    expect(screen.queryByRole("button", { name: "Reply to drop" })).toBeNull();
+    expect(onReply).not.toHaveBeenCalled();
+    expect(setToast).not.toHaveBeenCalled();
   });
 
   it("opens reply when slow mode is the only chat block", async () => {

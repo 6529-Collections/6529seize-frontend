@@ -7,7 +7,12 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 const mockPost = jest.fn();
 const mockApplyReplyPlacement = jest.fn();
 const mockScrollToSerialNo = jest.fn();
-const mockAuth = { connectedProfile: { id: "author" } };
+const mockAuth = {
+  connectedProfile: { id: "author", handle: "author" },
+  isAuthenticated: true,
+  isDirectProfileSession: true,
+  fetchingProfile: false,
+};
 const mockThreads = { waveId: "wave", collapseAll: false };
 
 jest.mock("@/components/auth/Auth", () => ({
@@ -55,6 +60,8 @@ beforeEach(() => {
   mockPost.mockReset();
   mockApplyReplyPlacement.mockReset().mockResolvedValue(false);
   mockAuth.connectedProfile.id = "author";
+  mockAuth.isAuthenticated = true;
+  mockAuth.isDirectProfileSession = true;
   mockThreads.collapseAll = false;
 });
 
@@ -106,6 +113,16 @@ it("hides the option from a different author", () => {
   renderAction(root);
   expect(screen.queryByRole("button")).toBeNull();
 });
+
+it.each(["isAuthenticated", "isDirectProfileSession"] as const)(
+  "hides reply placement when %s is false",
+  (flag) => {
+    mockAuth[flag] = false;
+    renderAction(root);
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(mockPost).not.toHaveBeenCalled();
+  }
+);
 
 it("hides the option on replies", () => {
   renderAction({

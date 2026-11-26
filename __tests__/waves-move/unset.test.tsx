@@ -62,6 +62,9 @@ const author = ({ children }: { children: ReactNode }) => (
       {
         connectedProfile: { id: "p1", handle: "author" },
         activeProfileProxy: null,
+        isAuthenticated: true,
+        isDirectProfileSession: true,
+        fetchingProfile: false,
       } as never
     }
   >

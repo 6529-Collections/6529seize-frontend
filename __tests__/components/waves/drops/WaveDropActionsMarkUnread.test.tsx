@@ -44,6 +44,9 @@ jest.mock("react-tooltip", () => ({
 }));
 
 const mockAuthContext = {
+  isAuthenticated: true,
+  isDirectProfileSession: true,
+  fetchingProfile: false,
   setToast: jest.fn(),
   connectedProfile: {
     handle: "test-user",
@@ -66,6 +69,8 @@ const mockDrop: ApiDrop = {
 describe("WaveDropActionsMarkUnread", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAuthContext.isAuthenticated = true;
+    mockAuthContext.isDirectProfileSession = true;
   });
 
   const renderComponent = () => {
@@ -80,6 +85,15 @@ describe("WaveDropActionsMarkUnread", () => {
     renderComponent();
     expect(screen.getByLabelText("Mark as unread")).toBeInTheDocument();
   });
+
+  it.each(["isAuthenticated", "isDirectProfileSession"] as const)(
+    "hides Mark as unread when %s is false",
+    (flag) => {
+      mockAuthContext[flag] = false;
+      renderComponent();
+      expect(screen.queryByLabelText("Mark as unread")).not.toBeInTheDocument();
+    }
+  );
 
   it("calls API when clicked", async () => {
     const { commonApiPost } = require("@/services/api/common-api");

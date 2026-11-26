@@ -6,6 +6,7 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import { DropVoteState } from "./types";
 import { Time } from "@/helpers/time";
 import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
+import { canReplyFromSession } from "@/helpers/waves/drop-reply-eligibility";
 
 interface DropInteractionRules {
   canShowVote: boolean; // determines if voting UI should be visible
@@ -25,7 +26,9 @@ interface DropInteractionRules {
  * @returns Object containing boolean flags for different interaction possibilities
  */
 export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
-  const { connectedProfile, activeProfileProxy } = useAuth();
+  const auth = useAuth();
+  const { connectedProfile } = auth;
+  const hasProfileSession = canReplyFromSession(auth);
   const votesPaused = useWavesWritesPaused("votes");
   const entriesPaused = useWavesWritesPaused("entries");
   // Deleting someone else's entry is moderation, which stays closed from the
@@ -38,13 +41,13 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
 
   // Determine vote state in order of precedence
   const getVoteState = (): DropVoteState => {
-    if (!connectedProfile) {
+    if (!connectedProfile || !auth.isAuthenticated || auth.fetchingProfile) {
       return DropVoteState.NOT_LOGGED_IN;
     }
-    if (!connectedProfile.handle) {
+    if (!connectedProfile.handle?.trim()) {
       return DropVoteState.NO_PROFILE;
     }
-    if (activeProfileProxy) {
+    if (!hasProfileSession) {
       return DropVoteState.PROXY;
     }
 
@@ -103,8 +106,7 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
 
   // Base rules that apply to all interactions
   const baseRules =
-    !!connectedProfile?.handle && // must have profile
-    !activeProfileProxy && // must not be using proxy
+    hasProfileSession && // must have an authenticated own-profile session
     !drop.id.startsWith("temp-"); // must not be temporary drop
 
   // Rules for showing vote UI - show only if none of these states are active

@@ -31,7 +31,7 @@ const WaveDropActionsAddReaction: React.FC<{
   size = "default",
   updateCurationCache = false,
 }) => {
-  const { react, canReact } = useDropReaction(drop, {
+  const { react, canReact, hasReactionSession } = useDropReaction(drop, {
     source: "picker",
     onSuccess: onAddReaction,
     updateCurationCache,
@@ -78,6 +78,10 @@ const WaveDropActionsAddReaction: React.FC<{
       document.removeEventListener("keydown", handleEscape, true);
     };
   }, [showPicker]);
+
+  if (!hasReactionSession) {
+    return null;
+  }
 
   const onReact = () => {
     if (!canReact) return;

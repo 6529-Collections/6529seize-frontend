@@ -3,6 +3,7 @@
 import { AuthContext } from "@/components/auth/Auth";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useSetWavePinnedDrop } from "@/hooks/waves/useSetWavePinnedDrop";
+import { canReplyFromSession } from "@/helpers/waves/drop-reply-eligibility";
 import { MapPinIcon } from "@heroicons/react/24/outline";
 import { useContext } from "react";
 import type { MouseEvent } from "react";
@@ -16,7 +17,9 @@ export default function WaveDropMobileMenuSetPinnedDrop({
   drop,
   onPinnedDropSet,
 }: WaveDropMobileMenuSetPinnedDropProps) {
-  const { requestAuth, setToast } = useContext(AuthContext);
+  const auth = useContext(AuthContext);
+  const { requestAuth, setToast } = auth;
+  const hasProfileSession = canReplyFromSession(auth);
   const { isPending, pendingDropId, setPinnedDrop } = useSetWavePinnedDrop(
     drop.wave.id,
     {
@@ -39,7 +42,7 @@ export default function WaveDropMobileMenuSetPinnedDrop({
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
-    if (isUpdating) {
+    if (!hasProfileSession || isUpdating) {
       return;
     }
 
@@ -56,6 +59,8 @@ export default function WaveDropMobileMenuSetPinnedDrop({
       }
     })();
   };
+
+  if (!hasProfileSession) return null;
 
   return (
     <button

@@ -7,6 +7,7 @@ import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimation
 import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
 import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
 import { useAuth } from "@/components/auth/Auth";
+import { canReplyFromSession } from "@/helpers/waves/drop-reply-eligibility";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
   type QuickCurationAction,
@@ -59,7 +60,11 @@ export default function WaveDropActionsMore({
   showOnlyQuickRemove = false,
   standaloneQuickRemoveCuration = null,
 }: WaveDropActionsMoreProps) {
-  const { connectedProfile } = useAuth();
+  const auth = useAuth();
+  const { connectedProfile } = auth;
+  const standaloneRemoval = canReplyFromSession(auth)
+    ? standaloneQuickRemoveCuration
+    : null;
   const locale = useBrowserLocale();
   const isMobileLayoutViewport = useIsMobileLayoutViewport();
   const [isOpen, setIsOpen] = useState(false);
@@ -85,7 +90,7 @@ export default function WaveDropActionsMore({
       Boolean(connectedProfile?.handle),
   });
   const quickRemoveCuration = showOnlyQuickRemove
-    ? standaloneQuickRemoveCuration
+    ? standaloneRemoval
     : availableQuickRemoveCuration;
   const { updateMembershipAsync } = useDropCurationMembershipMutation({
     dropId: drop.id,

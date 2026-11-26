@@ -23,6 +23,7 @@ import {
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { ChainEntryPendingError } from "@/lib/chain-waves/entryWriters";
 import Button from "@/components/utils/button/Button";
+import { useProfileActionSession } from "@/hooks/useProfileActionSession";
 
 interface WaveDropMobileMenuDeleteProps {
   readonly drop: ApiDrop;
@@ -34,7 +35,10 @@ const WaveDropMobileMenuDelete: React.FC<WaveDropMobileMenuDeleteProps> = ({
   onDropDeleted,
 }) => {
   const [isDeleteMode, setIsDeleteMode] = useState<boolean>(false);
-  const { requestAuth, setToast } = useContext(AuthContext);
+  const auth = useContext(AuthContext);
+  const { requestAuth, setToast } = auth;
+  const { hasProfileSession: hasDeleteSession, isSessionActive } =
+    useProfileActionSession(auth);
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
   const { processDropRemoved } = useMyStreamActions();
   const queryClient = useQueryClient();
@@ -92,7 +96,7 @@ const WaveDropMobileMenuDelete: React.FC<WaveDropMobileMenuDeleteProps> = ({
     },
   });
   const onDelete = async () => {
-    if (mutating) {
+    if (!hasDeleteSession || mutating) {
       return;
     }
     setMutating(true);
@@ -100,7 +104,7 @@ const WaveDropMobileMenuDelete: React.FC<WaveDropMobileMenuDeleteProps> = ({
     const { success } = chainWithdrawal
       ? { success: true }
       : await requestAuth();
-    if (!success) {
+    if (!success || !isSessionActive()) {
       setMutating(false);
       return;
     }
@@ -115,6 +119,8 @@ const WaveDropMobileMenuDelete: React.FC<WaveDropMobileMenuDeleteProps> = ({
   if (mutating) {
     confirmLabel = chainWithdrawal ? "Withdrawing..." : "Deleting...";
   }
+
+  if (!hasDeleteSession) return null;
 
   return (
     <div className="tw-w-full tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800">

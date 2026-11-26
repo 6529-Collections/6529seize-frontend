@@ -3,6 +3,7 @@
 import IconButton from "@/components/utils/button/IconButton";
 
 import { useAuth } from "@/components/auth/Auth";
+import { canReplyFromSession } from "@/helpers/waves/drop-reply-eligibility";
 import MailUnreadIcon from "@/components/common/icons/MailUnreadIcon";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -31,7 +32,9 @@ export default function WaveDropActionsMarkUnread({
   onMarkUnread,
 }: WaveDropActionsMarkUnreadProps) {
   const queryClient = useQueryClient();
-  const { setToast, connectedProfile, activeProfileProxy } = useAuth();
+  const auth = useAuth();
+  const { setToast, connectedProfile, activeProfileProxy } = auth;
+  const hasProfileSession = canReplyFromSession(auth);
   const [loading, setLoading] = useState(false);
   const unreadDividerContext = useUnreadDividerOptional();
   const dmUnreadActions = useOptionalDmUnreadActions();
@@ -43,7 +46,7 @@ export default function WaveDropActionsMarkUnread({
     !activeProfileProxy;
 
   const handleMarkUnread = useCallback(async () => {
-    if (loading) return;
+    if (!hasProfileSession || loading) return;
 
     setLoading(true);
     try {
@@ -112,6 +115,7 @@ export default function WaveDropActionsMarkUnread({
     drop.id,
     drop.wave.id,
     loading,
+    hasProfileSession,
     queryClient,
     setToast,
     unreadDividerContext,
@@ -121,7 +125,7 @@ export default function WaveDropActionsMarkUnread({
     onMarkUnread,
   ]);
 
-  if (isAuthor || !connectedProfile) {
+  if (isAuthor || !hasProfileSession) {
     return null;
   }
 

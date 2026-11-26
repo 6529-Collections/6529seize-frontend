@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import DropsListItemDeleteDropModal from "@/components/drops/view/item/options/delete/DropsListItemDeleteDropModal";
 import { AuthContext } from "@/components/auth/Auth";
@@ -11,6 +11,8 @@ import { ChainOperationError } from "@/lib/chain-identity/operation";
 import { isChainIdentityActive } from "@/lib/chain-identity/active";
 import { chainGateway } from "@/lib/chain-identity/gateway";
 import { identityOfWallet } from "@/lib/chain-waves/signing";
+import type { AuthContextType } from "@/components/auth/authTypes";
+import { createDeferredPromise } from "@/__tests__/utils/deferredPromise";
 
 jest.mock("@tanstack/react-query");
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
@@ -42,12 +44,20 @@ describe("DropsListItemDeleteDropModal", () => {
   const auth = {
     requestAuth: jest.fn().mockResolvedValue({ success: true }),
     setToast: jest.fn(),
+    connectedProfile: { id: "me", handle: "me" },
+    activeProfileProxy: null,
+    isAuthenticated: true,
+    isDirectProfileSession: true,
+    fetchingProfile: false,
   } as any;
   const rq = { invalidateDrops: jest.fn() } as any;
   const mutateAsync = jest.fn().mockResolvedValue(undefined);
+  let sessionOverrides: Partial<AuthContextType> = {};
 
   beforeEach(() => {
     jest.clearAllMocks();
+    sessionOverrides = {};
+    auth.requestAuth.mockResolvedValue({ success: true });
     (global.fetch as jest.MockedFunction<typeof fetch>).mockResolvedValue({
       ok: true,
       status: 200,
@@ -74,16 +84,61 @@ describe("DropsListItemDeleteDropModal", () => {
 
   const renderModal = (props: { onDropDeleted?: () => void } = {}) =>
     render(
-      <AuthContext.Provider value={auth}>
-        <ReactQueryWrapperContext.Provider value={rq}>
-          <DropsListItemDeleteDropModal
-            drop={drop}
-            closeModal={jest.fn()}
-            onDropDeleted={props.onDropDeleted}
-          />
-        </ReactQueryWrapperContext.Provider>
-      </AuthContext.Provider>
+      <DropsListItemDeleteDropModal
+        drop={drop}
+        closeModal={jest.fn()}
+        onDropDeleted={props.onDropDeleted}
+      />,
+      {
+        wrapper: ({ children }) => (
+          <AuthContext.Provider value={{ ...auth, ...sessionOverrides }}>
+            <ReactQueryWrapperContext.Provider value={rq}>
+              {children}
+            </ReactQueryWrapperContext.Provider>
+          </AuthContext.Provider>
+        ),
+      }
     );
+
+  it.each([
+    ["signed out", { isAuthenticated: false }],
+    ["proxy role", { isDirectProfileSession: false }],
+    ["loading profile", { fetchingProfile: true }],
+  ])("hides desktop confirmation when %s", (_state, overrides) => {
+    sessionOverrides = overrides;
+    renderModal();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(auth.requestAuth).not.toHaveBeenCalled();
+    expect(mutateAsync).not.toHaveBeenCalled();
+    expect(mockWithdrawEntry).not.toHaveBeenCalled();
+  });
+
+  it.each(["sign-out", "unmount"])(
+    "does not delete after %s while authentication is pending",
+    async (transition) => {
+      const user = userEvent.setup();
+      const { rerender, unmount } = renderModal();
+      const pendingAuth = createDeferredPromise<{ success: boolean }>();
+      auth.requestAuth.mockReturnValueOnce(pendingAuth.promise);
+      await user.click(screen.getByRole("button", { name: "Delete" }));
+      expect(auth.requestAuth).toHaveBeenCalledTimes(1);
+
+      if (transition === "unmount") {
+        unmount();
+      } else {
+        sessionOverrides = { isAuthenticated: false };
+        rerender(
+          <DropsListItemDeleteDropModal drop={drop} closeModal={jest.fn()} />
+        );
+      }
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      await act(async () => pendingAuth.resolve({ success: true }));
+
+      expect(mutateAsync).not.toHaveBeenCalled();
+      expect(mockWithdrawEntry).not.toHaveBeenCalled();
+      expect(rq.invalidateDrops).not.toHaveBeenCalled();
+    }
+  );
 
   it("renders above the mobile drop detail layer as an accessible dialog", async () => {
     renderModal();

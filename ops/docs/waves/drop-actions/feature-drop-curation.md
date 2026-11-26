@@ -90,6 +90,9 @@ Not shown on:
 - If a drop is not curatable for your account, specialized leaderboard
   curation controls are not shown.
 - Temporary drops (`temp-*`) cannot be curated.
+- Curation action menus and membership changes require an authenticated
+  own-profile session. They are unavailable while signed out, using a proxy
+  role, or loading a profile.
 - If wallet connection is missing when action runs, users see
   `Please connect your wallet to curate drops`.
 - While a curate/uncurate request is pending, repeat taps are blocked for that

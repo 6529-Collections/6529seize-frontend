@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import WaveDropMobileMenuDelete from "@/components/waves/drops/WaveDropMobileMenuDelete";
 import { AuthContext } from "@/components/auth/Auth";
@@ -9,6 +9,8 @@ import { deleteDrop } from "@/services/api/signed-drop-writes";
 import { AppToastContent } from "@/components/utils/toast/AppToast";
 import { ChainOperationError } from "@/lib/chain-identity/operation";
 import { ChainEntryPendingError } from "@/lib/chain-waves/entryWriters";
+import type { AuthContextType } from "@/components/auth/authTypes";
+import { createDeferredPromise } from "@/__tests__/utils/deferredPromise";
 
 jest.mock("framer-motion", () => ({
   motion: {
@@ -65,27 +67,92 @@ describe("WaveDropMobileMenuDelete", () => {
   const setToast = jest.fn();
   const onDropDeleted = jest.fn();
   const requestAuth = jest.fn();
+  let sessionOverrides: Partial<AuthContextType> = {};
 
   function renderComponent(authSuccess = true, shown = drop) {
     requestAuth.mockResolvedValue({ success: authSuccess });
     return render(
-      <AuthContext.Provider value={{ requestAuth, setToast } as any}>
-        <ReactQueryWrapperContext.Provider value={{ invalidateDrops } as any}>
-          <WaveDropMobileMenuDelete
-            drop={shown}
-            onDropDeleted={onDropDeleted}
-          />
-        </ReactQueryWrapperContext.Provider>
-      </AuthContext.Provider>
+      <WaveDropMobileMenuDelete drop={shown} onDropDeleted={onDropDeleted} />,
+      {
+        wrapper: ({ children }) => (
+          <AuthContext.Provider
+            value={
+              {
+                requestAuth,
+                setToast,
+                connectedProfile: { id: "me", handle: "me" },
+                activeProfileProxy: null,
+                isAuthenticated: true,
+                isDirectProfileSession: true,
+                fetchingProfile: false,
+                ...sessionOverrides,
+              } as AuthContextType
+            }
+          >
+            <ReactQueryWrapperContext.Provider
+              value={{ invalidateDrops } as any}
+            >
+              {children}
+            </ReactQueryWrapperContext.Provider>
+          </AuthContext.Provider>
+        ),
+      }
     );
   }
 
   beforeEach(() => {
     jest.clearAllMocks();
+    sessionOverrides = {};
     jest.mocked(deleteDrop).mockResolvedValue(undefined as never);
     mockWithdrawEntry.mockResolvedValue(undefined);
     mockInvalidateChainEntryQueries.mockResolvedValue(undefined);
   });
+
+  it.each([
+    ["signed out", { isAuthenticated: false }],
+    ["proxy role", { isDirectProfileSession: false }],
+    ["loading profile", { fetchingProfile: true }],
+  ])("hides mobile Delete when %s", (_state, overrides) => {
+    sessionOverrides = overrides;
+    renderComponent();
+    expect(
+      screen.queryByRole("button", { name: "Delete" })
+    ).not.toBeInTheDocument();
+    expect(requestAuth).not.toHaveBeenCalled();
+    expect(deleteDrop).not.toHaveBeenCalled();
+    expect(mockWithdrawEntry).not.toHaveBeenCalled();
+  });
+
+  it.each(["proxy session", "unmount"])(
+    "does not delete after %s while authentication is pending",
+    async (transition) => {
+      const user = userEvent.setup();
+      const { rerender, unmount } = renderComponent();
+      const pendingAuth = createDeferredPromise<{ success: boolean }>();
+      requestAuth.mockReturnValueOnce(pendingAuth.promise);
+      await user.click(screen.getByText("Delete"));
+      await user.click(screen.getByText("Are you sure?"));
+      expect(requestAuth).toHaveBeenCalledTimes(1);
+
+      if (transition === "unmount") {
+        unmount();
+      } else {
+        sessionOverrides = { isDirectProfileSession: false };
+        rerender(
+          <WaveDropMobileMenuDelete drop={drop} onDropDeleted={onDropDeleted} />
+        );
+      }
+      expect(
+        screen.queryByRole("button", { name: "Are you sure?" })
+      ).not.toBeInTheDocument();
+      await act(async () => pendingAuth.resolve({ success: true }));
+
+      expect(deleteDrop).not.toHaveBeenCalled();
+      expect(mockWithdrawEntry).not.toHaveBeenCalled();
+      expect(onDropDeleted).not.toHaveBeenCalled();
+      expect(invalidateDrops).not.toHaveBeenCalled();
+    }
+  );
 
   it("toggles delete mode and confirms deletion", async () => {
     const user = userEvent.setup();
