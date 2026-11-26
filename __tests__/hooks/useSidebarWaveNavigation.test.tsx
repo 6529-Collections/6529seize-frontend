@@ -101,6 +101,7 @@ it("retains matching search rows and scroll while hidden, with fetching paused",
   mockScreenActive = false;
   rerender({ list: waves });
   expect(result.current.queryEnabled).toBe(false);
+  expect(result.current.hasMatchingSearch).toBe(true);
   expect(result.current.resultWaves).toEqual(searchWaves);
   expect(container.scrollTop).toBe(300);
   expect(fetchPage).toHaveBeenCalledTimes(fetchCount);

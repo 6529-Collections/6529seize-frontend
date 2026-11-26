@@ -231,6 +231,7 @@ function applyEffectiveAppPrCiPlan(plan) {
         "services/capacitor/android-back-layers.ts",
         "components/brain/mobile/useWaveListSwipeBack.ts",
         "components/mobile-navigation/PhoneNavigationStack.tsx",
+        "components/mobile-navigation/PhoneListLayoutProvider.tsx",
         "contexts/PhoneNavigationScreenContext.tsx",
         "helpers/waves/phone-navigation-route.ts",
         "lib/motion/phone-navigation.ts",

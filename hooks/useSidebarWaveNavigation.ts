@@ -204,6 +204,7 @@ export function useSidebarWaveNavigation({
       ? (results.data?.pages.flatMap((page) => page.waves) ?? [])
       : [],
     queryEnabled,
+    hasMatchingSearch,
     scrollKey,
     viewKey,
   };

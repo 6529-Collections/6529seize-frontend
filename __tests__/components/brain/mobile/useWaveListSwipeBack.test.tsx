@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { animate } from "framer-motion";
 import { useWaveListSwipeBack } from "@/components/brain/mobile/useWaveListSwipeBack";
 import * as waveNavigation from "@/helpers/waves/wave-navigation-transition";
+import * as phoneMotion from "@/lib/motion/phone-navigation-registry";
 import { MOTION_SPRINGS } from "@/lib/motion/springs";
 import { Capacitor } from "@capacitor/core";
 import { Keyboard } from "@capacitor/keyboard";
@@ -270,6 +271,39 @@ it("catches a returning spring without jumping and cancels safely on unmount", a
   });
   expect(onSwipeBack).not.toHaveBeenCalled();
 });
+
+it.each([
+  [-20, true],
+  [-80, false],
+] as const)(
+  "releases a caught Back at its absolute page position after a %spx slow reversal",
+  (distance, committed) => {
+    const end = jest.fn();
+    jest.spyOn(phoneMotion, "beginPhoneBackGesture").mockReturnValue({
+      origin: 250,
+      width: 400,
+      move: jest.fn(),
+      end,
+    });
+    render(
+      <SwipeHarness
+        edgeSwipeBack
+        targetScreen="list"
+        onIntentStart={jest.fn()}
+        onSwipeBack={jest.fn()}
+      />
+    );
+    const target = screen.getByTestId("content");
+    fireEvent.touchStart(target, { touches: [touch(100)] });
+    act(() => jest.advanceTimersByTime(1000));
+    fireEvent.touchMove(target, { touches: [touch(100 + distance)] });
+    fireEvent.touchEnd(target, {
+      touches: [],
+      changedTouches: [touch(100 + distance)],
+    });
+    expect(end).toHaveBeenCalledWith(committed, distance, expect.any(Function));
+  }
+);
 
 it("clamps a reversed fallback drag at the resting edge", () => {
   jest.mocked(animate).mockReturnValue({
