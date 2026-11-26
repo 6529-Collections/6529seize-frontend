@@ -5,12 +5,24 @@ interface Options {
   readonly delay: number;
 }
 
+type Props = Pick<
+  SensorProps<Options>,
+  | "active"
+  | "event"
+  | "options"
+  | "onAbort"
+  | "onCancel"
+  | "onEnd"
+  | "onMove"
+  | "onStart"
+>;
+
 const DRAG_DISTANCE = 8;
 
 /** Vertical movement after a hold starts reordering. Quick swipes can scroll or pin. */
 export class PinnedWaveTouchSensor {
   autoScrollEnabled = true;
-  private readonly props: SensorProps<Options>;
+  private readonly props: Props;
   private readonly initial: { x: number; y: number; id: number };
   private readonly started = performance.now();
   private activated = false;
@@ -27,7 +39,7 @@ export class PinnedWaveTouchSensor {
     return TouchSensor.setup();
   }
 
-  constructor(props: SensorProps<Options>) {
+  constructor(props: Props) {
     this.props = props;
     const touch = (props.event as TouchEvent).touches[0]!;
     this.initial = { x: touch.clientX, y: touch.clientY, id: touch.identifier };

@@ -16,6 +16,7 @@ it("claims the first small vertical movement after a hold before lifting the row
   const onStart = jest.fn();
   const onMove = jest.fn();
   new PinnedWaveTouchSensor({
+    active: "wave",
     event: touchEvent("touchstart", 100),
     options: { delay: 200 },
     onStart,
@@ -23,7 +24,7 @@ it("claims the first small vertical movement after a hold before lifting the row
     onAbort: jest.fn(),
     onCancel: jest.fn(),
     onEnd: jest.fn(),
-  } as ConstructorParameters<typeof PinnedWaveTouchSensor>[0]);
+  });
 
   jest.advanceTimersByTime(650);
   const firstMove = touchEvent("touchmove", 104);
