@@ -13438,6 +13438,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         .getByRole("button", { name: "Next", exact: true })
         .locator("..");
       await expect(name).toHaveAttribute("required", "");
+      await expect(
+        page.getByLabel("Decision name", { exact: true })
+      ).toHaveCount(1);
       await expect(name).toHaveAttribute("aria-invalid", "false");
       await next.click();
       await expect(name).toHaveAttribute("aria-invalid", "true");

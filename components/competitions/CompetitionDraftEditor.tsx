@@ -59,6 +59,7 @@ import { t } from "@/i18n/messages";
 import CompetitionDraftEditorFooter from "./CompetitionDraftEditorFooter";
 import CompetitionDraftEditorLayout, {
   DecisionNameField,
+  getDecisionValidationFeedback,
   RulesLockedNote,
   rulesLockedNoteId,
   useDisplaySettingsDisclosure,
@@ -549,10 +550,10 @@ function DraftForm({
       />
     );
   const saveStatus = getSaveStatus(locale, persistence);
-  const validationFeedback = visibleErrors.length > 0 && invalid && (
-    <p role="alert" className="tw-m-0 tw-text-red">
-      {t(locale, "competitions.required")}
-    </p>
+  const validationFeedback = getDecisionValidationFeedback(
+    locale,
+    visibleErrors,
+    invalid
   );
   const footer = (
     <CompetitionDraftEditorFooter
