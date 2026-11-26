@@ -119,6 +119,9 @@ export default function WaveSlowMode({
             )
           : "Slow mode"
       }
+      phoneLabelClassName={
+        display === "configuration" ? "tw-text-iron-500" : undefined
+      }
       onOpen={resetEditor}
       renderEditor={renderEditor}
       valueLabel={slowModeLabel}

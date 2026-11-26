@@ -931,11 +931,13 @@ async function openPhoneWaveActions(page: Page) {
   return menu;
 }
 
+async function activateControl(control: Locator) {
+  if (test.info().project.use.hasTouch) await control.tap();
+  else await control.click();
+}
+
 async function openWaveInformation(page: Page) {
-  await page
-    .getByRole("button", { name: /^About / })
-    .first()
-    .click();
+  await activateControl(page.getByRole("button", { name: /^About / }).first());
   return page
     .getByRole("complementary", { name: "Wave details" })
     .or(
@@ -17506,6 +17508,495 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     });
   }
 
+  test("aligns Joined members with chat handles and keeps loading compact", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page);
+    sandbox.onlyCompetition("alpha");
+    const wave = await sandbox.legacyPrimary("alpha");
+    wave.metrics.subscribers_count = 3;
+    let releaseFollowers: (() => void) | undefined;
+    let followersRequested = false;
+    const followersReady = new Promise<void>((resolve) => {
+      releaseFollowers = resolve;
+    });
+    await page.route(
+      `**/identity-subscriptions/incoming/WAVE/${WAVE}**`,
+      async (route) => {
+        followersRequested = true;
+        await followersReady;
+        await route.fulfill({
+          json: {
+            data: [
+              "playwright",
+              "second-member",
+              "a-member-with-a-long-handle",
+            ].map((handle, index) => ({
+              identity: {
+                ...wave.author,
+                id: `00000000-0000-4000-8000-${String(8000 + index).padStart(12, "0")}`,
+                handle,
+              },
+              actions: [],
+            })),
+            page: 1,
+            next: false,
+          },
+        });
+      }
+    );
+    try {
+      await page.goto(`/waves/${WAVE}?tab=chat`);
+      const chatHandle = page
+        .getByRole("link", { name: "playwright", exact: true })
+        .first();
+      await expect(chatHandle).toBeVisible();
+      const chatTypography = await chatHandle.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return [
+          style.fontSize,
+          style.fontWeight,
+          style.lineHeight,
+          style.color,
+        ];
+      });
+      const information = await openWaveInformation(page);
+      const aboutContent = information
+        .getByTestId("wave-creation-date")
+        .locator("..");
+      await aboutContent.scrollIntoViewIfNeeded();
+      const aboutBounds = await aboutContent.boundingBox();
+      await activateControl(
+        information.getByRole("button", { name: "3 Joined", exact: true })
+      );
+      await expect.poll(() => followersRequested).toBe(true);
+      const loading = page.getByRole("status", {
+        name: "Loading followers",
+        exact: true,
+      });
+      await expect(loading).toBeVisible();
+      const loader = page
+        .getByRole("status", { name: "Loading followers", exact: true })
+        .locator("svg");
+      await expect(loader).toHaveCSS("width", "16px");
+      await expect(loader).toHaveCSS("height", "16px");
+      await page.screenshot({
+        path: testInfo.outputPath("joined-loading.png"),
+      });
+      releaseFollowers?.();
+      const members = page.getByRole("list", {
+        name: "Followers",
+        exact: true,
+      });
+      const handle = members.getByRole("link", {
+        name: "View playwright's profile",
+        exact: true,
+      });
+      await expect(handle).toBeVisible();
+      await handle.scrollIntoViewIfNeeded();
+      await expect(loading).toHaveCount(0);
+      await expect(handle).toHaveAttribute("href", "/playwright");
+      const memberTypography = await handle.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return [
+          style.fontSize,
+          style.fontWeight,
+          style.lineHeight,
+          style.color,
+        ];
+      });
+      expect(memberTypography).toEqual(chatTypography);
+      // Check the focus treatment in keyboard modality across browser tab preferences.
+      await page.keyboard.press("Tab");
+      await handle.focus();
+      await expect(handle).toBeFocused();
+      await expect(handle).not.toHaveCSS("box-shadow", "none");
+      const rowBounds = await handle.evaluate((element) => {
+        const bounds = element
+          .closest("[data-follower-row]")!
+          .getBoundingClientRect();
+        return { x: bounds.x, width: bounds.width };
+      });
+      expect(rowBounds.x).toBeCloseTo(aboutBounds!.x, 0);
+      expect(rowBounds.width).toBeCloseTo(aboutBounds!.width, 0);
+      await expect(members.getByRole("listitem")).toHaveCount(3);
+      await page.screenshot({
+        path: testInfo.outputPath("joined-members.png"),
+      });
+      await expectNoHorizontalOverflow(page);
+      await activateControl(
+        page.getByRole("button", { name: "Back", exact: true })
+      );
+      await expect(
+        information.getByRole("tab", { name: "About", exact: true })
+      ).toBeVisible();
+    } finally {
+      releaseFollowers?.();
+    }
+  });
+
+  test("keeps Wave information readable and aligned across About REP and Configuration", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page);
+    sandbox.onlyCompetition("alpha");
+    const wave = await sandbox.legacyPrimary("alpha");
+    wave.description_drop.moderation = { status: "VISIBLE", can_view: true };
+    wave.wave_score = {
+      visibility_score: 96,
+      quality_score: 95,
+      hotness_score: 98,
+      rep_sort_score: 85,
+    };
+    wave.wave_rep = {
+      total_rep: 42,
+      authenticated_user_contribution: 0,
+    };
+    const contributor = {
+      contribution: 47,
+      profile: {
+        id: PROFILE,
+        handle: "playwright",
+        primary_address: "0x0000000000000000000000000000000000000529",
+        pfp: null,
+      },
+    };
+    await page.route(`**/waves/${WAVE}/rep/overview**`, (route) =>
+      route.fulfill({
+        json: {
+          total_rep: 42,
+          positive_rep: 47,
+          negative_rep: -5,
+          authenticated_user_contribution: 0,
+          contributor_count: 2,
+          contributors: { data: [contributor], page: 1, next: false },
+        },
+      })
+    );
+    await page.route(`**/waves/${WAVE}/rep/categories**`, (route) =>
+      route.fulfill({
+        json: {
+          data: route.request().url().includes("/contributors")
+            ? [contributor]
+            : [{ category: "quality", total_rep: 42, contributor_count: 2 }],
+          page: 1,
+          next: false,
+        },
+      })
+    );
+    await page.route(`**/api/profile-logs?**`, (route) =>
+      route.fulfill({
+        json: {
+          data: [
+            {
+              id: "rep-positive",
+              profile_handle: "playwright",
+              created_at: new Date(Date.now() - 60_000).toISOString(),
+              contents: {
+                old_rating: 10,
+                new_rating: 31,
+                rating_category: "quality",
+                change_reason: "USER_EDIT",
+              },
+            },
+            {
+              id: "rep-negative",
+              profile_handle: null,
+              created_at: new Date(Date.now() - 120_000).toISOString(),
+              contents: {
+                old_rating: 31,
+                new_rating: -5,
+                rating_category: null,
+                change_reason: "LOST_TDH",
+              },
+            },
+          ],
+          page: 1,
+          next: false,
+        },
+      })
+    );
+    await page.goto(`/waves/${WAVE}?tab=chat`);
+    const information = await openWaveInformation(page);
+    await expect(information.getByText(wave.name, { exact: true })).toHaveCSS(
+      "font-weight",
+      "500"
+    );
+    const aboutContent = information
+      .getByTestId("wave-creation-date")
+      .locator("..");
+    await aboutContent.scrollIntoViewIfNeeded();
+    const contentBounds = await aboutContent.boundingBox();
+    expect(contentBounds).not.toBeNull();
+    const tabsBounds = await information.getByRole("tablist").boundingBox();
+    expect(tabsBounds!.x).toBeCloseTo(contentBounds!.x, 0);
+    const statsBounds = await information
+      .getByLabel("Wave trust stats", { exact: true })
+      .locator(":scope > div")
+      .first()
+      .boundingBox();
+    expect(statsBounds!.x).toBeCloseTo(contentBounds!.x, 0);
+    const pinned = information.getByRole("region", {
+      name: "Pinned drop",
+      exact: true,
+    });
+    const pinnedAvatar = pinned
+      .getByRole("link", { name: /^View .+'s profile$/ })
+      .first();
+    await expect(pinnedAvatar).toHaveCSS("width", "32px");
+    await expect(pinnedAvatar).toHaveCSS("height", "32px");
+    const avatarBounds = await pinnedAvatar.boundingBox();
+    expect(avatarBounds!.x).toBeCloseTo(contentBounds!.x, 0);
+    await expect(
+      pinned.getByRole("link", { name: "playwright", exact: true })
+    ).toHaveCSS("font-size", "14px");
+    await information.screenshot({
+      path: testInfo.outputPath("about-compact-pinned-post.png"),
+    });
+    await activateControl(
+      information.getByRole("tab", { name: "REP", exact: true })
+    );
+    const summary = information.getByRole("region", {
+      name: "Wave REP",
+      exact: true,
+    });
+    const categories = information.getByRole("region", {
+      name: "Categories",
+      exact: true,
+    });
+    const heading = categories.getByRole("heading", {
+      name: "Categories",
+      exact: true,
+    });
+    await expect(heading).toHaveCSS("font-size", "11px");
+    await expect(heading).toHaveCSS("font-weight", "600");
+    await expect(heading).toHaveCSS("text-transform", "uppercase");
+    for (const name of ["Contributors", "Activity"]) {
+      await expect(
+        information.getByRole("button", { name, exact: true })
+      ).toHaveCSS("font-size", "13px");
+    }
+    const phone = page.viewportSize()!.width < 768;
+    const search = categories.getByRole("searchbox", {
+      name: "Search Wave REP categories",
+    });
+    await expect(search).toHaveCSS("font-size", phone ? "16px" : "14px");
+    await expect(search).toHaveCSS("height", phone ? "44px" : "40px");
+    const quality = categories.getByRole("button", {
+      name: /^Show contributors in quality,/,
+    });
+    await expect(quality).toHaveCSS("min-height", phone ? "52px" : "44px");
+    await expect(quality).toHaveCSS("border-radius", "8px");
+    await expect(quality.getByText("quality", { exact: true })).toHaveCSS(
+      "font-size",
+      "14px"
+    );
+    const searchBounds = await search.boundingBox();
+    expect(searchBounds).not.toBeNull();
+    expect(searchBounds!.x).toBeCloseTo(contentBounds!.x, 0);
+    expect(searchBounds!.width).toBeCloseTo(contentBounds!.width, 0);
+    const contributors = information.getByRole("region", {
+      name: "All contributors by Wave REP",
+      exact: true,
+    });
+    for (const row of [quality, contributors.getByRole("link").first()]) {
+      const rowBounds = await row.boundingBox();
+      expect(rowBounds).not.toBeNull();
+      expect(rowBounds!.x).toBeCloseTo(searchBounds!.x, 0);
+      expect(rowBounds!.width).toBeCloseTo(searchBounds!.width, 0);
+    }
+    await search.fill("missing");
+    await expect(
+      categories.getByText("No matching categories", { exact: true })
+    ).toBeVisible();
+    await search.fill("");
+    await quality.press("Space");
+    await expect(quality).toBeFocused();
+    await expect(quality).toHaveAttribute("aria-pressed", "true");
+    await expect(
+      information.getByRole("heading", {
+        name: "Contributors in quality",
+        exact: true,
+      })
+    ).toBeVisible();
+    await categories
+      .getByRole("button", { name: /^Show all contributors,/ })
+      .press("Enter");
+    await quality.focus();
+    await expect(quality).not.toHaveCSS("box-shadow", "none");
+    const rowAlignment = await quality
+      .getByText("quality", { exact: true })
+      .evaluate((name) => {
+        const sectionHeading = name.closest("section")!.querySelector("h2")!;
+        return (
+          name.getBoundingClientRect().left -
+          sectionHeading.getBoundingClientRect().left
+        );
+      });
+    expect(rowAlignment).toBe(8);
+    await expect(summary.getByText("Total", { exact: true })).toHaveCSS(
+      "font-size",
+      "14px"
+    );
+    await expect(summary.getByText("0", { exact: true })).toHaveCSS(
+      "font-size",
+      "13px"
+    );
+    const total = summary
+      .getByText("Total", { exact: true })
+      .locator("..")
+      .locator("..");
+    await expect(total).toHaveCSS("border-radius", "8px");
+    await expect(total).toHaveCSS("border-width", "0px");
+    await expect(total.getByText("+42", { exact: true })).toHaveCSS(
+      "font-size",
+      "14px"
+    );
+    await expect(total.getByText("2 contributors", { exact: true })).toHaveCSS(
+      "font-size",
+      "13px"
+    );
+    const totalLayout = await total.evaluate((block) => {
+      const [content, count] = Array.from(block.children);
+      const [label, value] = Array.from(content!.children);
+      return {
+        valueBelowLabel:
+          value!.getBoundingClientRect().top >=
+          label!.getBoundingClientRect().bottom,
+        countOnRight:
+          count!.getBoundingClientRect().left >
+          content!.getBoundingClientRect().right,
+      };
+    });
+    expect(totalLayout).toEqual({ valueBelowLabel: true, countOnRight: true });
+    const stats = summary
+      .getByText("Your REP", { exact: true })
+      .locator("..")
+      .locator("..");
+    const statAppearance = await stats.evaluate((grid) =>
+      Array.from(grid.children).map((tile) => ({
+        label: tile.firstElementChild?.textContent?.trim(),
+        radius: getComputedStyle(tile).borderRadius,
+      }))
+    );
+    expect(statAppearance).toEqual([
+      { label: "Positive", radius: "8px" },
+      { label: "Negative", radius: "8px" },
+      { label: "Your REP", radius: "8px" },
+    ]);
+    await information.screenshot({
+      path: testInfo.outputPath("rep-contributors.png"),
+    });
+
+    // The sidebar's container query must also work below the three-column threshold.
+    await summary.evaluate((section) => {
+      section.parentElement!.style.width = "272px";
+    });
+    await expect(stats).toHaveCSS("grid-template-columns", /^\S+$/);
+    await information.screenshot({
+      path: testInfo.outputPath("rep-narrow-summary.png"),
+    });
+    await summary.evaluate((section) => {
+      section.parentElement!.style.removeProperty("width");
+    });
+    await expect(stats).toHaveCSS("grid-template-columns", /^\S+ \S+ \S+$/);
+
+    await activateControl(
+      information.getByRole("button", { name: "Activity", exact: true })
+    );
+    const activity = information.getByRole("region", {
+      name: "Wave REP activity",
+      exact: true,
+    });
+    const positive = activity
+      .getByRole("link", { name: "playwright", exact: true })
+      .locator("..")
+      .locator("..");
+    const activityBounds = await positive.boundingBox();
+    expect(activityBounds!.x).toBeCloseTo(contentBounds!.x, 0);
+    expect(activityBounds!.width).toBeCloseTo(contentBounds!.width, 0);
+    await expect(positive.getByText("+21", { exact: true })).toHaveCSS(
+      "font-size",
+      "14px"
+    );
+    await expect(positive.getByText("quality", { exact: true })).toHaveCSS(
+      "font-size",
+      "12px"
+    );
+    await expect(positive).toContainText("to");
+    await expect(positive.getByText("(+21)", { exact: true })).toHaveCount(0);
+    const negative = activity
+      .getByText("Unknown", { exact: true })
+      .locator("..")
+      .locator("..");
+    await expect(negative.getByRole("link")).toHaveCount(0);
+    await expect(negative.getByText("-36", { exact: true })).toBeVisible();
+    await expect(negative.getByText("Lost TDH", { exact: true })).toBeVisible();
+    await expect(negative).toHaveCSS("border-bottom-width", "0px");
+    const geometry = await positive.evaluate((row) => {
+      const [rater, change, ratings, time] = Array.from(row.children).map(
+        (child) => child.getBoundingClientRect()
+      );
+      return {
+        firstLine: rater!.top === change!.top,
+        secondLine: ratings!.top === time!.top,
+        rightEdge: change!.right === time!.right,
+      };
+    });
+    expect(geometry).toEqual({
+      firstLine: true,
+      secondLine: true,
+      rightEdge: true,
+    });
+    await activity.scrollIntoViewIfNeeded();
+    await information.screenshot({
+      path: testInfo.outputPath("rep-activity.png"),
+    });
+    await activateControl(
+      information.getByRole("tab", { name: "Configuration", exact: true })
+    );
+    await expect(
+      information.getByRole("heading", { name: "Chat", exact: true })
+    ).toBeVisible();
+    await expect(
+      information.getByRole("heading", { name: "Chat", exact: true })
+    ).toHaveCSS("font-size", "11px");
+    const configurationInsets = await information
+      .getByRole("heading", { level: 2 })
+      .evaluateAll((headings) =>
+        headings.flatMap((heading) => {
+          const section = heading.closest("section");
+          // The mobile panel title sits outside the content sections.
+          if (!section) return [];
+          const block = section.getBoundingClientRect();
+          return Array.from(section.children)
+            .map((child) => child.getBoundingClientRect())
+            .filter((child) => child.width > 0)
+            .map((child) => ({
+              left: child.left - block.left,
+              right: block.right - child.right,
+            }));
+        })
+      );
+    expect(configurationInsets.length).toBeGreaterThan(0);
+    for (const inset of configurationInsets) {
+      expect(inset.left).toBeCloseTo(16, 0);
+      expect(inset.right).toBeCloseTo(16, 0);
+    }
+    const deleteBounds = await information
+      .getByRole("button", {
+        name: "Delete all my messages from this wave",
+        exact: true,
+      })
+      .boundingBox();
+    expect(deleteBounds!.x).toBeCloseTo(contentBounds!.x, 0);
+    expect(deleteBounds!.width).toBeCloseTo(contentBounds!.width, 0);
+    await information.screenshot({
+      path: testInfo.outputPath("configuration-block-padding.png"),
+    });
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("keeps wave Configuration in the information panel and competition appearance in Settings", async ({
     page,
   }) => {
@@ -17537,7 +18028,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await expect(section).toHaveCSS("height", "32px");
       await expect(section).toHaveCSS("border-radius", "9999px");
     }
-    await information.getByRole("tab", { name: "REP", exact: true }).click();
+    await activateControl(
+      information.getByRole("tab", { name: "REP", exact: true })
+    );
     await expect(
       information.getByRole("tab", { name: "REP", exact: true })
     ).toHaveCSS("font-weight", "500");
@@ -17548,9 +18041,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           .getByText(value, { exact: true })
       ).toHaveCSS("font-variant-numeric", "normal");
     }
-    await information
-      .getByRole("tab", { name: "Configuration", exact: true })
-      .click();
+    await activateControl(
+      information.getByRole("tab", { name: "Configuration", exact: true })
+    );
     await expect(
       information.getByRole("tab", { name: "Configuration", exact: true })
     ).toHaveCSS("font-weight", "500");
@@ -17566,6 +18059,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await expect(
       information.getByRole("heading", { name: "Chat", exact: true })
     ).toBeVisible();
+    await expect(information.getByText("Slow mode", { exact: true })).toHaveCSS(
+      "color",
+      "rgb(132, 132, 144)"
+    );
     await expect(
       information.getByRole("tab", { name: "Voters", exact: true })
     ).toHaveCount(0);
@@ -17577,11 +18074,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       name: "Appearance and labels",
       exact: true,
     });
-    await appearance.click();
+    await activateControl(appearance);
     const full = page.getByRole("radio", { name: /^Full proposal/ });
     const summary = page.getByRole("radio", { name: /^Summary card/ });
     await expect(full).toBeChecked();
-    await page.getByText("Summary card", { exact: true }).click();
+    await activateControl(page.getByText("Summary card", { exact: true }));
     await expect(summary).toBeChecked();
     const limit = page.getByRole("spinbutton", {
       name: "Maximum proposal preview characters",
@@ -17593,9 +18090,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await expect(
       page.getByRole("button", { name: "Save changes", exact: true })
     ).toBeDisabled();
-    await page.getByRole("button", { name: "Cancel", exact: true }).click();
+    await activateControl(
+      page.getByRole("button", { name: "Cancel", exact: true })
+    );
     await expect(appearance).toHaveAttribute("aria-expanded", "false");
-    await appearance.click();
+    await activateControl(appearance);
     await expect(full).toBeChecked();
     await expectNoHorizontalOverflow(page);
   });
