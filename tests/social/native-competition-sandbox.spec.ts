@@ -16346,6 +16346,131 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     });
   }
 
+  test("aligns Joined members with chat handles and keeps loading compact", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page);
+    sandbox.onlyCompetition("alpha");
+    const wave = await sandbox.legacyPrimary("alpha");
+    wave.metrics.subscribers_count = 3;
+    let releaseFollowers: (() => void) | undefined;
+    let followersRequested = false;
+    const followersReady = new Promise<void>((resolve) => {
+      releaseFollowers = resolve;
+    });
+    await page.route(
+      `**/identity-subscriptions/incoming/WAVE/${WAVE}**`,
+      async (route) => {
+        followersRequested = true;
+        await followersReady;
+        await route.fulfill({
+          json: {
+            data: [
+              "playwright",
+              "second-member",
+              "a-member-with-a-long-handle",
+            ].map((handle, index) => ({
+              identity: {
+                ...wave.author,
+                id: `00000000-0000-4000-8000-${String(8000 + index).padStart(12, "0")}`,
+                handle,
+              },
+              actions: [],
+            })),
+            page: 1,
+            next: false,
+          },
+        });
+      }
+    );
+    try {
+      await page.goto(`/waves/${WAVE}?tab=chat`);
+      const chatHandle = page
+        .getByRole("link", { name: "playwright", exact: true })
+        .first();
+      await expect(chatHandle).toBeVisible();
+      const chatTypography = await chatHandle.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return [
+          style.fontSize,
+          style.fontWeight,
+          style.lineHeight,
+          style.color,
+        ];
+      });
+      const information = await openWaveInformation(page);
+      const aboutContent = information
+        .getByTestId("wave-creation-date")
+        .locator("..");
+      await aboutContent.scrollIntoViewIfNeeded();
+      const aboutBounds = await aboutContent.boundingBox();
+      await information
+        .getByRole("button", { name: "3 Joined", exact: true })
+        .click();
+      await expect.poll(() => followersRequested).toBe(true);
+      const loading = page.getByRole("status", {
+        name: "Loading followers",
+        exact: true,
+      });
+      await expect(loading).toBeVisible();
+      const loader = page
+        .getByRole("status", { name: "Loading followers", exact: true })
+        .locator("svg");
+      await expect(loader).toHaveCSS("width", "16px");
+      await expect(loader).toHaveCSS("height", "16px");
+      await page.screenshot({
+        path: testInfo.outputPath("joined-loading.png"),
+      });
+      releaseFollowers?.();
+      const members = page.getByRole("list", {
+        name: "Followers",
+        exact: true,
+      });
+      const handle = members.getByRole("link", {
+        name: "View playwright's profile",
+        exact: true,
+      });
+      await expect(handle).toBeVisible();
+      await handle.scrollIntoViewIfNeeded();
+      await expect(loading).toHaveCount(0);
+      await expect(handle).toHaveAttribute("href", "/playwright");
+      const memberTypography = await handle.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return [
+          style.fontSize,
+          style.fontWeight,
+          style.lineHeight,
+          style.color,
+        ];
+      });
+      expect(memberTypography).toEqual(chatTypography);
+      // Check the focus treatment in keyboard modality across browser tab preferences.
+      await page.keyboard.press("Tab");
+      await handle.focus();
+      await expect(handle).toBeFocused();
+      await expect(handle).not.toHaveCSS("box-shadow", "none");
+      const rowBounds = await handle.evaluate((element) => {
+        const bounds = element
+          .closest("[data-follower-row]")!
+          .getBoundingClientRect();
+        return { x: bounds.x, width: bounds.width };
+      });
+      expect(rowBounds.x).toBeCloseTo(aboutBounds!.x, 0);
+      expect(rowBounds.width).toBeCloseTo(aboutBounds!.width, 0);
+      await expect(members.getByRole("listitem")).toHaveCount(3);
+      await page.screenshot({
+        path: testInfo.outputPath("joined-members.png"),
+      });
+      await expectNoHorizontalOverflow(page);
+      await page.getByRole("button", { name: "Back", exact: true }).click();
+      await expect(
+        information.getByRole("tab", { name: "About", exact: true })
+      ).toBeVisible();
+    } finally {
+      releaseFollowers?.();
+    }
+  });
+
   test("keeps Wave information readable and aligned across About REP and Configuration", async ({
     page,
   }, testInfo) => {
