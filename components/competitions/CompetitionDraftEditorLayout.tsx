@@ -83,9 +83,10 @@ export default function CompetitionDraftEditorLayout({
       >
         <section
           ref={contentRef}
+          data-decision-editor="true"
           aria-label={title}
           aria-describedby={describedBy}
-          className={`tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-y-auto ${MOBILE_TEXT_STYLES}`}
+          className={`tw-group/decision-editor tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-y-auto ${MOBILE_TEXT_STYLES}`}
         >
           <div className="tw-min-h-0 tw-flex-1 tw-scroll-py-3 tw-overflow-y-auto">
             <div className="tw-flex tw-flex-col tw-gap-6 tw-px-4 tw-pb-6 tw-pt-5 sm:tw-px-6">

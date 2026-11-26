@@ -1,15 +1,45 @@
+/** Opt-in phone styling; shared forms keep their existing styles by default. */
+export const DECISION_EDITOR_MOBILE_STYLES = {
+  heading:
+    "max-md:group-data-[decision-editor=true]/decision-editor:tw-text-[15px] max-md:group-data-[decision-editor=true]/decision-editor:tw-leading-5 max-md:group-data-[decision-editor=true]/decision-editor:tw-text-iron-50",
+  helper:
+    "max-md:group-data-[decision-editor=true]/decision-editor:tw-text-meta max-md:group-data-[decision-editor=true]/decision-editor:tw-font-normal max-md:group-data-[decision-editor=true]/decision-editor:tw-leading-[18px] max-md:group-data-[decision-editor=true]/decision-editor:tw-text-iron-400",
+  panelPadding:
+    "max-md:group-data-[decision-editor=true]/decision-editor:tw-px-3 max-md:group-data-[decision-editor=true]/decision-editor:tw-py-4",
+  panelInlinePadding:
+    "max-md:group-data-[decision-editor=true]/decision-editor:tw-px-3",
+  panelHeader:
+    "max-md:group-data-[decision-editor=true]/decision-editor:tw-px-4",
+  disclosureHeader:
+    "max-md:group-data-[decision-editor=true]/decision-editor:tw-h-11 max-md:group-data-[decision-editor=true]/decision-editor:tw-px-4",
+  optionGrid:
+    "max-md:group-data-[decision-editor=true]/decision-editor:tw-grid-cols-1",
+  optionCard:
+    "max-md:group-data-[decision-editor=true]/decision-editor:tw-grid max-md:group-data-[decision-editor=true]/decision-editor:tw-grid-cols-[56px_minmax(0,1fr)] max-md:group-data-[decision-editor=true]/decision-editor:tw-items-center max-md:group-data-[decision-editor=true]/decision-editor:tw-gap-3 max-md:group-data-[decision-editor=true]/decision-editor:tw-p-3",
+  preview:
+    "max-md:group-data-[decision-editor=true]/decision-editor:tw-relative max-md:group-data-[decision-editor=true]/decision-editor:tw-mb-0 max-md:group-data-[decision-editor=true]/decision-editor:tw-h-11 max-md:group-data-[decision-editor=true]/decision-editor:tw-w-14 max-md:group-data-[decision-editor=true]/decision-editor:tw-overflow-hidden max-md:group-data-[decision-editor=true]/decision-editor:tw-p-1",
+  previewContent:
+    "max-md:group-data-[decision-editor=true]/decision-editor:tw-absolute max-md:group-data-[decision-editor=true]/decision-editor:tw-left-1/2 max-md:group-data-[decision-editor=true]/decision-editor:tw-top-1/2 max-md:group-data-[decision-editor=true]/decision-editor:tw-h-20 max-md:group-data-[decision-editor=true]/decision-editor:tw-w-[120px] max-md:group-data-[decision-editor=true]/decision-editor:-tw-translate-x-1/2 max-md:group-data-[decision-editor=true]/decision-editor:-tw-translate-y-1/2 max-md:group-data-[decision-editor=true]/decision-editor:tw-scale-[0.375]",
+  optionContent:
+    "max-md:group-data-[decision-editor=true]/decision-editor:tw-relative max-md:group-data-[decision-editor=true]/decision-editor:tw-w-full max-md:group-data-[decision-editor=true]/decision-editor:tw-items-center max-md:group-data-[decision-editor=true]/decision-editor:tw-gap-3",
+  optionTitle:
+    "max-md:group-data-[decision-editor=true]/decision-editor:tw-text-[15px] max-md:group-data-[decision-editor=true]/decision-editor:tw-font-medium max-md:group-data-[decision-editor=true]/decision-editor:tw-leading-5",
+  optionRadio:
+    "max-md:group-data-[decision-editor=true]/decision-editor:tw-order-last max-md:group-data-[decision-editor=true]/decision-editor:tw-mt-0",
+  optionText:
+    "max-md:group-data-[decision-editor=true]/decision-editor:tw-min-w-0 max-md:group-data-[decision-editor=true]/decision-editor:tw-flex-1",
+} as const;
+
 export const CREATE_WAVE_FORM_STYLES = {
-  stepTitle: "tw-m-0 tw-text-xl tw-font-semibold tw-leading-7 tw-text-white",
-  stepDescription:
-    "tw-m-0 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-300",
-  sectionTitle:
+  stepTitle: `tw-m-0 tw-text-xl tw-font-semibold tw-leading-7 tw-text-white ${DECISION_EDITOR_MOBILE_STYLES.heading}`,
+  stepDescription: `tw-m-0 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-300 ${DECISION_EDITOR_MOBILE_STYLES.helper}`,
+  sectionTitle: `tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100 ${DECISION_EDITOR_MOBILE_STYLES.heading}`,
+  toggleTitle:
     "tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100",
   fieldLabel:
     "tw-m-0 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100",
-  supportingText:
-    "tw-m-0 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400",
-  compactSupportingText:
-    "tw-m-0 tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-400",
+  supportingText: `tw-m-0 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400 ${DECISION_EDITOR_MOBILE_STYLES.helper}`,
+  compactSupportingText: `tw-m-0 tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-400 ${DECISION_EDITOR_MOBILE_STYLES.helper}`,
 } as const;
 
 const CREATE_WAVE_OPTION_STYLES = {

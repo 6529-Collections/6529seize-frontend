@@ -26,7 +26,7 @@ const TimeWeightedToggle = memo(
         >
           <h3
             id="time-weighted-title"
-            className={`${CREATE_WAVE_FORM_STYLES.sectionTitle} ${decisionEditor ? "max-md:tw-text-sm max-md:tw-font-medium max-md:tw-text-iron-200" : ""}`}
+            className={`${CREATE_WAVE_FORM_STYLES.toggleTitle} ${decisionEditor ? "max-md:tw-text-sm max-md:tw-font-medium max-md:tw-text-iron-200" : ""}`}
           >
             {t(locale, "waves.create.voting.timeWeighted.title")}
           </h3>

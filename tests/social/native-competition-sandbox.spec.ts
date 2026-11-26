@@ -3204,6 +3204,78 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
             await expectNoHorizontalOverflow(page);
             if (testInfo.project.name === "web-mobile-chromium")
               await expect(action).toHaveCSS("height", "44px");
+            const region = page.getByRole("region", {
+              name: "New decision",
+              exact: true,
+            });
+            if (step >= 2) {
+              const heading = region.getByRole("heading", { level: 2 });
+              await expect(heading).toHaveCount(1);
+              await expect(heading).toHaveCSS(
+                "font-size",
+                testInfo.project.name === "web-mobile-chromium"
+                  ? "15px"
+                  : "20px"
+              );
+            }
+            if (testInfo.project.name === "web-mobile-chromium") {
+              const compactOptions = region.getByRole("radio", {
+                name: /^(Standard drops|Identity nominations|Whole decision|Each drop)$/,
+              });
+              for (const radio of await compactOptions.all()) {
+                const layout = await radio.evaluate((element) => {
+                  const preview = element.closest("label")?.firstElementChild;
+                  const content = element.parentElement;
+                  if (!preview || !content)
+                    throw new Error("Option layout missing");
+                  const bounds = preview.getBoundingClientRect();
+                  return {
+                    width: bounds.width,
+                    height: bounds.height,
+                    sideBySide:
+                      bounds.right <= content.getBoundingClientRect().left,
+                  };
+                });
+                expect(layout).toEqual({
+                  width: 56,
+                  height: 44,
+                  sideBySide: true,
+                });
+              }
+              if (
+                process.env["PLAYWRIGHT_EDITOR_VISUAL_REVIEW"] === "1" &&
+                !reopened
+              ) {
+                const scrollport = page
+                  .getByRole("region", { name: "New decision", exact: true })
+                  .locator(":scope > div")
+                  .first();
+                const pages = await scrollport.evaluate((element) =>
+                  Math.max(
+                    1,
+                    Math.ceil(
+                      (element.scrollHeight - element.clientHeight) /
+                        (element.clientHeight * 0.8)
+                    ) + 1
+                  )
+                );
+                for (let part = 0; part < pages; part++) {
+                  await scrollport.evaluate((element, index) => {
+                    element.scrollTop = index * element.clientHeight * 0.8;
+                  }, part);
+                  await page.screenshot({
+                    path: testInfo.outputPath(
+                      `visual-${mode}-step-${step}-part-${part}.png`
+                    ),
+                    animations: "disabled",
+                    style: "nextjs-portal { visibility: hidden; }",
+                  });
+                }
+                await scrollport.evaluate((element) => {
+                  element.scrollTop = 0;
+                });
+              }
+            }
             await page.screenshot({
               path: testInfo.outputPath(
                 `${reopened ? "reopened" : "new"}-${mode}-step-${step}.png`

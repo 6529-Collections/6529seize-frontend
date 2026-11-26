@@ -12,7 +12,10 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { getEarliestApproveWaveEndTimestamp } from "./approveWaveDates.helpers";
-import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
+import {
+  CREATE_WAVE_FORM_STYLES,
+  DECISION_EDITOR_MOBILE_STYLES,
+} from "../utils/createWaveFormStyles";
 
 interface CreateWaveDatesApproveStartProps {
   readonly dates: CreateWaveDatesConfig;
@@ -59,7 +62,9 @@ export default function CreateWaveDatesApproveStart({
   };
 
   return (
-    <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/60 tw-p-5 tw-shadow-sm">
+    <section
+      className={`tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/60 tw-p-5 tw-shadow-sm ${DECISION_EDITOR_MOBILE_STYLES.panelPadding}`}
+    >
       <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
         <div className="tw-space-y-1">
           <div className="tw-flex tw-items-center tw-gap-x-2">
