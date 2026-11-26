@@ -4,6 +4,7 @@ it.each([
   ["/waves", "", null, "waves", null],
   ["/waves", "view=profile-feed", null, "feed", "waves"],
   ["/waves/wave-a", "", "wave-a", "conversation", "waves"],
+  ["/waves", "wave=wave-a", "wave-a", "conversation", "waves"],
   [
     "/waves/wave-a",
     "returnTo=%2Fwaves%3Fview%3Dprofile-feed",
@@ -32,3 +33,16 @@ it.each([
     getPhoneNavigationRoute(pathname, new URLSearchParams(), null)
   ).toBeNull();
 });
+
+it.each(["/notifications", "/preferences", "/network"])(
+  "does not turn another section into a conversation for a wave query: %s",
+  (pathname) => {
+    expect(
+      getPhoneNavigationRoute(
+        pathname,
+        new URLSearchParams("wave=wave-a"),
+        "wave-a"
+      )
+    ).toBeNull();
+  }
+);

@@ -621,7 +621,9 @@ for (const platform of ["ios", "android"] as const) {
         };
         browser.__feedReturnPaints = [];
         let readyForReturn = false;
-        let currentPaint: FeedReturnPaint | undefined;
+        let currentPaint:
+          | { -readonly [K in keyof FeedReturnPaint]: FeedReturnPaint[K] }
+          | undefined;
         const sample = () => {
           const chat = document.querySelector<HTMLElement>(
             '[data-phone-navigation-screen="conversation"]'
@@ -1327,11 +1329,12 @@ test.describe("phone chevron Back", () => {
       const row = page.getByRole("link", { name }).first();
       await expect(row).toBeVisible();
       if (surface !== "web") {
-        const source = await page
+        const retainedList = page
+          .getByRole("main", { includeHidden: true })
           .locator(
-            `[data-phone-navigation-screen="${destination === "/waves" ? "waves" : "messages"}"]`
-          )
-          .elementHandle();
+            `xpath=ancestor::*[@data-phone-navigation-screen="${destination === "/waves" ? "waves" : "messages"}"]`
+          );
+        const source = await retainedList.elementHandle();
         if (!source) throw new Error("Missing native source screen");
         const frames = sampleNativeNavigation(page, destination, true);
         await row.tap();
@@ -1341,11 +1344,7 @@ test.describe("phone chevron Back", () => {
         );
         // Discovery descendants explicitly use visibility:visible. The retained
         // screen must suppress the whole subtree once the chat has settled.
-        await expect(
-          page.locator(
-            `[data-phone-navigation-screen="${destination === "/waves" ? "waves" : "messages"}"]`
-          )
-        ).toHaveCSS("opacity", "0");
+        await expect(retainedList).toHaveCSS("opacity", "0");
         await expect(page).toHaveURL(new RegExp(`${conversation}$`, "u"));
         await source.dispose();
         await expectNoHorizontalOverflow(page);

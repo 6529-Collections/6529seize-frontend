@@ -11,8 +11,13 @@ jest.mock("next/navigation", () => ({
 }));
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: () => ({ registerRef: jest.fn() }),
-  PhoneListLayoutProvider: ({ children }: { children: ReactNode }) => children,
 }));
+jest.mock(
+  "@/components/mobile-navigation/PhoneListLayoutProvider",
+  () =>
+    ({ children }: { children: ReactNode }) =>
+      children
+);
 jest.mock("@/components/navigation/BottomNavigation", () => () => null);
 jest.mock("@/components/header/HeaderPlaceholder", () => () => null);
 jest.mock("@/components/providers/PullToRefresh", () => () => null);

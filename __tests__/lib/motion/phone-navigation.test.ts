@@ -207,3 +207,40 @@ it("opens over the same retained source and cleans its final motion styles", () 
   expect(destination.scrollTop).toBe(850);
   motion.dispose();
 });
+
+it("resets an interrupted entry before selecting another conversation", () => {
+  const { motion, page, destination } = setup();
+  motion.transition("forward", jest.fn());
+  motion.commit(true);
+  const entry = options();
+  entry.onUpdate?.(100);
+  page.dataset["phoneNavigationScreen"] = "conversation";
+  const navigate = jest.fn();
+  motion.transition("forward", navigate);
+  expect(navigate).toHaveBeenCalledTimes(1);
+  expect(page.style.transform).toBe("");
+  expect(destination.style.visibility).toBe("");
+  entry.onUpdate?.(50);
+  entry.onComplete?.();
+  expect(page.style.transform).toBe("");
+  const count = jest.mocked(animate).mock.calls.length;
+  motion.commit(false);
+  expect(animate).toHaveBeenCalledTimes(count);
+  motion.dispose();
+});
+
+it("ignores an old touch release after a newer Back takes ownership", () => {
+  const { motion, page } = setup();
+  const oldTouch = motion.begin();
+  oldTouch?.move(100);
+  const navigate = jest.fn();
+  motion.transition("back", navigate);
+  const back = options();
+  back.onUpdate?.(200);
+  oldTouch?.move(20);
+  oldTouch?.end(false, 0, jest.fn());
+  expect(page.style.transform).toBe("translate3d(200px,0,0)");
+  back.onComplete?.();
+  expect(navigate).toHaveBeenCalledTimes(1);
+  motion.dispose();
+});

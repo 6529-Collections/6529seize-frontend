@@ -114,10 +114,11 @@ async function tapEncryptedBackAndExpectSlide(page: Page) {
   await expect(
     page.getByRole("button", { name: /^(Back|Go back)$/u })
   ).toHaveCount(0);
-  if (await page.locator("[data-phone-navigation-stack]").count()) {
-    const underlay = await page
-      .locator('[data-phone-navigation-screen="encrypted"]')
-      .elementHandle();
+  const retainedInbox = page
+    .getByRole("main", { includeHidden: true })
+    .locator('xpath=ancestor::*[@data-phone-navigation-screen="encrypted"]');
+  if (await retainedInbox.count()) {
+    const underlay = await retainedInbox.elementHandle();
     if (!underlay) throw new Error("Missing retained encrypted inbox");
     const frames = sampleNativeNavigation(page, ENCRYPTED_ROUTE, false);
     await back.tap();

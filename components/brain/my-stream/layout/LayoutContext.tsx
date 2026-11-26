@@ -73,7 +73,7 @@ const calculateHeightStyle = (
   };
 };
 
-const calculateNativeKeyboardHeightStyle = (
+export const calculateNativeKeyboardHeightStyle = (
   spaces: LayoutSpaces,
   isCapacitor: boolean,
   isViewportLocked: boolean
@@ -93,7 +93,7 @@ const calculateNativeKeyboardHeightStyle = (
 
 // Context type definition
 // Define valid ref types for type safety
-type LayoutRefType =
+export type LayoutRefType =
   | "header"
   | "pinned"
   | "tabs"
@@ -209,7 +209,7 @@ interface LayoutContextType {
 }
 
 // Default context values
-const defaultSpaces: LayoutSpaces = {
+export const defaultSpaces: LayoutSpaces = {
   headerSpace: 0,
   pinnedSpace: 0,
   tabsSpace: 0,
@@ -223,7 +223,7 @@ const getStyleSpaces = (spaces: LayoutSpaces): LayoutSpaces =>
   spaces.measurementsComplete ? spaces : defaultSpaces;
 
 // Create context
-const LayoutContext = createContext<LayoutContextType>({
+export const LayoutContext = createContext<LayoutContextType>({
   spaces: defaultSpaces,
   registerRef: () => {}, // No-op for default value
   contentContainerStyle: {}, // Empty style object as default
@@ -526,62 +526,6 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
 
 // Custom hook to use the layout context
 export const useLayout = () => useContext(LayoutContext);
-
-/** Retained lists measure their own header without registering a second viewport lock. */
-export function PhoneListLayoutProvider({
-  active,
-  children,
-}: {
-  readonly active: boolean;
-  readonly children: ReactNode;
-}) {
-  const parent = useLayout();
-  const { isCapacitor } = useCapacitor();
-  const header = useRef<HTMLDivElement | null>(null);
-  const [headerHeight, setHeaderHeight] = useState(64);
-  const measureHeader = useCallback(() => {
-    const height = header.current?.getBoundingClientRect().height ?? 0;
-    if (height > 0) setHeaderHeight(height);
-  }, []);
-  const registerRef = useCallback(
-    (type: LayoutRefType, element: HTMLDivElement | null) => {
-      // Lists have no Wave/About tab bars; their refs belong to the outer page.
-      if (type !== "header") return;
-      header.current = element;
-      measureHeader();
-    },
-    [measureHeader]
-  );
-  useLayoutEffect(() => {
-    if (!active || !header.current) return;
-    const element = header.current;
-    const observer = new ResizeObserver(measureHeader);
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [active, measureHeader]);
-  const value = useMemo(() => {
-    const spaces = {
-      ...defaultSpaces,
-      headerSpace: headerHeight,
-      measurementsComplete: true,
-    };
-    const style = calculateNativeKeyboardHeightStyle(
-      spaces,
-      active && isCapacitor,
-      parent.isViewportLocked
-    );
-    return {
-      ...parent,
-      registerRef,
-      spaces,
-      mobileWavesViewStyle: style,
-      waveViewStyle: style,
-    };
-  }, [active, headerHeight, isCapacitor, parent, registerRef]);
-  return (
-    <LayoutContext.Provider value={value}>{children}</LayoutContext.Provider>
-  );
-}
 
 export const useLayoutViewportLock = (isLocked: boolean) => {
   const { acquireViewportLock } = useLayout();

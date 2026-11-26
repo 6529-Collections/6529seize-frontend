@@ -2150,7 +2150,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
             type: "touchStart",
             touchPoints: [{ x: 16, y }],
           });
-          for (const x of [32, 64, 100, 156]) {
+          for (const x of [32, 64, 100, 196]) {
             await page.evaluate(
               () =>
                 new Promise<void>((resolve) =>

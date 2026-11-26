@@ -249,7 +249,7 @@ it("catches a returning spring without jumping and cancels safely on unmount", a
   expect(animate).toHaveBeenCalledWith(
     40,
     0,
-    expect.objectContaining({ ...MOTION_SPRINGS.spatial.default, velocity: 40 })
+    expect.objectContaining({ ...MOTION_SPRINGS.spatial.default, velocity: 0 })
   );
   const options = jest.mocked(animate).mock.calls[0]![2]!;
   act(() => options.onUpdate?.(20));
@@ -269,6 +269,32 @@ it("catches a returning spring without jumping and cancels safely on unmount", a
     await finished;
   });
   expect(onSwipeBack).not.toHaveBeenCalled();
+});
+
+it("clamps a reversed fallback drag at the resting edge", () => {
+  jest.mocked(animate).mockReturnValue({
+    stop: jest.fn(),
+    cancel: jest.fn(),
+    then: () => Promise.resolve(),
+  } as unknown as ReturnType<typeof animate>);
+  render(
+    <SwipeHarness
+      edgeSwipeBack
+      targetScreen="list"
+      onIntentStart={jest.fn()}
+      onSwipeBack={jest.fn()}
+    />
+  );
+  const target = screen.getByTestId("content");
+  fireEvent.touchStart(target, { touches: [touch(16)] });
+  fireEvent.touchMove(target, { touches: [touch(56)] });
+  act(() => jest.advanceTimersByTime(20));
+  fireEvent.touchMove(target, { touches: [touch(0)] });
+  act(() => jest.advanceTimersByTime(20));
+  expect(screen.getByTestId("surface").style.transform).toBe(
+    "translate3d(0px, 0, 0)"
+  );
+  fireEvent.touchCancel(target);
 });
 
 it("skips the channel release spring with reduced motion", () => {

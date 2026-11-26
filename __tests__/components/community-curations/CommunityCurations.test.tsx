@@ -192,5 +192,16 @@ describe("CommunityCurations", () => {
     rerender(view(true));
     expect(container.querySelector("section")).toBe(feed);
     expect(scrollTo).toHaveBeenCalledWith({ top: 0 });
+    const drop = { stableKey: "drop-after-fresh-entry" };
+    mockUseCommunityCurationsDrops.mockReturnValue({
+      ...loadingState,
+      allDrops: [drop],
+      drops: [drop],
+      isLoading: false,
+    });
+    scrollTo.mockClear();
+    rerender(view(true));
+    expect(mockRestoreScrollOffset()).toBe(true);
+    expect(scrollTo).not.toHaveBeenCalled();
   });
 });

@@ -13,6 +13,10 @@ import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
 import { recordWaveSidebarMembership } from "@/helpers/waves/wave-sidebar-membership";
 
 let mockViewer = { key: "alice", canUseCollections: true, enabled: true };
+let mockScreenActive = true;
+jest.mock("@/contexts/PhoneNavigationScreenContext", () => ({
+  usePhoneNavigationScreenActive: () => mockScreenActive,
+}));
 jest.mock("@/hooks/useWaveDiscoveryViewer", () => ({
   useWaveDiscoveryViewer: () => mockViewer,
 }));
@@ -63,10 +67,47 @@ beforeEach(() => {
   sessionStorage.clear();
   jest.clearAllMocks();
   mockViewer = { key: "alice", canUseCollections: true, enabled: true };
+  mockScreenActive = true;
   const search = renderHook(() => useWaveSidebarSearch("alice"));
   act(() => search.result.current[1](""));
   search.unmount();
   fetchPage.mockResolvedValue({ waves: [], page: 1, next: false });
+});
+
+it("retains matching search rows and scroll while hidden, with fetching paused", async () => {
+  const searchWaves = waves.map((wave) => ({
+    ...wave,
+    contributors: [],
+    creator: null,
+    isDirectMessage: false,
+    hasCompetition: false,
+    descriptionDrop: { contents: null, media: [] },
+    totalDropsCount: 0,
+    isPrivate: false,
+    latestDropTimestamp: null,
+    pinned: false,
+    muted: false,
+    subscribed: false,
+  }));
+  fetchPage.mockResolvedValue({ waves: searchWaves, page: 1, next: false });
+  const { result, rerender, container } = setup();
+  act(() => result.current.setQueryText("fixture"));
+  await waitFor(() => expect(result.current.resultWaves).toHaveLength(3));
+  act(() => {
+    container.scrollTop = 300;
+    container.dispatchEvent(new Event("scroll"));
+  });
+  const fetchCount = fetchPage.mock.calls.length;
+  mockScreenActive = false;
+  rerender({ list: waves });
+  expect(result.current.queryEnabled).toBe(false);
+  expect(result.current.resultWaves).toEqual(searchWaves);
+  expect(container.scrollTop).toBe(300);
+  expect(fetchPage).toHaveBeenCalledTimes(fetchCount);
+  mockScreenActive = true;
+  rerender({ list: waves });
+  expect(result.current.resultWaves).toEqual(searchWaves);
+  expect(container.scrollTop).toBe(300);
 });
 
 it("switches collections without making Pinned a prerequisite for All and restores scroll", () => {

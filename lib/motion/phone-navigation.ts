@@ -39,6 +39,16 @@ function paintPhoneNavigation(
   layers.dim.style.opacity = String((1 - progress) * 0.12);
 }
 
+function applyMotionPreference(
+  layers: PhoneNavigationLayers,
+  reducedMotion: boolean
+) {
+  layers.page.style.willChange = reducedMotion ? "opacity" : "transform";
+  layers.page.style.boxShadow = reducedMotion
+    ? ""
+    : "-6px 0 22px rgb(0 0 0 / 0.28)";
+}
+
 /** One compositor position drives the page, its real destination and depth. */
 export function createPhoneNavigationMotion(
   getLayers: () => PhoneNavigationLayers | null
@@ -69,14 +79,6 @@ export function createPhoneNavigationMotion(
     position = 0;
   };
 
-  const applyMotionPreference = () => {
-    if (!layers) return;
-    layers.page.style.willChange = reducedMotion() ? "opacity" : "transform";
-    layers.page.style.boxShadow = reducedMotion()
-      ? ""
-      : "-6px 0 22px rgb(0 0 0 / 0.28)";
-  };
-
   const prepare = () => {
     const next = getLayers();
     if (!next) return false;
@@ -89,7 +91,7 @@ export function createPhoneNavigationMotion(
     // Descendant visibility rules must not reveal an inactive retained screen.
     // Reveal its entire composited subtree only for the navigation motion.
     next.destination.style.opacity = "1";
-    applyMotionPreference();
+    applyMotionPreference(next, reducedMotion());
     next.destination.style.willChange = "transform";
     next.dim.style.willChange = "opacity";
     return true;
@@ -133,7 +135,7 @@ export function createPhoneNavigationMotion(
   const onMotionPreferenceChange = () => {
     if (!layers) return;
     layers.page.style.removeProperty("opacity");
-    applyMotionPreference();
+    applyMotionPreference(layers, reducedMotion());
     paint(position);
   };
   motionPreference.addEventListener("change", onMotionPreferenceChange);
@@ -148,6 +150,14 @@ export function createPhoneNavigationMotion(
         if (focused instanceof HTMLElement && source)
           entryFocus.set(source, focused);
         stop();
+        if (
+          getLayers()?.page.dataset["phoneNavigationScreen"] === "conversation"
+        ) {
+          entering = false;
+          clear();
+          navigate();
+          return true;
+        }
         entering = true;
         navigate();
         return true;
@@ -162,14 +172,17 @@ export function createPhoneNavigationMotion(
       entering = false;
       if (!prepare()) return null;
       const origin = position;
+      const started = generation;
       paint(position);
       return {
         origin,
         width,
         move(distance) {
+          if (started !== generation) return;
           if (!reducedMotion()) paint(origin + distance);
         },
         end(committed, velocity, navigate) {
+          if (started !== generation) return;
           settle(committed ? width : 0, velocity, committed ? navigate : clear);
         },
       };

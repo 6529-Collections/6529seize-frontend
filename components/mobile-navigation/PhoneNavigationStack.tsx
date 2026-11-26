@@ -10,10 +10,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import {
-  PhoneListLayoutProvider,
-  useLayout,
-} from "@/components/brain/my-stream/layout/LayoutContext";
+import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
+import PhoneListLayoutProvider from "./PhoneListLayoutProvider";
 import BottomNavigation from "@/components/navigation/BottomNavigation";
 import HeaderPlaceholder from "@/components/header/HeaderPlaceholder";
 import PullToRefresh from "@/components/providers/PullToRefresh";

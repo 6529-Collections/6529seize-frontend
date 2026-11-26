@@ -166,15 +166,17 @@ export default function CommunityCurations({
     PROFILE_WAVES_FEED_SCROLL_KEY,
     scrollContainerRef
   );
+  const hasRestoredScrollOffsetRef = useRef(initialScrollOffset === 0);
   const resetFreshEntry = useEffectEvent(() => {
     // Explicit Feed entry clears the saved offset; a retained Feed must follow it too.
-    if (getPosition(PROFILE_WAVES_FEED_SCROLL_KEY) === 0)
+    if (getPosition(PROFILE_WAVES_FEED_SCROLL_KEY) === 0) {
+      hasRestoredScrollOffsetRef.current = true;
       scrollContainerRef.current?.scrollTo({ top: 0 });
+    }
   });
   useLayoutEffect(() => {
     if (retainedScreen?.active) resetFreshEntry();
   }, [retainedScreen?.active]);
-  const hasRestoredScrollOffsetRef = useRef(initialScrollOffset === 0);
   const cancelScrollRestore = () => {
     hasRestoredScrollOffsetRef.current = true;
   };

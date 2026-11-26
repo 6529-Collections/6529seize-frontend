@@ -18,11 +18,14 @@ async function readBackground(page: Page) {
   return page
     .getByRole("textbox", { name: "Write a message" })
     .evaluate((composer) => {
+      const activePage =
+        composer.closest('[data-phone-navigation-screen="conversation"]') ??
+        document;
       const header =
-        document.querySelector('button[aria-label="Back"]') ??
-        document.querySelector("h1");
+        activePage.querySelector('button[aria-label="Back"]') ??
+        activePage.querySelector("h1");
       if (!header) throw new Error("Wave header must be mounted");
-      const root = document.querySelector(
+      const root = activePage.querySelector(
         "[data-mobile-bottom-nav-scroll-target]"
       );
       const bounds = (element: Element) => {
@@ -38,7 +41,7 @@ async function readBackground(page: Page) {
         scrollY: window.scrollY,
         scrollTop: document.scrollingElement?.scrollTop,
         scrollHeight: document.scrollingElement?.scrollHeight,
-        threadScrollTop: document.querySelector(
+        threadScrollTop: activePage.querySelector(
           "[data-wave-drops-scroll-container]"
         )?.scrollTop,
         viewport: {
@@ -145,8 +148,11 @@ test.describe("Image viewer background layout @auth @medium @local-only", () => 
           // bottom reserve on its real layout root, not an isolated modal host.
           await page
             .getByRole("button", { name: "Back", exact: true })
-            .evaluate(() => {
-              const root = document.querySelector<HTMLElement>(
+            .evaluate((back) => {
+              const activePage =
+                back.closest('[data-phone-navigation-screen="conversation"]') ??
+                document;
+              const root = activePage.querySelector<HTMLElement>(
                 "[data-mobile-bottom-nav-scroll-target]"
               );
               if (!root) throw new Error("Native layout root must be mounted");

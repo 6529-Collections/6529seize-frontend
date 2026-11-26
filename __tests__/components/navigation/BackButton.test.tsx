@@ -195,7 +195,7 @@ describe("BackButton", () => {
 
   it("clears the remembered wave only when the Back motion commits", () => {
     mockIsApp = true;
-    let complete = () => undefined;
+    let complete: () => void = () => undefined;
     mockChevronBack.mockImplementationOnce((_, navigate) => {
       complete = navigate;
     });

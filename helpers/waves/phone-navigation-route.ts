@@ -29,7 +29,12 @@ export function getPhoneNavigationRoute(
     };
   if (pathname === getEncryptedMessagesRoute())
     return { screen: "encrypted", destination: "messages", family: "messages" };
-  if (waveId) {
+  const isConversationFamily =
+    pathname === "/waves" ||
+    pathname.startsWith("/waves/") ||
+    pathname === "/messages" ||
+    pathname.startsWith("/messages/");
+  if (waveId && isConversationFamily) {
     const family = pathname.startsWith("/messages") ? "messages" : "waves";
     let destination: PhoneListScreen = "waves";
     if (family === "messages") destination = "messages";

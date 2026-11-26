@@ -110,7 +110,10 @@ export function useWaveListSwipeBack<T extends HTMLElement = HTMLDivElement>({
           phoneGesture.current.move(distance);
           return;
         }
-        position.current = Math.min(origin.current + distance, width.current);
+        position.current = Math.max(
+          0,
+          Math.min(origin.current + distance, width.current)
+        );
         surface.current?.style.setProperty(
           "transform",
           `translate3d(${position.current}px, 0, 0)`
@@ -178,7 +181,10 @@ export function useWaveListSwipeBack<T extends HTMLElement = HTMLDivElement>({
           return;
         }
         const destination = committed ? width.current : 0;
-        const start = Math.min(origin.current + distance, width.current);
+        const start = Math.max(
+          0,
+          Math.min(origin.current + distance, width.current)
+        );
         let navigated = false;
         const finishNavigation = () => {
           if (navigated || generation.current !== releasedGeneration) return;
@@ -201,7 +207,7 @@ export function useWaveListSwipeBack<T extends HTMLElement = HTMLDivElement>({
           : element.animate(
               [
                 {
-                  transform: `translate3d(${Math.min(distance, width.current)}px, 0, 0)`,
+                  transform: `translate3d(${start}px, 0, 0)`,
                 },
                 { transform: `translate3d(${destination}px, 0, 0)` },
               ],

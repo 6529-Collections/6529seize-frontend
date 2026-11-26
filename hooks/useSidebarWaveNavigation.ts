@@ -89,12 +89,12 @@ export function useSidebarWaveNavigation({
   const [debounced, setDebounced] = useState("");
   useDebounce(() => setDebounced(queryText.trim()), 350, [queryText]);
   const searching = enabled && queryText.trim().length > 0;
-  const queryEnabled =
-    screenActive &&
+  const hasMatchingSearch =
     searching &&
     viewer.enabled &&
     debounced.length >= 3 &&
     debounced === queryText.trim();
+  const queryEnabled = screenActive && hasMatchingSearch;
   const results = useInfiniteQuery({
     queryKey: [
       QueryKey.WAVES_SEARCH,
@@ -200,7 +200,7 @@ export function useSidebarWaveNavigation({
     queryText,
     setQueryText,
     results,
-    resultWaves: queryEnabled
+    resultWaves: hasMatchingSearch
       ? (results.data?.pages.flatMap((page) => page.waves) ?? [])
       : [],
     queryEnabled,

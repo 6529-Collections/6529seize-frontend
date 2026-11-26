@@ -50,6 +50,7 @@ interface Gesture {
   velocityDistance: number;
   velocityPeak: number;
   velocityPeakAt: number;
+  sourceVelocityPeakAt: number;
   velocity: number;
   readonly velocitySamples: { distance: number; time: number }[];
   movedAt: number;
@@ -169,36 +170,48 @@ function additionalTouch(event: TouchEvent) {
   if (event.touches.length !== 1) cancel();
 }
 
+function sampledVelocity(
+  samples: Gesture["velocitySamples"],
+  distance: number,
+  timestamp: number,
+  windowMs: number
+) {
+  samples.push({ distance, time: timestamp });
+  while (samples.length > 1 && timestamp - samples[0]!.time > windowMs)
+    samples.shift();
+  const first = samples[0]!;
+  return (distance - first.distance) / Math.max(1, timestamp - first.time);
+}
+
 function trackVelocity(current: Gesture, distance: number, timestamp: number) {
   if (distance === current.distance) return;
   const now = performance.now();
   if (distance > current.velocityPeak) {
     current.velocityPeak = distance;
     current.velocityPeakAt = now;
+    current.sourceVelocityPeakAt = timestamp;
   }
+  const windowMs = current.owner?.options.current.velocityWindowMs ?? 0;
   const reversing = current.velocityPeak - distance >= VELOCITY_JITTER_PX;
   const referenceDistance = reversing
     ? current.velocityPeak
     : current.velocityDistance;
-  const referenceTime = reversing ? current.velocityPeakAt : current.movedAt;
+  const peakAt =
+    windowMs > 0 ? current.sourceVelocityPeakAt : current.velocityPeakAt;
+  const referenceTime = reversing ? peakAt : current.movedAt;
   current.distance = distance;
   // Native WebViews interpolate tiny final moves as well as rounding release
   // coordinates. Keep either from replacing the finger's forward velocity.
   if (Math.abs(distance - referenceDistance) < VELOCITY_JITTER_PX) return;
-  const windowMs = current.owner?.options.current.velocityWindowMs ?? 0;
   const samples = current.velocitySamples;
   if (windowMs > 0 && !reversing) {
     // WebKit may batch delivery and taper a flick's last few pixels. Use
     // event times over a short window, rather than the last delivered pair.
-    samples.push({ distance, time: timestamp });
-    while (samples.length > 2 && timestamp - samples[1]!.time >= windowMs)
-      samples.shift();
-    const first = samples[0]!;
-    current.velocity =
-      (distance - first.distance) / Math.max(1, timestamp - first.time);
+    current.velocity = sampledVelocity(samples, distance, timestamp, windowMs);
   } else {
     current.velocity =
-      (distance - referenceDistance) / Math.max(1, now - referenceTime);
+      (distance - referenceDistance) /
+      Math.max(1, (windowMs > 0 ? timestamp : now) - referenceTime);
     // Reversing must cancel immediately, without older forward samples.
     if (windowMs > 0)
       samples.splice(0, samples.length, { distance, time: timestamp });
@@ -207,6 +220,7 @@ function trackVelocity(current: Gesture, distance: number, timestamp: number) {
   current.velocityDistance = distance;
   current.velocityPeak = distance;
   current.velocityPeakAt = now;
+  current.sourceVelocityPeakAt = timestamp;
 }
 
 function claimGesture(current: Gesture, deltaX: number, deltaY: number) {
@@ -372,6 +386,7 @@ export function useHorizontalSwipe(
         velocityDistance: 0,
         velocityPeak: 0,
         velocityPeakAt: performance.now(),
+        sourceVelocityPeakAt: event.timeStamp,
         velocity: 0,
         velocitySamples: [{ distance: 0, time: event.timeStamp }],
         movedAt: performance.now(),

@@ -290,6 +290,47 @@ it("keeps a phone Back flick when WebKit batches moves and slows its final sampl
   );
 });
 
+it("recognizes a fresh flick after holding the initial touch still", () => {
+  const callbacks = {
+    onMove: jest.fn(),
+    onReply: jest.fn(),
+    onBack: jest.fn(),
+    onRender: jest.fn(),
+  };
+  render(<Harness {...callbacks} velocityWindowMs={80} backThreshold={215} />);
+  const target = screen.getByTestId("text");
+  start(target, 80);
+  act(() => jest.advanceTimersByTime(1000));
+  move(target, 100);
+  act(() => jest.advanceTimersByTime(40));
+  move(target, 200);
+  end(target, 200);
+  expect(callbacks.onBack).toHaveBeenLastCalledWith(true, 120, 2500);
+});
+
+it("uses source time for a slow reversal even when events arrive together", () => {
+  let sourceTime = 1000;
+  jest
+    .spyOn(Event.prototype, "timeStamp", "get")
+    .mockImplementation(() => sourceTime);
+  const callbacks = {
+    onMove: jest.fn(),
+    onReply: jest.fn(),
+    onBack: jest.fn(),
+    onRender: jest.fn(),
+  };
+  render(<Harness {...callbacks} velocityWindowMs={80} backThreshold={215} />);
+  const target = screen.getByTestId("text");
+  start(target, 80);
+  sourceTime += 100;
+  move(target, 360);
+  act(() => jest.advanceTimersByTime(1));
+  sourceTime += 200;
+  move(target, 330);
+  end(target, 330);
+  expect(callbacks.onBack).toHaveBeenLastCalledWith(true, 250, -150);
+});
+
 it("still cancels a sampled phone flick after a hold or a deliberate reversal", () => {
   const callbacks = {
     onMove: jest.fn(),
