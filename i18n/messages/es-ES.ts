@@ -1338,6 +1338,14 @@ export const ES_ES_MESSAGES = {
   "e2ee.list.pinned": "Fijado",
   "e2ee.list.pinnedChat": "{title}, chat fijado",
   "e2ee.list.pinChat": "Fijar {title} arriba",
+  "e2ee.list.pinDragInstructions":
+    "Pulsa la barra espaciadora para levantar este chat. Usa las flechas para moverlo y pulsa la barra espaciadora para soltarlo o Escape para cancelar.",
+  "e2ee.list.pinDragStarted": "Chat fijado levantado.",
+  "e2ee.list.pinDragPosition": "Posición {position}.",
+  "e2ee.list.pinDragCancelled": "Reordenación cancelada.",
+  "e2ee.list.pinOrderSaved": "Orden de los chats fijados guardado.",
+  "e2ee.list.pinOrderError":
+    "No se pudo guardar el orden de los chats fijados. Inténtalo de nuevo.",
   "e2ee.info.pin": "Fijar arriba",
   "e2ee.info.unpin": "Desfijar chat",
   "e2ee.info.pinSyncHelp":

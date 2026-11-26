@@ -100,7 +100,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
       },
     });
     ctx.readSync = this.readSync;
-    ctx.store.conversationPinned = this.readSync.pins.isPinned;
+    ctx.store.conversationPin = this.readSync.pins.pinForThread;
     this.controller = new EngineController(ctx, {
       refreshMe: () => this.refreshMe(),
       onOwnRevoked: () => this.onOwnRejected(),
@@ -596,6 +596,9 @@ class E2eeEngineImpl implements E2eeEngineExt {
   setConversationPinned = (g: string, pinned: boolean): Promise<void> =>
     this.readSync.pins.set(g, pinned);
 
+  moveConversationPin = (thread: string, target: string): Promise<void> =>
+    this.readSync.pins.move(thread, target);
+
   async addMembers(g: string, profileIds: string[]) {
     this.requireReady();
     const result = await addMembers(
@@ -713,11 +716,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
 
   async importBackupHistory(history: BackupHistory) {
     this.requireReady();
-    const result = await this.ctx.queue.run(() =>
-      importBackupHistory(this.ctx, history, this.readSync.pins)
-    );
-    await resolveProfiles(this.ctx, memberProfileIds(this.ctx));
-    return result;
+    return importBackupHistory(this.ctx, history, this.readSync.pins);
   }
 
   // -- devices ----------------------------------------------------------------
