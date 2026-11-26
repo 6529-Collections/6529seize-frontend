@@ -30,6 +30,9 @@ The control requires a connected profile handle and no proxy session.
 Changing a level preserves independently configured group alert preferences,
 including `@dropforgeops`.
 
+`All messages` also keeps the saved broadcast preference. `Mentions and @all`
+enables both broadcasts; `Mentions only` disables them.
+
 ## Common Scenarios
 
 - Exactly one notification level is selected. Direct mentions, replies, and

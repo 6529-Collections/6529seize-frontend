@@ -36,6 +36,16 @@ const ALL = "All messages";
 const BROADCAST = "Mentions and @all";
 const MENTIONS = "Mentions only";
 const groups = [ApiDropGroupMention.All];
+const independentGroups = [
+  ApiDropGroupMention.Admins,
+  ApiDropGroupMention.Devs6529,
+  "DROPS_6529" as ApiDropGroupMention,
+];
+const savedGroups = [
+  ...groups,
+  ApiDropGroupMention.Contributors,
+  ...independentGroups,
+];
 
 function TestAuthProvider({ children }: { readonly children: ReactNode }) {
   const auth = useContext(AuthContext);
@@ -161,7 +171,7 @@ describe("WaveNotificationSettings", () => {
   });
 
   it.each([
-    [false, [], ALL, true, groups],
+    [false, [], ALL, true, []],
     [false, [], BROADCAST, false, groups],
     [false, groups, MENTIONS, false, []],
     [true, groups, BROADCAST, false, groups],
@@ -202,28 +212,22 @@ describe("WaveNotificationSettings", () => {
     }
   );
 
-  it.each([ALL, BROADCAST, MENTIONS])(
+  it.each([
+    [ALL, false, true, savedGroups],
+    [BROADCAST, true, false, [...groups, ...independentGroups]],
+    [MENTIONS, false, false, independentGroups],
+  ])(
     "preserves independent alert preferences when choosing %s",
-    async (target) => {
-      const otherGroups = [
-        ApiDropGroupMention.Admins,
-        ApiDropGroupMention.Devs6529,
-        "DROPS_6529" as ApiDropGroupMention,
-      ];
-      setPreferences(target === BROADCAST, [
-        ...groups,
-        ApiDropGroupMention.Contributors,
-        ...otherGroups,
-      ]);
+    async (target, subscribed, nextSubscribed, nextGroups) => {
+      setPreferences(subscribed, savedGroups);
       renderComponent();
       await openMenu();
       await userEvent.click(choice(target));
       expect(mockPost).toHaveBeenCalledWith({
         endpoint: "notifications/wave-subscription/wave-123",
         body: {
-          subscribed: target === ALL,
-          enabled_group_notifications:
-            target === MENTIONS ? otherGroups : [...groups, ...otherGroups],
+          subscribed: nextSubscribed,
+          enabled_group_notifications: nextGroups,
         },
       });
     }

@@ -47,11 +47,16 @@ export function useWavePreferenceSettings(wave: ApiWave) {
       if (loading || preferencesUnavailable || level === notificationLevel)
         return;
       setLoadingTarget(level);
-      const otherGroups = (data?.enabled_group_notifications ?? []).filter(
+      const currentGroups = data?.enabled_group_notifications ?? [];
+      const otherGroups = currentGroups.filter(
         (group) =>
           group !== BROADCAST_MENTION_PREFERENCE &&
           group !== ApiDropGroupMention.Contributors
       );
+      let enabledGroups = currentGroups;
+      if (level === MENTIONS_ONLY) enabledGroups = otherGroups;
+      else if (level === "broadcast-mentions")
+        enabledGroups = [BROADCAST_MENTION_PREFERENCE, ...otherGroups];
       let errorKey:
         | "enableAllMessages"
         | "disableAllMessages"
@@ -70,10 +75,7 @@ export function useWavePreferenceSettings(wave: ApiWave) {
           endpoint: `notifications/wave-subscription/${wave.id}`,
           body: {
             subscribed: level === ALL_MESSAGES,
-            enabled_group_notifications:
-              level === MENTIONS_ONLY
-                ? otherGroups
-                : [BROADCAST_MENTION_PREFERENCE, ...otherGroups],
+            enabled_group_notifications: enabledGroups,
           },
         });
         await refetch();
