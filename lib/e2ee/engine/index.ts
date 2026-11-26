@@ -99,7 +99,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
       },
     });
     ctx.readSync = this.readSync;
-    ctx.store.conversationPinned = this.readSync.pins.isPinned;
+    ctx.store.conversationPin = this.readSync.pins.pinForThread;
     this.controller = new EngineController(ctx, {
       refreshMe: () => this.refreshMe(),
       onOwnRevoked: () => this.onOwnRejected(),
@@ -588,6 +588,9 @@ class E2eeEngineImpl implements E2eeEngineExt {
 
   setConversationPinned = (g: string, pinned: boolean): Promise<void> =>
     this.readSync.pins.set(g, pinned);
+
+  moveConversationPin = (thread: string, target: string): Promise<void> =>
+    this.readSync.pins.move(thread, target);
 
   async addMembers(g: string, profileIds: string[]) {
     this.requireReady();

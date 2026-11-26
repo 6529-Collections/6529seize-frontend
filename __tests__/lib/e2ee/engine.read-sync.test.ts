@@ -159,6 +159,83 @@ describe("E2EE engine: read-state sync (D175, P60)", () => {
     const newcomer = await addSyncDevice(world, alice, { readSync: false });
     await settle(world);
     expect(newcomer.engine.getConversation(g)?.pinned).toBe(true);
+    expect(newcomer.engine.getConversation(g)?.pinPosition).toBe(0);
+  });
+
+  it("syncs pinned order to another device and puts new pins and re-pins last", async () => {
+    const world = await createWorld();
+    const { bob, laptop, phone, g } = await aliceWithTwoDevices(world);
+    const group = await laptop.engine.createConversation({
+      profileIds: [bob.profileId],
+      kind: "group",
+    });
+    await settle(world);
+    await laptop.engine.setConversationPinned(g, true);
+    await laptop.engine.setConversationPinned(group, true);
+    const positions = (device: TestDevice) =>
+      [g, group].map(
+        (chat) => device.engine.getConversation(chat)?.pinPosition
+      );
+    await settle(world);
+    expect(positions(phone)).toEqual([0, 1]);
+
+    await laptop.engine.moveConversationPin(
+      `group:${group}`,
+      `dm:${bob.profileId}`
+    );
+    expect(positions(laptop)).toEqual([1, 0]);
+    await settle(world);
+    expect(positions(phone)).toEqual([1, 0]);
+    expect(positions(bob.primary)).toEqual([undefined, undefined]);
+
+    await Promise.all([
+      laptop.engine.moveConversationPin(
+        `dm:${bob.profileId}`,
+        `group:${group}`
+      ),
+      phone.engine.setConversationPinned(g, false),
+    ]);
+    await settle(world);
+    expect(laptop.engine.getConversation(g)?.pinned).toBeUndefined();
+    expect(phone.engine.getConversation(g)?.pinned).toBeUndefined();
+    await phone.engine.setConversationPinned(g, true);
+    await settle(world);
+    expect(positions(laptop)).toEqual([1, 0]);
+  });
+
+  it("settles on one order when two devices reorder the same pins concurrently", async () => {
+    const world = await createWorld();
+    const { bob, laptop, phone, g } = await aliceWithTwoDevices(world);
+    const createGroup = () =>
+      laptop.engine.createConversation({
+        profileIds: [bob.profileId],
+        kind: "group",
+      });
+    const first = await createGroup();
+    const second = await createGroup();
+    const chats = [g, first, second];
+    await settle(world);
+    for (const chat of chats)
+      await laptop.engine.setConversationPinned(chat, true);
+    await settle(world);
+
+    const positions = (device: TestDevice) =>
+      chats.map((chat) => device.engine.getConversation(chat)?.pinPosition);
+    await Promise.all([
+      laptop.engine.moveConversationPin(
+        `group:${second}`,
+        `dm:${bob.profileId}`
+      ),
+      phone.engine.moveConversationPin(`group:${first}`, `dm:${bob.profileId}`),
+    ]);
+    const competing = [positions(laptop), positions(phone)];
+    expect(competing).toEqual([
+      [1, 2, 0],
+      [1, 0, 2],
+    ]);
+    await settle(world);
+    expect(positions(phone)).toEqual(positions(laptop));
+    expect(competing).toContainEqual(positions(laptop));
   });
 
   it("shares a received pin with a new device while local apply is delayed", async () => {

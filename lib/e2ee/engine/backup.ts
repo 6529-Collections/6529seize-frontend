@@ -59,8 +59,11 @@ export async function backupHistory(
   if (Object.keys(reads).length > 0) {
     out.reads = reads;
   }
-  const pins = Object.values(ctx.device?.conversationPins?.versions ?? {});
+  const saved = ctx.device?.conversationPins;
+  const pins = Object.values(saved?.versions ?? {});
   if (pins.length > 0) out.pins = pins;
+  const pinRanks = Object.values(saved?.ranks ?? {});
+  if (pinRanks.length > 0) out.pinRanks = pinRanks;
   return out;
 }
 
@@ -180,7 +183,7 @@ export async function importBackupHistory(
     ctx,
     new Map([...reads].filter(([g]) => !restoredHere.has(g)))
   );
-  await pins.merge(history.pins ?? []);
+  await pins.merge({ pins: history.pins ?? [], ranks: history.pinRanks ?? [] });
   return { conversations, messages: imported };
 }
 

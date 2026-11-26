@@ -214,6 +214,7 @@ function applyEffectiveAppPrCiPlan(plan) {
         "hooks/useSidebarWavePin.ts",
         "components/brain/left-sidebar/waves/SidebarWaveTouchActions.tsx",
         "components/brain/left-sidebar/waves/PinnedWaveTouchSensor.ts",
+        "components/brain/left-sidebar/waves/pinnedRowDrag.ts",
         "components/brain/left-sidebar/waves/SidebarPinnedWaves.tsx",
         "components/brain/left-sidebar/waves/BrainLeftSidebarWave.tsx",
         "components/brain/left-sidebar/web/WebBrainLeftSidebarWave/index.tsx",
