@@ -41,7 +41,24 @@ const NEXTGEN_ADMIN_ACTIONS: readonly RegExp[] = [
 ].map(exactName);
 
 const DROP_FORGE_WRITE_ACTIONS: readonly RegExp[] = [
+  /^Top Up ETH$/,
+  /^Review top-up$/,
+  /^Confirm in wallet$/,
+  /^Launch$/,
+  /^Update Claim$/,
+  /^Process and Finalize$/,
+  /^Prepare manually$/,
+  /^Resume automatic execution$/,
+  /^Pause automatic execution$/,
+  /^Retry now$/,
+  /^Record transaction$/,
+  /^Cancel unsubmitted manual operation$/,
   /^Add Admin$/,
+  /^Set limit$/,
+  /^Edit limit$/,
+  /^Save & Enable$/,
+  /^Enable$/,
+  /^Disable$/,
   /^Revoke admin /,
   /^Back to Drop Forge$/,
   /^View Claim/,
@@ -125,6 +142,14 @@ async function expectDropForgeDenied(
     timeout: 8000,
   });
   await expectNoMainButtons(page, DROP_FORGE_WRITE_ACTIONS);
+  await expect(
+    page.getByRole("switch", {
+      name: /Automatic launch/,
+    })
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("textbox", { name: "Maximum ETH per payout" })
+  ).toHaveCount(0);
   await expect(
     page.getByRole("heading", { name: "Contract Admins" })
   ).toHaveCount(0);
