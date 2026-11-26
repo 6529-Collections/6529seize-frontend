@@ -1,4 +1,5 @@
 import { useAuth } from "@/components/auth/Auth";
+import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiUpdateWaveNotificationPreferencesRequest } from "@/generated/models/ApiUpdateWaveNotificationPreferencesRequest";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveNotificationPreferences } from "@/generated/models/ApiWaveNotificationPreferences";
@@ -46,6 +47,11 @@ export function useWavePreferenceSettings(wave: ApiWave) {
       if (loading || preferencesUnavailable || level === notificationLevel)
         return;
       setLoadingTarget(level);
+      const otherGroups = (data?.enabled_group_notifications ?? []).filter(
+        (group) =>
+          group !== BROADCAST_MENTION_PREFERENCE &&
+          group !== ApiDropGroupMention.Contributors
+      );
       let errorKey:
         | "enableAllMessages"
         | "disableAllMessages"
@@ -65,7 +71,9 @@ export function useWavePreferenceSettings(wave: ApiWave) {
           body: {
             subscribed: level === ALL_MESSAGES,
             enabled_group_notifications:
-              level === MENTIONS_ONLY ? [] : [BROADCAST_MENTION_PREFERENCE],
+              level === MENTIONS_ONLY
+                ? otherGroups
+                : [BROADCAST_MENTION_PREFERENCE, ...otherGroups],
           },
         });
         await refetch();
@@ -91,6 +99,7 @@ export function useWavePreferenceSettings(wave: ApiWave) {
     },
     [
       loading,
+      data?.enabled_group_notifications,
       preferencesUnavailable,
       notificationLevel,
       wave.id,

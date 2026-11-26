@@ -26,6 +26,8 @@ The control requires a connected profile handle and no proxy session.
 3. Choose `Mute` to stop wave alerts, or `Unmute` to restore the saved level.
 4. Choosing a level or Mute/Unmute closes the menu.
 
+Changing a level preserves independently configured group alert preferences.
+
 ## Common Scenarios
 
 - Exactly one notification level is selected. Direct mentions, replies, and

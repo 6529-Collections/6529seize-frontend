@@ -202,6 +202,33 @@ describe("WaveNotificationSettings", () => {
     }
   );
 
+  it.each([ALL, BROADCAST, MENTIONS])(
+    "preserves independent alert preferences when choosing %s",
+    async (target) => {
+      const otherGroups = [
+        ApiDropGroupMention.Admins,
+        ApiDropGroupMention.Devs6529,
+        "DROPS_6529" as ApiDropGroupMention,
+      ];
+      setPreferences(target === BROADCAST, [
+        ...groups,
+        ApiDropGroupMention.Contributors,
+        ...otherGroups,
+      ]);
+      renderComponent();
+      await openMenu();
+      await userEvent.click(choice(target));
+      expect(mockPost).toHaveBeenCalledWith({
+        endpoint: "notifications/wave-subscription/wave-123",
+        body: {
+          subscribed: target === ALL,
+          enabled_group_notifications:
+            target === MENTIONS ? otherGroups : [...groups, ...otherGroups],
+        },
+      });
+    }
+  );
+
   it("closes without toggling off the already selected level", async () => {
     renderComponent();
     await openMenu();
