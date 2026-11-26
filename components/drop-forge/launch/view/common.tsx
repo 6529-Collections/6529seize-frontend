@@ -4,6 +4,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import Toggle from "react-toggle";
+import { DropForgeAutoLaunchPill } from "@/components/drop-forge/DropForgeAutoLaunchPill";
 import DropForgeLaunchIcon from "@/components/common/icons/DropForgeLaunchIcon";
 import DropForgeExplorerLink from "@/components/drop-forge/DropForgeExplorerLink";
 import DropForgeFieldBox from "@/components/drop-forge/DropForgeFieldBox";
@@ -13,6 +14,7 @@ import DropForgeTestnetIndicator from "@/components/drop-forge/DropForgeTestnetI
 import { getDropForgeStorageLocationInfo } from "@/components/drop-forge/drop-forge-storage-location.helpers";
 import type { DropForgeLaunchClaimPermissionFallbackViewProps } from "@/components/drop-forge/launch/view/types";
 import type { ApiMintingClaimAction } from "@/generated/models/ApiMintingClaimAction";
+import type { ReactNode } from "react";
 
 export const BTN_SUBSCRIPTIONS_AIRDROP =
   "tw-h-12 tw-w-full lg:tw-w-64 tw-rounded-lg tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-400/60 tw-bg-primary-500 tw-px-5 tw-text-base tw-font-semibold tw-text-white tw-transition-colors tw-duration-150 enabled:hover:tw-bg-primary-600 enabled:hover:tw-ring-primary-300 enabled:active:tw-bg-primary-700 enabled:active:tw-ring-primary-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-50";
@@ -87,7 +89,12 @@ export function DropForgeLaunchClaimPermissionFallbackView({
 export function DropForgeLaunchClaimHeader({
   pageTitle,
   craftHref,
-}: Readonly<{ pageTitle: string; craftHref: string }>) {
+  showAutoLaunch,
+}: Readonly<{
+  pageTitle: string;
+  craftHref: string;
+  showAutoLaunch: boolean;
+}>) {
   return (
     <div className="tw-mb-6">
       <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-gap-4">
@@ -110,6 +117,7 @@ export function DropForgeLaunchClaimHeader({
         <h1 className="tw-mb-0 tw-inline-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-center tw-gap-2 tw-text-center tw-text-2xl tw-font-semibold tw-text-iron-50 sm:tw-w-auto sm:tw-justify-start sm:tw-gap-3 sm:tw-text-left sm:tw-text-3xl">
           <DropForgeLaunchIcon className="tw-h-7 tw-w-7 tw-flex-shrink-0 sm:tw-h-8 sm:tw-w-8" />
           <span className="tw-break-words">{pageTitle}</span>
+          {showAutoLaunch && <DropForgeAutoLaunchPill />}
         </h1>
         <DropForgeLaunchPageTitleRight />
       </div>
@@ -224,12 +232,14 @@ function DropForgeActionCompletionToggle({
 
 export function DropForgeSectionTitleWithToggle({
   title,
+  status,
   action,
   toggleDisabled,
   toggleAriaLabel,
   onActionToggle,
 }: Readonly<{
   title: string;
+  status?: ReactNode;
   action: ApiMintingClaimAction | null | undefined;
   toggleDisabled: boolean;
   toggleAriaLabel: string;
@@ -238,6 +248,7 @@ export function DropForgeSectionTitleWithToggle({
   return (
     <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
       <div className="tw-text-base tw-font-medium tw-text-white">{title}</div>
+      {status}
       <DropForgeActionCompletionToggle
         action={action}
         disabled={toggleDisabled}

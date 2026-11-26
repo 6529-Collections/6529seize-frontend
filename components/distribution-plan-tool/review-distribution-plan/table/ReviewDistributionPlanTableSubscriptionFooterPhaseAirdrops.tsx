@@ -183,7 +183,10 @@ export function DistributionPhaseAirdropsModal(
     }
 
     try {
-      const nextCsvContent = await file.text();
+      const nextCsvContent = (await file.text()).replace(
+        /^\s*address,count[ \t]*(?:\r?\n|$)/,
+        ""
+      );
       setCsvContent(nextCsvContent);
       setSelectedFileName(file.name);
       setInputError(null);
@@ -285,8 +288,9 @@ export function DistributionPhaseAirdropsModal(
               </code>
             </div>
             <div className="tw-mb-2">
-              Do not include a header row. Each line must contain exactly one
-              wallet address and one positive integer count.
+              CSV files may start with the <code>address,count</code> header.
+              When pasting, enter only data rows. Each data row needs a wallet
+              address and a positive integer count.
             </div>
             <pre className="tw-mb-0 tw-overflow-x-auto tw-rounded tw-bg-iron-900 tw-p-2 tw-text-xs tw-text-iron-50">
               <code>
