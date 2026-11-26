@@ -1,0 +1,477 @@
+import type {
+  ApiE2eeEntryKind,
+  ApiE2eeLogItem,
+  ApiE2eeWelcome,
+} from "@/lib/e2ee/api-types";
+import { bytesToBase64 } from "@/lib/e2ee/bytes";
+import {
+  type CrpOpener,
+  type RelayAuth,
+  RelayConnection,
+  RelayReadError,
+} from "./crp-client";
+import {
+  decodeRecordContent,
+  MissingBytes,
+  type RecordContent,
+  type Row,
+} from "./record-content";
+import {
+  contentRefOf,
+  deletedIdsOf,
+  isDeletion,
+  isOrdererRecord,
+  type RelayItem,
+  type RelaySignedEvent,
+  sha256Hex,
+} from "./relay-records";
+
+const PAGE = 500;
+const WELCOMES_PER_PAGE = 50;
+const PAGE_BYTE_BUDGET = 2.5 * 1024 * 1024;
+const WELCOME_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
+
+/** One verified record of a stream, decoded. */
+interface StreamRecord {
+  /** The event id, lowercase: what an orderer's DEL names. */
+  readonly id: string;
+  readonly pos: number;
+  readonly prev: string | null;
+  readonly hash: string;
+  readonly content: RecordContent;
+}
+
+interface StreamState {
+  after: number;
+  readonly records: StreamRecord[];
+  /** Event ids the orderer's DELs name: records the relays no longer serve. */
+  readonly deleted: Set<string>;
+  /** Event ids of the records accepted into `records`. */
+  readonly accepted: Set<string>;
+  /** Positions passed over so far: never more than the DELs account for. */
+  missing: number;
+}
+
+/** The head of a stream as 6529.io holds it: its newest record. */
+interface RelayStreamHead {
+  readonly pos: number;
+  readonly hash: string;
+}
+
+interface RelayReaderSettings {
+  readonly urls: readonly string[];
+  readonly net: string;
+  readonly ordererKey: string;
+  readonly auth: () => Promise<RelayAuth | null>;
+  readonly open?: CrpOpener | undefined;
+  readonly now?: (() => number) | undefined;
+}
+
+function rowsOf(
+  records: readonly StreamRecord[],
+  table: string
+): Map<string, Row> {
+  const rows = new Map<string, Row>();
+  const keyOf = (row: Row, columns: readonly string[]) =>
+    JSON.stringify(columns.map((column) => row[column] ?? null));
+  const columnsOf: Record<string, readonly string[]> = {
+    e2ee_welcomes: ["id"],
+    e2ee_welcome_deliveries: ["welcome_id", "device_key"],
+    e2ee_log: ["group_handle", "seq"],
+    e2ee_group_roster: ["id"],
+    e2ee_blob_chunks: ["blob_id", "chunk_index"],
+    e2ee_blobs: ["blob_id"],
+    e2ee_devices: ["device_key"],
+  };
+  const columns = columnsOf[table] ?? [];
+  for (const record of records) {
+    for (const op of record.content.ops) {
+      if (op.table !== table) continue;
+      if (op.op === "put") {
+        rows.set(keyOf(op.row, columns), op.row);
+        continue;
+      }
+      deleteMatching(rows, op.key);
+    }
+  }
+  return rows;
+}
+
+/** Removes the rows whose columns hold every value the key names. */
+function deleteMatching(rows: Map<string, Row>, key: Row): void {
+  for (const [id, row] of Array.from(rows.entries())) {
+    const matches = Object.entries(key).every(
+      ([column, value]) => row[column] === value
+    );
+    if (matches) rows.delete(id);
+  }
+}
+
+/** A text column's value; anything else in it is a malformed record. */
+function textOf(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (typeof value === "number") return String(value);
+  throw new RelayReadError("A text column holds something else");
+}
+
+function entryKind(value: unknown): ApiE2eeEntryKind | null {
+  if (value === 1) return "commit";
+  if (value === 2) return "proposal";
+  return null;
+}
+
+function parseKeyList(value: unknown): string[] {
+  if (typeof value !== "string" || !value) return [];
+  const parsed = JSON.parse(value) as unknown;
+  return Array.isArray(parsed)
+    ? parsed.filter((item): item is string => typeof item === "string")
+    : [];
+}
+
+/**
+ * Reads the delivery service's streams from the relays as a member device
+ * does: every record must be the orderer's (pinned key) and follow the hash
+ * chain; anything else throws, and the caller falls back to 6529.io's REST
+ * routes. Streams are cached and read onward from the last page.
+ */
+export class E2eeRelayReader {
+  private connection: Promise<RelayConnection> | null = null;
+  private readonly streams = new Map<string, StreamState>();
+
+  constructor(private readonly settings: RelayReaderSettings) {}
+
+  private now(): number {
+    return (this.settings.now ?? Date.now)();
+  }
+
+  private async connect(): Promise<RelayConnection> {
+    const existing = this.connection
+      ? await this.connection.catch(() => null)
+      : null;
+    if (existing?.isOpen) return existing;
+    const auth = await this.settings.auth();
+    if (!auth) throw new RelayReadError("No device grant for relay reads");
+    const attempt = (async () => {
+      let lastError: unknown = null;
+      for (const url of this.settings.urls) {
+        try {
+          return await RelayConnection.open({
+            url,
+            net: this.settings.net,
+            auth,
+            open: this.settings.open,
+          });
+        } catch (error) {
+          lastError = error;
+        }
+      }
+      throw lastError instanceof Error
+        ? lastError
+        : new RelayReadError("No relay could be reached");
+    })();
+    this.connection = attempt;
+    attempt.catch(() => {
+      if (this.connection === attempt) this.connection = null;
+    });
+    return attempt;
+  }
+
+  close(): void {
+    void this.connection
+      ?.then((connection) => connection.close())
+      .catch(() => undefined);
+    this.connection = null;
+  }
+
+  private async verified(item: RelayItem): Promise<StreamRecord | null> {
+    if (!(await isOrdererRecord(item.event, this.settings.ordererKey))) {
+      throw new RelayReadError(`Record ${item.event.id} is not the orderer's`);
+    }
+    const ref = contentRefOf(item.event);
+    if (!ref) return null;
+    let bytes = ref.inline;
+    if (!bytes && ref.payload) {
+      const payload = await (await this.connect()).payload(ref.payload.h);
+      if ((await sha256Hex(payload)) !== ref.payload.h) {
+        throw new RelayReadError("A payload does not match its hash");
+      }
+      bytes = payload;
+    }
+    if (!bytes) throw new RelayReadError("A record has no content");
+    const content = decodeRecordContent(bytes);
+    return {
+      id: item.event.id.toLowerCase(),
+      pos: content.pos,
+      prev: content.prev,
+      hash: await sha256Hex(bytes),
+      content,
+    };
+  }
+
+  /**
+   * The stream's records so far, verified and chained, read onward. The
+   * orderer's DELs are read first: the relays serve a record a DEL names
+   * no more, so its position may be missing, once per id a DEL names.
+   */
+  private async read(wave: string): Promise<readonly StreamRecord[]> {
+    const state = this.streams.get(wave) ?? {
+      after: 0,
+      records: [],
+      deleted: new Set<string>(),
+      accepted: new Set<string>(),
+      missing: 0,
+    };
+    const connection = await this.connect();
+    const fresh: StreamRecord[] = [];
+    for (;;) {
+      const page = await connection.history(wave, state.after, PAGE);
+      for (const item of page.items) {
+        state.after = Math.max(state.after, item.rseq);
+        if (isDeletion(item.event)) {
+          await this.takeDeletion(state, item.event);
+          continue;
+        }
+        const record = await this.verified(item);
+        if (record) fresh.push(record);
+      }
+      if (!page.more || !page.items.length) break;
+    }
+    fresh.sort((a, b) => a.pos - b.pos);
+    for (const record of fresh) this.accept(state, record);
+    this.streams.set(wave, state);
+    return state.records;
+  }
+
+  /** Notes the ids an orderer's DEL names; a DEL from anyone else throws. */
+  private async takeDeletion(
+    state: StreamState,
+    event: RelaySignedEvent
+  ): Promise<void> {
+    if (!(await isOrdererRecord(event, this.settings.ordererKey))) {
+      throw new RelayReadError(`Record ${event.id} is not the orderer's`);
+    }
+    deletedIdsOf(event).forEach((id) => state.deleted.add(id));
+  }
+
+  private accept(state: StreamState, record: StreamRecord): void {
+    // A record an orderer's DEL names is not applied, even if a relay still
+    // serves it: its position is one of the gaps the DEL accounts for.
+    if (state.deleted.has(record.id)) return;
+    const last = state.records[state.records.length - 1];
+    if (last && record.pos <= last.pos) {
+      if (
+        state.records.some(
+          (r) => r.pos === record.pos && r.hash === record.hash
+        )
+      ) {
+        return;
+      }
+      throw new RelayReadError("Two records at one position");
+    }
+    const gap = record.pos - (last?.pos ?? 0) - 1;
+    if (gap === 0) {
+      if (record.prev !== (last?.hash ?? null)) {
+        throw new RelayReadError("The stream's hash chain is broken");
+      }
+    } else if (gap < 0 || state.missing + gap > this.allowedGaps(state)) {
+      // Only the orderer's DELs may take positions out of a stream: one
+      // each, and none for a record accepted before its DEL arrived.
+      throw new RelayReadError("The stream's hash chain is broken");
+    } else {
+      state.missing += gap;
+    }
+    state.records.push(record);
+    state.accepted.add(record.id);
+  }
+
+  /** The positions the DELs read so far may account for. */
+  private allowedGaps(state: StreamState): number {
+    let allowed = 0;
+    for (const id of Array.from(state.deleted)) {
+      if (!state.accepted.has(id)) allowed++;
+    }
+    return allowed;
+  }
+
+  /**
+   * The device must be active, as the REST routes require: its row in its
+   * own stream (`dr/<device>`) exists, is not revoked and has not expired.
+   */
+  private async requireActiveDevice(deviceKey: string): Promise<void> {
+    const key = deviceKey.toLowerCase();
+    const device = rowsOf(await this.read(`dr/${key}`), "e2ee_devices").get(
+      JSON.stringify([key])
+    );
+    if (
+      device?.["revoked_at"] !== null ||
+      Number(device["expires_at_seconds"]) * 1000 <= this.now()
+    ) {
+      throw new RelayReadError("The device is not active");
+    }
+  }
+
+  private async bytesOf(value: unknown): Promise<Uint8Array> {
+    if (value instanceof Uint8Array) return value;
+    if (value instanceof MissingBytes) {
+      const bytes = await (await this.connect()).payload(value.sha256);
+      if ((await sha256Hex(bytes)) !== value.sha256) {
+        throw new RelayReadError("A payload does not match its hash");
+      }
+      return bytes;
+    }
+    throw new RelayReadError("Expected bytes");
+  }
+
+  /**
+   * The device's pending Welcomes, as `GET e2ee/devices/{k}/welcomes`.
+   * `head` is 6529.io's head of the device's inbox stream: relays that do
+   * not hold that record throw, so the caller reads from 6529.io instead.
+   */
+  async welcomes(
+    deviceKey: string,
+    head: RelayStreamHead
+  ): Promise<ApiE2eeWelcome[]> {
+    await this.requireActiveDevice(deviceKey);
+    const records = await this.read(`dv/${deviceKey.toLowerCase()}`);
+    const newest = records.find((record) => record.pos === head.pos);
+    if (newest?.hash !== head.hash.toLowerCase()) {
+      throw new RelayReadError("The relays are behind 6529.io for this inbox");
+    }
+    const welcomes = rowsOf(records, "e2ee_welcomes");
+    const cutoff = this.now() - WELCOME_RETENTION_MS;
+    const deliveries = Array.from(
+      rowsOf(records, "e2ee_welcome_deliveries").values()
+    )
+      .filter(
+        (row) =>
+          row["device_key"] === deviceKey.toLowerCase() &&
+          Number(row["created_at"]) >= cutoff
+      )
+      .sort(
+        (a, b) =>
+          Number(a["created_at"]) - Number(b["created_at"]) ||
+          textOf(a["welcome_id"]).localeCompare(textOf(b["welcome_id"]))
+      )
+      .slice(0, WELCOMES_PER_PAGE);
+    const out: ApiE2eeWelcome[] = [];
+    let bytes = 0;
+    for (const delivery of deliveries) {
+      const welcome = welcomes.get(JSON.stringify([delivery["welcome_id"]]));
+      if (!welcome) continue;
+      const data = await this.bytesOf(welcome["data"]);
+      const tree =
+        welcome["ratchet_tree"] === null
+          ? null
+          : await this.bytesOf(welcome["ratchet_tree"]);
+      bytes += data.length + (tree?.length ?? 0);
+      if (out.length && bytes > PAGE_BYTE_BUDGET) break;
+      out.push({
+        id: textOf(welcome["id"]),
+        group: textOf(welcome["group_handle"]),
+        epoch: Number(welcome["epoch"]),
+        data: bytesToBase64(data),
+        ratchet_tree: tree ? bytesToBase64(tree) : null,
+        added_by_profile_id: textOf(welcome["added_by_profile_id"]),
+        added_by_device_key: textOf(welcome["added_by_device_key"]),
+        created_at: Number(welcome["created_at"]),
+      });
+    }
+    return out;
+  }
+
+  /**
+   * A page of a group's log for one device, as `GET e2ee/groups/{g}/log`
+   * pages it: items after `afterSeq` inside the device's roster windows.
+   * `lastSeq` is 6529.io's head for the group; a relay that has not caught
+   * up with it throws, so the caller reads the page from 6529.io instead.
+   */
+  async log(input: {
+    readonly group: string;
+    readonly deviceKey: string;
+    readonly afterSeq: number;
+    readonly limit: number;
+    readonly lastSeq: number;
+  }): Promise<{
+    readonly items: ApiE2eeLogItem[];
+    readonly next_after_seq: number | null;
+  }> {
+    const group = input.group.toLowerCase();
+    const device = input.deviceKey.toLowerCase();
+    await this.requireActiveDevice(device);
+    const records = await this.read(`cv/${group}`);
+    const log = Array.from(rowsOf(records, "e2ee_log").values());
+    const highest = log.reduce(
+      (max, row) => Math.max(max, Number(row["seq"])),
+      0
+    );
+    if (highest < input.lastSeq) {
+      throw new RelayReadError("The relays are behind 6529.io for this group");
+    }
+    const windows = Array.from(rowsOf(records, "e2ee_group_roster").values())
+      .filter((row) => row["device_key"] === device)
+      .map((row) => ({
+        from: Number(row["joined_epoch"]),
+        to: row["removed_epoch"] === null ? null : Number(row["removed_epoch"]),
+      }));
+    if (!windows.length) throw new RelayReadError("No window for this device");
+    const inWindow = (epoch: number) =>
+      windows.some((w) => epoch >= w.from && (w.to === null || epoch < w.to));
+    const rows = log
+      .filter((row) => Number(row["seq"]) > input.afterSeq)
+      .filter((row) => inWindow(Number(row["epoch"])))
+      .sort((a, b) => Number(a["seq"]) - Number(b["seq"]))
+      .slice(0, input.limit + 1);
+    const page: ApiE2eeLogItem[] = [];
+    let bytes = 0;
+    for (const row of rows.slice(0, input.limit)) {
+      bytes += Number(row["padded_len"]);
+      if (page.length && bytes > PAGE_BYTE_BUDGET) break;
+      page.push(await this.logItem(row));
+    }
+    const hasMore = rows.length > page.length;
+    return {
+      items: page,
+      next_after_seq:
+        hasMore && page.length ? page[page.length - 1]!.seq : null,
+    };
+  }
+
+  private async logItem(row: Row): Promise<ApiE2eeLogItem> {
+    const isEntry = row["item_type"] === "entry";
+    const text = (column: string) =>
+      row[column] === null ? null : textOf(row[column]);
+    return {
+      seq: Number(row["seq"]),
+      type: isEntry ? "entry" : "message",
+      epoch: Number(row["epoch"]),
+      kind: isEntry ? entryKind(row["kind"]) : null,
+      data: bytesToBase64(await this.bytesOf(row["data"])),
+      entry_hash: text("entry_hash"),
+      epoch_commitment: text("epoch_commitment"),
+      next_commit_key: text("next_commit_key"),
+      signature: text("signature"),
+      roster_add: parseKeyList(row["roster_add"]),
+      roster_remove: parseKeyList(row["roster_remove"]),
+      epoch_fp: text("epoch_fp"),
+      created_at: Number(row["created_at"]),
+    };
+  }
+
+  /** One attachment chunk's bytes, base64, as the blob routes serve them. */
+  async blobChunk(
+    blobId: string,
+    index: number,
+    deviceKey: string
+  ): Promise<string> {
+    await this.requireActiveDevice(deviceKey);
+    const records = await this.read(`bl/${blobId.toLowerCase()}`);
+    const blob = rowsOf(records, "e2ee_blobs");
+    const chunk = rowsOf(records, "e2ee_blob_chunks").get(
+      JSON.stringify([blobId.toLowerCase(), index])
+    );
+    if (!chunk || blob.size === 0) {
+      throw new RelayReadError("No such attachment chunk on the relays");
+    }
+    return bytesToBase64(await this.bytesOf(chunk["data"]));
+  }
+}

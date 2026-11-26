@@ -12,6 +12,20 @@ interface E2eeRequestTransport {
   put: <T>(endpoint: string, body: object) => Promise<T>;
 }
 const enc = encodeURIComponent;
+const HASH = /^0x[0-9a-f]{64}$/u;
+
+/** The inbox head 6529.io names while records are on, if well formed. */
+function relayHeadOf(
+  value: unknown
+): { readonly pos: number; readonly hash: string } | null {
+  if (typeof value !== "object" || value === null) return null;
+  const { pos, hash } = value as Record<string, unknown>;
+  if (typeof pos !== "number" || !Number.isSafeInteger(pos) || pos < 1) {
+    return null;
+  }
+  if (typeof hash !== "string" || !HASH.test(hash.toLowerCase())) return null;
+  return { pos, hash: hash.toLowerCase() };
+}
 
 /** Endpoint mapping shared with the staging QA transport. Account checks stay in requests(). */
 export function buildE2eeApiClient({
@@ -67,11 +81,9 @@ export function buildE2eeApiClient({
     getDeviceGroups: (deviceKey, signal) =>
       get(`e2ee/devices/${enc(deviceKey)}/groups`, undefined, signal),
     getDeviceInboxStatus: async (deviceKey, signal) => {
-      const status = await get<Partial<ApiE2eeDeviceInboxStatus> | null>(
-        `e2ee/devices/${enc(deviceKey)}/inbox-status`,
-        undefined,
-        signal
-      );
+      const status = await get<
+        (Partial<ApiE2eeDeviceInboxStatus> & { relay_head?: unknown }) | null
+      >(`e2ee/devices/${enc(deviceKey)}/inbox-status`, undefined, signal);
       const queued = status?.has_queued_welcomes;
       if (
         typeof status?.has_pending_chats !== "boolean" ||
@@ -79,9 +91,11 @@ export function buildE2eeApiClient({
       ) {
         throw new TypeError("Invalid encrypted inbox status");
       }
+      const head = relayHeadOf(status.relay_head);
       return {
         has_pending_chats: status.has_pending_chats,
         ...(queued === undefined ? {} : { has_queued_welcomes: queued }),
+        ...(head ? { relay_head: head } : {}),
       };
     },
     createBlob: (body) => post(`e2ee/blobs`, body),
