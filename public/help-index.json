@@ -1675,6 +1675,7 @@
         "The guide links to the current in-app mint at /the-memes/mint and the official standalone mint page at https://thememes.6529.io/.",
         "Users can choose regular minting or subscription minting; a subscription does not create eligibility and can mint only in a phase the destination wallet already qualifies for.",
         "The current mint flow can move through Phase 0, Phase 1, Phase 2, and a public phase for a card.",
+        "Standard Memes phase windows follow Europe/Athens local time, including daylight saving: Phase 0 17:40–18:20, Phase 1 18:30–18:50, Phase 2 19:00–19:20, and Public 19:20–17:00 the next day. The card shows its active phase and eligibility.",
         "The live mint page is the source of truth for the current card, active phase, exact mint price and platform fee, remaining supply, and wallet eligibility.",
         "The guide links to /meme-calendar and @6529collections for current timing because mint dates can change.",
         "The February 2023 allowlist explanation is preserved only as dated historical context, not as the eligibility policy for the current card."
@@ -3857,6 +3858,7 @@
         "read-only encrypted chat",
         "continue the conversation",
         "pin an encrypted chat",
+        "reorder pinned encrypted chats",
         "pin a DM"
       ],
       "keywords": [
@@ -3913,6 +3915,7 @@
         "Encrypted messages trust each person's wallets the first time your device sees them (trust on first use). A member's later device is added automatically only when one of those wallets signed it. A device signed by a new wallet, or by a contract wallet whose signature could not be checked, is not added: the chat shows a notice naming the wallet with Add device and Ignore. Add it only if you know whose wallet it is. Chat info shows the wallet that signed each member's device. Your own profile is never trusted on first sighting: your other devices are added automatically only when signed by this device's wallet or by a wallet you added here with Add device; in Devices such a device shows Not added on this device with Add device. When someone else adds a member's device that your device has not verified for that person, the timeline notice says it isn't verified for them on this device, and Chat info marks it Not verified for that person on this device.",
         "Open a message's menu to mute the chat on this device, block its sender (they cannot start new chats with you or add you to encrypted chats), or choose who can message you in Preferences.",
         "Select the pin icon on a chat row in the encrypted inbox or sidebar. On rows that show the time, the pin is immediately to its left. Hover the row or tab to the icon on desktop, or tap the icon on a touchscreen. Pinned chats appear above unpinned chats. Select the filled pin to unpin the chat. Chat info also offers Pin to top and Unpin chat. Pins sync privately to your own trusted devices when encrypted sync is available and are included in the optional encrypted backup. When a direct message continues in a new encryption session, its inbox pin follows it.",
+        "Drag a pinned encrypted chat row to reorder it. On touch, hold briefly, then drag vertically. With a keyboard, focus the row, press Space, move it with the arrow keys, and press Space again to save. Escape cancels. New pins and re-pins go to the bottom. The order syncs privately to your trusted devices and is included in the optional encrypted backup.",
         "Reporting is for illegal or severe harm only: child sexual abuse material, a credible threat of violence, intimate images shared without consent, or doxxing. Only the selected message is shared, with proof its sender sent it, and it goes to 6529's moderators, who review it in WatchTower's Encrypted reports tab, not to wave moderators. The dialog shows the text and attachment names that will be sent. An edited message is reported as the edited version you see; the original is sent too only if you tick Also send the original message. Nothing else in the conversation is revealed.",
         "Encrypted messages run in one browser tab at a time per profile. Other tabs show Encrypted messages are open in another tab. with Use here, which moves them to that tab and pauses the first one.",
         "In the app sidebar, Disconnect & Logout, Logout, and Sign Out All Profiles close the menu before showing the encrypted messages choice when it applies. Choose Cancel to stay signed in.",
@@ -5985,7 +5988,10 @@
         "Drop Forge is the area for claim/drop workflows from craft to launch.",
         "The hub links to Craft and Launch sections, with list and detail pages for each.",
         "The creator owner and approved on-chain admins have Drop Forge landing and Launch access alongside configured claims admins. Craft remains restricted to distribution admins.",
-        "The Contract Admins card lists the creator owner first and all approved on-chain admins for every wallet with landing access. The creator contract links to Etherscan for the active chain. Each row puts its Owner/Admin badge above the available mainnet ENS name and full wallet address, wrapping on narrow screens. The header's Add Admin button expands an inline wallet or ENS input above the list; Cancel closes and clears it. Refresh shows a spinner while reloading. Add and Revoke controls are shown only to the owner and configured claims admins. The contract itself only permits the owner to approve or revoke admins; configured non-owner calls still fail. These transactions do not change environment admin lists or transfer ownership.",
+        "The Contract Admins card lists the creator owner first and all approved on-chain admins for every wallet with landing access. Expand Contract Admins on the hub to see the list and controls. It starts collapsed and opens independently of Launch Automation. The creator contract links to Etherscan for the active chain. Each row puts its Owner/Admin badge above the available mainnet ENS name and full wallet address, wrapping on narrow screens. The header's Add Admin button expands an inline wallet or ENS input above the list; Cancel closes and clears it. Refresh shows a spinner while reloading. Add and Revoke controls are shown only to the owner and configured claims admins. The contract itself only permits the owner to approve or revoke admins; configured non-owner calls still fail. These transactions do not change environment admin lists or transfer ownership.",
+        "Launch Automation is on the Drop Forge hub. Automatic launch and Automatic artist payment start Off. The creator owner and configured claims administrators can change launch and payout settings. Other authorized Drop Forge users can view the settings.",
+        "Distribution administrators choose Prepare manually or Process and Finalize in EMMA Review after confirming the token ID. Automatic launch can use a finalized distribution from either mode.",
+        "In Launch Automation, saving a positive Maximum ETH per payout enables Automatic artist payment. Disable keeps the saved limit for Enable. Submitted transactions continue to be tracked when Automatic launch is Off.",
         "Launch claim pages can include mint stats and subscription airdrop sections when configured."
       ],
       "canonical_path": "/drop-forge",
@@ -5993,7 +5999,8 @@
       "tags": ["drop-forge", "claims"],
       "source_refs": [
         "ops/docs/drop-forge/README.md",
-        "ops/docs/drop-forge/flow-drop-forge-craft-to-launch.md"
+        "ops/docs/drop-forge/flow-drop-forge-craft-to-launch.md",
+        "ops/docs/drop-forge/feature-launch-automation-settings.md"
       ]
     },
     {
@@ -7381,6 +7388,7 @@
         "@contributors",
         "@admins",
         "@devs6529",
+        "@dropforgeops",
         "mentioned waves",
         "mention shortcut",
         "personal mention alias",
@@ -7401,10 +7409,11 @@
         "Wave-name mentions are typed with # plus at least 2 characters and submit as tracked mentioned_waves metadata.",
         "The broadcast mentions @all and @contributors are available only to the Wave creator and profiles in the Admins scope.",
         "Before sending a new message with @all, a confirmation shows the current notification audience count. Choose Send with @all to send or Keep editing to preserve the draft. Counting errors require retrying; edits do not rebroadcast or prompt.",
-        "The case-insensitive @contributors mention targets profiles with Chat access that joined the Wave and enabled Broadcast mentions, while @admins targets the Wave creator and profiles in the Admins scope.",
-        "When Wave Chat access is Public, joined Wave followers with Broadcast mentions enabled are the bounded @contributors audience because there is no finite Chat-access group; muted followers and the author are excluded.",
-        "The Broadcast mentions notification preference controls both @all and @contributors, while All messages continues to notify a joined profile about every message.",
+        "The case-insensitive @contributors mention targets profiles with Chat access that joined the Wave and enabled the broadcast preference through 'Mentions and @all', while @admins targets the Wave creator and profiles in the Admins scope.",
+        "When Wave Chat access is Public, joined Wave followers with the broadcast preference enabled are the bounded @contributors audience because there is no finite Chat-access group; muted followers and the author are excluded.",
+        "'Mentions and @all' enables @all and @contributors notifications. Mentions only opts out of both broadcasts. All messages notifies a joined profile about every message and keeps the saved broadcast preference unchanged.",
         "The @devs6529 mention targets configured 6529 developer profiles that can view the Wave.",
+        "The @dropforgeops shortcut alerts configured Drop Forge operators who can view the Wave. Automated reports from the staging profile @drops6529 carry a post signature in Drop Forge Ops. The profile can also be mentioned directly.",
         "Any profile with Chat access can invoke @admins or @devs6529 by typing the complete token directly or selecting it from suggestions; the backend filters recipients by Wave access.",
         "Broadcast suggestions are unavailable to non-admins; if a non-admin types @all or @contributors directly in a new message, the token is posted as ordinary text without broadcast metadata or notifications.",
         "A non-admin can retain @contributors while editing an existing message that already contained it, but the edit does not rebroadcast the mention and they cannot add it as a broadcast mention to a message that did not already contain it.",
@@ -7773,6 +7782,7 @@
         "Unavailable submission actions use a lock icon. Hover, focus, or select the lock for the existing restriction reason. On phones, choose the available submission action or How to Submit from More wave actions. The Main Stage helper opens the existing nomination and eligibility guidance. On wider screens, submission controls and Add/Edit REP keep their normal placement.",
         "When the desktop or tablet center column is narrow, the Wave name and score stay on one line, Add/Edit REP keeps its text label, and submission actions use compact icons. The description teaser remains visible while the center header is at least 640px wide; below that width it is hidden and the name and score are centered beside the avatar. Join keeps its label. Search, More wave actions and the sidebar toggle stay visible; the eligible gallery/chat action and existing time choices are inside More, with their original icons. An active temporary time override keeps its zone indicator and undo control visible. Select the wave name for the full description in About. Widening the column restores the labels and teaser. On phones, one bar holds Back, the wave picture with its available score tucked beneath it, the wave name, Join when available, and More wave actions. The phone wave name wraps up to two lines and uses an ellipsis only beyond the second line. The site menu and global search are on the Waves list. More wave actions contains Wave details, message search, time display, sharing and actions you are eligible to use. Press the wave name to open Wave Information as a full-screen phone view sliding in from the right. Use the top-left Back chevron, swipe right, Escape, or the device Back action to return to the same thread section and scroll position. Short or cancelled swipes keep the view open; vertical gestures scroll the content. There is no Close icon or drag handle. Back in an editor returns to its parent information view. Direct messages do not show a Wave Score.",
         "Wave picture edit and link sharing are separate header features.",
+        "When a subwave's description preview is hidden, its parent link and wave name form a compact stack centered beside the avatar. The parent link and wave name remain separate actions. The loading header reserves the same title lines so the name stays in place when the wave finishes loading.",
         "Owners can select the three-dot Open options button in About for profile-wave actions and Delete. In phone information and the tablet overlay, Wave options opens inside the same panel. Phone information stays full-screen. Back returns to About; Back from About returns to the thread. Tablet panels also offer Close. Delete requires confirmation; cancelling it returns to Wave options.",
         "A wave you have not joined shows a Join button first in the conversation header's top-right controls.",
         "Eligible authors and administrators can select the wave name or Edit wave name in About to rename it inside the existing information panel. On phones, Rename wave stays in the full-screen information view. Back or a rightward swipe returns to About and discards an unsaved name; Save returns after saving. Back from About returns to the thread. Tablet overlays also offer Close. Save stays disabled until the name changes. Direct messages and proxy sessions do not offer rename.",
@@ -7808,7 +7818,7 @@
         "Signed-out visitors who select Join are taken to the wallet connect flow; after signing in, select Join again.",
         "The header Join is not shown for direct messages, proxy sessions, or connected wallets whose profile has not loaded.",
         "A subwave is joined separately from its parent wave.",
-        "Joined waves offer the bell notification menu; muting is separate from joining."
+        "The bell menu offers Mute/Unmute before or after joining. Joined waves also offer a single notification level."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
@@ -7830,8 +7840,9 @@
         "mute wave",
         "unmute wave",
         "bell button",
-        "speaker muted",
-        "speaker mute button",
+        "muted bell",
+        "notification levels",
+        "mentions only",
         "all message notifications",
         "broadcast mentions",
         "@all notifications",
@@ -7851,14 +7862,15 @@
         "contributors"
       ],
       "facts": [
-        "The bell button opens wave notification preferences after a connected non-proxy profile has joined the wave.",
-        "On phone layouts, notification choices open as a subview inside the same About sheet, which shrinks to fit the two options. Selecting an option, Back, the phone’s Back action, or Escape returns to About and restores focus to the bell. Close or tapping outside dismisses the whole sheet. Returning to About restores its full height, content, and scroll position.",
+        "The neutral bell opens notification settings for a connected non-proxy profile before or after joining. It rings for All messages and stays plain for either mention level. Muting overrides the saved level with a bell-slash and the existing rose-toned muted-control colours in the same place.",
+        "On smaller screens, notification choices use the site's standard picker sheet over About. Selecting a level or Mute/Unmute, closing the picker, tapping its backdrop, or pressing Escape restores focus to the bell. About keeps its content and scroll position.",
         "Desktop and tablet sidebars use an anchored notification menu with arrow-key navigation and Escape to return to the bell.",
-        "The notification menu has a Broadcast mentions option with an @ icon; it controls notifications for both @all and @contributors.",
-        "The notification menu has an All messages option for every-message notifications.",
-        "The speaker control mutes waves before or after joining.",
-        "When a wave is muted, the red speaker-muted Muted control unmutes it.",
-        "Muted waves suppress unread indicators and realtime unread accumulation but can still be opened manually.",
+        "Joined waves show three label-only notification levels: All messages, Mentions and @all, and Mentions only. Exactly one is selected. A divider separates Mute/Unmute below them; no row descriptions or hints are shown. Selecting All messages keeps the saved broadcast preference unchanged.",
+        "Changing a notification level preserves independently configured group alert preferences, including @dropforgeops.",
+        "Direct mentions, replies and quotes remain eligible at every level, subject to profile preferences. Mute suppresses wave alerts, including direct mentions.",
+        "Mute/Unmute is in the bell menu. Before joining, it is the only option.",
+        "Muted waves keep their saved level checked and visible but disabled; Unmute remains active. If preferences are unavailable, Retry replaces the levels inside the menu.",
+        "Muted waves show an icon-only neutral iron bell-slash on the avatar, separate from the score and any number. They hide unread counts, sort last, and suppress realtime unread accumulation but can still be opened manually.",
         "When a muted wave is open, new drops still appear live while typing indicators remain disabled."
       ],
       "canonical_path": "/waves",
@@ -9232,6 +9244,10 @@
         "Signed-out users at /emma see wallet guidance and a Connect wallet or Sign in action. Opening a plan while signed out preserves that plan destination through sign-in.",
         "About EMMA, the question-mark link beside the title on the entry and plans pages, opens /emma/help. This public help page contains the full introduction, Janus link, TDH policy, and Back to EMMA link.",
         "The distribution plan tool helps build mint plans with airdrops, allowlists, and public minting in one or more phases.",
+        "In EMMA Review, distribution administrators confirm the token ID and choose Prepare manually or Process and Finalize. The first saved manual action or creation of a background job sets the mode. Reset Subscriptions clears subscriber work and restores both choices while keeping artist and team uploads.",
+        "In EMMA Review, Artist Airdrops and Team Airdrops CSV file uploads accept the downloaded address,count header or a headerless file. Paste CSV takes wallet-and-count data rows.",
+        "Process and Finalize recognizes one phase each for 0, 1, and 2. For example, Phase 1, Phase1, P 1, P1, and 1 are equivalent regardless of case. Missing or duplicate phases block processing. Empty phases are accepted and Public is generated automatically.",
+        "EMMA Review shows the current step while processing. Download lists appears in each phase and Public row after processing completes with matching phase inputs, alongside Completed · Lists ready to download in the preparation row. In manual mode, a red × or green check beside Finalize Distribution shows whether finalization is complete.",
         "EMMA uses TDH as a lightweight anti-spam/rate-limit measure for allowlist creation.",
         "In Create Snapshots at /emma/plans/{planId}, Use a 6529 collection presents five image rows: The Memes by 6529 (ERC1155), Meme Lab (ERC1155), 6529 Gradient (ERC721), 6529 RAW (ERC721), and 6529 Intern JPGs (ERC1155). Tab reaches each shortcut; Enter or Space selects it.",
         "The Memes shortcut opens a season picker; choosing all or no seasons uses the full collection. Intern JPGs loads its subcollection token IDs. The other shortcuts fill name and contract address and clear old token IDs. Switching shortcuts preserves block numbers.",
@@ -9246,6 +9262,7 @@
         "app/emma/help/page.tsx",
         "app/emma/plans/page.tsx",
         "components/distribution-plan-tool/EmmaAuthGate.tsx",
+        "ops/docs/emma/feature-subscriptions-distribution-review.md",
         "components/distribution-plan-tool/create-snapshots/form/CreateSnapshotForm.tsx",
         "components/distribution-plan-tool/create-snapshots/form/CreateSnapshotFormCollections.tsx",
         "ops/docs/emma/feature-create-snapshots-status-and-retry.md"
@@ -9496,6 +9513,7 @@
         "Drop Forge craft claims live under /drop-forge/craft.",
         "Craft claim detail pages use /drop-forge/craft/{id}.",
         "Craft claims are distinct from launch claims.",
+        "The Craft Launch button requires Automatic launch to be on. After Launch is accepted, Craft shows Initializing… and then Claim initialized. Update Claim appears after publishing new metadata for an initialized claim.",
         "A winning submission only creates a craft claim after successful media inspection and validation of the computed details. Zero-byte files, empty SHA-256 digests, non-positive image/video dimensions, or video without positive duration and codecs cannot become valid computed media details. The binary media limit is 250 MB (250,000,000 bytes). Editable draft fields may still be incomplete; HTML details are format-only, and GLB does not require video-only details.",
         "GLB binary contents are checked server-side during inspection and before animation publication; renaming another file to .glb does not make it valid. This does not guarantee scene rendering or availability of external resources. Correct invalid or oversized media before retrying publication."
       ],
@@ -9515,13 +9533,18 @@
         "launch claims",
         "drop forge launch",
         "claim launch",
-        "launch detail"
+        "launch detail",
+        "mint watch"
       ],
       "keywords": ["drop", "forge", "launch", "claims", "detail", "mint"],
       "facts": [
         "Drop Forge launch claims live under /drop-forge/launch.",
         "Launch claim detail pages use /drop-forge/launch/{id}.",
-        "Configured claims admins, creator owner, and approved on-chain admins can use Launch completion tracking. The mainnet API checks on-chain-only access fresh for each request and fails closed on RPC errors. Sepolia action tracking remains unsupported.",
+        "Configured claims admins, creator owner, and approved on-chain admins can use Launch completion tracking on the configured contract. The API verifies creator permissions on the relevant chain.",
+        "The Auto Launch pill identifies a saved automation plan in Craft, the Launch list, and Launch detail.",
+        "Saved plans show inline prerequisite and manual completion statuses beside the manual Launch controls. Authorized operators can use Retry now after fixing a wallet funding or permission block while the safe execution window allows.",
+        "Phase 2 and Public subscriber airdrops run in separate transactions during the Phase 2 transition. New Auto Launch plans use manual Launch subscription rank and give Phase 2 the first allocation. The last eligible wallet can receive a partial allocation. Each row is marked Completed when the full group is delivered.",
+        "Drop Forge Ops reports partial subscriber airdrops and sold-out skips. Mint Watch posts readiness results at 17:20, 18:28, 18:58, and 19:22 Athens time. These checks also cover manual launches and verify sellouts on-chain. Ready and verified sellout posts are untagged. Reports with issues list the findings and tag @dropforgeops.",
         "The signing wallet pays operation gas. Admin approval does not redirect mint revenue. Pay Artist is a direct ETH transfer from the signing wallet's balance plus gas, not a withdrawal from the mint-income wallet or contract.",
         "If the authorized wallet is disconnected, a launch on-chain action opens wallet connection and continues after connection succeeds when its transaction details are unchanged; refreshed details cancel the pending action so the user can review and retry.",
         "Launch claim pages can include mint stats and subscription airdrop sections when configured."

@@ -14,11 +14,30 @@ import {
 } from "./ReviewDistributionPlanTable.types";
 
 export default function ReviewDistributionPlanTable() {
-  const { phases } = useContext(DistributionPlanToolContext);
+  const { phases, distributionPlan, confirmedTokenId } = useContext(
+    DistributionPlanToolContext
+  );
   const { connectedProfile } = useContext(AuthContext);
   const { seizeSettings } = useSeizeSettings();
 
   const [rows, setRows] = useState<ReviewDistributionPlanTablePhase[]>([]);
+
+  const [manualChoice, setManualChoice] = useState<{
+    planId: string;
+    tokenId: string;
+  } | null>(null);
+  const showManual =
+    manualChoice !== null &&
+    manualChoice.planId === distributionPlan?.id &&
+    manualChoice.tokenId === confirmedTokenId;
+
+  function chooseManual() {
+    if (distributionPlan && confirmedTokenId)
+      setManualChoice({
+        planId: distributionPlan.id,
+        tokenId: confirmedTokenId,
+      });
+  }
 
   useEffect(() => {
     setRows(
@@ -34,9 +53,13 @@ export default function ReviewDistributionPlanTable() {
     <>
       <DistributionPlanTableWrapper>
         <ReviewDistributionPlanTableHeader rows={rows} />
-        <ReviewDistributionPlanTableBody rows={rows} />
+        <ReviewDistributionPlanTableBody rows={rows} showManual={showManual} />
       </DistributionPlanTableWrapper>
-      <ReviewDistributionPlanTableSubscriptionFooter />
+      <ReviewDistributionPlanTableSubscriptionFooter
+        showManual={showManual}
+        onChooseManual={chooseManual}
+        onClearManualChoice={() => setManualChoice(null)}
+      />
     </>
   );
 }

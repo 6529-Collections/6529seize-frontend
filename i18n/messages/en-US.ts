@@ -2,7 +2,6 @@ import { BOOKMARK_MESSAGES } from "@/i18n/messages/bookmarks";
 import { NOTIFICATIONS_INBOX_MESSAGES } from "@/i18n/messages/notifications-inbox";
 import { VOTING_CREDIT_RETURN_MESSAGES } from "@/i18n/messages/voting-credit-returns";
 import { MEME_COLLABORATION_MESSAGES } from "@/i18n/messages/meme-collaborations";
-import emmaMessages from "@/i18n/messages/emma.en-US.json";
 import additionalActionMessages from "@/i18n/messages/additionalAction.en-US.json";
 import { EN_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
 import waveCreationMessages from "@/i18n/messages/wave-creation.en-US.json";
@@ -1654,19 +1653,18 @@ const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
   [
     ["trigger.tooltip", "Notification settings"],
     ["trigger.ariaLabel", "Open notification settings"],
-    ["broadcastMentions.label", "Broadcast mentions"],
-    [
-      "broadcastMentions.ariaLabel",
-      "Receive @all and @contributors notifications",
-    ],
+    ["levels.ariaLabel", "Notification level"],
+    ["broadcastMentions.label", "Mentions and @all"],
+    ["mentionsOnly.label", "Mentions only"],
+    ["mentionsOnly.ariaLabel", "Mentions only"],
+    ["broadcastMentions.ariaLabel", "Mentions and @all"],
     ["allMessages.label", "All messages"],
-    ["allMessages.ariaLabel", "Receive notifications for all messages"],
+    ["allMessages.ariaLabel", "All messages"],
     ["mute.label", "Mute"],
     ["mute.activeLabel", "Muted"],
+    ["mute.unmuteLabel", "Unmute"],
     ["mute.ariaLabel", "Mute wave"],
     ["mute.unmuteAriaLabel", "Unmute wave"],
-    ["mute.tooltip.enable", "Click to mute this wave"],
-    ["mute.tooltip.disable", "Click to unmute this wave"],
     ["mute.error.muteTitle", "Couldn't mute this wave."],
     ["mute.error.unmuteTitle", "Couldn't unmute this wave."],
     ["mute.error.description", PLEASE_TRY_AGAIN],
@@ -5691,7 +5689,6 @@ export const EN_US_ROOT_MESSAGES = {
   ...USER_RATE_MESSAGES,
   ...aboutMessages,
   ...emmaSnapshotsMessages,
-  ...emmaMessages,
   ...safeCollectingMessages,
   ...delegationTapGuideMessages,
   ...pageMetadataMessages,

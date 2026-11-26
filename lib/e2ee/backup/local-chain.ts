@@ -1,5 +1,4 @@
 import { base64ToBytes } from "../bytes";
-import type { ConversationPin } from "../conversation-pins";
 import { chainAt, type LinkedChunk } from "./chain";
 import { type BackupHistory, fingerprint, messageKey } from "./format";
 import type { BackupLocalState } from "./state";
@@ -51,10 +50,16 @@ export function startNewChain(local: BackupLocalState): void {
   local.pinIds = {};
 }
 
-export function backupPinIds(
-  pins: readonly ConversationPin[]
-): Record<string, string> {
-  return Object.fromEntries(pins.map(([thread, , id]) => [thread, id]));
+const pinRankKey = (thread: string): string => `rank:${thread}`;
+
+export function backupPinIds({
+  pins = [],
+  pinRanks = [],
+}: Pick<BackupHistory, "pins" | "pinRanks">): Record<string, string> {
+  return Object.fromEntries([
+    ...pins.map(([thread, , id]) => [thread, id] as const),
+    ...pinRanks.map(([[thread], , id]) => [pinRankKey(thread), id] as const),
+  ]);
 }
 
 /**
@@ -77,6 +82,9 @@ export function changedHistory(
   const pins = (history.pins ?? []).filter(
     ([thread, , id]) => local.pinIds?.[thread] !== id
   );
+  const pinRanks = (history.pinRanks ?? []).filter(
+    ([[thread], , id]) => local.pinIds?.[pinRankKey(thread)] !== id
+  );
   return {
     groups: history.groups.filter(
       (group) => local.groupPrints[group.g] !== fingerprint(group)
@@ -88,5 +96,6 @@ export function changedHistory(
     ),
     ...(Object.keys(reads).length > 0 ? { reads } : {}),
     ...(pins.length > 0 ? { pins } : {}),
+    ...(pinRanks.length > 0 ? { pinRanks } : {}),
   };
 }

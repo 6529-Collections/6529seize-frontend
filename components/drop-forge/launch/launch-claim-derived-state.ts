@@ -25,6 +25,7 @@ export interface ClaimTxModalState {
   message?: string | undefined;
   txHash?: `0x${string}` | undefined;
   actionLabel?: string | undefined;
+  airdrop?: Readonly<{ quantity: string; walletCount: number }> | undefined;
 }
 
 export const DEFAULT_PHASE_PRICE_ETH = "0.06529";
