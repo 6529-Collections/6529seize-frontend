@@ -3,7 +3,7 @@
 import { BellSlashIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { PinIcon } from "@/components/common/icons/PinIcon";
 import IconButton from "@/components/utils/button/IconButton";
@@ -252,8 +252,8 @@ function ConversationPinButton({
   };
 
   const position = collapsed
-    ? "tw-bottom-1 tw-right-1"
-    : "tw-inset-y-0 tw-right-1 tw-my-auto touch-only:tw-size-11";
+    ? "tw-absolute tw-bottom-1 tw-right-1"
+    : "tw-relative tw-z-10 touch-only:tw-size-11";
   const reveal =
     pinned || pending
       ? ""
@@ -269,7 +269,7 @@ function ConversationPinButton({
       aria-disabled={pending || undefined}
       pending={pending}
       title={t(locale, pinned ? "e2ee.info.unpin" : "e2ee.info.pin")}
-      className={`tw-absolute ${position} ${reveal}`}
+      className={`${position} ${reveal}`}
       onClick={() => void togglePin()}
     >
       <PinIcon
@@ -290,6 +290,7 @@ function E2eeConversationRow({
   zone,
 }: E2eeConversationRowProps) {
   const locale = useBrowserLocale();
+  const timestampId = useId();
   const { engine } = useE2eeContext();
   const router = useRouter();
   const { isCapacitor, isIos } = useCapacitor();
@@ -361,12 +362,15 @@ function E2eeConversationRow({
   }
 
   return (
-    <li className="tw-group/conversation tw-relative">
+    <li
+      className={`tw-group/conversation tw-relative tw-isolate tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-rounded-lg tw-px-3 tw-transition-colors ${rowClass}`}
+    >
       <Link
         href={href}
         onNavigate={handleNavigate}
         aria-current={active ? "page" : undefined}
-        className={`tw-flex tw-min-w-0 tw-items-center tw-gap-3 tw-rounded-lg tw-py-2 tw-pl-3 tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${pinButton ? "tw-pr-10 touch-only:tw-pr-14" : "tw-pr-3"} ${rowClass}`}
+        aria-describedby={timestampId}
+        className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-3 tw-py-2 tw-text-inherit tw-no-underline before:tw-absolute before:tw-inset-0 before:tw-z-[5] before:tw-rounded-lg before:tw-content-[''] focus-visible:tw-outline-none focus-visible:before:tw-ring-2 focus-visible:before:tw-ring-inset focus-visible:before:tw-ring-primary-400"
       >
         <ConversationAvatar
           conversation={conversation}
@@ -374,29 +378,16 @@ function E2eeConversationRow({
           title={title}
         />
         <span className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col">
-          <span className="tw-flex tw-min-w-0 tw-items-baseline tw-gap-2">
-            <span
-              className={`tw-min-w-0 tw-flex-1 tw-truncate tw-text-sm ${
-                hasUnread ? "tw-font-bold tw-text-iron-50" : "tw-font-semibold"
-              }`}
-            >
-              {title}
-            </span>
-            {pinned ? (
-              <span className="tw-sr-only">
-                {t(locale, "e2ee.list.pinned")}
-              </span>
-            ) : null}
-            <span
-              className={`tw-flex-shrink-0 tw-text-xs ${
-                hasUnread
-                  ? "tw-font-medium tw-text-primary-300"
-                  : "tw-text-iron-500"
-              }`}
-            >
-              {formatE2eeTimestamp(locale, conversation.updatedAt, { zone })}
-            </span>
+          <span
+            className={`tw-truncate tw-text-sm ${
+              hasUnread ? "tw-font-bold tw-text-iron-50" : "tw-font-semibold"
+            }`}
+          >
+            {title}
           </span>
+          {pinned ? (
+            <span className="tw-sr-only">{t(locale, "e2ee.list.pinned")}</span>
+          ) : null}
           <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
             <span
               className={`tw-min-w-0 tw-flex-1 tw-truncate tw-text-xs ${
@@ -419,6 +410,15 @@ function E2eeConversationRow({
         </span>
       </Link>
       {pinButton}
+      <time
+        id={timestampId}
+        dateTime={new Date(conversation.updatedAt).toISOString()}
+        className={`tw-shrink-0 tw-whitespace-nowrap tw-text-xs ${
+          hasUnread ? "tw-font-medium tw-text-primary-300" : "tw-text-iron-500"
+        }`}
+      >
+        {formatE2eeTimestamp(locale, conversation.updatedAt, { zone })}
+      </time>
     </li>
   );
 }

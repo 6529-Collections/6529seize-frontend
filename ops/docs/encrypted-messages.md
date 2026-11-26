@@ -108,8 +108,9 @@ ellipsis. Custom emojis render inline at a compact size, while code keeps emoji
 shortcodes literal.
 
 Use the pin icon on a chat row in the encrypted inbox or sidebar to keep the
-chat above unpinned chats. On desktop, hover the row or tab to the icon. On a
-touchscreen, tap the icon. Select the filled pin to unpin the chat. **Chat info**
+chat above unpinned chats. When a row shows a timestamp, the pin sits just to
+its left. On desktop, hover the row or tab to the icon. On a touchscreen,
+tap the icon. Select the filled pin to unpin the chat. **Chat info**
 also has **Pin to top** and **Unpin chat**. Your pin follows the direct
 conversation when it continues in a new encryption session. Pins sync privately
 to your other trusted devices after they connect. If encrypted sync is off, the
