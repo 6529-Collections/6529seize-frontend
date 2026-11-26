@@ -2,8 +2,8 @@
 
 import clsx from "clsx";
 import type { ReactNode } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { DISCLOSURE_ROW_BUTTON_CLASS } from "@/components/utils/button/disclosureRowStyles";
 
 import type { SupportedChain } from "@/components/nft-picker/types";
 import { VirtualizedTokenList } from "@/components/token-list/VirtualizedTokenList";
@@ -45,24 +45,24 @@ export function GrantTokensDisclosure({
   const body = renderGrantTokensDisclosureBody(disclosureState);
 
   return (
-    <div className="tw-mt-4 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.04] tw-bg-iron-900">
+    <div className="-tw-mx-4 -tw-mb-4 tw-mt-3.5 tw-rounded-none tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-transparent md:tw-mx-0 md:tw-mb-0 md:tw-mt-4 md:tw-rounded-lg md:tw-border md:tw-border-white/[0.04] md:tw-bg-iron-900">
       <button
         type="button"
         className={clsx(
-          "tw-group tw-flex tw-w-full tw-appearance-none tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-none tw-px-4 tw-py-3 tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-bg-iron-900",
-          isOpen ? "tw-bg-iron-900" : "tw-bg-iron-900/30"
+          DISCLOSURE_ROW_BUTTON_CLASS,
+          "tw-group tw-gap-2 tw-transition-colors tw-duration-200 md:tw-h-auto md:tw-justify-center md:tw-rounded-lg md:tw-py-3",
+          isOpen ? "md:tw-bg-iron-900" : "md:tw-bg-iron-900/30"
         )}
         onClick={toggleOpen}
         aria-expanded={isOpen}
         aria-controls={panelId}
       >
-        <span className="tw-text-sm tw-font-semibold tw-text-iron-400 tw-transition-colors tw-duration-200 desktop-hover:group-hover:tw-text-iron-200">
+        <span className="tw-text-sm tw-font-medium tw-text-iron-300 tw-transition-colors tw-duration-200 desktop-hover:group-hover:tw-text-iron-200 md:tw-font-semibold md:tw-text-iron-400">
           {isOpen
             ? `Hide ${tokensCountDescription}`
             : `Show ${tokensCountDescription}`}
         </span>
-        <FontAwesomeIcon
-          icon={faChevronDown}
+        <ChevronDownIcon
           aria-hidden="true"
           className={clsx(
             "tw-size-4 tw-text-iron-400 tw-transition-all tw-duration-200 desktop-hover:group-hover:tw-text-iron-200",
@@ -145,7 +145,9 @@ function GrantTokensErrorState({
 }: Readonly<{ message: string; onRetry: () => void }>) {
   return (
     <div className="tw-border-red-500/40 tw-bg-red-500/5 tw-rounded-lg tw-border tw-p-4">
-      <p className="tw-text-red-300 tw-m-0 tw-text-sm group-data-[typography=profile]/profile-xtdh:tw-text-[15px] group-data-[typography=profile]/profile-xtdh:tw-font-normal">{message}</p>
+      <p className="tw-text-red-300 tw-m-0 tw-text-sm group-data-[typography=profile]/profile-xtdh:tw-text-[15px] group-data-[typography=profile]/profile-xtdh:tw-font-normal">
+        {message}
+      </p>
       <Button
         variant="tertiary"
         size="sm"

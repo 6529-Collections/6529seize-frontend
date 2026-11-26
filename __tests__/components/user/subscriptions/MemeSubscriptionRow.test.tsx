@@ -181,6 +181,15 @@ describe("MemeSubscriptionRow", () => {
           date={null}
         />
       );
+      const explanation = screen.queryByText(
+        "No changes allowed on minting day",
+        { exact: true }
+      );
+      if (readonly) expect(explanation).not.toBeInTheDocument();
+      else {
+        expect(screen.getByRole("switch")).toBeDisabled();
+        expect(explanation).toBeVisible();
+      }
       const more = screen.getByRole("button", { name: "More" });
       const details = document.getElementById(
         more.getAttribute("aria-controls")!

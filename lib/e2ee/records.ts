@@ -1,5 +1,5 @@
 import type { HistorySummary } from "./history-order";
-import type { ConversationPin } from "./conversation-pins";
+import type { ConversationPin, PinRankVersions } from "./conversation-pins";
 import type {
   ApiE2eeDeviceGrant,
   ApiE2eeNotifyHint,
@@ -70,6 +70,8 @@ export interface StoredDevice {
 export interface StoredConversationPins {
   readonly versions: Readonly<Record<string, ConversationPin>>;
   readonly unsent: readonly string[];
+  readonly ranks?: PinRankVersions;
+  readonly unsentRanks?: readonly string[];
 }
 
 /** What this device still owes its siblings in read-state sync (P60 §4). */
@@ -225,6 +227,7 @@ export interface StoredGroup {
   readSync?: { received: Record<string, number> };
   /** Pin updates from the self group, saved atomically with its log cursor. */
   receivedPins?: Readonly<Record<string, ConversationPin>>;
+  receivedPinRanks?: PinRankVersions;
 }
 
 export interface StoredNotice {

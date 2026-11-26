@@ -77,7 +77,12 @@ function DropForgeLaunchClaimActionsSection({
 
 type LaunchClaimContentProps = Omit<
   DropForgeLaunchClaimPageViewProps,
-  "pageTitle" | "craftHref" | "loading" | "error" | "rootsError"
+  | "pageTitle"
+  | "craftHref"
+  | "loading"
+  | "error"
+  | "rootsError"
+  | "showAutoLaunch"
 >;
 
 function getLaunchPhasePanelProps(
@@ -108,6 +113,7 @@ function getLaunchPhasePanelProps(
     payArtistActionDisabled: props.payArtistActionDisabled,
     payArtistWritePending: props.payArtistWritePending,
     runPayArtistWrite: props.runPayArtistWrite,
+    automationLaunch: props.automationLaunch,
     selectedPhaseDiffs: props.selectedPhaseDiffs,
     changedFieldBoxClassName: props.changedFieldBoxClassName,
     changedFieldBoxLabelClassName: props.changedFieldBoxLabelClassName,
@@ -139,12 +145,7 @@ function getLaunchPhasePanelProps(
 }
 
 export default function DropForgeLaunchClaimContent(
-  props: Readonly<
-    Omit<
-      DropForgeLaunchClaimPageViewProps,
-      "pageTitle" | "craftHref" | "loading" | "error" | "rootsError"
-    >
-  >
+  props: Readonly<LaunchClaimContentProps>
 ) {
   const {
     claim,

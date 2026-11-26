@@ -190,6 +190,8 @@ export interface E2eeConversation {
   dmPeer?: E2eeMember | null;
   /** The viewing profile pinned this thread in its inbox. */
   pinned?: boolean;
+  /** Position in the viewing profile's pinned chat order. */
+  pinPosition?: number;
   g: string;
   kind: "dm" | "group";
   name: string | null;
@@ -331,6 +333,7 @@ export interface E2eeEngine {
   react(g: string, id: string, reaction: string, on: boolean): Promise<void>;
   markRead(g: string): void;
   setConversationPinned(g: string, pinned: boolean): Promise<void>;
+  moveConversationPin(thread: string, target: string): Promise<void>;
   rename(g: string, name: string): Promise<void>;
   addMembers(g: string, profileIds: string[]): Promise<E2eeEligibility[]>;
   removeMember(g: string, profileId: string): Promise<void>;

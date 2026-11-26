@@ -2,7 +2,6 @@ import { BOOKMARK_MESSAGES } from "@/i18n/messages/bookmarks";
 import { NOTIFICATIONS_INBOX_MESSAGES } from "@/i18n/messages/notifications-inbox";
 import { VOTING_CREDIT_RETURN_MESSAGES } from "@/i18n/messages/voting-credit-returns";
 import { MEME_COLLABORATION_MESSAGES } from "@/i18n/messages/meme-collaborations";
-import emmaMessages from "@/i18n/messages/emma.en-US.json";
 import additionalActionMessages from "@/i18n/messages/additionalAction.en-US.json";
 import { EN_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
 import waveCreationMessages from "@/i18n/messages/wave-creation.en-US.json";
@@ -3007,7 +3006,24 @@ const XTDH_COLLECTION_MESSAGES = objectMessages("xtdh.collections", {
 } as const);
 
 const XTDH_GRANT_MESSAGES = objectMessages("xtdh.grant", {
+  createAction: "Grant",
+  createHeading: "Create New Grant",
+  actions: "Grant actions",
+  stopAction: "Stop Grant",
+  revokeAction: "Revoke Grant",
   "lastGrant.label": "Last grant",
+  statusTabsLabel: "Select tab",
+} as const);
+
+const XTDH_STATS_MESSAGES = objectMessages("xtdh.stats", {
+  generating: "Generating",
+  inbound: "Inbound",
+  outbound: "Outbound",
+  net: "Net",
+  perDay: "/day",
+  grantedRate: "Granted rate",
+  grantedRateLabel: "Granted Rate",
+  actionTitle: "Action",
 } as const);
 
 const WAVE_SLOW_MODE_NOTICE_MESSAGES = objectMessages("waves.slowMode.notice", {
@@ -3684,6 +3700,7 @@ export const EN_US_ROOT_MESSAGES = {
   ...IDENTITY_FILTER_MESSAGES,
   ...XTDH_COLLECTION_MESSAGES,
   ...XTDH_GRANT_MESSAGES,
+  ...XTDH_STATS_MESSAGES,
   ...WAVE_SLOW_MODE_NOTICE_MESSAGES,
   ...COLLECTION_DELEGATION_MESSAGES,
   ...DELEGATION_EXPIRY_MESSAGES,
@@ -5672,7 +5689,6 @@ export const EN_US_ROOT_MESSAGES = {
   ...USER_RATE_MESSAGES,
   ...aboutMessages,
   ...emmaSnapshotsMessages,
-  ...emmaMessages,
   ...safeCollectingMessages,
   ...delegationTapGuideMessages,
   ...pageMetadataMessages,

@@ -15,6 +15,7 @@ import { formatInteger } from "@/i18n/format";
 import type { ApiSubscriptionCoverage } from "@/generated/models/ApiSubscriptionCoverage";
 import type { NFTSubscription } from "@/generated/models/NFTSubscription";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
+import { DISCLOSURE_ROW_BUTTON_CLASS } from "@/components/utils/button/disclosureRowStyles";
 import { CalendarDaysIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useMemo, useState, type ReactNode } from "react";
 import MemeSubscriptionRow from "./MemeSubscriptionRow";
@@ -196,7 +197,7 @@ export default function UserPageSubscriptionsUpcoming(
       }
     >
       <>
-        <div className="tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-pb-2 tw-pt-2.5">
+        <div className="tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-pb-0 tw-pt-2.5 md:tw-pb-2">
           {!showSheet && content}
           {!props.loading &&
             subscriptions.length > 0 &&
@@ -209,7 +210,7 @@ export default function UserPageSubscriptionsUpcoming(
                   isPhone ? "subscription-upcoming-sheet" : undefined
                 }
                 onClick={() => setExpanded(!expanded)}
-                className="tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-center tw-gap-2 tw-border-0 tw-bg-transparent tw-px-5 tw-py-2 tw-text-center tw-text-meta tw-font-normal tw-text-iron-400 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-100 sm:tw-min-h-[60px] sm:tw-py-3"
+                className={`${DISCLOSURE_ROW_BUTTON_CLASS} tw-min-h-11 tw-gap-2 max-md:tw-mt-1 max-md:tw-rounded-none max-md:tw-border-x-0 max-md:tw-border-b-0 max-md:tw-border-t max-md:tw-border-solid max-md:tw-border-iron-800 md:tw-h-auto md:tw-min-h-[60px] md:tw-justify-center md:tw-px-5 md:tw-py-3 md:tw-text-center md:tw-text-meta md:tw-font-normal md:tw-text-iron-400`}
               >
                 {t(
                   locale,
@@ -219,7 +220,7 @@ export default function UserPageSubscriptionsUpcoming(
                 )}
                 <ChevronDownIcon
                   aria-hidden="true"
-                  className={`tw-size-4 ${expanded ? "tw-rotate-180" : ""}`}
+                  className={`tw-size-4 max-md:tw-text-iron-400 ${expanded ? "tw-rotate-180" : ""}`}
                 />
               </button>
             )}
@@ -241,9 +242,13 @@ export default function UserPageSubscriptionsUpcoming(
               <button
                 type="button"
                 onClick={() => setExpanded(false)}
-                className="tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-py-3 tw-text-meta tw-font-normal tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                className={`${DISCLOSURE_ROW_BUTTON_CLASS} tw-mt-1 tw-min-h-11 tw-rounded-none !tw-border-t tw-border-solid tw-border-iron-800`}
               >
                 {t(locale, "subscriptions.upcoming.showLess")}
+                <ChevronDownIcon
+                  aria-hidden="true"
+                  className="tw-size-4 tw-rotate-180 tw-text-iron-400"
+                />
               </button>
             </div>
           )}

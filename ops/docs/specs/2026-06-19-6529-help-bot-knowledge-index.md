@@ -14,6 +14,10 @@ clearance, pin-limit toast, top-level personal-view eligibility, and the existin
 thread-header alternative. Pinned reordering requires a brief hold followed by
 vertical movement; stationary holding opens the menu.
 
+The encrypted chats record explains how to drag pinned chats in the inbox
+or sidebar, including touch and keyboard gestures. It covers the position of
+new pins, encrypted sync to trusted devices, and encrypted backup.
+
 The `waves.discovery` record covers plain-text description previews, retained
 media, visible Worth Checking Out edges and minimum artwork tint, full-height Active
 Votes artwork, wrapping metrics and neutral zero-submission status without a
