@@ -8199,11 +8199,11 @@
         "On smaller screens, notification choices use the site's standard picker sheet over About. Selecting a level or Mute/Unmute, closing the picker, tapping its backdrop, or pressing Escape restores focus to the bell. About keeps its content and scroll position.",
         "Desktop and tablet sidebars use an anchored notification menu with arrow-key navigation and Escape to return to the bell.",
         "Joined waves show three label-only notification levels: All messages, Mentions and @all, and Mentions only. Exactly one is selected. A divider separates Mute/Unmute below them; no row descriptions or hints are shown. Selecting All messages keeps the saved broadcast preference unchanged.",
+        "Changing a notification level preserves independently configured group alert preferences, including @dropforgeops.",
         "Direct mentions, replies and quotes remain eligible at every level, subject to profile preferences. Mute suppresses wave alerts, including direct mentions.",
         "Mute/Unmute is in the bell menu. Before joining, it is the only option.",
         "Muted waves keep their saved level checked and visible but disabled; Unmute remains active. If preferences are unavailable, Retry replaces the levels inside the menu.",
         "Muted waves show an icon-only neutral iron bell-slash on the avatar, separate from the score and any number. They hide unread counts, sort last, and suppress realtime unread accumulation but can still be opened manually.",
-        "Changing a notification level preserves other group preferences such as @dropforgeops.",
         "When a muted wave is open, new drops still appear live while typing indicators remain disabled."
       ],
       "canonical_path": "/waves",

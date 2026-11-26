@@ -39,7 +39,8 @@ const groups = [ApiDropGroupMention.All];
 const independentGroups = [
   ApiDropGroupMention.Admins,
   ApiDropGroupMention.Devs6529,
-  "DROPS_6529" as ApiDropGroupMention,
+  ApiDropGroupMention.Drops6529,
+  "FUTURE_GROUP" as ApiDropGroupMention,
 ];
 const savedGroups = [
   ...groups,
@@ -133,6 +134,7 @@ describe("WaveNotificationSettings", () => {
     [false, groups, BROADCAST],
     [true, [], ALL],
     [true, groups, ALL],
+    [true, independentGroups, ALL],
   ])(
     "reads legacy preferences %s / %j as one selected level",
     async (subscribed, enabled, selected) => {
@@ -213,13 +215,21 @@ describe("WaveNotificationSettings", () => {
   );
 
   it.each([
-    [ALL, false, true, savedGroups],
-    [BROADCAST, true, false, [...groups, ...independentGroups]],
-    [MENTIONS, false, false, independentGroups],
+    [ALL, false, true, savedGroups, savedGroups],
+    [ALL, false, true, independentGroups, independentGroups],
+    [BROADCAST, true, false, [...groups, ...independentGroups], savedGroups],
+    [
+      BROADCAST,
+      false,
+      false,
+      [...groups, ...independentGroups],
+      independentGroups,
+    ],
+    [MENTIONS, false, false, independentGroups, savedGroups],
   ])(
     "preserves independent alert preferences when choosing %s",
-    async (target, subscribed, nextSubscribed, nextGroups) => {
-      setPreferences(subscribed, savedGroups);
+    async (target, subscribed, nextSubscribed, nextGroups, initialGroups) => {
+      setPreferences(subscribed, initialGroups);
       renderComponent();
       await openMenu();
       await userEvent.click(choice(target));
