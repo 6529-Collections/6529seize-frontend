@@ -7133,7 +7133,7 @@
         "Profile xTDH lives at /{user}/xtdh.",
         "The tab has received and granted views where available.",
         "Owner mode affects which xTDH grant actions are visible.",
-        "Granted and Received use text buttons without a background, with compact text below medium widths and larger text on desktop. Granted status filters use rounded pills below medium widths and connected tabs on desktop. Owners can use + Grant beside the view buttons or the Outbound stat to switch to Granted, scroll to Create New Grant and focus its first input."
+        "Granted and Received use text buttons without a background, with compact text below medium widths and larger text on desktop. Granted status filters use rounded pills on all screen sizes. Owners can use + Grant beside the view buttons or the Outbound stat to switch to Granted, scroll to Create New Grant and focus its first input."
       ],
       "canonical_path": "/{user}/xtdh",
       "related_paths": ["/network/xtdh"],
