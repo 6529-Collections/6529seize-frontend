@@ -124,6 +124,43 @@ describe("calculateTooltipLayout", () => {
     expect(layout.placement).toBe("bottom");
   });
 
+  it("keeps the start edge fixed while a preview widens", () => {
+    const childRect = createRect({
+      left: 400,
+      top: 100,
+      width: 20,
+      height: 20,
+    });
+    const positions = [360, 720].map(
+      (width) =>
+        calculateTooltipLayout({
+          childRect,
+          tooltipRect: { width, height: 300 },
+          placement: "bottom",
+          alignment: "start",
+          offset: 10,
+        }).position
+    );
+
+    expect(positions).toEqual([
+      { x: 400, y: 130 },
+      { x: 400, y: 130 },
+    ]);
+  });
+
+  it("keeps start-aligned previews inside the right viewport edge", () => {
+    const layout = calculateTooltipLayout({
+      childRect: createRect({ left: 1200, top: 100, width: 20, height: 20 }),
+      tooltipRect: { width: 720, height: 300 },
+      placement: "bottom",
+      alignment: "start",
+      offset: 10,
+    });
+
+    expect(layout.position.x).toBe(552);
+    expect(layout.position.y).toBe(130);
+  });
+
   it("keeps left placement behavior unchanged", () => {
     const childRect = createRect({
       left: 300,

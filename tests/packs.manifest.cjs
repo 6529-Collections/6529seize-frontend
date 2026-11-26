@@ -593,8 +593,11 @@ const PACKS = [
   {
     ...sandboxPack(
       "test:e2e:wave-link-preview-sandbox",
-      "Embedded wave preview readability in the sidebar and responsive chat.",
-      ["tests/social/wave-link-preview-sandbox.spec.ts"],
+      "Embedded wave previews and profile-wave badge sheets and hover cards.",
+      [
+        "tests/social/wave-link-preview-sandbox.spec.ts",
+        "tests/social/curation-wave-preview-sandbox.spec.ts",
+      ],
       {
         ...AUTH_SANDBOX_ENV,
         NEXT_DEV_DIST_DIR: ".next-playwright-wave-link-preview",

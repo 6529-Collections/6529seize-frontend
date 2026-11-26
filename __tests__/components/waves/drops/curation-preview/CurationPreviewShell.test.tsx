@@ -15,16 +15,15 @@ describe("CurationPreviewShell", () => {
     );
   });
 
-  it("bounds expanded sheet content to the small viewport height", () => {
+  it("lets the shared dialog size and scroll the expanded sheet", () => {
     render(
-      <CurationPreviewShell variant="sheet" expanded>
+      <CurationPreviewShell variant="sheet">
         <span>Preview content</span>
       </CurationPreviewShell>
     );
 
     expect(screen.getByText("Preview content").parentElement).toHaveClass(
-      "tw-h-[calc(100svh-4rem)]",
-      "tw-overflow-hidden"
+      "tw-flex-none"
     );
   });
 });

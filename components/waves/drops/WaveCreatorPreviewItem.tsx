@@ -15,6 +15,7 @@ import WavesIcon from "@/components/common/icons/WavesIcon";
 
 interface WaveCreatorPreviewItemProps {
   readonly wave: ApiWave;
+  readonly variant?: "modal" | "compact" | "sheet" | undefined;
   readonly onSelect?:
     | ((wave: ApiWave, href: string, event: React.MouseEvent) => void)
     | undefined;
@@ -23,6 +24,7 @@ interface WaveCreatorPreviewItemProps {
 export const WaveCreatorPreviewItem: React.FC<WaveCreatorPreviewItemProps> = ({
   wave,
   onSelect,
+  variant = "modal",
 }) => {
   const timeAgoShort = useTimeAgoShort();
   const isDirectMessage = wave.chat.scope.group?.is_direct_message ?? false;
@@ -46,7 +48,11 @@ export const WaveCreatorPreviewItem: React.FC<WaveCreatorPreviewItemProps> = ({
         event.stopPropagation();
         onSelect(wave, waveHref, event);
       }}
-      className="tw-group tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-iron-800/70 tw-bg-iron-950/60 tw-px-4 tw-py-3 tw-no-underline tw-transition tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900/60"
+      className={`tw-group tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-no-underline tw-transition tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
+        variant === "modal"
+          ? "tw-border tw-border-iron-800/70 tw-bg-iron-950/60 tw-px-4 tw-py-3 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900/60"
+          : "-tw-mx-2 tw-min-h-14 tw-border-0 tw-bg-transparent tw-px-2 tw-py-2 active:tw-bg-white/[0.04] desktop-hover:hover:tw-bg-white/[0.04]"
+      }`}
     >
       <div className="tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
         {imageSrc ? (
@@ -62,14 +68,20 @@ export const WaveCreatorPreviewItem: React.FC<WaveCreatorPreviewItemProps> = ({
         )}
       </div>
       <div className="tw-min-w-0 tw-flex-1">
-        <div className="tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100">
+        <div
+          className={`tw-truncate tw-text-iron-100 ${variant === "modal" ? "tw-text-sm tw-font-semibold" : "tw-font-medium"} ${variant === "sheet" ? "tw-text-[15px]" : "tw-text-sm"}`}
+        >
           {wave.name}
         </div>
-        <div className="tw-truncate tw-text-xs tw-text-iron-500">
+        <div
+          className={`tw-truncate tw-text-iron-500 ${variant === "sheet" ? "tw-text-[13px]" : "tw-text-xs"}`}
+        >
           {wave.metrics.latest_drop_timestamp ? (
             <>
               <span>Last drop: </span>
-              <span className="tw-text-iron-300">
+              <span
+                className={variant === "modal" ? "tw-text-iron-300" : undefined}
+              >
                 {timeAgoShort(wave.metrics.latest_drop_timestamp)}
               </span>
             </>

@@ -1,5 +1,7 @@
 export type TooltipPlacement = "top" | "bottom" | "left" | "right" | "auto";
 
+export type TooltipAlignment = "center" | "start";
+
 export type ResolvedTooltipPlacement = Exclude<TooltipPlacement, "auto">;
 
 export type TooltipCoordinates = { x: number; y: number };
@@ -120,27 +122,30 @@ function calculateInitialPosition(
   childRect: DOMRect,
   tooltipRect: TooltipSize,
   placement: ResolvedTooltipPlacement,
-  offset: number
+  offset: number,
+  alignment: TooltipAlignment
 ): TooltipCoordinates {
-  let x = 0;
-  let y = 0;
+  let x =
+    alignment === "start"
+      ? childRect.left
+      : childRect.left + (childRect.width - tooltipRect.width) / 2;
+  let y =
+    alignment === "start"
+      ? childRect.top
+      : childRect.top + (childRect.height - tooltipRect.height) / 2;
 
   switch (placement) {
     case "top":
-      x = childRect.left + (childRect.width - tooltipRect.width) / 2;
       y = childRect.top - tooltipRect.height - offset;
       break;
     case "bottom":
-      x = childRect.left + (childRect.width - tooltipRect.width) / 2;
       y = childRect.bottom + offset;
       break;
     case "left":
       x = childRect.left - tooltipRect.width - offset;
-      y = childRect.top + (childRect.height - tooltipRect.height) / 2;
       break;
     case "right":
       x = childRect.right + offset;
-      y = childRect.top + (childRect.height - tooltipRect.height) / 2;
       break;
   }
 
@@ -167,10 +172,7 @@ function adjustPositionForViewport(
   ) {
     resolvedPlacement = "top";
     y = childRect.top - tooltipRect.height - offset;
-  } else if (
-    placement === "left" &&
-    x < viewport.left + VIEWPORT_PADDING
-  ) {
+  } else if (placement === "left" && x < viewport.left + VIEWPORT_PADDING) {
     resolvedPlacement = "right";
     x = childRect.right + offset;
   } else if (
@@ -231,11 +233,13 @@ export function calculateTooltipLayout({
   tooltipRect,
   placement,
   offset,
+  alignment = "center",
 }: {
   childRect: DOMRect;
   tooltipRect: TooltipSize;
   placement: TooltipPlacement;
   offset: number;
+  alignment?: TooltipAlignment;
 }): TooltipLayout {
   const targetPlacement = getOptimalPlacement(
     childRect,
@@ -247,7 +251,8 @@ export function calculateTooltipLayout({
     childRect,
     tooltipRect,
     targetPlacement,
-    offset
+    offset,
+    alignment
   );
   const adjustedPosition = adjustPositionForViewport(
     initialPosition,

@@ -20,6 +20,7 @@ import {
   type ResolvedTooltipPlacement,
   type TooltipCoordinates,
   type TooltipPlacement,
+  type TooltipAlignment,
 } from "./tooltipPositioning";
 import { useTooltipReposition } from "./useTooltipReposition";
 import { getHoverCardTabExitTarget } from "./hoverCardFocus";
@@ -29,6 +30,7 @@ interface HoverCardProps {
   readonly content: React.ReactNode;
   readonly ariaLabel: string;
   readonly placement?: TooltipPlacement | undefined;
+  readonly alignment?: TooltipAlignment | undefined;
   readonly delayShow?: number | undefined;
   readonly delayHide?: number | undefined;
   readonly disabled?: boolean | undefined;
@@ -51,6 +53,7 @@ export default function HoverCard({
   content,
   ariaLabel,
   placement = "top",
+  alignment = "center",
   delayShow = 700,
   delayHide = 0,
   disabled = false,
@@ -107,12 +110,13 @@ export default function HoverCard({
       tooltipRect: measureTooltipSize(cardRef.current),
       placement,
       offset,
+      alignment,
     });
 
     setPosition(layout.position);
     setArrowPosition(layout.arrowPosition);
     setActualPlacement(layout.placement);
-  }, [offset, placement, resolveTriggerNode]);
+  }, [alignment, offset, placement, resolveTriggerNode]);
 
   const cancelShowTimer = useCallback(() => {
     if (showTimer.current !== undefined) {

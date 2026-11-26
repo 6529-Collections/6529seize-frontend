@@ -277,7 +277,7 @@ jobs:
             corePlaywrightLanes.push({ lane: "playwright-subscription-status", label: "Subscription status and funding", runner: defaultRunner });
           }
           const waveLinkPreviewRequired = plan.changed_files.some((file) =>
-            /^(?:components\/waves\/list\/WaveItem(?:Wide|Chat|Follow)\.tsx$|tests\/social\/wave-link-preview-sandbox\.spec\.ts$)/.test(file)
+            /^(?:components\/waves\/list\/WaveItem(?:Wide|Chat|Follow)\.tsx$|components\/waves\/drops\/(?:CurationWave(?:Badge|PreviewCard)\.tsx$|WaveCreatorPreview(?:Item|List)\.tsx$|curation-preview\/)|components\/utils\/tooltip\/(?:HoverCard\.tsx|tooltipPositioning\.ts)$|tests\/social\/(?:curation-wave-preview|wave-link-preview)-sandbox\.spec\.ts$)/.test(file)
           );
           if (waveLinkPreviewRequired) {
             corePlaywrightLanes.push({ lane: "playwright-wave-link-preview", label: "Wave link previews desktop and mobile", runner: defaultRunner });
