@@ -1312,6 +1312,7 @@ export const ES_ES_MESSAGES = {
   ...ES_ES_THE_MEMES_MINT_PROGRESS_MESSAGES,
   "e2ee.list.pinned": "Fijado",
   "e2ee.list.pinnedChat": "{title}, chat fijado",
+  "e2ee.list.pinChat": "Fijar {title} arriba",
   "e2ee.info.pin": "Fijar arriba",
   "e2ee.info.unpin": "Desfijar chat",
   "e2ee.info.pinSyncHelp":

@@ -306,6 +306,9 @@ describe("encrypted conversation list", () => {
       expect(
         within(rows[0]!).getByText("Pinned", { exact: true })
       ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { pressed: true })
+      ).toHaveAccessibleName("Pin Pinned earlier to top");
     }
   );
 
@@ -381,7 +384,7 @@ describe("encrypted conversation list", () => {
     ).toBeVisible();
   });
 
-  it("opens the history with unread incoming messages when concurrent chats share a row", () => {
+  it("pins the thread while opening the session with unread incoming messages", async () => {
     const pair = {
       kind: "dm" as const,
       admins: [SELF_ID, ALICE_ID],
@@ -389,20 +392,20 @@ describe("encrypted conversation list", () => {
     };
     const current = conversation({ ...pair, g: "a" });
     const incoming = conversation({ ...pair, g: "b", unread: 1 });
+    const engine = createFakeE2eeEngine({ conversations: [current, incoming] });
     render(
-      <E2eeTestProvider
-        value={contextFor(
-          createFakeE2eeEngine({ conversations: [current, incoming] })
-        )}
-      >
+      <E2eeTestProvider value={contextFor(engine)}>
         <E2eeConversationListPage />
       </E2eeTestProvider>
     );
-    const row = within(
-      screen.getByRole("list", { name: "Encrypted chats" })
-    ).getByRole("link");
-    expect(row).toHaveAttribute("href", "/messages/encrypted/b");
-    expect(row).toHaveTextContent("1 unread message");
+    const list = within(screen.getByRole("list", { name: "Encrypted chats" }));
+    const link = list.getByRole("link");
+    const pin = list.getByRole("button", { name: "Pin alice to top" });
+    expect(link).toHaveAttribute("href", "/messages/encrypted/b");
+    expect(link).toHaveTextContent("1 unread message");
+    expect(link).not.toContainElement(pin);
+    await act(async () => fireEvent.click(pin));
+    expect(engine.setConversationPinned).toHaveBeenCalledWith(current.g, true);
   });
 
   it("keeps unread histories unread until viewed and previews the history it opens", () => {
