@@ -16554,6 +16554,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     );
     await page.goto(`/waves/${WAVE}?tab=chat`);
     const information = await openWaveInformation(page);
+    await expect(information.getByText(wave.name, { exact: true })).toHaveCSS(
+      "font-weight",
+      "500"
+    );
     const aboutContent = information
       .getByTestId("wave-creation-date")
       .locator("..");
