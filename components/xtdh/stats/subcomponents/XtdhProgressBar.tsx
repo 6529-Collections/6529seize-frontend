@@ -1,4 +1,4 @@
-export interface XtdhProgressBarProps {
+interface XtdhProgressBarProps {
   readonly percentage: number;
   readonly ariaLabel?: string | undefined;
   readonly ariaValueText?: string | undefined;
