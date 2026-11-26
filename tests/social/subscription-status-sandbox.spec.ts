@@ -708,6 +708,13 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
           expect(choose!.y).toBeGreaterThanOrEqual(
             figures!.y + figures!.height + 19
           );
+          await overview
+            .getByRole("button", { name: "Forecast use", exact: true })
+            .focus();
+          await page.keyboard.press("Tab");
+          await expect(
+            overview.getByRole("link", { name: "Choose drops", exact: true })
+          ).toBeFocused();
         }
         if (
           phase !== "before" &&

@@ -6,12 +6,16 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
 interface UserPageXtdhGrantedListTabsProps {
+  readonly idPrefix: string;
+  readonly panelId: string;
   readonly activeTab: GrantedTab;
   readonly onTabChange: (tab: GrantedTab) => void;
   readonly pendingCount?: number | undefined;
 }
 
 export function UserPageXtdhGrantedListTabs({
+  idPrefix,
+  panelId,
   activeTab,
   onTabChange,
   pendingCount,
@@ -58,6 +62,8 @@ export function UserPageXtdhGrantedListTabs({
       {GRANTED_TABS.map((tab, index) => (
         <PillTab
           key={tab.key}
+          id={`${idPrefix}-${tab.value}`}
+          aria-controls={panelId}
           active={activeTab === tab.value}
           role="tab"
           aria-selected={activeTab === tab.value}

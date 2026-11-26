@@ -253,7 +253,7 @@ On the web and Android, the tab appears after the page loads.
 
 - Settings use compact inline controls on the same subtle dark surface as
   Upcoming Drops, with the full address available in its tooltip.
-  Upcoming Drops uses date-first rows with the original mode explanation
+  Upcoming Drops keeps the original mode explanation
   below its heading for the owner only. Minting Today has a primary-blue label
   and a dot that pings unless reduced motion is enabled. All rows share one panel
   with no nested row boxes.
@@ -261,15 +261,17 @@ On the web and Android, the tab appears after the page loads.
   when the existing latest-Meme data matches its token and contract; missing,
   mismatched or failed artwork leaves the row usable without an image.
   The panel has vertical padding around the rows and
-  footer, with subtle horizontal dividers between rows. Dates are emphasized above
-  quieter Meme titles, including Minting Today. Its blue label takes the date's
-  place, with uncropped 80 × 113 artwork from 640px and 48 × 68 artwork on phones.
-  Below 640px, today's artwork sits above the full-width text, so its controls
-  align with the right edge of the later rows. The owner quantity picker and
-  switch stay paired beside the Meme name when there is room, or below it on
-  narrower rows, still aligned right. Visitors keep quantity and subscription status together with
-  the same responsive placement. Below 768px, More expands the original mint-day allocation details as text
-  below the row; desktop keeps them visible. Show More stays centered in the panel footer at every screen size.
+  footer, with subtle horizontal dividers between rows. From 768px, dates are
+  emphasized above quieter Meme titles, including Minting Today, whose blue label
+  takes the date's place. Its uncropped artwork is 80 × 113 from 768px and
+  48 × 68 below that width. Below 768px, artwork or the bordered month/day column
+  sits beside the text, with the Meme name above the weekday and season.
+  The owner quantity picker and switch stay paired beside the name when there
+  is room, or below the metadata on narrower rows. Visitor status stacks above
+  the quantity. More expands the original mint-day allocation details below
+  the row; desktop keeps them visible. Below 768px, Show More and Show Less use
+  a full-width footer row with a label on the left and chevron on the right;
+  desktop keeps its centered control.
   Visitors see non-interactive `Subscribed` or `Not subscribed` text
   instead of disabled drop switches, and plain selected / eligible quantities
   without chip backgrounds or dropdown arrows. Owners keep the existing editable switches, quantity
