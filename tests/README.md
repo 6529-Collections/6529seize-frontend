@@ -447,10 +447,6 @@ App PR CI:
 false` because CI dev servers always start cold.
 - When the critical-shell check is selected, it runs as three parallel jobs.
   One job runs both route-shell halves and `test:e2e:session-recovery-sandbox`.
-  The session recovery pack also checks signed-out and proxy Reply access,
-  copying from the mobile action sheet, and clearing a selected reply when
-  the acting session changes. It uses saved synthetic sessions with dev auth
-  disabled, so signed-out coverage exercises the actual guest state.
   The other two run `test:e2e:profile-following-sandbox` with Playwright
   `--shard=1/2` and `--shard=2/2`. Playwright splits the ordered test list by
   count, not by project. Today each of the four projects has the same number

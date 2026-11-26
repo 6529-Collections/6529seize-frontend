@@ -104,15 +104,6 @@ availability. Submission availability is exposed through the Chat tab
   immediately.
 - Existing drops, unread controls, and typing indicators continue to render
   while posting is blocked.
-- Reply controls use the same posting-access requirements as the composer.
-  Signed-out, proxy, suspended, and otherwise ineligible viewers can still read
-  allowed content and use available copy actions without selecting a reply.
-- Open replies let eligible signed-in viewers outside the chat group choose a
-  reply before the composer opens. Slow mode still allows preparing that reply
-  while the send cooldown runs.
-- Switching accounts or proxy mode, or losing reply access, removes the reply
-  target so a blocked composer does not leave a selected green message. Saved
-  draft text keeps its existing account and wave ownership.
 
 ## Failure and Recovery
 

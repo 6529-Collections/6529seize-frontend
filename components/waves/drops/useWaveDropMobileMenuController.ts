@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useId } from "react";
+import { useCallback, useEffect } from "react";
 import {
   useWaveDropMobileMenu,
   type WaveDropMobileMenuRequest,
@@ -9,14 +9,12 @@ import {
 type WaveDropMobileMenuControllerInput = WaveDropMobileMenuRequest & {
   readonly enabled: boolean;
   readonly isOpen: boolean;
-  readonly interactionScopeKey: string;
 };
 
 export const useWaveDropMobileMenuController = ({
   drop,
   enabled,
   isOpen,
-  interactionScopeKey,
   longPressTriggered,
   onAddReaction,
   onBoostAnimation,
@@ -31,16 +29,14 @@ export const useWaveDropMobileMenuController = ({
   standaloneQuickRemoveCuration,
 }: WaveDropMobileMenuControllerInput) => {
   const mobileMenu = useWaveDropMobileMenu();
-  const ownerId = useId();
+
   useEffect(() => {
     if (!enabled || !isOpen) {
-      mobileMenu?.closeDrop(drop.id, ownerId);
       return;
     }
 
     mobileMenu?.open({
       drop,
-      ownerId,
       longPressTriggered,
       showReplyAndQuote,
       onOpenChange,
@@ -58,10 +54,8 @@ export const useWaveDropMobileMenuController = ({
     drop,
     enabled,
     isOpen,
-    interactionScopeKey,
     longPressTriggered,
     mobileMenu,
-    ownerId,
     onAddReaction,
     onBoostAnimation,
     onEdit,
@@ -77,9 +71,9 @@ export const useWaveDropMobileMenuController = ({
 
   useEffect(() => {
     return () => {
-      mobileMenu?.clearDrop(drop.id, ownerId);
+      mobileMenu?.clearDrop(drop.id);
     };
-  }, [drop.id, mobileMenu, interactionScopeKey, ownerId]);
+  }, [drop.id, mobileMenu]);
 
   return useCallback(() => {
     mobileMenu?.close();

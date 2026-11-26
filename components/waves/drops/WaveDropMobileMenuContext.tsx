@@ -18,14 +18,12 @@ export type WaveDropMobileMenuRequest = Omit<
   "isOpen" | "setOpen"
 > & {
   readonly onOpenChange?: ((open: boolean) => void) | undefined;
-  readonly ownerId?: string | undefined;
 };
 
 interface WaveDropMobileMenuContextValue {
   readonly open: (request: WaveDropMobileMenuRequest) => void;
   readonly close: () => void;
-  readonly closeDrop: (dropId: string, ownerId: string) => void;
-  readonly clearDrop: (dropId: string, ownerId?: string) => void;
+  readonly clearDrop: (dropId: string) => void;
 }
 
 const WaveDropMobileMenuContext =
@@ -79,11 +77,7 @@ const WaveDropMobileMenuProviderRoot: React.FC<{
 
   const open = useCallback((request: WaveDropMobileMenuRequest) => {
     const current = activeMenuRef.current;
-    if (
-      current?.isOpen &&
-      (current.drop.id !== request.drop.id ||
-        current.ownerId !== request.ownerId)
-    ) {
+    if (current?.isOpen && current.drop.id !== request.drop.id) {
       current.onOpenChange?.(false);
     }
 
@@ -105,25 +99,9 @@ const WaveDropMobileMenuProviderRoot: React.FC<{
     setOpen(false);
   }, [setOpen]);
 
-  const closeDrop = useCallback(
-    (dropId: string, ownerId: string) => {
-      const current = activeMenuRef.current;
-      if (
-        current?.drop.id === dropId &&
-        current.ownerId === ownerId &&
-        current.isOpen
-      )
-        setOpen(false);
-    },
-    [setOpen]
-  );
-
-  const clearDrop = useCallback((dropId: string, ownerId?: string) => {
+  const clearDrop = useCallback((dropId: string) => {
     const current = activeMenuRef.current;
-    if (
-      current?.drop.id !== dropId ||
-      (ownerId !== undefined && current.ownerId !== ownerId)
-    ) {
+    if (current?.drop.id !== dropId) {
       return;
     }
 
@@ -133,8 +111,8 @@ const WaveDropMobileMenuProviderRoot: React.FC<{
   }, []);
 
   const value = useMemo<WaveDropMobileMenuContextValue>(
-    () => ({ open, close, closeDrop, clearDrop }),
-    [clearDrop, close, closeDrop, open]
+    () => ({ open, close, clearDrop }),
+    [clearDrop, close, open]
   );
 
   return (

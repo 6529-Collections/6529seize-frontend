@@ -6,16 +6,6 @@ import {
 } from "@/contexts/wave/WaveEligibilityContext";
 import { commonApiFetch } from "@/services/api/common-api";
 
-let mockActorId = "profile-a";
-jest.mock("@/components/auth/authContext", () => ({
-  useAuth: () => ({
-    connectedProfile: { id: mockActorId },
-    activeProfileProxy: null,
-    isAuthenticated: true,
-    isDirectProfileSession: true,
-  }),
-}));
-
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
 }));
@@ -52,7 +42,6 @@ function renderProvider() {
 }
 
 beforeEach(() => {
-  mockActorId = "profile-a";
   renders = 0;
   jest.mocked(commonApiFetch).mockReset();
 });
@@ -153,57 +142,4 @@ it("still refreshes a wave that has no confirmed eligibility yet", async () => {
 
   expect(await screen.findByText("true")).toBeInTheDocument();
   expect(commonApiFetch).toHaveBeenCalledTimes(1);
-});
-
-it("clears the previous actor's denial and ignores their held update", () => {
-  const view = renderProvider();
-  act(() =>
-    api.updateEligibility(WAVE_ID, {
-      ...ELIGIBLE,
-      authenticated_user_eligible_to_chat: false,
-    })
-  );
-  const previousUpdate = api.updateEligibility;
-  mockActorId = "profile-b";
-  view.rerender(
-    <WaveEligibilityProvider>
-      <Consumer />
-    </WaveEligibilityProvider>
-  );
-  expect(screen.getByTestId("chat")).toHaveTextContent("unknown");
-  act(() => previousUpdate(WAVE_ID, ELIGIBLE));
-  expect(screen.getByTestId("chat")).toHaveTextContent("unknown");
-  act(() => api.updateEligibility(WAVE_ID, ELIGIBLE));
-  expect(screen.getByTestId("chat")).toHaveTextContent("true");
-});
-
-it("ignores a previous actor's delayed eligibility response", async () => {
-  let finishPrevious: ((value: unknown) => void) | undefined;
-  jest.mocked(commonApiFetch).mockImplementation(
-    () =>
-      new Promise((resolve) => {
-        finishPrevious = resolve;
-      })
-  );
-  const view = renderProvider();
-  let pending: Promise<void> | undefined;
-  act(() => {
-    pending = api.refreshEligibility(WAVE_ID);
-  });
-  mockActorId = "profile-b";
-  view.rerender(
-    <WaveEligibilityProvider>
-      <Consumer />
-    </WaveEligibilityProvider>
-  );
-  act(() => api.updateEligibility(WAVE_ID, ELIGIBLE));
-  await act(async () => {
-    finishPrevious?.({
-      chat: { authenticated_user_eligible: false },
-      voting: { authenticated_user_eligible: false },
-      participation: { authenticated_user_eligible: false },
-    });
-    await pending;
-  });
-  expect(screen.getByTestId("chat")).toHaveTextContent("true");
 });

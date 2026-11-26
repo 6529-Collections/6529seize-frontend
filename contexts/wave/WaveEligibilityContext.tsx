@@ -7,9 +7,7 @@ import React, {
   useState,
   useRef,
   useMemo,
-  useLayoutEffect,
 } from "react";
-import { useAuth } from "@/components/auth/authContext";
 import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ChatRestriction } from "@/hooks/useDropPriviledges";
@@ -68,7 +66,6 @@ const RAW_ELIGIBILITY_KEYS = [
 ] as const satisfies readonly (keyof WaveEligibility)[];
 
 const ELIGIBILITY_FRESH_MS = 5 * 60 * 1000;
-const EMPTY_ELIGIBILITY: Record<string, WaveEligibility> = {};
 
 const updatesRawEligibility = (update: EligibilityUpdate): boolean =>
   RAW_ELIGIBILITY_KEYS.some((key) => key in update);
@@ -89,79 +86,44 @@ const changesEligibility = (
 export const WaveEligibilityProvider: React.FC<
   WaveEligibilityProviderProps
 > = ({ children }) => {
-  const {
-    connectedProfile,
-    activeProfileProxy,
-    isAuthenticated,
-    isDirectProfileSession,
-  } = useAuth();
-  const scopeKey = JSON.stringify([
-    connectedProfile?.id,
-    activeProfileProxy?.id,
-    isAuthenticated,
-    isDirectProfileSession,
-  ]);
-  const [scopedState, setScopedState] = useState({
-    scopeKey,
-    epoch: 0,
-    eligibility: {} as Record<string, WaveEligibility>,
-  });
-  if (scopedState.scopeKey !== scopeKey) {
-    setScopedState({ scopeKey, epoch: scopedState.epoch + 1, eligibility: {} });
-  }
-  const { epoch } = scopedState;
-  const eligibility =
-    scopedState.scopeKey === scopeKey
-      ? scopedState.eligibility
-      : EMPTY_ELIGIBILITY;
+  const [eligibility, setEligibility] = useState<
+    Record<string, WaveEligibility>
+  >({});
   const refreshingRef = useRef<Set<string>>(new Set());
   // When the server last confirmed each wave's eligibility, changed or not.
   // The only freshness record: kept out of state so confirmations alone do
   // not re-render consumers. One entry per visited wave, like `eligibility`.
   const confirmedAtRef = useRef<Map<string, number>>(new Map());
 
-  const activeEpochRef = useRef(epoch);
-  useLayoutEffect(() => {
-    activeEpochRef.current = epoch;
-    confirmedAtRef.current.clear();
-    refreshingRef.current.clear();
-  }, [epoch]);
-
   const updateEligibility = useCallback(
     (waveId: string, newEligibility: EligibilityUpdate) => {
-      if (activeEpochRef.current !== epoch) return;
       if (updatesRawEligibility(newEligibility)) {
-        confirmedAtRef.current.set(`${epoch}:${waveId}`, Date.now());
+        confirmedAtRef.current.set(waveId, Date.now());
       }
 
-      setScopedState((prev) => {
-        if (prev.scopeKey !== scopeKey || prev.epoch !== epoch) return prev;
-        const current = prev.eligibility[waveId];
+      setEligibility((prev) => {
+        const current = prev[waveId];
         if (!changesEligibility(current, newEligibility)) {
           return prev;
         }
         return {
           ...prev,
-          eligibility: {
-            ...prev.eligibility,
-            [waveId]: { ...current, ...newEligibility } as WaveEligibility,
-          },
+          [waveId]: { ...current, ...newEligibility } as WaveEligibility,
         };
       });
     },
-    [epoch, scopeKey]
+    []
   );
 
   const refreshEligibility = useCallback(
     async (waveId: string) => {
-      const refreshKey = `${epoch}:${waveId}`;
-      // Requests and freshness belong to the actor that started them.
-      if (refreshingRef.current.has(refreshKey)) {
+      // Prevent multiple concurrent refreshes for the same wave
+      if (refreshingRef.current.has(waveId)) {
         return;
       }
 
       // Check if data is recent (less than 5 minutes old)
-      const confirmedAt = confirmedAtRef.current.get(refreshKey);
+      const confirmedAt = confirmedAtRef.current.get(waveId);
       if (
         confirmedAt !== undefined &&
         Date.now() - confirmedAt < ELIGIBILITY_FRESH_MS
@@ -169,7 +131,7 @@ export const WaveEligibilityProvider: React.FC<
         return;
       }
 
-      refreshingRef.current.add(refreshKey);
+      refreshingRef.current.add(waveId);
 
       try {
         const wave = await commonApiFetch<ApiWave>({
@@ -195,10 +157,10 @@ export const WaveEligibilityProvider: React.FC<
           error
         );
       } finally {
-        refreshingRef.current.delete(refreshKey);
+        refreshingRef.current.delete(waveId);
       }
     },
-    [epoch, updateEligibility]
+    [updateEligibility]
   );
 
   const getEligibility = useCallback(

@@ -4,7 +4,9 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
 import useLongPressClickSuppression from "@/hooks/useLongPressClickSuppression";
-import { useDropReplyAccess } from "@/hooks/drops/useDropReplyAccess";
+import { useAuth } from "@/components/auth/Auth";
+import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
+import { isDropReplyEligible } from "@/helpers/waves/drop-reply-eligibility";
 import { useSwipeToReply } from "@/hooks/useSwipeToReply";
 import { cancelHorizontalSwipe } from "@/hooks/useHorizontalSwipe";
 import { SwipeReplyHint } from "./SwipeReplyHint";
@@ -35,16 +37,14 @@ function DropMobileMenuHandlerInner({
   const [isSlideUp, setIsSlideUp] = useState(false);
   const { canUseTouchActionSheet } = useDropActionInteractionMode();
   const mobileMenu = useWaveDropMobileMenu();
-  const {
-    canReply: hasReplyAccess,
-    canReplyToDrop,
-    identityKey,
-  } = useDropReplyAccess(drop.wave.id, undefined, showReplyAndQuote);
+  const { connectedProfile } = useAuth();
+  const { getEligibility } = useWaveEligibility();
   const canReply =
     canUseTouchActionSheet &&
     showReplyAndQuote &&
     !isTemporaryDrop &&
-    hasReplyAccess;
+    Boolean(connectedProfile?.handle) &&
+    isDropReplyEligible(drop, getEligibility(drop.wave.id));
 
   const longPressTimeout = useRef<NodeJS.Timeout | null>(null);
   const touchStartX = useRef(0);
@@ -122,11 +122,10 @@ function DropMobileMenuHandlerInner({
   };
 
   const handleOnReply = useCallback(() => {
-    if (!showReplyAndQuote || !canReplyToDrop(drop)) return;
     mobileMenu?.close();
     setIsSlideUp(false);
     onReply();
-  }, [mobileMenu, onReply, showReplyAndQuote, canReplyToDrop, drop]);
+  }, [mobileMenu, onReply]);
 
   const handleOnAddReaction = useCallback(() => {
     mobileMenu?.close();
@@ -162,7 +161,6 @@ function DropMobileMenuHandlerInner({
 
   useWaveDropMobileMenuController({
     drop,
-    interactionScopeKey: identityKey,
     enabled: true,
     isOpen: effectiveIsSlideUp,
     longPressTriggered,

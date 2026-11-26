@@ -40,6 +40,7 @@ import { AuthSignModal } from "./AuthSignModal";
 import { useAuthRequestActions } from "./useAuthRequestActions";
 import { AuthContext } from "./authContext";
 import {
+  getAuthSessionRole,
   isDirectProfileAuthSession,
   resolveActiveProfileProxy,
 } from "./auth-session-scope";
@@ -77,7 +78,6 @@ import { DesktopProfileRecoveryContext } from "@/contexts/DesktopProfileRecovery
 import { useAuthChainGuard } from "./useAuthChainGuard";
 import { useAuthContextValue } from "./useAuthContextValue";
 import { useReceivedProfileProxies } from "./useReceivedProfileProxies";
-import { useAuthSessionRole } from "@/hooks/useAuthSessionRole";
 import { useSessionRecovery } from "./useSessionRecovery";
 import { useShownWalletForWrites } from "./useShownWalletForWrites";
 
@@ -239,7 +239,7 @@ export default function Auth({
 
   const [activeProfileProxy, setActiveProfileProxy] =
     useState<ApiProfileProxy | null>(null);
-  const authRole = useAuthSessionRole();
+  const authRole = getAuthSessionRole();
   const isDirectProfileSession = isDirectProfileAuthSession({
     authRole,
     profileId: connectedProfile?.id,

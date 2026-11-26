@@ -61,12 +61,11 @@ navigation swipe if the same finger then moves.
 Releasing the hold does not select an action in the sheet; tap the action you
 want after the sheet opens.
 
-Reply requires a signed-in, non-proxy profile with permission to reply. Open
-replies remain available when starting a new chat message is restricted. Slow
-mode lets you choose a reply and prepare a draft while waiting to send. Temporary
-or failed messages cannot be replied to. Links, media controls, sliders, editors
-and selected text keep their own touch behavior. Eligible viewers can also use
-`Reply` in the long-press menu.
+Reply requires a connected profile and the wave's reply permissions. Open replies
+remain available when starting a new chat message is restricted. Temporary or
+failed messages cannot be replied to. Links, media controls, sliders, editors and
+selected text keep their own touch behavior. `Reply` in the action sheet remains
+available in the long-press menu.
 
 ## What the Menu Can Show
 
@@ -88,15 +87,6 @@ and selected text keep their own touch behavior. Eligible viewers can also use
 
 ## Availability Rules
 
-- The sheet can open while posting is unavailable. Signed-out viewers can still
-  use `Copy text` and `Copy link`, along with other available reading controls.
-- `Reply` and swipe-to-reply are unavailable while signed out, using a proxy,
-  setting up a profile, or waiting for posting access to be checked. They are
-  also unavailable when the profile is suspended, chat is disabled, or the
-  profile has neither chat nor reply access.
-- Changing accounts or proxy mode, or losing reply access, clears the selected
-  reply target and reconciles any open action sheet. It does not send a message
-  or discard the saved draft text.
 - `Open drop` is hidden for chat drops.
 - `Mark as unread` is hidden on your own drops and when no profile is
   connected.

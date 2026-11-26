@@ -13,36 +13,6 @@ import { render, screen } from "@testing-library/react";
 import { useState, type ComponentProps } from "react";
 import userEvent from "@testing-library/user-event";
 
-jest.mock("@/components/auth/SeizeConnectContext", () => ({
-  useSeizeConnectContext: () => ({
-    address: "0xabc",
-    hasValidWalletAuth: true,
-    connectionState: "connected",
-  }),
-}));
-jest.mock("@/components/auth/auth-session-scope", () => ({
-  isAuthSessionForProfile: () => true,
-}));
-jest.mock("@/services/auth/auth.utils", () => ({
-  ...jest.requireActual("@/services/auth/auth.utils"),
-  getWalletAddress: () => "0xabc",
-}));
-jest.mock("@/hooks/useWaveData", () => ({
-  useWaveData: () => ({
-    data: { chat: { enabled: true, authenticated_user_eligible: true } },
-  }),
-}));
-jest.mock(
-  "@/hooks/content-moderation/usePublicProfileModerationStatus",
-  () => ({
-    usePublicProfileModerationStatus: () => ({
-      isLoading: false,
-      isSuspended: false,
-      isError: false,
-    }),
-  })
-);
-
 jest.mock(
   "@/components/waves/drops/WaveDropDocumentationAction",
   () => () => null
@@ -139,36 +109,6 @@ beforeAll(() => {
   Object.assign(navigator, {
     clipboard: { writeText },
   });
-});
-
-test("hides Reply for a proxy while retaining copy actions", () => {
-  render(
-    <AuthContext.Provider
-      value={
-        {
-          ...unauthenticatedAuth,
-          connectedProfile: { id: "profile-1", handle: "alice" },
-          isAuthenticated: true,
-          isDirectProfileSession: false,
-          activeProfileProxy: { id: "proxy-1" },
-        } as AuthProviderValue
-      }
-    >
-      <WaveDropMobileMenu
-        drop={dropFixture}
-        isOpen
-        showReplyAndQuote
-        longPressTriggered={false}
-        setOpen={jest.fn()}
-        onReply={jest.fn()}
-        onAddReaction={jest.fn()}
-      />
-    </AuthContext.Provider>
-  );
-  expect(screen.getByRole("button", { name: "Copy text" })).toBeInTheDocument();
-  expect(
-    screen.queryByRole("button", { name: "Reply" })
-  ).not.toBeInTheDocument();
 });
 
 const mockedUseDropInteractionRules = jest.mocked(useDropInteractionRules);
@@ -302,14 +242,7 @@ test("releases the native modal before handing reply focus to the composer", asy
     const [open, setOpen] = useState(true);
     return (
       <AuthContext.Provider
-        value={
-          {
-            connectedProfile: { id: "profile-1", handle: "alice" },
-            isAuthenticated: true,
-            isDirectProfileSession: true,
-            fetchingProfile: false,
-          } as AuthProviderValue
-        }
+        value={{ connectedProfile: { handle: "alice" } } as AuthProviderValue}
       >
         <button type="button" onClick={() => setOpen(true)}>
           Open actions
@@ -358,10 +291,7 @@ test("shows the confirmed curation removal immediately without unrelated mobile 
       value={
         {
           ...unauthenticatedAuth,
-          connectedProfile: { id: "profile-1", handle: "curator" },
-          isAuthenticated: true,
-          isDirectProfileSession: true,
-          fetchingProfile: false,
+          connectedProfile: { handle: "curator" },
         } as AuthProviderValue
       }
     >
@@ -401,10 +331,7 @@ test("copies serial jump links for non-memes drops", async () => {
     <AuthContext.Provider
       value={
         {
-          connectedProfile: { id: "profile-1", handle: "alice" },
-          isAuthenticated: true,
-          isDirectProfileSession: true,
-          fetchingProfile: false,
+          connectedProfile: { handle: "alice" },
           activeProfileProxy: null,
         } as any
       }
@@ -438,10 +365,7 @@ test("copies canonical drop links for memes submissions", async () => {
     <AuthContext.Provider
       value={
         {
-          connectedProfile: { id: "profile-1", handle: "alice" },
-          isAuthenticated: true,
-          isDirectProfileSession: true,
-          fetchingProfile: false,
+          connectedProfile: { handle: "alice" },
           activeProfileProxy: null,
         } as any
       }
@@ -475,10 +399,7 @@ test("copies canonical drop links for quorum participation drops", async () => {
     <AuthContext.Provider
       value={
         {
-          connectedProfile: { id: "profile-1", handle: "alice" },
-          isAuthenticated: true,
-          isDirectProfileSession: true,
-          fetchingProfile: false,
+          connectedProfile: { handle: "alice" },
           activeProfileProxy: null,
         } as any
       }
@@ -512,10 +433,7 @@ test("hides follow and clap when author and memes wave", () => {
     <AuthContext.Provider
       value={
         {
-          connectedProfile: { id: "profile-1", handle: "alice" },
-          isAuthenticated: true,
-          isDirectProfileSession: true,
-          fetchingProfile: false,
+          connectedProfile: { handle: "alice" },
           activeProfileProxy: null,
         } as any
       }
@@ -560,10 +478,7 @@ test("shows pinned-drop action in the mobile menu for admins", () => {
     <AuthContext.Provider
       value={
         {
-          connectedProfile: { id: "profile-1", handle: "admin" },
-          isAuthenticated: true,
-          isDirectProfileSession: true,
-          fetchingProfile: false,
+          connectedProfile: { handle: "admin" },
           activeProfileProxy: null,
         } as any
       }
@@ -608,10 +523,7 @@ test("does not show pinned-drop action in the mobile menu for non-admins", () =>
     <AuthContext.Provider
       value={
         {
-          connectedProfile: { id: "profile-1", handle: "alice" },
-          isAuthenticated: true,
-          isDirectProfileSession: true,
-          fetchingProfile: false,
+          connectedProfile: { handle: "alice" },
           activeProfileProxy: null,
         } as any
       }
@@ -644,10 +556,7 @@ test("shows full menu when a profile handle is present", () => {
     <AuthContext.Provider
       value={
         {
-          connectedProfile: { id: "profile-1", handle: "alice" },
-          isAuthenticated: true,
-          isDirectProfileSession: true,
-          fetchingProfile: false,
+          connectedProfile: { handle: "alice" },
           activeProfileProxy: null,
         } as any
       }
@@ -740,10 +649,7 @@ test("does not show mobile download actions for media", () => {
     <AuthContext.Provider
       value={
         {
-          connectedProfile: { id: "profile-1", handle: "alice" },
-          isAuthenticated: true,
-          isDirectProfileSession: true,
-          fetchingProfile: false,
+          connectedProfile: { handle: "alice" },
           activeProfileProxy: null,
         } as any
       }
@@ -776,10 +682,7 @@ test("shows clap by default for non-author profiles", () => {
     <AuthContext.Provider
       value={
         {
-          connectedProfile: { id: "profile-1", handle: "bob" },
-          isAuthenticated: true,
-          isDirectProfileSession: true,
-          fetchingProfile: false,
+          connectedProfile: { handle: "bob" },
           activeProfileProxy: null,
         } as unknown as AuthProviderValue
       }
@@ -805,9 +708,6 @@ test("shows one Flag Content action as the final authenticated mobile menu entry
       value={
         {
           connectedProfile: { id: "viewer-1", handle: "bob" },
-          isAuthenticated: true,
-          isDirectProfileSession: true,
-          fetchingProfile: false,
           activeProfileProxy: null,
         } as unknown as AuthProviderValue
       }
@@ -843,10 +743,7 @@ test("hides clap when voting is hidden", () => {
     <AuthContext.Provider
       value={
         {
-          connectedProfile: { id: "profile-1", handle: "bob" },
-          isAuthenticated: true,
-          isDirectProfileSession: true,
-          fetchingProfile: false,
+          connectedProfile: { handle: "bob" },
           activeProfileProxy: null,
         } as unknown as AuthProviderValue
       }
@@ -997,10 +894,7 @@ test("uses the single-drop mobile menu layer override", () => {
       <AuthContext.Provider
         value={
           {
-            connectedProfile: { id: "profile-1", handle: "alice" },
-            isAuthenticated: true,
-            isDirectProfileSession: true,
-            fetchingProfile: false,
+            connectedProfile: { handle: "alice" },
             activeProfileProxy: null,
           } as any
         }
@@ -1043,10 +937,7 @@ test("preserves the default mobile menu layer when its override is undefined", (
       <AuthContext.Provider
         value={
           {
-            connectedProfile: { id: "profile-1", handle: "alice" },
-            isAuthenticated: true,
-            isDirectProfileSession: true,
-            fetchingProfile: false,
+            connectedProfile: { handle: "alice" },
             activeProfileProxy: null,
           } as any
         }
@@ -1076,10 +967,7 @@ test("resets the reaction view when the underlying drop changes", async () => {
     <AuthContext.Provider
       value={
         {
-          connectedProfile: { id: "profile-1", handle: "alice" },
-          isAuthenticated: true,
-          isDirectProfileSession: true,
-          fetchingProfile: false,
+          connectedProfile: { handle: "alice" },
           activeProfileProxy: null,
         } as AuthProviderValue
       }

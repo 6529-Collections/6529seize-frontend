@@ -6,7 +6,6 @@ import { useChatFileDrop } from "@/hooks/useChatFileDrop";
 import { getNativeComposerStyle } from "@/components/waves/composerPresentation";
 
 import { useAuth } from "@/components/auth/Auth";
-import { useWaveReplyTarget } from "@/hooks/drops/useWaveReplyTarget";
 import SpinnerLoader from "@/components/common/SpinnerLoader";
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
 import { LegacyDmComposerGate } from "@/components/e2ee/legacy/LegacyDmBanner";
@@ -239,8 +238,23 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     readonly files: File[];
   } | null>(null);
 
-  const { activeDrop, setActiveDrop: setActiveDropForWave } =
-    useWaveReplyTarget(wave);
+  const [activeDropState, setActiveDropState] = useState<{
+    readonly waveId: string;
+    readonly activeDrop: ActiveDropState | null;
+  }>({
+    waveId: wave.id,
+    activeDrop: null,
+  });
+
+  const activeDrop =
+    activeDropState.waveId === wave.id ? activeDropState.activeDrop : null;
+
+  const setActiveDropForWave = useCallback(
+    (nextActiveDrop: ActiveDropState | null) => {
+      setActiveDropState({ waveId: wave.id, activeDrop: nextActiveDrop });
+    },
+    [wave.id]
+  );
   const activeDropRef = useRef(activeDrop);
 
   useEffect(() => {

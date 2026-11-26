@@ -2,12 +2,14 @@
 
 import IconButton from "@/components/utils/button/IconButton";
 
-import React from "react";
+import React, { useContext } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import DropActionTooltip from "./DropActionTooltip";
+import { AuthContext } from "@/components/auth/Auth";
+import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { useDropReplyAccess } from "@/hooks/drops/useDropReplyAccess";
+import { isDropReplyEligible } from "@/helpers/waves/drop-reply-eligibility";
 
 interface WaveDropActionsReplyProps {
   readonly drop: ApiDrop;
@@ -20,19 +22,22 @@ const WaveDropActionsReply: React.FC<WaveDropActionsReplyProps> = ({
   drop,
 }) => {
   const locale = useBrowserLocale();
-  const { canReply: hasReplyAccess, canReplyToDrop } = useDropReplyAccess(
-    drop.wave.id
-  );
+  const { setToast } = useContext(AuthContext);
+  const { getEligibility } = useWaveEligibility();
   const isTemporaryDrop = drop.id.startsWith("temp-");
 
   const canReply = !isTemporaryDrop;
 
   const handleReplyClick = () => {
-    if (!canReplyToDrop(drop)) return;
+    if (!isDropReplyEligible(drop, getEligibility(drop.wave.id))) {
+      setToast({
+        message: t(locale, "waves.drop.actions.replyUnavailable"),
+        type: "error",
+      });
+      return;
+    }
     onReply();
   };
-
-  if (!hasReplyAccess) return null;
 
   return (
     <DropActionTooltip

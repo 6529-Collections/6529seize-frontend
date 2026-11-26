@@ -11,16 +11,6 @@ import { DropSize } from "@/helpers/waves/drop.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 
-// This suite exercises a confirmed own-profile session; access transitions are
-// covered with the real hook in useDropReplyAccess.test.tsx.
-jest.mock("@/hooks/drops/useDropReplyAccess", () => ({
-  useDropReplyAccess: () => ({
-    canReply: true,
-    canReplyToDrop: () => true,
-    identityKey: "own-profile",
-  }),
-}));
-
 jest.mock("@/hooks/isMobileDevice");
 jest.mock("@/hooks/useIsTouchDevice", () => ({
   __esModule: true,
@@ -41,7 +31,7 @@ jest.mock("@/components/waves/drops/WaveDropMobileMenu", () => ({
   ),
 }));
 
-const drop = { id: "drop", wave: { id: "wave-1" }, type: DropSize.FULL } as any;
+const drop = { id: "drop", type: DropSize.FULL } as any;
 const TOUCH_ACTION_SHEET_SELECT_NONE_CLASS = "touch-action-sheet-select-none";
 
 const isMobileMock = useIsMobileDevice as jest.Mock;

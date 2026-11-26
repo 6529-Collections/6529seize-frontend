@@ -45,16 +45,6 @@ const setDocumentVisibilityState = (state: DocumentVisibilityState) => {
   });
 };
 
-// This suite exercises a confirmed own-profile session; access transitions are
-// covered with the real hook in useDropReplyAccess.test.tsx.
-jest.mock("@/hooks/drops/useDropReplyAccess", () => ({
-  useDropReplyAccess: () => ({
-    canReply: true,
-    canReplyToDrop: () => true,
-    identityKey: "own-profile",
-  }),
-}));
-
 jest.mock("next/dynamic", () => ({
   __esModule: true,
   default: (loader: () => unknown) => {

@@ -1,8 +1,8 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { useDropReplyAccess } from "@/hooks/drops/useDropReplyAccess";
+import { isDropReplyEligible } from "@/helpers/waves/drop-reply-eligibility";
+import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
@@ -101,8 +101,6 @@ function WaveDropMobileMenuAuthenticatedActions({
   extendedDrop,
   drop,
   showReplyAndQuote,
-  canReply,
-  canReplyToDrop,
   isTemporaryDrop,
   onReply,
   onOpenReactionPicker,
@@ -130,8 +128,6 @@ function WaveDropMobileMenuAuthenticatedActions({
   readonly extendedDrop: ExtendedDrop;
   readonly drop: ApiDrop;
   readonly showReplyAndQuote: boolean;
-  readonly canReply: boolean;
-  readonly canReplyToDrop: (drop: ApiDrop) => boolean;
   readonly isTemporaryDrop: boolean;
   readonly onReply: () => void;
   readonly onOpenReactionPicker: () => void;
@@ -157,9 +153,17 @@ function WaveDropMobileMenuAuthenticatedActions({
   readonly showOnlyQuickRemove: boolean;
 }) {
   const locale = useBrowserLocale();
+  const { setToast } = useContext(AuthContext);
+  const { getEligibility } = useWaveEligibility();
   const handleReplyClick = () => {
     if (isTemporaryDrop) return;
-    if (!canReplyToDrop(drop)) return;
+    if (!isDropReplyEligible(drop, getEligibility(drop.wave.id))) {
+      setToast({
+        message: t(locale, "waves.drop.actions.replyUnavailable"),
+        type: "error",
+      });
+      return;
+    }
     closeMenu();
     onReply();
   };
@@ -187,7 +191,7 @@ function WaveDropMobileMenuAuthenticatedActions({
         onMobilePickerOpen={onOpenReactionPicker}
         mobileButtonRef={reactionButtonRef}
       />
-      {showReplyAndQuote && canReply && (
+      {showReplyAndQuote && (
         <button
           className={`tw-flex tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 ${
             isTemporaryDrop
@@ -347,11 +351,6 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
   standaloneQuickRemoveCuration = null,
 }) => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const { canReply, canReplyToDrop } = useDropReplyAccess(
-    drop.wave.id,
-    undefined,
-    showReplyAndQuote && !showOnlyQuickRemove
-  );
   const locale = useBrowserLocale();
   const { isCapacitor } = useCapacitor();
   const isTemporaryDrop = drop.id.startsWith("temp-");
@@ -383,13 +382,6 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
       clearCurationsDialogTimeout(curationsDialogTimeoutRef);
     };
   }, []);
-
-  const previousCanReply = useRef(canReply);
-  useEffect(() => {
-    const wasAvailable = previousCanReply.current;
-    previousCanReply.current = canReply;
-    if (wasAvailable && !canReply) setOpen(false);
-  }, [canReply, setOpen]);
 
   // A new opening ends the previous reply handoff before committing its UI.
   if (isOpen && replyHandoff) setReplyHandoff(false);
@@ -426,7 +418,6 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
 
   const closeMenu = () => setOpen(false);
   const handleReply = () => {
-    if (!showReplyAndQuote || !canReplyToDrop(drop)) return;
     if (isCapacitor) {
       // A leaving modal keeps the chat inert during its exit animation. Remove
       // that boundary before transferring the completed tap to the editor.
@@ -587,8 +578,6 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
                     extendedDrop={extendedDrop}
                     drop={drop}
                     showReplyAndQuote={showReplyAndQuote}
-                    canReply={canReply}
-                    canReplyToDrop={canReplyToDrop}
                     isTemporaryDrop={isTemporaryDrop}
                     onReply={handleReply}
                     onOpenReactionPicker={() => setActiveView("reactions")}
@@ -654,23 +643,8 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
   );
 };
 
-const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = (props) => {
-  const {
-    connectedProfile,
-    activeProfileProxy,
-    isAuthenticated,
-    isDirectProfileSession,
-  } = useContext(AuthContext);
-  const { address } = useSeizeConnectContext();
-  const contentKey = JSON.stringify([
-    props.drop.id,
-    address?.toLowerCase(),
-    connectedProfile?.id,
-    activeProfileProxy?.id,
-    isAuthenticated,
-    isDirectProfileSession,
-  ]);
-  return <WaveDropMobileMenuContent key={contentKey} {...props} />;
-};
+const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = (props) => (
+  <WaveDropMobileMenuContent key={props.drop.id} {...props} />
+);
 
 export default WaveDropMobileMenu;

@@ -1,7 +1,9 @@
 "use client";
 
 import { useCompactMode } from "@/contexts/CompactModeContext";
-import { useDropReplyAccess } from "@/hooks/drops/useDropReplyAccess";
+import { useAuth } from "@/components/auth/Auth";
+import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
+import { isDropReplyEligible } from "@/helpers/waves/drop-reply-eligibility";
 import { useSwipeToReply } from "@/hooks/useSwipeToReply";
 import { cancelHorizontalSwipe } from "@/hooks/useHorizontalSwipe";
 import { useEditingDrop } from "@/contexts/EditingDropContext";
@@ -197,11 +199,8 @@ const WaveDropInner = ({
       location,
     })
   );
-  const { canReply, canReplyToDrop, identityKey } = useDropReplyAccess(
-    drop.wave.id,
-    undefined,
-    showReplyAndQuote && effectiveShowInteractions
-  );
+  const { connectedProfile } = useAuth();
+  const { getEligibility } = useWaveEligibility();
   const canSwipeReply =
     canUseTouchActionSheet &&
     location === DropLocation.WAVE &&
@@ -209,7 +208,8 @@ const WaveDropInner = ({
     showReplyAndQuote &&
     !isEditing &&
     !drop.id.startsWith("temp-") &&
-    canReply;
+    Boolean(connectedProfile?.handle) &&
+    isDropReplyEligible(drop, getEligibility(drop.wave.id));
   const { contentRef: swipeContentRef, onTouchStart: startReplySwipe } =
     useSwipeToReply({
       rootRef: dropRef,
@@ -405,7 +405,6 @@ const WaveDropInner = ({
   );
 
   const handleOnReply = useCallback(() => {
-    if (!showReplyAndQuote || !canReplyToDrop(drop)) return;
     // Cancel any active edit mode first
     if (editingDropId) {
       setEditingDropId(null);
@@ -417,8 +416,6 @@ const WaveDropInner = ({
     onReply,
     drop,
     activePartIndex,
-    showReplyAndQuote,
-    canReplyToDrop,
     editingDropId,
     setEditingDropId,
     mobileMenu,
@@ -574,7 +571,6 @@ const WaveDropInner = ({
 
   useWaveDropMobileMenuController({
     drop,
-    interactionScopeKey: identityKey,
     enabled: effectiveShowInteractions,
     isOpen: effectiveIsSlideUp,
     longPressTriggered,
