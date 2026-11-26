@@ -89,6 +89,15 @@ function getSaveStatus(
   );
 }
 
+/** Keep the disclosure open across responsive remounts and reset on step exit. */
+function useDisplaySettingsDisclosure(step: CreateWaveStep) {
+  const [open, setOpen] = useState(false);
+  if (step !== CreateWaveStep.OVERVIEW && open) {
+    setOpen(false);
+  }
+  return [open, setOpen] as const;
+}
+
 /** Edit competition rules while retaining the parent Wave's shared chat settings. */
 function DraftForm({
   wave,
@@ -150,10 +159,8 @@ function DraftForm({
   const conflictCopyKey = useRef<string | null>(null);
   const formRef = useRef<HTMLElement>(null);
   useKeyboardFocusScroll(formRef);
-  const [displaySettingsOpen, setDisplaySettingsOpen] = useState(false);
-  if (step !== CreateWaveStep.OVERVIEW && displaySettingsOpen) {
-    setDisplaySettingsOpen(false);
-  }
+  const [displaySettingsOpen, setDisplaySettingsOpen] =
+    useDisplaySettingsDisclosure(step);
   const [saveErrorFocusRequest, setSaveErrorFocusRequest] = useState(0);
   const votingErrors = getCreateWaveValidationErrors({
     config,
