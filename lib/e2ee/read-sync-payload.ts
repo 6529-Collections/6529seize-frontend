@@ -1,5 +1,9 @@
 import { randomBytes, utf8Decode, utf8Encode } from "./bytes";
-import { isConversationPin, type ConversationPin } from "./conversation-pins";
+import {
+  isConversationPin,
+  isConversationPinRank,
+  type PinChanges,
+} from "./conversation-pins";
 
 /**
  * The payload of a self group (D175, design P60 §3): read positions shared
@@ -15,6 +19,8 @@ const READ_SYNC_BODY_BYTES = 3072;
 const READ_SYNC_MAX_POSITIONS = 32;
 /** Leaves room in the same bucket for the longer pin records. */
 export const PINS_PER_PAYLOAD = 16;
+/** Rank records include the pin generation and use their own padded pages. */
+export const PIN_RANKS_PER_PAYLOAD = 12;
 
 const GROUP_PATTERN = /^0x[0-9a-f]{64}$/u;
 const ID_PATTERN = /^[0-9a-f]{32}$/u;
@@ -37,10 +43,10 @@ export interface ReadSyncPayload {
   readonly s?: readonly [id: string, page: number, pages: number];
 }
 
-export interface PinSyncPayload {
+export interface PinSyncPayload extends Pick<PinChanges, "pins"> {
   readonly v: typeof READ_SYNC_VERSION;
   readonly t: "pins";
-  readonly pins: readonly ConversationPin[];
+  readonly ranks?: PinChanges["ranks"];
   /** A device joined or restarted and wants its siblings' state. */
   readonly request?: true;
 }
@@ -56,7 +62,8 @@ export function encodeReadSync(
 ): Uint8Array {
   if (
     payload.t === "pins"
-      ? payload.pins.length > PINS_PER_PAYLOAD
+      ? payload.pins.length > PINS_PER_PAYLOAD ||
+        (payload.ranks?.length ?? 0) > PIN_RANKS_PER_PAYLOAD
       : payload.r.length > READ_SYNC_MAX_POSITIONS
   ) {
     throw new Error("E2EE_READ_SYNC_TOO_MANY");
@@ -123,10 +130,16 @@ export function decodeSelfSync(
   const json = parsed as Record<string, unknown>;
   if (json["v"] === READ_SYNC_VERSION && json["t"] === "pins") {
     if (!Array.isArray(json["pins"])) return null;
+    const ranks = Array.isArray(json["ranks"])
+      ? json["ranks"]
+          .slice(0, PIN_RANKS_PER_PAYLOAD)
+          .filter(isConversationPinRank)
+      : [];
     return {
       v: READ_SYNC_VERSION,
       t: "pins",
       pins: json["pins"].slice(0, PINS_PER_PAYLOAD).filter(isConversationPin),
+      ...(ranks.length > 0 ? { ranks } : {}),
       ...(json["request"] === true ? { request: true } : {}),
     };
   }

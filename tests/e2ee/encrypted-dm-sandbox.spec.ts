@@ -50,7 +50,12 @@ import {
   openGifPicker,
 } from "../support/e2ee/giphyFixture";
 import { checkEncryptedPoll } from "../support/e2ee/polls";
-import { expectPinBeforeTimestamp } from "../support/e2ee/pinLayout";
+import {
+  dragPinnedChat,
+  encryptedInbox,
+  expectPinBeforeTimestamp,
+  pinEncryptedChat,
+} from "../support/e2ee/pinLayout";
 
 /** A valid 1x1 RGBA PNG (raster images are the only inline type). */
 const PIXEL_PNG_BASE64 =
@@ -183,6 +188,86 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     const open = sessions;
     sessions = [];
     await closeE2eeUsers(open);
+  });
+
+  test("pinned chat rows reorder by drag and keep their order after reload", async ({
+    baseURL,
+    browser,
+  }, testInfo) => {
+    const users = await resetE2eeSandbox(baseURL);
+    const alice = await openE2eeUser(browser, testInfo, baseURL, users.alice);
+    const bob = await openE2eeUser(browser, testInfo, baseURL, users.bob);
+    const carol = await openE2eeUser(browser, testInfo, baseURL, users.carol);
+    sessions = [alice, bob, carol];
+    await Promise.all(sessions.map((session) => enroll(session)));
+    const { page } = alice;
+    const mobile = isMobileWebProject(testInfo.project.name);
+    const groupTitle = "Pinned group";
+    await startChat(alice, ["bob"], { kind: "dm" });
+    await startChat(alice, ["bob", "carol"], {
+      kind: "group",
+      name: groupTitle,
+    });
+    await startChat(alice, ["carol"], { kind: "dm" });
+    await page.bringToFront();
+    await gotoPath(page, ENCRYPTED_ROUTE);
+    const inbox = encryptedInbox(page);
+    const links = inbox.getByRole("link");
+    const bobLink = conversationListRow(page, "bob");
+    const groupLink = conversationListRow(page, groupTitle);
+    const carolLink = conversationListRow(page, "carol");
+    const original = [/bob/u, /Pinned group/u, /carol/u];
+    const reordered = [/Pinned group/u, /bob/u, /carol/u];
+    await pinEncryptedChat(inbox, "bob");
+    await pinEncryptedChat(inbox, groupTitle);
+    await expect(links).toHaveText(original);
+    await expect(carolLink).not.toHaveAttribute("aria-keyshortcuts", "Space");
+    await expect(groupLink).toHaveAttribute("aria-keyshortcuts", "Space");
+    if (mobile) {
+      await dragPinnedChat(page, groupLink, bobLink, true);
+    } else {
+      const moveGroupUp = async () => {
+        await groupLink.focus();
+        await page.keyboard.press("Space");
+        await expect(
+          page.getByText("Position 2.", { exact: true })
+        ).toHaveCount(1);
+        // The keyboard sensor attaches its listener after pickup.
+        await page.evaluate(
+          () =>
+            new Promise<void>((resolve) =>
+              requestAnimationFrame(() =>
+                requestAnimationFrame(() => resolve())
+              )
+            )
+        );
+        await page.keyboard.press("ArrowUp");
+        await expect(
+          page.getByText("Position 1.", { exact: true })
+        ).toHaveCount(1);
+      };
+      await moveGroupUp();
+      await page.keyboard.press("Escape");
+      await expect(
+        page.getByText("Reordering canceled.", { exact: true })
+      ).toHaveCount(1);
+      await expect(groupLink).toBeFocused();
+      await expect(links).toHaveText(original);
+      await moveGroupUp();
+      await page.keyboard.press("Space");
+      await expect(links).toHaveText(reordered);
+      await dragPinnedChat(page, bobLink, groupLink);
+    }
+    const expected = mobile ? reordered : original;
+    await expect(links).toHaveText(expected);
+    await expect(page).toHaveURL(new RegExp(`${ENCRYPTED_ROUTE}$`, "u"));
+    await page.reload();
+    await expect(links).toHaveText(expected, {
+      timeout: E2EE_UI_TIMEOUT_MS,
+    });
+    await inbox.screenshot({
+      path: testInfo.outputPath("pinned-encrypted-chats.png"),
+    });
   });
 
   test("both participants can create and vote in encrypted DM polls", async ({

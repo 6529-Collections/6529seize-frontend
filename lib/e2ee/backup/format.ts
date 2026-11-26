@@ -1,8 +1,12 @@
 import { utf8Decode, utf8Encode } from "../bytes";
 import {
   isConversationPin,
+  isConversationPinRank,
   mergeConversationPins,
+  mergeConversationPinRanks,
   type ConversationPin,
+  type ConversationPinRank,
+  type PinRankVersions,
 } from "../conversation-pins";
 import {
   isPollRoster,
@@ -57,6 +61,7 @@ export interface BackupSegment {
   /** Added after v2 shipped; older decoders ignore the key. */
   reads?: BackupReadRecord[];
   pins?: ConversationPin[];
+  pinRanks?: ConversationPinRank[];
 }
 
 /** What the engine hands to the backup module (copies, never live state). */
@@ -67,6 +72,8 @@ export interface BackupHistory {
   reads?: Record<string, number>;
   /** Latest pin or unpin per thread. */
   pins?: ConversationPin[];
+  /** Latest placement per pinned thread. */
+  pinRanks?: ConversationPinRank[];
 }
 
 export const messageKey = (g: string, id: string): string => `${g}|${id}`;
@@ -96,6 +103,7 @@ export interface EncodedSegment {
   messages: BackupMessageRecord[];
   reads: BackupReadRecord[];
   pins: ConversationPin[];
+  pinRanks: ConversationPinRank[];
 }
 
 /** Greedy packing of records into segments of at most `maxBytes` JSON. */
@@ -109,14 +117,30 @@ export function packSegments(
   let messages: BackupMessageRecord[] = [];
   let reads: BackupReadRecord[] = [];
   let pins: ConversationPin[] = [];
+  let pinRanks: ConversationPinRank[] = [];
   // Reserve enough overhead for a segment containing every record type.
   const base = utf8Encode(
-    JSON.stringify({ v: 2, at, groups: [], messages: [], reads: [], pins: [] })
+    JSON.stringify({
+      v: 2,
+      at,
+      groups: [],
+      messages: [],
+      reads: [],
+      pins: [],
+      pinRanks: [],
+    })
   ).length;
   let size = base;
 
   const flush = () => {
-    if (groups.length + messages.length + reads.length + pins.length === 0) {
+    if (
+      groups.length +
+        messages.length +
+        reads.length +
+        pins.length +
+        pinRanks.length ===
+      0
+    ) {
       return;
     }
     const segment: BackupSegment = {
@@ -126,6 +150,7 @@ export function packSegments(
       messages,
       ...(reads.length > 0 ? { reads } : {}),
       ...(pins.length > 0 ? { pins } : {}),
+      ...(pinRanks.length > 0 ? { pinRanks } : {}),
     };
     out.push({
       json: utf8Encode(JSON.stringify(segment)),
@@ -133,11 +158,13 @@ export function packSegments(
       messages,
       reads,
       pins,
+      pinRanks,
     });
     groups = [];
     messages = [];
     reads = [];
     pins = [];
+    pinRanks = [];
     size = base;
   };
 
@@ -165,6 +192,9 @@ export function packSegments(
   }
   for (const pin of history.pins ?? []) {
     add(utf8Encode(JSON.stringify(pin)).length, () => pins.push(pin));
+  }
+  for (const rank of history.pinRanks ?? []) {
+    add(utf8Encode(JSON.stringify(rank)).length, () => pinRanks.push(rank));
   }
   flush();
   return out;
@@ -345,6 +375,9 @@ export function decodeSegment(json: Uint8Array): BackupSegment {
   const pins = Array.isArray(parsed["pins"])
     ? parsed["pins"].filter(isConversationPin)
     : [];
+  const pinRanks = Array.isArray(parsed["pinRanks"])
+    ? parsed["pinRanks"].filter(isConversationPinRank)
+    : [];
   return {
     v: 2,
     at: isNumber(parsed["at"]) ? parsed["at"] : 0,
@@ -352,6 +385,7 @@ export function decodeSegment(json: Uint8Array): BackupSegment {
     messages: parsed["messages"].filter(isMessageRecord),
     ...(reads.length > 0 ? { reads } : {}),
     ...(pins.length > 0 ? { pins } : {}),
+    ...(pinRanks.length > 0 ? { pinRanks } : {}),
   };
 }
 
@@ -369,6 +403,7 @@ export function mergeSegments(
   const messages = new Map<string, BackupMessageRecord>();
   const reads: Record<string, number> = {};
   let pins: Readonly<Record<string, ConversationPin>> = {};
+  let pinRanks: PinRankVersions = {};
   for (const segment of segments) {
     for (const group of segment.groups) {
       groups.set(group.g.toLowerCase(), group);
@@ -381,12 +416,15 @@ export function mergeSegments(
       reads[key] = Math.max(reads[key] ?? 0, seq);
     }
     pins = mergeConversationPins(pins, segment.pins ?? []);
+    pinRanks = mergeConversationPinRanks(pinRanks, segment.pinRanks ?? []);
   }
   const pinVersions = Object.values(pins);
+  const rankVersions = Object.values(pinRanks);
   return {
     groups: [...groups.values()],
     messages: [...messages.values()],
     ...(Object.keys(reads).length > 0 ? { reads } : {}),
     ...(pinVersions.length > 0 ? { pins: pinVersions } : {}),
+    ...(rankVersions.length > 0 ? { pinRanks: rankVersions } : {}),
   };
 }
