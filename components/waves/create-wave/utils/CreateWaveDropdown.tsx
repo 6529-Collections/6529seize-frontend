@@ -198,8 +198,8 @@ export default function CreateWaveDropdown<TValue extends string>({
   const placementClasses =
     menuPlacement === "top" ? "tw-bottom-full tw-mb-1" : "tw-top-full tw-mt-1";
   const menuClasses = useMobileSheet
-    ? ""
-    : `tw-absolute tw-z-20 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-shadow-lg ${placementClasses}`;
+    ? "tw-bg-transparent"
+    : `tw-absolute tw-z-20 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-shadow-lg ${placementClasses}`;
 
   const optionList = (
     <ul
@@ -208,7 +208,7 @@ export default function CreateWaveDropdown<TValue extends string>({
       role="listbox"
       aria-label={ariaLabel}
       data-placement={useMobileSheet ? undefined : menuPlacement}
-      className={`tw-m-0 tw-w-full tw-list-none tw-bg-iron-900 tw-p-2 ${menuClasses}`}
+      className={`tw-m-0 tw-w-full tw-list-none tw-p-2 ${menuClasses}`}
     >
       {options.map((option, index) => (
         <li key={option.value} role="none">
