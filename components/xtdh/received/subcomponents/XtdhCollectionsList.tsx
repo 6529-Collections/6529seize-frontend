@@ -18,6 +18,7 @@ type ApiXtdhCollection = Omit<
 };
 
 interface XtdhCollectionsListProps {
+  readonly variant?: "default" | "profile";
   readonly isEnabled: boolean;
   readonly isLoading: boolean;
   readonly isError: boolean;
@@ -31,6 +32,7 @@ interface XtdhCollectionsListProps {
 }
 
 export function XtdhCollectionsList({
+  variant = "default",
   isEnabled,
   isLoading,
   isError,
@@ -55,7 +57,7 @@ export function XtdhCollectionsList({
 
   const showInitialLoading = isLoading && collections.length === 0;
   if (showInitialLoading) {
-    return <CollectionsSkeleton />;
+    return <CollectionsSkeleton variant={variant} />;
   }
 
   const showInitialError = isError && collections.length === 0;
@@ -96,10 +98,14 @@ export function XtdhCollectionsList({
 
   return (
     <div>
-      <ul className="tw-m-0 tw-flex tw-flex-col tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800 tw-p-0">
+      <ul
+        data-xtdh-collections=""
+        className={`tw-m-0 tw-flex tw-flex-col tw-p-0 ${variant === "profile" ? "tw-gap-3 tw-bg-transparent" : "tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800"}`}
+      >
         {collections.map((collection, index) => (
           <XtdhReceivedCollectionCard
             key={getCollectionKey(collection, index)}
+            variant={variant}
             collection={collection}
             onSelect={onSelectCollection}
             isSelected={
@@ -119,7 +125,11 @@ export function XtdhCollectionsList({
   );
 }
 
-function CollectionsSkeleton() {
+function CollectionsSkeleton({
+  variant,
+}: {
+  readonly variant: "default" | "profile";
+}) {
   const locale = useBrowserLocale();
 
   return (
@@ -128,20 +138,21 @@ function CollectionsSkeleton() {
         {t(locale, "xtdh.collections.loading")}
       </output>
       <ul
+        data-xtdh-collections=""
         aria-hidden="true"
-        className="tw-m-0 tw-flex tw-flex-col tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800 tw-p-0"
+        className={`tw-m-0 tw-flex tw-flex-col tw-p-0 ${variant === "profile" ? "tw-gap-3 tw-bg-transparent" : "tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800"}`}
       >
         {SKELETON_INDICES.map((index) => (
           <li
             key={`skeleton-${index}`}
             data-testid="xtdh-collection-skeleton"
-            className="tw-w-full tw-list-none tw-overflow-hidden tw-rounded-b-xl tw-px-6 tw-py-6 motion-safe:tw-animate-pulse"
+            className={`tw-w-full tw-list-none tw-overflow-hidden tw-px-6 tw-py-6 motion-safe:tw-animate-pulse ${variant === "profile" ? "tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.04] tw-bg-iron-900/50 max-md:tw-p-4" : "tw-rounded-b-xl"}`}
           >
             <div className="tw-flex tw-flex-col tw-items-start tw-justify-between tw-gap-x-3 tw-gap-y-6 md:tw-flex-row">
               <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center">
                 <div
                   data-xtdh-skeleton-thumbnail=""
-                  className="tw-h-16 tw-w-16 tw-shrink-0 tw-rounded-lg tw-bg-iron-800"
+                  className={`tw-h-16 tw-w-16 tw-shrink-0 tw-rounded-lg tw-bg-iron-800 ${variant === "profile" ? "max-md:tw-size-10" : ""}`}
                 />
                 <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-0.5">
                   <div className="tw-h-6 tw-w-32 tw-rounded tw-bg-iron-800" />
@@ -155,7 +166,7 @@ function CollectionsSkeleton() {
             </div>
             <div
               data-xtdh-skeleton-metrics=""
-              className="tw-mb-0 tw-mt-6 tw-grid tw-gap-x-6 tw-gap-y-4 sm:tw-grid-cols-2 md:tw-ml-20 md:tw-mt-4 md:tw-grid-cols-3"
+              className={`tw-mb-0 tw-mt-6 tw-grid tw-gap-x-6 tw-gap-y-4 sm:tw-grid-cols-2 md:tw-ml-20 md:tw-mt-4 md:tw-grid-cols-3 ${variant === "profile" ? "max-md:tw-mt-4 max-md:tw-grid-cols-2 max-md:tw-gap-x-3 max-md:tw-gap-y-3" : ""}`}
             >
               {SKELETON_METRIC_KEYS.map((metricKey) => (
                 <div key={metricKey} className="tw-space-y-1.5">

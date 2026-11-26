@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useContext, useEffect, useMemo, useRef } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+} from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   QueryKey,
@@ -28,6 +35,8 @@ export default function UserPageXtdhGrantedList({
   isSelf = false,
 }: Readonly<UserPageXtdhGrantedListProps>) {
   const enabled = Boolean(grantor);
+  const statusTabsId = useId();
+  const statusPanelId = `${statusTabsId}-panel`;
   const {
     activeTab,
     activeSubFilter,
@@ -99,9 +108,10 @@ export default function UserPageXtdhGrantedList({
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
           <div className="tw-min-w-0 tw-flex-1">
             <UserPageXtdhGrantedListTabs
+              idPrefix={statusTabsId}
+              panelId={statusPanelId}
               activeTab={activeTab}
               onTabChange={handleTabChange}
-              fill={false}
               pendingCount={pendingCount}
             />
           </div>
@@ -115,28 +125,36 @@ export default function UserPageXtdhGrantedList({
           )}
         </div>
       </div>
-      <UserPageXtdhGrantedListContent
-        enabled={enabled}
-        isLoading={isLoading}
-        isError={isError}
-        errorMessage={errorMessage}
-        grants={grants}
-        isSelf={isSelf}
-        onRetry={handleRetry}
-        statuses={apiParams.statuses}
-      />
-      {showLoadMore && (
-        <div className="tw-flex tw-justify-center tw-px-6 tw-pb-6">
-          <Button
-            variant="tertiary"
-            size="md"
-            onClick={() => fetchNextPage()}
-            loading={isFetchingNextPage}
-          >
-            Load More
-          </Button>
-        </div>
-      )}
+      <div
+        id={statusPanelId}
+        role="tabpanel"
+        aria-labelledby={`${statusTabsId}-${activeTab}`}
+        tabIndex={0}
+        className="tw-space-y-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+      >
+        <UserPageXtdhGrantedListContent
+          enabled={enabled}
+          isLoading={isLoading}
+          isError={isError}
+          errorMessage={errorMessage}
+          grants={grants}
+          isSelf={isSelf}
+          onRetry={handleRetry}
+          statuses={apiParams.statuses}
+        />
+        {showLoadMore && (
+          <div className="tw-flex tw-justify-center tw-px-6 tw-pb-6">
+            <Button
+              variant="tertiary"
+              size="md"
+              onClick={() => fetchNextPage()}
+              loading={isFetchingNextPage}
+            >
+              Load More
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

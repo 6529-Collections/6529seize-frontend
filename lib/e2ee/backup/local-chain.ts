@@ -1,4 +1,5 @@
 import { base64ToBytes } from "../bytes";
+import type { ConversationPin } from "../conversation-pins";
 import { chainAt, type LinkedChunk } from "./chain";
 import { type BackupHistory, fingerprint, messageKey } from "./format";
 import type { BackupLocalState } from "./state";
@@ -47,6 +48,13 @@ export function startNewChain(local: BackupLocalState): void {
   local.groupPrints = {};
   local.messagePrints = {};
   local.readsSent = {};
+  local.pinIds = {};
+}
+
+export function backupPinIds(
+  pins: readonly ConversationPin[]
+): Record<string, string> {
+  return Object.fromEntries(pins.map(([thread, , id]) => [thread, id]));
 }
 
 /**
@@ -66,6 +74,9 @@ export function changedHistory(
         )
       )
     : {};
+  const pins = (history.pins ?? []).filter(
+    ([thread, , id]) => local.pinIds?.[thread] !== id
+  );
   return {
     groups: history.groups.filter(
       (group) => local.groupPrints[group.g] !== fingerprint(group)
@@ -76,5 +87,6 @@ export function changedHistory(
         fingerprint(message)
     ),
     ...(Object.keys(reads).length > 0 ? { reads } : {}),
+    ...(pins.length > 0 ? { pins } : {}),
   };
 }
