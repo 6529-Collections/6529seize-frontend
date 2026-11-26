@@ -694,11 +694,6 @@ async function selectCompetitionFilter(page: Page, name: string) {
     await tab.click();
   }
 }
-const competitionContent = (page: Page) =>
-  page
-    .getByRole("main")
-    .locator('[data-competition-detail], [data-competition-navigation="flat"]')
-    .filter({ visible: true });
 const waveTabStrip = (page: Page) =>
   page.getByRole("tablist").filter({
     has: page.getByRole("tab", { name: "Chat", exact: true }),
@@ -13442,7 +13437,14 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       const footer = page
         .getByRole("button", { name: "Next", exact: true })
         .locator("..");
+      await expect(name).toHaveAttribute("required", "");
+      await expect(name).toHaveAttribute("aria-invalid", "false");
       await next.click();
+      await expect(name).toHaveAttribute("aria-invalid", "true");
+      await expect(name).toBeFocused();
+      await expect(name).toHaveCSS("border-width", "1px");
+      await expect(name).toHaveCSS("outline-width", "1px");
+      await expect(name).toBeInViewport({ ratio: 1 });
       const message = page.getByRole("alert").filter({
         hasText: "Complete the required fields before continuing.",
       });
@@ -13468,6 +13470,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         style: "nextjs-portal { visibility: hidden; }",
       });
       await name.fill("Validation placement draft");
+      await expect(name).toHaveAttribute("aria-invalid", "false");
       await expect(message).toHaveCount(0);
       await next.click();
       await expect(

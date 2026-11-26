@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode, Ref } from "react";
+import type { ChangeEventHandler, ReactNode, Ref } from "react";
 import { useState } from "react";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
@@ -8,11 +8,54 @@ import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { CreateWaveStep } from "@/types/waves.types";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 
 const MOBILE_TEXT_STYLES =
   "max-md:[&_:is(p,span).tw-font-normal.tw-text-iron-300]:tw-text-meta max-md:[&_:is(p,span).tw-font-normal.tw-text-iron-300]:tw-leading-[18px] max-md:[&_:is(p,span).tw-font-normal.tw-text-iron-300]:tw-text-iron-400 max-md:[&_:is(p,span,div,output).tw-text-iron-400]:tw-text-meta max-md:[&_:is(p,span,div,output).tw-text-iron-400]:tw-font-normal max-md:[&_:is(p,span,div,output).tw-text-iron-400]:tw-leading-[18px]";
 
 const RULES_LOCKED_NOTE_ID = "competition-draft-rules-locked";
+
+export function DecisionNameField({
+  locale,
+  inputClassName,
+  errors,
+  currentErrors,
+  value,
+  onChange,
+}: {
+  readonly locale: SupportedLocale;
+  readonly inputClassName: string;
+  readonly errors: readonly CREATE_WAVE_VALIDATION_ERROR[];
+  readonly currentErrors: readonly CREATE_WAVE_VALIDATION_ERROR[];
+  readonly value: string;
+  readonly onChange: ChangeEventHandler<HTMLInputElement>;
+}) {
+  const nameErrors = [
+    CREATE_WAVE_VALIDATION_ERROR.NAME_REQUIRED,
+    CREATE_WAVE_VALIDATION_ERROR.NAME_TOO_LONG,
+  ];
+  const isNameError =
+    nameErrors.some((error) => errors.includes(error)) &&
+    nameErrors.some((error) => currentErrors.includes(error));
+  return (
+    <label className="tw-block tw-min-w-0 tw-space-y-2 tw-text-sm tw-font-medium tw-text-iron-300">
+      <span>
+        {t(locale, "competitions.titleLabel")}
+        <span aria-hidden="true" className="tw-ml-1 tw-text-error">
+          *
+        </span>
+      </span>
+      <input
+        required
+        maxLength={250}
+        aria-invalid={isNameError}
+        className={`${inputClassName} aria-[invalid=true]:tw-border-error aria-[invalid=true]:hover:tw-border-error aria-[invalid=true]:focus:tw-border-error aria-[invalid=true]:focus:tw-outline-1 aria-[invalid=true]:focus:tw-outline-error`}
+        value={value}
+        onChange={onChange}
+      />
+    </label>
+  );
+}
 
 /** Keep the disclosure open across responsive remounts and reset on step exit. */
 export function useDisplaySettingsDisclosure(step: CreateWaveStep) {

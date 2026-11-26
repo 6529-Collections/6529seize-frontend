@@ -36,6 +36,9 @@ The **Decisions** tab follows the selected decision's **Settings** tab and prece
 1. Open **Decisions**, then **+ Decision**, with decision creation permission.
 2. Choose Rank or Approve and configure eligibility, dates, submission
    requirements, voting credits, result rules, outcomes and presentation. Outcomes are optional and describe rewards fulfilled manually.
+   **Decision name** is required and marked with an asterisk. **Decision type**
+   starts with Rank selected, and **Description** is optional. If Next finds an
+   invalid name, the field is highlighted and focused.
    **Decision type** opens a dropdown on desktop and a bottom sheet on
    smaller screens, including the app. The current choice is marked; choosing
    another type closes the picker. Dismissing it leaves the choice unchanged.

@@ -58,6 +58,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import CompetitionDraftEditorFooter from "./CompetitionDraftEditorFooter";
 import CompetitionDraftEditorLayout, {
+  DecisionNameField,
   RulesLockedNote,
   rulesLockedNoteId,
   useDisplaySettingsDisclosure,
@@ -385,27 +386,26 @@ function DraftForm({
     });
     return result.ok ? result.group : null;
   };
-  const invalid = getCreateWaveValidationErrors({ config, step }).length > 0;
+  const currentStepErrors = getCreateWaveValidationErrors({ config, step });
+  const invalid = currentStepErrors.length > 0;
   let content;
   if (step === CreateWaveStep.OVERVIEW)
     content = (
       <div className="tw-space-y-6">
         <div className="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-[minmax(0,1fr)_190px]">
-          <label className="tw-block tw-min-w-0 tw-space-y-2 tw-text-sm tw-font-medium tw-text-iron-300">
-            <span>{t(locale, "competitions.titleLabel")}</span>
-            <input
-              required
-              maxLength={250}
-              className={EDITOR_INPUT}
-              value={config.overview.name}
-              onChange={(event) =>
-                controller.setOverview({
-                  ...config.overview,
-                  name: event.target.value,
-                })
-              }
-            />
-          </label>
+          <DecisionNameField
+            locale={locale}
+            inputClassName={EDITOR_INPUT}
+            errors={visibleErrors}
+            currentErrors={currentStepErrors}
+            value={config.overview.name}
+            onChange={(event) =>
+              controller.setOverview({
+                ...config.overview,
+                name: event.target.value,
+              })
+            }
+          />
           <div className="tw-min-w-0 tw-space-y-2 tw-text-sm tw-font-medium tw-text-iron-300">
             <span>{t(locale, "competitions.type")}</span>
             <CreateWaveDropdown
