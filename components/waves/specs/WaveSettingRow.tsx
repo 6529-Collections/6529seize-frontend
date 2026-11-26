@@ -361,8 +361,8 @@ export default function WaveSettingRow({
   if (variant === "content") {
     return (
       <section className="tw-relative tw-px-4 tw-py-4 [&_a]:tw-relative [&_a]:tw-z-10">
-        <div className="tw-flex tw-min-h-7 tw-items-center tw-justify-between tw-gap-x-4">
-          <h2 className="tw-mb-0 !tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.06em] !tw-text-iron-400 sm:tw-tracking-[0.1em]">
+        <div className="tailwind-scope tw-flex tw-min-h-7 tw-items-center tw-justify-between tw-gap-x-4">
+          <h2 className="tw-mb-0 tw-text-[0.6875rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.06em] tw-text-iron-400 sm:tw-tracking-[0.1em]">
             {label}
           </h2>
           {editButton}

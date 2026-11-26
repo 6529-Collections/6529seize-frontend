@@ -380,7 +380,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
       </section>
 
       <section aria-labelledby="wave-rep-categories-heading">
-        <div className="tw-mb-2 tw-flex tw-items-center tw-justify-between tw-gap-3">
+        <div className="tailwind-scope tw-mb-2 tw-flex tw-items-center tw-justify-between tw-gap-3">
           <h2
             id="wave-rep-categories-heading"
             data-wave-typography="preserve"
@@ -488,7 +488,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
       </section>
 
       <div className="tw-sticky tw-top-0 tw-z-20 tw-flex tw-flex-col tw-bg-iron-950">
-        <fieldset className="tw-m-0 tw-flex tw-min-w-0 tw-gap-1 tw-border-0 tw-p-0">
+        <fieldset className="tailwind-scope tw-m-0 tw-flex tw-min-w-0 tw-gap-1 tw-border-0 tw-p-0">
           <legend className="tw-sr-only">
             {detailText("waves.rep.details.view.ariaLabel")}
           </legend>
@@ -496,7 +496,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
             type="button"
             aria-pressed={activeView === "contributors"}
             onClick={() => setActiveView("contributors")}
-            className={`tw-h-11 tw-cursor-pointer tw-rounded-full tw-border-0 tw-px-3 tw-py-0 !tw-text-[13px] tw-font-medium tw-transition focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:tw-h-8 ${
+            className={`tw-h-11 tw-cursor-pointer tw-rounded-full tw-border-0 tw-px-3 tw-py-0 tw-text-[13px] tw-font-medium tw-transition focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:tw-h-8 ${
               activeView === "contributors"
                 ? "tw-bg-white/[0.08] tw-text-white"
                 : "tw-bg-transparent tw-text-iron-500 hover:tw-text-iron-300"
@@ -508,7 +508,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
             type="button"
             aria-pressed={activeView === "activity"}
             onClick={showActivity}
-            className={`tw-h-11 tw-cursor-pointer tw-rounded-full tw-border-0 tw-px-3 tw-py-0 !tw-text-[13px] tw-font-medium tw-transition focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:tw-h-8 ${
+            className={`tw-h-11 tw-cursor-pointer tw-rounded-full tw-border-0 tw-px-3 tw-py-0 tw-text-[13px] tw-font-medium tw-transition focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:tw-h-8 ${
               activeView === "activity"
                 ? "tw-bg-white/[0.08] tw-text-white"
                 : "tw-bg-transparent tw-text-iron-500 hover:tw-text-iron-300"
@@ -521,7 +521,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
 
       {activeView === "contributors" && (
         <section aria-labelledby="wave-rep-contributors-heading">
-          <div className="tw-mb-3 tw-flex tw-items-center tw-justify-between tw-gap-3">
+          <div className="tailwind-scope tw-mb-3 tw-flex tw-items-center tw-justify-between tw-gap-3">
             <div className="tw-min-w-0">
               <h2
                 id="wave-rep-contributors-heading"
@@ -627,7 +627,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
 
       {activeView === "activity" && (
         <section aria-labelledby="wave-rep-activity-heading">
-          <div className="tw-mb-3 tw-flex tw-items-center tw-justify-between tw-gap-3">
+          <div className="tailwind-scope tw-mb-3 tw-flex tw-items-center tw-justify-between tw-gap-3">
             <div>
               <h2
                 id="wave-rep-activity-heading"

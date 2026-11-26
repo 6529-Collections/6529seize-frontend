@@ -16601,6 +16601,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await expect(heading).toHaveCSS("font-size", "11px");
     await expect(heading).toHaveCSS("font-weight", "600");
     await expect(heading).toHaveCSS("text-transform", "uppercase");
+    for (const name of ["Contributors", "Activity"]) {
+      await expect(
+        information.getByRole("button", { name, exact: true })
+      ).toHaveCSS("font-size", "13px");
+    }
     const phone = page.viewportSize()!.width < 768;
     const search = categories.getByRole("searchbox", {
       name: "Search Wave REP categories",
@@ -16783,6 +16788,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await expect(
       information.getByRole("heading", { name: "Chat", exact: true })
     ).toBeVisible();
+    await expect(
+      information.getByRole("heading", { name: "Chat", exact: true })
+    ).toHaveCSS("font-size", "11px");
     const configurationInsets = await information
       .getByRole("heading", { level: 2 })
       .evaluateAll((headings) =>
