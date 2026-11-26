@@ -20,6 +20,7 @@ export function AnonymousAuthorAvatar({
 }) {
   return (
     <div
+      data-wave-drop-author-avatar
       aria-hidden="true"
       className={`${className} tw-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/10`}
     >
