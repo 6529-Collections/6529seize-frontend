@@ -71,13 +71,17 @@ function NotificationMenuItem({
   onSelect,
 }: NotificationMenuItemProps) {
   const descriptionId = useId();
+  const hintId = `${descriptionId}-hint`;
+  const describedBy =
+    [description && descriptionId, hint && hintId].filter(Boolean).join(" ") ||
+    undefined;
   const button = (
     <NotificationButton
       type="button"
       disabled={disabled}
       aria-checked={checked}
       aria-label={ariaLabel}
-      aria-describedby={description ? descriptionId : undefined}
+      aria-describedby={describedBy}
       aria-busy={loading}
       onClick={(event) => {
         event.stopPropagation();
@@ -97,7 +101,11 @@ function NotificationMenuItem({
           </span>
         )}
       </span>
-      {hint && <span className="tw-text-xs tw-text-iron-400">{hint}</span>}
+      {hint && (
+        <span id={hintId} className="tw-text-xs tw-text-iron-400">
+          {hint}
+        </span>
+      )}
       {loading ? (
         <Spinner dimension={12} />
       ) : (
@@ -199,47 +207,58 @@ export default function WaveNotificationPreferenceButtons({
     >
       {settings.following && (
         <>
-          <li
-            role="none"
-            className="tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-text-iron-400"
-          >
-            {message("waves.notificationSettings.heading")}
+          <li role="group" aria-labelledby={`${tooltipId}-heading`}>
+            <span
+              id={`${tooltipId}-heading`}
+              className="tw-block tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-text-iron-400"
+            >
+              {message("waves.notificationSettings.heading")}
+            </span>
+            <ul
+              role="none"
+              className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-0.5 tw-p-0"
+            >
+              {settings.preferencesUnavailable ? (
+                <NotificationMenuItem
+                  mobile={mobile}
+                  icon={ArrowPathIcon}
+                  label={message("waves.notificationSettings.retry.label")}
+                  ariaLabel={message(
+                    "waves.notificationSettings.retry.ariaLabel"
+                  )}
+                  disabled={busy || settings.preferencesFetching}
+                  loading={settings.preferencesFetching}
+                  onSelect={settings.onRetryClick}
+                />
+              ) : (
+                LEVELS.map(({ level, key, icon }) => (
+                  <NotificationMenuItem
+                    key={level}
+                    mobile={mobile}
+                    icon={icon}
+                    label={message(`waves.notificationSettings.${key}.label`)}
+                    ariaLabel={message(
+                      `waves.notificationSettings.${key}.ariaLabel`
+                    )}
+                    description={message(
+                      `waves.notificationSettings.${key}.description`
+                    )}
+                    checked={settings.notificationLevel === level}
+                    disabled={
+                      settings.isMuted ||
+                      settings.loading ||
+                      settings.muteLoading
+                    }
+                    loading={settings.loadingTarget === level}
+                    onSelect={() => {
+                      void settings.onLevelSelect(level);
+                      close();
+                    }}
+                  />
+                ))
+              )}
+            </ul>
           </li>
-          {settings.preferencesUnavailable ? (
-            <NotificationMenuItem
-              mobile={mobile}
-              icon={ArrowPathIcon}
-              label={message("waves.notificationSettings.retry.label")}
-              ariaLabel={message("waves.notificationSettings.retry.ariaLabel")}
-              disabled={busy || settings.preferencesFetching}
-              loading={settings.preferencesFetching}
-              onSelect={settings.onRetryClick}
-            />
-          ) : (
-            LEVELS.map(({ level, key, icon }) => (
-              <NotificationMenuItem
-                key={level}
-                mobile={mobile}
-                icon={icon}
-                label={message(`waves.notificationSettings.${key}.label`)}
-                ariaLabel={message(
-                  `waves.notificationSettings.${key}.ariaLabel`
-                )}
-                description={message(
-                  `waves.notificationSettings.${key}.description`
-                )}
-                checked={settings.notificationLevel === level}
-                disabled={
-                  settings.isMuted || settings.loading || settings.muteLoading
-                }
-                loading={settings.loadingTarget === level}
-                onSelect={() => {
-                  void settings.onLevelSelect(level);
-                  close();
-                }}
-              />
-            ))
-          )}
           <li
             role="separator"
             className="tw-my-1 tw-border-0 tw-border-t tw-border-solid tw-border-white/10"

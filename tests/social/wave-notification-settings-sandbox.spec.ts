@@ -178,6 +178,18 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
         })
       ).toHaveAttribute("aria-expanded", "true");
       await expectReachable(page, "menuitemradio");
+      const allMessages = choices.getByRole("menuitemradio", { name: ALL });
+      await allMessages.focus();
+      await page.keyboard.press("ArrowDown");
+      await expect(
+        choices.getByRole("menuitemradio", { name: BROADCAST })
+      ).toBeFocused();
+      await page.keyboard.press("End");
+      await expect(
+        choices.getByRole("menuitem", { name: "Mute wave" })
+      ).toBeFocused();
+      await page.keyboard.press("Home");
+      await expect(allMessages).toBeFocused();
       await expect(page.getByRole("dialog")).toHaveCount(1);
       expect(
         await choices

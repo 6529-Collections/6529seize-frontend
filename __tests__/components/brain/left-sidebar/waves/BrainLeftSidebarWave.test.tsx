@@ -315,12 +315,15 @@ describe("BrainLeftSidebarWave", () => {
   });
 
   it("shows muted indicator when wave is muted", () => {
-    const mutedWave = { ...baseWave, id: "5", isMuted: true };
+    const mutedWave = { ...baseWave, id: "5", isMuted: true, waveScore };
     render(<BrainLeftSidebarWave wave={mutedWave} onHover={onHover} />);
     const badge = screen.getByTestId("wave-muted-badge");
     expect(badge).toHaveClass("tw-bg-iron-800", "tw-text-iron-300");
-    expect(badge).toHaveTextContent("");
+    expect(badge.textContent).toBe("");
     expect(badge.querySelector("svg")).toBeInTheDocument();
+    expect(screen.getByText("83").closest("[aria-label]")).not.toContainElement(
+      badge
+    );
     expect(
       screen.queryByText(String(mutedWave.unreadDropsCount))
     ).not.toBeInTheDocument();

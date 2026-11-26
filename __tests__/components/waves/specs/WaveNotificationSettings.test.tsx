@@ -103,6 +103,9 @@ describe("WaveNotificationSettings", () => {
       trigger.id
     );
     expect(screen.getAllByRole("menuitemradio")).toHaveLength(3);
+    expect(
+      screen.getByRole("group", { name: "Notify me about" })
+    ).toContainElement(choice(MENTIONS));
     expect(screen.getByText("Notify me about")).toBeInTheDocument();
     expect(screen.getByText("Every new post")).toBeInTheDocument();
     expect(
@@ -110,6 +113,9 @@ describe("WaveNotificationSettings", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Mentions and replies to you")).toBeInTheDocument();
     expect(screen.getByRole("menuitem", { name: "Mute wave" })).toBeEnabled();
+    expect(
+      screen.getByRole("menuitem", { name: "Mute wave" })
+    ).toHaveAccessibleDescription("No alerts");
     expect(screen.getByText("No alerts")).toBeInTheDocument();
   });
 
@@ -161,6 +167,20 @@ describe("WaveNotificationSettings", () => {
     }
   );
 
+  it.each([undefined, null])(
+    "tolerates an omitted or null group preference array (%s)",
+    async (enabled) => {
+      mockSubscription.mockReturnValue({
+        data: { subscribed: false, enabled_group_notifications: enabled },
+        refetch,
+      } as unknown as ReturnType<typeof useWaveNotificationSubscription>);
+      renderComponent();
+      await openMenu();
+      expect(choice(MENTIONS)).toHaveAttribute("aria-checked", "true");
+      expect(screen.getByRole("menuitem", { name: "Mute wave" })).toBeEnabled();
+    }
+  );
+
   it("closes without toggling off the already selected level", async () => {
     renderComponent();
     await openMenu();
@@ -194,6 +214,27 @@ describe("WaveNotificationSettings", () => {
         });
     }
   );
+
+  it("offers only mute when unjoined preferences are unavailable", async () => {
+    mockSubscription.mockReturnValue({
+      data: undefined,
+      isPending: false,
+      isError: true,
+      refetch,
+    } as unknown as ReturnType<typeof useWaveNotificationSubscription>);
+    renderComponent({ ...wave, subscribed_actions: [] });
+    await openMenu();
+    expect(screen.queryByRole("menuitemradio")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("menuitem", { name: "Retry notification settings" })
+    ).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("menuitem", { name: "Mute wave" }));
+    expect(mockPost).toHaveBeenCalledWith({
+      endpoint: "waves/wave-123/mute",
+      body: {},
+    });
+    expect(refetch).not.toHaveBeenCalled();
+  });
 
   it("keeps the selected level visible but disabled while muted", async () => {
     setPreferences(true, []);

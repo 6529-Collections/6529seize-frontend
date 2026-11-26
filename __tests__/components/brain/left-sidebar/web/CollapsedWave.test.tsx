@@ -87,7 +87,7 @@ describe("CollapsedWave", () => {
     expect(screen.queryByText("3")).not.toBeInTheDocument();
     const badge = screen.getByTestId("wave-muted-badge");
     expect(badge).toHaveClass("tw-bg-iron-800", "tw-text-iron-300");
-    expect(badge).toHaveTextContent("");
+    expect(badge.textContent).toBe("");
     expect(badge.querySelector("svg")).toBeInTheDocument();
   });
 

@@ -31,7 +31,7 @@ export function useWavePreferenceSettings(wave: ApiWave) {
   if (data?.subscribed) {
     notificationLevel = ALL_MESSAGES;
   } else if (
-    data?.enabled_group_notifications.includes(BROADCAST_MENTION_PREFERENCE)
+    data?.enabled_group_notifications?.includes(BROADCAST_MENTION_PREFERENCE)
   ) {
     notificationLevel = "broadcast-mentions";
   }
