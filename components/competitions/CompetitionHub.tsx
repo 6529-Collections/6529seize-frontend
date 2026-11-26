@@ -16,8 +16,10 @@ import {
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import { TabToggleWithOverflow } from "@/components/common/TabToggleWithOverflow";
+import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import type { ApiCompetition } from "@/generated/models/ApiCompetition";
 import type { ApiWaveV3 } from "@/generated/models/ApiWaveV3";
@@ -132,6 +134,8 @@ function CompetitionCard({
 function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
   const locale = useBrowserLocale();
   const { isApp } = useDeviceInfo();
+  const isPhone = useMediaQuery(PHONE_WAVES_LAYOUT_QUERY);
+  const useCompactFilters = isApp || isPhone;
   const isMobileViewport = useIsMobileLayoutViewport();
   // New decisions move to the 6529 Network.
   const wavesWritesPaused = useWavesWritesPaused();
@@ -173,7 +177,7 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
       });
     });
     return () => window.cancelAnimationFrame(frame);
-  }, [filter, isApp]);
+  }, [filter, useCompactFilters]);
 
   const query = useCompetitionList(hub.id, filter);
   const visible = query.data?.pages.flatMap((page) => page.data) ?? [];
@@ -222,12 +226,12 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
           <div
             ref={filtersScrollerRef}
             data-competition-filters-scroll
-            className={`tw-scroll-px-10 tw-overflow-x-auto ${isApp ? "tw-no-scrollbar tw-overscroll-x-contain" : "tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500"}`}
+            className={`tw-scroll-px-10 tw-overflow-x-auto ${useCompactFilters ? "tw-no-scrollbar tw-overscroll-x-contain" : "tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500"}`}
           >
             <div className="tw-w-max tw-pr-px [&_button]:tw-text-meta [&_button]:tw-font-medium">
               <TabToggleWithOverflow
                 variant="compactPills"
-                maxVisibleTabs={isApp ? 1 : tabOptions.length}
+                maxVisibleTabs={useCompactFilters ? 1 : tabOptions.length}
                 options={tabOptions}
                 activeKey={filter}
                 onSelect={selectFilter}

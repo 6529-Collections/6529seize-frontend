@@ -12094,6 +12094,76 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     });
   }
 
+  test("uses the existing More filters below md on the web without changing selections", async ({
+    page,
+  }, testInfo) => {
+    await installCompetitionApi(page);
+    await page.setViewportSize({ width: 320, height: 844 });
+    await page.goto(ROOT);
+    const collection = page.getByRole("region", {
+      name: "Decisions",
+      exact: true,
+    });
+    const active = collection.getByRole("tab", {
+      name: "Active and upcoming",
+      exact: true,
+    });
+    const more = collection.getByRole("button", {
+      name: "More tabs",
+      exact: true,
+    });
+    for (const width of [320, 767, 768]) {
+      await page.setViewportSize({ width, height: 844 });
+      await expect(active).toHaveAttribute("aria-selected", "true");
+      if (width < 768) {
+        await expect(more).toBeVisible();
+        await more.click();
+        await page.keyboard.press("Escape");
+        await expect(more).toBeFocused();
+        await expect(active).toHaveAttribute("aria-selected", "true");
+      } else {
+        await expect(more).toHaveCount(0);
+      }
+      for (const label of ["Completed", "Drafts", "All"]) {
+        if (width < 768) {
+          await expect(
+            collection.getByRole("tab", { name: label, exact: true })
+          ).toHaveCount(0);
+          await more.click();
+          await page
+            .getByRole("menuitem", { name: label, exact: true })
+            .click();
+          await expect(more).toHaveText(label);
+          await expect(more).toBeFocused();
+        } else {
+          const tab = collection.getByRole("tab", { name: label, exact: true });
+          await tab.click();
+          await expect(tab).toHaveAttribute("aria-selected", "true");
+        }
+        await expect(
+          collection.getByRole("tabpanel", { name: label, exact: true })
+        ).toBeVisible();
+      }
+      await page.screenshot({
+        path: testInfo.outputPath(`decision-filters-${width}.png`),
+        animations: "disabled",
+        style: "nextjs-portal { visibility: hidden; }",
+      });
+      await active.click();
+      await expectNoHorizontalOverflow(page);
+    }
+    await collection.getByRole("tab", { name: "Drafts", exact: true }).click();
+    await page.setViewportSize({ width: 767, height: 844 });
+    await expect(more).toHaveText("Drafts");
+    await expect(
+      collection.getByRole("tabpanel", { name: "Drafts", exact: true })
+    ).toBeVisible();
+    await page.setViewportSize({ width: 768, height: 844 });
+    await expect(
+      collection.getByRole("tab", { name: "Drafts", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
+  });
+
   test("separates wave and competition creation while preserving the filter pills", async ({
     page,
   }, testInfo) => {
