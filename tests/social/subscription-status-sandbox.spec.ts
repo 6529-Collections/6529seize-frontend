@@ -684,18 +684,7 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
               })
               .locator('#profile-subscriptions-overview [aria-busy="true"]')
           ).toHaveCount(0, { timeout: RESPONSE_TIMEOUT_MS });
-        if (
-          phase !== "before" &&
-          name === "no-selections" &&
-          owner &&
-          (page.viewportSize()?.width ?? 1280) < 640
-        ) {
-          await expect(
-            overview.getByRole("heading", {
-              name: "No upcoming drops selected",
-              exact: true,
-            })
-          ).toHaveCSS("font-size", "20px");
+        if (phase !== "before" && name === "no-selections" && owner) {
           const figures = await page
             .getByRole("region", { name: "Subscription minting", exact: true })
             .locator("#subscription-overview-actions")
@@ -705,16 +694,35 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
             .boundingBox();
           expect(figures).not.toBeNull();
           expect(choose).not.toBeNull();
-          expect(choose!.y).toBeGreaterThanOrEqual(
-            figures!.y + figures!.height + 19
-          );
-          await overview
-            .getByRole("button", { name: "Forecast use", exact: true })
-            .focus();
-          await page.keyboard.press("Tab");
-          await expect(
-            overview.getByRole("link", { name: "Choose drops", exact: true })
-          ).toBeFocused();
+          if ((page.viewportSize()?.width ?? 1280) < 640) {
+            await expect(
+              overview.getByRole("heading", {
+                name: "No upcoming drops selected",
+                exact: true,
+              })
+            ).toHaveCSS("font-size", "20px");
+            expect(choose!.y).toBeGreaterThanOrEqual(
+              figures!.y + figures!.height + 19
+            );
+            await overview
+              .getByRole("button", { name: "Forecast use", exact: true })
+              .focus();
+            await page.keyboard.press("Tab");
+            await expect(
+              overview.getByRole("link", { name: "Choose drops", exact: true })
+            ).toBeFocused();
+          } else {
+            expect(choose!.y + choose!.height).toBeLessThanOrEqual(figures!.y);
+            await overview
+              .getByRole("link", { name: "Choose drops", exact: true })
+              .focus();
+            for (const name of ["Top up", "Refresh balance", "Forecast use"]) {
+              await page.keyboard.press("Tab");
+              await expect(
+                overview.getByRole("button", { name, exact: true })
+              ).toBeFocused();
+            }
+          }
         }
         if (
           phase !== "before" &&
