@@ -387,8 +387,10 @@ function CoverageSummaryContent({
     };
 
   return (
-    <div className="tw-contents max-sm:tw-flex max-sm:tw-flex-col">
-      <div className="tw-grid tw-min-w-0 tw-grid-cols-1 tw-gap-4 max-sm:tw-contents sm:tw-grid-cols-[minmax(0,1fr)_auto] sm:tw-gap-x-5">
+    <div className="tw-contents">
+      <div
+        className={`tw-grid tw-min-w-0 tw-flex-1 tw-grid-cols-1 sm:tw-grid-cols-[minmax(0,1fr)_auto] sm:tw-gap-x-5 ${showChooseDrops ? "sm:tw-grid-rows-[auto_auto_1fr]" : "sm:tw-grid-rows-[auto_1fr]"}`}
+      >
         <div
           className={`tw-min-w-0 ${showChooseDrops ? "sm:tw-col-span-full" : ""}`}
         >
@@ -488,9 +490,45 @@ function CoverageSummaryContent({
             </p>
           )}
         </div>
+        <div
+          id="subscription-overview-actions"
+          className={`tw-col-span-full tw-mt-5 tw-grid tw-min-w-0 tw-grid-cols-[minmax(0,1fr)_max-content] tw-gap-x-4 tw-gap-y-0.5 tw-text-sm max-[383px]:tw-grid-cols-1 sm:tw-mt-0 sm:tw-flex sm:tw-flex-row sm:tw-flex-wrap sm:tw-gap-x-5 sm:tw-gap-y-3 sm:tw-self-end sm:tw-pt-6 ${showChooseDrops ? "sm:tw-row-start-3" : "sm:tw-row-start-2"}`}
+        >
+          {action}
+          <SubscriptionCoverageForecast
+            coverage={coverage}
+            isLoading={pending}
+            description={!coverage ? description : undefined}
+          />
+          {paid && coverage && (
+            <p className="tw-col-span-full tw-m-0 tw-text-sm tw-text-iron-400">
+              {t(locale, "subscriptions.coverage.summary.forecastSnapshot", {
+                funded: getFundedDropsLabel(
+                  locale,
+                  coverage.fully_funded_drops
+                ),
+              })}
+            </p>
+          )}
+          {showNextUnfunded && coverage?.next_unfunded && (
+            <dl className="tw-col-span-full tw-m-0 tw-flex tw-min-w-0 tw-items-baseline tw-justify-between tw-gap-3 tw-text-sm sm:tw-justify-start sm:tw-gap-2">
+              <dt className="tw-shrink-0 tw-text-iron-500">
+                {t(
+                  locale,
+                  paymentUnavailable
+                    ? "subscriptions.coverage.summary.nextDrop"
+                    : "subscriptions.coverage.nextUnfunded"
+                )}
+              </dt>
+              <dd className="tw-m-0 tw-min-w-0 tw-text-right tw-font-medium tw-text-iron-100 sm:tw-text-left">
+                <CoveragePoint point={coverage.next_unfunded} />
+              </dd>
+            </dl>
+          )}
+        </div>
         {showActions && (
           <div
-            className={`tw-grid tw-w-full tw-gap-2 max-sm:tw-order-1 max-sm:tw-mt-5 sm:tw-w-auto sm:tw-self-end ${showChooseDrops ? "tw-grid-cols-2 sm:tw-col-start-1 sm:tw-flex sm:tw-justify-self-start" : "tw-grid-cols-1 sm:tw-col-start-2"}`}
+            className={`tw-mt-5 tw-grid tw-w-full tw-gap-2 sm:tw-w-auto sm:tw-self-end ${showChooseDrops ? "tw-grid-cols-2 sm:tw-col-start-1 sm:tw-row-start-2 sm:tw-mt-4 sm:tw-flex sm:tw-justify-self-start" : "tw-grid-cols-1 sm:tw-col-start-2 sm:tw-row-start-1 sm:tw-mt-0"}`}
           >
             {sectionAction && (
               <ButtonLink
@@ -516,40 +554,7 @@ function CoverageSummaryContent({
           </div>
         )}
       </div>
-      <div
-        id="subscription-overview-actions"
-        className="tw-mt-5 tw-grid tw-min-w-0 tw-grid-cols-[minmax(0,1fr)_max-content] tw-gap-x-4 tw-gap-y-0.5 tw-text-sm max-[383px]:tw-grid-cols-1 sm:tw-mt-auto sm:tw-flex sm:tw-flex-row sm:tw-flex-wrap sm:tw-gap-x-5 sm:tw-gap-y-3 sm:tw-pt-6"
-      >
-        {action}
-        <SubscriptionCoverageForecast
-          coverage={coverage}
-          isLoading={pending}
-          description={!coverage ? description : undefined}
-        />
-        {paid && coverage && (
-          <p className="tw-col-span-full tw-m-0 tw-text-sm tw-text-iron-400">
-            {t(locale, "subscriptions.coverage.summary.forecastSnapshot", {
-              funded: getFundedDropsLabel(locale, coverage.fully_funded_drops),
-            })}
-          </p>
-        )}
-        {showNextUnfunded && coverage?.next_unfunded && (
-          <dl className="tw-col-span-full tw-m-0 tw-flex tw-min-w-0 tw-items-baseline tw-justify-between tw-gap-3 tw-text-sm sm:tw-justify-start sm:tw-gap-2">
-            <dt className="tw-shrink-0 tw-text-iron-500">
-              {t(
-                locale,
-                paymentUnavailable
-                  ? "subscriptions.coverage.summary.nextDrop"
-                  : "subscriptions.coverage.nextUnfunded"
-              )}
-            </dt>
-            <dd className="tw-m-0 tw-min-w-0 tw-text-right tw-font-medium tw-text-iron-100 sm:tw-text-left">
-              <CoveragePoint point={coverage.next_unfunded} />
-            </dd>
-          </dl>
-        )}
-      </div>
-      {showHistory && topUp && <div className="tw-mt-4 max-sm:tw-order-2">{topUp}</div>}
+      {showHistory && topUp && <div className="tw-mt-4">{topUp}</div>}
       {children}
     </div>
   );

@@ -165,6 +165,11 @@ test.describe("Profile xTDH compact design @auth @medium @local-only", () => {
       .getByRole("listitem")
       .filter({ has: page.getByText("Design collection", { exact: true }) });
     await expect(cards).toHaveCount(2);
+    await expect(
+      page
+        .getByRole("tabpanel", { name: "Active", exact: true })
+        .getByRole("listitem")
+    ).toHaveCount(2);
     const card = cards.first();
     await expect(card.getByText("Last grant", { exact: true })).toBeVisible();
     const fields = await card.getByRole("term").evaluateAll((nodes) =>
@@ -236,7 +241,9 @@ test.describe("Profile xTDH compact design @auth @medium @local-only", () => {
       // unchanged message and controls without changing the product markup.
       const confirmation = page
         .getByText(message, { exact: true })
-        .locator("xpath=ancestor::div[.//button[normalize-space()='Cancel']][1]");
+        .locator(
+          "xpath=ancestor::div[.//button[normalize-space()='Cancel']][1]"
+        );
       await expect(confirmation).toBeVisible();
       await expect(
         confirmation.getByRole("paragraph").filter({ hasText: action })

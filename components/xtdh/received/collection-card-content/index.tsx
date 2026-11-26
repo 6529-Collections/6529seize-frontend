@@ -150,7 +150,7 @@ export function XtdhReceivedCollectionCard({
             )}
           </div>
           <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-0.5">
-            <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50 group-data-[typography=profile]/profile-xtdh:tw-text-[15px] group-data-[typography=profile]/profile-xtdh:tw-text-iron-100 max-md:group-data-[typography=profile]/profile-xtdh:tw-leading-5">
+            <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50 group-data-[typography=profile]/profile-xtdh:tw-text-[15px] group-data-[typography=profile]/profile-xtdh:tw-text-iron-100 max-md:group-data-[typography=profile]/profile-xtdh:tw-break-words max-md:group-data-[typography=profile]/profile-xtdh:tw-leading-5">
               {displayName}
             </p>
             <div className="tw-flex tw-w-full tw-items-center tw-gap-2">
