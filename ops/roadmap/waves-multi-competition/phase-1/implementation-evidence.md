@@ -37,8 +37,8 @@ frontend migration is not included in this follow-up.
 - Frontend main: `fbc351e1aeaa41a3a8bf0f3c6d8e055e808a1923`.
 - Both worktrees start from newly fetched main refs.
 - The original foundation was merged in backend PR #1773 and frontend PR #3376.
-- Frozen Phase 0 census: 296 mounted GET route shapes and 183 OpenAPI GET
-  operations. These are the frozen baseline counts, not today's total API size.
+- The original Phase 0 census recorded 296 mounted GET route shapes and 183
+  OpenAPI GET operations.
 - No OpenAPI or generated-model changes are required by this follow-up.
 
 ## Current Implementation
