@@ -358,7 +358,12 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     };
     const sidebarPin = sidebar.getByRole("button", pinButton);
     const inboxPin = lists.last().getByRole("button", pinButton);
-    await sidebar.locator(`a[href="${ENCRYPTED_ROUTE}/${dm}"]`).hover();
+    const sidebarChat = sidebar.getByRole("link", { name: a.user.handle });
+    await expect(sidebarChat).toHaveAttribute(
+      "href",
+      `${ENCRYPTED_ROUTE}/${dm}`
+    );
+    await sidebarChat.hover();
     await sidebarPin.click();
     await expect(inboxPin).toHaveAttribute("aria-pressed", "true");
     await expect(b.page).toHaveURL((url) => url.pathname === ENCRYPTED_ROUTE);
