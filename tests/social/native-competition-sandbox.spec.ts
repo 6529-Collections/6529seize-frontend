@@ -935,11 +935,13 @@ async function openPhoneWaveActions(page: Page) {
   return menu;
 }
 
+async function activateControl(control: Locator) {
+  if (test.info().project.use.hasTouch) await control.tap();
+  else await control.click();
+}
+
 async function openWaveInformation(page: Page) {
-  await page
-    .getByRole("button", { name: /^About / })
-    .first()
-    .click();
+  await activateControl(page.getByRole("button", { name: /^About / }).first());
   return page
     .getByRole("complementary", { name: "Wave details" })
     .or(
@@ -16469,9 +16471,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         .locator("..");
       await aboutContent.scrollIntoViewIfNeeded();
       const aboutBounds = await aboutContent.boundingBox();
-      await information
-        .getByRole("button", { name: "3 Joined", exact: true })
-        .click();
+      await activateControl(
+        information.getByRole("button", { name: "3 Joined", exact: true })
+      );
       await expect.poll(() => followersRequested).toBe(true);
       const loading = page.getByRole("status", {
         name: "Loading followers",
@@ -16527,7 +16529,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         path: testInfo.outputPath("joined-members.png"),
       });
       await expectNoHorizontalOverflow(page);
-      await page.getByRole("button", { name: "Back", exact: true }).click();
+      await activateControl(
+        page.getByRole("button", { name: "Back", exact: true })
+      );
       await expect(
         information.getByRole("tab", { name: "About", exact: true })
       ).toBeVisible();
@@ -16654,7 +16658,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await information.screenshot({
       path: testInfo.outputPath("about-compact-pinned-post.png"),
     });
-    await information.getByRole("tab", { name: "REP", exact: true }).click();
+    await activateControl(
+      information.getByRole("tab", { name: "REP", exact: true })
+    );
     const summary = information.getByRole("region", {
       name: "Wave REP",
       exact: true,
@@ -16800,9 +16806,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     });
     await expect(stats).toHaveCSS("grid-template-columns", /^\S+ \S+ \S+$/);
 
-    await information
-      .getByRole("button", { name: "Activity", exact: true })
-      .click();
+    await activateControl(
+      information.getByRole("button", { name: "Activity", exact: true })
+    );
     const activity = information.getByRole("region", {
       name: "Wave REP activity",
       exact: true,
@@ -16851,9 +16857,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await information.screenshot({
       path: testInfo.outputPath("rep-activity.png"),
     });
-    await information
-      .getByRole("tab", { name: "Configuration", exact: true })
-      .click();
+    await activateControl(
+      information.getByRole("tab", { name: "Configuration", exact: true })
+    );
     await expect(
       information.getByRole("heading", { name: "Chat", exact: true })
     ).toBeVisible();
@@ -16927,7 +16933,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await expect(section).toHaveCSS("height", "32px");
       await expect(section).toHaveCSS("border-radius", "9999px");
     }
-    await information.getByRole("tab", { name: "REP", exact: true }).click();
+    await activateControl(
+      information.getByRole("tab", { name: "REP", exact: true })
+    );
     await expect(
       information.getByRole("tab", { name: "REP", exact: true })
     ).toHaveCSS("font-weight", "500");
@@ -16938,9 +16946,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           .getByText(value, { exact: true })
       ).toHaveCSS("font-variant-numeric", "normal");
     }
-    await information
-      .getByRole("tab", { name: "Configuration", exact: true })
-      .click();
+    await activateControl(
+      information.getByRole("tab", { name: "Configuration", exact: true })
+    );
     await expect(
       information.getByRole("tab", { name: "Configuration", exact: true })
     ).toHaveCSS("font-weight", "500");
@@ -16971,11 +16979,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       name: "Appearance and labels",
       exact: true,
     });
-    await appearance.click();
+    await activateControl(appearance);
     const full = page.getByRole("radio", { name: /^Full proposal/ });
     const summary = page.getByRole("radio", { name: /^Summary card/ });
     await expect(full).toBeChecked();
-    await page.getByText("Summary card", { exact: true }).click();
+    await activateControl(page.getByText("Summary card", { exact: true }));
     await expect(summary).toBeChecked();
     const limit = page.getByRole("spinbutton", {
       name: "Maximum proposal preview characters",
@@ -16987,9 +16995,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await expect(
       page.getByRole("button", { name: "Save changes", exact: true })
     ).toBeDisabled();
-    await page.getByRole("button", { name: "Cancel", exact: true }).click();
+    await activateControl(
+      page.getByRole("button", { name: "Cancel", exact: true })
+    );
     await expect(appearance).toHaveAttribute("aria-expanded", "false");
-    await appearance.click();
+    await activateControl(appearance);
     await expect(full).toBeChecked();
     await expectNoHorizontalOverflow(page);
   });
