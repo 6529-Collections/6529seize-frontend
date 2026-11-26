@@ -1,4 +1,13 @@
 import WaveDropActionsMore from "@/components/waves/drops/WaveDropActionsMore";
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: () => ({
+    connectedProfile: { id: "viewer", handle: "viewer" },
+    isAuthenticated: true,
+    isDirectProfileSession: true,
+    fetchingProfile: false,
+    activeProfileProxy: null,
+  }),
+}));
 import { useDropLinkPreviewToggleControl } from "@/components/waves/drops/useDropLinkPreviewToggleControl";
 import { useCanShowDropCurationsAction } from "@/hooks/drops/useCanShowDropCurationsAction";
 import { useDropCurationMembershipMutation } from "@/hooks/drops/useDropCurationMembershipMutation";

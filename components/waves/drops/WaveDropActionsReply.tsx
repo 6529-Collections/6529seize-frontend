@@ -9,7 +9,10 @@ import { AuthContext } from "@/components/auth/Auth";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { isDropReplyEligible } from "@/helpers/waves/drop-reply-eligibility";
+import {
+  canReplyFromSession,
+  isDropReplyEligible,
+} from "@/helpers/waves/drop-reply-eligibility";
 
 interface WaveDropActionsReplyProps {
   readonly drop: ApiDrop;
@@ -22,13 +25,16 @@ const WaveDropActionsReply: React.FC<WaveDropActionsReplyProps> = ({
   drop,
 }) => {
   const locale = useBrowserLocale();
-  const { setToast } = useContext(AuthContext);
+  const auth = useContext(AuthContext);
+  const { setToast } = auth;
+  const hasReplySession = canReplyFromSession(auth);
   const { getEligibility } = useWaveEligibility();
   const isTemporaryDrop = drop.id.startsWith("temp-");
 
   const canReply = !isTemporaryDrop;
 
   const handleReplyClick = () => {
+    if (!hasReplySession || isTemporaryDrop) return;
     if (!isDropReplyEligible(drop, getEligibility(drop.wave.id))) {
       setToast({
         message: t(locale, "waves.drop.actions.replyUnavailable"),
@@ -38,6 +44,8 @@ const WaveDropActionsReply: React.FC<WaveDropActionsReplyProps> = ({
     }
     onReply();
   };
+
+  if (!hasReplySession) return null;
 
   return (
     <DropActionTooltip

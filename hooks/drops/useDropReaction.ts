@@ -11,6 +11,7 @@ import { recordReaction } from "@/helpers/reactions/reactionHistory";
 import { enqueueDropReactionRequest } from "@/helpers/reactions/dropReactionRequestQueue";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
+import { canReplyFromSession } from "@/helpers/waves/drop-reply-eligibility";
 import { COMMUNITY_CURATIONS_DROPS_QUERY_KEY } from "@/hooks/useCommunityCurationsDrops";
 import {
   useCanonicalNotificationDropUpdate,
@@ -58,6 +59,7 @@ import {
 interface UseDropReactionResult {
   readonly react: (reactionCode: string) => Promise<void>;
   readonly canReact: boolean;
+  readonly hasReactionSession: boolean;
 }
 
 interface UseDropReactionOptions {
@@ -413,7 +415,9 @@ export function useDropReaction(
   drop: ExtendedDrop,
   options?: UseDropReactionOptions
 ): UseDropReactionResult {
-  const { setToast, connectedProfile, activeProfileProxy } = useAuth();
+  const auth = useAuth();
+  const { setToast, connectedProfile, activeProfileProxy } = auth;
+  const hasReactionSession = canReplyFromSession(auth);
   const { applyOptimisticDropUpdate } = useMyStreamActions();
   const { getEligibility, updateEligibility } = useWaveEligibility();
   const queryClient = useQueryClient();
@@ -439,8 +443,8 @@ export function useDropReaction(
       waveEligibility?.authenticated_user_chat_restriction ===
         ChatRestriction.NO_PERMISSION);
   const canReact =
+    hasReactionSession &&
     !isRecoveryPending &&
-    !activeProfileProxy &&
     !drop.id.startsWith("temp-") &&
     (isEligibleToChat !== false || isChatOnlyRestriction);
   const contextProfileContext = drop.context_profile_context;
@@ -649,5 +653,5 @@ export function useDropReaction(
     ]
   );
 
-  return { react, canReact };
+  return { react, canReact, hasReactionSession };
 }

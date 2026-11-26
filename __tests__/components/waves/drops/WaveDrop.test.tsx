@@ -18,6 +18,8 @@ import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import { DropLocation } from "@/components/waves/drops/drop.types";
 import { DropClientDeliveryState } from "@/helpers/waves/drop.helpers";
+import { AuthContext } from "@/components/auth/Auth";
+import type { AuthContextType } from "@/components/auth/authTypes";
 
 const mockWaveDropActions = jest.fn();
 const mockWaveDropContent = jest.fn();
@@ -190,7 +192,21 @@ const setViewportWidth = (width: number) => {
 };
 
 const renderWithEditingDropProvider = (component: React.ReactElement) => {
-  return render(<EditingDropProvider>{component}</EditingDropProvider>);
+  return render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { id: "profile-1", handle: "alice" },
+          isAuthenticated: true,
+          isDirectProfileSession: true,
+          fetchingProfile: false,
+          activeProfileProxy: null,
+        } as AuthContextType
+      }
+    >
+      <EditingDropProvider>{component}</EditingDropProvider>
+    </AuthContext.Provider>
+  );
 };
 
 const drop: any = {
@@ -251,6 +267,62 @@ describe("WaveDrop", () => {
   afterEach(() => {
     jest.useRealTimers();
   });
+
+  it.each(["own", "guest", "proxy"])(
+    "uses the same session guard for Reply, swipe and Edit (%s)",
+    (session) => {
+      const onReply = jest.fn();
+      const auth = {
+        connectedProfile: { id: "profile-1", handle: "alice" },
+        isAuthenticated: session !== "guest",
+        isDirectProfileSession: session !== "proxy",
+        activeProfileProxy: null,
+        fetchingProfile: false,
+      } as AuthContextType;
+      const content = () => (
+        <AuthContext.Provider value={auth}>
+          <WaveDrop
+            drop={drop}
+            previousDrop={null}
+            nextDrop={null}
+            showWaveInfo={false}
+            activeDrop={null}
+            showReplyAndQuote
+            location={DropLocation.WAVE}
+            dropViewDropId={null}
+            onReply={onReply}
+            onReplyClick={jest.fn()}
+            onQuoteClick={jest.fn()}
+          />
+        </AuthContext.Provider>
+      );
+      setHoverSupport(true);
+      const view = render(
+        <EditingDropProvider>{content()}</EditingDropProvider>
+      );
+      act(() => getLastMockProps(mockWaveDropActions).onReply());
+      expect(onReply).toHaveBeenCalledTimes(session === "own" ? 1 : 0);
+
+      isMobileMock.mockReturnValue(true);
+      hasTouchInputMock.mockReturnValue(true);
+      isTouchDeviceMock.mockReturnValue(true);
+      setHoverSupport(false);
+      act(() => setViewportWidth(390));
+      view.rerender(<EditingDropProvider>{content()}</EditingDropProvider>);
+      const row = screen.getByTestId("content").closest("[data-wave-drop-id]");
+      if (session === "own")
+        expect(row).toHaveAttribute("data-reply-enabled", "true");
+      else expect(row).not.toHaveAttribute("data-reply-enabled");
+      act(() => getLastMockProps(mockWaveDropActions).onEdit());
+      expect(getLastMockProps(mockWaveDropContent).isEditing).toBe(
+        session === "own"
+      );
+      if (session !== "own") {
+        fireEvent.click(screen.getByTestId("save-edit"));
+        expect(mockMutate).not.toHaveBeenCalled();
+      }
+    }
+  );
 
   it.each([
     { isMobile: false, canRemove: false },

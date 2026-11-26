@@ -23,6 +23,8 @@ Sidebar layout and `Trending` shell behavior are documented in
 
 ## Entry Points
 
+- Boost controls require an authenticated own-profile session and are hidden
+  while signed out, using a proxy role, or loading a profile.
 - Desktop: hover a full drop and use the flame button in the action bar.
 - Mobile: open the touch menu and choose `Boost` or `Remove Boost`.
 - Any boosted card: press the card body to jump to that drop.

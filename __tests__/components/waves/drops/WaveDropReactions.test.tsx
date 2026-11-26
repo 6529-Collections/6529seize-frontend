@@ -457,6 +457,9 @@ describe("WaveDropReactions", () => {
     mockSetQueryData.mockReset();
     mockGetEligibility.mockReturnValue(null);
     mockUseAuth.mockReturnValue({
+      isAuthenticated: true,
+      isDirectProfileSession: true,
+      fetchingProfile: false,
       connectedProfile: { id: "profile-1", handle: "alice" },
       activeProfileProxy: null,
       requestAuth: requestAuthMock,
@@ -1378,10 +1381,15 @@ describe("WaveDropReactions", () => {
     });
   });
 
-  it("renders reaction pills as non-interactive when disconnected", () => {
+  it.each([
+    ["disconnected", { connectedProfile: null }],
+    ["unauthenticated", { isAuthenticated: false }],
+    ["remaining proxy role", { isDirectProfileSession: false }],
+    ["loading profile", { fetchingProfile: true }],
+  ])("keeps counts readable without reacting when %s", (_state, overrides) => {
     mockUseAuth.mockReturnValue({
-      connectedProfile: null,
-      setToast: jest.fn(),
+      ...mockUseAuth(),
+      ...overrides,
     });
     mockUseEmoji.mockReturnValue(
       createEmojiContextValue(
@@ -1430,6 +1438,9 @@ describe("WaveDropReactions", () => {
 
   it("renders reaction pills as non-interactive in proxy mode", () => {
     mockUseAuth.mockReturnValue({
+      isAuthenticated: true,
+      isDirectProfileSession: true,
+      fetchingProfile: false,
       connectedProfile: { id: "profile-1", handle: "alice" },
       activeProfileProxy: { id: "proxy-1" },
       setToast: setToastMock,

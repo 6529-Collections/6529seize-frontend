@@ -7,7 +7,16 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 const wrapper =
   (value: any) =>
   ({ children }: any) => (
-    <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+    <AuthContext.Provider
+      value={{
+        isAuthenticated: true,
+        isDirectProfileSession: true,
+        fetchingProfile: false,
+        ...value,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
   );
 
 jest.mock("@/helpers/time", () => ({
@@ -35,6 +44,94 @@ describe("useDropInteractionRules", () => {
     });
     expect(result.current.canVote).toBe(false);
     expect(result.current.voteState).toBe("NOT_LOGGED_IN");
+  });
+
+  it.each([
+    ["signed out", { connectedProfile: null, isAuthenticated: false }],
+    ["unauthenticated profile", { isAuthenticated: false }],
+    ["remaining proxy role", { isDirectProfileSession: false }],
+    ["active proxy", { activeProfileProxy: { id: "proxy-1" } }],
+    ["loading profile", { fetchingProfile: true }],
+    ["missing handle", { connectedProfile: { handle: " " } }],
+  ])(
+    "hides Delete when %s, even with deletion permissions",
+    (_state, overrides) => {
+      const { result } = renderHook(
+        () =>
+          useDropInteractionRules({
+            ...baseDrop,
+            drop_type: ApiDropType.Chat,
+            reply_to: { drop_id: "parent", drop_part_id: 1 },
+            wave: {
+              ...baseDrop.wave,
+              authenticated_user_admin: true,
+              admin_drop_deletion_enabled: true,
+              authenticated_user_can_delete_replies: true,
+            },
+          }),
+        {
+          wrapper: wrapper({
+            connectedProfile: { handle: "me" },
+            activeProfileProxy: null,
+            ...overrides,
+          }),
+        }
+      );
+      expect(result.current.canDelete).toBe(false);
+      expect(result.current.canSetPinnedDrop).toBe(false);
+      expect(result.current.canVote).toBe(false);
+      expect(result.current.canShowVote).toBe(false);
+    }
+  );
+
+  it.each([
+    ["author", true, false, false],
+    ["wave admin", false, true, false],
+    ["reply moderator", false, false, true],
+    ["ordinary viewer", false, false, false],
+  ])(
+    "preserves chat deletion rights for an authenticated %s",
+    (_role, isAuthor, isAdmin, isReplyModerator) => {
+      const { result } = renderHook(
+        () =>
+          useDropInteractionRules({
+            ...baseDrop,
+            drop_type: ApiDropType.Chat,
+            author: { handle: isAuthor ? "me" : "other" },
+            reply_to: isReplyModerator
+              ? { drop_id: "parent", drop_part_id: 1 }
+              : null,
+            wave: {
+              ...baseDrop.wave,
+              authenticated_user_admin: isAdmin,
+              admin_drop_deletion_enabled: true,
+              authenticated_user_can_delete_replies: isReplyModerator,
+            },
+          }),
+        {
+          wrapper: wrapper({
+            connectedProfile: { handle: "me" },
+            activeProfileProxy: null,
+          }),
+        }
+      );
+      expect(result.current.canDelete).toBe(
+        isAuthor || isAdmin || isReplyModerator
+      );
+    }
+  );
+
+  it("still hides Delete for temporary drops", () => {
+    const { result } = renderHook(
+      () => useDropInteractionRules({ ...baseDrop, id: "temp-1" }),
+      {
+        wrapper: wrapper({
+          connectedProfile: { handle: "me" },
+          activeProfileProxy: null,
+        }),
+      }
+    );
+    expect(result.current.canDelete).toBe(false);
   });
 
   it("does not grant ownership or deletion for a real user sharing the Anonymous placeholder handle", () => {

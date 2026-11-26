@@ -70,10 +70,14 @@ rolls back if the request fails.
 ## Edge Cases
 
 - Temporary drops (`temp-*`) cannot be reacted to and do not show rating actions.
-- Reaction controls are disabled while a proxy profile is active.
-- Reaction controls are disabled only when chatting and reacting are disabled
-  for the entire wave. A chat-group restriction alone does not disable
-  reactions for viewers.
+- Quick-react buttons and `Add Reaction` / `Update Reaction` are hidden while
+  signed out, using a proxy role, or loading a profile. They require an
+  authenticated session for your own profile.
+- Reaction chips keep their counts visible in unavailable sessions, but cannot
+  add, replace, or remove your reaction until your own profile is authenticated.
+- For an authenticated own-profile session, reaction controls are disabled when
+  chatting and reacting are disabled for the entire wave. A chat-group
+  restriction alone does not disable reactions.
 - Light placeholder drops do not render reaction or rating controls.
 - Chat drops do not show clap rating controls.
 - Memes-wave participatory drops hide clap rating controls.

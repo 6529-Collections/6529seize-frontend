@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
+import { canReplyFromSession } from "@/helpers/waves/drop-reply-eligibility";
 import type { LinkPreviewToggleControl } from "@/components/waves/LinkPreviewContext";
 import { useMyStreamActionsOptional } from "@/contexts/wave/MyStreamContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -28,7 +29,9 @@ function dropHasLinks(parts: ApiDrop["parts"] | undefined): boolean {
 export function useDropLinkPreviewToggleControl(
   drop?: ApiDrop
 ): LinkPreviewToggleControl | undefined {
-  const { connectedProfile, activeProfileProxy, setToast } = useAuth();
+  const auth = useAuth();
+  const { connectedProfile, setToast } = auth;
+  const hasProfileSession = canReplyFromSession(auth);
   const myStream = useMyStreamActionsOptional();
   const applyOptimisticDropUpdate = myStream?.applyOptimisticDropUpdate;
   const [isLoading, setIsLoading] = useState(false);
@@ -40,9 +43,11 @@ export function useDropLinkPreviewToggleControl(
   const previewsHidden = drop?.hide_link_preview ?? false;
   const isTemporaryDrop = dropId?.startsWith("temp-") ?? false;
   const isAuthor =
-    connectedProfile?.handle === dropAuthorHandle && !activeProfileProxy;
+    hasProfileSession && connectedProfile?.handle === dropAuthorHandle;
   const hasLinks = useMemo(() => dropHasLinks(drop?.parts), [drop?.parts]);
-  const canToggle = Boolean(dropId && dropWaveId && !isTemporaryDrop);
+  const canToggle = Boolean(
+    hasProfileSession && isAuthor && dropId && dropWaveId && !isTemporaryDrop
+  );
   const toggleRuntimeRef = useRef({
     dropId,
     dropWaveId,

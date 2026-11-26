@@ -1,16 +1,15 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
+import { useAuth } from "@/components/auth/Auth";
+import { canReplyFromSession } from "@/helpers/waves/drop-reply-eligibility";
 import { useProfileWave } from "@/hooks/useProfileWave";
 import {
   type DropCurationMembership,
   useDropCurations,
 } from "./useDropCurations";
 
-export type QuickCurationAction = Pick<
-  DropCurationMembership,
-  "id" | "name"
->;
+export type QuickCurationAction = Pick<DropCurationMembership, "id" | "name">;
 
 interface DropCurationActionsAvailability {
   readonly showManageCurations: boolean;
@@ -33,15 +32,23 @@ export function useCanShowDropCurationsAction({
   readonly isWaveAdmin: boolean;
   readonly enabled?: boolean | undefined;
 }): DropCurationActionsAvailability {
+  const hasProfileSession = canReplyFromSession(useAuth());
   const searchParams = useSearchParams();
   const { data: curations = [] } = useDropCurations({
     dropId,
-    enabled: enabled && !isTemporaryDrop,
+    enabled: enabled && hasProfileSession && !isTemporaryDrop,
   });
   const { data: cachedProfileWave } = useProfileWave({
     identity: profileIdentity,
     enabled: false,
   });
+  if (!hasProfileSession) {
+    return {
+      showManageCurations: false,
+      quickAddCuration: null,
+      quickRemoveCuration: null,
+    };
+  }
   const manageableCurations = curations.filter(
     (curation) => curation.authenticated_user_can_curate === true
   );
@@ -55,9 +62,7 @@ export function useCanShowDropCurationsAction({
       : null;
   const preferredCuration =
     activeCuration ??
-    manageableCurations.find(
-      (curation) => curation.id === profileCurationId
-    ) ??
+    manageableCurations.find((curation) => curation.id === profileCurationId) ??
     (cachedProfileWave?.profile_wave_id === waveId ||
     manageableCurations.length === 1
       ? manageableCurations[0]
@@ -71,8 +76,7 @@ export function useCanShowDropCurationsAction({
 
   return {
     showManageCurations:
-      !isTemporaryDrop &&
-      (isWaveAdmin || manageableCurations.length > 0),
+      !isTemporaryDrop && (isWaveAdmin || manageableCurations.length > 0),
     quickAddCuration,
     quickRemoveCuration,
   };

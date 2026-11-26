@@ -25,6 +25,7 @@ import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWrit
 import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
 import { withViewerVote } from "@/lib/chain-waves/optimistic";
 import { AuthContext } from "@/components/auth/Auth";
+import { useProfileActionSession } from "@/hooks/useProfileActionSession";
 import {
   chainWriteDetails,
   chainWriteFailure,
@@ -108,8 +109,11 @@ const SingleWaveDropVoteSubmit = forwardRef<
     const pausedReason = useWavesPausedReason("votes");
     const chainWriters = useChainWavesWriters();
     const position = drop.rank;
+    const auth = useContext(AuthContext);
     const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
-      useContext(AuthContext);
+      auth;
+    const { hasProfileSession, isSessionActive } =
+      useProfileActionSession(auth);
     const queryClient = useQueryClient();
     const [loading, setLoading] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
@@ -490,6 +494,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
     };
 
     const handleClick = async () => {
+      if (!isSessionActive()) return;
       if (isProcessing || loading || isSpinnerExiting || isTextExiting) {
         return;
       }
@@ -510,7 +515,8 @@ const SingleWaveDropVoteSubmit = forwardRef<
       const textExitFinished = await delayWhileMounted(
         VOTE_BUTTON_TRANSITION_MS
       );
-      if (!textExitFinished) {
+      if (!textExitFinished || !isSessionActive()) {
+        resetLoadingState();
         return;
       }
       setIsTextExiting(false);
@@ -524,7 +530,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
         return;
       }
 
-      if (!success) {
+      if (!success || !isSessionActive()) {
         resetLoadingState();
         return;
       }
@@ -547,6 +553,8 @@ const SingleWaveDropVoteSubmit = forwardRef<
     useImperativeHandle(ref, () => ({
       handleClick,
     }));
+
+    if (!hasProfileSession) return null;
 
     const idleButtonLabel =
       submitLabelOverride ?? getVoteActionLabel(locale, newRating, voteLabel);

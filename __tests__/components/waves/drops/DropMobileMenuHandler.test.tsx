@@ -10,6 +10,8 @@ import DropMobileMenuHandler from "@/components/waves/drops/DropMobileMenuHandle
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import { AuthContext } from "@/components/auth/Auth";
+import type { AuthContextType } from "@/components/auth/authTypes";
 
 jest.mock("@/hooks/isMobileDevice");
 jest.mock("@/hooks/useIsTouchDevice", () => ({
@@ -99,6 +101,41 @@ beforeEach(() => {
 afterEach(() => {
   jest.useRealTimers();
 });
+
+test.each(["own", "guest", "proxy"])(
+  "guards the reusable drop menu handler for %s sessions",
+  async (session) => {
+    jest.useFakeTimers();
+    const onReply = jest.fn();
+    const auth = {
+      connectedProfile: { id: "profile-1", handle: "alice" },
+      isAuthenticated: session !== "guest",
+      isDirectProfileSession: session !== "proxy",
+      activeProfileProxy: null,
+      fetchingProfile: false,
+    } as AuthContextType;
+    render(
+      <AuthContext.Provider value={auth}>
+        <DropMobileMenuHandler
+          drop={{
+            ...drop,
+            wave: { id: "wave-1", authenticated_user_eligible_to_chat: true },
+          }}
+          showReplyAndQuote
+          onReply={onReply}
+        >
+          <div data-testid="child" />
+        </DropMobileMenuHandler>
+      </AuthContext.Provider>
+    );
+    fireEvent.touchStart(screen.getByTestId("child"), {
+      touches: [{ clientX: 0, clientY: 0 }],
+    });
+    act(() => jest.advanceTimersByTime(600));
+    fireEvent.click(await screen.findByTestId("menu"));
+    expect(onReply).toHaveBeenCalledTimes(session === "own" ? 1 : 0);
+  }
+);
 
 test("applies selection suppression while touch sheet mode is active", () => {
   const { getByTestId } = render(

@@ -507,6 +507,9 @@ describe("useDropReaction", () => {
       setToast: setToastMock,
       requestAuth: requestAuthMock,
       activeProfileProxy: null,
+      isAuthenticated: true,
+      isDirectProfileSession: true,
+      fetchingProfile: false,
       connectedProfile: {
         id: "identity-1",
         handle: "user",
@@ -533,27 +536,63 @@ describe("useDropReaction", () => {
     });
   });
 
-  it("disables reactions while a proxy profile is active", async () => {
-    mockUseAuth.mockReturnValue({
-      setToast: setToastMock,
-      activeProfileProxy: { id: "proxy-1" },
-      connectedProfile: { id: "identity-1", handle: "user" },
-    });
+  describe.each(["quick-react", "picker"] as const)(
+    "%s session guard",
+    (source) => {
+      it.each([
+        ["signed out", { connectedProfile: null, isAuthenticated: false }],
+        ["unauthenticated profile", { isAuthenticated: false }],
+        ["remaining proxy role", { isDirectProfileSession: false }],
+        ["active proxy", { activeProfileProxy: { id: "proxy-1" } }],
+        ["loading profile", { fetchingProfile: true }],
+        [
+          "missing handle",
+          { connectedProfile: { id: "identity-1", handle: " " } },
+        ],
+      ])("blocks reactions for %s", async (_state, overrides) => {
+        mockUseAuth.mockReturnValue({ ...mockUseAuth(), ...overrides });
+        const { result } = renderHook(() =>
+          useDropReaction(mockDrop, { source })
+        );
 
-    const { result } = renderHook(() =>
-      useDropReaction(mockDrop, { source: "quick-react" })
-    );
+        expect(result.current.hasReactionSession).toBe(false);
+        expect(result.current.canReact).toBe(false);
 
-    expect(result.current.canReact).toBe(false);
+        await act(async () => {
+          await result.current.react(":smile:");
+        });
 
-    await act(async () => {
-      await result.current.react(":smile:");
-    });
+        expect(applyOptimisticDropUpdateMock).not.toHaveBeenCalled();
+        expect(
+          dropReactionMonitoring.beginReactionMutation
+        ).not.toHaveBeenCalled();
+        expect(commonApi.commonApiPost).not.toHaveBeenCalled();
+        expect(commonApi.commonApiDelete).not.toHaveBeenCalled();
+      });
 
-    expect(dropReactionMonitoring.beginReactionMutation).not.toHaveBeenCalled();
-    expect(commonApi.commonApiPost).not.toHaveBeenCalled();
-    expect(commonApi.commonApiDelete).not.toHaveBeenCalled();
-  });
+      it("blocks activation after the session changes to a proxy role", async () => {
+        const { result, rerender } = renderHook(() =>
+          useDropReaction(mockDrop, { source })
+        );
+        expect(result.current.canReact).toBe(true);
+
+        mockUseAuth.mockReturnValue({
+          ...mockUseAuth(),
+          isDirectProfileSession: false,
+        });
+        rerender();
+        expect(result.current.canReact).toBe(false);
+
+        await act(async () => {
+          await result.current.react(":smile:");
+        });
+
+        expect(applyOptimisticDropUpdateMock).not.toHaveBeenCalled();
+        expect(commonApi.commonApiPost).not.toHaveBeenCalled();
+        expect(commonApi.commonApiDelete).not.toHaveBeenCalled();
+      });
+    }
+  );
 
   it("disables reactions when chat and reactions are disabled for the wave", async () => {
     mockGetEligibility.mockReturnValue({

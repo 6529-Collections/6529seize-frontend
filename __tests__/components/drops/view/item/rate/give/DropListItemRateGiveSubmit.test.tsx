@@ -68,6 +68,10 @@ const setQueriesData = jest.fn();
 });
 
 const auth = {
+  isAuthenticated: true,
+  isDirectProfileSession: true,
+  fetchingProfile: false,
+  activeProfileProxy: null,
   requestAuth: jest.fn().mockResolvedValue({ success: true }),
   setToast: jest.fn(),
   connectedProfile: { handle: "me" },

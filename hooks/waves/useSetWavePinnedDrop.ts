@@ -4,6 +4,8 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiSetPinnedDropRequest } from "@/generated/models/ApiSetPinnedDropRequest";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { commonApiPost } from "@/services/api/common-api";
+import { useAuth } from "@/components/auth/Auth";
+import { useProfileActionSession } from "@/hooks/useProfileActionSession";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
 
@@ -44,6 +46,7 @@ export function useSetWavePinnedDrop(
   waveId: string,
   options?: UseSetWavePinnedDropOptions
 ): UseSetWavePinnedDropResult {
+  const { isSessionActive } = useProfileActionSession(useAuth());
   const queryClient = useQueryClient();
   const [pendingDropId, setPendingDropId] = useState<string | null>(null);
 
@@ -83,10 +86,13 @@ export function useSetWavePinnedDrop(
 
   const setPinnedDrop = useCallback(
     async (input: SetWavePinnedDropInput): Promise<ApiWave> => {
+      if (!isSessionActive()) {
+        throw new Error("Sign in as your own profile to pin drops.");
+      }
       setPendingDropId(input.dropId);
       return await mutation.mutateAsync(input);
     },
-    [mutation]
+    [mutation, isSessionActive]
   );
 
   const errorMessage = useMemo(() => {

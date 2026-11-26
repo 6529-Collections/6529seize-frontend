@@ -1,6 +1,27 @@
+import type { AuthContextType } from "@/components/auth/authTypes";
 import type { WaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ChatRestriction } from "@/hooks/useDropPriviledges";
+
+/** Direct-profile actions require a settled, authenticated non-proxy session. */
+export function canReplyFromSession(
+  auth: Pick<
+    AuthContextType,
+    | "connectedProfile"
+    | "isAuthenticated"
+    | "isDirectProfileSession"
+    | "activeProfileProxy"
+    | "fetchingProfile"
+  >
+): boolean {
+  return Boolean(
+    auth.isAuthenticated &&
+    auth.isDirectProfileSession &&
+    auth.connectedProfile?.handle?.trim() &&
+    !auth.activeProfileProxy &&
+    !auth.fetchingProfile
+  );
+}
 
 /** Open replies and slow mode can permit starting a reply while chat is blocked. */
 export function isDropReplyEligible(

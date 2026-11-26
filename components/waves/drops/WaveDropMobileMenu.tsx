@@ -1,7 +1,10 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import { isDropReplyEligible } from "@/helpers/waves/drop-reply-eligibility";
+import {
+  canReplyFromSession,
+  isDropReplyEligible,
+} from "@/helpers/waves/drop-reply-eligibility";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -153,10 +156,12 @@ function WaveDropMobileMenuAuthenticatedActions({
   readonly showOnlyQuickRemove: boolean;
 }) {
   const locale = useBrowserLocale();
-  const { setToast } = useContext(AuthContext);
+  const auth = useContext(AuthContext);
+  const { setToast } = auth;
   const { getEligibility } = useWaveEligibility();
+  const hasReplySession = canReplyFromSession(auth);
   const handleReplyClick = () => {
-    if (isTemporaryDrop) return;
+    if (!showReplyAndQuote || !hasReplySession || isTemporaryDrop) return;
     if (!isDropReplyEligible(drop, getEligibility(drop.wave.id))) {
       setToast({
         message: t(locale, "waves.drop.actions.replyUnavailable"),
@@ -191,7 +196,7 @@ function WaveDropMobileMenuAuthenticatedActions({
         onMobilePickerOpen={onOpenReactionPicker}
         mobileButtonRef={reactionButtonRef}
       />
-      {showReplyAndQuote && (
+      {showReplyAndQuote && hasReplySession && (
         <button
           className={`tw-flex tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 ${
             isTemporaryDrop
@@ -350,7 +355,11 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
   showOnlyQuickRemove = false,
   standaloneQuickRemoveCuration = null,
 }) => {
-  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const auth = useContext(AuthContext);
+  const { connectedProfile, activeProfileProxy } = auth;
+  const standaloneRemoval = canReplyFromSession(auth)
+    ? standaloneQuickRemoveCuration
+    : null;
   const locale = useBrowserLocale();
   const { isCapacitor } = useCapacitor();
   const isTemporaryDrop = drop.id.startsWith("temp-");
@@ -450,7 +459,7 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
       connectedProfileHandle !== null,
   });
   const quickRemoveCuration = showOnlyQuickRemove
-    ? standaloneQuickRemoveCuration
+    ? standaloneRemoval
     : availableQuickRemoveCuration;
   const { updateMembershipAsync } = useDropCurationMembershipMutation({
     dropId: drop.id,

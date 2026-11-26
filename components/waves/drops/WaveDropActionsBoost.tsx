@@ -5,6 +5,7 @@ import BoostIcon from "@/components/common/icons/BoostIcon";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { canShowDropBoostAction } from "@/helpers/waves/drop-boost.helpers";
 import { useDropBoostMutation } from "@/hooks/drops/useDropBoostMutation";
+import { canReplyFromSession } from "@/helpers/waves/drop-reply-eligibility";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import DropActionTooltip from "./DropActionTooltip";
@@ -18,13 +19,16 @@ const WaveDropActionsBoost: React.FC<WaveDropActionsBoostProps> = ({
   drop,
   showCount = true,
 }) => {
-  const { connectedProfile } = useAuth();
+  const auth = useAuth();
+  const { connectedProfile } = auth;
   const { toggleBoost, isPending } = useDropBoostMutation();
   const [isAnimating, setIsAnimating] = useState(false);
   const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const isTemporaryDrop = drop.id.startsWith("temp-");
-  const canShowBoost = canShowDropBoostAction({ drop, connectedProfile });
+  const canShowBoost =
+    canReplyFromSession(auth) &&
+    canShowDropBoostAction({ drop, connectedProfile });
   const canBoost = canShowBoost && !isTemporaryDrop && !!connectedProfile;
   const isBoosted = drop.context_profile_context?.boosted ?? false;
   const boostCount = drop.boosts;

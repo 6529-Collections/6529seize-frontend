@@ -14,6 +14,7 @@ import { chainIdentityPointer } from "@/components/chain-waves/chainIdentityPoin
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { DropVoteState } from "@/hooks/drops/types";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
+import { useProfileActionSession } from "@/hooks/useProfileActionSession";
 import { commonApiPost } from "@/services/api/common-api";
 import { applyWaveDropVoteUpdate } from "@/hooks/waves/invalidateWaveApprovalStatusQueries";
 import { useChainWavesWriters } from "@/components/chain-waves/useChainWavesWriters";
@@ -57,8 +58,9 @@ export default function DropListItemRateGiveSubmit({
   readonly onSuccessfulRateChange: () => void;
   readonly isMobile?: boolean | undefined;
 }) {
-  const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
-    useContext(AuthContext);
+  const auth = useContext(AuthContext);
+  const { requestAuth, setToast, connectedProfile, activeProfileProxy } = auth;
+  const { hasProfileSession, isSessionActive } = useProfileActionSession(auth);
   const queryClient = useQueryClient();
   const [mutating, setMutating] = useState<boolean>(false);
   const [clickCount, setClickCount] = useState<number>(0);
@@ -120,6 +122,10 @@ export default function DropListItemRateGiveSubmit({
   });
 
   const submitRate = useCallback(async () => {
+    if (!isSessionActive()) {
+      setClickCount(0);
+      return;
+    }
     if (!canVote) {
       setToast({
         message: VOTE_STATE_ERRORS[voteState],
@@ -131,8 +137,9 @@ export default function DropListItemRateGiveSubmit({
     setMutating(true);
     // On the 6529 Network each vote carries its own signature.
     const { success } = chainWriters ? { success: true } : await requestAuth();
-    if (!success) {
+    if (!success || !isSessionActive()) {
       setMutating(false);
+      setClickCount(0);
       return;
     }
 
@@ -206,6 +213,7 @@ export default function DropListItemRateGiveSubmit({
     });
   }, [
     canVote,
+    isSessionActive,
     rate,
     mutating,
     requestAuth,
@@ -237,6 +245,8 @@ export default function DropListItemRateGiveSubmit({
   const onRateSubmit = () => {
     setClickCount((prevCount) => prevCount + 1);
   };
+
+  if (!hasProfileSession) return null;
 
   return (
     <div>

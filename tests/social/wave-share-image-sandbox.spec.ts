@@ -203,6 +203,9 @@ test.describe("Share posts as image @auth @local-only", () => {
     const row = await findTouchMessage(page);
     await longPressTouchMessage(row, DEFAULT_LONG_PRESS_DURATION_MS + 600);
     await expect(
+      page.getByRole("button", { name: "Delete", exact: true })
+    ).toBeVisible();
+    await expect(
       page.getByRole("menuitem", { name: "More actions, scroll down" })
     ).toHaveCount(0);
     await expect(page.getByRole("menuitem", { name: "Scroll up" })).toHaveCount(

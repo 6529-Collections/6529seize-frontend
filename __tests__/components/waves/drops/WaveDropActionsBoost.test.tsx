@@ -28,6 +28,30 @@ jest.mock("react-tooltip", () => ({
 
 const useAuthMock = useAuth as jest.Mock;
 
+it.each([false, true])(
+  "hides boost for unavailable sessions on mobile=%s",
+  (mobile) => {
+    useAuthMock.mockReturnValue({
+      connectedProfile: { id: "viewer", handle: "viewer" },
+      isAuthenticated: true,
+      isDirectProfileSession: false,
+      fetchingProfile: false,
+      activeProfileProxy: null,
+    });
+    render(
+      mobile ? (
+        <WaveDropMobileMenuBoost
+          drop={createDrop()}
+          onBoostChange={jest.fn()}
+        />
+      ) : (
+        <WaveDropActionsBoost drop={createDrop()} />
+      )
+    );
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  }
+);
+
 const createDrop = ({
   authorId = "author-id",
   authorHandle = "alice",
@@ -62,6 +86,9 @@ const createDrop = ({
 describe("WaveDropActionsBoost", () => {
   beforeEach(() => {
     useAuthMock.mockReturnValue({
+      isAuthenticated: true,
+      isDirectProfileSession: true,
+      fetchingProfile: false,
       connectedProfile: { id: "author-id", handle: "alice" },
     });
   });
@@ -99,6 +126,9 @@ describe("WaveDropActionsBoost", () => {
 
   it("shows the desktop boost button on drops from other authors", () => {
     useAuthMock.mockReturnValue({
+      isAuthenticated: true,
+      isDirectProfileSession: true,
+      fetchingProfile: false,
       connectedProfile: { id: "viewer-id", handle: "bob" },
     });
 
@@ -111,6 +141,9 @@ describe("WaveDropActionsBoost", () => {
 describe("WaveDropMobileMenuBoost", () => {
   beforeEach(() => {
     useAuthMock.mockReturnValue({
+      isAuthenticated: true,
+      isDirectProfileSession: true,
+      fetchingProfile: false,
       connectedProfile: { id: "author-id", handle: "alice" },
     });
   });

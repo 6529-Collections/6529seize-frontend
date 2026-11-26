@@ -1,5 +1,7 @@
 import { AuthContext } from "@/components/auth/Auth";
 import WaveDropActionsSetPinnedDrop from "@/components/waves/drops/WaveDropActionsSetPinnedDrop";
+import WaveDropMobileMenuSetPinnedDrop from "@/components/waves/drops/WaveDropMobileMenuSetPinnedDrop";
+import type { AuthContextType } from "@/components/auth/authTypes";
 import { useSetWavePinnedDrop } from "@/hooks/waves/useSetWavePinnedDrop";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -19,10 +21,14 @@ const renderWithAuth = ({
   requestAuth = jest.fn().mockResolvedValue({ success: true }),
   setToast = jest.fn(),
   onPinnedDropSet = jest.fn(),
+  sessionOverrides = {},
+  mobile = false,
 }: {
   requestAuth?: jest.Mock;
   setToast?: jest.Mock;
   onPinnedDropSet?: jest.Mock;
+  sessionOverrides?: Partial<AuthContextType>;
+  mobile?: boolean;
 } = {}) => {
   render(
     <AuthContext.Provider
@@ -30,6 +36,8 @@ const renderWithAuth = ({
         {
           connectedProfile: { handle: "admin" },
           fetchingProfile: false,
+          isAuthenticated: true,
+          isDirectProfileSession: true,
           connectionStatus: null,
           receivedProfileProxies: [],
           activeProfileProxy: null,
@@ -37,13 +45,21 @@ const renderWithAuth = ({
           requestAuth,
           setToast,
           setActiveProfileProxy: jest.fn(),
+          ...sessionOverrides,
         } as any
       }
     >
-      <WaveDropActionsSetPinnedDrop
-        drop={drop}
-        onPinnedDropSet={onPinnedDropSet}
-      />
+      {mobile ? (
+        <WaveDropMobileMenuSetPinnedDrop
+          drop={drop}
+          onPinnedDropSet={onPinnedDropSet}
+        />
+      ) : (
+        <WaveDropActionsSetPinnedDrop
+          drop={drop}
+          onPinnedDropSet={onPinnedDropSet}
+        />
+      )}
     </AuthContext.Provider>
   );
 
@@ -51,6 +67,17 @@ const renderWithAuth = ({
 };
 
 describe("WaveDropActionsSetPinnedDrop", () => {
+  it.each([false, true])(
+    "hides pinning for a proxy-role session on mobile=%s",
+    (mobile) => {
+      const { requestAuth } = renderWithAuth({
+        mobile,
+        sessionOverrides: { isDirectProfileSession: false },
+      });
+      expect(screen.queryByRole("button")).not.toBeInTheDocument();
+      expect(requestAuth).not.toHaveBeenCalled();
+    }
+  );
   beforeEach(() => {
     jest.clearAllMocks();
     mockedUseSetWavePinnedDrop.mockReturnValue({

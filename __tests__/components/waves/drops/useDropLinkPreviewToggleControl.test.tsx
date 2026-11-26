@@ -23,9 +23,7 @@ jest.mock("@/services/api/common-api", () => ({
 const authModule = jest.requireMock("@/components/auth/Auth") as {
   useAuth: typeof useAuthHook;
 };
-const myStreamModule = jest.requireMock(
-  "@/contexts/wave/MyStreamContext"
-) as {
+const myStreamModule = jest.requireMock("@/contexts/wave/MyStreamContext") as {
   useMyStreamActionsOptional: typeof useMyStreamActionsOptionalHook;
 };
 const mockedUseAuth = jest.mocked(authModule.useAuth);
@@ -161,6 +159,9 @@ describe("useDropLinkPreviewToggleControl", () => {
     jest.clearAllMocks();
     mockedUseAuth.mockReturnValue({
       activeProfileProxy: null,
+      isAuthenticated: true,
+      isDirectProfileSession: true,
+      fetchingProfile: false,
       connectedProfile: { handle: "alice" },
       setToast,
     });

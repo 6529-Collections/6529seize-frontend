@@ -41,7 +41,9 @@ const WaveDropActionsQuickReact: React.FC<{
   readonly onReactionStarted?: () => void;
 }> = ({ drop, isMobile = false, onReactionStarted }) => {
   const locale = useBrowserLocale();
-  const { react, canReact } = useDropReaction(drop, { source: "quick-react" });
+  const { react, canReact, hasReactionSession } = useDropReaction(drop, {
+    source: "quick-react",
+  });
 
   const handleReaction = useCallback(
     (reactionCode: string) => {
@@ -94,6 +96,10 @@ const WaveDropActionsQuickReact: React.FC<{
     }
     return [...emojis.values()];
   }, [topReactionCodes, findCustomEmoji, findNativeEmoji]);
+  if (!hasReactionSession) {
+    return null;
+  }
+
   // Only use a fallback when nothing can be rendered. It must send the emoji
   // it displays, rather than disguising an unavailable saved reaction as 👍.
   const visibleEmojis = topEmojis.length ? topEmojis : [DEFAULT_QUICK_REACTION];

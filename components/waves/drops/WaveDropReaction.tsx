@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
+import { canReplyFromSession } from "@/helpers/waves/drop-reply-eligibility";
 import type { useEmoji } from "@/contexts/EmojiContext";
 import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
@@ -240,7 +241,8 @@ function WaveDropReaction({
     () => true,
     () => false
   );
-  const { setToast, connectedProfile, activeProfileProxy } = useAuth();
+  const auth = useAuth();
+  const { setToast, connectedProfile, activeProfileProxy } = auth;
   const { applyOptimisticDropUpdate } = useMyStreamActions();
   const { getEligibility, updateEligibility } = useWaveEligibility();
   const queryClient = useQueryClient();
@@ -261,8 +263,7 @@ function WaveDropReaction({
         ChatRestriction.NO_PERMISSION);
   const canReact =
     !isRecoveryPending &&
-    Boolean(connectedProfile?.handle) &&
-    !activeProfileProxy &&
+    canReplyFromSession(auth) &&
     (isEligibleToChat !== false || isChatOnlyRestriction);
   const updateEligibilityAfterExpectedDisabledReaction = useCallback(
     (error: unknown, method: "DELETE" | "POST") => {

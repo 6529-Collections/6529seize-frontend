@@ -3,7 +3,10 @@
 import { useCompactMode } from "@/contexts/CompactModeContext";
 import { useAuth } from "@/components/auth/Auth";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
-import { isDropReplyEligible } from "@/helpers/waves/drop-reply-eligibility";
+import {
+  canReplyFromSession,
+  isDropReplyEligible,
+} from "@/helpers/waves/drop-reply-eligibility";
 import { useSwipeToReply } from "@/hooks/useSwipeToReply";
 import { cancelHorizontalSwipe } from "@/hooks/useHorizontalSwipe";
 import { useEditingDrop } from "@/contexts/EditingDropContext";
@@ -113,7 +116,9 @@ const WaveDropInner = ({
     useState<BoostAnimationState | null>(null);
   const dropRef = useRef<HTMLDivElement>(null);
   const { editingDropId, setEditingDropId } = useEditingDrop();
-  const isEditing = editingDropId === drop.id;
+  const auth = useAuth();
+  const hasReplySession = Boolean(canReplyFromSession(auth));
+  const isEditing = editingDropId === drop.id && hasReplySession;
   const longPressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const touchStartPosition = useRef<{ x: number; y: number } | null>(null);
   const timestampSwipeStartRef = useRef<TimestampSwipeStart | null>(null);
@@ -199,7 +204,6 @@ const WaveDropInner = ({
       location,
     })
   );
-  const { connectedProfile } = useAuth();
   const { getEligibility } = useWaveEligibility();
   const canSwipeReply =
     canUseTouchActionSheet &&
@@ -208,7 +212,7 @@ const WaveDropInner = ({
     showReplyAndQuote &&
     !isEditing &&
     !drop.id.startsWith("temp-") &&
-    Boolean(connectedProfile?.handle) &&
+    hasReplySession &&
     isDropReplyEligible(drop, getEligibility(drop.wave.id));
   const { contentRef: swipeContentRef, onTouchStart: startReplySwipe } =
     useSwipeToReply({
@@ -405,6 +409,9 @@ const WaveDropInner = ({
   );
 
   const handleOnReply = useCallback(() => {
+    if (!hasReplySession || !showReplyAndQuote || drop.id.startsWith("temp-")) {
+      return;
+    }
     // Cancel any active edit mode first
     if (editingDropId) {
       setEditingDropId(null);
@@ -416,6 +423,8 @@ const WaveDropInner = ({
     onReply,
     drop,
     activePartIndex,
+    hasReplySession,
+    showReplyAndQuote,
     editingDropId,
     setEditingDropId,
     mobileMenu,
@@ -456,10 +465,11 @@ const WaveDropInner = ({
   });
 
   const handleOnEdit = useCallback(() => {
+    if (!hasReplySession) return;
     mobileMenu?.close();
     setIsSlideUp(false); // Close mobile menu when entering edit mode
     setEditingDropId(drop.id);
-  }, [setEditingDropId, drop.id, mobileMenu]);
+  }, [hasReplySession, setEditingDropId, drop.id, mobileMenu]);
 
   const handleEditSave = useCallback(
     (
@@ -468,6 +478,7 @@ const WaveDropInner = ({
       _mentionedGroups?: ApiDropGroupMention[],
       mentionedWaves?: ApiMentionedWave[]
     ) => {
+      if (!hasReplySession) return;
       const updateRequest = buildDropUpdateRequest({
         drop,
         activePartIndex,
@@ -486,7 +497,13 @@ const WaveDropInner = ({
         currentDrop: drop,
       });
     },
-    [drop, activePartIndex, dropUpdateMutation, setEditingDropId]
+    [
+      hasReplySession,
+      drop,
+      activePartIndex,
+      dropUpdateMutation,
+      setEditingDropId,
+    ]
   );
 
   const handleEditCancel = useCallback(() => {

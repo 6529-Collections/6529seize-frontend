@@ -36,7 +36,8 @@ jump back to that spot later.
 
 ## Availability and Edge Cases
 
-- If no connected profile is available, the action is hidden.
+- The action requires an authenticated own-profile session. It is hidden while
+  signed out, using a proxy role, loading a profile, or missing a profile.
 - In standard profile sessions, the action is hidden on your own drops.
 - Desktop and touch menus run the same mark-unread request.
 - Repeated taps/clicks are blocked while one request is in flight.

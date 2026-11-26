@@ -114,6 +114,10 @@ describe("SingleWaveDropVoteSubmit", () => {
   };
 
   const mockAuthContext = {
+    isAuthenticated: true,
+    isDirectProfileSession: true,
+    fetchingProfile: false,
+    activeProfileProxy: null,
     requestAuth: jest.fn().mockResolvedValue({ success: true }),
     setToast: jest.fn(),
     connectedProfile: {
@@ -979,10 +983,14 @@ describe("SingleWaveDropVoteSubmit", () => {
     expect(button).toBeInTheDocument();
   });
 
-  it("handles missing connected profile gracefully", () => {
+  it.each([
+    ["missing profile", { connectedProfile: null }],
+    ["signed out", { isAuthenticated: false }],
+    ["proxy role", { isDirectProfileSession: false }],
+  ])("hides vote submission with %s", (_state, overrides) => {
     const authContextWithoutProfile = {
       ...mockAuthContext,
-      connectedProfile: null,
+      ...overrides,
     };
 
     render(
@@ -1001,7 +1009,6 @@ describe("SingleWaveDropVoteSubmit", () => {
       </QueryClientProvider>
     );
 
-    const button = screen.getByRole("button");
-    expect(button).toBeInTheDocument();
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 });
