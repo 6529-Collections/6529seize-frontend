@@ -1,19 +1,34 @@
 import {
   DROPDOWN_CHECKMARK_CLASSES,
+  DROPDOWN_PANEL_SURFACE_CLASSES,
   getDropdownOptionStateClasses,
 } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import IconButton from "@/components/utils/button/IconButton";
-
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import MyStreamActionTooltip from "@/components/brain/my-stream/MyStreamActionTooltip";
-import { useWaveInformationPanel } from "@/components/brain/mobile/WaveInformationPanelContext";
+import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { AtSymbolIcon, BellIcon, CheckIcon } from "@heroicons/react/24/outline";
-import type { ComponentProps, ComponentType, SVGProps } from "react";
-import { Fragment, useId } from "react";
-import { createPortal } from "react-dom";
-import { waveNotificationSettingsMessage } from "./waveNotificationSettings.messages";
+import {
+  ArrowPathIcon,
+  AtSymbolIcon,
+  BellAlertIcon,
+  BellIcon,
+  BellSlashIcon,
+  CheckIcon,
+  MegaphoneIcon,
+} from "@heroicons/react/24/outline";
+import type {
+  ComponentProps,
+  ComponentType,
+  KeyboardEvent,
+  SVGProps,
+} from "react";
+import { Fragment, useId, useRef, useState } from "react";
+import { waveNotificationSettingsMessage as message } from "./waveNotificationSettings.messages";
 import type { WaveNotificationSettingsState } from "./useWaveNotificationSettings";
+import type { NotificationLevel } from "./waveNotificationSettings.helpers";
 
 interface WaveNotificationPreferenceButtonsProps {
   readonly waveId: string;
@@ -21,63 +36,25 @@ interface WaveNotificationPreferenceButtonsProps {
   readonly compact?: boolean | undefined;
 }
 
-const getMenuItemStyle = ({
-  active,
-  disabled,
-}: {
-  readonly active: boolean;
-  readonly disabled: boolean;
-}) => {
-  if (disabled) {
-    return "tw-bg-transparent tw-cursor-not-allowed tw-text-iron-500";
-  }
-
-  return `tw-cursor-pointer ${getDropdownOptionStateClasses(active)}`;
-};
+// Headless UI supplies menuitem; retain the single-choice semantics.
+function NotificationButton(props: ComponentProps<"button">) {
+  return (
+    <button
+      {...props}
+      role={props["aria-checked"] === undefined ? "menuitem" : "menuitemradio"}
+    />
+  );
+}
 
 interface NotificationMenuItemProps {
   readonly mobile: boolean;
   readonly icon: ComponentType<SVGProps<SVGSVGElement>>;
   readonly label: string;
   readonly ariaLabel: string;
-  readonly active: boolean;
-  readonly buttonDisabled: boolean;
+  readonly checked?: boolean;
+  readonly disabled: boolean;
   readonly loading: boolean;
   readonly onSelect: () => void;
-}
-
-function NotificationMenuItemIndicator({
-  loading,
-  active,
-}: {
-  readonly loading: boolean;
-  readonly active: boolean;
-}) {
-  if (loading) {
-    return <Spinner dimension={12} />;
-  }
-
-  if (active) {
-    return (
-      <CheckIcon
-        className={`tw-size-4 tw-flex-shrink-0 ${DROPDOWN_CHECKMARK_CLASSES}`}
-        aria-hidden="true"
-      />
-    );
-  }
-
-  return <span className="tw-size-4 tw-flex-shrink-0" aria-hidden="true" />;
-}
-
-// Headless UI supplies menuitem; preserve the checked preference semantics.
-function NotificationCheckbox(props: ComponentProps<"button">) {
-  return (
-    <button
-      {...props}
-      role="menuitemcheckbox"
-      aria-checked={props["aria-checked"] ?? false}
-    />
-  );
 }
 
 function NotificationMenuItem({
@@ -85,43 +62,46 @@ function NotificationMenuItem({
   icon: Icon,
   label,
   ariaLabel,
-  active,
-  buttonDisabled,
+  checked,
+  disabled,
   loading,
   onSelect,
 }: NotificationMenuItemProps) {
-  const Button = mobile ? "button" : NotificationCheckbox;
   const button = (
-    <Button
+    <NotificationButton
       type="button"
-      disabled={buttonDisabled}
-      role={mobile ? "checkbox" : "menuitemcheckbox"}
-      aria-checked={active}
+      disabled={disabled}
+      aria-checked={checked}
+      aria-label={ariaLabel}
+      aria-busy={loading}
+      onKeyDown={mobile ? onMobileMenuKeyDown : undefined}
       onClick={(event) => {
         event.stopPropagation();
         onSelect();
       }}
-      className={`tw-flex tw-w-full ${mobile ? "tw-min-h-12" : ""} tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-px-3 tw-py-2 tw-text-left tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-text-iron-500 [[role=menu]:focus-visible_&]:data-[focus]:tw-ring-2 [[role=menu]:focus-visible_&]:data-[focus]:tw-ring-inset [[role=menu]:focus-visible_&]:data-[focus]:tw-ring-iron-400 ${getMenuItemStyle(
-        {
-          active,
-          disabled: buttonDisabled,
-        }
-      )}`}
-      aria-label={ariaLabel}
+      className={`tw-flex tw-w-full tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-px-3 tw-py-2 tw-text-left tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 [[role=menu]:focus-visible_&]:data-[focus]:tw-ring-2 [[role=menu]:focus-visible_&]:data-[focus]:tw-ring-inset [[role=menu]:focus-visible_&]:data-[focus]:tw-ring-iron-400 ${mobile ? "tw-min-h-12" : ""} ${getDropdownOptionStateClasses(checked === true)}`}
     >
       <Icon className="tw-size-4 tw-flex-shrink-0" aria-hidden="true" />
-      <span className="tw-min-w-0 tw-flex-1 tw-text-left tw-text-sm tw-font-medium">
+      <span className="tw-min-w-0 tw-flex-1 tw-text-sm tw-font-medium">
         {label}
       </span>
-      <NotificationMenuItemIndicator loading={loading} active={active} />
-    </Button>
+      {loading ? (
+        <Spinner dimension={12} />
+      ) : (
+        checked !== undefined && (
+          <span className="tw-size-4 tw-flex-shrink-0" aria-hidden="true">
+            {checked && <CheckIcon className={DROPDOWN_CHECKMARK_CLASSES} />}
+          </span>
+        )
+      )}
+    </NotificationButton>
   );
   return (
-    <li role={mobile ? "listitem" : "none"} className="tw-list-none">
+    <li role="none" className="tw-list-none">
       {mobile ? (
         button
       ) : (
-        <MenuItem as={Fragment} disabled={buttonDisabled}>
+        <MenuItem as={Fragment} disabled={disabled}>
           {button}
         </MenuItem>
       )}
@@ -129,104 +109,165 @@ function NotificationMenuItem({
   );
 }
 
+const LEVELS = [
+  { level: "all-messages", key: "allMessages", icon: BellAlertIcon },
+  {
+    level: "broadcast-mentions",
+    key: "broadcastMentions",
+    icon: MegaphoneIcon,
+  },
+  { level: "mentions-only", key: "mentionsOnly", icon: AtSymbolIcon },
+] as const satisfies readonly {
+  level: NotificationLevel;
+  key: string;
+  icon: typeof BellIcon;
+}[];
+
+function onMobileMenuKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
+  const menu = event.currentTarget.closest('[role="menu"]');
+  if (!menu || !["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key))
+    return;
+  event.preventDefault();
+  const items = Array.from(
+    menu.querySelectorAll<HTMLButtonElement>(
+      "button[role^=menuitem]:not(:disabled)"
+    )
+  );
+  if (!items.length) return;
+  const current = items.indexOf(event.currentTarget);
+  let next = (current + 1) % items.length;
+  if (event.key === "ArrowUp")
+    next = (current - 1 + items.length) % items.length;
+  if (event.key === "Home") next = 0;
+  if (event.key === "End") next = items.length - 1;
+  items[next]?.focus();
+}
+
 export default function WaveNotificationPreferenceButtons({
   waveId,
   settings,
   compact = false,
 }: WaveNotificationPreferenceButtonsProps) {
-  const title = waveNotificationSettingsMessage(
-    "waves.notificationSettings.trigger.tooltip"
-  );
-  const sheet = useWaveInformationPanel(title);
-  const mobile = sheet.isInSheet;
+  const title = message("waves.notificationSettings.trigger.tooltip");
+  const mobile = useIsMobileLayoutViewport();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const menuRef = useRef<HTMLUListElement>(null);
+  const closeMobile = () => setMobileOpen(false);
+  useAndroidBackLayer(mobile && mobileOpen, menuRef, closeMobile);
   const instanceId = useId();
   const tooltipId = `wave-notification-actions-${waveId}-${instanceId}`;
-  const triggerId = `${tooltipId}-trigger`;
-  const menuId = `${tooltipId}-menu`;
-  const isOpen = sheet.isOpen;
-  const triggerActive =
-    settings.broadcastMentionsEnabled || settings.allDropsEnabled;
-
+  const busy = settings.muteLoading || settings.loadingTarget !== null;
+  let Icon = BellIcon;
+  if (settings.isMuted) Icon = BellSlashIcon;
+  else if (settings.following && settings.notificationLevel === "all-messages")
+    Icon = BellAlertIcon;
   const trigger = (
     <IconButton
-      id={triggerId}
+      id={`${tooltipId}-trigger`}
       type="button"
-      disabled={settings.loading && !settings.loadingTarget}
-      aria-disabled={settings.loading}
-      onClick={(event) => {
-        if (settings.loading) event.preventDefault();
-        else if (mobile) sheet.open(event.currentTarget);
-      }}
-      onKeyDown={(event) => {
-        if (
-          settings.loading &&
-          ["Enter", " ", "ArrowDown", "ArrowUp"].includes(event.key)
-        )
-          event.preventDefault();
+      aria-busy={busy}
+      onClick={() => {
+        if (mobile) setMobileOpen(true);
       }}
       data-tooltip-id={tooltipId}
       data-tooltip-content={title}
-      layout={compact ? "notification-compact" : "notification-wide"}
-      variant={triggerActive ? "selected" : "ghost"}
-      aria-label={waveNotificationSettingsMessage(
-        "waves.notificationSettings.trigger.ariaLabel"
-      )}
+      layout={compact ? "notification-mute" : "notification-mute-wide"}
+      variant={settings.isMuted ? "selected" : "ghost"}
+      aria-label={message("waves.notificationSettings.trigger.ariaLabel")}
       {...(mobile
         ? {
-            "aria-expanded": isOpen,
-            "aria-controls": sheet.contentId,
+            "aria-haspopup": "dialog" as const,
+            "aria-expanded": mobileOpen,
+            "aria-controls": mobileOpen ? `${tooltipId}-menu` : undefined,
           }
         : {})}
     >
-      {settings.loadingTarget ? (
-        <Spinner dimension={12} />
-      ) : (
-        <BellIcon className="tw-size-4 tw-flex-shrink-0" aria-hidden="true" />
-      )}
+      <Icon className="tw-size-4 tw-flex-shrink-0" aria-hidden="true" />
     </IconButton>
   );
   const choices = (close: () => void) => (
     <ul
-      role={mobile ? "list" : "none"}
-      className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-0.5 tw-px-2"
+      ref={mobile ? menuRef : undefined}
+      id={mobile ? `${tooltipId}-menu` : undefined}
+      role={mobile ? "menu" : "none"}
+      aria-label={mobile ? title : undefined}
+      className={`tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-0.5 ${mobile ? "tw-p-0" : "tw-px-2"}`}
     >
+      {settings.following && (
+        <>
+          <li
+            role="group"
+            aria-label={message("waves.notificationSettings.levels.ariaLabel")}
+          >
+            <ul
+              role="none"
+              className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-0.5 tw-p-0"
+            >
+              {settings.preferencesUnavailable ? (
+                <NotificationMenuItem
+                  mobile={mobile}
+                  icon={ArrowPathIcon}
+                  label={message("waves.notificationSettings.retry.label")}
+                  ariaLabel={message(
+                    "waves.notificationSettings.retry.ariaLabel"
+                  )}
+                  disabled={busy || settings.preferencesFetching}
+                  loading={settings.preferencesFetching}
+                  onSelect={settings.onRetryClick}
+                />
+              ) : (
+                LEVELS.map(({ level, key, icon }) => (
+                  <NotificationMenuItem
+                    key={level}
+                    mobile={mobile}
+                    icon={icon}
+                    label={message(`waves.notificationSettings.${key}.label`)}
+                    ariaLabel={message(
+                      `waves.notificationSettings.${key}.ariaLabel`
+                    )}
+                    checked={settings.notificationLevel === level}
+                    disabled={
+                      settings.isMuted ||
+                      settings.loading ||
+                      settings.muteLoading
+                    }
+                    loading={settings.loadingTarget === level}
+                    onSelect={() => {
+                      void settings.onLevelSelect(level);
+                      close();
+                    }}
+                  />
+                ))
+              )}
+            </ul>
+          </li>
+          <li role="none">
+            <hr className="tw-mx-0 tw-my-1 tw-border-0 tw-border-t tw-border-solid tw-border-white/10" />
+          </li>
+        </>
+      )}
       <NotificationMenuItem
         mobile={mobile}
-        icon={AtSymbolIcon}
-        label={waveNotificationSettingsMessage(
-          "waves.notificationSettings.broadcastMentions.label"
+        icon={BellSlashIcon}
+        label={message(
+          settings.isMuted
+            ? "waves.notificationSettings.mute.unmuteLabel"
+            : "waves.notificationSettings.mute.label"
         )}
-        ariaLabel={waveNotificationSettingsMessage(
-          "waves.notificationSettings.broadcastMentions.ariaLabel"
+        ariaLabel={message(
+          settings.isMuted
+            ? "waves.notificationSettings.mute.unmuteAriaLabel"
+            : "waves.notificationSettings.mute.ariaLabel"
         )}
-        active={settings.broadcastMentionsEnabled}
-        buttonDisabled={settings.loading}
-        loading={settings.loadingTarget === "broadcast-mentions"}
+        disabled={busy}
+        loading={settings.muteLoading}
         onSelect={() => {
-          settings.onBroadcastMentionsClick();
-          close();
-        }}
-      />
-      <NotificationMenuItem
-        mobile={mobile}
-        icon={BellIcon}
-        label={waveNotificationSettingsMessage(
-          "waves.notificationSettings.allMessages.label"
-        )}
-        ariaLabel={waveNotificationSettingsMessage(
-          "waves.notificationSettings.allMessages.ariaLabel"
-        )}
-        active={settings.allDropsEnabled}
-        buttonDisabled={settings.loading}
-        loading={settings.loadingTarget === "all-drops"}
-        onSelect={() => {
-          settings.onAllDropsNotificationsClick();
+          settings.onMuteClick();
           close();
         }}
       />
     </ul>
   );
-
   return (
     <div
       className={
@@ -236,9 +277,15 @@ export default function WaveNotificationPreferenceButtons({
       {mobile ? (
         <>
           {trigger}
-          {sheet.isOpen &&
-            sheet.container &&
-            createPortal(choices(sheet.close), sheet.container)}
+          <CommonDropdownItemsMobileWrapper
+            isOpen={mobileOpen}
+            setOpen={setMobileOpen}
+            label={title}
+            hideOnDesktopHover={false}
+            zIndexClassName="tw-z-[11000]"
+          >
+            <li role="none">{choices(closeMobile)}</li>
+          </CommonDropdownItemsMobileWrapper>
         </>
       ) : (
         <Menu>
@@ -246,10 +293,10 @@ export default function WaveNotificationPreferenceButtons({
             <>
               <MenuButton as={Fragment}>{trigger}</MenuButton>
               <MenuItems
-                id={menuId}
+                id={`${tooltipId}-menu`}
                 anchor={{ to: "bottom end", gap: 8, padding: 16 }}
                 modal={false}
-                className="tailwind-scope tw-z-[1020] tw-w-[260px] tw-max-w-[calc(100vw-2rem)] tw-rounded-lg tw-bg-iron-900 tw-py-1 tw-shadow-lg tw-ring-1 tw-ring-white/10 focus:tw-outline-none"
+                className={`tailwind-scope tw-z-[1020] tw-w-max tw-min-w-[290px] tw-max-w-[calc(100vw-2rem)] tw-py-1 focus:tw-outline-none ${DROPDOWN_PANEL_SURFACE_CLASSES}`}
               >
                 {choices(close)}
               </MenuItems>

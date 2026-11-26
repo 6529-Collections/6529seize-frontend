@@ -1,777 +1,484 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useContext, type ReactNode } from "react";
 import WaveNotificationSettings from "@/components/waves/specs/WaveNotificationSettings";
 import { AuthContext } from "@/components/auth/Auth";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
+import { useWaveNotificationSubscription } from "@/hooks/useWaveNotificationSubscription";
+import { commonApiPost, commonApiDelete } from "@/services/api/common-api";
+import { WaveInformationPanelContext } from "@/components/brain/mobile/WaveInformationPanelContext";
 
 jest.mock("@/hooks/useWaveNotificationSubscription", () => ({
   useWaveNotificationSubscription: jest.fn(),
 }));
-
 jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
   commonApiDelete: jest.fn(),
 }));
-
+const mockInvalidate = jest.fn();
 jest.mock("@tanstack/react-query", () => ({
-  useQueryClient: () => ({
-    invalidateQueries: jest.fn(),
-  }),
+  useQueryClient: () => ({ invalidateQueries: mockInvalidate }),
 }));
 
-const mockWave: ApiWave = {
+const wave = {
   id: "wave-123",
   name: "Test Wave",
-  metrics: {
-    subscribers_count: 50,
-    muted: false,
-  },
-  subscribed_actions: ["follow"],
-} as any;
+  metrics: { subscribers_count: 1500, muted: false },
+  subscribed_actions: ["DROP_CREATED"],
+} as ApiWave;
+const setToast = jest.fn();
+const refetch = jest.fn();
+const mockSubscription = jest.mocked(useWaveNotificationSubscription);
+const mockPost = jest.mocked(commonApiPost);
+const mockDelete = jest.mocked(commonApiDelete);
+const ALL = "All messages";
+const BROADCAST = "Mentions and @all";
+const MENTIONS = "Mentions only";
+const groups = [ApiDropGroupMention.All];
+const independentGroups = [
+  ApiDropGroupMention.Admins,
+  ApiDropGroupMention.Devs6529,
+  ApiDropGroupMention.Drops6529,
+  "FUTURE_GROUP" as ApiDropGroupMention,
+];
+const savedGroups = [
+  ...groups,
+  ApiDropGroupMention.Contributors,
+  ...independentGroups,
+];
 
-const mockWaveHighSubscribers: ApiWave = {
-  id: "wave-456",
-  name: "Popular Wave",
-  metrics: {
-    subscribers_count: 1500,
-    muted: false,
-  },
-  subscribed_actions: ["follow"],
-} as any;
+function TestAuthProvider({ children }: { readonly children: ReactNode }) {
+  const auth = useContext(AuthContext);
+  return (
+    <AuthContext.Provider value={{ ...auth, setToast }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
 
-const mockWaveMuted: ApiWave = {
-  id: "wave-muted",
-  name: "Muted Wave",
-  metrics: {
-    subscribers_count: 50,
-    muted: true,
-  },
-  subscribed_actions: ["follow"],
-} as any;
-
-const mockAuthContext = {
-  setToast: jest.fn(),
-};
-
-const mockUseWaveNotificationSubscription =
-  require("@/hooks/useWaveNotificationSubscription").useWaveNotificationSubscription;
-
-const mockMatchMedia = () => {
-  Object.defineProperty(window, "matchMedia", {
-    configurable: true,
-    writable: true,
-    value: jest.fn().mockImplementation((query) => ({
-      matches: false,
-      media: query,
-      onchange: null,
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
-      dispatchEvent: jest.fn(),
-    })),
+function setPreferences(subscribed: boolean, enabled = groups) {
+  mockSubscription.mockReturnValue({
+    data: { subscribed, enabled_group_notifications: enabled },
+    refetch,
+  } as unknown as ReturnType<typeof useWaveNotificationSubscription>);
+}
+function renderComponent(currentWave = wave, compact = false) {
+  return render(
+    <TestAuthProvider>
+      <WaveNotificationSettings wave={currentWave} compact={compact} />
+    </TestAuthProvider>
+  );
+}
+async function openMenu() {
+  const trigger = screen.getByRole("button", {
+    name: "Open notification settings",
   });
-  globalThis.matchMedia = window.matchMedia;
-};
+  await userEvent.click(trigger);
+  return trigger;
+}
+function choice(name: string) {
+  return screen.getByRole("menuitemradio", { name });
+}
 
 describe("WaveNotificationSettings", () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    mockMatchMedia();
-    mockUseWaveNotificationSubscription.mockReturnValue({
-      data: { subscribed: false, enabled_group_notifications: [] },
-      refetch: jest.fn(),
+    Object.defineProperty(window, "matchMedia", {
+      configurable: true,
+      value: jest.fn().mockImplementation((query) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+        dispatchEvent: jest.fn(),
+      })),
     });
+    setPreferences(false, []);
+    mockPost.mockResolvedValue({});
+    mockDelete.mockResolvedValue(undefined);
   });
 
-  const renderComponent = (wave = mockWave) => {
-    return render(
-      <AuthContext.Provider value={mockAuthContext as any}>
-        <WaveNotificationSettings wave={wave} />
-      </AuthContext.Provider>
-    );
-  };
-
-  const openNotificationMenu = async () => {
-    const trigger = screen.getByLabelText("Open notification settings");
-    await userEvent.click(trigger);
-    return trigger;
-  };
-
-  it("renders mute without notification menu when not following wave", () => {
-    const waveNotFollowing = { ...mockWave, subscribed_actions: [] };
-    renderComponent(waveNotFollowing);
-
-    expect(screen.getByLabelText("Mute wave")).toBeInTheDocument();
-    expect(
-      screen.queryByLabelText("Open notification settings")
-    ).not.toBeInTheDocument();
-  });
-
-  it("renders a notification menu and mute button when following wave", async () => {
+  it("shows three label-only levels and mute under one neutral bell", async () => {
     renderComponent();
-
-    const trigger = screen.getByLabelText("Open notification settings");
-    const muteButton = screen.getByLabelText("Mute wave");
-
-    expect(trigger).toBeInTheDocument();
-    expect(muteButton).toBeInTheDocument();
-    expect(trigger).toHaveClass("tw-cursor-pointer");
-    expect(muteButton).toHaveClass("tw-cursor-pointer");
-    expect(trigger.parentElement?.parentElement).toHaveClass(
-      "tw-grid",
-      "tw-grid-cols-2",
-      "tw-gap-x-1.5"
-    );
-    expect(muteButton.parentElement?.parentElement).toBe(
-      trigger.parentElement?.parentElement
-    );
-    expect(trigger).toHaveClass("tw-w-full", "tw-border");
-    expect(muteButton).toHaveClass("tw-w-full", "tw-border");
-    expect(
-      screen.queryByLabelText("Receive @all and @contributors notifications")
-    ).not.toBeInTheDocument();
-
-    await openNotificationMenu();
-
-    const menu = screen.getByRole("menu");
-    expect(menu).toHaveAttribute("aria-labelledby", trigger.id);
-    expect(menu.querySelector("ul")).toHaveClass("tw-m-0");
-
-    const broadcastMentionsButton = screen.getByLabelText(
-      "Receive @all and @contributors notifications"
-    );
-    const allButton = screen.getByLabelText(
-      "Receive notifications for all messages"
-    );
-    expect(broadcastMentionsButton).toBeInTheDocument();
-    expect(allButton).toBeInTheDocument();
-    expect(broadcastMentionsButton).toHaveAttribute("role", "menuitemcheckbox");
-    expect(allButton).toHaveAttribute("role", "menuitemcheckbox");
-    expect(broadcastMentionsButton).toHaveClass("tw-cursor-pointer");
-    expect(allButton).toHaveClass("tw-cursor-pointer");
-    expect(broadcastMentionsButton).not.toHaveAttribute("data-tooltip-content");
-    expect(allButton).not.toHaveAttribute("data-tooltip-content");
-    expect(broadcastMentionsButton.parentElement).toHaveAttribute(
-      "role",
-      "none"
-    );
-    expect(allButton.parentElement).toHaveAttribute("role", "none");
-    expect(screen.getByText("Broadcast mentions")).toBeInTheDocument();
-    expect(screen.queryByText("@ALL")).not.toBeInTheDocument();
-    expect(
-      screen.queryByLabelText("Receive mentions-only notifications")
-    ).not.toBeInTheDocument();
-  });
-
-  it("shows broadcast mention menu item as active when enabled", async () => {
-    mockUseWaveNotificationSubscription.mockReturnValue({
-      data: {
-        subscribed: false,
-        enabled_group_notifications: [ApiDropGroupMention.All],
-      },
-      refetch: jest.fn(),
-    });
-
-    renderComponent();
-
-    expect(screen.getByLabelText("Open notification settings")).toHaveClass(
+    expect(screen.getAllByRole("button")).toHaveLength(1);
+    const trigger = await openMenu();
+    expect(trigger).not.toHaveClass(
       "tw-bg-primary-400/10",
-      "tw-border-primary-400/30",
       "tw-text-primary-400"
     );
-
-    await openNotificationMenu();
-
-    const broadcastMentionsButton = screen.getByLabelText(
-      "Receive @all and @contributors notifications"
+    expect(screen.getByRole("menu")).toHaveAttribute(
+      "aria-labelledby",
+      trigger.id
     );
-    expect(broadcastMentionsButton).toHaveClass(
-      "tw-text-iron-100",
-      "tw-bg-iron-800"
-    );
-  });
-
-  it("shows all-message menu item as active when all-message notifications enabled", async () => {
-    mockUseWaveNotificationSubscription.mockReturnValue({
-      data: { subscribed: true, enabled_group_notifications: [] },
-      refetch: jest.fn(),
-    });
-
-    renderComponent();
-
-    expect(screen.getByLabelText("Open notification settings")).toHaveClass(
-      "tw-bg-primary-400/10",
-      "tw-border-primary-400/30",
-      "tw-text-primary-400"
-    );
-
-    await openNotificationMenu();
-
-    const allButton = screen.getByLabelText(
-      "Receive notifications for all messages"
-    );
-    expect(allButton).toHaveClass("tw-text-iron-100", "tw-bg-iron-800");
-  });
-
-  it("can show broadcast mention and all-message menu items active together", async () => {
-    mockUseWaveNotificationSubscription.mockReturnValue({
-      data: {
-        subscribed: true,
-        enabled_group_notifications: [ApiDropGroupMention.All],
-      },
-      refetch: jest.fn(),
-    });
-
-    renderComponent();
-
-    expect(screen.getByLabelText("Open notification settings")).toHaveClass(
-      "tw-bg-primary-400/10",
-      "tw-border-primary-400/30",
-      "tw-text-primary-400"
-    );
-
-    await openNotificationMenu();
-
+    expect(screen.getAllByRole("menuitemradio")).toHaveLength(3);
     expect(
-      screen.getByLabelText("Receive @all and @contributors notifications")
-    ).toHaveClass("tw-text-iron-100", "tw-bg-iron-800");
-    expect(
-      screen.getByLabelText("Receive notifications for all messages")
-    ).toHaveClass("tw-text-iron-100", "tw-bg-iron-800");
+      screen.getByRole("group", { name: "Notification level" })
+    ).toContainElement(choice(MENTIONS));
+    expect(screen.queryByText("Notify me about")).not.toBeInTheDocument();
+    for (const name of [ALL, BROADCAST, MENTIONS]) {
+      expect(choice(name).textContent).toBe(name);
+      expect(choice(name)).not.toHaveAccessibleDescription();
+    }
+    const mute = screen.getByRole("menuitem", { name: "Mute wave" });
+    expect(mute).toBeEnabled();
+    expect(mute.textContent).toBe("Mute");
+    expect(mute).not.toHaveAccessibleDescription();
   });
 
-  it("enables all-message notifications for waves with many followers", async () => {
-    const { commonApiPost } = require("@/services/api/common-api");
-    const refetch = jest.fn();
-    mockUseWaveNotificationSubscription.mockReturnValue({
-      data: { subscribed: false, enabled_group_notifications: [] },
-      refetch,
-    });
-    commonApiPost.mockResolvedValue({});
-
-    renderComponent(mockWaveHighSubscribers);
-
-    await openNotificationMenu();
-
-    const allButton = screen.getByLabelText(
-      "Receive notifications for all messages"
-    );
-    expect(allButton).toBeEnabled();
-    expect(allButton).not.toHaveClass("tw-cursor-not-allowed");
-
-    await userEvent.click(allButton);
-
-    await waitFor(() => {
-      expect(commonApiPost).toHaveBeenCalledWith({
-        endpoint: "notifications/wave-subscription/wave-456",
-        body: {
-          subscribed: true,
-          enabled_group_notifications: [],
-        },
-      });
-    });
-
-    expect(refetch).toHaveBeenCalled();
-  });
-
-  it("enables broadcast mention notifications while preserving all drop preference", async () => {
-    const { commonApiPost } = require("@/services/api/common-api");
-    const refetch = jest.fn();
-
-    mockUseWaveNotificationSubscription.mockReturnValue({
-      data: { subscribed: true, enabled_group_notifications: [] },
-      refetch,
-    });
-
-    commonApiPost.mockResolvedValue({});
-
-    renderComponent();
-
-    await openNotificationMenu();
-
-    const broadcastMentionsButton = screen.getByLabelText(
-      "Receive @all and @contributors notifications"
-    );
-    await userEvent.click(broadcastMentionsButton);
-
-    await waitFor(() => {
-      expect(commonApiPost).toHaveBeenCalledWith({
-        endpoint: "notifications/wave-subscription/wave-123",
-        body: {
-          subscribed: true,
-          enabled_group_notifications: [ApiDropGroupMention.All],
-        },
-      });
-    });
-
-    expect(refetch).toHaveBeenCalled();
-    await waitFor(() => {
-      expect(
-        screen.queryByLabelText("Receive @all and @contributors notifications")
-      ).not.toBeInTheDocument();
-    });
-  });
-
-  it("disables broadcast mention notifications", async () => {
-    const { commonApiPost } = require("@/services/api/common-api");
-    const refetch = jest.fn();
-
-    mockUseWaveNotificationSubscription.mockReturnValue({
-      data: {
-        subscribed: false,
-        enabled_group_notifications: [ApiDropGroupMention.All],
-      },
-      refetch,
-    });
-
-    commonApiPost.mockResolvedValue({});
-
-    renderComponent();
-
-    await openNotificationMenu();
-
-    const broadcastMentionsButton = screen.getByLabelText(
-      "Receive @all and @contributors notifications"
-    );
-    await userEvent.click(broadcastMentionsButton);
-
-    await waitFor(() => {
-      expect(commonApiPost).toHaveBeenCalledWith({
-        endpoint: "notifications/wave-subscription/wave-123",
-        body: {
-          subscribed: false,
-          enabled_group_notifications: [],
-        },
-      });
-    });
-
-    expect(refetch).toHaveBeenCalled();
-  });
-
-  it.each([true, false])(
-    "preserves Drop Forge preferences when broadcast enabled is %s",
-    async (enabled) => {
-      const { commonApiPost } = require("@/services/api/common-api");
-      mockUseWaveNotificationSubscription.mockReturnValue({
-        data: {
-          subscribed: true,
-          enabled_group_notifications: enabled
-            ? [
-                ApiDropGroupMention.All,
-                ApiDropGroupMention.Contributors,
-                ApiDropGroupMention.Drops6529,
-              ]
-            : [ApiDropGroupMention.Drops6529],
-        },
-        refetch: jest.fn(),
-      });
-      commonApiPost.mockResolvedValue({});
+  it.each([
+    [false, [], MENTIONS],
+    [false, groups, BROADCAST],
+    [true, [], ALL],
+    [true, groups, ALL],
+    [true, independentGroups, ALL],
+  ])(
+    "reads legacy preferences %s / %j as one selected level",
+    async (subscribed, enabled, selected) => {
+      setPreferences(subscribed, enabled);
       renderComponent();
-      await openNotificationMenu();
+      await openMenu();
+      for (const name of [ALL, BROADCAST, MENTIONS]) {
+        expect(choice(name)).toHaveAttribute(
+          "aria-checked",
+          String(name === selected)
+        );
+      }
+    }
+  );
+
+  it("keeps the desktop dropdown inside About without opening a subview", async () => {
+    const openSubview = jest.fn();
+    render(
+      <WaveInformationPanelContext.Provider
+        value={{
+          view: "about",
+          contentId: "about-subview",
+          container: null,
+          open: openSubview,
+          back: jest.fn(),
+        }}
+      >
+        <TestAuthProvider>
+          <WaveNotificationSettings wave={wave} />
+        </TestAuthProvider>
+      </WaveInformationPanelContext.Provider>
+    );
+    await openMenu();
+    expect(screen.getByRole("menu")).toBeVisible();
+    expect(openSubview).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    [false, [], ALL, true, []],
+    [false, [], BROADCAST, false, groups],
+    [false, groups, MENTIONS, false, []],
+    [true, groups, BROADCAST, false, groups],
+    [true, groups, MENTIONS, false, []],
+    [false, groups, ALL, true, groups],
+    [true, [], BROADCAST, false, groups],
+  ])(
+    "saves the chosen level in one request from %s / %j to %s",
+    async (subscribed, enabled, target, nextSubscribed, nextGroups) => {
+      setPreferences(subscribed, enabled);
+      renderComponent();
+      await openMenu();
+      await userEvent.click(choice(target));
+      expect(mockPost).toHaveBeenCalledTimes(1);
+      expect(mockPost).toHaveBeenCalledWith({
+        endpoint: "notifications/wave-subscription/wave-123",
+        body: {
+          subscribed: nextSubscribed,
+          enabled_group_notifications: nextGroups,
+        },
+      });
+      expect(refetch).toHaveBeenCalledTimes(1);
+      expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+    }
+  );
+
+  it.each([undefined, null])(
+    "tolerates an omitted or null group preference array (%s)",
+    async (enabled) => {
+      mockSubscription.mockReturnValue({
+        data: { subscribed: false, enabled_group_notifications: enabled },
+        refetch,
+      } as unknown as ReturnType<typeof useWaveNotificationSubscription>);
+      renderComponent();
+      await openMenu();
+      expect(choice(MENTIONS)).toHaveAttribute("aria-checked", "true");
+      expect(screen.getByRole("menuitem", { name: "Mute wave" })).toBeEnabled();
+    }
+  );
+
+  it.each([
+    [ALL, false, true, savedGroups, savedGroups],
+    [ALL, false, true, independentGroups, independentGroups],
+    [BROADCAST, true, false, [...groups, ...independentGroups], savedGroups],
+    [
+      BROADCAST,
+      false,
+      false,
+      [...groups, ...independentGroups],
+      independentGroups,
+    ],
+    [MENTIONS, false, false, independentGroups, savedGroups],
+  ])(
+    "preserves independent alert preferences when choosing %s",
+    async (target, subscribed, nextSubscribed, nextGroups, initialGroups) => {
+      setPreferences(subscribed, initialGroups);
+      renderComponent();
+      await openMenu();
+      await userEvent.click(choice(target));
+      expect(mockPost).toHaveBeenCalledWith({
+        endpoint: "notifications/wave-subscription/wave-123",
+        body: {
+          subscribed: nextSubscribed,
+          enabled_group_notifications: nextGroups,
+        },
+      });
+    }
+  );
+
+  it("closes without toggling off the already selected level", async () => {
+    renderComponent();
+    await openMenu();
+    await userEvent.click(choice(MENTIONS));
+    expect(mockPost).not.toHaveBeenCalled();
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+  });
+
+  it.each([false, true])(
+    "offers only mute or unmute before joining (muted: %s)",
+    async (muted) => {
+      renderComponent({
+        ...wave,
+        subscribed_actions: [],
+        metrics: { ...wave.metrics, muted },
+      });
+      await openMenu();
+      expect(screen.queryByRole("menuitemradio")).not.toBeInTheDocument();
+      const item = screen.getByRole("menuitem", {
+        name: muted ? "Unmute wave" : "Mute wave",
+      });
+      await userEvent.click(item);
+      if (muted)
+        expect(mockDelete).toHaveBeenCalledWith({
+          endpoint: "waves/wave-123/mute",
+        });
+      else
+        expect(mockPost).toHaveBeenCalledWith({
+          endpoint: "waves/wave-123/mute",
+          body: {},
+        });
+    }
+  );
+
+  it("offers only mute when unjoined preferences are unavailable", async () => {
+    mockSubscription.mockReturnValue({
+      data: undefined,
+      isPending: false,
+      isError: true,
+      refetch,
+    } as unknown as ReturnType<typeof useWaveNotificationSubscription>);
+    renderComponent({ ...wave, subscribed_actions: [] });
+    await openMenu();
+    expect(screen.queryByRole("menuitemradio")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("menuitem", { name: "Retry notification settings" })
+    ).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("menuitem", { name: "Mute wave" }));
+    expect(mockPost).toHaveBeenCalledWith({
+      endpoint: "waves/wave-123/mute",
+      body: {},
+    });
+    expect(refetch).not.toHaveBeenCalled();
+  });
+
+  it.each([false, true])(
+    "keeps the muted colour and disabled saved level (compact: %s)",
+    async (compact) => {
+      setPreferences(true, []);
+      renderComponent(
+        { ...wave, metrics: { ...wave.metrics, muted: true } },
+        compact
+      );
+      const trigger = await openMenu();
+      expect(trigger).toHaveClass("tw-text-error", "tw-bg-error/10");
+      expect(choice(ALL)).toHaveAttribute("aria-checked", "true");
+      for (const item of screen.getAllByRole("menuitemradio"))
+        expect(item).toBeDisabled();
+      const unmute = screen.getByRole("menuitem", { name: "Unmute wave" });
+      expect(unmute).toBeEnabled();
+      await userEvent.click(choice(BROADCAST));
+      expect(mockPost).not.toHaveBeenCalled();
+      await userEvent.click(unmute);
+      expect(mockDelete).toHaveBeenCalledWith({
+        endpoint: "waves/wave-123/mute",
+      });
+      expect(mockInvalidate).toHaveBeenCalledTimes(4);
+      expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+    }
+  );
+
+  it("keeps mute available while preferences load", async () => {
+    mockSubscription.mockReturnValue({
+      data: undefined,
+      isPending: true,
+      refetch,
+    } as unknown as ReturnType<typeof useWaveNotificationSubscription>);
+    renderComponent();
+    await openMenu();
+    for (const item of screen.getAllByRole("menuitemradio")) {
+      expect(item).toBeDisabled();
+      expect(item).toHaveAttribute("aria-checked", "false");
+    }
+    await userEvent.click(choice(ALL));
+    expect(mockPost).not.toHaveBeenCalled();
+    await userEvent.click(screen.getByRole("menuitem", { name: "Mute wave" }));
+    expect(mockPost).toHaveBeenCalledWith({
+      endpoint: "waves/wave-123/mute",
+      body: {},
+    });
+  });
+
+  it("retries unavailable preferences inside the menu with mute still available", async () => {
+    mockSubscription.mockReturnValue({
+      data: undefined,
+      isPending: false,
+      isFetching: false,
+      refetch,
+    } as unknown as ReturnType<typeof useWaveNotificationSubscription>);
+    renderComponent();
+    await openMenu();
+    expect(screen.queryByRole("menuitemradio")).not.toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "Mute wave" })).toBeEnabled();
+    await userEvent.click(
+      screen.getByRole("menuitem", { name: "Retry notification settings" })
+    );
+    expect(refetch).toHaveBeenCalled();
+    expect(mockPost).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    [false, [], ALL, "API Error"],
+    [false, groups, MENTIONS, "Unable to update subscription"],
+  ])(
+    "preserves error feedback and prior preference on failure",
+    async (subscribed, enabled, target, error) => {
+      setPreferences(subscribed, enabled);
+      mockPost.mockRejectedValue(error);
+      renderComponent();
+      await openMenu();
+      await userEvent.click(choice(target));
+      await waitFor(() =>
+        expect(setToast).toHaveBeenCalledWith({
+          title: "Couldn't update notification settings.",
+          description: "Please try again.",
+          details: `${error}.`,
+          type: "error",
+        })
+      );
+      await openMenu();
+      expect(choice(target)).toHaveAttribute("aria-checked", "false");
+    }
+  );
+
+  it.each([false, true])(
+    "preserves mute error feedback (muted: %s)",
+    async (muted) => {
+      const api = muted ? mockDelete : mockPost;
+      api.mockRejectedValue(new Error("Request failed"));
+      renderComponent({ ...wave, metrics: { ...wave.metrics, muted } });
+      await openMenu();
       await userEvent.click(
-        screen.getByLabelText("Receive @all and @contributors notifications")
+        screen.getByRole("menuitem", {
+          name: muted ? "Unmute wave" : "Mute wave",
+        })
       );
       await waitFor(() =>
-        expect(commonApiPost).toHaveBeenCalledWith({
-          endpoint: "notifications/wave-subscription/wave-123",
-          body: {
-            subscribed: true,
-            enabled_group_notifications: enabled
-              ? [ApiDropGroupMention.Drops6529]
-              : [ApiDropGroupMention.All, ApiDropGroupMention.Drops6529],
-          },
+        expect(setToast).toHaveBeenCalledWith({
+          title: muted
+            ? "Couldn't unmute this wave."
+            : "Couldn't mute this wave.",
+          description: "Please try again.",
+          details: "Request failed.",
+          type: "error",
         })
       );
     }
   );
 
-  it("enables all-message notifications while preserving broadcast mention preference", async () => {
-    const { commonApiPost } = require("@/services/api/common-api");
-    const refetch = jest.fn();
-
-    mockUseWaveNotificationSubscription.mockReturnValue({
-      data: {
-        subscribed: false,
-        enabled_group_notifications: [ApiDropGroupMention.All],
-      },
-      refetch,
-    });
-
-    commonApiPost.mockResolvedValue({});
-
-    renderComponent();
-
-    await openNotificationMenu();
-
-    const allButton = screen.getByLabelText(
-      "Receive notifications for all messages"
-    );
-    await userEvent.click(allButton);
-
-    await waitFor(() => {
-      expect(commonApiPost).toHaveBeenCalledWith({
-        endpoint: "notifications/wave-subscription/wave-123",
-        body: {
-          subscribed: true,
-          enabled_group_notifications: [ApiDropGroupMention.All],
-        },
-      });
-    });
-
-    expect(refetch).toHaveBeenCalled();
-  });
-
-  it("disables all-message notifications while preserving broadcast mention preference", async () => {
-    const { commonApiPost } = require("@/services/api/common-api");
-    const refetch = jest.fn();
-
-    mockUseWaveNotificationSubscription.mockReturnValue({
-      data: {
-        subscribed: true,
-        enabled_group_notifications: [ApiDropGroupMention.All],
-      },
-      refetch,
-    });
-
-    commonApiPost.mockResolvedValue({});
-
-    renderComponent();
-
-    await openNotificationMenu();
-
-    const allButton = screen.getByLabelText(
-      "Receive notifications for all messages"
-    );
-    await userEvent.click(allButton);
-
-    await waitFor(() => {
-      expect(commonApiPost).toHaveBeenCalledWith({
-        endpoint: "notifications/wave-subscription/wave-123",
-        body: {
-          subscribed: false,
-          enabled_group_notifications: [ApiDropGroupMention.All],
-        },
-      });
-    });
-
-    expect(refetch).toHaveBeenCalled();
-  });
-
-  it("mutes a wave with many followers", async () => {
-    const { commonApiPost } = require("@/services/api/common-api");
-    commonApiPost.mockResolvedValue({});
-
-    renderComponent(mockWaveHighSubscribers);
-
-    const muteButton = screen.getByLabelText("Mute wave");
-    await userEvent.click(muteButton);
-
-    await waitFor(() => {
-      expect(commonApiPost).toHaveBeenCalledWith({
-        endpoint: "waves/wave-456/mute",
-        body: {},
-      });
-    });
-  });
-
-  it("mutes the wave from the mute button before joining", async () => {
-    const { commonApiPost } = require("@/services/api/common-api");
-    commonApiPost.mockResolvedValue({});
-
-    renderComponent({ ...mockWave, subscribed_actions: [] });
-
-    const muteButton = screen.getByLabelText("Mute wave");
-    await userEvent.click(muteButton);
-
-    await waitFor(() => {
-      expect(commonApiPost).toHaveBeenCalledWith({
-        endpoint: "waves/wave-123/mute",
-        body: {},
-      });
-    });
-  });
-
-  it("mutes the wave from the mute button", async () => {
-    const { commonApiPost } = require("@/services/api/common-api");
-    commonApiPost.mockResolvedValue({});
-
-    renderComponent();
-
-    expect(
-      screen.getByLabelText("Open notification settings")
-    ).toBeInTheDocument();
-
-    const muteButton = screen.getByLabelText("Mute wave");
-    await userEvent.click(muteButton);
-
-    await waitFor(() => {
-      expect(commonApiPost).toHaveBeenCalledWith({
-        endpoint: "waves/wave-123/mute",
-        body: {},
-      });
-    });
-  });
-
-  it("does not update notification preferences before preferences load", async () => {
-    const { commonApiPost } = require("@/services/api/common-api");
-
-    mockUseWaveNotificationSubscription.mockReturnValue({
-      data: undefined,
-      isPending: true,
-      refetch: jest.fn(),
-    });
-
-    renderComponent();
-
-    const trigger = screen.getByLabelText("Open notification settings");
-    expect(trigger).toBeDisabled();
-    expect(screen.getByLabelText("Mute wave")).not.toBeDisabled();
-
-    await userEvent.click(trigger);
-
-    expect(
-      screen.queryByLabelText("Receive @all and @contributors notifications")
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByLabelText("Receive notifications for all messages")
-    ).not.toBeInTheDocument();
-    expect(commonApiPost).not.toHaveBeenCalled();
-  });
-
-  it("lets users retry when notification preferences fail to load", async () => {
-    const { commonApiPost } = require("@/services/api/common-api");
-    const refetch = jest.fn();
-
-    mockUseWaveNotificationSubscription.mockReturnValue({
-      data: undefined,
-      isError: true,
-      isFetching: false,
-      isPending: false,
-      refetch,
-    });
-
-    renderComponent();
-
-    const retryButton = screen.getByLabelText("Retry notification settings");
-    expect(retryButton).toBeEnabled();
-    expect(retryButton).toHaveClass("enabled:tw-cursor-pointer");
-    expect(screen.getByLabelText("Mute wave")).toBeInTheDocument();
-    expect(
-      screen.queryByLabelText("Open notification settings")
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByLabelText("Receive @all and @contributors notifications")
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByLabelText("Receive notifications for all messages")
-    ).not.toBeInTheDocument();
-
-    await userEvent.click(retryButton);
-
-    expect(refetch).toHaveBeenCalled();
-    expect(commonApiPost).not.toHaveBeenCalled();
-  });
-
-  it("handles API error when enabling all-message notifications", async () => {
-    const { commonApiPost } = require("@/services/api/common-api");
-
-    mockUseWaveNotificationSubscription.mockReturnValue({
-      data: { subscribed: false, enabled_group_notifications: [] },
-      refetch: jest.fn(),
-    });
-
-    commonApiPost.mockRejectedValue("API Error");
-
-    renderComponent();
-
-    await openNotificationMenu();
-
-    const allButton = screen.getByLabelText(
-      "Receive notifications for all messages"
-    );
-    await userEvent.click(allButton);
-
-    await waitFor(() => {
-      expect(mockAuthContext.setToast).toHaveBeenCalledWith({
-        title: "Couldn't update notification settings.",
-        description: "Please try again.",
-        details: "API Error.",
-        type: "error",
-      });
-    });
-  });
-
-  it("handles API error when disabling broadcast mention notifications", async () => {
-    const { commonApiPost } = require("@/services/api/common-api");
-
-    mockUseWaveNotificationSubscription.mockReturnValue({
-      data: {
-        subscribed: false,
-        enabled_group_notifications: [ApiDropGroupMention.All],
-      },
-      refetch: jest.fn(),
-    });
-
-    commonApiPost.mockRejectedValue("Unable to update subscription");
-
-    renderComponent();
-
-    await openNotificationMenu();
-
-    const broadcastMentionsButton = screen.getByLabelText(
-      "Receive @all and @contributors notifications"
-    );
-    await userEvent.click(broadcastMentionsButton);
-
-    await waitFor(() => {
-      expect(mockAuthContext.setToast).toHaveBeenCalledWith({
-        title: "Couldn't update notification settings.",
-        description: "Please try again.",
-        details: "Unable to update subscription.",
-        type: "error",
-      });
-    });
-  });
-
-  it("shows loading spinner when toggling notifications", async () => {
-    const { commonApiPost } = require("@/services/api/common-api");
-    const refetch = jest.fn();
-
-    mockUseWaveNotificationSubscription.mockReturnValue({
-      data: { subscribed: false, enabled_group_notifications: [] },
-      refetch,
-    });
-
-    // Make the API call hang to test loading state
-    commonApiPost.mockImplementation(() => new Promise(() => {}));
-
-    renderComponent();
-
-    await openNotificationMenu();
-
-    const allButton = screen.getByLabelText(
-      "Receive notifications for all messages"
-    );
-    await userEvent.click(allButton);
-
-    await waitFor(() => {
-      expect(
-        screen.queryByLabelText("Receive notifications for all messages")
-      ).not.toBeInTheDocument();
-    });
-
-    const trigger = screen.getByLabelText("Open notification settings");
-    await waitFor(() => {
-      expect(trigger.querySelector(".spinner")).toBeInTheDocument();
-    });
-  });
-
-  it("keeps mute button focusable when wave has high subscriber count", () => {
-    renderComponent(mockWaveHighSubscribers);
-
-    const muteButton = screen.getByLabelText("Mute wave");
-    expect(muteButton).not.toBeDisabled();
-  });
-
-  it("keeps keyboard focus on mute when switching between compact and full controls", () => {
-    const view = (compact: boolean) => (
-      <AuthContext.Consumer>
-        {(auth) => (
-          <AuthContext.Provider value={{ ...auth, ...mockAuthContext }}>
-            <WaveNotificationSettings wave={mockWave} compact={compact} />
-          </AuthContext.Provider>
-        )}
-      </AuthContext.Consumer>
-    );
-    const { rerender } = render(view(false));
-    const muteButton = screen.getByRole("button", { name: "Mute wave" });
-    muteButton.focus();
-
-    for (const compact of [true, false]) {
-      rerender(view(compact));
-      expect(screen.getByRole("button", { name: "Mute wave" })).toBe(
-        muteButton
+  it.each(["preference", "mute", "unmute"])(
+    "shows per-row loading and prevents overlapping writes for %s",
+    async (operation) => {
+      let finish: () => void = () => {};
+      const api = operation === "unmute" ? mockDelete : mockPost;
+      api.mockImplementation(
+        () =>
+          new Promise<void>((resolve) => {
+            finish = resolve;
+          })
       );
-      expect(muteButton).toHaveFocus();
+      renderComponent({
+        ...wave,
+        metrics: { ...wave.metrics, muted: operation === "unmute" },
+      });
+      await openMenu();
+      const target =
+        operation === "preference"
+          ? choice(ALL)
+          : screen.getByRole("menuitem", {
+              name: operation === "unmute" ? "Unmute wave" : "Mute wave",
+            });
+      await userEvent.click(target);
+      const trigger = await openMenu();
+      expect(trigger).toHaveAttribute("aria-busy", "true");
+      expect(
+        screen.getByRole("menu").querySelector(".spinner")
+      ).toBeInTheDocument();
+      for (const item of screen.getAllByRole("menuitemradio"))
+        expect(item).toBeDisabled();
+      expect(
+        screen.getByRole("menuitem", {
+          name: operation === "unmute" ? "Unmute wave" : "Mute wave",
+        })
+      ).toBeDisabled();
+      await act(async () => finish());
+      await waitFor(() =>
+        expect(trigger).toHaveAttribute("aria-busy", "false")
+      );
     }
-  });
+  );
 
-  it("renders muted button when wave is muted", () => {
-    renderComponent(mockWaveMuted);
-
-    const mutedButton = screen.getByLabelText("Unmute wave");
-    expect(mutedButton).toBeInTheDocument();
-    expect(mutedButton).toHaveClass("tw-cursor-pointer");
-    expect(mutedButton).toHaveClass(
-      "tw-bg-error/10",
-      "tw-border-error/40",
-      "tw-text-error"
+  it("retains the same focused bell across compact and muted states", () => {
+    const view = (compact: boolean, muted: boolean) => (
+      <TestAuthProvider>
+        <WaveNotificationSettings
+          wave={{ ...wave, metrics: { ...wave.metrics, muted } }}
+          compact={compact}
+        />
+      </TestAuthProvider>
     );
-    expect(screen.getByText("Muted")).toBeInTheDocument();
-  });
-
-  it("does not render notification settings when wave is muted", () => {
-    renderComponent(mockWaveMuted);
-
-    expect(
-      screen.queryByLabelText("Open notification settings")
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByLabelText("Receive @all and @contributors notifications")
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByLabelText("Receive notifications for all messages")
-    ).not.toBeInTheDocument();
-  });
-
-  it("calls unmute API when clicking muted button", async () => {
-    const { commonApiDelete } = require("@/services/api/common-api");
-    commonApiDelete.mockResolvedValue({});
-
-    renderComponent(mockWaveMuted);
-
-    const mutedButton = screen.getByLabelText("Unmute wave");
-    await userEvent.click(mutedButton);
-
-    await waitFor(() => {
-      expect(commonApiDelete).toHaveBeenCalledWith({
-        endpoint: "waves/wave-muted/mute",
-      });
+    const { rerender } = render(view(false, false));
+    const trigger = screen.getByRole("button", {
+      name: "Open notification settings",
     });
-  });
-
-  it("shows loading spinner when unmuting", async () => {
-    const { commonApiDelete } = require("@/services/api/common-api");
-    commonApiDelete.mockImplementation(() => new Promise(() => {}));
-
-    renderComponent(mockWaveMuted);
-
-    const mutedButton = screen.getByLabelText("Unmute wave");
-    await userEvent.click(mutedButton);
-
-    await waitFor(() => {
-      expect(mutedButton.querySelector(".spinner")).toBeInTheDocument();
-    });
-  });
-
-  it("handles error when unmuting fails", async () => {
-    const { commonApiDelete } = require("@/services/api/common-api");
-    commonApiDelete.mockRejectedValue("Unable to unmute wave");
-
-    renderComponent(mockWaveMuted);
-
-    const mutedButton = screen.getByLabelText("Unmute wave");
-    await userEvent.click(mutedButton);
-
-    await waitFor(() => {
-      expect(mockAuthContext.setToast).toHaveBeenCalledWith({
-        title: "Couldn't unmute this wave.",
-        description: "Please try again.",
-        details: "Unable to unmute wave.",
-        type: "error",
-      });
-    });
+    trigger.focus();
+    for (const [compact, muted] of [
+      [true, false],
+      [true, true],
+      [false, true],
+    ] as const) {
+      rerender(view(compact, muted));
+      expect(
+        screen.getByRole("button", { name: "Open notification settings" })
+      ).toBe(trigger);
+      expect(trigger).toHaveFocus();
+      expect(screen.getAllByRole("button")).toHaveLength(1);
+    }
   });
 });

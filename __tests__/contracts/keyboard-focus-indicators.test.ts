@@ -66,9 +66,9 @@ const AUDITED_EXCEPTIONS: readonly AuditedException[] = [
   },
   {
     file: "components/waves/specs/wave-notification-settings/WaveNotificationPreferenceButtons.tsx",
-    marker: "tw-ring-white/10 focus:tw-outline-none",
+    marker: "tw-max-w-[calc(100vw-2rem)] tw-py-1 focus:tw-outline-none",
     literalHash:
-      "a908df2dc19dfa7d6083f72e8f56f77ce69648e86ed5a5cb93d675cf2e0f429f",
+      "21e92674c459e5db2210b24dd618351b07b1fd545eea62706410675d0a7d4b71",
     reason: OPTIONS_REASON,
   },
   {

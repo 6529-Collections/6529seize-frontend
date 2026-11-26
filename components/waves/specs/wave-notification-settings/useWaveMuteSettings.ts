@@ -70,18 +70,9 @@ export function useWaveMuteSettings(wave: ApiWave) {
     void toggleMute();
   }, [toggleMute]);
 
-  const muteTooltip = isMuted
-    ? waveNotificationSettingsMessage(
-        "waves.notificationSettings.mute.tooltip.disable"
-      )
-    : waveNotificationSettingsMessage(
-        "waves.notificationSettings.mute.tooltip.enable"
-      );
-
   return {
     isMuted,
     muteLoading,
-    muteTooltip,
     onMuteClick,
   };
 }
