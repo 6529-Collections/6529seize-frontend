@@ -30,6 +30,9 @@ import {
   sidebarScrollMetrics,
 } from "../support/waveListScroll";
 
+// A brief hold could finish before the former pin menu would have opened.
+const LONG_WAVE_ROW_HOLD_MS = 650;
+
 // Headless Chromium otherwise hides the native scrollbar we need to exercise.
 // launchOptions replaces the config value, so keep the sandbox setting too.
 test.use({
@@ -119,8 +122,7 @@ for (const surface of [
         type: "touchStart",
         touchPoints: [{ x, y }],
       });
-      // Hold past the former menu delay before starting to drag.
-      await page.waitForTimeout(650);
+      await page.waitForTimeout(LONG_WAVE_ROW_HOLD_MS);
       await expect(
         page.getByRole("dialog", { name: /^(Pin|Unpin) wave$/ })
       ).toHaveCount(0);
@@ -313,7 +315,7 @@ for (const pinSurface of [
     await expect(page).toHaveURL(/\/waves$/);
 
     touch = await startWaveRowTouch(page, row);
-    await page.waitForTimeout(650);
+    await page.waitForTimeout(LONG_WAVE_ROW_HOLD_MS);
     await expect(
       page.getByRole("dialog", { name: /^(Pin|Unpin) wave$/ })
     ).toHaveCount(0);

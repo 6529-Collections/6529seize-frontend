@@ -131,6 +131,7 @@ export function useWaveRowTouchGestures(options: Options) {
       const dy = Math.abs(event.clientY - current.y);
       if (!current.swiping) {
         if (Math.max(Math.abs(dx), dy) < INTENT_DISTANCE) return;
+        // A moved touch should never open the row on release.
         releaseClick = blockReleaseClick();
         if (dx < INTENT_DISTANCE || dx < dy * 1.5) {
           finish();

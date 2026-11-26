@@ -139,16 +139,27 @@ it.each(["first move", "next move", "release"])(
   }
 );
 
-it("keeps vertical scrolling out of pin swipes for the entire touch", () => {
-  render(<Harness />);
-  const wave = screen.getByRole("link");
-  pointer(wave, "pointerdown");
-  pointer(wave, "pointermove", 103, 120);
-  pointer(wave, "pointermove", 200, 140);
-  pointer(wave, "pointerup", 200, 140);
-  expect(onTogglePin).not.toHaveBeenCalled();
-  expect(onSwipe).not.toHaveBeenCalled();
-});
+it.each([
+  { holdMs: 0, x: 103 },
+  { holdMs: 600, x: 100 },
+])(
+  "keeps vertical movement after a $holdMs ms hold out of pin swipes",
+  ({ holdMs, x }) => {
+    render(<Harness />);
+    const wave = screen.getByRole("link");
+    pointer(wave, "pointerdown");
+    act(() => {
+      jest.advanceTimersByTime(holdMs);
+    });
+    pointer(wave, "pointermove", x, 120);
+    pointer(wave, "pointermove", 200, 140);
+    pointer(wave, "pointerup", 200, 140);
+    fireEvent.click(wave, { detail: 1 });
+    expect(onTogglePin).not.toHaveBeenCalled();
+    expect(onSwipe).not.toHaveBeenCalled();
+    expect(onNavigate).not.toHaveBeenCalled();
+  }
+);
 
 it("leaves a stationary touch release to the row", () => {
   render(<Harness />);
