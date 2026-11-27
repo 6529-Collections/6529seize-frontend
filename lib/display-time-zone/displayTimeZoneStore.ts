@@ -82,8 +82,25 @@ function readSnapshot(): DisplayTimeZoneSnapshot {
 }
 
 function publish(next: DisplayTimeZoneSnapshot): void {
+  if (
+    cachedSnapshot?.preference === next.preference &&
+    cachedSnapshot.override === next.override
+  ) {
+    return;
+  }
   cachedSnapshot = next;
   globalThis.dispatchEvent(new Event(CHANGE_EVENT));
+}
+
+function handleStorage(event: StorageEvent): void {
+  if (event.key === null || event.key === DISPLAY_TIME_ZONE_STORAGE_KEY) {
+    publish(readSnapshot());
+  }
+}
+
+// The cache also serves callers outside React, so keep one listener for the tab.
+if (typeof window !== "undefined") {
+  globalThis.addEventListener("storage", handleStorage);
 }
 
 export function getDisplayTimeZoneSnapshot(): DisplayTimeZoneSnapshot {
@@ -102,19 +119,9 @@ export function subscribeToDisplayTimeZone(onChange: () => void): () => void {
   if (typeof window === "undefined") {
     return () => undefined;
   }
-  const handleStorage = (event: StorageEvent) => {
-    if (event.key !== null && event.key !== DISPLAY_TIME_ZONE_STORAGE_KEY) {
-      return;
-    }
-    cachedSnapshot = readSnapshot();
-    onChange();
-  };
-  window.addEventListener(CHANGE_EVENT, onChange);
-  window.addEventListener("storage", handleStorage);
-  return () => {
-    window.removeEventListener(CHANGE_EVENT, onChange);
-    window.removeEventListener("storage", handleStorage);
-  };
+  cachedSnapshot ??= readSnapshot();
+  globalThis.addEventListener(CHANGE_EVENT, onChange);
+  return () => globalThis.removeEventListener(CHANGE_EVENT, onChange);
 }
 
 /** Saves the setting on this device and turns the wave switch off. */

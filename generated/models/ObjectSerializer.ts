@@ -881,8 +881,12 @@ export * from '../models/ApiValidateProfileCmsAgentPatchRequest';
 export * from '../models/ApiValidateProfileCmsPackageRequest';
 export * from '../models/ApiVotingCreditReleaseReason';
 export * from '../models/ApiWallet';
+export * from '../models/ApiWalletAggregatedActivity';
+export * from '../models/ApiWalletAggregatedActivityMemes';
 export * from '../models/ApiWalletDistributionAllocation';
 export * from '../models/ApiWalletDistributionAllocations';
+export * from '../models/ApiWalletOwnerBalance';
+export * from '../models/ApiWalletOwnerBalanceMemes';
 export * from '../models/ApiWave';
 export * from '../models/ApiWaveAllMentionCount';
 export * from '../models/ApiWaveChatConfig';
@@ -1923,8 +1927,12 @@ import { ApiValidateProfileCmsAgentPatchRequest } from '../models/ApiValidatePro
 import { ApiValidateProfileCmsPackageRequest } from '../models/ApiValidateProfileCmsPackageRequest';
 import { ApiVotingCreditReleaseReason } from '../models/ApiVotingCreditReleaseReason';
 import { ApiWallet } from '../models/ApiWallet';
+import { ApiWalletAggregatedActivity } from '../models/ApiWalletAggregatedActivity';
+import { ApiWalletAggregatedActivityMemes } from '../models/ApiWalletAggregatedActivityMemes';
 import { ApiWalletDistributionAllocation, ApiWalletDistributionAllocationPhaseEnum     } from '../models/ApiWalletDistributionAllocation';
 import { ApiWalletDistributionAllocations } from '../models/ApiWalletDistributionAllocations';
+import { ApiWalletOwnerBalance } from '../models/ApiWalletOwnerBalance';
+import { ApiWalletOwnerBalanceMemes } from '../models/ApiWalletOwnerBalanceMemes';
 import { ApiWave } from '../models/ApiWave';
 import { ApiWaveAllMentionCount } from '../models/ApiWaveAllMentionCount';
 import { ApiWaveChatConfig } from '../models/ApiWaveChatConfig';
@@ -3216,8 +3224,12 @@ let typeMap: {[index: string]: any} = {
     "ApiValidateProfileCmsAgentPatchRequest": ApiValidateProfileCmsAgentPatchRequest,
     "ApiValidateProfileCmsPackageRequest": ApiValidateProfileCmsPackageRequest,
     "ApiWallet": ApiWallet,
+    "ApiWalletAggregatedActivity": ApiWalletAggregatedActivity,
+    "ApiWalletAggregatedActivityMemes": ApiWalletAggregatedActivityMemes,
     "ApiWalletDistributionAllocation": ApiWalletDistributionAllocation,
     "ApiWalletDistributionAllocations": ApiWalletDistributionAllocations,
+    "ApiWalletOwnerBalance": ApiWalletOwnerBalance,
+    "ApiWalletOwnerBalanceMemes": ApiWalletOwnerBalanceMemes,
     "ApiWave": ApiWave,
     "ApiWaveAllMentionCount": ApiWaveAllMentionCount,
     "ApiWaveChatConfig": ApiWaveChatConfig,
