@@ -1994,6 +1994,7 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       },
     ];
     let ready = true;
+    const initialPhases = Promise.withResolvers<void>();
     await page.route(
       (url) =>
         url.pathname === routePath || url.pathname.startsWith(`${routePath}/`),
@@ -2003,6 +2004,7 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
           return;
         }
         const path = new URL(route.request().url()).pathname;
+        if (path === `${routePath}/phases`) await initialPhases.promise;
         await route.fulfill({
           json:
             path === routePath
@@ -2014,7 +2016,19 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       }
     );
 
-    await page.goto(`/emma/plans/${plan.id}?step=review`);
+    const phasesRequested = page.waitForRequest(
+      (request) => new URL(request.url()).pathname === `${routePath}/phases`
+    );
+    try {
+      await page.goto(`/emma/plans/${plan.id}?step=review`);
+      await phasesRequested;
+      await expect(
+        page.getByText(/^Loading your distribution plan/)
+      ).toBeVisible();
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+    } finally {
+      initialPhases.resolve();
+    }
     const phase = page.getByRole("rowheader", { name: longName });
     await expect(phase).toBeVisible();
     const table = page.getByRole("table").filter({ has: phase });

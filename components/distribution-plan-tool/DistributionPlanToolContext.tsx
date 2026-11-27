@@ -273,7 +273,12 @@ export default function DistributionPlanToolContextWrapper({
         }}
       >
         <div>{children}</div>
-        <RunOperations />
+        <RunOperations
+          distributionPlan={distributionPlan}
+          fetching={fetching}
+          isOpeningPlan={activeStep === DistributionPlanToolStep.CREATE_PLAN}
+          setState={setState}
+        />
       </DistributionPlanToolContext.Provider>
     </>
   );
