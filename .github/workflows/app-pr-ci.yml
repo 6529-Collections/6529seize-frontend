@@ -393,8 +393,9 @@ jobs:
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ${{ matrix.runner }}
     # Smoke can run composer, Collect and artwork docs sequentially. Allow that
-    # full workload, native and profile coverage to finish after server bootstrap.
-    timeout-minutes: ${{ (matrix.lane == 'playwright-smoke' || matrix.lane == 'playwright-native-competition' || startsWith(matrix.lane, 'playwright-critical-shell')) && 30 || 20 }}
+    # full workload and profile coverage to finish after server bootstrap. Native
+    # editor coverage also needs room for all cases, artifacts and container cleanup.
+    timeout-minutes: ${{ matrix.lane == 'playwright-native-competition' && 45 || (matrix.lane == 'playwright-smoke' || startsWith(matrix.lane, 'playwright-critical-shell')) && 30 || 20 }}
     permissions:
       contents: read
       issues: read

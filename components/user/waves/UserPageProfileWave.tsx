@@ -263,7 +263,10 @@ export default function UserPageProfileWave({
   const [isSetupOpen, setIsSetupOpen] = useState(false);
   const openProfileCurationSetup = () => {
     if (wavesWritesPaused) {
-      setToast({ message: t(locale, "wavesMove.paused"), type: "error" });
+      setToast({
+        message: t(locale, "wavesMove.newWavesClosed"),
+        type: "error",
+      });
       return;
     }
     setIsSetupOpen(true);
