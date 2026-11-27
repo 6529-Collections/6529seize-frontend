@@ -220,6 +220,8 @@ describe("effective App PR CI plan", () => {
     "helpers/gif-preview.helpers.ts",
     "tests/social/wave-switch-loading.spec.ts",
     "tests/social/wave-media-processing-sandbox.spec.ts",
+    "tests/social/wave-time-zone-sandbox.spec.ts",
+    "lib/display-time-zone/displayTimeZoneStore.ts",
     "components/waves/drops/wave-drops-all/hooks/useDeferredNewestDrops.ts",
     "components/waves/drops/wave-drops-all/index.tsx",
     "helpers/waves/drop-media-reconciliation.ts",
