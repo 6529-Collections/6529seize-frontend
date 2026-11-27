@@ -15,7 +15,6 @@ import {
   useContext,
   useEffect,
   useLayoutEffect,
-  useMemo,
   useRef,
   useState,
   type ReactNode,
@@ -28,10 +27,7 @@ import {
 import SpringNavigationSurface from "./SpringNavigationSurface";
 import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
-import {
-  MobilePageContext,
-  type MobilePageNavigation,
-} from "./MobilePageContext";
+import { MobilePageContext, useMobilePageState } from "./MobilePageContext";
 import { useWaveInformation } from "@/contexts/WaveInformationContext";
 import { useMobileFormHistory } from "./useMobileFormHistory";
 import IconButton from "@/components/utils/button/IconButton";
@@ -87,49 +83,14 @@ export default function MobileNavigationView({
 }) {
   const parentPage = useContext(MobilePageContext);
   const locale = useBrowserLocale();
-  const drafts = useRef(
-    new Map<string, () => { dirty: boolean; busy: boolean }>()
-  );
-  const [navigationStack, setNavigationState] = useState(
-    new Map<string, MobilePageNavigation>()
-  );
-  const navigation = [...navigationStack.values()].at(-1);
-  const [pendingLeave, setPendingLeave] = useState<(() => void) | null>(null);
-  const registerDraft = useCallback(
-    (id: string, read: () => { dirty: boolean; busy: boolean }) => {
-      drafts.current.set(id, read);
-      return () => {
-        drafts.current.delete(id);
-      };
-    },
-    []
-  );
-  const setNavigation = useCallback(
-    (id: string, value: MobilePageNavigation | null) => {
-      setNavigationState((current) => {
-        const next = new Map(current);
-        if (value) next.set(id, value);
-        else next.delete(id);
-        return next;
-      });
-    },
-    []
-  );
-  const pageContext = useMemo(
-    () => ({ registerDraft, setNavigation }),
-    [registerDraft, setNavigation]
-  );
-  const guard = useCallback(
-    (leave: () => void) => {
-      if (!guardDrafts) return false;
-      const states = [...drafts.current.values()].map((read) => read());
-      if (states.some((state) => state.busy)) return true;
-      if (!states.some((state) => state.dirty)) return false;
-      setPendingLeave(() => leave);
-      return true;
-    },
-    [guardDrafts]
-  );
+  const {
+    pageContext,
+    navigation,
+    navigationStack,
+    guard,
+    pendingLeave,
+    setPendingLeave,
+  } = useMobilePageState(guardDrafts);
   const registerBackGuard = useWaveInformation()?.registerBackGuard;
   useEffect(
     () =>

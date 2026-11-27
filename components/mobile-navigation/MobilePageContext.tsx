@@ -2,11 +2,14 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useLayoutEffect,
   useId,
+  useMemo,
   useRef,
+  useState,
   type ReactNode,
 } from "react";
 
@@ -26,6 +29,61 @@ export const MobilePageContext = createContext<{
     navigation: MobilePageNavigation | null
   ) => void;
 } | null>(null);
+
+/** Shared draft protection and nested titles for responsive phone surfaces. */
+export function useMobilePageState(guardDrafts = true) {
+  const drafts = useRef(
+    new Map<string, () => { dirty: boolean; busy: boolean }>()
+  );
+  const [navigationStack, setNavigationState] = useState(
+    new Map<string, MobilePageNavigation>()
+  );
+  const navigation = [...navigationStack.values()].at(-1);
+  const [pendingLeave, setPendingLeave] = useState<(() => void) | null>(null);
+  const registerDraft = useCallback(
+    (id: string, read: () => { dirty: boolean; busy: boolean }) => {
+      drafts.current.set(id, read);
+      return () => {
+        drafts.current.delete(id);
+      };
+    },
+    []
+  );
+  const setNavigation = useCallback(
+    (id: string, value: MobilePageNavigation | null) => {
+      setNavigationState((current) => {
+        const next = new Map(current);
+        if (value) next.set(id, value);
+        else next.delete(id);
+        return next;
+      });
+    },
+    []
+  );
+  const pageContext = useMemo(
+    () => ({ registerDraft, setNavigation }),
+    [registerDraft, setNavigation]
+  );
+  const guard = useCallback(
+    (leave: () => void) => {
+      if (!guardDrafts) return false;
+      const states = [...drafts.current.values()].map((read) => read());
+      if (states.some((state) => state.busy)) return true;
+      if (!states.some((state) => state.dirty)) return false;
+      setPendingLeave(() => leave);
+      return true;
+    },
+    [guardDrafts]
+  );
+  return {
+    pageContext,
+    navigation,
+    navigationStack,
+    guard,
+    pendingLeave,
+    setPendingLeave,
+  };
+}
 
 /** Forms report their draft; the containing phone view owns dismissal. */
 export function useMobilePageDraft(dirty: boolean, busy = false) {

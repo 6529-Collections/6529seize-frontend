@@ -40,6 +40,16 @@ import { WaveInformationPanelContext } from "../mobile/WaveInformationPanelConte
 import MobileWrapperDialogHeader from "@/components/mobile-wrapper-dialog/MobileWrapperDialogHeader";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import {
+  MobilePageContext,
+  useMobilePageState,
+} from "@/components/mobile-navigation/MobilePageContext";
+import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
+import useDialogKeyboard, {
+  DIALOG_KEYBOARD_VIEWPORT_STYLE,
+} from "@/hooks/useDialogKeyboard";
 
 export { SidebarTab } from "./BrainRightSidebarTypes";
 
@@ -249,6 +259,10 @@ const OverlaySidebar = ({
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const titleRef = useRef<HTMLElement>(null);
   const locale = useBrowserLocale();
+  const isPhone = useMediaQuery(PHONE_WAVES_LAYOUT_QUERY);
+  const keyboardViewportRef = useDialogKeyboard(isOpen && isPhone);
+  const { pageContext, navigation, guard, pendingLeave, setPendingLeave } =
+    useMobilePageState();
   const contentId = useId();
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [subview, setSubview] = useState<{
@@ -274,12 +288,25 @@ const OverlaySidebar = ({
     }),
     [subview, contentId, container]
   );
+  const title =
+    (isPhone ? navigation?.title : undefined) ?? subview?.title ?? panelLabel;
+  const requestBack = () => {
+    const leave =
+      (isPhone ? navigation?.back : undefined) ??
+      (subview ? panel.back : close);
+    if (isPhone && (navigation?.protectDrafts ?? true) && guard(leave)) return;
+    leave();
+  };
+  const requestClose = () => {
+    if (isPhone && guard(close)) return;
+    close();
+  };
 
   useEffect(() => {
-    if (!subview) return;
+    if (!subview && !isPhone) return;
     const frame = requestAnimationFrame(() => titleRef.current?.focus());
     return () => cancelAnimationFrame(frame);
-  }, [subview]);
+  }, [subview, isPhone, title]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -321,11 +348,11 @@ const OverlaySidebar = ({
             as={m.div}
             key="overlay-sidebar"
             open={true}
-            onClose={close}
-            aria-label={subview?.title ?? panelLabel}
+            onClose={requestClose}
+            aria-label={title}
             onKeyDown={(event) => {
               if (
-                subview &&
+                (subview || isPhone) &&
                 event.key === "Escape" &&
                 !event.defaultPrevented &&
                 event.target instanceof Element &&
@@ -334,7 +361,7 @@ const OverlaySidebar = ({
                 ) === event.currentTarget
               ) {
                 event.preventDefault();
-                panel.back();
+                requestBack();
               }
             }}
             className="tailwind-scope tw-relative tw-z-[100]"
@@ -345,7 +372,7 @@ const OverlaySidebar = ({
             <m.div
               data-testid="brain-right-sidebar-backdrop"
               aria-hidden="true"
-              onClick={close}
+              onClick={requestClose}
               className="tw-fixed tw-inset-0 tw-z-[90] tw-bg-gray-700/60 tw-will-change-[opacity]"
               initial={prefersReducedMotion ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -362,7 +389,9 @@ const OverlaySidebar = ({
               }
             />
             <m.div
-              className="tw-fixed tw-inset-y-0 tw-right-0 tw-z-[100] tw-w-[20.5rem] tw-max-w-full tw-will-change-transform"
+              ref={keyboardViewportRef}
+              {...(isPhone ? { style: DIALOG_KEYBOARD_VIEWPORT_STYLE } : {})}
+              className="tw-fixed tw-inset-y-0 tw-right-0 tw-z-[100] tw-w-full tw-max-w-full tw-will-change-transform md:tw-w-[20.5rem]"
               initial={prefersReducedMotion ? false : { x: "100%" }}
               animate={{ x: 0 }}
               exit={{
@@ -373,13 +402,14 @@ const OverlaySidebar = ({
             >
               <DialogPanel
                 id={BRAIN_RIGHT_SIDEBAR_ID}
+                data-testid="brain-right-sidebar-panel"
                 aria-label={panelLabel}
-                className="tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-overflow-visible tw-border-y-0 tw-border-l tw-border-r-0 tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-shadow-2xl"
+                className="tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-overflow-visible tw-border-0 tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-shadow-2xl md:tw-border-l"
               >
-                <div className="tw-absolute -tw-left-5 tw-top-2 tw-z-[110]">
+                <div className="tw-absolute -tw-left-5 tw-top-2 tw-z-[110] tw-hidden md:tw-block">
                   <IconButton
                     type="button"
-                    onClick={close}
+                    onClick={requestClose}
                     ref={closeButtonRef}
                     data-autofocus
                     layout="sidebar-edge"
@@ -394,32 +424,50 @@ const OverlaySidebar = ({
                     />
                   </IconButton>
                 </div>
-                <WaveInformationPanelContext.Provider value={panel}>
-                  <div
-                    hidden={subview !== null}
-                    className="tw-h-full tw-min-h-0"
-                  >
-                    {children}
-                  </div>
-                  {subview && (
-                    <MobileWrapperDialogHeader
-                      title={subview.title}
-                      titleRef={titleRef}
-                      onBack={panel.back}
-                      onClose={close}
-                      showDesktopCloseButton={false}
-                      className="tw-pt-4"
-                      backLabel={t(locale, "common.back")}
-                      closeLabel={t(locale, "common.close")}
+                <MobilePageContext.Provider
+                  value={isPhone ? pageContext : null}
+                >
+                  <WaveInformationPanelContext.Provider value={panel}>
+                    {(subview !== null || isPhone) && (
+                      <MobileWrapperDialogHeader
+                        title={title}
+                        titleRef={titleRef}
+                        onBack={requestBack}
+                        onClose={requestClose}
+                        showDesktopCloseButton={false}
+                        className="tw-pt-[max(1rem,env(safe-area-inset-top))]"
+                        backLabel={t(locale, "common.back")}
+                        closeLabel={t(locale, "common.close")}
+                      />
+                    )}
+                    <div
+                      hidden={subview !== null}
+                      className="tw-h-full tw-min-h-0"
+                    >
+                      {children}
+                    </div>
+                    <div
+                      id={contentId}
+                      ref={setContainer}
+                      hidden={!subview}
+                      className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-pb-6 has-[[data-wave-access-dialog]]:tw-flex has-[[data-wave-access-dialog]]:tw-flex-col has-[[data-wave-access-dialog]]:tw-overflow-hidden has-[[data-wave-access-dialog]]:tw-pb-0"
                     />
-                  )}
-                  <div
-                    id={contentId}
-                    ref={setContainer}
-                    hidden={!subview}
-                    className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-pb-6 has-[[data-wave-access-dialog]]:tw-flex has-[[data-wave-access-dialog]]:tw-flex-col has-[[data-wave-access-dialog]]:tw-overflow-hidden has-[[data-wave-access-dialog]]:tw-pb-0"
-                  />
-                </WaveInformationPanelContext.Provider>
+                  </WaveInformationPanelContext.Provider>
+                </MobilePageContext.Provider>
+                <MobileWrapperConfirmationDialog
+                  isOpen={pendingLeave !== null}
+                  title={t(locale, "waves.information.discardTitle")}
+                  message={t(locale, "waves.information.discardMessage")}
+                  confirmText={t(locale, "waves.create.dialog.discardConfirm")}
+                  confirmVariant="destructive"
+                  onClose={() => setPendingLeave(null)}
+                  onConfirm={() => {
+                    const leave = pendingLeave;
+                    setPendingLeave(null);
+                    leave?.();
+                  }}
+                  zIndexClassName="tw-z-[11000]"
+                />
               </DialogPanel>
             </m.div>
           </Dialog>

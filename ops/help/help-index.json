@@ -3700,6 +3700,7 @@
         "On mobile, selecting the wave name opens a dismissible information panel containing About, REP and Configuration. About includes the pinned drop.",
         "On phones the information panel fills the screen and slides in from the right. Use the Back chevron, swipe right, press Escape, or use device Back to return to the original decision, tab, curation and scroll position. The underlying view stays mounted. Vertical gestures scroll the information content; short or cancelled horizontal swipes keep it open. There is no Close icon, drag handle or outside backdrop.",
         "On tablet-sized layouts, the overlay side panel also keeps these editors inside the panel. Back or Escape returns to the selected information tab.",
+        "An open side panel fills the viewport when the browser becomes narrower than 768 px. Its selected information tab and access-editor draft stay in place; widening the browser restores the side-panel width.",
         "Each row in Configuration's Curations section shows the assigned group's criteria summary and a member count. Select the count to open the full criteria and current members in Network.",
         "Selecting a section switches information for the active wave without navigating away from the thread.",
         "On phones the header avatar and name open the same details view. The header score is display-only; tap Score in About statistics for its breakdown and Learn more. The Joined count opens a Members page.",

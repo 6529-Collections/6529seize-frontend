@@ -32,6 +32,7 @@ import type { CreateWaveInlineGroupBuilderState } from "@/components/waves/creat
 
 const GROUP_ASSIGNMENT_PANEL_CLASS_NAME =
   "tw-relative tw-flex tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/30 tw-p-4 tw-shadow-none sm:tw-p-5";
+const WAVE_ACCESS_VARIANT = "wave-access";
 
 type GroupAssignmentPanelStartMode = "actions" | "existing" | "criteria";
 
@@ -136,7 +137,9 @@ function GroupAssignmentCriteriaPanel({
 }) {
   const locale = useBrowserLocale();
   // This view belongs to the current edit session, not the criteria draft.
-  const [showMobileCategories, setShowMobileCategories] = useState(true);
+  const [showMobileCategories, setShowMobileCategories] = useState(
+    variant !== WAVE_ACCESS_VARIANT || mobileNavigation
+  );
   const {
     addExcludedIdentity,
     addIdentity,
@@ -196,7 +199,7 @@ function GroupAssignmentCriteriaPanel({
       {view !== null &&
         (view === "identities" ? (
           <>
-            {(variant === "wave-access"
+            {(variant === WAVE_ACCESS_VARIANT
               ? !mobileNavigation
               : mobileNavigation) && (
               <h3 className="tw-mb-4 tw-mt-0 tw-text-base tw-font-semibold tw-text-iron-100">
@@ -474,7 +477,7 @@ function SharedGroupAssignmentPanel({
     quiet || presentation === "embedded"
       ? "tw-relative tw-flex tw-min-w-0 tw-flex-col tw-gap-4"
       : GROUP_ASSIGNMENT_PANEL_CLASS_NAME;
-  if (variant === "wave-access" && mobileNavigation) {
+  if (variant === WAVE_ACCESS_VARIANT && mobileNavigation) {
     panelClassName +=
       " tw-group/wave-access has-[[data-wave-access-identities]]:tw-border-0 has-[[data-wave-access-identities]]:tw-bg-transparent has-[[data-wave-access-identities]]:tw-p-0";
   }
@@ -491,7 +494,7 @@ function SharedGroupAssignmentPanel({
         <div className="tw-relative tw-flex tw-flex-col tw-gap-4">
           {showHeader && (
             <div
-              className={`tw-flex tw-min-w-0 tw-flex-col tw-gap-3 ${variant === "wave-access" && mobileNavigation ? "group-has-[[data-wave-access-identities]]/wave-access:tw-hidden" : ""} ${isEditingWaveAccess ? "tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-pb-4" : "lg:tw-flex-row lg:tw-items-start lg:tw-justify-between"}`}
+              className={`tw-flex tw-min-w-0 tw-flex-col tw-gap-3 ${variant === WAVE_ACCESS_VARIANT && mobileNavigation ? "group-has-[[data-wave-access-identities]]/wave-access:tw-hidden" : ""} ${isEditingWaveAccess ? "tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-pb-4" : "lg:tw-flex-row lg:tw-items-start lg:tw-justify-between"}`}
             >
               <CreateWaveInlineGroupHeader
                 currentGroupLabel={currentGroupLabel}
