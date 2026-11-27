@@ -22,6 +22,7 @@ import {
   RESPONSE_TIMEOUT_MS,
 } from "../support/routeReadiness";
 import { MEMES_MINT_TITLE_PATTERN } from "../support/mintTitle";
+import { readMintMetadataGeometry } from "./mintMetadataGeometry";
 
 async function gotoReady(page: Page, path: string) {
   await gotoDocumentWithTransientRetry(page, path);
@@ -303,6 +304,61 @@ function isProductionBaseURL(baseURL?: string) {
 }
 
 test.describe("Media, mint, and detail read-only coverage @surface @medium @large @readonly", () => {
+  test("mint geometry uses one layout snapshot and still exposes real overlap", async ({
+    page,
+  }) => {
+    await page.setContent(`
+      <main style="padding:20px">
+        <section id="metadata">
+          <div style="display:flex;gap:24px">
+            <div id="date"><div>Mint date</div><div>June 2022</div></div>
+            <div><div>Mint price</div><div>0.06529 ETH</div></div>
+          </div>
+          <a href="/distribution-plan" style="display:block;margin-top:20px">Distribution Plan</a>
+          <div style="margin-top:32px">Edition size</div>
+        </section>
+      </main>
+    `);
+    const locators = {
+      date: page.getByText("Mint date", { exact: true }),
+      price: page.getByText("Mint price", { exact: true }),
+      edition: page.getByText("Edition size", { exact: true }),
+      links: page.getByRole("link", { name: "Distribution Plan", exact: true }),
+    };
+    await page
+      .getByText("Mint date", { exact: true })
+      .locator("..")
+      .evaluate((element) => {
+        const originalBounds = element.getBoundingClientRect.bind(element);
+        element.getBoundingClientRect = () => {
+          const result = originalBounds();
+          // A layout shift between separate browser commands used to produce
+          // impossible relative coordinates. One synchronous read finishes first.
+          queueMicrotask(() => {
+            element.closest<HTMLElement>("section")!.style.marginTop = "400px";
+          });
+          return result;
+        };
+      });
+    const beforeShift = await readMintMetadataGeometry(locators);
+    const afterShift = await readMintMetadataGeometry(locators);
+    expect(afterShift.date.y).toBe(beforeShift.date.y + 400);
+    for (const layout of [beforeShift, afterShift]) {
+      expect(layout.date.y).toBe(layout.price.y);
+      expect(layout.valueOffset).toBe(0);
+      expect(layout.links[0]!.y + layout.links[0]!.height).toBeLessThan(
+        layout.edition.y
+      );
+    }
+    await locators.links.evaluate((element) => {
+      (element as HTMLElement).style.transform = "translateY(100px)";
+    });
+    const overlap = await readMintMetadataGeometry(locators);
+    expect(overlap.links[0]!.y + overlap.links[0]!.height).toBeGreaterThan(
+      overlap.edition.y
+    );
+  });
+
   for (const card of [
     {
       name: "Memes",
@@ -335,6 +391,10 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
       const date = details.getByText("Mint date", { exact: true });
       const price = details.getByText(card.priceLabel, { exact: true });
       const edition = details.getByText(card.editionLabel, { exact: true });
+      // The document shell may be ready before the client detail data.
+      await expect(date).toHaveCount(1, { timeout: RESPONSE_TIMEOUT_MS });
+      await expect(price).toHaveCount(1, { timeout: RESPONSE_TIMEOUT_MS });
+      await page.evaluate(() => document.fonts.ready.then(() => undefined));
       for (const width of [390, 767, 768, 1024, 1600]) {
         await page.setViewportSize({ width, height: 1000 });
         await expect(date).toHaveCount(1);
@@ -352,60 +412,51 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
         ]) {
           await expect(details.getByText(label, { exact: true })).toBeVisible();
         }
-        const dateBounds = (await details
-          .getByText("Mint date", { exact: true })
-          .locator("..")
-          .boundingBox())!;
-        const priceBounds = (await details
-          .getByText(card.priceLabel, { exact: true })
-          .locator("..")
-          .boundingBox())!;
-        const editionBounds = (await edition.boundingBox())!;
-        if (width >= 768) {
-          expect(dateBounds.y).toBeCloseTo(priceBounds.y, 0);
-          const valueOffset = await date.evaluate((element, priceLabel) => {
-            const section = element.closest("section");
-            const price = Array.from(
-              section?.querySelectorAll("div") ?? []
-            ).find((candidate) => candidate.textContent === priceLabel);
-            const dateValue = element.nextElementSibling;
-            const priceValue = price?.nextElementSibling;
-            if (!dateValue || !priceValue)
-              throw new Error("Both mint values must remain available");
-            return (
-              dateValue.getBoundingClientRect().top -
-              priceValue.getBoundingClientRect().top
-            );
-          }, card.priceLabel);
-          expect(valueOffset).toBeCloseTo(0, 0);
-          expect(dateBounds.x + dateBounds.width).toBeLessThanOrEqual(
-            priceBounds.x
-          );
-          expect(
-            Math.max(
-              dateBounds.y + dateBounds.height,
-              priceBounds.y + priceBounds.height
-            )
-          ).toBeLessThan(editionBounds.y);
-          for (const link of await details
-            .getByRole("link", {
+        // Resizing and async trading content can shift this entire block.
+        // Compare one layout snapshot, and wait for the responsive layout's
+        // original contract rather than mixing coordinates from different frames.
+        await expect(async () => {
+          const {
+            date: dateBounds,
+            price: priceBounds,
+            edition: editionBounds,
+            valueOffset,
+            links,
+          } = await readMintMetadataGeometry({
+            date,
+            price,
+            edition,
+            links: details.getByRole("link", {
               name: /^(Distribution Plan|Main Stage Submission)$/,
-            })
-            .all()) {
-            const bounds = (await link.boundingBox())!;
-            expect(bounds.y).toBeGreaterThanOrEqual(
-              priceBounds.y + priceBounds.height
+            }),
+          });
+          if (width >= 768) {
+            expect(dateBounds.y).toBeCloseTo(priceBounds.y, 0);
+            expect(valueOffset).toBeCloseTo(0, 0);
+            expect(dateBounds.x + dateBounds.width).toBeLessThanOrEqual(
+              priceBounds.x
             );
-            expect(bounds.y + bounds.height).toBeLessThan(editionBounds.y);
+            expect(
+              Math.max(
+                dateBounds.y + dateBounds.height,
+                priceBounds.y + priceBounds.height
+              )
+            ).toBeLessThan(editionBounds.y);
+            for (const bounds of links) {
+              expect(bounds.y).toBeGreaterThanOrEqual(
+                priceBounds.y + priceBounds.height
+              );
+              expect(bounds.y + bounds.height).toBeLessThan(editionBounds.y);
+            }
+          } else {
+            expect(dateBounds.y + dateBounds.height).toBeLessThan(
+              editionBounds.y
+            );
+            expect(priceBounds.y).toBeGreaterThan(
+              editionBounds.y + editionBounds.height
+            );
           }
-        } else {
-          expect(dateBounds.y + dateBounds.height).toBeLessThan(
-            editionBounds.y
-          );
-          expect(priceBounds.y).toBeGreaterThan(
-            editionBounds.y + editionBounds.height
-          );
-        }
+        }).toPass({ timeout: 5000 });
         await expectNoHorizontalOverflow(page);
       }
       await details.screenshot({
@@ -729,112 +780,121 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     ).toBeVisible();
   });
 
-  test("keeps Meme Collect labels complete and actions clear of the desktop rail", async ({
-    page,
-    context,
-    baseURL,
-  }, info) => {
-    // Keep the consent overlay from covering the sticky action targets.
-    await context.addCookies([
-      { name: "essential-cookies-consent", value: "true", url: baseURL! },
-      { name: "performance-cookies-consent", value: "false", url: baseURL! },
-    ]);
-    await gotoReady(page, "/the-memes/1");
-    const panel = page.getByTestId("collect-detail-panel");
-    const sticky = page.getByTestId("collect-sticky-actions");
-    const collect = panel.getByRole("button", { name: /^Collect [0-9]/ });
-    const stickyCollect = page
-      .getByTestId("collect-sticky-actions")
-      .locator('button[type="submit"]');
-    for (const width of [
-      320, 359, 360, 375, 390, 399, 400, 430, 479, 480, 639, 640, 767, 768,
-      1023, 1024, 1052, 1088, 1100, 1200, 1280, 1440, 1680,
-    ]) {
-      await page.setViewportSize({ width, height: 900 });
-      await expectTradingPanelLayout(page);
-      await expectNoHorizontalOverflow(page);
-      await expect(collect).toHaveCSS("background-color", "rgb(63, 105, 252)");
-      await expect(collect).toHaveCSS("opacity", "0.5");
-      await expect(stickyCollect).toBeDisabled();
-      for (const property of ["background-color", "color", "opacity"]) {
-        await expect(stickyCollect).toHaveCSS(
-          property,
-          await collect.evaluate(
-            (element, name) => getComputedStyle(element).getPropertyValue(name),
-            property
-          )
+  // Retain every width and both sticky/desktop breakpoint transitions without
+  // putting hundreds of browser assertions in a single 60-second test.
+  for (const widths of [
+    [320, 359, 360, 375, 390, 399, 400, 430],
+    [479, 480, 639, 640, 767, 768],
+    [1023, 1024, 1052, 1088, 1100, 1200, 1280, 1440, 1680],
+  ]) {
+    test(`keeps Meme Collect labels complete and actions clear of the desktop rail (${widths[0]}-${widths.at(-1)}px)`, async ({
+      page,
+      context,
+      baseURL,
+    }, info) => {
+      // Keep the consent overlay from covering the sticky action targets.
+      await context.addCookies([
+        { name: "essential-cookies-consent", value: "true", url: baseURL! },
+        { name: "performance-cookies-consent", value: "false", url: baseURL! },
+      ]);
+      await gotoReady(page, "/the-memes/1");
+      const panel = page.getByTestId("collect-detail-panel");
+      const sticky = page.getByTestId("collect-sticky-actions");
+      const collect = panel.getByRole("button", { name: /^Collect [0-9]/ });
+      const stickyCollect = page
+        .getByTestId("collect-sticky-actions")
+        .locator('button[type="submit"]');
+      for (const width of widths) {
+        await page.setViewportSize({ width, height: 900 });
+        await expectTradingPanelLayout(page);
+        await expectNoHorizontalOverflow(page);
+        await expect(collect).toHaveCSS(
+          "background-color",
+          "rgb(63, 105, 252)"
         );
+        await expect(collect).toHaveCSS("opacity", "0.5");
+        await expect(stickyCollect).toBeDisabled();
+        for (const property of ["background-color", "color", "opacity"]) {
+          await expect(stickyCollect).toHaveCSS(
+            property,
+            await collect.evaluate(
+              (element, name) =>
+                getComputedStyle(element).getPropertyValue(name),
+              property
+            )
+          );
+        }
+        const guidance = page
+          .getByTestId("collect-detail-panel")
+          .locator("[data-collect-connection-header] span");
+        await expect(guidance).toHaveCSS("text-wrap-style", "pretty");
+        if (width < 1024) {
+          await page
+            .getByRole("navigation", { name: "Meme page sections" })
+            .evaluate((element) => element.scrollIntoView({ block: "start" }));
+          await expect(sticky).toBeVisible();
+          const stickyOffer = sticky.getByRole("button", {
+            name: /^Make an offer:/,
+          });
+          await expectFullCollectLabel(stickyCollect);
+          // Measure both controls in one frame while the sticky bar slides in.
+          const stickyRow = await sticky.evaluate((element) => {
+            const collectBox = element
+              .querySelector('button[type="submit"]')!
+              .getBoundingClientRect();
+            const offerBox = element
+              .querySelector('button[type="button"]')!
+              .getBoundingClientRect();
+            return {
+              yOffset: offerBox.y - collectBox.y,
+              gap: offerBox.x - collectBox.right,
+              offerWidth: offerBox.width,
+            };
+          });
+          expect(stickyRow.yOffset).toBeCloseTo(0, 0);
+          expect(stickyRow.gap).toBeCloseTo(8, 0);
+          expect(stickyRow.offerWidth).toBeGreaterThanOrEqual(44);
+          await expect(stickyOffer).toHaveCSS("overflow", "hidden");
+          await expect(stickyOffer).toHaveCSS("text-overflow", "ellipsis");
+          const sidebar = page.getByLabel("Primary sidebar", { exact: true });
+          const railRight = (await sidebar.isVisible())
+            ? (await sidebar.boundingBox())!.x +
+              (await sidebar.boundingBox())!.width
+            : 0;
+          await expect
+            .poll(async () => (await sticky.boundingBox())!.x)
+            .toBeCloseTo(railRight, 0);
+          expect((await sticky.boundingBox())!.width).toBeCloseTo(
+            width - railRight,
+            0
+          );
+        } else {
+          await expect(sticky).toBeHidden();
+        }
+        if (width === 360 || width === 1024) {
+          await panel.screenshot({
+            path: info.outputPath(`trading-panel-${width}.png`),
+          });
+        }
+        if (width === 390) {
+          await expectDetailActionHover(
+            page,
+            sticky.getByRole("button", { name: /^Make an offer:/ })
+          );
+        }
+        if (width === 1024) {
+          await expectDetailActionHover(
+            page,
+            panel.getByRole("button", { name: /^Make an offer:/ })
+          );
+          await expectDetailActionHover(
+            page,
+            panel.getByRole("button", { name: /^More trading actions for/ })
+          );
+        }
       }
-      const guidance = page
-        .getByTestId("collect-detail-panel")
-        .locator("[data-collect-connection-header] span");
-      await expect(guidance).toHaveCSS("text-wrap-style", "pretty");
-      if (width < 1024) {
-        await page
-          .getByRole("navigation", { name: "Meme page sections" })
-          .evaluate((element) => element.scrollIntoView({ block: "start" }));
-        await expect(sticky).toBeVisible();
-        const stickyOffer = sticky.getByRole("button", {
-          name: /^Make an offer:/,
-        });
-        await expectFullCollectLabel(stickyCollect);
-        // Measure both controls in one frame while the sticky bar slides in.
-        const stickyRow = await sticky.evaluate((element) => {
-          const collectBox = element
-            .querySelector('button[type="submit"]')!
-            .getBoundingClientRect();
-          const offerBox = element
-            .querySelector('button[type="button"]')!
-            .getBoundingClientRect();
-          return {
-            yOffset: offerBox.y - collectBox.y,
-            gap: offerBox.x - collectBox.right,
-            offerWidth: offerBox.width,
-          };
-        });
-        expect(stickyRow.yOffset).toBeCloseTo(0, 0);
-        expect(stickyRow.gap).toBeCloseTo(8, 0);
-        expect(stickyRow.offerWidth).toBeGreaterThanOrEqual(44);
-        await expect(stickyOffer).toHaveCSS("overflow", "hidden");
-        await expect(stickyOffer).toHaveCSS("text-overflow", "ellipsis");
-        const sidebar = page.getByLabel("Primary sidebar", { exact: true });
-        const railRight = (await sidebar.isVisible())
-          ? (await sidebar.boundingBox())!.x +
-            (await sidebar.boundingBox())!.width
-          : 0;
-        await expect
-          .poll(async () => (await sticky.boundingBox())!.x)
-          .toBeCloseTo(railRight, 0);
-        expect((await sticky.boundingBox())!.width).toBeCloseTo(
-          width - railRight,
-          0
-        );
-      } else {
-        await expect(sticky).toBeHidden();
-      }
-      if (width === 360 || width === 1024) {
-        await panel.screenshot({
-          path: info.outputPath(`trading-panel-${width}.png`),
-        });
-      }
-      if (width === 390) {
-        await expectDetailActionHover(
-          page,
-          sticky.getByRole("button", { name: /^Make an offer:/ })
-        );
-      }
-      if (width === 1024) {
-        await expectDetailActionHover(
-          page,
-          panel.getByRole("button", { name: /^Make an offer:/ })
-        );
-        await expectDetailActionHover(
-          page,
-          panel.getByRole("button", { name: /^More trading actions for/ })
-        );
-      }
-    }
-  });
+    });
+  }
 
   for (const listed of [true, false]) {
     test(`keeps one Meme trading placeholder throughout initial loading (${listed ? "listed" : "unlisted"})`, async ({
@@ -887,7 +947,7 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
         const loading = page
           .getByTestId("collect-detail-panel")
           .locator("[data-collect-detail-loading]");
-        await expect(loading).toBeVisible();
+        await expect(loading).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
         await page.evaluate(() => document.fonts.ready);
         const viewport = page.viewportSize()!;
         const widths = [320, 360, 375, 390, 430, 768, 1023, 1024, 1440];
@@ -952,8 +1012,13 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
           path: info.outputPath("trading-loading.png"),
         });
         releaseAsset();
+        // Releasing the asset starts a real response followed by dependent
+        // requests. Give that data phase the shared response budget, not the
+        // default five-second DOM-assertion deadline.
         await expect
-          .poll(() => ordersRequested && capabilitiesRequested)
+          .poll(() => ordersRequested && capabilitiesRequested, {
+            timeout: RESPONSE_TIMEOUT_MS,
+          })
           .toBe(true);
         await expectStableLoading();
         const ordersResponse = page.waitForResponse(

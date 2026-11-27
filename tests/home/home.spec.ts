@@ -2265,7 +2265,7 @@ test("collapsed sidebar fits full rows when a desktop update appears @smoke @med
     const account = page
       .getByLabel("Primary sidebar", { exact: true })
       .locator("[data-sidebar-account]");
-    await expect(share).toBeVisible();
+    await expect(share).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     await expect(account).toHaveAttribute("data-sidebar-account", "signed-out");
     await expect(
       page
@@ -2275,7 +2275,11 @@ test("collapsed sidebar fits full rows when a desktop update appears @smoke @med
     await expect(about).toHaveCSS("height", "46px");
     const accountBeforeUpdate = await account.boundingBox();
 
+    const initialVersionResponse = page.waitForResponse("**/api/version", {
+      timeout: RESPONSE_TIMEOUT_MS,
+    });
     releaseVersion();
+    expect((await initialVersionResponse).ok()).toBe(true);
     await expect(update).toBeVisible();
     await expect
       .poll(async () => (await about.boundingBox())!.height)
@@ -2303,7 +2307,13 @@ test("collapsed sidebar fits full rows when a desktop update appears @smoke @med
     await expect(about).toBeInViewport({ ratio: 1 });
 
     await page.setViewportSize({ width: 1440, height: 600 });
+    // A full document navigation restarts the provider. SSR sidebar visibility
+    // is not evidence that its new version poll has completed.
+    const nextVersionResponse = page.waitForResponse("**/api/version", {
+      timeout: RESPONSE_TIMEOUT_MS,
+    });
     await page.goto("/notifications", { waitUntil: "domcontentloaded" });
+    expect((await nextVersionResponse).ok()).toBe(true);
     await expect(share).toHaveCount(0);
     await expect(update).toBeVisible();
     await expect(about).toHaveCSS("height", "46px");

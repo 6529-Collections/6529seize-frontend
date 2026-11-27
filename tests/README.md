@@ -109,6 +109,22 @@ The initial Coming Up card/credit assertions use that data-response budget too;
 cached-return, delayed-response recovery and interaction assertions retain
 their existing deadlines.
 
+Mint metadata layout checks read the date, price, values, statistics and links
+in one browser task. Async trading content and viewport changes can move the
+whole block between separate bounding-box requests; mixing those coordinates
+is not evidence of overlap. The checks still require the original desktop and
+phone ordering at all five widths. A synthetic regression schedules a layout
+shift between browser tasks and separately proves real link overlap remains
+detectable. Initial client detail data uses the existing response budget;
+geometry assertions keep their five-second convergence budget.
+
+The sidebar update layout scenario waits for its controlled version response
+after each full document navigation, before checking Update and the unchanged
+row/account geometry. An SSR sidebar alone does not mean the new version
+provider has hydrated. Messages keyboard coverage likewise establishes the
+initial selected tab and lazy panel, then sends real keyboard input to the
+verified focus target while continuing to assert both focus and selection.
+
 The profile pages sandbox also checks Collected personal actions against its
 isolated API. Anonymous and visitor profiles omit the entire action row. Owners
 retain action alignment, browser/native Back, filter and focus restoration;
