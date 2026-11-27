@@ -16268,14 +16268,22 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           .getByRole("link", { name: "New decision", exact: true })
           .locator(":scope > span")
       ).toHaveCSS("font-weight", "500");
-      const [curationAction, decisionAction] = await Promise.all([
-        newCuration.boundingBox(),
-        newDecision.boundingBox(),
-      ]);
-      expect(curationAction!.x + curationAction!.width).toBeCloseTo(
-        decisionAction!.x + decisionAction!.width,
-        0
-      );
+      await expect
+        .poll(
+          () =>
+            newCuration.or(newDecision).evaluateAll((actions) => {
+              const [first, second] = actions;
+              if (!first || !second || actions.length !== 2) {
+                return Number.POSITIVE_INFINITY;
+              }
+              return (
+                first.getBoundingClientRect().right -
+                second.getBoundingClientRect().right
+              );
+            }),
+          { message: "Curation and Decision actions should align on the right" }
+        )
+        .toBeCloseTo(0, 0);
       await page.screenshot({
         path: testInfo.outputPath(`phone-decisions-empty-${surface}.png`),
         animations: "disabled",
