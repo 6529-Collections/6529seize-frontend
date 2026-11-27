@@ -2358,8 +2358,8 @@
       ],
       "facts": [
         "Profiles, handles, ratings, consolidations and delegations move from 6529.io to the 6529 Network. A notice above the profile tabs says when.",
-        "From the freeze (Saturday 28 November 2026 00:00 UTC) you can't change them for about 24 hours. Edit profile, Add statement, statement removal, Set primary, Add wallet, Rep and NIC rating, group bulk ratings, Assign Proxy and new Allocate Rep or Allocate NIC proxy actions, and Create profile are paused or hidden, and a request sent anyway shows Paused for the move to the 6529 Network.",
-        "From the switch-on (Sunday 29 November 2026 00:00 UTC) you change them on the 6529 Network, through this site.",
+        "From the freeze (Sunday 29 November 2026 00:00 UTC) you can't change them for about 24 hours. Edit profile, Add statement, statement removal, Set primary, Add wallet, Rep and NIC rating, group bulk ratings, Assign Proxy and new Allocate Rep or Allocate NIC proxy actions, and Create profile are paused or hidden, and a request sent anyway shows Paused for the move to the 6529 Network.",
+        "From the switch-on (Monday 30 November 2026 00:00 UTC) you change them on the 6529 Network, through this site.",
         "Wave and drop ratings, follows, artwork alerts and profile preferences are not affected.",
         "From the freeze, new delegations and consolidations on NFTDelegation don't count for 6529. Delegations and consolidations as of the freeze moved to the 6529 Network. The Delegation Center under /safe-collecting says so on every page.",
         "NextGen mints still read delegations from NFTDelegation, not from the 6529 Network."

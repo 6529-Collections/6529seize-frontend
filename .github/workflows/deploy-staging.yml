@@ -63,12 +63,12 @@ jobs:
       NEXT_PUBLIC_E2EE_DM_ENABLED: "true"
       NEXT_PUBLIC_E2EE_POLLS_ENABLED: "true"
       # Votes, entries and wave settings move to the 6529 Network (lib/waves-move/schedule.ts).
-      NEXT_PUBLIC_WAVES_FREEZE_AT: "2026-11-29T00:00:00Z"
-      NEXT_PUBLIC_WAVES_SWITCH_ON_AT: "2026-11-30T00:00:00Z"
+      NEXT_PUBLIC_WAVES_FREEZE_AT: "2026-11-30T00:00:00Z"
+      NEXT_PUBLIC_WAVES_SWITCH_ON_AT: "2026-12-01T00:00:00Z"
       # Identities move to the 6529 Network (lib/identity-move/schedule.ts).
       # Staging never writes to the live chain: no chain flags, gateway or
       # network id here.
-      NEXT_PUBLIC_IDENTITY_FREEZE_AT: "2026-11-28T00:00:00Z"
+      NEXT_PUBLIC_IDENTITY_FREEZE_AT: "2026-11-29T00:00:00Z"
       # Gap-only chat sync (WAVES-PLAN 0.7/0.8): on in staging, off in production.
       NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC: "true"
       # App-socket PING keepalive (needs API #2354): on in staging, off in production.
