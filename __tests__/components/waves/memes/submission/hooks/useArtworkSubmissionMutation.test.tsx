@@ -526,7 +526,7 @@ describe("useArtworkSubmissionMutation on the 6529 Network", () => {
         <AppToastContent toast={setToast.mock.calls[0][0]} />
       ).container;
       expect(toast).toHaveTextContent(
-        "This wallet has no identity on the 6529 Network yet. Set one up on your identity page."
+        "This wallet has no identity on the 6529 Network yet. Create one on your identity page."
       );
       expect(
         within(toast).getByRole("link", { name: "your identity page" })

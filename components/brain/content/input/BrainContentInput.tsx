@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback } from "react";
+import { WavesMoveScope } from "@/components/waves-move/WavesMoveScope";
 import { useWaveData } from "@/hooks/useWaveData";
 import useCapacitor from "@/hooks/useCapacitor";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
@@ -67,17 +68,20 @@ const BrainContentInput: React.FC<BrainContentInputProps> = ({
   return (
     <div className={composerSurfaceClassName}>
       <div>
-        <PrivilegedDropCreator
-          key={wave.id}
-          wave={wave}
-          activeDrop={activeDrop}
-          onCancelReplyQuote={onCancelReplyQuote}
-          onAllDropsAdded={onCancelReplyQuote}
-          onDropAddedToQueue={onCancelReplyQuote}
-          dropId={null}
-          fixedDropMode={DropMode.CHAT}
-          focusOnInitialActiveDrop
-        />
+        {/* The reply's wave scopes the move's pause and lines in the composer. */}
+        <WavesMoveScope wave={wave} waveId={wave.id}>
+          <PrivilegedDropCreator
+            key={wave.id}
+            wave={wave}
+            activeDrop={activeDrop}
+            onCancelReplyQuote={onCancelReplyQuote}
+            onAllDropsAdded={onCancelReplyQuote}
+            onDropAddedToQueue={onCancelReplyQuote}
+            dropId={null}
+            fixedDropMode={DropMode.CHAT}
+            focusOnInitialActiveDrop
+          />
+        </WavesMoveScope>
       </div>
     </div>
   );

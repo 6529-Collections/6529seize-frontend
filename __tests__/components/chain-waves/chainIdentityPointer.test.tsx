@@ -52,7 +52,7 @@ describe("chainIdentityPointer", () => {
       <p>{chainIdentityPointer(DEFAULT_LOCALE, await noIdentityError())}</p>
     );
     expect(container).toHaveTextContent(
-      "This wallet has no identity on the 6529 Network yet. Set one up on your identity page."
+      "This wallet has no identity on the 6529 Network yet. Create one on your identity page."
     );
     expect(
       screen.getByRole("link", { name: "your identity page" })

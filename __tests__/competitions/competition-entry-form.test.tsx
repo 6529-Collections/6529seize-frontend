@@ -412,7 +412,7 @@ describe("on the 6529 Network", () => {
       render(<CompetitionEntryForm onClose={jest.fn()} />);
       fireEvent.click(screen.getByRole("button", { name: "Submit an entry" }));
       expect(await screen.findByRole("alert")).toHaveTextContent(
-        "This wallet has no identity on the 6529 Network yet. Set one up on your identity page."
+        "This wallet has no identity on the 6529 Network yet. Create one on your identity page."
       );
       expect(
         screen.getByRole("link", { name: "your identity page" })

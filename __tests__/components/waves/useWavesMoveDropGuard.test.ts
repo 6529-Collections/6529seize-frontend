@@ -10,9 +10,11 @@ let mockPausedFor: ((kind?: string) => boolean) | null = null;
 const mockSetToast = jest.fn();
 const mockQueryClient = {};
 
+let mockMovedToChain = false;
 jest.mock("@/hooks/useWavesMovePhase", () => ({
   useWavesWritesPaused: (kind?: string) =>
     mockPausedFor ? mockPausedFor(kind) : mockPaused,
+  useWaveMovedToChain: () => mockMovedToChain,
 }));
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({ setToast: mockSetToast }),
@@ -39,6 +41,7 @@ describe("useWavesMoveDropGuard", () => {
     jest.clearAllMocks();
     mockPaused = false;
     mockPausedFor = null;
+    mockMovedToChain = false;
   });
   afterEach(() => jest.useRealTimers());
 
@@ -108,6 +111,35 @@ describe("useWavesMoveDropGuard", () => {
     expect(entry.onError).not.toHaveBeenCalled();
     expect(removed).toHaveBeenCalledTimes(1);
     expect(mockSetToast).toHaveBeenCalledTimes(1);
+  });
+
+  it("says new polls aren't open yet for a poll in a wave that moved", () => {
+    mockPausedFor = (kind) => kind === undefined;
+    mockMovedToChain = true;
+    const { result } = renderHook(() => useWavesMoveDropGuard(jest.fn()));
+    const poll = send(ApiDropType.Chat, { poll: { options: [] } });
+
+    expect(result.current.refusePausedDrop(poll)).toBe(true);
+    expect(mockSetToast).toHaveBeenCalledWith({
+      message: "New polls aren't open yet.",
+      type: "error",
+    });
+  });
+
+  it("keeps the paused line for an entry refused in a wave that moved", () => {
+    mockPaused = true;
+    mockMovedToChain = true;
+    const { result } = renderHook(() => useWavesMoveDropGuard(jest.fn()));
+
+    expect(
+      result.current.refusePausedDrop(
+        send(ApiDropType.Participatory, { poll: { options: [] } })
+      )
+    ).toBe(true);
+    expect(mockSetToast).toHaveBeenCalledWith({
+      message: "Paused for the move to the 6529 Network.",
+      type: "error",
+    });
   });
 
   it("refuses drop mode with the paused line", () => {

@@ -5,11 +5,21 @@
   "wavesMove.frozen": "Votes, entries and wave settings are moving to the 6529 Network. You can't change them until {switchOnWeekday} {switchOnTime} UTC. Chat keeps working.",
   "wavesMove.moved": "Votes, entries and wave settings moved to the 6529 Network on {switchOnDay}. You can't change them on this site yet. Chat keeps working.",
   "wavesMove.movedChain": "Votes, entries and wave settings moved to the 6529 Network on {switchOnDay}. Your votes, poll ballots, wave REP and entries go there from this site. Wave settings can't be changed here yet. Chat keeps working.",
+  "wavesMove.movedDocuments": "Waves and decisions made outside 6529.io show here once their documents reach the 6529 Network.",
   "wavesMove.resultPending": "The result due {resultWeekday} {resultTime} UTC is counted on the 6529 Network after {switchOnWeekday} {switchOnTime} UTC.",
   "wavesMove.day": "{weekday} {day} {month}",
   "wavesMove.paused": "Paused for the move to the 6529 Network.",
   "wavesMove.pollClosed": "This poll closed when the wave moved to the 6529 Network.",
   "wavesMove.submissionsPaused": "Submissions Paused",
   "wavesMove.session.votesMissing": "This browser's key can't sign votes, poll ballots or wave REP yet. One wallet signature adds them, with a new 30-day key.",
-  "wavesMove.session.addVotes": "Add votes to this browser"
+  "wavesMove.session.addVotes": "Add votes to this browser",
+  "wavesMove.pollsNotOpen": "New polls aren't open yet.",
+  "wavesMove.chainPolls": "Polls made on the 6529 Network don't show on 6529.io yet.",
+  "wavesMove.groupNamePending": "This group's name shows here once 6529.io has read it from the 6529 Network.",
+  "wavesMove.newWavesClosed": "New waves aren't open yet while waves move to the 6529 Network.",
+  "wavesMove.chatHistoryOneByOne": "In this wave, delete your posts one at a time. Each delete is signed by your device.",
+  "wavesMove.curationsStay": "Curations stay on 6529.io for now.",
+  "wavesMove.moderatorHideRelays": "Hiding a post here doesn't remove it from the 6529 Network's relays yet.",
+  "wavesMove.pollPostLocked": "A post with a poll can't be edited or deleted on this site in a wave that moves to the 6529 Network.",
+  "wavesMove.onChainRefused": "This wave moved to the 6529 Network, so this change can't be made on this site."
 }

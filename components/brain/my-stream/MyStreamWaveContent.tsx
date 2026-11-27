@@ -58,8 +58,6 @@ import { getWavePathRoute } from "@/helpers/navigation.helpers";
 import { useWaveViewMode } from "@/hooks/useWaveViewMode";
 import { useWave } from "@/hooks/useWave";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { ApiDropType } from "@/generated/models/ApiDropType";
-import { areSameProfileIdentity } from "@/helpers/ProfileHelpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getDropQueryKey } from "@/services/api/drop-api";
 import { markMobileLaunchStep } from "@/utils/monitoring/mobileLaunchTiming";
@@ -89,6 +87,8 @@ import {
 import { getWaveReplyEligibility } from "@/helpers/waves/wave-chat-replies.helpers";
 import WavesMoveNotice from "@/components/waves-move/WavesMoveNotice";
 import { WavesMoveScope } from "@/components/waves-move/WavesMoveScope";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
+import { editPostRefusal } from "./editPostRequest";
 
 export interface MyStreamWaveProps {
   readonly waveId: string;
@@ -197,6 +197,8 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     dropId: requestedEditPostId,
     enabled: requestedEditPostId.length > 0,
   });
+  // A post with a poll can't be edited while its wave moves.
+  const pollEditsPaused = useWavesWritesPaused();
 
   useEffect(() => {
     if (!requestedEditPostId || !requestedEditPost) {
@@ -211,21 +213,16 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
         scroll: false,
       });
     };
-    const canEdit =
-      requestedEditPost.wave.id === waveId &&
-      requestedEditPost.drop_type !== ApiDropType.Participatory &&
-      !activeProfileProxy &&
-      areSameProfileIdentity({
-        left: requestedEditPost.author,
-        right: connectedProfile,
-      });
-
-    if (!canEdit) {
+    const refusal = editPostRefusal({
+      post: requestedEditPost,
+      waveId,
+      isProxy: !!activeProfileProxy,
+      connectedProfile,
+      pollEditsPaused,
+    });
+    if (refusal !== null) {
       clearEditRequest();
-      setToast({
-        type: "warning",
-        message: t(locale, "profileCuration.actions.authorOnly"),
-      });
+      setToast({ type: "warning", message: t(locale, refusal) });
       return;
     }
 
@@ -236,6 +233,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     connectedProfile,
     locale,
     pathname,
+    pollEditsPaused,
     requestedEditPost,
     requestedEditPostId,
     router,
