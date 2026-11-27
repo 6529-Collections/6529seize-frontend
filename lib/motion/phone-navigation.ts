@@ -167,6 +167,9 @@ export function createPhoneNavigationMotion(
       settle(width, 0, navigate);
       return true;
     },
+    canCatch() {
+      return animation !== null && position > 0;
+    },
     begin() {
       stop();
       entering = false;

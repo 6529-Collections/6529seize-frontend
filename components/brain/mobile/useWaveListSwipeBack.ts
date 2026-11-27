@@ -7,6 +7,7 @@ import { useHorizontalSwipe } from "@/hooks/useHorizontalSwipe";
 import { MOTION_SPRINGS } from "@/lib/motion/springs";
 import {
   beginPhoneBackGesture,
+  canCatchPhoneBackGesture,
   type PhoneBackGesture,
 } from "@/lib/motion/phone-navigation-registry";
 import {
@@ -64,7 +65,12 @@ export function useWaveListSwipeBack<T extends HTMLElement = HTMLDivElement>({
       intentRatio: 1.2,
       flick: true,
       velocityWindowMs: 120,
-      captureOnPress: includeHeader,
+      // Promoting the chat to a transformed layer on touch-down can interrupt
+      // WebKit scrolling. Prepare it on Back intent unless it is already moving.
+      captureOnPress: () =>
+        includeHeader &&
+        (canCatchPhoneBackGesture() ||
+          (useSpring && animation.current !== null && position.current > 0)),
       allowReverse: true,
       priorityLeftEdgeWidth: edgeSwipeBack ? LEFT_EDGE_WIDTH : 0,
       onStart: () => {
