@@ -13,6 +13,10 @@ import { act, renderHook } from "@testing-library/react";
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(),
 }));
+let mockWavesWritesPaused = false;
+jest.mock("@/hooks/useWavesMovePhase", () => ({
+  useWavesWritesPaused: () => mockWavesWritesPaused,
+}));
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStreamActionsOptional: jest.fn(),
 }));
@@ -23,9 +27,7 @@ jest.mock("@/services/api/common-api", () => ({
 const authModule = jest.requireMock("@/components/auth/Auth") as {
   useAuth: typeof useAuthHook;
 };
-const myStreamModule = jest.requireMock(
-  "@/contexts/wave/MyStreamContext"
-) as {
+const myStreamModule = jest.requireMock("@/contexts/wave/MyStreamContext") as {
   useMyStreamActionsOptional: typeof useMyStreamActionsOptionalHook;
 };
 const mockedUseAuth = jest.mocked(authModule.useAuth);
@@ -166,6 +168,38 @@ describe("useDropLinkPreviewToggleControl", () => {
       setToast,
     });
     mockedCommonApiPost.mockResolvedValue({ hide_link_preview: true });
+  });
+
+  describe("while its wave moves to the 6529 Network", () => {
+    afterEach(() => {
+      mockWavesWritesPaused = false;
+    });
+
+    // A drop whose wave says it moves, unlike createDrop's.
+    const inMovingWave = (drop: ApiDrop): ApiDrop => ({
+      ...drop,
+      wave: { ...drop.wave, stays_on_site: false },
+    });
+
+    it("can't change an entry's link previews", () => {
+      mockWavesWritesPaused = true;
+      const entry = inMovingWave({
+        ...createDrop(false),
+        drop_type: ApiDropType.Participatory,
+      });
+      const { result } = renderHook(() =>
+        useDropLinkPreviewToggleControl(entry)
+      );
+      expect(result.current?.canToggle).toBe(false);
+    });
+
+    it("keeps a chat post's link previews changeable", () => {
+      mockWavesWritesPaused = true;
+      const { result } = renderHook(() =>
+        useDropLinkPreviewToggleControl(inMovingWave(createDrop(false)))
+      );
+      expect(result.current?.canToggle).toBe(true);
+    });
   });
 
   it("posts desired state and reconciles optimistic state from response", async () => {

@@ -1,4 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
+import { isChainGroupNamePending } from "@/lib/waves-move/chainGroupName";
 import { useMemo, useRef, useState } from "react";
 import { useClickAway } from "react-use";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
@@ -171,6 +172,7 @@ function useCreateWaveGroupInlinePanelViewState({
     !disabled;
   const canResetDraft = hasUnsavedGroup && !isCreating;
   const currentGroupLabel = selectedGroup?.name ?? defaultLabel;
+  const currentGroupNamePending = isChainGroupNamePending(selectedGroup);
   const canReplaceCriteria =
     selectedGroup === null ||
     (selectedGroupIncludedWallets !== undefined &&
@@ -181,6 +183,7 @@ function useCreateWaveGroupInlinePanelViewState({
     canResetDraft,
     canReplaceCriteria,
     currentGroupLabel,
+    currentGroupNamePending,
     displayedBuilder,
     draftSummary,
     draftSummaryParts,
@@ -656,6 +659,7 @@ export function useCreateWaveGroupInlinePanel({
     canReplaceCriteria,
     canResetDraft,
     currentGroupLabel,
+    currentGroupNamePending,
     displayedBuilder,
     draftSummary,
     draftSummaryParts,
@@ -728,6 +732,7 @@ export function useCreateWaveGroupInlinePanel({
     canReplaceCriteria,
     canResetDraft,
     currentGroupLabel,
+    currentGroupNamePending,
     displayedBuilder,
     draftSummary,
     draftSummaryParts,

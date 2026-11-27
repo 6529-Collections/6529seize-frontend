@@ -280,7 +280,7 @@ describe("DropsListItemDeleteDropModal", () => {
         jest.mocked(isChainIdentityActive).mockReturnValue(true);
         const shown = await refusedWithdrawal();
         expect(shown).toHaveTextContent(
-          "This wallet has no identity on the 6529 Network yet. Set one up on your identity page."
+          "This wallet has no identity on the 6529 Network yet. Create one on your identity page."
         );
         expect(
           screen.getByRole("link", { name: "your identity page" })

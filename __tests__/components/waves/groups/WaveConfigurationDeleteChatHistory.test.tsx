@@ -25,6 +25,10 @@ const mockAuthState = {
 };
 
 jest.mock("@/components/auth/Auth", () => ({ useAuth: () => mockAuthState }));
+let mockMovedToChain = false;
+jest.mock("@/hooks/useWavesMovePhase", () => ({
+  useWaveMovedToChain: () => mockMovedToChain,
+}));
 jest.mock("@/components/react-query-wrapper/ReactQueryWrapper", () => {
   const React = jest.requireActual<typeof import("react")>("react");
   return {
@@ -100,6 +104,7 @@ function confirm() {
 describe("WaveConfigurationDeleteChatHistory", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockMovedToChain = false;
     mockDelete.mockReset();
     mockPrepare.mockReset();
     sessionStorage.clear();
@@ -254,4 +259,22 @@ describe("WaveConfigurationDeleteChatHistory", () => {
       expect(screen.queryByRole("button")).not.toBeInTheDocument();
     }
   );
+
+  it("says to delete posts one at a time in a wave that moved", () => {
+    mockMovedToChain = true;
+    render(<WaveConfigurationDeleteChatHistory wave={wave} />);
+    expect(
+      screen.getByText(
+        "In this wave, delete your posts one at a time. Each delete is signed by your device."
+      )
+    ).toBeInTheDocument();
+    const button = screen.getByRole("button", {
+      name: "Delete all my messages from this wave",
+    });
+    expect(button).toBeDisabled();
+    expect(button).toHaveAccessibleDescription(
+      "In this wave, delete your posts one at a time. Each delete is signed by your device."
+    );
+    expect(mockPrepare).not.toHaveBeenCalled();
+  });
 });

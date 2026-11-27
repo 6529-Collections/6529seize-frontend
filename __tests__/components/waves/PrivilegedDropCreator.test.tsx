@@ -54,6 +54,7 @@ jest.mock("@/hooks/useDropPriviledges", () => ({
 const mockWritesPaused = jest.fn((_kind?: string) => false);
 jest.mock("@/hooks/useWavesMovePhase", () => ({
   useWavesWritesPaused: (kind?: string) => mockWritesPaused(kind),
+  useWaveMovedToChain: () => false,
 }));
 const mockUsePublicProfileModerationStatus = jest.fn(
   (_profileId?: string | null) => ({

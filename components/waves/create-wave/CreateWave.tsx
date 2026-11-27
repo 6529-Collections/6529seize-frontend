@@ -379,6 +379,11 @@ export default function CreateWave({
         scrollResetKey={step}
       >
         <WavesMoveNotice className="tw-mb-4" siteWide />
+        {wavesWritesPaused && (
+          <p className="tw-mb-4 tw-mt-0 tw-text-sm tw-text-iron-400">
+            {t(locale, "wavesMove.newWavesClosed")}
+          </p>
+        )}
         <CreateWaveLayout
           quickChat={quickChat}
           config={config}

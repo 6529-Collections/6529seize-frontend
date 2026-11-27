@@ -99,15 +99,19 @@ export function CompactComposerActionButton({
   label,
   icon,
   disabled = false,
+  muted = false,
   pressed,
   required = false,
   ...props
 }: Omit<ComponentPropsWithRef<"button">, "children"> & {
   readonly label: string;
   readonly icon: ReactNode;
+  /** Looks unavailable but still takes a press, to say why. */
+  readonly muted?: boolean;
   readonly pressed?: boolean;
   readonly required?: boolean;
 }) {
+  const looksDisabled = disabled || muted;
   return (
     <button
       {...props}
@@ -115,14 +119,14 @@ export function CompactComposerActionButton({
       disabled={disabled}
       aria-pressed={pressed}
       className={`tw-group tw-flex tw-w-11 tw-flex-none tw-flex-col tw-items-center tw-gap-1.5 tw-rounded-xl tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 ${
-        disabled
+        looksDisabled
           ? "tw-cursor-default tw-text-iron-600"
           : "tw-cursor-pointer tw-text-iron-300 desktop-hover:hover:tw-text-white"
       }`}
     >
       <span
         className={`tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-transition desktop-hover:tw-size-9 ${getActionSurfaceStyles(
-          { pressed, disabled, required }
+          { pressed, disabled: looksDisabled, required }
         )}`}
         aria-hidden="true"
       >
