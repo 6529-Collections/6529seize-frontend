@@ -3,6 +3,10 @@ import {
   getEncryptedMessagesRoute,
 } from "@/helpers/navigation.helpers";
 import {
+  E2EE_CHAT_FROM_PARAM,
+  getE2eeChatReturnRoute,
+} from "@/components/e2ee/conversation/e2eeChatOrigin";
+import {
   isProfileWavesFeed,
   returnsToProfileWavesFeed,
 } from "./profile-feed-navigation";
@@ -24,7 +28,12 @@ export function getPhoneNavigationRoute(
   if (getEncryptedConversationIdFromPathname(pathname))
     return {
       screen: "conversation",
-      destination: "encrypted",
+      // Reveal the same list the chat's Back returns to.
+      destination:
+        getE2eeChatReturnRoute(search.get(E2EE_CHAT_FROM_PARAM)) ===
+        getEncryptedMessagesRoute()
+          ? "encrypted"
+          : "messages",
       family: "messages",
     };
   if (pathname === getEncryptedMessagesRoute())

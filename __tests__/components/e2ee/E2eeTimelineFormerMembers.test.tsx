@@ -28,6 +28,7 @@ jest.mock("@/components/e2ee/conversation/E2eeComposer", () => ({
 }));
 jest.mock("next/navigation", () => ({
   usePathname: () => "/messages/encrypted/0x",
+  useSearchParams: () => new URLSearchParams(),
   useRouter: () => ({
     push: jest.fn(),
     replace: jest.fn(),

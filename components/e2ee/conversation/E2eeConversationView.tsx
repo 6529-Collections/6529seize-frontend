@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useWaveListSwipeBack } from "@/components/brain/mobile/useWaveListSwipeBack";
 import useCapacitor from "@/hooks/useCapacitor";
 import { ChatFileDropOverlay } from "@/components/composer/ChatFileDropOverlay";
@@ -40,6 +40,10 @@ import { E2eeContinuedNotice } from "./E2eeContinuedNotice";
 import { E2eeConversationBanners } from "./E2eeConversationBanners";
 import { E2eeUntrustedDeviceBanners } from "./E2eeUntrustedDeviceBanners";
 import { E2eeConversationHeader } from "./E2eeConversationHeader";
+import {
+  E2EE_CHAT_FROM_PARAM,
+  getE2eeChatReturnRoute,
+} from "./e2eeChatOrigin";
 import type { E2eeMessageActions } from "./E2eeMessageItem";
 import { E2eeReportDialog } from "./E2eeReportDialog";
 import { E2eeSearchPanel } from "./E2eeSearchPanel";
@@ -146,6 +150,10 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
   const composerInputId = useId();
   const { engine, profileId } = e2ee;
   const { conversation, messages } = useE2eeConversation(g);
+  const searchParams = useSearchParams();
+  const returnRoute = getE2eeChatReturnRoute(
+    searchParams.get(E2EE_CHAT_FROM_PARAM)
+  );
   const {
     ref: swipeBackRef,
     onTouchStart,
@@ -158,7 +166,7 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
     onSwipeBack: () => {
       const input = document.activeElement;
       if (input instanceof HTMLElement) input.blur();
-      router.push(getEncryptedMessagesRoute(), { scroll: false });
+      router.push(returnRoute, { scroll: false });
     },
   });
   const lastSeq = messages.at(-1)?.seq ?? 0;
@@ -317,6 +325,7 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
         searchPanelId={searchPanelId}
         onToggleSearch={() => setSearchOpen((open) => !open)}
         onOpenInfo={() => setInfoOpen(true)}
+        backHref={returnRoute}
       />
       <E2eeDmHistory
         conversation={conversation}
