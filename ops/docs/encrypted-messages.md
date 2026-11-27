@@ -769,8 +769,9 @@ restore it on a new device.
 - **Read sync across your own devices.** Reading an encrypted chat on one of
   your devices marks it read on your other devices too, usually within a
   minute. Your devices share read positions through a hidden encrypted chat
-  that only your own devices are in; 6529 cannot read it. A device joins after
-  it updates to the current version, and one added very recently can take a
+  that only your own devices are in; 6529 cannot read it. A device joins once
+  it runs the current version and its wallet is trusted on your other devices
+  (see [Device trust](#device-trust)); a device added very recently can take a
   few minutes longer. Encrypted backups include read positions, so a restore
   brings them back. The bell and app-icon badge work as before.
 - Phone message pushes use title **New encrypted message** and body
