@@ -90,4 +90,16 @@ describe("toast.helpers", () => {
       "Use another wallet."
     );
   });
+
+  it("shows a sentence about the 6529 Network as written, ahead of the wallet checks", () => {
+    expect(
+      getFriendlyToastContent({
+        message:
+          "The 6529 Network refused this change: the request was denied.",
+        type: "error",
+      })
+    ).toEqual({
+      title: "The 6529 Network refused this change: the request was denied.",
+    });
+  });
 });

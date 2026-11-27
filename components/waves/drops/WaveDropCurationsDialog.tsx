@@ -13,6 +13,7 @@ import {
 } from "@/hooks/drops/useDropCurations";
 import { useDropCurationMembershipMutation } from "@/hooks/drops/useDropCurationMembershipMutation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useWaveMovedToChain } from "@/hooks/useWavesMovePhase";
 import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
@@ -185,6 +186,9 @@ export default function WaveDropCurationsDialog({
 }) {
   const locale = useBrowserLocale();
   const { setToast } = useAuth();
+  // Curations keep working on 6529.io in a wave that moved; they don't go
+  // to the 6529 Network.
+  const movedToChain = useWaveMovedToChain(wave);
   const [isCreateCurationOpen, setIsCreateCurationOpen] = useState(false);
   const {
     data: curations = [],
@@ -289,6 +293,11 @@ export default function WaveDropCurationsDialog({
                   {t(locale, "profileCuration.membership.description")}
                 </p>
               </div>
+            )}
+            {movedToChain && (
+              <p className="tw-m-0 tw-text-sm tw-text-iron-400">
+                {t(locale, "wavesMove.curationsStay")}
+              </p>
             )}
 
             {isLoading && (

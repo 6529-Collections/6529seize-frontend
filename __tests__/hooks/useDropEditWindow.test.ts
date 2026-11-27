@@ -1,12 +1,19 @@
 import { act, renderHook } from "@testing-library/react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useDropEditWindow } from "@/hooks/useDropEditWindow";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
+
+jest.mock("@/hooks/useWavesMovePhase", () => ({
+  useWavesWritesPaused: jest.fn(() => false),
+}));
 
 const NOW = Date.UTC(2026, 10, 5);
 const WINDOW_MS = 300_000;
 const drop = (overrides: Partial<ApiDrop> = {}): ApiDrop =>
   ({
     id: "message",
+    drop_type: ApiDropType.Chat,
     created_at: NOW,
     updated_at: null,
     wave: { description_drop_id: "description" },
@@ -54,4 +61,37 @@ it("keeps the server's wave-description exception and denies non-authors", () =>
   expect(result.current).toBe(true);
   rerender({ author: false });
   expect(result.current).toBe(false);
+});
+
+it("closes editing a post with a poll while its wave moves, and nothing else", () => {
+  const pollPost = drop({ poll: {} } as unknown as Partial<ApiDrop>);
+  jest.mocked(useWavesWritesPaused).mockReturnValue(true);
+  try {
+    expect(
+      renderHook(() => useDropEditWindow(pollPost, true)).result.current
+    ).toBe(false);
+    expect(
+      renderHook(() => useDropEditWindow(drop(), true)).result.current
+    ).toBe(true);
+  } finally {
+    jest.mocked(useWavesWritesPaused).mockReturnValue(false);
+  }
+  expect(
+    renderHook(() => useDropEditWindow(pollPost, true)).result.current
+  ).toBe(true);
+});
+
+it("closes editing an entry while its wave moves", () => {
+  const entry = drop({ drop_type: ApiDropType.Participatory });
+  jest.mocked(useWavesWritesPaused).mockReturnValue(true);
+  try {
+    expect(
+      renderHook(() => useDropEditWindow(entry, true)).result.current
+    ).toBe(false);
+  } finally {
+    jest.mocked(useWavesWritesPaused).mockReturnValue(false);
+  }
+  expect(renderHook(() => useDropEditWindow(entry, true)).result.current).toBe(
+    true
+  );
 });

@@ -6,6 +6,8 @@ import { useMyStreamActionsOptional } from "@/contexts/wave/MyStreamContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiToggleHideLinkPreviewRequest } from "@/generated/models/ApiToggleHideLinkPreviewRequest";
 import { DropSize } from "@/helpers/waves/drop.helpers";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import { commonApiPost } from "@/services/api/common-api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -42,7 +44,14 @@ export function useDropLinkPreviewToggleControl(
   const isAuthor =
     connectedProfile?.handle === dropAuthorHandle && !activeProfileProxy;
   const hasLinks = useMemo(() => dropHasLinks(drop?.parts), [drop?.parts]);
-  const canToggle = Boolean(dropId && dropWaveId && !isTemporaryDrop);
+  // An entry's link previews move with the entry: in a wave that moves,
+  // 6529.io takes no change to them from the freeze.
+  const wavesWritesPaused = useWavesWritesPaused();
+  const isEntry =
+    drop?.drop_type !== undefined && drop.drop_type !== ApiDropType.Chat;
+  const canToggle = Boolean(
+    dropId && dropWaveId && !isTemporaryDrop && !(wavesWritesPaused && isEntry)
+  );
   const toggleRuntimeRef = useRef({
     dropId,
     dropWaveId,

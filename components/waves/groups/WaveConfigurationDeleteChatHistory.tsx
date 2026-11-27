@@ -8,7 +8,10 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { useContext, useState } from "react";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useWaveMovedToChain } from "@/hooks/useWavesMovePhase";
+import { t } from "@/i18n/messages";
+import { useContext, useId, useState } from "react";
 import { useWaveChatHistoryPurge } from "./useWaveChatHistoryPurge";
 
 const text = (key: Parameters<typeof waveRightPanelText>[0], params = {}) =>
@@ -148,7 +151,36 @@ export default function WaveConfigurationDeleteChatHistory({
   readonly wave: ApiWave;
 }) {
   const { activeProfileProxy, connectedProfile } = useAuth();
+  const locale = useBrowserLocale();
+  // In a wave that moved, each delete is signed on its own; 6529.io can't
+  // sign a whole history for someone.
+  const movedToChain = useWaveMovedToChain(wave);
+  const oneByOneId = useId();
   if (!connectedProfile?.id || activeProfileProxy) return null;
+  if (movedToChain) {
+    return (
+      <section className="tw-px-4 tw-py-4">
+        <Button
+          variant="destructiveOutline"
+          size="lg"
+          fullWidth
+          disabled
+          aria-describedby={oneByOneId}
+          className="!tw-whitespace-normal !tw-px-3 !tw-text-xs !tw-font-medium"
+        >
+          {text(
+            "waves.sidebar.rightPanel.configuration.deleteChatHistory.button"
+          )}
+        </Button>
+        <p
+          id={oneByOneId}
+          className="tw-mb-0 tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-400"
+        >
+          {t(locale, "wavesMove.chatHistoryOneByOne")}
+        </p>
+      </section>
+    );
+  }
   return (
     <DeleteChatHistory
       key={`${connectedProfile.id}:${wave.id}`}

@@ -2,6 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 import { useWavesMoveScope } from "@/components/waves-move/WavesMoveScope";
+import { waveMoveSignal } from "@/lib/waves-move/scope";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import {
@@ -111,6 +112,20 @@ export function useChainWavesActive(): boolean {
   const phase = useWavesMovePhase();
   const scope = useWavesMoveScope();
   return scope !== "stays" && phase === "moved" && isChainWavesEnabled();
+}
+
+/**
+ * Whether this part of the page is in a wave that moved to the 6529
+ * Network, from the switch-on: `wave`, when it says, else the wave around.
+ * The lines for what 6529.io can't do there yet show only then, and never
+ * in a wave that stays or outside any wave.
+ */
+export function useWaveMovedToChain(wave?: unknown): boolean {
+  const phase = useWavesMovePhase();
+  const scope = useWavesMoveScope();
+  const signal = wave === undefined ? null : waveMoveSignal(wave);
+  const moves = signal ?? scope === "moves";
+  return phase === "moved" && moves;
 }
 
 /**

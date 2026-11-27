@@ -7,8 +7,12 @@ import {
   type ApiModerationCheckDetail,
 } from "@/generated/models/ApiModerationCheckDetail";
 import { ApiModerationAction } from "@/generated/models/ApiModerationAction";
+import { ApiModerationCheckSubjectTypeEnum } from "@/generated/models/ApiModerationCheck";
 import type { ApiModerationActionRequest } from "@/generated/models/ApiModerationActionRequest";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useWavesMovePhase } from "@/hooks/useWavesMovePhase";
+import { useWaveData } from "@/hooks/useWaveData";
+import { waveMoveSignal } from "@/lib/waves-move/scope";
 import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
 import { applyModerationAction } from "@/services/api/moderation-checks-api";
@@ -49,6 +53,14 @@ function moderationActionLabel(
   return t(locale, `checks.action.${action}`);
 }
 
+/** The actions that hide a post from 6529.io. */
+const HIDING_ACTIONS: ReadonlySet<string> = new Set([
+  ApiModerationAction.Block,
+  ApiModerationAction.Quarantine,
+  ApiModerationAction.Remove,
+  ApiModerationAction.Suppress,
+]);
+
 export default function CheckActions({
   detail,
   onSaved,
@@ -59,6 +71,19 @@ export default function CheckActions({
   readonly onReload: () => void;
 }) {
   const locale = useBrowserLocale();
+  // From the switch-on, posts in waves that moved are also on the 6529
+  // Network's relays, which a hide here doesn't reach yet. Only a post in
+  // a wave that moved is there: read its wave to know.
+  const scopeWaveId: unknown = detail.check.scope["wave_id"];
+  const relaysWaveId =
+    useWavesMovePhase() === "moved" &&
+    detail.check.subject_type === ApiModerationCheckSubjectTypeEnum.Drop &&
+    typeof scopeWaveId === "string"
+      ? scopeWaveId
+      : null;
+  const { data: relaysWave } = useWaveData({ waveId: relaysWaveId });
+  const postOnRelays =
+    relaysWaveId !== null && waveMoveSignal(relaysWave) === true;
   const queryClient = useQueryClient();
   const id = useId();
   const [action, setAction] = useState<ApiModerationAction | "">("");
@@ -167,6 +192,11 @@ export default function CheckActions({
             {t(locale, "checks.markReviewedHelp")}
           </p>
         )}
+      {postOnRelays && HIDING_ACTIONS.has(action) && (
+        <p className="tw-text-sm tw-text-iron-400">
+          {t(locale, "wavesMove.moderatorHideRelays")}
+        </p>
+      )}
       {action === ApiModerationAction.Reevaluate && (
         <p className="tw-text-sm tw-text-iron-400">
           {t(locale, "checks.reevaluateHelp")}

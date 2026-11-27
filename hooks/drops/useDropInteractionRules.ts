@@ -144,8 +144,16 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
     ? isAuthor && drop.drop_type === ApiDropType.Participatory
     : isAuthor || canDeleteAsAdmin || canDeleteAsReplyModerator;
   // Delete rules
-  const canDelete = baseRules && !isEntryDeletePaused && canDeleteEntryOrDrop;
-  const canSetPinnedDrop = baseRules && isAdmin;
+  // A post with a poll can't be deleted here once its wave moves: the poll
+  // footer says why.
+  const isPollDeletePaused = entryModerationPaused && !!drop.poll;
+  const canDelete =
+    baseRules &&
+    !isEntryDeletePaused &&
+    !isPollDeletePaused &&
+    canDeleteEntryOrDrop;
+  // The pinned drop is a wave setting, closed with the others.
+  const canSetPinnedDrop = baseRules && isAdmin && !entryModerationPaused;
 
   // Check if voting has ended by comparing current time with voting period end time
   const now = Time.currentMillis();
