@@ -14,7 +14,9 @@ import type {
   AllowlistTransferPool,
   DistributionPlanTokenPoolDownload,
 } from "../allowlist-tool/allowlist-tool.types";
-import RunOperations from "./run-operations/RunOperations";
+import RunOperations, {
+  isAnalysisRunning,
+} from "./run-operations/RunOperations";
 import {
   distributionPlanApiFetch,
   distributionPlanApiPost,
@@ -110,11 +112,13 @@ export default function DistributionPlanToolContextWrapper({
   const stepRef = useRef(DistributionPlanToolStep.CREATE_PLAN);
   const planRequest = useRef(0);
   const activePlanId = useRef<string | null>(null);
+  const runSubmission = useRef<{ pending: boolean } | null>(null);
 
   useEffect(
     () => () => {
       planRequest.current += 1;
       activePlanId.current = null;
+      runSubmission.current = null;
     },
     []
   );
@@ -143,22 +147,57 @@ export default function DistributionPlanToolContextWrapper({
   const [confirmedTokenId, setConfirmedTokenId] = useState<string | null>(null);
 
   const runOperations = async () => {
-    if (!distributionPlan) return;
-    const request = planRequest.current;
-    const endpoint = `/allowlists/${distributionPlan.id}/runs`;
+    const planId = distributionPlan?.id;
+    if (
+      planId === undefined ||
+      activePlanId.current !== planId ||
+      runSubmission.current?.pending === true
+    )
+      return;
+
+    const submission = { pending: true };
+    runSubmission.current = submission;
     setFetching(true);
-    const { success, data } =
-      await distributionPlanApiPost<AllowlistDescription>({
-        endpoint,
-        body: {
-          allowlistId: distributionPlan.id,
-        },
-      });
-    if (request !== planRequest.current) return;
-    if (success && data) {
+    try {
+      const { success, data } =
+        await distributionPlanApiPost<AllowlistDescription>({
+          endpoint: `/allowlists/${planId}/runs`,
+          body: { allowlistId: planId },
+        });
+      if (
+        runSubmission.current === submission &&
+        success &&
+        data?.id === planId
+      ) {
+        await setState(data);
+      }
+    } finally {
+      if (runSubmission.current === submission) {
+        submission.pending = false;
+        setFetching(false);
+      }
+    }
+  };
+
+  const pollRunStatus = async (planId: string) => {
+    const submission = runSubmission.current;
+    if (activePlanId.current !== planId || submission?.pending === true) return;
+
+    const request = planRequest.current;
+    const data = await readPlanData<AllowlistDescription>(
+      `/allowlists/${planId}`
+    );
+    // A poll from before a submission must never replace the new run's state.
+    if (request !== planRequest.current || submission !== runSubmission.current)
+      return;
+
+    const status = data?.activeRun?.status;
+    if (
+      data?.id === planId &&
+      status !== undefined &&
+      !isAnalysisRunning(status)
+    ) {
       await setState(data);
-    } else {
-      setFetching(false);
     }
   };
 
@@ -175,7 +214,9 @@ export default function DistributionPlanToolContextWrapper({
   const setState = useCallback(
     async (plan: AllowlistDescription | null) => {
       const request = ++planRequest.current;
-      activePlanId.current = plan?.id ?? null;
+      const planId = plan?.id ?? null;
+      if (activePlanId.current !== planId) runSubmission.current = null;
+      activePlanId.current = planId;
       if (!plan) {
         setStep(DistributionPlanToolStep.CREATE_PLAN);
         setDistributionPlan(null);
@@ -241,7 +282,7 @@ export default function DistributionPlanToolContextWrapper({
           )
         );
       }
-      setFetching(false);
+      setFetching(runSubmission.current?.pending === true);
     },
     [setStep]
   );
@@ -277,7 +318,7 @@ export default function DistributionPlanToolContextWrapper({
           distributionPlan={distributionPlan}
           fetching={fetching}
           isOpeningPlan={activeStep === DistributionPlanToolStep.CREATE_PLAN}
-          setState={setState}
+          pollRunStatus={pollRunStatus}
         />
       </DistributionPlanToolContext.Provider>
     </>

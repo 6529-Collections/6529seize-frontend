@@ -94,12 +94,18 @@ export function restoreEmmaPlanStep(
   const first = DistributionPlanToolStep.CREATE_SNAPSHOTS;
   if (requested === undefined || !operations || !phases) return first;
   const available = lastAvailableStep(operations, phases, downloads);
-  return (
+  const restored =
     steps[
       Math.max(
         steps.indexOf(first),
         Math.min(steps.indexOf(requested), steps.indexOf(available))
       )
-    ] ?? first
-  );
+    ] ?? first;
+  if (
+    restored === DistributionPlanToolStep.BUILD_PHASES &&
+    !operations.some(({ code }) => code === AllowlistOperationCode.ADD_PHASE)
+  ) {
+    return DistributionPlanToolStep.CREATE_PHASES;
+  }
+  return restored;
 }

@@ -4,45 +4,34 @@ import {
   AllowlistRunStatus,
   type AllowlistDescription,
 } from "@/components/allowlist-tool/allowlist-tool.types";
-import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
 import { useInterval } from "react-use";
 
-const LOADING_STATES = [AllowlistRunStatus.CLAIMED, AllowlistRunStatus.PENDING];
+export function isAnalysisRunning(status: AllowlistRunStatus | undefined) {
+  return (
+    status === AllowlistRunStatus.CLAIMED ||
+    status === AllowlistRunStatus.PENDING
+  );
+}
 
 export default function RunOperations({
   distributionPlan,
   fetching,
   isOpeningPlan,
-  setState,
+  pollRunStatus,
 }: Readonly<{
   distributionPlan: AllowlistDescription | null;
   fetching: boolean;
   isOpeningPlan: boolean;
-  setState: (plan: AllowlistDescription) => void;
+  pollRunStatus: (planId: string) => Promise<void>;
 }>) {
-  const status = distributionPlan?.activeRun?.status;
-  const analysisInProgress =
-    status !== undefined && LOADING_STATES.includes(status);
+  const analysisInProgress = isAnalysisRunning(
+    distributionPlan?.activeRun?.status
+  );
   const showLoader = !isOpeningPlan && (analysisInProgress || fetching);
 
   useInterval(
-    async () => {
-      const fetchActiveRun = async () => {
-        if (!distributionPlan) return;
-        const endpoint = `/allowlists/${distributionPlan.id}`;
-        const { success, data } =
-          await distributionPlanApiFetch<AllowlistDescription>(endpoint);
-        if (!success || !data) {
-          return;
-        }
-        if (
-          data.activeRun?.status &&
-          !LOADING_STATES.includes(data.activeRun?.status)
-        ) {
-          setState(data);
-        }
-      };
-      await fetchActiveRun();
+    () => {
+      if (distributionPlan) void pollRunStatus(distributionPlan.id);
     },
     distributionPlan?.id && analysisInProgress ? 2000 : null
   );

@@ -6,6 +6,8 @@ import DistributionPlanToolContextWrapper, {
 } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import {
   AllowlistOperationCode,
+  AllowlistRunStatus,
+  type AllowlistDescription,
   DistributionPlanTokenPoolDownloadStatus,
 } from "@/components/allowlist-tool/allowlist-tool.types";
 import {
@@ -28,6 +30,7 @@ jest.mock("react-use", () => ({
   useInterval: jest.fn(),
 }));
 import type { TypeOptions } from "react-toastify";
+import { useInterval } from "react-use";
 
 const mockShowAppToast = jest.fn();
 const mockShowAppToasts = jest.fn(
@@ -51,6 +54,11 @@ jest.mock("@/components/utils/toast/AppToast", () => ({
 }));
 
 const plan = { id: "1", name: "Plan", description: "desc", createdAt: 0 };
+const analysisPlan = (status: AllowlistRunStatus): AllowlistDescription => ({
+  ...plan,
+  activeRun: { status, createdAt: 1, errorReason: null },
+});
+
 const transferPools = [
   {
     id: "tp1",
@@ -115,6 +123,14 @@ test("restores the requested step from saved progress and clamps premature Revie
     DistributionPlanToolStep.REVIEW
   );
   expect(restoreEmmaPlanStep(build, [], phases, [])).toBe(
+    DistributionPlanToolStep.CREATE_PHASES
+  );
+  const phaseOperation = {
+    ...operations[0]!,
+    code: AllowlistOperationCode.ADD_PHASE,
+    hasRan: true,
+  };
+  expect(restoreEmmaPlanStep(build, [phaseOperation], phases, [])).toBe(
     DistributionPlanToolStep.BUILD_PHASES
   );
   expect(restoreEmmaPlanStep(review, [], [], [])).toBe(
@@ -176,9 +192,18 @@ function ContextReader() {
   return (
     <>
       <div data-testid="step">{context.step}</div>
+      <div data-testid="run-status">
+        {context.distributionPlan?.activeRun?.status}
+      </div>
       <button data-testid="run" onClick={context.runOperations} />
       <button data-testid="set-null" onClick={() => context.setState(null)} />
       <button data-testid="set-plan" onClick={() => context.setState(plan)} />
+      <button
+        data-testid="set-claimed"
+        onClick={() =>
+          context.setState(analysisPlan(AllowlistRunStatus.CLAIMED))
+        }
+      />
       <button
         data-testid="toast"
         onClick={() =>
@@ -316,6 +341,78 @@ describe("DistributionPlanToolContext", () => {
       DistributionPlanToolStep.CREATE_SNAPSHOTS
     );
   });
+
+  it("ignores an older poll when a retry has been submitted", async () => {
+    setup();
+    await act(async () => {
+      screen.getByTestId("set-claimed").click();
+    });
+
+    const oldPoll = Promise.withResolvers<{
+      success: boolean;
+      data: AllowlistDescription;
+    }>();
+    jest.mocked(distributionPlanApiFetch).mockReturnValueOnce(oldPoll.promise);
+    const tick = jest.mocked(useInterval).mock.lastCall?.[0];
+    if (!tick) throw new Error("Expected the plan to poll a claimed run");
+    act(() => {
+      tick();
+    });
+
+    expect(distributionPlanApiFetch).toHaveBeenCalledWith(
+      `/allowlists/${plan.id}`
+    );
+
+    jest.mocked(distributionPlanApiPost).mockResolvedValueOnce({
+      success: true,
+      data: analysisPlan(AllowlistRunStatus.PENDING),
+    });
+    await act(async () => {
+      screen.getByTestId("run").click();
+    });
+    await act(async () => {
+      oldPoll.resolve({
+        success: true,
+        data: analysisPlan(AllowlistRunStatus.FAILED),
+      });
+    });
+
+    expect(screen.getByTestId("run-status")).toHaveTextContent(
+      AllowlistRunStatus.PENDING
+    );
+    expect(jest.mocked(useInterval).mock.lastCall?.[1]).toBe(2000);
+  });
+
+  it.each([
+    { step: "set-plan", expected: AllowlistRunStatus.PENDING },
+    { step: "set-null", expected: "" },
+  ])(
+    "applies the retry only to the same plan after $step",
+    async ({ step, expected }) => {
+      setup();
+      await act(async () => {
+        screen.getByTestId("set-plan").click();
+      });
+      const response = Promise.withResolvers<{
+        success: boolean;
+        data: AllowlistDescription;
+      }>();
+      jest
+        .mocked(distributionPlanApiPost)
+        .mockReturnValueOnce(response.promise);
+      act(() => {
+        screen.getByTestId("run").click();
+      });
+      await act(async () => {
+        screen.getByTestId(step).click();
+        response.resolve({
+          success: true,
+          data: analysisPlan(AllowlistRunStatus.PENDING),
+        });
+      });
+      expect(screen.getByTestId("run-status").textContent).toBe(expected);
+    }
+  );
 
   it("displays toasts for messages", () => {
     setup();
