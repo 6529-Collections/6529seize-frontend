@@ -1,6 +1,5 @@
 "use client";
 
-import { Capacitor } from "@capacitor/core";
 import {
   ArrowLeftIcon,
   InformationCircleIcon,
@@ -65,10 +64,7 @@ export function E2eeConversationHeader({
       <Link
         href={backHref}
         onNavigate={(event) => {
-          if (
-            (isCapacitor && Capacitor.getPlatform() !== "ios") ||
-            !window.matchMedia(PHONE_WAVES_LAYOUT_QUERY).matches
-          ) {
+          if (!window.matchMedia(PHONE_WAVES_LAYOUT_QUERY).matches) {
             return;
           }
           event.preventDefault();

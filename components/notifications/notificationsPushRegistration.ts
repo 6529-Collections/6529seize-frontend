@@ -570,17 +570,7 @@ export const registerPushNotificationWithRetry = async (
 ): Promise<boolean> => {
   const registrationJwt = connectedJwt ?? getUsablePushAuthJwt();
   if (!registrationJwt) {
-    Sentry.addBreadcrumb({
-      category: "notifications",
-      level: "warning",
-      message: "Push registration skipped (auth token unavailable).",
-      data: {
-        component: "NotificationsProvider",
-        operation: "registerPushNotification",
-        profile_id: profileId,
-        platform: deviceInfo.platform,
-      },
-    });
+    reportUnavailablePushAuth(profileId, deviceInfo.platform);
     return false;
   }
   let installation: Awaited<
@@ -594,14 +584,25 @@ export const registerPushNotificationWithRetry = async (
       connectedJwt ? profileId : undefined
     );
   } catch (error) {
+    const tags = {
+      component: "NotificationsProvider",
+      operation: "preparePushInstallationRegistration",
+      push_failure_reason: getPushPreparationFailureReason(error),
+    };
+    if (tags.push_failure_reason === "auth_changed") {
+      Sentry.addBreadcrumb({
+        category: "notifications",
+        level: "info",
+        message: "Push registration skipped (auth changed).",
+        data: { ...tags, platform: deviceInfo.platform },
+      });
+      return false;
+    }
+
     // Storage/proof failures must settle the shared registration promise without
     // logging potentially sensitive storage contents.
     Sentry.captureException(new Error("Push installation preparation failed"), {
-      tags: {
-        component: "NotificationsProvider",
-        operation: "preparePushInstallationRegistration",
-        push_failure_reason: getPushPreparationFailureReason(error),
-      },
+      tags,
       extra: { profile_id: profileId, platform: deviceInfo.platform },
     });
     return false;
@@ -645,12 +646,10 @@ const registerPreparedPushNotificationWithRetry = async (
 
   for (let attempt = 0; attempt < PUSH_REGISTRATION_TOTAL_ATTEMPTS; attempt++) {
     if (!isPushRegistrationAuthCurrent(registration)) {
-      reportUnavailablePushAuth(
-        attempt,
-        profileId,
-        deviceInfo.platform,
-        PUSH_REGISTRATION_TOTAL_ATTEMPTS
-      );
+      reportUnavailablePushAuth(profileId, deviceInfo.platform, {
+        attempt: attempt + 1,
+        maxAttempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
+      });
       return false;
     }
 

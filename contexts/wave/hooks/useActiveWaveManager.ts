@@ -4,7 +4,6 @@ import {
   runPhoneConversationEntryTransition,
   runWaveNavigationTransition,
 } from "@/helpers/waves/wave-navigation-transition";
-import { Capacitor } from "@capacitor/core";
 import {
   getCompetitionRoute,
   isCompetitionPathname,
@@ -169,8 +168,7 @@ export function useActiveWaveManager() {
         waveId !== null &&
         getWaveFromWindow() === null &&
         (current.pathname === "/waves" || current.pathname === "/messages") &&
-        current.searchParams.get("view") !== "profile-feed" &&
-        (!isApp || Capacitor.getPlatform() === "ios");
+        current.searchParams.get("view") !== "profile-feed";
       if (opensPhoneConversation) {
         const destination = new URL(buildUrl(waveId, options), current);
         runPhoneConversationEntryTransition(

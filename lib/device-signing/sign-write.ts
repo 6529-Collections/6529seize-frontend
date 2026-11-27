@@ -1,4 +1,5 @@
 import type { ApiDeviceSignature } from "@/generated/models/ApiDeviceSignature";
+import type { IndexedDbOperation } from "@/lib/storage/idb-keyval";
 import {
   getStructuredApiErrorCode,
   getStructuredApiErrorStatus,
@@ -106,6 +107,7 @@ interface SigningProgress {
   grantFound: boolean | null;
   readonly startedAt: number;
   lockedAt: number | null;
+  storageOperation?: IndexedDbOperation | undefined;
 }
 
 type LocalFailureReason = Extract<
@@ -119,6 +121,7 @@ interface SigningFailure {
   readonly phase: SigningProgress["phase"];
   readonly elapsedMs: number;
   readonly lockWaitMs: number | undefined;
+  readonly storageOperation?: IndexedDbOperation | undefined;
 }
 
 type SigningAttempt =
@@ -142,9 +145,14 @@ async function signWrite(
   write: DeviceSignedWrite,
   progress: SigningProgress
 ): Promise<SigningAttempt> {
-  const allocation = await allocateDeviceSeq(address, Date.now(), () => {
-    progress.phase = "storage";
-    progress.lockedAt = now();
+  const allocation = await allocateDeviceSeq(address, Date.now(), {
+    onLocked() {
+      progress.phase = "storage";
+      progress.lockedAt = now();
+    },
+    onStorageFailure(operation) {
+      progress.storageOperation = operation;
+    },
   });
   progress.grantFound = allocation !== null;
   if (!allocation) {
@@ -263,6 +271,8 @@ async function attemptSignature(
     phase: progress.phase,
     elapsedMs,
     lockWaitMs,
+    storageOperation:
+      failure === "storage-error" ? progress.storageOperation : undefined,
   };
 }
 
@@ -383,6 +393,7 @@ const reportFallback = (
     phase: failure?.phase ?? "send",
     elapsedMs: failure?.elapsedMs,
     lockWaitMs: failure?.lockWaitMs,
+    storageOperation: failure?.storageOperation,
   });
 
 /** A finished write, or a request to sign it again. */

@@ -849,7 +849,16 @@ test("collecting and orders center their content, use the app font and keep priv
 
 test("returning from an artwork restores the collection and collecting mode", async ({
   page,
+  baseURL,
 }) => {
+  if (
+    baseURL &&
+    ["localhost", "127.0.0.1", "[::1]"].includes(new URL(baseURL).hostname)
+  ) {
+    // Prepare the dev route before measuring navigation and browser Back.
+    const ready = await page.request.get("/6529-gradient/0");
+    expect(ready.ok()).toBe(true);
+  }
   const mutations = await mockCatalog(page);
   await page.goto("/collect?collection=gradients&intent=lowest", {
     waitUntil: "domcontentloaded",

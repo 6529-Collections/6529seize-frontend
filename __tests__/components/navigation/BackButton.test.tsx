@@ -149,29 +149,66 @@ describe("BackButton", () => {
     }
   );
 
-  it.each([
-    "other-native",
-    "phone-web",
-    "other-native-dm",
-    "profile-feed",
-    "other-section",
-  ])("preserves the existing Back path for %s", (surface) => {
-    mockIsApp = surface !== "phone-web";
-    mockIsIos = !surface.startsWith("other-native");
-    const query =
-      surface === "profile-feed"
-        ? { returnTo: "/waves?view=profile-feed" }
-        : {};
-    let pathname = "/waves/w1";
-    if (surface === "other-native-dm") pathname = "/messages/w1";
-    if (surface === "other-section") pathname = "/network";
-    setup(query, {
-      activeWaveId: "w1",
-      pathname,
-      isDm: surface === "other-native-dm",
-    });
+  it.each(["other-native", "phone-web", "other-native-dm", "profile-feed"])(
+    "shares the requested phone Back motion for %s",
+    (surface) => {
+      mockIsApp = surface !== "phone-web";
+      mockIsIos = !surface.startsWith("other-native");
+      const query =
+        surface === "profile-feed"
+          ? { returnTo: "/waves?view=profile-feed" }
+          : {};
+      let pathname = "/waves/w1";
+      if (surface === "other-native-dm") pathname = "/messages/w1";
+      const { setActiveWave } = setup(query, {
+        activeWaveId: "w1",
+        pathname,
+        isDm: surface === "other-native-dm",
+      });
+      fireEvent.click(screen.getByRole("button", { name: "Back" }));
+      expect(mockChevronBack).toHaveBeenCalledWith(
+        surface === "other-native-dm" ? "/messages" : "/waves",
+        expect.any(Function)
+      );
+      expect(setActiveWave).toHaveBeenCalledWith(
+        null,
+        surface === "profile-feed"
+          ? { profileFeed: true }
+          : { isDirectMessage: surface === "other-native-dm" }
+      );
+    }
+  );
+
+  it("preserves direct Back for an active wave in another section", () => {
+    mockIsApp = true;
+    mockIsIos = true;
+    const { setActiveWave } = setup(
+      {},
+      { activeWaveId: "w1", pathname: "/network" }
+    );
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
     expect(mockChevronBack).not.toHaveBeenCalled();
+    expect(setActiveWave).toHaveBeenCalledWith(null, {
+      isDirectMessage: false,
+    });
+  });
+
+  it("clears the remembered wave only when the Back motion commits", () => {
+    mockIsApp = true;
+    let complete: () => void = () => undefined;
+    mockChevronBack.mockImplementationOnce((_, navigate) => {
+      complete = navigate;
+    });
+    const { setActiveWave } = setup(
+      {},
+      { activeWaveId: "w1", pathname: "/waves/w1" }
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
+    expect(mockClearLastVisited).not.toHaveBeenCalled();
+    expect(setActiveWave).not.toHaveBeenCalled();
+    act(() => complete());
+    expect(mockClearLastVisited).toHaveBeenCalledTimes(1);
+    expect(setActiveWave).toHaveBeenCalledTimes(1);
   });
 
   it.each([

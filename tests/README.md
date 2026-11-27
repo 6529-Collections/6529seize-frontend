@@ -69,6 +69,21 @@ exclude Validator after results settle and still navigate through Join 6529.
 Member search results are covered by the focused search unit tests, alongside
 the member navigation scenarios in the session recovery sandbox.
 
+Homepage layout and homepage-based search checks use a synthetic mint newer
+than the server-rendered live selection, with its roots and artwork fulfilled
+locally. This lets the existing client fixture settle without stale mint data
+leaving live interactive artwork in the page. Transition scenarios set their
+clock after this fixture mint's scheduled grace period. Sidebar storage init
+scripts run only in the top frame so sandboxed artwork frames retain their
+storage isolation.
+
+The Coming Up visitor-timezone scenario also supplies a completed mint and
+waits for the controlled artwork, signed-out sections and fonts before resizing
+or scrolling. Its fixed clock and Shanghai midnight assertions remain separate
+from live mint selection; seeing the decision label alone is not page readiness.
+The scenario uses the existing data-response readiness budget rather than
+changing the overall test timeout or adding retries.
+
 The profile pages sandbox also checks Collected personal actions against its
 isolated API. Anonymous and visitor profiles omit the entire action row. Owners
 retain action alignment, browser/native Back, filter and focus restoration;
@@ -79,14 +94,14 @@ profile and native-shell packs.
 ## Pack registry
 
 The native competition pack's wave-loading sandbox covers touch row pin/unpin
-with real browser input, release reversal, native scrolling, menu clearance,
+with real browser input, release reversal, native scrolling, reduced motion,
 visible 44px row pin controls and their state in All/Joined/Pinned, native
-header/list alignment, ordinary
-tap navigation, and saved Pinned order.
-Stationary holds open the pin menu; touch reordering starts after a brief hold
-followed by vertical movement. The existing desktop drag and keyboard contracts
-remain covered. Gesture, row action, pin status, and touch sensor changes select
-this pack through the effective CI planner.
+header/list alignment, and ordinary tap navigation. Reorder tests hold the row
+before dragging vertically, check for interruptions from pin controls, and
+verify the saved order across reload on mobile web and in simulated iOS and
+Android shells. The pack also covers desktop drag and keyboard reordering.
+Gesture, row action, pin status, and touch sensor changes select this pack
+through the effective CI planner.
 
 The reaction sandbox covers live count and profile-list updates, desktop tooltip
 and dialog overflow, recoverable detail-read failures, and mobile long press.

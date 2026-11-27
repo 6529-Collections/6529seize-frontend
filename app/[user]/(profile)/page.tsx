@@ -107,15 +107,17 @@ async function prepareRepTab({
 
   // Dehydrate pending queries so each response travels in its own RSC chunk
   // and the existing observers can join those requests after hydration.
-  void queryClient.prefetchQuery(
-    repOverviewQueryOptions(user, "incoming", viewer, apiHeaders)
-  );
-  void queryClient.prefetchInfiniteQuery(
-    repCategoriesQueryOptions(user, "incoming", viewer, apiHeaders)
-  );
-  void queryClient.prefetchQuery(
-    nicOverviewQueryOptions(user, "incoming", viewer, apiHeaders)
-  );
+  if (profile.id) {
+    void queryClient.prefetchQuery(
+      repOverviewQueryOptions(user, "incoming", viewer, apiHeaders)
+    );
+    void queryClient.prefetchInfiniteQuery(
+      repCategoriesQueryOptions(user, "incoming", viewer, apiHeaders)
+    );
+    void queryClient.prefetchQuery(
+      nicOverviewQueryOptions(user, "incoming", viewer, apiHeaders)
+    );
+  }
   // The statements endpoint returns the same moderated list to every viewer.
   // Reuse the public key and the request already shared by metadata and header.
   void queryClient.prefetchQuery({

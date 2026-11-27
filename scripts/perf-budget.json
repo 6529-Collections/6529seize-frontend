@@ -9,9 +9,9 @@
       "id": "root",
       "label": "Root layout",
       "route": null,
-      "chunks": 48,
-      "gzip_bytes": 1219933,
-      "brotli_bytes": 1043465
+      "chunks": 44,
+      "gzip_bytes": 1088611,
+      "brotli_bytes": 930293
     },
     {
       "id": "home",
@@ -25,9 +25,9 @@
       "id": "wave",
       "label": "Wave",
       "route": "waves/[wave]",
-      "chunks": 102,
-      "gzip_bytes": 2875715,
-      "brotli_bytes": 2407359
+      "chunks": 107,
+      "gzip_bytes": 2694858,
+      "brotli_bytes": 2269624
     },
     {
       "id": "meme",
@@ -41,17 +41,17 @@
       "id": "profile",
       "label": "Profile",
       "route": "[user]/(profile)",
-      "chunks": 65,
-      "gzip_bytes": 1580135,
-      "brotli_bytes": 1343693
+      "chunks": 74,
+      "gzip_bytes": 1582820,
+      "brotli_bytes": 1349521
     },
     {
       "id": "museum",
       "label": "Museum",
       "route": "museum",
-      "chunks": 52,
-      "gzip_bytes": 1224167,
-      "brotli_bytes": 1047019
+      "chunks": 48,
+      "gzip_bytes": 1092910,
+      "brotli_bytes": 933904
     }
   ]
 }

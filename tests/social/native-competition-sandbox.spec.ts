@@ -757,6 +757,7 @@ async function expectWaveSectionOffered(
 ) {
   const direct = waveSectionButton(page, name, app);
   const more = phoneWaveMore(page);
+  if (available) await expect(direct.or(more).first()).toBeVisible();
   if (await more.isVisible()) {
     await more.click();
     const sheet = phoneWaveSections(page);
@@ -2147,7 +2148,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
             type: "touchStart",
             touchPoints: [{ x: 16, y }],
           });
-          for (const x of [32, 64, 100, 156]) {
+          for (const x of [32, 64, 100, 196]) {
             await page.evaluate(
               () =>
                 new Promise<void>((resolve) =>
@@ -13487,14 +13488,16 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await expect(name).toHaveValue("Keyboard layout draft");
       }
       await expect(name).toBeVisible({ timeout: 30000 });
+      await expect(footer).toBeInViewport();
+      let restingBottom = 0;
+      // Capture a rendered baseline in the same poll that validates it.
       await expect
-        .poll(() =>
-          footer.evaluate((element) => element.getBoundingClientRect().bottom)
-        )
+        .poll(async () => {
+          const bounds = await footer.boundingBox();
+          restingBottom = bounds ? bounds.y + bounds.height : 0;
+          return restingBottom;
+        })
         .toBeCloseTo(page.viewportSize()!.height, 0);
-      const restingBottom = await footer.evaluate(
-        (element) => element.getBoundingClientRect().bottom
-      );
       for (const label of ["Decision name", "Description"]) {
         const field = page.getByLabel(label, { exact: true });
         expect(
@@ -16265,14 +16268,22 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           .getByRole("link", { name: "New decision", exact: true })
           .locator(":scope > span")
       ).toHaveCSS("font-weight", "500");
-      const [curationAction, decisionAction] = await Promise.all([
-        newCuration.boundingBox(),
-        newDecision.boundingBox(),
-      ]);
-      expect(curationAction!.x + curationAction!.width).toBeCloseTo(
-        decisionAction!.x + decisionAction!.width,
-        0
-      );
+      await expect
+        .poll(
+          () =>
+            newCuration.or(newDecision).evaluateAll((actions) => {
+              const [first, second] = actions;
+              if (!first || !second || actions.length !== 2) {
+                return Number.POSITIVE_INFINITY;
+              }
+              return (
+                first.getBoundingClientRect().right -
+                second.getBoundingClientRect().right
+              );
+            }),
+          { message: "Curation and Decision actions should align on the right" }
+        )
+        .toBeCloseTo(0, 0);
       await page.screenshot({
         path: testInfo.outputPath(`phone-decisions-empty-${surface}.png`),
         animations: "disabled",

@@ -1,5 +1,11 @@
 import type { ApiDeviceGrant } from "@/generated/models/ApiDeviceGrant";
-import { createStore, get, set, values } from "@/lib/storage/idb-keyval";
+import {
+  createStore,
+  get,
+  set,
+  values,
+  type IndexedDbFailureHandler,
+} from "@/lib/storage/idb-keyval";
 
 /** One browser-held device key per lowercase wallet address. */
 export interface StoredDeviceKey {
@@ -28,10 +34,15 @@ const getStore = () => {
 };
 
 export const deviceKeyStorage = {
-  read: (address: string): Promise<StoredDeviceKey | undefined> =>
-    get<StoredDeviceKey>(address, getStore()),
-  write: (record: StoredDeviceKey): Promise<void> =>
-    set(record.address, record, getStore()),
+  read: (
+    address: string,
+    onFailure?: IndexedDbFailureHandler
+  ): Promise<StoredDeviceKey | undefined> =>
+    get<StoredDeviceKey>(address, getStore(), onFailure),
+  write: (
+    record: StoredDeviceKey,
+    onFailure?: IndexedDbFailureHandler
+  ): Promise<void> => set(record.address, record, getStore(), onFailure),
   readAll: (): Promise<StoredDeviceKey[]> =>
     values<StoredDeviceKey>(getStore()),
 };
