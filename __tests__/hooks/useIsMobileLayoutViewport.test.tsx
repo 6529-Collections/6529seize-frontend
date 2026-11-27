@@ -1,4 +1,4 @@
-import { act, renderHook } from "@testing-library/react";
+import { act, cleanup, renderHook } from "@testing-library/react";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 
 /** Sets the jsdom viewport width for viewport snapshot tests. */
@@ -14,6 +14,7 @@ describe("useIsMobileLayoutViewport", () => {
   const originalWidth = globalThis.window.innerWidth;
 
   afterEach(() => {
+    cleanup();
     setViewportWidth(originalWidth);
     jest.restoreAllMocks();
   });
@@ -89,6 +90,22 @@ describe("useIsMobileLayoutViewport", () => {
     resize(1024);
     expect(first.result.current).toBe(false);
     expect(second.result.current).toBe(false);
+  });
+
+  it("reads the live layout for a new consumer while a resize is pending", () => {
+    setViewportWidth(1440);
+    const first = renderHook(useIsMobileLayoutViewport);
+
+    setViewportWidth(1023);
+    const next = renderHook(useIsMobileLayoutViewport);
+    expect(first.result.current).toBe(false);
+    expect(next.result.current).toBe(true);
+
+    act(() => {
+      globalThis.window.dispatchEvent(new Event("resize"));
+    });
+    expect(first.result.current).toBe(true);
+    expect(next.result.current).toBe(true);
   });
 
   it("removes the shared resize listener when the last consumer unmounts", () => {

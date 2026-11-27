@@ -17,6 +17,7 @@ const isMobileLayoutViewport = () => {
 };
 
 const subscribers = new Set<() => void>();
+// Tracks the last layout seen by the resize listener. Snapshots read the live width.
 let lastIsMobile = false;
 
 const handleMobileLayoutResize = () => {
@@ -39,8 +40,8 @@ const subscribe = (onStoreChange: () => void) => {
   }
 
   if (subscribers.size === 0) {
-    lastIsMobile = isMobileLayoutViewport();
     browserWindow.addEventListener("resize", handleMobileLayoutResize);
+    lastIsMobile = isMobileLayoutViewport();
   }
 
   subscribers.add(onStoreChange);
