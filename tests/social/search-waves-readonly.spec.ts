@@ -10,6 +10,11 @@ import {
 } from "../testHelpers";
 import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
 import { expectUrlState } from "../support/urlState";
+import {
+  installComingUpFixture,
+  installCompletedMintStatus,
+  loadingTestArtwork,
+} from "../home/homeDropFixtures";
 import { installHomeArtworkFixture } from "../support/homeArtworkFixture";
 
 const NAVIGATION_TIMEOUT_MS = 15000;
@@ -179,6 +184,19 @@ async function gotoReady(page: Page, path: string) {
   await gotoDocumentWithTransientRetry(page, path);
   await waitForRouteReady(page);
   await expectNoHorizontalOverflow(page);
+}
+
+async function gotoHomeWithStableArtwork(page: Page) {
+  // Search contracts should not depend on the current mint's interactive media.
+  await installComingUpFixture(page);
+  await installCompletedMintStatus(page);
+  await gotoReady(page, "/");
+  await expect(
+    page
+      .getByRole("main")
+      .first()
+      .getByRole("img", { name: loadingTestArtwork.name, exact: true })
+  ).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
 }
 
 async function firstVisible(locator: Locator) {
@@ -1096,7 +1114,7 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
   test("delegation page search discovers the Safe Collecting family without legacy titles", async ({
     page,
   }) => {
-    await gotoReady(page, "/");
+    await gotoHomeWithStableArtwork(page);
     const { searchInput } = await openHeaderSearch(page);
     await searchInput.fill("delegation");
     await page.getByRole("tab", { name: /^Pages/ }).click();
@@ -1175,7 +1193,7 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
   test("global header search preserves keyboard flow and page navigation", async ({
     page,
   }) => {
-    await gotoReady(page, "/");
+    await gotoHomeWithStableArtwork(page);
 
     const { searchButton, searchInput } = await openHeaderSearch(page);
     await expect(
