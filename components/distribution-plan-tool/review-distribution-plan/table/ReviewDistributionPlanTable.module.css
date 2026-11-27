@@ -34,6 +34,8 @@
   }
 }
 
+/* Keep the explicit table roles in the markup for iOS 16.4. Older WebKit can
+   lose native table semantics when these elements switch to block or grid. */
 @container emma-review-table (max-width: 34rem) {
   .table,
   .table thead,

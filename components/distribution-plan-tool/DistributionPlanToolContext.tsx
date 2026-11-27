@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useRef, useState } from "react";
+import { createContext, useCallback, useEffect, useRef, useState } from "react";
 
 import type { AppToastInput } from "@/components/utils/toast/AppToast";
 import { showAppToast, showAppToasts } from "@/components/utils/toast/AppToast";
@@ -104,15 +104,27 @@ export default function DistributionPlanToolContextWrapper({
 }: {
   children: React.ReactNode;
 }) {
-  const [step, setActiveStep] = useState<DistributionPlanToolStep>(
+  const [activeStep, setActiveStep] = useState<DistributionPlanToolStep>(
     DistributionPlanToolStep.CREATE_PLAN
   );
   const stepRef = useRef(DistributionPlanToolStep.CREATE_PLAN);
   const planRequest = useRef(0);
+  const activePlanId = useRef<string | null>(null);
+
+  useEffect(
+    () => () => {
+      planRequest.current += 1;
+      activePlanId.current = null;
+    },
+    []
+  );
+
   const setStep = useCallback((next: DistributionPlanToolStep) => {
     stepRef.current = next;
     setActiveStep(next);
-    writeEmmaPlanStep(next);
+    if (activePlanId.current !== null) {
+      writeEmmaPlanStep(activePlanId.current, next);
+    }
   }, []);
   const [fetching, setFetching] = useState(false);
   const [operations, setOperations] = useState<AllowlistOperation[]>([]);
@@ -132,6 +144,7 @@ export default function DistributionPlanToolContextWrapper({
 
   const runOperations = async () => {
     if (!distributionPlan) return;
+    const request = planRequest.current;
     const endpoint = `/allowlists/${distributionPlan.id}/runs`;
     setFetching(true);
     const { success, data } =
@@ -141,13 +154,17 @@ export default function DistributionPlanToolContextWrapper({
           allowlistId: distributionPlan.id,
         },
       });
+    if (request !== planRequest.current) return;
     if (success && data) {
       await setState(data);
+    } else {
+      setFetching(false);
     }
-    setFetching(false);
   };
 
   const fetchOperations = async (distributionPlanId: string) => {
+    if (distributionPlanId !== activePlanId.current) return;
+    // A newer plan load owns the operation list once setState starts it.
     const request = planRequest.current;
     const data = await readPlanData<AllowlistOperation[]>(
       `/allowlists/${distributionPlanId}/operations`
@@ -158,6 +175,7 @@ export default function DistributionPlanToolContextWrapper({
   const setState = useCallback(
     async (plan: AllowlistDescription | null) => {
       const request = ++planRequest.current;
+      activePlanId.current = plan?.id ?? null;
       if (!plan) {
         setStep(DistributionPlanToolStep.CREATE_PLAN);
         setDistributionPlan(null);
@@ -232,7 +250,7 @@ export default function DistributionPlanToolContextWrapper({
     <>
       <DistributionPlanToolContext.Provider
         value={{
-          step,
+          step: activeStep,
           setStep,
           fetching,
           runOperations,

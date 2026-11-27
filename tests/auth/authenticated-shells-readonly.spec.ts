@@ -15,6 +15,7 @@ import {
 import { ApiSubscriptionCoverageStatus } from "../../generated/models/ApiSubscriptionCoverageStatus";
 import { ApiSubscriptionCoverageMode } from "../../generated/models/ApiSubscriptionCoverageMode";
 import { isCapacitorSimulationProject } from "../support/surfaceSimulation";
+import { expectUrlState } from "../support/urlState";
 
 const plan = {
   id: "emma-layout-fixture",
@@ -2032,14 +2033,24 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
 
     await page.reload();
     await expect(phase).toBeVisible();
-    await expect(page).toHaveURL(/\?step=review$/);
+    await expectUrlState(
+      page,
+      (url) =>
+        url.pathname === `/emma/plans/${plan.id}` &&
+        url.searchParams.get("step") === "review"
+    );
 
     ready = false;
     await page.reload();
     await expect(
       page.getByRole("heading", { name: "Create Snapshots" })
     ).toBeVisible();
-    await expect(page).toHaveURL(/\?step=create-snapshots$/);
+    await expectUrlState(
+      page,
+      (url) =>
+        url.pathname === `/emma/plans/${plan.id}` &&
+        url.searchParams.get("step") === "create-snapshots"
+    );
   });
 
   for (const width of [320, 768, 1440]) {

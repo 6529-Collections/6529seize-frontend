@@ -21,9 +21,13 @@ const steps = Object.values(DistributionPlanToolStep);
 const stepSlug = (step: DistributionPlanToolStep) =>
   step.toLowerCase().replaceAll("_", "-");
 
-export function writeEmmaPlanStep(step: DistributionPlanToolStep) {
+export function writeEmmaPlanStep(
+  planId: string,
+  step: DistributionPlanToolStep
+) {
   const url = new URL(window.location.href);
-  if (!/^\/emma\/plans\/[a-zA-Z0-9_-]+\/?$/.test(url.pathname)) return;
+  const planPath = `/emma/plans/${planId}`;
+  if (url.pathname !== planPath && url.pathname !== `${planPath}/`) return;
   const slug = stepSlug(step);
   if (url.searchParams.get("step") !== slug) {
     url.searchParams.set("step", slug);
@@ -52,6 +56,7 @@ function lastAvailableStep(
     ({ code }) => code === AllowlistOperationCode.CREATE_TOKEN_POOL
   );
   const snapshotIncomplete = snapshots.some((snapshot) => {
+    // The create-snapshot operation stores the token pool ID in params.id.
     const download = downloads?.find(
       ({ tokenPoolId }) => tokenPoolId === snapshot.params["id"]
     );

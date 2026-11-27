@@ -544,11 +544,8 @@ export function SubscriptionFooterMain({
   const publishStatusKey = isLoadingOverview
     ? "emma.review.checkingDistribution"
     : publishBlockReason;
-  const publication = overview?.github_publication;
-  const published =
-    publication?.folder === `card${Number(confirmedTokenId)}`
-      ? publication
-      : undefined;
+  const published = overview?.github_publication;
+  const claim = Number(confirmedTokenId);
 
   return (
     <div className="tw-min-w-0 tw-py-3 tw-@container">
@@ -624,9 +621,9 @@ export function SubscriptionFooterMain({
         <h3 id={photosHeadingId} className={footerHeadingClass}>
           {photosLabel}
         </h3>
-        {overview?.is_normalized && (
-          <FinalizedDistributionCounts claim={Number(confirmedTokenId)} />
-        )}
+        {overview?.is_normalized &&
+          Number.isSafeInteger(claim) &&
+          claim > 0 && <FinalizedDistributionCounts claim={claim} />}
         <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2">
           <span className="tw-text-sm tw-tabular-nums tw-text-iron-400">
             {isLoadingOverview

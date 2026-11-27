@@ -69,6 +69,7 @@ export function ReviewDistributionExports({
                 <ChevronDownIcon className="tw-size-3" aria-hidden="true" />
               </Button>
             }
+            // File format and product names are the same across locales.
             items={[
               {
                 id: FetchResultsType.JSON,

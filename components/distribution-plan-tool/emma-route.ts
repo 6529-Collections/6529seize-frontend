@@ -1,4 +1,4 @@
-export const emmaStepSlugs = [
+const emmaStepSlugs = [
   "create-plan",
   "create-snapshots",
   "create-custom-snapshot",

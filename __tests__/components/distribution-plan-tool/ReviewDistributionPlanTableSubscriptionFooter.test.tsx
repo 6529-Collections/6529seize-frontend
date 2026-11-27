@@ -909,7 +909,7 @@ test("shows finalized Craft totals above the controls in Distribution Photos", a
     .mockResolvedValue([{ phase: "Phase 0", addresses: 46, total: 70 }]);
   jest
     .mocked(getMemesMintingAllowlists)
-    .mockResolvedValue([{ phase: "Phase 0", addresses: 196, total: 196 }]);
+    .mockResolvedValue([{ phase: "Phase_0", addresses: 196, total: 196 }]);
   render(<TestWrapper initialTokenId="123" />);
   const photos = within(
     screen.getByRole("region", { name: "Distribution Photos" })

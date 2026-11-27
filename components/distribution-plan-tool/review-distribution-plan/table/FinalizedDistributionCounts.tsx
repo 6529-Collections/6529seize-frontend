@@ -1,8 +1,5 @@
 import Button from "@/components/utils/button/Button";
-import {
-  normalizeDistributionPhase,
-  normalizeRootPhase,
-} from "@/components/drop-forge/craft/craft-claim-helpers";
+import { normalizeDistributionPhase } from "@/components/drop-forge/craft/craft-claim-helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger, selectPluralCategory } from "@/i18n/format";
 import { t } from "@/i18n/messages";
@@ -96,7 +93,7 @@ export function FinalizedDistributionCounts({
               phaseNames.includes(normalizeDistributionPhase(phase))
             );
             const allowlist = data.allowlists.find(({ phase }) =>
-              phaseNames.includes(normalizeRootPhase(phase))
+              phaseNames.includes(normalizeDistributionPhase(phase))
             );
             return (
               <tr key={key}>

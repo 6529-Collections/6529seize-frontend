@@ -117,6 +117,15 @@ test("restores the requested step from saved progress and clamps premature Revie
   expect(restoreEmmaPlanStep(review, [], [], [])).toBe(
     DistributionPlanToolStep.CREATE_SNAPSHOTS
   );
+  const snapshot = {
+    ...operations[0]!,
+    code: AllowlistOperationCode.CREATE_TOKEN_POOL,
+    hasRan: true,
+    params: { id: "tok1" },
+  };
+  expect(restoreEmmaPlanStep(review, [snapshot], [], [])).toBe(
+    DistributionPlanToolStep.CREATE_PHASES
+  );
   const operation = {
     ...operations[0]!,
     code: AllowlistOperationCode.MAP_RESULTS_TO_DELEGATED_WALLETS,
@@ -192,6 +201,50 @@ describe("DistributionPlanToolContext", () => {
     });
     mockShowAppToast.mockClear();
     mockShowAppToasts.mockClear();
+  });
+
+  afterEach(() => {
+    window.history.replaceState(null, "", "/");
+  });
+
+  it("writes a restored step back to the same plan's URL", async () => {
+    window.history.replaceState(null, "", "/emma/plans/1?step=review");
+    setup();
+
+    await act(async () => {
+      screen.getByTestId("set-plan").click();
+    });
+
+    expect(window.location.search).toBe("?step=create-snapshots");
+  });
+
+  it.each([
+    {
+      scenario: "after navigating to another plan",
+      nextPath: "/emma/plans/2?step=review",
+      unmount: false,
+    },
+    {
+      scenario: "after unmounting",
+      nextPath: "/emma/plans/1?step=review",
+      unmount: true,
+    },
+  ])("ignores a late restore $scenario", async ({ nextPath, unmount }) => {
+    window.history.replaceState(null, "", "/emma/plans/1?step=review");
+    const pending = Promise.withResolvers<{ success: boolean; data: [] }>();
+    jest.mocked(distributionPlanApiFetch).mockReturnValueOnce(pending.promise);
+    const view = setup();
+
+    await act(async () => {
+      screen.getByTestId("set-plan").click();
+    });
+    if (unmount) view.unmount();
+    window.history.replaceState(null, "", nextPath);
+    await act(async () => {
+      pending.resolve({ success: true, data: [] });
+    });
+
+    expect(window.location.pathname + window.location.search).toBe(nextPath);
   });
 
   it("renders children and default step", () => {
