@@ -294,7 +294,7 @@
     "uuid": "14.0.0",
     "viem": "2.52.2",
     "wagmi": "2.19.5",
-    "zod": "3.25.76"
+    "zod": "4.6.6"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.12.1",
