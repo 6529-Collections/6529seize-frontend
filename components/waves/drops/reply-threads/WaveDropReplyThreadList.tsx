@@ -10,6 +10,7 @@ import HighlightDropWrapper from "@/components/drops/view/HighlightDropWrapper";
 import { useLinkedReply, useWaveReplyThreads } from "./WaveReplyThreadsContext";
 import { useCallback, useMemo } from "react";
 import type { RenderThreadReply } from "./WaveDropReplyThread";
+import { withWaveAdminFlags } from "./withWaveAdminFlags";
 
 interface WaveDropReplyThreadListProps {
   readonly id: string;
@@ -60,8 +61,8 @@ export default function WaveDropReplyThreadList({
         previous: drops,
         streamDrops: waveMessages?.drops ?? [],
         parentDropId,
-      }),
-    [data, drops, parentDropId, waveMessages]
+      }).map((reply) => withWaveAdminFlags(reply, wave)),
+    [data, drops, parentDropId, wave, waveMessages]
   );
 
   return (

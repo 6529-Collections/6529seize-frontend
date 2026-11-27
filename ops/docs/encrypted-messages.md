@@ -287,8 +287,11 @@ Select **Direct Message** on someone’s profile or profile card to open
 chat** for an existing encrypted conversation or **Start chat** for a new one.
 Opening the composer creates no conversation.
 
-In the 6529 app, the back arrow to the left of the chat avatar returns to the
-encrypted messages list. It stays visible on iPad in portrait and landscape.
+In the 6529 app, the back arrow to the left of the chat avatar (and a swipe
+to the right) returns to the list you opened the chat from: **Messages** or the
+encrypted messages list. A chat opened another way, such as from a profile or a
+link, returns to the encrypted messages list. The arrow stays visible on iPad
+in portrait and landscape.
 
 1. Select **+** beside **Messages** to open **New message** at `/messages/new`.
    On desktop, the chat list stays beside the form.
@@ -796,6 +799,14 @@ restore it on a new device.
 
 - Unread and mention counts appear on encrypted chats and count toward the
   Messages badge.
+- **Read sync across your own devices.** Reading an encrypted chat on one of
+  your devices marks it read on your other devices too, usually within a
+  minute. Your devices share read positions through a hidden encrypted chat
+  that only your own devices are in; 6529 cannot read it. A device joins once
+  it runs the current version and its wallet is trusted on your other devices
+  (see [Device trust](#device-trust)); a device added very recently can take a
+  few minutes longer. Encrypted backups include read positions, so a restore
+  brings them back. The bell and app-icon badge work as before.
 - Phone message pushes use title **New encrypted message** and body
   **Open 6529 Mobile to view** in production or **Open 6529 Staging to view**
   on staging. Invitation pushes say that you were added to an encrypted chat.
@@ -1044,7 +1055,8 @@ menu remain available. Pending, unsent, deleted and unreadable messages, notices
 and read-only conversations do not offer swipe to reply. Links, media controls and text selection keep their own interactions.
 
 In the native app, swipe right across conversation content to return to the
-Encrypted messages list, or use the existing Back control. Reverse below the
+same list as the Back control: **Messages** for a chat opened there, otherwise
+the Encrypted messages list. Reverse below the
 gesture threshold before release to cancel the return. Vertical scrolling
 and multi-touch do not trigger the shortcut. Reduced motion removes the added
 settling animation.

@@ -93,6 +93,36 @@ describe("display time zone store", () => {
     expect(listener).toHaveBeenCalledTimes(2);
   });
 
+  it("shares one snapshot across subscribers and skips unchanged settings", () => {
+    const first = jest.fn(getDisplayTimeZoneSnapshot);
+    const second = jest.fn(getDisplayTimeZoneSnapshot);
+    const unsubscribeFirst = subscribeToDisplayTimeZone(first);
+    const unsubscribeSecond = subscribeToDisplayTimeZone(second);
+    const storageEvent = new StorageEvent("storage", {
+      key: DISPLAY_TIME_ZONE_STORAGE_KEY,
+    });
+
+    try {
+      globalThis.localStorage.setItem(DISPLAY_TIME_ZONE_STORAGE_KEY, "UTC");
+      globalThis.dispatchEvent(storageEvent);
+
+      const snapshot = getDisplayTimeZoneSnapshot();
+      expect(snapshot.preference).toBe("UTC");
+      expect(first.mock.results[0]?.value).toBe(snapshot);
+      expect(second.mock.results[0]?.value).toBe(snapshot);
+
+      globalThis.dispatchEvent(storageEvent);
+      setDisplayTimeZonePreference("UTC");
+
+      expect(first).toHaveBeenCalledTimes(1);
+      expect(second).toHaveBeenCalledTimes(1);
+      expect(getDisplayTimeZoneSnapshot()).toBe(snapshot);
+    } finally {
+      unsubscribeFirst();
+      unsubscribeSecond();
+    }
+  });
+
   it("keeps working when storage throws", () => {
     const getItem = jest
       .spyOn(Storage.prototype, "getItem")

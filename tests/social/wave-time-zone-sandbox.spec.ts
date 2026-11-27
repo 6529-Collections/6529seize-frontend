@@ -3,6 +3,7 @@ import { DEFAULT_LONG_PRESS_DURATION_MS } from "../../hooks/useLongPressInteract
 import { expect, expectNoHorizontalOverflow, test } from "../testHelpers";
 import {
   getSandboxApiOrigin,
+  installLocalSandboxBrowserMutationGuard,
   useLocalSandboxMutationGuard,
 } from "../support/localSandbox";
 import {
@@ -485,24 +486,41 @@ test.describe("Display time zone @auth @local-only", () => {
     await expect(seededTime).toHaveText("Apr 21, 2024");
   });
 
-  test("Preferences saves UTC on the device and waves use it after hydration", async ({
+  test("Preferences updates an open Wave in another tab and survives reload", async ({
+    baseURL,
+    context,
     page,
   }, testInfo) => {
-    await page.goto("/preferences?tab=time-zone");
-    await expect(
-      page.getByRole("heading", { name: "Show times in" })
-    ).toBeVisible();
-    // The radio input is visually hidden; its row is the label to click.
-    await page.getByText(/The same for everyone/).click();
-    await expect(page.getByRole("radio", { name: "UTC" })).toBeChecked();
-
+    const isPhone = testInfo.project.name === "web-mobile-chromium";
     await page.goto(`/waves/${WAVE}`);
     const seededTime = seededPostTime(page);
-    const isPhone = testInfo.project.name === "web-mobile-chromium";
     await expect(seededTime).toHaveText(
-      isPhone ? "Apr 22, 2024" : "Apr 22, 2024 - 12:00 AM UTC"
+      isPhone ? "Apr 21, 2024" : "Apr 21, 2024 - 08:00 PM"
     );
-    // A saved setting is not the temporary switch, so no chip is shown.
+
+    const preferences = await context.newPage();
+    const guard = await installLocalSandboxBrowserMutationGuard(
+      preferences,
+      baseURL
+    );
+    try {
+      await preferences.goto("/preferences?tab=time-zone");
+      await expect(
+        preferences.getByRole("heading", { name: "Show times in" })
+      ).toBeVisible();
+      await preferences.getByText(/The same for everyone/).click();
+      await expect(
+        preferences.getByRole("radio", { name: "UTC" })
+      ).toBeChecked();
+      guard.assertNoBlockedMutations();
+    } finally {
+      await preferences.close();
+    }
+
+    const utcTime = isPhone ? "Apr 22, 2024" : "Apr 22, 2024 - 12:00 AM UTC";
+    await expect(seededTime).toHaveText(utcTime);
+    await page.reload();
+    await expect(seededTime).toHaveText(utcTime);
     await expect(page.getByText("Times in UTC")).toHaveCount(0);
   });
 });
