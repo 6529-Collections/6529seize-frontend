@@ -1,4 +1,5 @@
 import type { ApiDeviceGrant } from "@/generated/models/ApiDeviceGrant";
+import type { IndexedDbFailureHandler } from "@/lib/storage/idb-keyval";
 import { requestPersistentStorage } from "@/lib/storage/persistent-storage";
 import { generateDeviceKeyPair } from "./ed25519";
 import { deviceKeyStorage, type StoredDeviceKey } from "./device-key-storage";
@@ -224,6 +225,12 @@ export async function forgetDeviceGrant(
   }
 }
 
+interface SequenceAllocationDiagnostics {
+  /** Called once the cross-tab lock is held, for timing diagnostics. */
+  readonly onLocked: () => void;
+  readonly onStorageFailure: IndexedDbFailureHandler;
+}
+
 /**
  * Allocates the next sequence number for a usable grant and persists it
  * before anything is signed, so a sequence is never reused.
@@ -231,8 +238,7 @@ export async function forgetDeviceGrant(
 export async function allocateDeviceSeq(
   address: string,
   nowMs: number,
-  /** Called once the cross-tab lock is held, for timing diagnostics. */
-  onLocked?: () => void
+  diagnostics?: SequenceAllocationDiagnostics
 ): Promise<{
   readonly record: StoredDeviceKey;
   readonly grant: ApiDeviceGrant;
@@ -240,8 +246,11 @@ export async function allocateDeviceSeq(
 } | null> {
   const normalized = normalizeAddress(address);
   return await withDeviceKeyLock(normalized, async () => {
-    onLocked?.();
-    const record = await deviceKeyStorage.read(normalized);
+    diagnostics?.onLocked();
+    const record = await deviceKeyStorage.read(
+      normalized,
+      diagnostics?.onStorageFailure
+    );
     const grant = record ? getUsableGrant(record, nowMs) : null;
     writeDeviceGrantHint(normalized, grant, record?.ownProfileId);
     if (!record || !grant) {
@@ -249,7 +258,7 @@ export async function allocateDeviceSeq(
     }
     const seq = Math.max(record.lastSeq + 1, nowMs);
     const updated: StoredDeviceKey = { ...record, lastSeq: seq };
-    await deviceKeyStorage.write(updated);
+    await deviceKeyStorage.write(updated, diagnostics?.onStorageFailure);
     return { record: updated, grant, seq };
   });
 }

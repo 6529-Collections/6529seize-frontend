@@ -1,4 +1,5 @@
 import * as Sentry from "@sentry/nextjs";
+import type { IndexedDbOperation } from "@/lib/storage/idb-keyval";
 
 /**
  * Why a device-signed write was not signed on its first attempt. "unsupported"
@@ -22,6 +23,8 @@ interface SignedWriteFallbackReport {
   readonly action: string;
   readonly reason: SignedWriteFallbackReason;
   readonly phase: SigningPhase;
+  /** Failed IndexedDB operation, when the storage layer could identify it. */
+  readonly storageOperation?: IndexedDbOperation | undefined;
   /** Time spent signing before the failure, in milliseconds. */
   readonly elapsedMs?: number | undefined;
   /** Time spent waiting for the cross-tab key lock, in milliseconds. */
@@ -51,6 +54,9 @@ export function reportSignedWriteFallback(
       signing_action: report.action,
       signing_fallback_reason: report.reason,
       signing_phase: report.phase,
+      ...(report.storageOperation && {
+        signing_storage_operation: report.storageOperation,
+      }),
     };
     Sentry.addBreadcrumb({
       category: CATEGORY,
