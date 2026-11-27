@@ -3,6 +3,18 @@ import type { Page, TestInfo } from "@playwright/test";
 import { expect } from "../testHelpers";
 import { attachRedactedTextArtifact } from "./artifactRedaction";
 
+/** Seed the app's sidebar preference, never a sandboxed artwork's storage. */
+export async function seedSidebarCollapsedState(
+  page: Page,
+  collapsed: boolean
+) {
+  await page.addInitScript((value) => {
+    // Init scripts also execute in child frames, including opaque-origin art.
+    if (window !== window.top) return;
+    globalThis.sessionStorage.setItem("sidebarCollapsed", String(value));
+  }, collapsed);
+}
+
 type BundleTiming = {
   path: string;
   startedMs: number;
