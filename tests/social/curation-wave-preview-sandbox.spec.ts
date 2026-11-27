@@ -299,6 +299,65 @@ test.describe("Profile-wave badge preview @auth @local-only", () => {
     await expect(badge).toBeFocused();
   });
 
+  test("uses the sheet on a compact desktop and hover at the desktop breakpoint", async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-desktop-chromium",
+      "Non-touch viewport interaction contract"
+    );
+    await page.setViewportSize({ width: 513, height: 900 });
+    const badge = await installPreview(page, baseURL, { tiles: 1 });
+    await expect(badge).toHaveAttribute("aria-haspopup", "dialog");
+    await badge.click();
+    const sheet = page.getByRole("dialog");
+    const openWave = sheet.getByRole("link", { name: "Open profile wave" });
+    await expect(openWave).toHaveAttribute(
+      "href",
+      `/waves/${WAVE}?curation=preview`
+    );
+    await sheet.getByRole("button", { name: "Show all waves" }).click();
+    await expect(
+      sheet.getByText("Created wave 2", { exact: true })
+    ).toBeVisible();
+    const openBounds = await openWave.boundingBox();
+    const toggleBounds = await sheet
+      .getByRole("button", { name: "Hide waves" })
+      .boundingBox();
+    if (!openBounds || !toggleBounds)
+      throw new Error("Sheet actions must have layout bounds");
+    expect(openBounds.height).toBe(44);
+    expect(openBounds.width).toBe(513 - 32);
+    expect(toggleBounds.y).toBeGreaterThanOrEqual(
+      openBounds.y + openBounds.height
+    );
+    const close = await expectFloatingCloseButton(sheet);
+    await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(page, testInfo, "profile-wave-compact-desktop");
+    await close.click();
+    await expect(sheet).toHaveCount(0);
+    await expect(badge).toBeFocused();
+
+    await page.setViewportSize({ width: 1023, height: 900 });
+    await expect(badge).toHaveAttribute("aria-haspopup", "dialog");
+    await badge.press("Enter");
+    await expectFloatingCloseButton(sheet);
+    await page.keyboard.press("Escape");
+    await expect(sheet).toHaveCount(0);
+    await expect(badge).toBeFocused();
+
+    await page.setViewportSize({ width: 1024, height: 900 });
+    await expect(badge).not.toHaveAttribute("aria-haspopup", "dialog");
+    await badge.hover();
+    await expect(
+      page.getByRole("dialog").getByRole("link", { name: "Open profile wave" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("dialog").getByRole("button", { name: "Close", exact: true })
+    ).toHaveCount(0);
+  });
+
   for (const tiles of [0, 1]) {
     test(`fits short content with ${tiles} preview tiles`, async ({
       page,

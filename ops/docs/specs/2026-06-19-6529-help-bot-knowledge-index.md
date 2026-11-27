@@ -391,6 +391,10 @@ and smaller-layout field menu. Keep these instructions aligned with the header.
 The drop-actions record covers current reactor names in desktop tooltips and
 Reactions dialogs, touch long press, live count updates, and closing and reopening
 details to retry a failed names request without reloading the thread.
+It also describes profile-wave badge previews: touch devices and windows narrower
+than 1024px open the sheet, with a full-width `Open profile wave` action and the
+`Show all waves` / `Hide waves` disclosure beneath it. Mouse and trackpad devices
+in wider windows retain the hover preview and direct badge navigation.
 
 The Waves navigation record distinguishes the mobile web and native headers.
 Mobile web keeps its site header, feed icon and labeled `Create wave` button.

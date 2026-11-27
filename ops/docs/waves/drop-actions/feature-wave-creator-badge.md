@@ -8,9 +8,10 @@ as a square profile-wave picture badge.
 
 Selecting the compact water-drop button opens the shared created-waves viewer
 (`Waves by {profile}`), so users can jump into waves that author created.
-On touch devices, selecting the profile-wave badge opens that author's
-profile-wave preview sheet. On desktop, hover to open the preview or click the
-badge to open the profile wave directly. The preview shows artwork, the wave
+On touch devices or in windows narrower than 1024px, selecting the profile-wave
+badge opens that author's profile-wave preview sheet. On wider desktop windows,
+hover to open the preview or click the badge to open the profile wave directly.
+The preview shows artwork, the wave
 name and description, and `Open profile wave`. Select `Show all waves` to expand
 the author's created-waves list, or `Hide waves` to collapse it. The expanded
 section includes `Show all brain activity`, which opens `/{user}/brain`.
@@ -32,7 +33,8 @@ section includes `Show all brain activity`, which opens `/{user}/brain`.
   author-status badges.
 - Select the water-drop button, or the profile-wave badge in the chat feed.
 - On mouse and trackpad devices, the compact button's tooltip says
-  `View created waves`. Hovering the profile-wave badge shows a preview with
+  `View created waves`. In desktop windows at least 1024px wide, hovering the
+  profile-wave badge shows a preview with
   a primary-colored `Open profile wave` link and a neutral `Show all waves`
   disclosure.
 
@@ -43,9 +45,9 @@ section includes `Show all brain activity`, which opens `/{user}/brain`.
 2. If the author is a wave creator, the water-drop badge or profile-wave badge
    appears in the author identity row.
 3. Select the compact water-drop button to open the shared
-   `Waves by {profile}` viewer. For a profile-wave badge, tap on touch or hover
-   on desktop to open the preview. Clicking that badge on desktop opens the
-   profile wave directly.
+   `Waves by {profile}` viewer. For a profile-wave badge, tap on touch or click
+   in a window narrower than 1024px to open the sheet. On wider desktop windows,
+   hover to preview or click to open the profile wave directly.
 4. From the profile-wave preview, select `Open profile wave` to open the
    featured wave or `Show all waves` to expand the created-waves list.
 5. If the viewer opened, review created-wave rows, then select a row to open
@@ -64,10 +66,11 @@ section includes `Show all brain activity`, which opens `/{user}/brain`.
   tab overflow flow.
 - The profile-wave preview fetches the expanded created-waves list only after
   the user selects `Show all waves`.
-- Mouse and trackpad devices use the hover card, including narrow desktop
-  windows. It expands into a second panel when space allows, growing from the
-  badge-side edge while remaining inside the viewport.
-- Touch devices, including tablets, use the sheet regardless of window width.
+- Mouse and trackpad devices use the hover card in windows at least 1024px wide.
+  It expands into a second panel when space allows, growing from the badge-side
+  edge while remaining inside the viewport.
+- Windows narrower than 1024px use the sheet, including on mouse and trackpad
+  devices. Touch devices, including tablets, use the sheet at every window width.
   `Open profile wave` is a full-width button above the centered
   `Show all waves` / `Hide waves` disclosure.
 - The sheet fits shorter content. Longer content scrolls together, including the

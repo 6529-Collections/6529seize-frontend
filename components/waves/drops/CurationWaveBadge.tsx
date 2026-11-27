@@ -17,6 +17,7 @@ import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import HoverCard from "@/components/utils/tooltip/HoverCard";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import type { CurationPreviewHoverLayout } from "./curation-preview/types";
 import { CurationWavePreviewCard } from "./CurationWavePreviewCard";
 
@@ -54,6 +55,7 @@ export const CurationWaveBadge: React.FC<CurationWaveBadgeProps> = ({
   wavePfp,
 }) => {
   const { hasTouchScreen } = useDeviceInfo();
+  const isMobileLayoutViewport = useIsMobileLayoutViewport();
   const isClientHydrated = useSyncExternalStore(
     subscribeToClientRender,
     getClientRenderSnapshot,
@@ -107,7 +109,8 @@ export const CurationWaveBadge: React.FC<CurationWaveBadgeProps> = ({
   const imageSize = IMAGE_SIZE[size];
   const showImage = waveImageSrc !== null && failedImageSrc !== waveImageSrc;
   const imageSrc = showImage ? waveImageSrc : null;
-  const usesSheetPreview = isClientHydrated && hasTouchScreen;
+  const usesSheetPreview =
+    isClientHydrated && (hasTouchScreen || isMobileLayoutViewport);
 
   const previewCard = (
     <CurationWavePreviewCard
