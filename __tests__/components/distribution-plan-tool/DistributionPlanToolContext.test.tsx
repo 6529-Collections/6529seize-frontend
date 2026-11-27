@@ -4,7 +4,10 @@ import DistributionPlanToolContextWrapper, {
   DistributionPlanToolContext,
   DistributionPlanToolStep,
 } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
-import { AllowlistOperationCode } from "@/components/allowlist-tool/allowlist-tool.types";
+import {
+  AllowlistOperationCode,
+  DistributionPlanTokenPoolDownloadStatus,
+} from "@/components/allowlist-tool/allowlist-tool.types";
 import {
   getRequestedEmmaPlanStep,
   restoreEmmaPlanStep,
@@ -123,9 +126,36 @@ test("restores the requested step from saved progress and clamps premature Revie
     hasRan: true,
     params: { id: "tok1" },
   };
-  expect(restoreEmmaPlanStep(review, [snapshot], [], [])).toBe(
+  const completed = DistributionPlanTokenPoolDownloadStatus.COMPLETED;
+  const download = {
+    contract: "",
+    tokenPoolId: "tok1",
+    allowlistId: plan.id,
+    blockNo: 1,
+    status: completed,
+    rawStatus: completed,
+    stale: false,
+    retryable: false,
+    attemptCount: 1,
+    failureCount: 0,
+  };
+  expect(restoreEmmaPlanStep(review, [snapshot], [], [download])).toBe(
     DistributionPlanToolStep.CREATE_PHASES
   );
+  expect(restoreEmmaPlanStep(review, [snapshot], phases, [download])).toBe(
+    DistributionPlanToolStep.REVIEW
+  );
+  for (const incompleteDownloads of [
+    null,
+    [],
+    [{ ...download, tokenPoolId: "another-pool" }],
+    [{ ...download, status: DistributionPlanTokenPoolDownloadStatus.PENDING }],
+    [{ ...download, status: DistributionPlanTokenPoolDownloadStatus.FAILED }],
+  ]) {
+    expect(
+      restoreEmmaPlanStep(review, [snapshot], phases, incompleteDownloads)
+    ).toBe(DistributionPlanToolStep.CREATE_SNAPSHOTS);
+  }
   const operation = {
     ...operations[0]!,
     code: AllowlistOperationCode.MAP_RESULTS_TO_DELEGATED_WALLETS,

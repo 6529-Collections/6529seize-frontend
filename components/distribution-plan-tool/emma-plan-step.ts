@@ -60,9 +60,9 @@ function lastAvailableStep(
     const download = downloads?.find(
       ({ tokenPoolId }) => tokenPoolId === snapshot.params["id"]
     );
-    return download
-      ? download.status !== DistributionPlanTokenPoolDownloadStatus.COMPLETED
-      : !snapshot.hasRan;
+    return (
+      download?.status !== DistributionPlanTokenPoolDownloadStatus.COMPLETED
+    );
   });
   if (snapshotIncomplete || (!snapshots.length && !phases.length))
     return CREATE_SNAPSHOTS;
