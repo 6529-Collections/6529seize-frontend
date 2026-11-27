@@ -4160,7 +4160,7 @@
         "If an optional rationale reply fails after a successful vote, the vote stays saved and the user is told that the reply failed.",
         "Boosting is a per-user flame toggle on full drop cards and boosted cards in wave and direct-message threads.",
         "Wave creator badges and drop state indicators explain context around submitted drops.",
-        "On touch devices, including tablets, tapping a profile-wave badge opens a content-sized sheet with one scrolling area and an inside close button. Open profile wave is the full-width main action. On desktop, hover opens the preview and clicking the badge opens the profile wave. Show all waves expands the author’s created-wave list; Hide waves collapses it. Show all brain activity opens the author’s Brain tab. The preview retains the artwork, wave details and captions."
+        "On touch devices, including tablets, tapping a profile-wave badge opens a content-sized sheet with one scrolling area and a close button floating above the sheet. Open profile wave is the full-width main action. On desktop, hover opens the preview and clicking the badge opens the profile wave. Show all waves expands the author’s created-wave list; Hide waves collapses it. Show all brain activity opens the author’s Brain tab. The preview retains the artwork, wave details and captions."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],

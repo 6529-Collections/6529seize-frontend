@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveDropsFeedV2 } from "@/generated/models/ApiWaveDropsFeedV2";
-import { devices, type Page } from "@playwright/test";
+import { devices, type Locator, type Page } from "@playwright/test";
 import {
   captureSafeScreenshot,
   expect,
@@ -29,6 +29,19 @@ function expectPointerInside(before: Bounds | null, after: Bounds | null) {
   expect(x).toBeLessThanOrEqual(after.x + after.width);
   expect(y).toBeGreaterThanOrEqual(after.y);
   expect(y).toBeLessThanOrEqual(after.y + after.height);
+}
+
+async function expectFloatingCloseButton(card: Locator) {
+  const close = card.getByRole("button", { name: "Close", exact: true });
+  await expect(close).toBeVisible();
+  await expect(close).toBeInViewport();
+  const surface = card.locator(".mobile-wrapper-dialog > div").last();
+  const closeBox = await close.boundingBox();
+  const surfaceBox = await surface.boundingBox();
+  if (!closeBox || !surfaceBox)
+    throw new Error("Sheet and close button must have layout bounds");
+  expect(closeBox.y + closeBox.height).toBeLessThanOrEqual(surfaceBox.y);
+  return close;
 }
 
 async function installPreview(
@@ -266,14 +279,7 @@ test.describe("Profile-wave badge preview @auth @local-only", () => {
     // The only scrolling owner is the shared dialog; previews and rows must
     // remain in its content flow instead of being squeezed into inner panes.
     expect(await section.locator(".tw-overflow-y-auto").count()).toBe(0);
-    const close = card.getByRole("button", { name: "Close", exact: true });
-    await expect(close).toBeVisible();
-    const surface = card.locator(".mobile-wrapper-dialog > div").last();
-    const closeBox = await close.boundingBox();
-    const surfaceBox = await surface.boundingBox();
-    if (!closeBox || !surfaceBox)
-      throw new Error("Sheet and close button must have layout bounds");
-    expect(closeBox.y).toBeGreaterThanOrEqual(surfaceBox.y);
+    const close = await expectFloatingCloseButton(card);
     await expect(
       section.getByRole("link", { name: "Show all brain activity" })
     ).toHaveAttribute("href", "/playwright/brain");
@@ -286,6 +292,7 @@ test.describe("Profile-wave badge preview @auth @local-only", () => {
     await expect(
       section.getByText("Created wave 2", { exact: true })
     ).toBeInViewport();
+    await expectFloatingCloseButton(card);
     await captureSafeScreenshot(page, testInfo, "profile-wave-sheet-expanded");
     await close.tap();
     await expect(card).toHaveCount(0);
@@ -329,6 +336,7 @@ test.describe("Profile-wave badge preview @auth @local-only", () => {
         24
       );
       await expectNoHorizontalOverflow(page);
+      await expectFloatingCloseButton(card);
       if (tiles === 0 && testInfo.project.name === "web-mobile-chromium") {
         const accessibility = await new AxeBuilder({ page })
           .include('[role="dialog"]')
@@ -538,6 +546,7 @@ test.describe("Profile-wave badge preview @auth @local-only", () => {
         card.getByText("Created wave 2", { exact: true })
       ).toBeVisible();
       await expect(card.locator(".tw-overflow-y-auto")).toHaveCount(1);
+      await expectFloatingCloseButton(card);
       await captureSafeScreenshot(page, testInfo, "profile-wave-ipad");
     });
   });

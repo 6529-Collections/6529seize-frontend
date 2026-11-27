@@ -149,7 +149,7 @@ const WavePreviewHeader: React.FC<{
 
   return (
     <div
-      className={`tw-flex tw-items-center ${isSheet ? "tw-gap-3 tw-pr-12" : "tw-gap-2.5"} ${hasBannerCover && !isSheet ? "tw-mb-3" : ""}`}
+      className={`tw-flex tw-items-center ${isSheet ? "tw-gap-3" : "tw-gap-2.5"} ${hasBannerCover && !isSheet ? "tw-mb-3" : ""}`}
     >
       {pictureElement}
       {titleElement}

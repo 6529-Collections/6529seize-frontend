@@ -71,8 +71,8 @@ section includes `Show all brain activity`, which opens `/{user}/brain`.
   `Open profile wave` is a full-width button above the centered
   `Show all waves` / `Hide waves` disclosure.
 - The sheet fits shorter content. Longer content scrolls together, including the
-  header, artwork captions, actions and created-wave rows. The close button stays
-  inside the sheet, and the drag handle remains available.
+  header, artwork captions, actions and created-wave rows. The close button floats
+  above the sheet, and the drag handle remains available.
 - Desktop created-wave lists scroll within their panel and include
   `Show all brain activity` for the full Brain tab.
 - Viewer rows show a wave picture when available, otherwise a wave/chat icon
