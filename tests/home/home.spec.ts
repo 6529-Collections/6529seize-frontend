@@ -18,6 +18,7 @@ import { gateSidebarHydration } from "../support/sidebarHydration";
 import { installSectionTrackingFixture } from "../support/sectionTrackingFixture";
 import { installReadonlyMutationGuard } from "../support/readonlyMutationGuard";
 import { RESPONSE_TIMEOUT_MS } from "../support/routeReadiness";
+import { installHomeArtworkFixture } from "../support/homeArtworkFixture";
 import {
   comingUpLeaderboard,
   comingUpLeaderboardPattern,
@@ -27,6 +28,85 @@ import {
   installCompletedMintStatus,
   loadingTestArtwork,
 } from "./homeDropFixtures";
+
+test("Homepage artwork fixture replaces only embedded artwork documents @smoke @medium @large", async ({
+  page,
+}) => {
+  const origin = "https://home-artwork.example.test";
+  await page.route(`${origin}/**`, (route) => {
+    const path = new URL(route.request().url()).pathname;
+    if (path === "/") {
+      return route.fulfill({
+        contentType: "text/html",
+        body: `<main><h1>Real homepage shell</h1>
+          <section data-home-drop><iframe title="Current drop" src="/current"></iframe></section>
+          <section data-home-section="Coming up"><iframe title="Submission" src="/submission"></iframe></section>
+          <iframe title="Unrelated embed" src="/ordinary"></iframe>
+          <img alt="Static artwork" src="/image.svg"></main>`,
+      });
+    }
+    if (path === "/data") return route.fulfill({ json: { unchanged: true } });
+    if (path === "/image.svg") {
+      return route.fulfill({
+        contentType: "image/svg+xml",
+        body: '<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"/>',
+      });
+    }
+    return route.fulfill({
+      contentType: "text/html",
+      body: `<p>Original embed</p><script>parent.document.body.setAttribute("data-executed-" + location.pathname.slice(1), "yes");</script>`,
+    });
+  });
+  const fixture = await installHomeArtworkFixture(page);
+  expect(await installHomeArtworkFixture(page)).toBe(fixture);
+
+  await page.goto(origin, { waitUntil: "domcontentloaded" });
+  await expect(
+    page.getByRole("heading", { name: "Real homepage shell" })
+  ).toBeVisible();
+  for (const title of ["Current drop", "Submission"]) {
+    await expect(
+      page
+        .frameLocator(`iframe[title="${title}"]`)
+        .getByText("HTML artwork fixture", { exact: true })
+    ).toBeVisible();
+  }
+  expect(fixture.documentsReplaced()).toBe(2);
+  await expect(page.locator("body")).not.toHaveAttribute(
+    "data-executed-current",
+    "yes"
+  );
+  await expect(page.locator("body")).not.toHaveAttribute(
+    "data-executed-submission",
+    "yes"
+  );
+  await expect(
+    page
+      .frameLocator('iframe[title="Unrelated embed"]')
+      .getByText("Original embed", { exact: true })
+  ).toBeVisible();
+  await expect(page.locator("body")).toHaveAttribute(
+    "data-executed-ordinary",
+    "yes"
+  );
+  await expect(
+    page.getByRole("img", { name: "Static artwork" })
+  ).toHaveJSProperty("naturalWidth", 4);
+  expect(
+    await page.evaluate(async () => (await fetch("/data")).json())
+  ).toEqual({ unchanged: true });
+
+  await page
+    .locator('iframe[title="Submission"]')
+    .evaluate((frame: HTMLIFrameElement) => {
+      frame.src = "/submission-fallback";
+    });
+  await expect.poll(fixture.documentsReplaced).toBe(3);
+  await expect(page.locator("body")).not.toHaveAttribute(
+    "data-executed-submission-fallback",
+    "yes"
+  );
+});
 
 test.describe("Initial homepage HTML", () => {
   test.use({ javaScriptEnabled: false });

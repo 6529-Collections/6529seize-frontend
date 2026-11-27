@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test";
+import { installHomeArtworkFixture } from "../support/homeArtworkFixture";
 import {
   decodeFunctionData,
   encodeFunctionResult,
@@ -23,6 +24,7 @@ export const loadingTestArtwork = {
 };
 
 export async function installLoadingTestArtwork(page: Page) {
+  await installHomeArtworkFixture(page);
   await page.route("**/home-loading-fixture.png", (route) =>
     route.fulfill({
       contentType: "image/svg+xml",
