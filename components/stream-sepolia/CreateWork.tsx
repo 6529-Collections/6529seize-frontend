@@ -189,8 +189,10 @@ function IndependentRun({
   token,
   editionsToken,
   draft,
+  viewer,
   onDone,
 }: {
+  readonly viewer: Address;
   readonly token: Address;
   readonly editionsToken: Address | null;
   readonly draft: Draft;
@@ -208,14 +210,15 @@ function IndependentRun({
         recordBytes({
           name: draft.title.trim(),
           description: draft.description.trim(),
-          artist: draft.artistName.trim(),
+          artist: draft.artistName.trim() || shortAddress(viewer),
           year: new Date().getUTCFullYear(),
         }),
         "application/json"
       ),
     ]).then(([mediaFile, recordFile]) => {
       if (!active) return;
-      setContext({
+      // A run keeps its first context, so a re-render never drops what earlier steps learned.
+      setContext((current) => current ?? {
         token,
         editionsToken: draft.editions ? editionsToken : null,
         media: mediaFile,
@@ -227,7 +230,7 @@ function IndependentRun({
     return () => {
       active = false;
     };
-  }, [draft, token, editionsToken]);
+  }, [draft, token, editionsToken, viewer]);
   if (!context) return <p className="tw-text-sm tw-text-iron-400">{t(locale, "streamSepolia.loading")}</p>;
   const chunks = context.media.chunks.length;
   const steps: Step<IndependentWorkContext>[] = [
@@ -336,7 +339,7 @@ function CreateBody({ viewer }: { readonly viewer: Address }) {
         </h2>
         <p className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-400">{reviewLine(draft, locale)}</p>
         <div className="tw-mt-4">
-          <IndependentRun token={oneOfOne.token} editionsToken={editions?.token ?? null} draft={draft} onDone={setDone} />
+          <IndependentRun viewer={viewer} token={oneOfOne.token} editionsToken={editions?.token ?? null} draft={draft} onDone={setDone} />
         </div>
       </section>
     );
@@ -346,9 +349,7 @@ function CreateBody({ viewer }: { readonly viewer: Address }) {
       className="tw-flex tw-flex-col tw-gap-5"
       onSubmit={(event) => {
         event.preventDefault();
-        if (!ready) return;
-        if (!draft.artistName.trim()) update({ artistName: shortAddress(viewer) });
-        setReviewing(true);
+        if (ready) setReviewing(true);
       }}
     >
       <ProductChoice value={product} onChange={setProduct} />

@@ -1,4 +1,6 @@
 import {
+  BaseError,
+  ContractFunctionRevertedError,
   encodeAbiParameters,
   getAbiItem,
   getAddress,
@@ -102,6 +104,8 @@ const SALE_SETTLED = getAbiItem({ abi: englishAuctionAbi, name: "SaleSettled" })
 const EDITION_BID_PLACED = getAbiItem({ abi: editionAuctionAbi, name: "BidPlaced" });
 const EDITION_BID_RAISED = getAbiItem({ abi: editionAuctionAbi, name: "BidRaised" });
 const EDITION_BID_CLAIMED = getAbiItem({ abi: editionAuctionAbi, name: "BidClaimed" });
+const AUCTION_OPENED = getAbiItem({ abi: editionAuctionAbi, name: "AuctionOpened" });
+const AUCTION_CLEARED = getAbiItem({ abi: editionAuctionAbi, name: "AuctionCleared" });
 
 export interface SaleSummary {
   readonly saleId: bigint;
@@ -115,6 +119,27 @@ export interface SaleSummary {
   readonly bidder: Address;
   readonly firstStartTx: Hex;
   readonly startedAt: bigint;
+  /** The edition sale's result once it cleared: copies sold and the price each. */
+  readonly edition: { readonly count: bigint; readonly price: bigint } | null;
+}
+
+/** Cleared edition results, keyed by master token and ID. */
+async function editionResults(): Promise<Map<string, { count: bigint; price: bigint }>> {
+  const instance = getStreamInstance();
+  const results = new Map<string, { count: bigint; price: bigint }>();
+  for (const address of [instance.addresses.editionAuction, instance.addresses.independentEditionAuction]) {
+    const [opened, cleared] = await Promise.all([
+      scanLogs({ address, event: AUCTION_OPENED }),
+      scanLogs({ address, event: AUCTION_CLEARED }),
+    ]);
+    const bySale = new Map(opened.map((log) => [log.args.saleId, log.args]));
+    for (const log of cleared) {
+      const open = bySale.get(log.args.saleId);
+      if (!open || log.args.count === 0n) continue;
+      results.set(`${open.master.toLowerCase()}:${open.id}`, { count: log.args.count, price: log.args.price });
+    }
+  }
+  return results;
 }
 
 export async function listSales(): Promise<SaleSummary[]> {
@@ -129,6 +154,7 @@ export async function listSales(): Promise<SaleSummary[]> {
     last.set(saleId, log);
   }
   const saleIds = [...first.keys()];
+  const editions = await editionResults();
   const auctions = await Promise.all(
     saleIds.map((saleId) =>
       client.readContract({
@@ -153,6 +179,7 @@ export async function listSales(): Promise<SaleSummary[]> {
       bidder: auction.bidder,
       firstStartTx: start.transactionHash,
       startedAt: last.get(saleId)?.args.startTime ?? start.args.startTime,
+      edition: editions.get(`${start.args.token.toLowerCase()}:${start.args.tokenId}`) ?? null,
     };
   });
 }
@@ -352,6 +379,15 @@ export interface EditionBidRow {
   readonly refund: bigint | null;
 }
 
+const NOT_OPENED: EditionDetail["sale"] = {
+  status: 0,
+  maxCount: 0,
+  terms: { basePrice: 0n, marginShare: 0, softWindow: 0 },
+  feeShare: 0,
+  bidCount: 0,
+  liveUnits: 0,
+};
+
 export interface EditionDetail {
   readonly auctionAddress: Address;
   readonly editionsToken: Address;
@@ -392,6 +428,22 @@ export interface EditionDetail {
   readonly bids: readonly EditionBidRow[];
 }
 
+/**
+ * Whether an edition sale was opened. The lens reverts with UnknownAuction for
+ * a sale that does not exist instead of answering status NONE.
+ */
+export async function editionSaleExists(address: Address, saleId: bigint): Promise<boolean> {
+  const sale = await getStreamClient()
+    .readContract({ address, abi: editionAuctionAbi, functionName: "auction", args: [saleId] })
+    .catch((error: unknown) => {
+      if (error instanceof BaseError && error.walk((cause) => cause instanceof ContractFunctionRevertedError)) {
+        return null;
+      }
+      throw error;
+    });
+  return sale !== null && sale.status !== 0;
+}
+
 export async function readEdition(
   oneOfOneToken: Address,
   tokenId: bigint
@@ -412,7 +464,13 @@ export async function readEdition(
       functionName: functionName as never,
       args: args as never,
     }) as Promise<T>;
-  const sale = await read<EditionDetail["sale"]>("auction");
+  const sale = await read<EditionDetail["sale"]>("auction").catch((error: unknown) => {
+    // Not opened yet: the lens reverts with UnknownAuction.
+    if (error instanceof BaseError && error.walk((cause) => cause instanceof ContractFunctionRevertedError)) {
+      return NOT_OPENED;
+    }
+    throw error;
+  });
   const base = {
     auctionAddress: address,
     editionsToken,
@@ -615,7 +673,6 @@ export async function readMyCollections(viewer: Address): Promise<IndependentCon
   );
 }
 
-const AUCTION_OPENED = getAbiItem({ abi: editionAuctionAbi, name: "AuctionOpened" });
 
 export interface MyOneOfOneBid {
   readonly saleId: bigint;

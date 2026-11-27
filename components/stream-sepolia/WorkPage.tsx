@@ -11,11 +11,10 @@ import { artistAddress } from "@/lib/stream/reads";
 import { AUCTION_STATE, sameAddress } from "@/lib/stream/state";
 
 import { EditionPanel } from "./EditionPanel";
-import { sepoliaAddressUrl, shortAddress } from "./format";
+import { StreamIdentity } from "./StreamIdentity";
 import { OneOfOnePanel } from "./OneOfOnePanel";
 import { RefundBanner } from "./RefundBanner";
 import { useEdition, useOneOfOne, useWorkMeta } from "./useStreamData";
-import { useStreamWallet } from "./WalletGate";
 import { WorkArt } from "./WorkArt";
 
 const LABEL =
@@ -31,7 +30,6 @@ export function WorkPage({ token, tokenId }: { readonly token: string; readonly 
 
 function WorkBody({ token, tokenId }: { readonly token: Address; readonly tokenId: bigint }) {
   const locale = useBrowserLocale();
-  const wallet = useStreamWallet();
   const curated = sameAddress(token, getStreamInstance().addresses.stream);
   const meta = useWorkMeta(token, tokenId);
   const oneOfOne = useOneOfOne(token, tokenId);
@@ -83,14 +81,7 @@ function WorkBody({ token, tokenId }: { readonly token: Address; readonly tokenI
             </h1>
             <p className="tw-m-0 tw-mt-2 tw-text-sm tw-text-iron-400">
               {t(locale, "streamSepolia.work.by")}{" "}
-              <a
-                href={sepoliaAddressUrl(artist)}
-                target="_blank"
-                rel="noreferrer"
-                className="tw-text-iron-200 tw-underline tw-decoration-white/20 tw-underline-offset-4 hover:tw-text-white"
-              >
-                {sameAddress(artist, wallet.address) ? t(locale, "streamSepolia.you") : shortAddress(artist)}
-              </a>
+              <StreamIdentity address={artist} />
             </p>
             {meta.data.description ? (
               <p className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">{meta.data.description}</p>

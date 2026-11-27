@@ -9,7 +9,9 @@ import "@/i18n/namespaces/stream-sepolia";
 import type { SaleSummary } from "@/lib/stream/reads";
 import { AUCTION_STATE, isZeroAddress } from "@/lib/stream/state";
 
-import { formatDuration, formatEth } from "./format";
+import { THE_MEMES_GRID_CLASS_NAME } from "@/components/the-memes/theMemesLayout";
+
+import { formatCount, formatDuration, formatEth } from "./format";
 import { STREAM_BASE } from "./StreamNav";
 import { useNow, useSales, useWorkMeta } from "./useStreamData";
 import { WorkArt } from "./WorkArt";
@@ -70,6 +72,16 @@ function WorkCard({ sale, now }: { readonly sale: SaleSummary; readonly now: num
           <p className="tw-m-0 tw-mt-1 tw-text-sm tw-tabular-nums tw-text-iron-400">
             {statusLine(sale, now, locale)}
           </p>
+          {sale.edition ? (
+            <p className="tw-m-0 tw-mt-0.5 tw-text-sm tw-tabular-nums tw-text-iron-500">
+              {sale.edition.count === 1n
+                ? t(locale, "streamSepolia.card.editionsOne", { price: formatEth(sale.edition.price, locale) })
+                : t(locale, "streamSepolia.card.editions", {
+                    count: formatCount(sale.edition.count, locale),
+                    price: formatEth(sale.edition.price, locale),
+                  })}
+            </p>
+          ) : null}
         </div>
       </Link>
     </li>
@@ -93,7 +105,7 @@ function Shelf({
       {sales.length === 0 ? (
         <p className="tw-m-0 tw-mt-3 tw-text-sm tw-text-iron-500">{empty}</p>
       ) : (
-        <ul className="tw-m-0 tw-mt-3 tw-grid tw-list-none tw-grid-cols-2 tw-gap-x-4 tw-gap-y-8 tw-p-0 sm:tw-grid-cols-3 lg:tw-grid-cols-4">
+        <ul className={`tw-m-0 tw-mt-3 tw-list-none tw-p-0 ${THE_MEMES_GRID_CLASS_NAME}`}>
           {sales.map((sale) => (
             <WorkCard key={sale.saleId.toString()} sale={sale} now={now} />
           ))}

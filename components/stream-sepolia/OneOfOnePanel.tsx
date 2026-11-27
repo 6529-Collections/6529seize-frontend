@@ -10,9 +10,10 @@ import "@/i18n/namespaces/stream-sepolia";
 import { englishAuctionAbi } from "@/lib/stream/generated/EnglishAuction";
 import { getStreamInstance } from "@/lib/stream/instances";
 import type { OneOfOneDetail } from "@/lib/stream/reads";
-import { oneOfOneView, sameAddress, type OneOfOneView } from "@/lib/stream/state";
+import { oneOfOneView, type OneOfOneView } from "@/lib/stream/state";
 
-import { formatClock, formatDuration, formatEth, sepoliaAddressUrl, sepoliaTxUrl, shortAddress } from "./format";
+import { formatClock, formatDuration, formatEth, sepoliaTxUrl } from "./format";
+import { StreamIdentity } from "./StreamIdentity";
 import { TxAction } from "./TxAction";
 import { useNow } from "./useStreamData";
 import { useStreamWallet, WalletGate } from "./WalletGate";
@@ -32,7 +33,7 @@ function Figure({ label, value }: { readonly label: string; readonly value: stri
   return (
     <div>
       <p className={LABEL}>{label}</p>
-      <p className="tw-m-0 tw-mt-1 tw-whitespace-nowrap tw-text-2xl tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50 sm:tw-text-3xl xl:tw-text-4xl">
+      <p className="tw-m-0 tw-mt-1 tw-text-2xl tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50 sm:tw-text-3xl">
         {value}
       </p>
     </div>
@@ -277,7 +278,6 @@ function Actions({ view, detail }: { readonly view: OneOfOneView; readonly detai
 
 function BidHistory({ detail }: { readonly detail: OneOfOneDetail }) {
   const locale = useBrowserLocale();
-  const wallet = useStreamWallet();
   if (detail.bids.length === 0) return null;
   return (
     <section aria-labelledby="stream-bid-history" className="tw-mt-6">
@@ -290,9 +290,7 @@ function BidHistory({ detail }: { readonly detail: OneOfOneDetail }) {
             key={bid.transactionHash}
             className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-py-2.5 tw-text-sm"
           >
-            <a href={sepoliaAddressUrl(bid.bidder)} target="_blank" rel="noreferrer" className={LINK}>
-              {sameAddress(bid.bidder, wallet.address) ? t(locale, "streamSepolia.you") : shortAddress(bid.bidder)}
-            </a>
+            <StreamIdentity address={bid.bidder} />
             <a
               href={sepoliaTxUrl(bid.transactionHash)}
               target="_blank"
@@ -342,7 +340,7 @@ export function OneOfOnePanel({
       <h2 id="stream-one-title" className={LABEL}>
         {t(locale, "streamSepolia.one.title")}
       </h2>
-      <div className="tw-mt-3 tw-grid tw-grid-cols-2 tw-gap-4">
+      <div className="tw-mt-3 tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-3">
         <Figure label={top.left.label} value={top.left.value} />
         {top.right ? <Figure label={top.right.label} value={top.right.value} /> : null}
       </div>
@@ -356,9 +354,7 @@ export function OneOfOnePanel({
         {view.screen === "sold" && owner ? (
           <p className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-300">
             {t(locale, "streamSepolia.one.owner")}{" "}
-            <a href={sepoliaAddressUrl(owner)} target="_blank" rel="noreferrer" className={LINK}>
-              {sameAddress(owner, wallet.address) ? t(locale, "streamSepolia.you") : shortAddress(owner)}
-            </a>
+            <StreamIdentity address={owner} />
             {detail.settlement ? (
               <>
                 {" · "}

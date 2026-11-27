@@ -23,7 +23,8 @@ import { encodeEditionOpenData } from "@/lib/stream/item";
 import { quoteEditionBid, readStartItem, type EditionBidRow, type EditionDetail } from "@/lib/stream/reads";
 import { editionView, sameAddress, type EditionView } from "@/lib/stream/state";
 
-import { formatClock, formatCount, formatDuration, formatEth, shortAddress } from "./format";
+import { formatClock, formatCount, formatDuration, formatEth } from "./format";
+import { StreamIdentity } from "./StreamIdentity";
 import { CARD, LABEL } from "./OneOfOnePanel";
 import { TxAction } from "./TxAction";
 import { useNow } from "./useStreamData";
@@ -37,10 +38,16 @@ const STEPPER_BUTTON =
 const STEPPER_INPUT =
   "tw-min-w-0 tw-flex-1 tw-border-0 tw-border-x tw-border-solid tw-border-white/[0.07] tw-bg-transparent tw-text-center tw-text-base tw-font-semibold tw-tabular-nums tw-text-iron-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400";
 
-function standingLabel(standing: BidStanding, locale: SupportedLocale): string {
-  if (standing === "in") return t(locale, "streamSepolia.ed.in");
-  if (standing === "part") return t(locale, "streamSepolia.ed.part");
-  return t(locale, "streamSepolia.ed.out");
+/** "Winning" while bidding is open; "Won" once the result is final. */
+function standingLabel(standing: BidStanding, final: boolean, locale: SupportedLocale): string {
+  if (standing === "in") return t(locale, final ? "streamSepolia.ed.won" : "streamSepolia.ed.in");
+  if (standing === "part") return t(locale, final ? "streamSepolia.ed.partWon" : "streamSepolia.ed.part");
+  return t(locale, final ? "streamSepolia.ed.lost" : "streamSepolia.ed.out");
+}
+
+/** Whether the edition result is final (bidding has closed). */
+function isFinal(detail: EditionDetail): boolean {
+  return detail.sale.status >= 2 || !detail.endTimes.biddingOpen;
 }
 
 const STANDING_TONE: Record<BidStanding, string> = {
@@ -71,10 +78,12 @@ function Result({
       {count > 0 && clearing ? (
         <>
           <p className="tw-m-0 tw-mt-2 tw-text-2xl tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl">
-            {t(locale, "streamSepolia.ed.result", {
-              count: formatCount(count, locale),
-              price: formatEth(clearing.price, locale),
-            })}
+            {count === 1
+              ? t(locale, "streamSepolia.ed.resultOne", { price: formatEth(clearing.price, locale) })
+              : t(locale, "streamSepolia.ed.result", {
+                  count: formatCount(count, locale),
+                  price: formatEth(clearing.price, locale),
+                })}
           </p>
           <p className="tw-m-0 tw-mt-2 tw-text-sm tw-text-iron-400">
             {t(locale, "streamSepolia.ed.raised", {
@@ -142,7 +151,6 @@ function Book({
   readonly clearingStep: number | null;
 }) {
   const locale = useBrowserLocale();
-  const wallet = useStreamWallet();
   const rationed = detail.clearing?.rationed ?? false;
   const rows = [...detail.bids]
     .filter((bid) => !bid.claimed || detail.sale.status >= 4)
@@ -164,10 +172,12 @@ function Book({
         <td colSpan={4} className="tw-px-0 tw-py-2">
           <div className="tw-flex tw-items-center tw-gap-3 tw-text-[13px] tw-font-semibold tw-text-emerald-400">
             <span className="tw-whitespace-nowrap">
-              {t(locale, "streamSepolia.ed.priceLine", {
-                count: formatCount(count, locale),
-                price: formatEth(detail.clearing.price, locale),
-              })}
+              {count === 1
+                ? t(locale, "streamSepolia.ed.priceLineOne", { price: formatEth(detail.clearing.price, locale) })
+                : t(locale, "streamSepolia.ed.priceLine", {
+                    count: formatCount(count, locale),
+                    price: formatEth(detail.clearing.price, locale),
+                  })}
             </span>
             <span aria-hidden="true" className="tw-h-0.5 tw-flex-1 tw-rounded tw-bg-emerald-400" />
           </div>
@@ -181,7 +191,7 @@ function Book({
         <table className="tw-w-full tw-border-collapse tw-text-sm">
           <thead>
             <tr>
-              {(["price", "editions", "bidder", "standing"] as const).map((column, index) => (
+              {(["price", "editions", "bidder", isFinal(detail) ? "result" : "standing"] as const).map((column, index) => (
                 <th
                   key={column}
                   scope="col"
@@ -197,7 +207,6 @@ function Book({
           <tbody>
             {rows.map((row, index) => {
               const standing = bidStanding({ step: row.step, clearingStep, rationed });
-              const mine = sameAddress(row.bidder, wallet.address);
               return (
                 <Fragment key={row.bidId.toString()}>
                   {index === lineIndex ? priceLine : null}
@@ -209,14 +218,10 @@ function Book({
                       {formatCount(row.quantity, locale)}
                     </td>
                     <td className="tw-hidden tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.07] tw-py-2 tw-pr-3 sm:tw-table-cell">
-                      {mine ? (
-                        <span className="tw-font-semibold tw-text-primary-300">{t(locale, "streamSepolia.you")}</span>
-                      ) : (
-                        <span className="tw-font-mono tw-text-xs">{shortAddress(row.bidder)}</span>
-                      )}
+                      <StreamIdentity address={row.bidder} />
                     </td>
                     <td className={`tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.07] tw-py-2 tw-text-right tw-text-xs tw-font-bold ${STANDING_TONE[standing]}`}>
-                      {standingLabel(standing, locale)}
+                      {standingLabel(standing, isFinal(detail), locale)}
                     </td>
                   </tr>
                 </Fragment>
@@ -254,6 +259,8 @@ function WhyThisMany({ detail }: { readonly detail: EditionDetail }) {
         {candidates.map((candidate, index) => {
           const width = Number((candidate.revenue * 1000n) / bestRevenue) / 10;
           const picked = index === pick;
+          // Show why a shorter bar won: the top earner is marked when it was not chosen.
+          const mostRaised = !picked && candidate.revenue === bestRevenue;
           return (
             <li
               key={candidate.step}
@@ -273,6 +280,9 @@ function WhyThisMany({ detail }: { readonly detail: EditionDetail }) {
               </span>
               <span className={`tw-text-right tw-tabular-nums ${picked ? "tw-font-semibold tw-text-iron-50" : "tw-text-iron-300"}`}>
                 {t(locale, "streamSepolia.ed.candidateEth", { revenue: formatEth(candidate.revenue, locale) })}
+                {mostRaised ? (
+                  <span className="tw-ml-1.5 tw-text-xs tw-text-iron-500">{t(locale, "streamSepolia.ed.mostRaised")}</span>
+                ) : null}
               </span>
             </li>
           );
@@ -469,7 +479,7 @@ function YourBids({
                   </span>
                 ) : null}
                 {!bid.claimed && !view.canClaim ? (
-                  <span className={`tw-text-xs tw-font-bold ${STANDING_TONE[standing]}`}>{standingLabel(standing, locale)}</span>
+                  <span className={`tw-text-xs tw-font-bold ${STANDING_TONE[standing]}`}>{standingLabel(standing, isFinal(detail), locale)}</span>
                 ) : null}
               </div>
               {!bid.claimed && view.canClaim ? (
@@ -656,6 +666,14 @@ export function EditionPanel({
   });
   const clearingStep =
     detail.clearing && detail.clearing.count > 0n ? Number(detail.clearing.step) : null;
+  const wallet = useStreamWallet();
+  // The side column holds your bids, the bid box and the settle buttons; without them the
+  // sale takes the full width instead of leaving an empty column.
+  const hasSide =
+    view.canBid ||
+    view.canSettle ||
+    view.canAbandon ||
+    detail.bids.some((bid) => sameAddress(bid.bidder, wallet.address));
   return (
     <section aria-label={productLabel} className="tw-mt-10">
       <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-text-iron-50">{productLabel}</h2>
@@ -666,7 +684,11 @@ export function EditionPanel({
       ) : null}
       {view.screen === "openable" || view.screen === "not_open" ? null : (
         // Phones: one column, the numbers and the bid box first. Desktop: two columns.
-        <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-4 lg:tw-grid lg:tw-grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:tw-items-start lg:tw-gap-5">
+        <div
+          className={`tw-mt-4 tw-flex tw-flex-col tw-gap-4 lg:tw-grid lg:tw-items-start lg:tw-gap-5 ${
+            hasSide ? "lg:tw-grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]" : "lg:tw-grid-cols-1"
+          }`}
+        >
           <div className="tw-contents lg:tw-flex lg:tw-flex-col lg:tw-gap-5">
             <div className="tw-order-1 lg:tw-order-none">
               <Result detail={detail} view={view} live={view.canBid} />

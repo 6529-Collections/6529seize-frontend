@@ -28,27 +28,37 @@ export function WorkArt({
   const locale = useBrowserLocale();
   const { art } = useWorkArt({ token, tokenId, firstStartTx, curated });
   const [broken, setBroken] = useState<string | null>(null);
-  const frame =
-    size === "large"
-      ? "tw-aspect-square tw-w-full tw-rounded-xl tw-bg-black/40"
-      : "tw-aspect-square tw-w-full tw-rounded-lg tw-bg-black/40";
+  const large = size === "large";
   if (art.data && broken !== art.data) {
+    // The art keeps its own aspect ratio; on the work page the frame shrinks to it.
     return (
-      <div className={`${frame} tw-flex tw-items-center tw-justify-center tw-overflow-hidden`}>
+      <div
+        className={
+          large
+            ? "tw-flex tw-justify-center"
+            : "tw-flex tw-aspect-square tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-bg-iron-950"
+        }
+      >
         {/* Art is a data URL read from the chain; next/image cannot optimise it. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={art.data}
           alt={title}
           onError={() => setBroken(art.data ?? null)}
-          className="tw-h-full tw-w-full tw-object-contain [image-rendering:auto]"
+          className={
+            large
+              ? "tw-block tw-h-auto tw-max-h-[80vh] tw-w-auto tw-max-w-full tw-rounded-lg tw-object-contain"
+              : "tw-h-full tw-w-full tw-object-contain"
+          }
         />
       </div>
     );
   }
   return (
     <div
-      className={`${frame} tw-flex tw-items-center tw-justify-center tw-border tw-border-solid tw-border-white/[0.07] tw-text-xs tw-text-iron-500`}
+      className={`tw-flex tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-dashed tw-border-white/[0.07] tw-text-xs tw-text-iron-600 ${
+        large ? "tw-aspect-[4/3]" : "tw-aspect-square"
+      }`}
     >
       {art.isLoading || art.fetchStatus === "fetching"
         ? t(locale, "streamSepolia.art.loading")

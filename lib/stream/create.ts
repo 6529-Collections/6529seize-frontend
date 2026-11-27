@@ -29,7 +29,7 @@ import {
   type MediaFile,
   type PackageItem,
 } from "./item";
-import { saleIdOf } from "./reads";
+import { editionSaleExists, saleIdOf } from "./reads";
 import { ZERO_ADDRESS } from "./state";
 
 /** What a create step may send. Matches the UI's transaction request shape. */
@@ -60,6 +60,20 @@ export interface IndependentWorkContext {
   tokenId?: bigint;
 }
 
+function manifestOf(file: StoredFile) {
+  return [file.chunkHashes, BigInt(file.bytes.length), ENCODING_IDENTITY, file.mimeType, file.sha256] as const;
+}
+
+/** A stored file's ID, computed by the content store from its manifest. */
+export async function fileIdOf(file: StoredFile): Promise<Hex> {
+  return getStreamClient().readContract({
+    address: getStreamInstance().addresses.contentStore,
+    abi: contentStoreAbi,
+    functionName: "manifestId",
+    args: manifestOf(file),
+  });
+}
+
 /** Writes a file's missing chunks and registers its manifest. Returns its file ID and whether anything was sent. */
 export async function storeFile(
   file: StoredFile,
@@ -81,19 +95,8 @@ export async function storeFile(
       sent = true;
     }
   }
-  const manifest = [
-    file.chunkHashes,
-    BigInt(file.bytes.length),
-    ENCODING_IDENTITY,
-    file.mimeType,
-    file.sha256,
-  ] as const;
-  const fileId = await client.readContract({
-    address: store,
-    abi: contentStoreAbi,
-    functionName: "manifestId",
-    args: manifest,
-  });
+  const manifest = manifestOf(file);
+  const fileId = await fileIdOf(file);
   const registered = await client
     .readContract({ address: store, abi: contentStoreAbi, functionName: "fileInfo", args: [fileId] })
     .then(() => true)
@@ -118,9 +121,13 @@ export async function cc0TextFileId(): Promise<Hex> {
   });
 }
 
-/** Builds the work's item from the stored files (call after both are stored). */
+/**
+ * Builds the work's item from its files. Every step calls it, so a step that
+ * runs after a reload rebuilds what earlier steps knew from the chain.
+ */
 export async function prepareIndependentItem(context: IndependentWorkContext, artist: Address) {
-  if (!context.primaryFileId || !context.recordFileId) throw new Error("files not stored");
+  context.primaryFileId ??= await fileIdOf(context.media);
+  context.recordFileId ??= await fileIdOf(context.record);
   const draft = {
     artist,
     collectionId: 1n,
@@ -186,29 +193,40 @@ export async function startIndependentSale(context: IndependentWorkContext, io: 
   return true;
 }
 
+/** The work's item and token, rebuilt from the chain when a step runs after a reload. Throws if the sale never started. */
+async function ensureStarted(context: IndependentWorkContext, artist: Address) {
+  if (!context.item || !context.mediaList) await prepareIndependentItem(context, artist);
+  if (context.tokenId === undefined) {
+    const minted = await getStreamClient().readContract({
+      address: context.token,
+      abi: streamAbi,
+      functionName: "tokenOfContent",
+      args: [context.media.sha256],
+    });
+    if (minted === 0n) throw new Error("the sale has not started");
+    context.tokenId = minted;
+  }
+  return { item: context.item!, mediaList: context.mediaList!, tokenId: context.tokenId };
+}
+
 export async function openIndependentEdition(context: IndependentWorkContext, io: CreateIo): Promise<boolean> {
-  if (!context.editionsToken || context.tokenId === undefined || !context.item) return false;
+  if (!context.editionsToken) return false;
+  const { item, tokenId } = await ensureStarted(context, io.account);
   const address = getStreamInstance().addresses.independentEditionAuction;
-  const saleId = saleIdOf(context.editionsToken, context.tokenId);
-  const sale = await getStreamClient().readContract({
-    address,
-    abi: editionAuctionAbi,
-    functionName: "auction",
-    args: [saleId],
-  });
-  if (sale.status !== 0) return false;
+  const saleId = saleIdOf(context.editionsToken, tokenId);
+  if (await editionSaleExists(address, saleId)) return false;
   await io.send({
     address,
     abi: editionAuctionAbi as Abi,
     functionName: "open",
-    args: [context.editionsToken, context.tokenId, encodeEditionOpenData(context.item, false)],
+    args: [context.editionsToken, tokenId, encodeEditionOpenData(item, false)],
   });
   return true;
 }
 
 /** Opens the work's on-chain record and marks its media complete, so wallets show the art. */
 export async function openWorkRecord(context: IndependentWorkContext, io: CreateIo): Promise<boolean> {
-  if (context.tokenId === undefined || !context.item || !context.mediaList) return false;
+  const { item, mediaList, tokenId } = await ensureStarted(context, io.account);
   const facts = getStreamInstance().addresses.workFacts;
   const client = getStreamClient();
   let sent = false;
@@ -216,14 +234,14 @@ export async function openWorkRecord(context: IndependentWorkContext, io: Create
     address: facts,
     abi: workFactsAbi,
     functionName: "factsOf",
-    args: [context.token, context.tokenId],
+    args: [context.token, tokenId],
   });
   if (!current.opened) {
     await io.send({
       address: facts,
       abi: workFactsAbi as Abi,
       functionName: "open",
-      args: [context.token, context.tokenId, context.item, context.mediaList],
+      args: [context.token, tokenId, item, mediaList],
     });
     sent = true;
   }
@@ -232,7 +250,7 @@ export async function openWorkRecord(context: IndependentWorkContext, io: Create
       address: facts,
       abi: workFactsAbi as Abi,
       functionName: "markOnChainComplete",
-      args: [context.token, context.tokenId],
+      args: [context.token, tokenId],
     });
     sent = true;
   }
