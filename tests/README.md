@@ -421,6 +421,22 @@ budget. Wait for an API response only when that response is itself part of
 the contract; rendered rows may also come from cached data. Use the existing
 hydration-ready marker when checking the transition from server HTML to
 interactive chrome.
+
+Homepage layout fixtures and homepage-based header-search tests install
+`support/homeArtworkFixture.ts` before navigation. It replaces only GET iframe
+documents inside the current-drop and Coming Up artwork containers with inert
+HTML. Browser API routes cannot intercept the server's initial drop read, so a
+newer server-seeded artwork can otherwise survive the client fixture and execute
+changing third-party scripts during unrelated assertions. Both the NFT iframe
+and sandboxed submission renderer are covered; the application document, API
+responses, image requests, and unrelated embeds remain untouched. Dedicated
+media packs retain live artwork coverage and do not install this fixture.
+
+Use `seedSidebarCollapsedState` from `support/sidebarHydration.ts` for sidebar
+session fixtures. Playwright init scripts also run in child frames; the helper
+seeds only the top frame so opaque-origin artwork does not throw a storage
+`SecurityError`. Do not suppress application page errors to work around this.
+
 Use `expectUrlState` from `support/urlState.ts` for route/query predicates;
 Playwright's predicate-based `toHaveURL` also waits for the page load event,
 which pending media can delay even after the correct URL is committed. Keep

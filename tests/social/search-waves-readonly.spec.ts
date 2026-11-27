@@ -15,6 +15,7 @@ import {
   installCompletedMintStatus,
   loadingTestArtwork,
 } from "../home/homeDropFixtures";
+import { installHomeArtworkFixture } from "../support/homeArtworkFixture";
 
 const NAVIGATION_TIMEOUT_MS = 15000;
 const GLOBAL_SEARCH_QUERY = "wave score";
@@ -179,6 +180,7 @@ const localFixtureWave = {
 };
 
 async function gotoReady(page: Page, path: string) {
+  if (path === "/") await installHomeArtworkFixture(page);
   await gotoDocumentWithTransientRetry(page, path);
   await waitForRouteReady(page);
   await expectNoHorizontalOverflow(page);

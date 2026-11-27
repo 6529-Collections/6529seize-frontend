@@ -14,10 +14,14 @@ import {
   isDesktopWebProject,
   isMobileWebProject,
 } from "../support/surfaceSimulation";
-import { gateSidebarHydration } from "../support/sidebarHydration";
+import {
+  gateSidebarHydration,
+  seedSidebarCollapsedState,
+} from "../support/sidebarHydration";
 import { installSectionTrackingFixture } from "../support/sectionTrackingFixture";
 import { installReadonlyMutationGuard } from "../support/readonlyMutationGuard";
 import { RESPONSE_TIMEOUT_MS } from "../support/routeReadiness";
+import { installHomeArtworkFixture } from "../support/homeArtworkFixture";
 import {
   comingUpLeaderboard,
   comingUpLeaderboardPattern,
@@ -27,6 +31,148 @@ import {
   installCompletedMintStatus,
   loadingTestArtwork,
 } from "./homeDropFixtures";
+
+test("Homepage artwork fixture replaces only embedded artwork documents @smoke @medium @large", async ({
+  page,
+}) => {
+  const origin = "https://home-artwork.example.test";
+  await page.route(`${origin}/**`, (route) => {
+    const path = new URL(route.request().url()).pathname;
+    if (path === "/") {
+      return route.fulfill({
+        contentType: "text/html",
+        body: `<main><h1>Real homepage shell</h1>
+          <section data-home-drop><iframe title="Current drop" src="/current"></iframe></section>
+          <section data-home-section="Coming up"><iframe title="Submission" src="/submission"></iframe></section>
+          <iframe title="Unrelated embed" src="/ordinary"></iframe>
+          <img alt="Static artwork" src="/image.svg"></main>`,
+      });
+    }
+    if (path === "/data") return route.fulfill({ json: { unchanged: true } });
+    if (path === "/image.svg") {
+      return route.fulfill({
+        contentType: "image/svg+xml",
+        body: '<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"/>',
+      });
+    }
+    return route.fulfill({
+      contentType: "text/html",
+      body: `<p>Original embed</p><script>parent.document.body.setAttribute("data-executed-" + location.pathname.slice(1), "yes");</script>`,
+    });
+  });
+  const fixture = await installHomeArtworkFixture(page);
+  expect(await installHomeArtworkFixture(page)).toBe(fixture);
+
+  await page.goto(origin, { waitUntil: "domcontentloaded" });
+  await expect(
+    page.getByRole("heading", { name: "Real homepage shell" })
+  ).toBeVisible();
+  for (const title of ["Current drop", "Submission"]) {
+    await expect(
+      page
+        .frameLocator(`iframe[title="${title}"]`)
+        .getByText("HTML artwork fixture", { exact: true })
+    ).toBeVisible();
+  }
+  expect(fixture.documentsReplaced()).toBe(2);
+  await expect(page.locator("body")).not.toHaveAttribute(
+    "data-executed-current",
+    "yes"
+  );
+  await expect(page.locator("body")).not.toHaveAttribute(
+    "data-executed-submission",
+    "yes"
+  );
+  await expect(
+    page
+      .frameLocator('iframe[title="Unrelated embed"]')
+      .getByText("Original embed", { exact: true })
+  ).toBeVisible();
+  await expect(page.locator("body")).toHaveAttribute(
+    "data-executed-ordinary",
+    "yes"
+  );
+  await expect(
+    page.getByRole("img", { name: "Static artwork" })
+  ).toHaveJSProperty("naturalWidth", 4);
+  expect(
+    await page.evaluate(async () => (await fetch("/data")).json())
+  ).toEqual({ unchanged: true });
+
+  await page
+    .getByTitle("Submission", { exact: true })
+    .evaluate((frame: HTMLIFrameElement) => {
+      frame.src = "/submission-fallback";
+    });
+  await expect.poll(fixture.documentsReplaced).toBe(3);
+  await expect(page.locator("body")).not.toHaveAttribute(
+    "data-executed-submission-fallback",
+    "yes"
+  );
+});
+
+test("Sidebar session fixture seeds only the top frame, not sandboxed artwork @smoke @medium @large", async ({
+  context,
+}) => {
+  const origin = "https://sidebar-fixture.example.test";
+  await context.route(`${origin}/**`, (route) =>
+    route.fulfill({
+      contentType: "text/html",
+      body:
+        new URL(route.request().url()).pathname === "/artwork"
+          ? "<p>Sandboxed artwork</p>"
+          : '<main><h1>Sidebar fixture</h1><iframe title="Artwork" sandbox="allow-scripts" src="/artwork"></iframe></main>',
+    })
+  );
+
+  // Reproduce the old initializer on an isolated control page. App-page error
+  // assertions remain unchanged; only this deliberate negative control records
+  // the expected SecurityError instead of treating it as an app regression.
+  const control = await context.newPage();
+  const controlErrors: Error[] = [];
+  control.on("pageerror", (error) => controlErrors.push(error));
+  await control.addInitScript(() => {
+    globalThis.sessionStorage.setItem("sidebarCollapsed", "true");
+  });
+  await control.goto(origin, { waitUntil: "domcontentloaded" });
+  await expect(
+    control
+      .getByTitle("Artwork", { exact: true })
+      .contentFrame()
+      .getByText("Sandboxed artwork", { exact: true })
+  ).toBeVisible();
+  await expect
+    .poll(() =>
+      controlErrors.some(
+        (error) =>
+          error.name === "SecurityError" && /sessionStorage/.test(error.message)
+      )
+    )
+    .toBe(true);
+  await control.close();
+
+  for (const collapsed of [true, false]) {
+    const page = await context.newPage();
+    const errors: Error[] = [];
+    page.on("pageerror", (error) => errors.push(error));
+    await seedSidebarCollapsedState(page, collapsed);
+    await page.goto(origin, { waitUntil: "domcontentloaded" });
+    await expect(
+      page.getByRole("heading", { name: "Sidebar fixture" })
+    ).toBeVisible();
+    await expect(
+      page
+        .getByTitle("Artwork", { exact: true })
+        .contentFrame()
+        .getByText("Sandboxed artwork", { exact: true })
+    ).toBeVisible();
+    expect(
+      await page.evaluate(() => sessionStorage.getItem("sidebarCollapsed"))
+    ).toBe(String(collapsed));
+    expect(errors).toEqual([]);
+    await page.close();
+  }
+});
 
 test.describe("Initial homepage HTML", () => {
   test.use({ javaScriptEnabled: false });
@@ -2151,11 +2297,7 @@ test("collapsed sidebar fits full rows when a desktop update appears @smoke @med
     "Desktop collapsed sidebar geometry"
   );
   await page.setViewportSize({ width: 1440, height: 600 });
-  await page.addInitScript(() => {
-    if (globalThis.top === globalThis.window) {
-      globalThis.sessionStorage.setItem("sidebarCollapsed", "true");
-    }
-  });
+  await seedSidebarCollapsedState(page, true);
   let releaseVersion!: () => void;
   const versionReady = new Promise<void>((resolve) => {
     releaseVersion = resolve;
@@ -2465,11 +2607,7 @@ for (const { width, stored, expectedWidth } of [
       "Saved desktop sidebar width does not apply to native or mobile layouts"
     );
     await page.setViewportSize({ width, height: 900 });
-    await page.addInitScript((value) => {
-      if (globalThis.top === globalThis.window) {
-        globalThis.sessionStorage.setItem("sidebarCollapsed", value);
-      }
-    }, stored);
+    await seedSidebarCollapsedState(page, stored === "true");
     const hydration = await gateSidebarHydration(page);
     const sidebar = page.getByLabel("Primary sidebar", { exact: true });
     const layout = page.getByRole("main").first().locator("..");
