@@ -47,7 +47,7 @@ export function WorkArt({
           onError={() => setBroken(art.data ?? null)}
           className={
             large
-              ? "tw-block tw-h-auto tw-max-h-[80vh] tw-w-auto tw-max-w-full tw-rounded-lg tw-object-contain"
+              ? "tw-block tw-h-auto tw-max-h-[60vh] tw-w-auto tw-max-w-full tw-rounded-lg tw-object-contain sm:tw-max-h-[80vh]"
               : "tw-h-full tw-w-full tw-object-contain"
           }
         />
