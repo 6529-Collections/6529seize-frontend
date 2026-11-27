@@ -130,15 +130,26 @@ async function monitorTargetPaints(page: Page) {
       const sample = () => {
         if (location.pathname === `/waves/${target}`) {
           frames++;
-          const pane = document.querySelector(
-            '[data-testid="wave-content"], [data-testid="wave-pending"]'
-          );
-          if (
-            !pane ||
-            pane.getBoundingClientRect().height === 0 ||
-            !document.body.textContent?.includes(name)
-          )
-            empty++;
+          // Native entry keeps the real source list visible until the incoming
+          // conversation commits. Every frame must show that list or the target pane.
+          const pane = Array.from(
+            document.querySelectorAll(
+              '[data-testid="wave-content"], [data-testid="wave-pending"], [data-phone-navigation-screen="waves"][aria-hidden="false"]'
+            )
+          ).find((element) => {
+            const style = getComputedStyle(element);
+            return (
+              element.getBoundingClientRect().height > 0 &&
+              style.visibility === "visible" &&
+              Number(style.opacity) > 0 &&
+              (
+                element.closest(
+                  "[data-phone-navigation-screen], [data-phone-wave-page]"
+                ) ?? element
+              ).textContent?.includes(name)
+            );
+          });
+          if (!pane) empty++;
           if (pane?.getAttribute("data-testid") === "wave-pending") pending++;
         }
         frame = requestAnimationFrame(sample);

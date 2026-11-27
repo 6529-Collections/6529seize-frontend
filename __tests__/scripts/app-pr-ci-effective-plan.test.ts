@@ -242,6 +242,7 @@ describe("effective App PR CI plan", () => {
     "components/brain/mobile/useWaveListSwipeBack.ts",
     "components/brain/mobile/useWaveNavigationTransition.ts",
     "helpers/waves/wave-navigation-transition.ts",
+    "components/mobile-navigation/PhoneListLayoutProvider.tsx",
     "styles/wave-navigation-transition.css",
     "components/community-curations/CommunityCurationsMasonry.tsx",
     "components/brain/my-stream/MyStreamWaveChat.tsx",

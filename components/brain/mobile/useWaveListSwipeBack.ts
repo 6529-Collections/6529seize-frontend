@@ -6,6 +6,10 @@ import { animate } from "framer-motion";
 import { useHorizontalSwipe } from "@/hooks/useHorizontalSwipe";
 import { MOTION_SPRINGS } from "@/lib/motion/springs";
 import {
+  beginPhoneBackGesture,
+  type PhoneBackGesture,
+} from "@/lib/motion/phone-navigation-registry";
+import {
   navigateAfterWaveSwipe,
   runWaveNavigationTransition,
   skipWaveNavigationTransition,
@@ -38,6 +42,8 @@ export function useWaveListSwipeBack<T extends HTMLElement = HTMLDivElement>({
   const width = useRef(0);
   const position = useRef(0);
   const origin = useRef(0);
+  const phoneGesture = useRef<PhoneBackGesture | null>(null);
+  const intentStarted = useRef(false);
   const animation = useRef<Animation | ReturnType<typeof animate> | null>(null);
   const settling = useRef(false);
   const generation = useRef(0);
@@ -51,13 +57,24 @@ export function useWaveListSwipeBack<T extends HTMLElement = HTMLDivElement>({
     {
       enabled,
       direction: 1,
-      threshold: 100,
+      threshold: () =>
+        (width.current || globalThis.innerWidth) / 2 - origin.current,
       // Recognize a rightward thumb arc before the browser starts a scroll.
       // Reply retains the recognizer's narrower default direction cone.
       intentRatio: 1.2,
       flick: true,
+      velocityWindowMs: 120,
+      captureOnPress: includeHeader,
+      allowReverse: true,
       priorityLeftEdgeWidth: edgeSwipeBack ? LEFT_EDGE_WIDTH : 0,
       onStart: () => {
+        intentStarted.current = false;
+        phoneGesture.current = beginPhoneBackGesture();
+        if (phoneGesture.current) {
+          width.current = phoneGesture.current.width;
+          origin.current = phoneGesture.current.origin;
+          return;
+        }
         const previousAnimation = animation.current;
         animation.current = null;
         if (previousAnimation && "stop" in previousAnimation)
@@ -74,16 +91,41 @@ export function useWaveListSwipeBack<T extends HTMLElement = HTMLDivElement>({
         width.current =
           measuredWidth > 0 ? measuredWidth : globalThis.innerWidth;
         surface.current?.style.setProperty("will-change", "transform");
-        onIntentStart?.();
       },
       onMove: (distance) => {
-        position.current = Math.min(origin.current + distance, width.current);
+        if (!intentStarted.current) {
+          intentStarted.current = true;
+          const input = document.activeElement;
+          if (
+            input instanceof HTMLElement &&
+            (input.matches("input, textarea") || input.isContentEditable)
+          )
+            input.blur();
+          onIntentStart?.();
+        }
+        if (phoneGesture.current) {
+          phoneGesture.current.move(distance);
+          return;
+        }
+        position.current = Math.max(
+          0,
+          Math.min(origin.current + distance, width.current)
+        );
         surface.current?.style.setProperty(
           "transform",
           `translate3d(${position.current}px, 0, 0)`
         );
       },
       onEnd: (committed, distance, velocity) => {
+        const shouldNavigate = committed && enabled;
+        const nativeGesture = phoneGesture.current;
+        phoneGesture.current = null;
+        if (nativeGesture) {
+          nativeGesture.end(shouldNavigate, velocity, () =>
+            navigateAfterWaveSwipe(navigate.current)
+          );
+          return;
+        }
         const element = surface.current;
         if (!element) return;
         const reducedMotion = globalThis.matchMedia(
@@ -104,7 +146,7 @@ export function useWaveListSwipeBack<T extends HTMLElement = HTMLDivElement>({
           (!useSpring && typeof element.animate !== "function")
         ) {
           cleanup();
-          if (committed && enabled) navigateAfterWaveSwipe(navigate.current);
+          if (shouldNavigate) navigateAfterWaveSwipe(navigate.current);
           return;
         }
         settling.current = committed;
@@ -136,7 +178,10 @@ export function useWaveListSwipeBack<T extends HTMLElement = HTMLDivElement>({
           return;
         }
         const destination = committed ? width.current : 0;
-        const start = Math.min(origin.current + distance, width.current);
+        const start = Math.max(
+          0,
+          Math.min(origin.current + distance, width.current)
+        );
         let navigated = false;
         const finishNavigation = () => {
           if (navigated || generation.current !== releasedGeneration) return;
@@ -159,7 +204,7 @@ export function useWaveListSwipeBack<T extends HTMLElement = HTMLDivElement>({
           : element.animate(
               [
                 {
-                  transform: `translate3d(${Math.min(distance, width.current)}px, 0, 0)`,
+                  transform: `translate3d(${start}px, 0, 0)`,
                 },
                 { transform: `translate3d(${destination}px, 0, 0)` },
               ],

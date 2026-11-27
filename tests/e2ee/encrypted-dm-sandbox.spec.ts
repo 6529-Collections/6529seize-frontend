@@ -1,4 +1,8 @@
 import {
+  expectNativeNavigation,
+  sampleNativeNavigation,
+} from "../support/nativePhoneNavigation";
+import {
   dropEncryptedAttachment,
   checkEncryptedImageActions,
 } from "../support/e2ee/attachmentMedia";
@@ -115,6 +119,22 @@ async function tapEncryptedBackAndExpectSlide(page: Page) {
   await expect(
     page.getByRole("button", { name: /^(Back|Go back)$/u })
   ).toHaveCount(0);
+  const retainedInbox = page
+    .getByRole("main", { includeHidden: true })
+    .locator('xpath=ancestor::*[@data-phone-navigation-screen="encrypted"]');
+  if (await retainedInbox.count()) {
+    const underlay = await retainedInbox.elementHandle();
+    if (!underlay) throw new Error("Missing retained encrypted inbox");
+    const frames = sampleNativeNavigation(page, ENCRYPTED_ROUTE, false);
+    await back.tap();
+    expectNativeNavigation(await frames);
+    await expect(page).toHaveURL(new RegExp(`${ENCRYPTED_ROUTE}$`, "u"));
+    expect(await underlay.evaluate((element) => element.isConnected)).toBe(
+      true
+    );
+    await underlay.dispose();
+    return;
+  }
   await page.evaluate(() => {
     const root = document.documentElement;
     const start = document.startViewTransition.bind(document);
@@ -656,7 +676,7 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     ).toBeVisible();
     await alice.page.keyboard.press("Escape");
 
-    const releaseBack = await dragEncryptedMessage(alice.page, body, 130);
+    const releaseBack = await dragEncryptedMessage(alice.page, body, 240);
     await releaseBack();
     await expect(alice.page).toHaveURL(new RegExp(`${ENCRYPTED_ROUTE}$`, "u"));
     const bobRow = conversationListRow(alice.page, "bob");
@@ -667,11 +687,13 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     await expect(bobRow).toBeVisible();
     await tapEncryptedBackAndExpectSlide(bob.page);
     await expect(conversationListRow(bob.page, "alice")).toBeVisible();
-    await bobRow.tap();
-    await expect(alice.page.locator("html")).toHaveAttribute(
-      "data-test-encrypted-entry-slide",
-      "ready"
+    const entryFrames = sampleNativeNavigation(
+      alice.page,
+      ENCRYPTED_ROUTE,
+      true
     );
+    await bobRow.tap();
+    expectNativeNavigation(await entryFrames, { headerMayLoad: true });
     await expectMessage(alice.page, incoming);
     await conversationListRow(bob.page, "alice").tap();
     await expect(bob.page.locator("html")).toHaveAttribute(

@@ -1,5 +1,6 @@
 "use client";
 import "@/i18n/namespaces/wave-sidebar";
+import { usePhoneNavigationScreen } from "@/contexts/PhoneNavigationScreenContext";
 import { SidebarAnnouncementSkeleton } from "@/components/brain/left-sidebar/waves/SidebarDiscoverySkeletons";
 import { SidebarDiscovery } from "@/components/brain/left-sidebar/waves/SidebarDiscovery";
 import {
@@ -172,7 +173,11 @@ const UnifiedWavesListWaves = forwardRef<
     const [following] = useShowFollowingWaves();
     const { connectedProfile, activeProfileProxy } = useAuth();
     const seizeSettings = useSeizeSettingsOptional();
-    const { activeWave, waves: streamWaves } = useMyStream();
+    const { activeWave: streamActiveWave, waves: streamWaves } = useMyStream();
+    const retainedScreen = usePhoneNavigationScreen();
+    const activeWave = retainedScreen
+      ? { ...streamActiveWave, id: null, parentWaveId: null }
+      : streamActiveWave;
     const isJoinedFilterActive =
       following && !!connectedProfile?.handle && !activeProfileProxy;
     const {
@@ -370,6 +375,7 @@ const UnifiedWavesListWaves = forwardRef<
     );
 
     const virtual = useVirtualizedWaves<AnimatedSidebarWaveTreeRow>({
+      isActive: retainedScreen?.active ?? true,
       items: isPinnedCollection ? [] : virtualizedRows,
       key: virtualizedKey,
       scrollContainerRef,

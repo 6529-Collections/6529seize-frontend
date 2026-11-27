@@ -22,6 +22,7 @@ import { Keyboard } from "@capacitor/keyboard";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { useExitActiveWave } from "./useExitActiveWave";
+import { runPhoneChevronBackTransition } from "@/helpers/waves/wave-navigation-transition";
 
 const ROOT_ROUTES = new Set([
   "/",
@@ -112,7 +113,9 @@ export default function AndroidBackNavigation() {
     }
     const parentRoute = getParentRoute(url);
     if (parentRoute) {
-      router.replace(parentRoute);
+      runPhoneChevronBackTransition(parentRoute, () =>
+        router.replace(parentRoute)
+      );
       return;
     }
     if (history.canGoBack) {
