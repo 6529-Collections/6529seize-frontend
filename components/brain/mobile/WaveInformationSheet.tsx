@@ -92,7 +92,7 @@ export default function WaveInformationSheet({
         id={contentId}
         ref={setContainer}
         hidden={!subviewOpen}
-        className="tw-min-h-0 tw-flex-1 tw-py-4"
+        className="tw-min-h-0 tw-flex-1 tw-py-4 has-[[data-wave-access-dialog]]:tw-flex has-[[data-wave-access-dialog]]:tw-flex-col has-[[data-wave-access-dialog]]:tw-overflow-hidden has-[[data-wave-access-dialog]]:tw-py-0"
       />
     </WaveInformationPanelContext.Provider>
   );

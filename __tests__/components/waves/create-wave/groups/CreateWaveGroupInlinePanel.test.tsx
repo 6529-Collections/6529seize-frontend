@@ -34,6 +34,7 @@ jest.mock(
         <div
           data-testid="identities-panel"
           data-simplified-copy={props.simplifyIncludedCopy}
+          data-presentation={props.variant}
         >
           <span data-testid="restored-included-identities">
             {props.includedIdentities
@@ -548,6 +549,10 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(screen.getByTestId("identities-panel")).toHaveAttribute(
       "data-simplified-copy",
       "true"
+    );
+    expect(screen.getByTestId("identities-panel")).toHaveAttribute(
+      "data-presentation",
+      "default"
     );
     expect(screen.getByRole("button", { name: "Save changes" })).toBeDisabled();
     expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();

@@ -45,6 +45,7 @@ interface CreateWaveInlineGroupIdentitiesProps {
   readonly simplifyIncludedCopy?: boolean;
   readonly showIdentityTotal?: boolean;
   readonly mobilePresentation?: boolean;
+  readonly variant?: "default" | "wave-access";
 }
 
 function getModeConfig(
@@ -153,14 +154,28 @@ function CurrentUserSwitch({
   checked,
   label,
   onChange,
+  waveAccessPresentation = false,
 }: {
   readonly checked: boolean;
   readonly label: string;
   readonly onChange: (checked: boolean) => void;
+  readonly waveAccessPresentation?: boolean;
 }) {
   return (
-    <label className="tw-inline-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-gap-x-2 sm:tw-gap-x-3">
-      <span className="tw-text-xs tw-font-semibold tw-text-iron-50">
+    <label
+      className={
+        waveAccessPresentation
+          ? "tw-mt-3 tw-flex tw-min-h-11 tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-pb-3"
+          : "tw-inline-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-gap-x-2 sm:tw-gap-x-3"
+      }
+    >
+      <span
+        className={
+          waveAccessPresentation
+            ? "tw-text-[15px] tw-text-iron-50"
+            : "tw-text-xs tw-font-semibold tw-text-iron-50"
+        }
+      >
         {label}
       </span>
       <span
@@ -203,6 +218,7 @@ function IdentityControlsRow({
   onCurrentUserToggle,
   onRemove,
   selectedWalletCount,
+  waveAccessPresentation,
 }: {
   readonly activeIdentities: readonly CommunityMemberMinimal[];
   readonly currentUserIdentity: CommunityMemberMinimal | null;
@@ -214,6 +230,7 @@ function IdentityControlsRow({
   readonly onCurrentUserToggle: (checked: boolean) => void;
   readonly onRemove: (wallet: string) => void;
   readonly selectedWalletCount: number;
+  readonly waveAccessPresentation: boolean;
 }) {
   const showRow =
     activeIdentities.length > 0 ||
@@ -223,12 +240,29 @@ function IdentityControlsRow({
     return null;
   }
 
+  const currentUserSwitch = isIncludedMode && currentUserIdentity && (
+    <CurrentUserSwitch
+      checked={isCurrentUserIncluded}
+      label={includeMeLabel}
+      onChange={onCurrentUserToggle}
+      waveAccessPresentation={waveAccessPresentation}
+    />
+  );
+
   return (
-    <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
+    <div
+      className={
+        waveAccessPresentation
+          ? "!tw-mt-0 tw-flex tw-flex-col tw-gap-3"
+          : "tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3"
+      }
+    >
+      {waveAccessPresentation && currentUserSwitch}
       {activeIdentities.length > 0 && (
         <GroupIdentitySelectedList
           identities={activeIdentities}
           mobilePresentation={mobilePresentation}
+          variant={waveAccessPresentation ? "wave-access" : "default"}
           onRemove={onRemove}
         />
       )}
@@ -237,13 +271,7 @@ function IdentityControlsRow({
           {emptyText}
         </p>
       )}
-      {isIncludedMode && currentUserIdentity && (
-        <CurrentUserSwitch
-          checked={isCurrentUserIncluded}
-          label={includeMeLabel}
-          onChange={onCurrentUserToggle}
-        />
-      )}
+      {!waveAccessPresentation && currentUserSwitch}
     </div>
   );
 }
@@ -292,11 +320,13 @@ export default function CreateWaveInlineGroupIdentities(
     simplifyIncludedCopy = false,
     showIdentityTotal = true,
     mobilePresentation = false,
+    variant = "default",
   } = props;
   const { connectedProfile } = useAuth();
   const locale = useBrowserLocale();
   const [mode, setMode] = useState<InlineIdentityMode>("included");
   const isIncludedMode = mode === "included";
+  const waveAccessPresentation = variant === "wave-access";
   const hideRedundantCopy = simplifyIncludedCopy && isIncludedMode;
   const {
     activeIdentities,
@@ -365,11 +395,34 @@ export default function CreateWaveInlineGroupIdentities(
       key: "excluded",
     },
   ];
+  const excludedWarning = showCurrentUserExcludedWarning && (
+    <p
+      role="status"
+      aria-live="polite"
+      className={
+        waveAccessPresentation
+          ? "tw-m-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-leading-relaxed tw-text-iron-200"
+          : "tw-m-0 tw-rounded-lg tw-border tw-border-solid tw-border-[#fef08a]/20 tw-bg-[#fef08a]/10 tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-leading-relaxed tw-text-[#fef08a]"
+      }
+    >
+      {t(locale, "waves.create.groups.inlineIdentities.creatorExcludedWarning")}
+    </p>
+  );
   return (
     <div
+      data-wave-access-identities={
+        waveAccessPresentation && mobilePresentation ? true : undefined
+      }
       className={`tw-space-y-4 ${mobilePresentation ? "[&_label:has([role=switch])]:tw-w-full [&_label:has([role=switch])]:tw-justify-between" : ""}`}
     >
-      <div data-group-criteria-tabs className="tw-w-fit">
+      <div
+        data-group-criteria-tabs
+        className={
+          waveAccessPresentation && mobilePresentation
+            ? "tw-w-full"
+            : "tw-w-fit"
+        }
+      >
         <CommonTabs<InlineIdentityMode>
           variant="connected"
           connectedSize="sm"
@@ -380,7 +433,7 @@ export default function CreateWaveInlineGroupIdentities(
             locale,
             "waves.create.groups.inlineIdentities.modeLabel"
           )}
-          fill={false}
+          fill={waveAccessPresentation && mobilePresentation}
           size="sm"
         />
       </div>
@@ -392,7 +445,13 @@ export default function CreateWaveInlineGroupIdentities(
             : "tw-space-y-3"
         }
       >
-        <h3 className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-200">
+        <h3
+          className={
+            waveAccessPresentation
+              ? "tw-m-0 tw-text-[15px] tw-font-semibold tw-text-iron-50"
+              : "tw-m-0 tw-text-sm tw-font-medium tw-text-iron-200"
+          }
+        >
           {searchLabel}
         </h3>
         <GroupCreateIdentitiesSearch
@@ -403,7 +462,7 @@ export default function CreateWaveInlineGroupIdentities(
           placeholder={searchPlaceholder}
           hideLabel={true}
           inputAppearance="modal"
-          inputClassName="focus:!tw-ring-1 desktop-hover:hover:focus:tw-ring-primary-400"
+          inputClassName={`focus:!tw-ring-1 desktop-hover:hover:focus:tw-ring-primary-400 ${waveAccessPresentation && mobilePresentation ? "tw-h-11 tw-text-base" : ""}`}
           iconClassName="tw-text-iron-500"
           resultsLayout={resultsLayout}
           sort="level"
@@ -420,6 +479,7 @@ export default function CreateWaveInlineGroupIdentities(
           isCurrentUserIncluded={isCurrentUserIncluded}
           isIncludedMode={isIncludedMode}
           mobilePresentation={mobilePresentation}
+          waveAccessPresentation={waveAccessPresentation}
           onCurrentUserToggle={(checked) =>
             updateCurrentUserSelection({
               checked,
@@ -433,10 +493,12 @@ export default function CreateWaveInlineGroupIdentities(
           selectedWalletCount={selectedWallets.length}
         />
       </div>
+      {waveAccessPresentation && excludedWarning}
       <CreateWaveInlineGroupWalletSources
         quiet
         networkPresentation
         mobilePresentation={mobilePresentation}
+        variant={variant}
         hideEmptyMessages={simplifyIncludedCopy}
         direction={mode}
         sources={activeWalletSources}
@@ -449,18 +511,7 @@ export default function CreateWaveInlineGroupIdentities(
           totalText={showIdentityTotal ? totalText : null}
         />
       )}
-      {showCurrentUserExcludedWarning && (
-        <p
-          role="status"
-          aria-live="polite"
-          className="tw-m-0 tw-rounded-lg tw-border tw-border-solid tw-border-[#fef08a]/20 tw-bg-[#fef08a]/10 tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-leading-relaxed tw-text-[#fef08a]"
-        >
-          {t(
-            locale,
-            "waves.create.groups.inlineIdentities.creatorExcludedWarning"
-          )}
-        </p>
-      )}
+      {!waveAccessPresentation && excludedWarning}
     </div>
   );
 }

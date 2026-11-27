@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import clsx from "clsx";
 import { useQuery } from "@tanstack/react-query";
 import { UserIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import pLimit from "p-limit";
@@ -28,9 +29,11 @@ function SelectedWallet({
   identity,
   onRemove,
   mobilePresentation,
+  waveAccessPresentation,
 }: {
   readonly identity: CommunityMemberMinimal;
   readonly mobilePresentation: boolean;
+  readonly waveAccessPresentation: boolean;
   readonly onRemove: (wallet: string) => void;
 }) {
   const locale = useBrowserLocale();
@@ -67,9 +70,20 @@ function SelectedWallet({
   const failed =
     profile.isError && getStructuredApiErrorStatus(profile.error) !== 404;
 
+  const mobileAccess = waveAccessPresentation && mobilePresentation;
+
   return (
     <li
-      className={`tw-flex tw-min-h-14 tw-min-w-0 tw-items-center tw-gap-3 ${mobilePresentation ? "tw-rounded-xl tw-bg-iron-800 tw-px-3 tw-py-2 tw-ring-1 tw-ring-iron-700" : "tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-1"}`}
+      className={clsx(
+        "tw-flex tw-min-h-14 tw-min-w-0 tw-items-center tw-gap-3",
+        mobileAccess &&
+          "tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-py-2 last:tw-border-b-0 [&>div:first-child]:tw-size-9",
+        mobilePresentation &&
+          !mobileAccess &&
+          "tw-rounded-xl tw-bg-iron-800 tw-px-3 tw-py-2 tw-ring-1 tw-ring-iron-700",
+        !mobilePresentation &&
+          "tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-1"
+      )}
     >
       <ProfileAvatar
         pfpUrl={data?.pfp}
@@ -86,13 +100,15 @@ function SelectedWallet({
           </output>
         ) : (
           <>
-            <span className="tw-block tw-truncate tw-text-sm tw-font-medium tw-text-iron-100">
+            <span
+              className={`tw-block tw-truncate tw-font-medium ${waveAccessPresentation && mobilePresentation ? "tw-text-[15px] tw-text-iron-50" : "tw-text-sm tw-text-iron-100"}`}
+            >
               {name ?? walletLabel}
             </span>
             {name && (
               <span
                 title={wallet}
-                className="tw-block tw-truncate tw-text-xs tw-text-iron-400"
+                className={`tw-block tw-truncate ${waveAccessPresentation && mobilePresentation ? "tw-text-[13px] tw-text-iron-500" : "tw-text-xs tw-text-iron-400"}`}
               >
                 {walletLabel}
               </span>
@@ -135,7 +151,16 @@ function SelectedWallet({
             wallet: shortWallet,
           }
         )}
-        className={`tw-flex tw-shrink-0 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${mobilePresentation ? "tw-relative tw-size-8 tw-rounded-full tw-text-iron-500 after:tw-absolute after:-tw-inset-1.5 after:tw-content-[''] active:tw-bg-iron-700 active:tw-text-iron-50 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-iron-50" : "tw-size-11 tw-rounded-lg tw-text-iron-400 desktop-hover:hover:tw-text-error"}`}
+        className={clsx(
+          "tw-flex tw-shrink-0 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400",
+          mobileAccess &&
+            "-tw-mr-2 tw-size-11 tw-rounded-lg tw-text-iron-500 active:tw-bg-white/[0.06] desktop-hover:hover:tw-text-iron-200",
+          mobilePresentation &&
+            !mobileAccess &&
+            "tw-relative tw-size-8 tw-rounded-full tw-text-iron-500 after:tw-absolute after:-tw-inset-1.5 after:tw-content-[''] active:tw-bg-iron-700 active:tw-text-iron-50 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-iron-50",
+          !mobilePresentation &&
+            "tw-size-11 tw-rounded-lg tw-text-iron-400 desktop-hover:hover:tw-text-error"
+        )}
       >
         <XMarkIcon aria-hidden="true" className="tw-size-4" />
       </button>
@@ -147,9 +172,11 @@ export default function GroupIdentitySelectedList({
   identities,
   onRemove,
   mobilePresentation = false,
+  variant = "default",
 }: {
   readonly identities: readonly CommunityMemberMinimal[];
   readonly mobilePresentation?: boolean;
+  readonly variant?: "default" | "wave-access";
   readonly onRemove: (wallet: string) => void;
 }) {
   const locale = useBrowserLocale();
@@ -165,13 +192,18 @@ export default function GroupIdentitySelectedList({
   return (
     <div className="tw-w-full tw-min-w-0">
       <ul
-        className={`tw-m-0 tw-list-none tw-p-0 ${mobilePresentation ? "tw-space-y-3" : ""}`}
+        className={clsx(
+          "tw-m-0 tw-list-none tw-p-0",
+          mobilePresentation &&
+            (variant === "wave-access" ? "tw-flex tw-flex-col" : "tw-space-y-3")
+        )}
       >
         {visibleIdentities.map((identity) => (
           <SelectedWallet
             key={identity.wallet}
             identity={identity}
             mobilePresentation={mobilePresentation}
+            waveAccessPresentation={variant === "wave-access"}
             onRemove={onRemove}
           />
         ))}

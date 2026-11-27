@@ -53,6 +53,8 @@ type GroupAssignmentPanelProps = GroupInlinePanelOptions & {
   readonly onMakeWavePublic?: (() => void) | undefined;
   readonly showMatchWaveAccess?: boolean;
   readonly onMatchWaveAccess?: (() => void) | undefined;
+  readonly actionsContainer?: HTMLElement | null | undefined;
+  readonly variant?: "default" | "wave-access";
 };
 
 function DraftPrivacyControl({
@@ -122,6 +124,7 @@ function GroupAssignmentCriteriaPanel({
   mobileNavigation,
   simplifyCriteriaCopy,
   panelState,
+  variant = "default",
 }: {
   readonly alwaysExpanded?: boolean;
   readonly disabled: boolean;
@@ -129,6 +132,7 @@ function GroupAssignmentCriteriaPanel({
   readonly mobileNavigation: boolean;
   readonly simplifyCriteriaCopy: boolean;
   readonly panelState: GroupAssignmentPanelState;
+  readonly variant?: "default" | "wave-access";
 }) {
   const locale = useBrowserLocale();
   // This view belongs to the current edit session, not the criteria draft.
@@ -192,12 +196,15 @@ function GroupAssignmentCriteriaPanel({
       {view !== null &&
         (view === "identities" ? (
           <>
-            {mobileNavigation && (
+            {(variant === "wave-access"
+              ? !mobileNavigation
+              : mobileNavigation) && (
               <h3 className="tw-mb-4 tw-mt-0 tw-text-base tw-font-semibold tw-text-iron-100">
                 {t(locale, "waves.create.groups.identities")}
               </h3>
             )}
             <CreateWaveInlineGroupIdentities
+              variant={variant}
               mobilePresentation={mobileNavigation}
               simplifyIncludedCopy={simplifyCriteriaCopy}
               showIdentityTotal={!simplifyCriteriaCopy}
@@ -279,6 +286,7 @@ function GroupAssignmentActivePanel({
   panelState,
   quiet,
   selectedGroup,
+  variant,
 }: {
   readonly allowGroupClear: boolean;
   readonly defaultLabel: string;
@@ -289,6 +297,7 @@ function GroupAssignmentActivePanel({
   readonly panelState: GroupAssignmentPanelState;
   readonly quiet: boolean;
   readonly selectedGroup: ApiGroupFull | null;
+  readonly variant: "default" | "wave-access";
 }) {
   const {
     displayedBuilder,
@@ -301,6 +310,7 @@ function GroupAssignmentActivePanel({
   ) {
     return (
       <GroupAssignmentCriteriaPanel
+        variant={variant}
         disabled={disabled}
         isWaveAccessEditor={isWaveAccessEditor}
         mobileNavigation={mobileNavigation}
@@ -341,6 +351,7 @@ function GroupAssignmentDraftFooter({
   quiet,
   showPrivacyControl,
   simplifyCriteriaCopy,
+  actionsContainer,
 }: {
   readonly disabled: boolean;
   readonly draftMembersPreview: ReactNode;
@@ -350,6 +361,7 @@ function GroupAssignmentDraftFooter({
   readonly quiet: boolean;
   readonly showPrivacyControl: boolean;
   readonly simplifyCriteriaCopy: boolean;
+  readonly actionsContainer?: HTMLElement | null | undefined;
 }) {
   const {
     canCreateDraft,
@@ -383,6 +395,7 @@ function GroupAssignmentDraftFooter({
 
   return (
     <CreateWaveInlineGroupDraftSummary
+      actionsContainer={actionsContainer}
       draftSummary={draftSummary}
       simplifyCriteriaCopy={simplifyCriteriaCopy}
       mobilePresentation={mobileNavigation}
@@ -421,6 +434,8 @@ function SharedGroupAssignmentPanel({
     showMatchWaveAccess = false,
     onMatchWaveAccess,
     presentation = "default",
+    actionsContainer,
+    variant = "default",
   } = panelProps;
   const quiet = presentation === "quiet";
   const isDesktopViewport = useMediaQuery("(min-width: 1024px)");
@@ -455,6 +470,15 @@ function SharedGroupAssignmentPanel({
     (showMakeWavePublic && Boolean(onMakeWavePublic)) ||
     (showMatchWaveAccess && Boolean(onMatchWaveAccess));
 
+  let panelClassName =
+    quiet || presentation === "embedded"
+      ? "tw-relative tw-flex tw-min-w-0 tw-flex-col tw-gap-4"
+      : GROUP_ASSIGNMENT_PANEL_CLASS_NAME;
+  if (variant === "wave-access" && mobileNavigation) {
+    panelClassName +=
+      " tw-group/wave-access has-[[data-wave-access-identities]]:tw-border-0 has-[[data-wave-access-identities]]:tw-bg-transparent has-[[data-wave-access-identities]]:tw-p-0";
+  }
+
   return (
     <>
       <div
@@ -462,16 +486,12 @@ function SharedGroupAssignmentPanel({
         data-mobile-group-editor={
           mobileNavigation && isEditingWaveAccess ? true : undefined
         }
-        className={
-          quiet || presentation === "embedded"
-            ? "tw-relative tw-flex tw-min-w-0 tw-flex-col tw-gap-4"
-            : GROUP_ASSIGNMENT_PANEL_CLASS_NAME
-        }
+        className={panelClassName}
       >
         <div className="tw-relative tw-flex tw-flex-col tw-gap-4">
           {showHeader && (
             <div
-              className={`tw-flex tw-min-w-0 tw-flex-col tw-gap-3 ${isEditingWaveAccess ? "tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-pb-4" : "lg:tw-flex-row lg:tw-items-start lg:tw-justify-between"}`}
+              className={`tw-flex tw-min-w-0 tw-flex-col tw-gap-3 ${variant === "wave-access" && mobileNavigation ? "group-has-[[data-wave-access-identities]]/wave-access:tw-hidden" : ""} ${isEditingWaveAccess ? "tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-pb-4" : "lg:tw-flex-row lg:tw-items-start lg:tw-justify-between"}`}
             >
               <CreateWaveInlineGroupHeader
                 currentGroupLabel={currentGroupLabel}
@@ -519,6 +539,7 @@ function SharedGroupAssignmentPanel({
           )}
 
           <GroupAssignmentActivePanel
+            variant={variant}
             mobileNavigation={mobileNavigation}
             simplifyCriteriaCopy={simplifyCriteriaCopy}
             allowGroupClear={allowGroupClear}
@@ -530,6 +551,7 @@ function SharedGroupAssignmentPanel({
             selectedGroup={selectedGroup}
           />
           <GroupAssignmentDraftFooter
+            actionsContainer={actionsContainer}
             mobileNavigation={mobileNavigation}
             disabled={disabled}
             draftMembersPreview={draftMembersPreview}

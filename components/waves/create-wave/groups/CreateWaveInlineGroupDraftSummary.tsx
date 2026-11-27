@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { createPortal } from "react-dom";
 import GroupCriteriaReadinessHint from "@/components/groups/assignment/GroupCriteriaReadinessHint";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -17,6 +18,7 @@ export default function CreateWaveInlineGroupDraftSummary({
   draftMembersPreview,
   onCreateAndUse,
   quiet = false,
+  actionsContainer,
 }: {
   readonly draftSummary: string | null;
   readonly isValid: boolean;
@@ -30,6 +32,7 @@ export default function CreateWaveInlineGroupDraftSummary({
   readonly draftMembersPreview?: ReactNode | undefined;
   readonly onCreateAndUse: () => void;
   readonly quiet?: boolean;
+  readonly actionsContainer?: HTMLElement | null | undefined;
 }) {
   const locale = useBrowserLocale();
   const showDraftActions = forceVisible || draftSummary !== null;
@@ -64,6 +67,32 @@ export default function CreateWaveInlineGroupDraftSummary({
   }
 
   const dividerClassName = quiet ? "tw-border-iron-800" : "tw-border-white/5";
+  const pinnedActions = actionsContainer !== undefined;
+  let actionsClassName = `tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2 ${saveChangesLabel ? "tw-self-end sm:tw-col-start-2 sm:tw-justify-self-end" : "tw-self-start"}`;
+  let buttonClassName: string | undefined;
+  if (pinnedActions) {
+    actionsClassName = mobilePresentation ? "tw-w-full" : "tw-ml-auto";
+    buttonClassName = mobilePresentation
+      ? "tw-h-11 tw-w-full tw-rounded-xl tw-text-[15px] tw-font-semibold"
+      : "tw-h-10 tw-rounded-lg tw-px-5";
+  }
+  const actions = (
+    <>
+      {pinnedActions && !mobilePresentation && privacyControl}
+      <div className={actionsClassName}>
+        <Button
+          variant="action"
+          size="md"
+          className={buttonClassName}
+          disabled={!canCreateDraft}
+          loading={isCreating}
+          onClick={onCreateAndUse}
+        >
+          {submitLabel}
+        </Button>
+      </div>
+    </>
+  );
   return (
     <div
       className={
@@ -83,7 +112,7 @@ export default function CreateWaveInlineGroupDraftSummary({
         </p>
       )}
       <div
-        className={`tw-flex tw-flex-col tw-gap-4 ${saveChangesLabel ? "sm:tw-grid sm:tw-grid-cols-[minmax(0,1fr)_auto] sm:tw-items-end" : ""}`}
+        className={`tw-flex tw-flex-col tw-gap-4 ${saveChangesLabel && !pinnedActions ? "sm:tw-grid sm:tw-grid-cols-[minmax(0,1fr)_auto] sm:tw-items-end" : ""}`}
       >
         <div data-group-criteria-summary className={summaryClassName}>
           {!simplifyCriteriaCopy && (
@@ -111,20 +140,8 @@ export default function CreateWaveInlineGroupDraftSummary({
             {simplifyCriteriaCopy && !isValid && <GroupCriteriaReadinessHint />}
           </div>
         </div>
-        {privacyControl}
-        <div
-          className={`tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2 ${saveChangesLabel ? "tw-self-end sm:tw-col-start-2 sm:tw-justify-self-end" : "tw-self-start"}`}
-        >
-          <Button
-            variant="action"
-            size="md"
-            disabled={!canCreateDraft}
-            loading={isCreating}
-            onClick={onCreateAndUse}
-          >
-            {submitLabel}
-          </Button>
-        </div>
+        {(!pinnedActions || mobilePresentation) && privacyControl}
+        {actionsContainer ? createPortal(actions, actionsContainer) : actions}
       </div>
     </div>
   );

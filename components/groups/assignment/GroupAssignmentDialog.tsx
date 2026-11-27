@@ -9,7 +9,7 @@ import IconButton from "@/components/utils/button/IconButton";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FocusTrap } from "focus-trap-react";
-import { useContext, useId, useRef, type ReactNode } from "react";
+import { useContext, useId, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
@@ -88,6 +88,21 @@ export default function GroupAssignmentDialog({
   const modalRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
   const descriptionId = useId();
+  const [actionsContainer, setActionsContainer] =
+    useState<HTMLDivElement | null>(null);
+  const pinnedFooter = isWaveAccessEditor && !criteriaDraft;
+  const desktopFooterClassName = `tw-flex tw-shrink-0 tw-items-center tw-justify-between tw-gap-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-6 tw-py-4 empty:tw-hidden ${embedded ? "tw-flex-wrap" : ""}`;
+  const footer = pinnedFooter ? (
+    <div
+      ref={setActionsContainer}
+      data-wave-access-footer
+      className={
+        embedded && phoneNavigation
+          ? "tw-shrink-0 tw-bg-gradient-to-t tw-from-iron-950 tw-via-iron-950 tw-to-transparent tw-px-4 tw-pb-3 tw-pt-6 empty:tw-hidden"
+          : desktopFooterClassName
+      }
+    />
+  ) : null;
   useAndroidBackLayer(!embedded, modalRef, () => {
     if (!paused) onClose();
   });
@@ -120,6 +135,8 @@ export default function GroupAssignmentDialog({
 
   let panelContent: ReactNode = (
     <GroupAssignmentPanel
+      variant={pinnedFooter ? "wave-access" : "default"}
+      actionsContainer={pinnedFooter ? actionsContainer : undefined}
       suggestedName={suggestedName}
       defaultLabel={defaultLabel}
       disabled={disabled}
@@ -175,12 +192,32 @@ export default function GroupAssignmentDialog({
 
   if (embedded) {
     return (
-      <div className="tw-flex tw-flex-col tw-gap-4 tw-px-4">
-        <p className="tw-mb-0 tw-text-sm tw-leading-5 tw-text-iron-400">
-          {description}
-        </p>
-        {beforePanel}
-        {panelContent}
+      <div
+        data-wave-access-dialog={pinnedFooter ? true : undefined}
+        className={
+          pinnedFooter
+            ? "tw-group/access-dialog tw-flex tw-min-h-0 tw-flex-1 tw-flex-col"
+            : "tw-contents"
+        }
+      >
+        <div
+          className={`tw-flex tw-flex-col tw-gap-4 tw-px-4 ${pinnedFooter ? "tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-pb-6" : ""}`}
+        >
+          <div
+            className={
+              pinnedFooter
+                ? "tw-flex tw-flex-col tw-gap-4 group-has-[[data-wave-access-identities]]/access-dialog:tw-hidden"
+                : "tw-contents"
+            }
+          >
+            <p className="tw-mb-0 tw-text-sm tw-leading-5 tw-text-iron-400">
+              {description}
+            </p>
+            {beforePanel}
+          </div>
+          {panelContent}
+        </div>
+        {footer}
       </div>
     );
   }
@@ -208,7 +245,7 @@ export default function GroupAssignmentDialog({
               aria-describedby={descriptionId}
               tabIndex={-1}
               open
-              className="tw-relative tw-m-0 tw-flex tw-max-h-[90dvh] tw-w-full tw-transform tw-flex-col tw-overflow-hidden tw-rounded-t-2xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-0 tw-text-left tw-shadow-2xl tw-transition-all tw-duration-300 sm:tw-max-w-5xl sm:tw-rounded-2xl"
+              className={`tw-relative tw-m-0 tw-flex tw-max-h-[90dvh] tw-w-full tw-transform tw-flex-col tw-overflow-hidden tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-0 tw-text-left tw-shadow-2xl tw-transition-all tw-duration-300 sm:tw-max-w-5xl ${pinnedFooter ? "tw-rounded-xl" : "tw-rounded-t-2xl sm:tw-rounded-2xl"}`}
             >
               <div className="tw-flex tw-flex-shrink-0 tw-items-start tw-justify-between tw-gap-4 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-p-5 sm:tw-p-6">
                 <div className="tw-min-w-0 tw-flex-1">
@@ -243,6 +280,7 @@ export default function GroupAssignmentDialog({
                   {panelContent}
                 </div>
               </div>
+              {footer}
             </dialog>
           </div>
         </div>

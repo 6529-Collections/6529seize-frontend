@@ -417,7 +417,7 @@ const OverlaySidebar = ({
                     id={contentId}
                     ref={setContainer}
                     hidden={!subview}
-                    className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-pb-6"
+                    className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-pb-6 has-[[data-wave-access-dialog]]:tw-flex has-[[data-wave-access-dialog]]:tw-flex-col has-[[data-wave-access-dialog]]:tw-overflow-hidden has-[[data-wave-access-dialog]]:tw-pb-0"
                   />
                 </WaveInformationPanelContext.Provider>
               </DialogPanel>
