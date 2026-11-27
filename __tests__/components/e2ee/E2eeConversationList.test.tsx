@@ -280,6 +280,40 @@ describe("encrypted conversation list", () => {
     expect(realRow).not.toHaveTextContent("bob");
   });
 
+  it("links chats on Messages with their way back, and nowhere else", () => {
+    mockPathname.mockReturnValue("/messages");
+    const engine = createFakeE2eeEngine({ conversations });
+    const view = render(
+      <E2eeTestProvider value={contextFor(engine)}>
+        <E2eeMessagesSection variant="app" />
+      </E2eeTestProvider>
+    );
+    const messagesRow = within(
+      screen.getByRole("list", { name: "Encrypted chats" })
+    ).getByRole("link", { name: /Collectors/ });
+    expect(messagesRow).toHaveAttribute(
+      "href",
+      `/messages/encrypted/${GROUP_G}?from=messages`
+    );
+    view.unmount();
+
+    // The encrypted list page and the side pane beside a chat keep plain links.
+    mockPathname.mockReturnValue(`/messages/encrypted/${DM_G}`);
+    render(
+      <E2eeTestProvider value={contextFor(engine)}>
+        <E2eeMessagesSection />
+        <E2eeConversationListPage />
+      </E2eeTestProvider>
+    );
+    for (const list of screen.getAllByRole("list", {
+      name: "Encrypted chats",
+    })) {
+      expect(
+        within(list).getByRole("link", { name: /Collectors/ })
+      ).toHaveAttribute("href", `/messages/encrypted/${GROUP_G}`);
+    }
+  });
+
   it.each([E2eeConversationListPage, E2eeMessagesSection])(
     "keeps an older pinned chat above newer chats in %p",
     async (List) => {

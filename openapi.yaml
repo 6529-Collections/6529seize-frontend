@@ -153,6 +153,61 @@ paths:
                   $ref: "#/components/schemas/ApiAggregatedActivityMemes"
         "404":
           description: Memes Aggregated Activity for consolidation key not found
+  /aggregated-activity/wallet/{wallet}:
+    get:
+      tags:
+        - Aggregated Activity
+      summary: Get aggregated activity for a wallet
+      description: >-
+        Returns activity totals across tracked collections for an individual
+        wallet.
+      operationId: getAggregatedActivityByWallet
+      security: []
+      parameters:
+        - name: wallet
+          in: path
+          description: Ethereum wallet address
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Wallet activity totals
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWalletAggregatedActivity"
+        "404":
+          description: No aggregated activity for this wallet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+  /aggregated-activity/wallet/{wallet}/memes:
+    get:
+      tags:
+        - Aggregated Activity
+      summary: Get a wallet's Memes activity by season
+      operationId: getMemesAggregatedActivityByWallet
+      security: []
+      parameters:
+        - name: wallet
+          in: path
+          description: Ethereum wallet address
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: >-
+            Memes activity by season. Returns an empty array if there are no
+            matching rows.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiWalletAggregatedActivityMemes"
   /alchemy-proxy/contracts:
     servers:
       - url: /
@@ -3330,10 +3385,10 @@ paths:
       summary: The stream owner each wallet's records use
       description: >-
         For each wallet, the owner that names it in signed records: its
-        principal id at the latest finalized height, or the wallet itself
-        while it is bound to no principal. Clients use it for the targets of
-        follows, mutes, blocks, artwork alerts and mention shortcuts. 1 to 50
-        wallets. 503 while the chain gateway is unavailable.
+        principal id at the latest finalized height, or the wallet itself while
+        it is bound to no principal. Clients use it for the targets of follows,
+        mutes, blocks, artwork alerts and mention shortcuts. 1 to 50 wallets.
+        503 while the chain gateway is unavailable.
       operationId: getSignedRecordsOwners
       security:
         - {}
@@ -16270,6 +16325,62 @@ paths:
                   $ref: "#/components/schemas/ApiOwnerBalanceMemes"
         "404":
           description: Memes Owner Balance for consolidation key not found
+  /owners-balances/wallet/{wallet}:
+    get:
+      tags:
+        - Owners Balances
+      summary: Get owner balances for a wallet
+      description: >-
+        Returns holdings, ranks, and TDH values for an individual wallet. TDH
+        values are null when the wallet has no record for the latest TDH block.
+      operationId: getOwnerBalanceByWallet
+      security: []
+      parameters:
+        - name: wallet
+          in: path
+          description: Ethereum wallet address
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Wallet balances and ranks
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWalletOwnerBalance"
+        "404":
+          description: No recorded balances for this wallet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+  /owners-balances/wallet/{wallet}/memes:
+    get:
+      tags:
+        - Owners Balances
+      summary: Get a wallet's Memes balances by season
+      description: TDH values are zero when the wallet has no TDH record for a season.
+      operationId: getMemesOwnerBalanceByWallet
+      security: []
+      parameters:
+        - name: wallet
+          in: path
+          description: Ethereum wallet address
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: >-
+            Memes balances by season. Returns an empty array if there are no
+            matching rows.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiWalletOwnerBalanceMemes"
   /policies/eula-consent:
     post:
       tags:
@@ -16664,18 +16775,18 @@ paths:
           description: >-
             The pointer changed (expected-current guard). With profile sites on
             the 6529 chain, publish records the signed publication record and
-            returns the draft with its publication_cid and, in
-            chain_documents, the content core and the record; the person's
-            browser uploads both to the gateway's document store, and the
-            person's PROFILE_REPLACE then makes it primary. Publishing a draft
-            that already has a publication_cid returns it as stored, with its
-            chain_documents, without signing again.
+            returns the draft with its publication_cid and, in chain_documents,
+            the content core and the record; the person's browser uploads both
+            to the gateway's document store, and the person's PROFILE_REPLACE
+            then makes it primary. Publishing a draft that already has a
+            publication_cid returns it as stored, with its chain_documents,
+            without signing again.
         "413":
           description: >-
             With profile sites on the 6529 chain: the content core or the
             publication record is larger than the gateway's document store
-            takes, 2 MiB a file (code cms_chain_document_too_large). Nothing
-            was recorded.
+            takes, 2 MiB a file (code cms_chain_document_too_large). Nothing was
+            recorded.
         "423":
           description: >-
             The identity freeze is on (code IDENTITY_FROZEN), while profiles
@@ -16683,15 +16794,15 @@ paths:
         "502":
           description: >-
             With profile sites on the 6529 chain, when the draft's publication
-            record was recorded earlier (a second publish, or another click
-            that recorded first): the record read back from storage doesn't
-            match its CID (code cms_publication_mismatch).
+            record was recorded earlier (a second publish, or another click that
+            recorded first): the record read back from storage doesn't match its
+            CID (code cms_publication_mismatch).
         "503":
           description: >-
             With profile sites on the 6529 chain, when the draft's publication
-            record was recorded earlier (a second publish, or another click
-            that recorded first): the record can't be read from storage now
-            (code cms_check_unavailable). Publish again shortly.
+            record was recorded earlier (a second publish, or another click that
+            recorded first): the record can't be read from storage now (code
+            cms_check_unavailable). Publish again shortly.
   /profile-cms/packages/{id}/rollback:
     post:
       tags:
@@ -19787,6 +19898,20 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-6529-signed-records
+          in: header
+          required: false
+          description: >-
+            The change as one signed record: base64url of the UTF-8 JSON array
+            of one signed record event, a kind 9 RECORD in the owner's ps stream
+            (the principal, or the wallet while it is bound to none) of type
+            subs.mode, subs.all-editions, subs.card or subs.count, stating the
+            same change as the body and signed with the signed-in wallet's
+            device key. After the switch to identities a change needs it; before
+            it, the change is made unsigned and a record sent with it is only
+            compared in shadow.
+          schema:
+            type: string
       requestBody:
         required: true
         content:
@@ -19801,9 +19926,24 @@ paths:
               schema:
                 $ref: "#/components/schemas/SubscriptionModeResponse"
         "400":
-          description: Not enough balance
+          description: >-
+            Not enough balance. A signed record that does not verify or does not
+            state the request gets INVALID_SIGNED_RECORD, with the reason in
+            `reason`.
         "403":
           description: User can only change subscription mode for their own consolidation
+        "409":
+          description: >-
+            Subscription changes are signed now and none was sent
+            (SIGNED_RECORD_REQUIRED); a newer change to this choice is already
+            saved (STALE_SIGNED_RECORD); or the key's wallets belong to more
+            than one identity.
+        "503":
+          description: >-
+            Subscription changes are paused for a few minutes, or the anchor
+            height or the wallet binding needed to check a signed record is
+            unavailable (ANCHOR_UNAVAILABLE, BINDING_UNAVAILABLE). Try again
+            shortly.
   /subscriptions/{consolidation_key}/subscribe-all-editions:
     post:
       tags:
@@ -19820,6 +19960,20 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-6529-signed-records
+          in: header
+          required: false
+          description: >-
+            The change as one signed record: base64url of the UTF-8 JSON array
+            of one signed record event, a kind 9 RECORD in the owner's ps stream
+            (the principal, or the wallet while it is bound to none) of type
+            subs.mode, subs.all-editions, subs.card or subs.count, stating the
+            same change as the body and signed with the signed-in wallet's
+            device key. After the switch to identities a change needs it; before
+            it, the change is made unsigned and a record sent with it is only
+            compared in shadow.
+          schema:
+            type: string
       requestBody:
         required: true
         content:
@@ -19833,8 +19987,24 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SubscribeAllEditionsResponse"
+        "400":
+          description: >-
+            A signed record that does not verify or does not state the request
+            gets INVALID_SIGNED_RECORD, with the reason in `reason`.
         "403":
           description: User can only change subscription mode for their own consolidation
+        "409":
+          description: >-
+            Subscription changes are signed now and none was sent
+            (SIGNED_RECORD_REQUIRED); a newer change to this choice is already
+            saved (STALE_SIGNED_RECORD); or the key's wallets belong to more
+            than one identity.
+        "503":
+          description: >-
+            Subscription changes are paused for a few minutes, or the anchor
+            height or the wallet binding needed to check a signed record is
+            unavailable (ANCHOR_UNAVAILABLE, BINDING_UNAVAILABLE). Try again
+            shortly.
   /subscriptions/{consolidation_key}/subscription:
     post:
       tags:
@@ -19851,6 +20021,20 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-6529-signed-records
+          in: header
+          required: false
+          description: >-
+            The change as one signed record: base64url of the UTF-8 JSON array
+            of one signed record event, a kind 9 RECORD in the owner's ps stream
+            (the principal, or the wallet while it is bound to none) of type
+            subs.mode, subs.all-editions, subs.card or subs.count, stating the
+            same change as the body and signed with the signed-in wallet's
+            device key. After the switch to identities a change needs it; before
+            it, the change is made unsigned and a record sent with it is only
+            compared in shadow.
+          schema:
+            type: string
       requestBody:
         required: true
         content:
@@ -19865,9 +20049,24 @@ paths:
               schema:
                 $ref: "#/components/schemas/SubscriptionResponse"
         "400":
-          description: Not enough balance or NFT already released
+          description: >-
+            Not enough balance or NFT already released. A signed record that
+            does not verify or does not state the request gets
+            INVALID_SIGNED_RECORD, with the reason in `reason`.
         "403":
           description: User can only change subscription mode for their own consolidation
+        "409":
+          description: >-
+            Subscription changes are signed now and none was sent
+            (SIGNED_RECORD_REQUIRED); a newer change to this choice is already
+            saved (STALE_SIGNED_RECORD); or the key's wallets belong to more
+            than one identity.
+        "503":
+          description: >-
+            Subscription changes are paused for a few minutes, or the anchor
+            height or the wallet binding needed to check a signed record is
+            unavailable (ANCHOR_UNAVAILABLE, BINDING_UNAVAILABLE). Try again
+            shortly.
   /subscriptions/{consolidation_key}/subscription-count:
     post:
       tags:
@@ -19884,6 +20083,20 @@ paths:
           required: true
           schema:
             type: string
+        - name: x-6529-signed-records
+          in: header
+          required: false
+          description: >-
+            The change as one signed record: base64url of the UTF-8 JSON array
+            of one signed record event, a kind 9 RECORD in the owner's ps stream
+            (the principal, or the wallet while it is bound to none) of type
+            subs.mode, subs.all-editions, subs.card or subs.count, stating the
+            same change as the body and signed with the signed-in wallet's
+            device key. After the switch to identities a change needs it; before
+            it, the change is made unsigned and a record sent with it is only
+            compared in shadow.
+          schema:
+            type: string
       requestBody:
         required: true
         content:
@@ -19898,9 +20111,24 @@ paths:
               schema:
                 $ref: "#/components/schemas/SubscriptionCountResponse"
         "400":
-          description: Not enough balance, NFT already released, or exceeds eligibility
+          description: >-
+            Not enough balance, NFT already released, or exceeds eligibility. A
+            signed record that does not verify or does not state the request
+            gets INVALID_SIGNED_RECORD, with the reason in `reason`.
         "403":
           description: User can only change subscription mode for their own consolidation
+        "409":
+          description: >-
+            Subscription changes are signed now and none was sent
+            (SIGNED_RECORD_REQUIRED); a newer change to this choice is already
+            saved (STALE_SIGNED_RECORD); or the key's wallets belong to more
+            than one identity.
+        "503":
+          description: >-
+            Subscription changes are paused for a few minutes, or the anchor
+            height or the wallet binding needed to check a signed record is
+            unavailable (ANCHOR_UNAVAILABLE, BINDING_UNAVAILABLE). Try again
+            shortly.
   /identity-subscriptions/outgoing/{target_type}:
     get:
       tags:
@@ -30066,9 +30294,9 @@ components:
         stays_on_site:
           type: boolean
           description: >-
-            The decision's wave's stays_on_site: true when the wave, and with
-            it this decision, stays on 6529.io; false when it moves to the
-            6529 chain.
+            The decision's wave's stays_on_site: true when the wave, and with it
+            this decision, stays on 6529.io; false when it moves to the 6529
+            chain.
         main_stage_trait_rules:
           type: array
           description: >-
@@ -33384,55 +33612,6 @@ components:
           type: integer
           format: int64
           nullable: true
-    ApiSignedRecordsOwner:
-      type: object
-      required:
-        - wallet
-        - owner
-      properties:
-        wallet:
-          type: string
-          description: Lowercase wallet.
-        owner:
-          type: string
-          description: Its principal id, or the wallet while it is bound to none.
-    ApiSignedRecordsOwners:
-      type: object
-      required:
-        - anchor
-        - owners
-      properties:
-        anchor:
-          type: integer
-          format: int64
-          description: The finalized height the owners were read at.
-        owners:
-          type: array
-          items:
-            $ref: "#/components/schemas/ApiSignedRecordsOwner"
-    ApiSignedRecordsAnchor:
-      type: object
-      required:
-        - anchor
-        - head_height
-        - finalized_time
-        - max_anchor_lag
-      properties:
-        anchor:
-          type: integer
-          format: int64
-          description: The latest finalized height; sign it as the record's anchor.
-        head_height:
-          type: integer
-          format: int64
-        finalized_time:
-          type: integer
-          format: int64
-          description: The finalized block's slot start, epoch milliseconds.
-        max_anchor_lag:
-          type: integer
-          format: int64
-          description: How many heights behind the finalized head a submitted anchor may be.
     ApiDeviceGrantProof:
       type: object
       allOf:
@@ -37326,8 +37505,8 @@ components:
           type: boolean
           description: >-
             True when the group stays on 6529.io: it is hidden, private, a
-            direct message's group, or made after the waves freeze. False
-            when it moves to the 6529 chain.
+            direct message's group, or made after the waves freeze. False when
+            it moves to the 6529 chain.
         id:
           type: string
         name:
@@ -42504,10 +42683,10 @@ components:
       type: object
       description: >-
         Only in a publish answer with profile sites on the 6529 chain: the two
-        files the person's browser uploads to the gateway's document store,
-        each with its CID, before the PROFILE_REPLACE that names them. With
-        the package, the answer stays under 5 MB for a package at the 2 MiB
-        storage cap.
+        files the person's browser uploads to the gateway's document store, each
+        with its CID, before the PROFILE_REPLACE that names them. With the
+        package, the answer stays under 5 MB for a package at the 2 MiB storage
+        cap.
       required:
         - content_core
         - publication
@@ -44566,6 +44745,57 @@ components:
           nullable: true
           minLength: 1
           maxLength: 50
+    ApiSignedRecordsAnchor:
+      type: object
+      required:
+        - anchor
+        - head_height
+        - finalized_time
+        - max_anchor_lag
+      properties:
+        anchor:
+          type: integer
+          format: int64
+          description: The latest finalized height; sign it as the record's anchor.
+        head_height:
+          type: integer
+          format: int64
+        finalized_time:
+          type: integer
+          format: int64
+          description: The finalized block's slot start, epoch milliseconds.
+        max_anchor_lag:
+          type: integer
+          format: int64
+          description: >-
+            How many heights behind the finalized head a submitted anchor may
+            be.
+    ApiSignedRecordsOwner:
+      type: object
+      required:
+        - wallet
+        - owner
+      properties:
+        wallet:
+          type: string
+          description: Lowercase wallet.
+        owner:
+          type: string
+          description: Its principal id, or the wallet while it is bound to none.
+    ApiSignedRecordsOwners:
+      type: object
+      required:
+        - anchor
+        - owners
+      properties:
+        anchor:
+          type: integer
+          format: int64
+          description: The finalized height the owners were read at.
+        owners:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiSignedRecordsOwner"
     ApiStartMultipartMediaUploadResponse:
       required:
         - upload_id
@@ -44802,8 +45032,8 @@ components:
           nullable: true
           description: >-
             Consecutive fully funded intended drops beginning with the immediate
-            next intended drop, counted past the forecast horizon. It assumes the
-            current mint price, eligibility count and subscription settings
+            next intended drop, counted past the forecast horizon. It assumes
+            the current mint price, eligibility count and subscription settings
             (mode, edition preference and stored per-drop selections) stay as
             they are, and that each later calendar drop is one Meme. Equal to
             fully_funded_drops when the horizon has an unfunded intended drop or
@@ -45829,6 +46059,284 @@ components:
         tdh:
           type: integer
           format: int64
+    ApiWalletAggregatedActivity:
+      type: object
+      required:
+        - wallet
+        - created_at
+        - updated_at
+        - block_reference
+        - primary_purchases_value
+        - primary_purchases_count
+        - secondary_purchases_value
+        - secondary_purchases_count
+        - burns
+        - sales_value
+        - sales_count
+        - airdrops
+        - transfers_in
+        - transfers_out
+        - primary_purchases_value_memes
+        - primary_purchases_count_memes
+        - secondary_purchases_value_memes
+        - secondary_purchases_count_memes
+        - burns_memes
+        - sales_value_memes
+        - sales_count_memes
+        - airdrops_memes
+        - transfers_in_memes
+        - transfers_out_memes
+        - primary_purchases_value_memelab
+        - primary_purchases_count_memelab
+        - secondary_purchases_value_memelab
+        - secondary_purchases_count_memelab
+        - burns_memelab
+        - sales_value_memelab
+        - sales_count_memelab
+        - airdrops_memelab
+        - transfers_in_memelab
+        - transfers_out_memelab
+        - primary_purchases_value_gradients
+        - primary_purchases_count_gradients
+        - secondary_purchases_value_gradients
+        - secondary_purchases_count_gradients
+        - burns_gradients
+        - sales_value_gradients
+        - sales_count_gradients
+        - airdrops_gradients
+        - transfers_in_gradients
+        - transfers_out_gradients
+        - primary_purchases_value_nextgen
+        - primary_purchases_count_nextgen
+        - secondary_purchases_value_nextgen
+        - secondary_purchases_count_nextgen
+        - burns_nextgen
+        - sales_value_nextgen
+        - sales_count_nextgen
+        - airdrops_nextgen
+        - transfers_in_nextgen
+        - transfers_out_nextgen
+      properties:
+        wallet:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        block_reference:
+          type: integer
+          format: int64
+        primary_purchases_value:
+          type: number
+          format: double
+        primary_purchases_count:
+          type: integer
+          format: int64
+        secondary_purchases_value:
+          type: number
+          format: double
+        secondary_purchases_count:
+          type: integer
+          format: int64
+        burns:
+          type: integer
+          format: int64
+        sales_value:
+          type: number
+          format: double
+        sales_count:
+          type: integer
+          format: int64
+        airdrops:
+          type: integer
+          format: int64
+        transfers_in:
+          type: integer
+          format: int64
+        transfers_out:
+          type: integer
+          format: int64
+        primary_purchases_value_memes:
+          type: number
+          format: double
+        primary_purchases_count_memes:
+          type: integer
+          format: int64
+        secondary_purchases_value_memes:
+          type: number
+          format: double
+        secondary_purchases_count_memes:
+          type: integer
+          format: int64
+        burns_memes:
+          type: integer
+          format: int64
+        sales_value_memes:
+          type: number
+          format: double
+        sales_count_memes:
+          type: integer
+          format: int64
+        airdrops_memes:
+          type: integer
+          format: int64
+        transfers_in_memes:
+          type: integer
+          format: int64
+        transfers_out_memes:
+          type: integer
+          format: int64
+        primary_purchases_value_memelab:
+          type: number
+          format: double
+        primary_purchases_count_memelab:
+          type: integer
+          format: int64
+        secondary_purchases_value_memelab:
+          type: number
+          format: double
+        secondary_purchases_count_memelab:
+          type: integer
+          format: int64
+        burns_memelab:
+          type: integer
+          format: int64
+        sales_value_memelab:
+          type: number
+          format: double
+        sales_count_memelab:
+          type: integer
+          format: int64
+        airdrops_memelab:
+          type: integer
+          format: int64
+        transfers_in_memelab:
+          type: integer
+          format: int64
+        transfers_out_memelab:
+          type: integer
+          format: int64
+        primary_purchases_value_gradients:
+          type: number
+          format: double
+        primary_purchases_count_gradients:
+          type: integer
+          format: int64
+        secondary_purchases_value_gradients:
+          type: number
+          format: double
+        secondary_purchases_count_gradients:
+          type: integer
+          format: int64
+        burns_gradients:
+          type: integer
+          format: int64
+        sales_value_gradients:
+          type: number
+          format: double
+        sales_count_gradients:
+          type: integer
+          format: int64
+        airdrops_gradients:
+          type: integer
+          format: int64
+        transfers_in_gradients:
+          type: integer
+          format: int64
+        transfers_out_gradients:
+          type: integer
+          format: int64
+        primary_purchases_value_nextgen:
+          type: number
+          format: double
+        primary_purchases_count_nextgen:
+          type: integer
+          format: int64
+        secondary_purchases_value_nextgen:
+          type: number
+          format: double
+        secondary_purchases_count_nextgen:
+          type: integer
+          format: int64
+        burns_nextgen:
+          type: integer
+          format: int64
+        sales_value_nextgen:
+          type: number
+          format: double
+        sales_count_nextgen:
+          type: integer
+          format: int64
+        airdrops_nextgen:
+          type: integer
+          format: int64
+        transfers_in_nextgen:
+          type: integer
+          format: int64
+        transfers_out_nextgen:
+          type: integer
+          format: int64
+    ApiWalletAggregatedActivityMemes:
+      type: object
+      required:
+        - wallet
+        - created_at
+        - updated_at
+        - season
+        - primary_purchases_value
+        - primary_purchases_count
+        - secondary_purchases_value
+        - secondary_purchases_count
+        - burns
+        - sales_value
+        - sales_count
+        - airdrops
+        - transfers_in
+        - transfers_out
+      properties:
+        wallet:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        season:
+          type: integer
+          format: int64
+        primary_purchases_value:
+          type: number
+          format: double
+        primary_purchases_count:
+          type: integer
+          format: int64
+        secondary_purchases_value:
+          type: number
+          format: double
+        secondary_purchases_count:
+          type: integer
+          format: int64
+        burns:
+          type: integer
+          format: int64
+        sales_value:
+          type: number
+          format: double
+        sales_count:
+          type: integer
+          format: int64
+        airdrops:
+          type: integer
+          format: int64
+        transfers_in:
+          type: integer
+          format: int64
+        transfers_out:
+          type: integer
+          format: int64
     ApiWalletDistributionAllocation:
       type: object
       required:
@@ -45864,6 +46372,197 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiWalletDistributionAllocation"
+    ApiWalletOwnerBalance:
+      type: object
+      required:
+        - wallet
+        - created_at
+        - updated_at
+        - block_reference
+        - total_balance
+        - gradients_balance
+        - nextgen_balance
+        - memelab_balance
+        - unique_memelab
+        - memes_balance
+        - unique_memes
+        - genesis
+        - nakamoto
+        - memes_cards_sets
+        - memes_cards_sets_minus1
+        - memes_cards_sets_minus2
+        - boost
+        - boosted_tdh
+        - boosted_memes_tdh
+        - boosted_gradients_tdh
+        - boosted_nextgen_tdh
+        - total_balance_rank
+        - memes_balance_rank
+        - unique_memes_rank
+        - gradients_balance_rank
+        - nextgen_balance_rank
+        - memelab_balance_rank
+        - unique_memelab_rank
+        - boosted_tdh_rank
+        - boosted_memes_tdh_rank
+        - boosted_gradients_tdh_rank
+        - boosted_nextgen_tdh_rank
+      properties:
+        wallet:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        block_reference:
+          type: integer
+          format: int64
+        total_balance:
+          type: integer
+          format: int64
+        gradients_balance:
+          type: integer
+          format: int64
+        nextgen_balance:
+          type: integer
+          format: int64
+        memelab_balance:
+          type: integer
+          format: int64
+        unique_memelab:
+          type: integer
+          format: int64
+        memes_balance:
+          type: integer
+          format: int64
+        unique_memes:
+          type: integer
+          format: int64
+        genesis:
+          type: integer
+          format: int64
+        nakamoto:
+          type: integer
+          format: int64
+        memes_cards_sets:
+          type: integer
+          format: int64
+        memes_cards_sets_minus1:
+          type: integer
+          format: int64
+        memes_cards_sets_minus2:
+          type: integer
+          format: int64
+        boost:
+          type: number
+          format: double
+          nullable: true
+        boosted_tdh:
+          type: integer
+          format: int64
+          nullable: true
+        boosted_memes_tdh:
+          type: integer
+          format: int64
+          nullable: true
+        boosted_gradients_tdh:
+          type: integer
+          format: int64
+          nullable: true
+        boosted_nextgen_tdh:
+          type: integer
+          format: int64
+          nullable: true
+        total_balance_rank:
+          type: integer
+          format: int64
+        memes_balance_rank:
+          type: integer
+          format: int64
+        unique_memes_rank:
+          type: integer
+          format: int64
+        gradients_balance_rank:
+          type: integer
+          format: int64
+        nextgen_balance_rank:
+          type: integer
+          format: int64
+        memelab_balance_rank:
+          type: integer
+          format: int64
+        unique_memelab_rank:
+          type: integer
+          format: int64
+        boosted_tdh_rank:
+          type: integer
+          format: int64
+        boosted_memes_tdh_rank:
+          type: integer
+          format: int64
+        boosted_gradients_tdh_rank:
+          type: integer
+          format: int64
+        boosted_nextgen_tdh_rank:
+          type: integer
+          format: int64
+    ApiWalletOwnerBalanceMemes:
+      type: object
+      required:
+        - wallet
+        - created_at
+        - updated_at
+        - season
+        - balance
+        - unique
+        - sets
+        - tdh
+        - boost
+        - boosted_tdh
+        - tdh__raw
+        - tdh_rank
+        - rank
+      properties:
+        wallet:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        season:
+          type: integer
+          format: int64
+        balance:
+          type: integer
+          format: int64
+        unique:
+          type: integer
+          format: int64
+        sets:
+          type: integer
+          format: int64
+        tdh:
+          type: integer
+          format: int64
+        boost:
+          type: number
+          format: double
+        boosted_tdh:
+          type: integer
+          format: int64
+        tdh__raw:
+          type: integer
+          format: int64
+        tdh_rank:
+          type: integer
+          format: int64
+        rank:
+          type: integer
+          format: int64
     ApiWave:
       type: object
       required:

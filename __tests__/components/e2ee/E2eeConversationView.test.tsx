@@ -45,6 +45,7 @@ jest.mock("@/components/e2ee/gate/E2eeRenewalBanner", () => ({
 }));
 jest.mock("next/navigation", () => ({
   usePathname: () => "/messages/encrypted/0x",
+  useSearchParams: () => new URLSearchParams(),
   useRouter: () => ({
     push: mockPush,
     replace: jest.fn(),

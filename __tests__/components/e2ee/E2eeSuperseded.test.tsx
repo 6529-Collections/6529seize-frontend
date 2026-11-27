@@ -43,6 +43,7 @@ jest.mock("@/components/e2ee/conversation/E2eeEmojiProvider", () => ({
 }));
 jest.mock("next/navigation", () => ({
   usePathname: () => "/messages/encrypted/0x",
+  useSearchParams: () => new URLSearchParams(),
   useRouter: () => ({
     push: mockPush,
     replace: jest.fn(),

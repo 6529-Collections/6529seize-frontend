@@ -19,9 +19,11 @@ import {
 
 const mockPush = jest.fn();
 let mockIsCapacitor = false;
+let mockSearch = new URLSearchParams();
 
 jest.mock("next/navigation", () => ({
   usePathname: () => "/messages/encrypted/0x",
+  useSearchParams: () => mockSearch,
   useRouter: () => ({
     push: mockPush,
     replace: jest.fn(),
@@ -45,6 +47,11 @@ const touch = (clientX: number, clientY = 100) => ({
   clientX,
   clientY,
 });
+
+/** The chat URL's query, as after a link, a reload or a deep link. */
+function openedWith(query: string) {
+  mockSearch = new URLSearchParams(query);
+}
 
 function renderConversation() {
   const chat = conversation();
@@ -95,6 +102,8 @@ describe("encrypted conversation swipe back", () => {
     mockIsCapacitor = true;
     Element.prototype.scrollTo = jest.fn();
     Element.prototype.scrollIntoView = jest.fn();
+    // A deep link or a chat opened outside Messages carries no origin.
+    openedWith("");
   });
 
   afterEach(() => {
@@ -115,6 +124,37 @@ describe("encrypted conversation swipe back", () => {
       scroll: false,
     });
     expect(surface.style.transform).toBe("");
+    expect(
+      screen.getByRole("link", { name: "Back to encrypted messages" })
+    ).toHaveAttribute("href", getEncryptedMessagesRoute());
+  });
+
+  it("returns Back and swipe to Messages for a chat opened there, also after a reload", () => {
+    openedWith("from=messages");
+    renderConversation();
+    expect(
+      screen.getByRole("link", { name: "Back to messages" })
+    ).toHaveAttribute("href", "/messages");
+    cleanup();
+
+    // A reload keeps the URL, and with it the Back target.
+    const surface = renderConversation();
+    expect(
+      screen.getByRole("link", { name: "Back to messages" })
+    ).toHaveAttribute("href", "/messages");
+    fireEvent.touchStart(surface, { touches: [touch(80)] });
+    move(surface, 200);
+    release(surface, 200);
+    expect(mockPush).toHaveBeenCalledWith("/messages", { scroll: false });
+  });
+
+  it.each([
+    ["a deep link or a chat-to-chat jump", ""],
+    ["an unknown origin", "from=elsewhere"],
+    ["an external origin", "from=https%3A%2F%2Fexample.com"],
+  ])("returns to the encrypted list after %s", (_case, query) => {
+    openedWith(query);
+    renderConversation();
     expect(
       screen.getByRole("link", { name: "Back to encrypted messages" })
     ).toHaveAttribute("href", getEncryptedMessagesRoute());

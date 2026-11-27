@@ -14,6 +14,21 @@ it.each([
   ],
   ["/messages", "", null, "messages", null],
   ["/messages/dm-a", "", "dm-a", "conversation", "messages"],
+  [`/messages/encrypted/0x${"a".repeat(64)}`, "", null, "conversation", "encrypted"],
+  [
+    `/messages/encrypted/0x${"a".repeat(64)}`,
+    "from=messages",
+    null,
+    "conversation",
+    "messages",
+  ],
+  [
+    `/messages/encrypted/0x${"a".repeat(64)}`,
+    "from=elsewhere",
+    null,
+    "conversation",
+    "encrypted",
+  ],
 ] as const)(
   "keeps the correct live return screen for %s?%s",
   (pathname, query, waveId, screen, destination) => {
