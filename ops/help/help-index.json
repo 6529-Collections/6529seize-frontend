@@ -2388,6 +2388,7 @@
         "claim handle",
         "add wallet",
         "remove wallet",
+        "leave identity",
         "sign on this browser",
         "REP left to give",
         "get fake6529",
@@ -2404,12 +2405,12 @@
         "delegation"
       ],
       "facts": [
-        "/network/identity shows the connected wallet's identity on the 6529 Network: create an identity, get $fake6529 for fees, move $fake6529 to the identity, see the REP and NIC left to give, claim a handle, save the profile, add or remove wallets, and give this browser a key.",
+        "/network/identity shows the connected wallet's identity on the 6529 Network: create an identity, get $fake6529 for fees, move $fake6529 to the identity, see the REP and NIC left to give, claim a handle, save the profile, add wallets or let the connected wallet leave, and give this browser a key.",
         "Each change shows the most it can cost in $fake6529 before the wallet is asked, then waits until the 6529 Network has made it final. The identity pays for its own changes; the wallet pays for creating an identity and for moving $fake6529.",
         "Your TDH is the most REP you can give across everyone, and the most NIC. The page and the REP and NIC forms on profile pages show what is left, read from the 6529 Network.",
         "Sign on this browser: the wallet signs once to give this browser a key for 30 days that signs REP, NIC and profile changes without a wallet prompt each time. The key signs a change on its own only when its fee is at most 20 times the change's cost at the 6529 Network's lowest fees; above that it signs no change, and the page says the fee so the wallet can sign it.",
-        "Adding a wallet needs both wallets: the identity's wallet signs first, and 6529.io holds that signature. The new wallet then signs in to 6529.io, on any device, opens /network/identity and signs the request there.",
-        "Removing a wallet shows, before signing, the date until which that wallet can't join another identity or create one, from the 6529 Network's rule. It can rejoin the same identity at any time.",
+        "Adding a wallet needs both wallets: the identity's wallet signs first, and 6529.io holds that signature. The new wallet then signs in to 6529.io, on any device, opens /network/identity and signs the request there. For now no other wallet can remove an added wallet, so add only a wallet you control.",
+        "A wallet can leave its identity, unless it is the last one. Removing an identity's other wallets comes later. When the 6529 Network gives a wait, leaving shows its end date before signing: until then that wallet can't join another identity or create one. It can rejoin the same identity at any time.",
         "The Delegation Center landing page lists, registers and revokes delegations on the 6529 Network."
       ],
       "canonical_path": "/network/identity",

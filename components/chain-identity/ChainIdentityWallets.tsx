@@ -98,33 +98,28 @@ function addWalletHint(
   return input.error === null ? null : chainErrorMessage(locale, input.error);
 }
 
-/** What removing a wallet does, said before the wallet signs. */
-function removeWalletNote(
+/** What leaving does to this wallet, said before it signs. */
+function leaveNote(
   locale: SupportedLocale,
   input: {
-    readonly removing: Hex;
-    readonly wallet: Hex;
     readonly rejoinWaitMs: number | null;
     readonly nowMs: number;
   }
 ): string {
-  const target = shortHex(input.removing);
   const effect =
     input.rejoinWaitMs === null
-      ? t(locale, "chainIdentity.wallets.removeNoteNoWait", { wallet: target })
-      : t(locale, "chainIdentity.wallets.removeNote", {
-          wallet: target,
+      ? t(locale, "chainIdentity.wallets.leaveNoteNoWait")
+      : t(locale, "chainIdentity.wallets.leaveNote", {
           date: formatDate(locale, input.nowMs + input.rejoinWaitMs, DATE_TIME),
         });
-  return sameWallet(input.removing, input.wallet)
-    ? `${t(locale, "chainIdentity.wallets.removeSelf")} ${effect}`
-    : effect;
+  return `${effect} ${t(locale, "chainIdentity.wallets.leaveAfter")}`;
 }
 
 /**
- * The identity's wallets: IDENTITY_REMOVE for any of them but the last, and
- * IDENTITY_JOIN, which this wallet signs first and 6529.io's relay holds
- * until the new wallet signs, on this device or another.
+ * The identity's wallets: IDENTITY_REMOVE for this wallet itself, unless it
+ * is the last (the 6529 Network takes a removal only from the wallet being
+ * removed), and IDENTITY_JOIN, which this wallet signs first and 6529.io's
+ * relay holds until the new wallet signs, on this device or another.
  */
 export default function ChainIdentityWallets({
   wallet,
@@ -136,17 +131,19 @@ export default function ChainIdentityWallets({
   readonly wallet: Hex;
   readonly config: Config;
   readonly identity: ChainIdentity;
-  /** The chain's wait before a removed wallet can join again; null: unknown. */
+  /**
+   * The chain's wait before a wallet that left can join another identity or
+   * create one; null: unknown.
+   */
   readonly rejoinWaitMs: number | null;
   readonly onChanged: () => void;
 }) {
   const locale = useBrowserLocale();
   const { requestAuth } = useAuth();
   const [joining, setJoining] = useState("");
-  const [removing, setRemoving] = useState<Hex | null>(null);
   // The wallet the join being signed adds: fixed when "Add wallet" is clicked.
   const [joinTarget, setJoinTarget] = useState<Hex | null>(null);
-  const remove = useChainAction(onChanged);
+  const leave = useChainAction(onChanged);
   const join = useChainAction(() => setJoining(""));
   const started = useSyncExternalStore(
     subscribeStartedJoins,
@@ -182,7 +179,10 @@ export default function ChainIdentityWallets({
       : null;
   const canJoin =
     typedOk && readiness?.kind === "free" && waiting === undefined;
-  const canRemove = identity.wallets.length > 1;
+  // Only this wallet can leave, and never as the identity's last wallet.
+  const canLeave =
+    identity.wallets.length > 1 &&
+    identity.wallets.some((item) => sameWallet(item, wallet));
 
   const readinessText = addWalletHint(locale, {
     typed,
@@ -193,10 +193,9 @@ export default function ChainIdentityWallets({
     error: membership.isError ? membership.error : null,
   });
 
-  const startRemove = (target: Hex) => {
-    setRemoving(target);
-    void remove.prepare(async () => {
-      const operation = identityRemove(identity.principalId, wallet, target);
+  const startLeave = () => {
+    void leave.prepare(async () => {
+      const operation = identityRemove(identity.principalId, wallet, wallet);
       return {
         draft: await draftOperation(operation.request, operation.primaryType),
         signer: walletSigner(config, wallet),
@@ -205,15 +204,8 @@ export default function ChainIdentityWallets({
     });
   };
 
-  const removeNote =
-    removing === null
-      ? undefined
-      : removeWalletNote(locale, {
-          removing,
-          wallet,
-          rejoinWaitMs,
-          nowMs,
-        });
+  // Shown only while the wallet is asked to confirm leaving.
+  const leaveText = leaveNote(locale, { rejoinWaitMs, nowMs });
 
   const startJoin = () => {
     if (!canJoin) {
@@ -272,27 +264,30 @@ export default function ChainIdentityWallets({
                 </span>
               )}
             </span>
-            {canRemove && (
+            {canLeave && sameWallet(item, wallet) && (
               <Button
                 variant="secondary"
                 size="sm"
-                disabled={remove.busy || remove.state.kind === "confirm"}
-                aria-label={t(locale, "chainIdentity.wallets.removeLabel", {
-                  wallet: shortHex(item),
-                })}
-                onClick={() => startRemove(item)}
+                disabled={leave.busy || leave.state.kind === "confirm"}
+                aria-describedby="chain-identity-leave-hint"
+                onClick={startLeave}
               >
-                {t(locale, "chainIdentity.wallets.remove")}
+                {t(locale, "chainIdentity.wallets.leave")}
               </Button>
             )}
           </li>
         ))}
       </ul>
+      {canLeave && (
+        <p id="chain-identity-leave-hint" className={CHAIN_HINT_CLASS}>
+          {t(locale, "chainIdentity.wallets.leaveHint")}
+        </p>
+      )}
       <ChainActionStatus
-        state={remove.state}
-        note={removeNote}
-        onConfirm={() => void remove.confirm()}
-        onCancel={remove.cancel}
+        state={leave.state}
+        note={leaveText}
+        onConfirm={() => void leave.confirm()}
+        onCancel={leave.cancel}
       />
 
       <div className="tw-mt-5 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-pt-4">

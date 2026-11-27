@@ -1,5 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import type { ReactNode } from "react";
 import type { Config } from "wagmi";
 import ChainIdentityWallets from "@/components/chain-identity/ChainIdentityWallets";
@@ -74,39 +80,96 @@ beforeEach(() => {
   });
 });
 
-it("says before signing when a removed wallet can join again, from the chain's wait", async () => {
+it("offers leaving only on this wallet's own row, and says removing the others comes later", () => {
+  renderWallets([IDENTITY_WALLET, SECOND]);
+  const [own, other] = screen.getAllByRole("listitem");
+  expect(own).toHaveTextContent(IDENTITY_WALLET);
+  expect(
+    within(own!).getByRole("button", { name: "Leave this identity" })
+  ).toBeInTheDocument();
+  expect(other).toHaveTextContent(SECOND);
+  expect(within(other!).queryByRole("button")).not.toBeInTheDocument();
+  expect(
+    within(own!).getByRole("button", { name: "Leave this identity" })
+  ).toHaveAccessibleDescription(
+    "For now a wallet can leave only by signing for itself. Removing your identity's other wallets comes later."
+  );
+  expect(screen.getByText(/^Both wallets sign\./)).toHaveTextContent(
+    /Add only a wallet you control: it can sign for your identity, and for now no other wallet can remove it\.$/
+  );
+});
+
+it("finds this wallet's row wherever it is and however its letters are cased", () => {
+  renderWallets([
+    SECOND,
+    IDENTITY_WALLET.replace(/[a-f]/g, (letter) => letter.toUpperCase()),
+  ]);
+  const [other, own] = screen.getAllByRole("listitem");
+  expect(within(other!).queryByRole("button")).not.toBeInTheDocument();
+  expect(
+    within(own!).getByRole("button", { name: "Leave this identity" })
+  ).toBeInTheDocument();
+});
+
+it("offers no leaving to an identity's last wallet", () => {
+  renderWallets([IDENTITY_WALLET]);
+  expect(
+    screen.queryByRole("button", { name: "Leave this identity" })
+  ).not.toBeInTheDocument();
+  expect(screen.queryByText(/comes later/)).not.toBeInTheDocument();
+});
+
+it("removes only this wallet, and says before signing when it can join again, from the chain's wait", async () => {
   jest.useFakeTimers({
     now: Date.UTC(2026, 10, 25, 12, 0),
     doNotFake: ["queueMicrotask"],
   });
   try {
     renderWallets([IDENTITY_WALLET, SECOND]);
+    expect(
+      screen.queryByText(/^Once this wallet leaves,/)
+    ).not.toBeInTheDocument();
     fireEvent.click(
-      screen.getByRole("button", { name: "Remove 0x000000…0000dd" })
+      screen.getByRole("button", { name: "Leave this identity" })
     );
     expect(
       await screen.findByText(
-        "After this, 0x000000…0000dd can't join another identity or create one until Nov 26, 2026, 12:00 PM. It can rejoin yours at any time. Its NFTs stop counting toward your identity's TDH; if the REP or NIC you have given then adds up to more than your TDH, the 6529 Network scales your ratings down."
+        "Once this wallet leaves, it no longer signs for your identity, and it can't join another identity or create one until Nov 26, 2026, 12:00 PM. It can rejoin yours at any time. Its NFTs stop counting toward your identity's TDH; if the REP or NIC you have given then adds up to more than your TDH, the 6529 Network scales your ratings down. Afterwards, manage your identity from one of its other wallets. This browser's key, if it is on, keeps signing for your identity until you turn it off."
       )
     ).toBeInTheDocument();
+    expect(draftOperation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        opType: "IDENTITY_REMOVE",
+        body: { wallet: IDENTITY_WALLET.toLowerCase() },
+      }),
+      "IdentityRemove"
+    );
     expect(
       screen.getByText(
         "Fee: at most 0.000001 $fake6529, from your identity's balance."
       )
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Leave this identity" })
+    ).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(
+      screen.queryByText(/^Once this wallet leaves,/)
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Leave this identity" })
+    ).toBeEnabled();
   } finally {
     jest.useRealTimers();
   }
 });
 
-it("warns when removing the wallet in use, and claims no wait the chain didn't give", async () => {
+it("says what leaving does, and claims no wait the chain didn't give", async () => {
   renderWallets([IDENTITY_WALLET, SECOND], null);
-  fireEvent.click(
-    screen.getByRole("button", { name: "Remove 0x000000…0000aa" })
-  );
+  fireEvent.click(screen.getByRole("button", { name: "Leave this identity" }));
   expect(
     await screen.findByText(
-      "This is the wallet you are using now. Afterwards it no longer signs for your identity: manage it from one of its other wallets. This browser's key, if it is on, keeps signing until you turn it off. After this, 0x000000…0000aa no longer signs for your identity. Its NFTs stop counting toward your identity's TDH; if the REP or NIC you have given then adds up to more than your TDH, the 6529 Network scales your ratings down."
+      "Once this wallet leaves, it no longer signs for your identity. It can rejoin yours at any time. Its NFTs stop counting toward your identity's TDH; if the REP or NIC you have given then adds up to more than your TDH, the 6529 Network scales your ratings down. Afterwards, manage your identity from one of its other wallets. This browser's key, if it is on, keeps signing for your identity until you turn it off."
     )
   ).toBeInTheDocument();
 });
@@ -122,7 +185,7 @@ it("checks the new wallet on the chain before anything is signed", async () => {
   });
   expect(
     await screen.findByText(
-      "That wallet belongs to another identity. Remove it there first."
+      "That wallet belongs to another identity. It has to leave that identity first."
     )
   ).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Add wallet" })).toBeDisabled();

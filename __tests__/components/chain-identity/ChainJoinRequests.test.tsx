@@ -110,7 +110,7 @@ it("signs a held join after showing who asks and the fee, then waits for the cha
   ).toBeInTheDocument();
   expect(
     screen.getByText(
-      "Sign only if you asked for this from your own identity. Once this wallet joins an identity, its NFTs count toward that identity's TDH, that identity's delegations (where airdrops go, for example) apply to it, and any of that identity's wallets can revoke this wallet's delegations or remove it."
+      "Sign only if you asked for this from your own identity. Once this wallet joins an identity, its NFTs count toward that identity's TDH, that identity's delegations (where airdrops go, for example) apply to it, and any of that identity's wallets can revoke this wallet's delegations."
     )
   ).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Review and sign" }));
