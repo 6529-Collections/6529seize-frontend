@@ -11,12 +11,15 @@ import type { MouseEvent } from "react";
 interface WaveDropActionsSetPinnedDropProps {
   readonly drop: ApiDrop;
   readonly onPinnedDropSet?: (() => void) | undefined;
+  readonly variant?: "desktop" | "mobile";
 }
 
 export default function WaveDropActionsSetPinnedDrop({
   drop,
   onPinnedDropSet,
+  variant = "desktop",
 }: WaveDropActionsSetPinnedDropProps) {
+  const isMobile = variant === "mobile";
   const auth = useContext(AuthContext);
   const { requestAuth, setToast } = auth;
   const hasProfileSession = canReplyFromSession(auth);
@@ -67,11 +70,19 @@ export default function WaveDropActionsSetPinnedDrop({
       type="button"
       onClick={handleClick}
       disabled={isUpdating}
-      className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-iron-300 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-800"
+      className={
+        isMobile
+          ? "tw-flex tw-w-full tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 tw-transition-colors tw-duration-200 active:tw-bg-iron-800"
+          : "tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-iron-300 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-800"
+      }
     >
       {isUpdating ? (
         <svg
-          className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-animate-spin"
+          className={
+            isMobile
+              ? "tw-h-5 tw-w-5 tw-flex-shrink-0 tw-animate-spin tw-text-iron-300"
+              : "tw-h-4 tw-w-4 tw-flex-shrink-0 tw-animate-spin"
+          }
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
@@ -91,9 +102,21 @@ export default function WaveDropActionsSetPinnedDrop({
           />
         </svg>
       ) : (
-        <MapPinIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+        <MapPinIcon
+          className={
+            isMobile
+              ? "tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-300"
+              : "tw-h-4 tw-w-4 tw-flex-shrink-0"
+          }
+        />
       )}
-      <span className="tw-text-sm tw-font-medium">
+      <span
+        className={
+          isMobile
+            ? "tw-text-base tw-font-semibold tw-text-iron-300"
+            : "tw-text-sm tw-font-medium"
+        }
+      >
         {isUpdating ? "Updating pinned drop..." : "Set as pinned drop"}
       </span>
     </button>

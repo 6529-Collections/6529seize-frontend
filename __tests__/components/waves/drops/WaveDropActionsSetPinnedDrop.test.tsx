@@ -91,108 +91,122 @@ describe("WaveDropActionsSetPinnedDrop", () => {
     });
   });
 
-  it("requests auth, updates the pinned drop, and closes on success", async () => {
-    const setPinnedDrop = jest.fn();
-    mockedUseSetWavePinnedDrop.mockImplementation((_waveId, options) => ({
-      setPinnedDrop: setPinnedDrop.mockImplementation(async (input) => {
-        options?.onSuccess?.({ id: "wave-1" } as any, input);
-        return { id: "wave-1" } as any;
-      }),
-      data: undefined,
-      isPending: false,
-      pendingDropId: null,
-      error: null,
-      errorMessage: null,
-      reset: jest.fn(),
-    }));
+  it.each([false, true])(
+    "requests auth, updates the pinned drop, and closes on success on mobile=%s",
+    async (mobile) => {
+      const setPinnedDrop = jest.fn();
+      mockedUseSetWavePinnedDrop.mockImplementation((_waveId, options) => ({
+        setPinnedDrop: setPinnedDrop.mockImplementation(async (input) => {
+          options?.onSuccess?.({ id: "wave-1" } as any, input);
+          return { id: "wave-1" } as any;
+        }),
+        data: undefined,
+        isPending: false,
+        pendingDropId: null,
+        error: null,
+        errorMessage: null,
+        reset: jest.fn(),
+      }));
 
-    const { requestAuth, setToast, onPinnedDropSet } = renderWithAuth();
-
-    await userEvent.click(
-      screen.getByRole("button", { name: "Set as pinned drop" })
-    );
-
-    await waitFor(() => {
-      expect(requestAuth).toHaveBeenCalledTimes(1);
-      expect(setPinnedDrop).toHaveBeenCalledWith({ dropId: "drop-1" });
-      expect(setToast).toHaveBeenCalledWith({
-        message: "Pinned drop updated.",
-        type: "success",
+      const { requestAuth, setToast, onPinnedDropSet } = renderWithAuth({
+        mobile,
       });
-      expect(onPinnedDropSet).toHaveBeenCalledTimes(1);
-    });
-  });
 
-  it("shows an error toast when the mutation fails", async () => {
-    const expectedError = new Error("No access");
-    mockedUseSetWavePinnedDrop.mockImplementation((_waveId, options) => ({
-      setPinnedDrop: jest.fn().mockImplementation(async (input) => {
-        options?.onError?.("No access", expectedError, input);
-        throw expectedError;
-      }),
-      data: undefined,
-      isPending: false,
-      pendingDropId: null,
-      error: null,
-      errorMessage: null,
-      reset: jest.fn(),
-    }));
+      await userEvent.click(
+        screen.getByRole("button", { name: "Set as pinned drop" })
+      );
 
-    const { setToast, onPinnedDropSet } = renderWithAuth();
-
-    await userEvent.click(
-      screen.getByRole("button", { name: "Set as pinned drop" })
-    );
-
-    await waitFor(() => {
-      expect(setToast).toHaveBeenCalledWith({
-        message: "No access",
-        type: "error",
+      await waitFor(() => {
+        expect(requestAuth).toHaveBeenCalledTimes(1);
+        expect(setPinnedDrop).toHaveBeenCalledWith({ dropId: "drop-1" });
+        expect(setToast).toHaveBeenCalledWith({
+          message: "Pinned drop updated.",
+          type: "success",
+        });
+        expect(onPinnedDropSet).toHaveBeenCalledTimes(1);
       });
-      expect(onPinnedDropSet).not.toHaveBeenCalled();
-    });
-  });
+    }
+  );
 
-  it("does not mutate when auth is rejected", async () => {
-    const setPinnedDrop = jest.fn();
-    const requestAuth = jest.fn().mockResolvedValue({ success: false });
-    mockedUseSetWavePinnedDrop.mockReturnValue({
-      setPinnedDrop,
-      data: undefined,
-      isPending: false,
-      pendingDropId: null,
-      error: null,
-      errorMessage: null,
-      reset: jest.fn(),
-    });
+  it.each([false, true])(
+    "shows an error toast when the mutation fails on mobile=%s",
+    async (mobile) => {
+      const expectedError = new Error("No access");
+      mockedUseSetWavePinnedDrop.mockImplementation((_waveId, options) => ({
+        setPinnedDrop: jest.fn().mockImplementation(async (input) => {
+          options?.onError?.("No access", expectedError, input);
+          throw expectedError;
+        }),
+        data: undefined,
+        isPending: false,
+        pendingDropId: null,
+        error: null,
+        errorMessage: null,
+        reset: jest.fn(),
+      }));
 
-    renderWithAuth({ requestAuth });
+      const { setToast, onPinnedDropSet } = renderWithAuth({ mobile });
 
-    await userEvent.click(
-      screen.getByRole("button", { name: "Set as pinned drop" })
-    );
+      await userEvent.click(
+        screen.getByRole("button", { name: "Set as pinned drop" })
+      );
 
-    await waitFor(() => {
-      expect(requestAuth).toHaveBeenCalledTimes(1);
-      expect(setPinnedDrop).not.toHaveBeenCalled();
-    });
-  });
+      await waitFor(() => {
+        expect(setToast).toHaveBeenCalledWith({
+          message: "No access",
+          type: "error",
+        });
+        expect(onPinnedDropSet).not.toHaveBeenCalled();
+      });
+    }
+  );
 
-  it("shows a pending state for the active drop", () => {
-    mockedUseSetWavePinnedDrop.mockReturnValue({
-      setPinnedDrop: jest.fn(),
-      data: undefined,
-      isPending: true,
-      pendingDropId: "drop-1",
-      error: null,
-      errorMessage: null,
-      reset: jest.fn(),
-    });
+  it.each([false, true])(
+    "does not mutate when auth is rejected on mobile=%s",
+    async (mobile) => {
+      const setPinnedDrop = jest.fn();
+      const requestAuth = jest.fn().mockResolvedValue({ success: false });
+      mockedUseSetWavePinnedDrop.mockReturnValue({
+        setPinnedDrop,
+        data: undefined,
+        isPending: false,
+        pendingDropId: null,
+        error: null,
+        errorMessage: null,
+        reset: jest.fn(),
+      });
 
-    renderWithAuth();
+      renderWithAuth({ requestAuth, mobile });
 
-    expect(
-      screen.getByRole("button", { name: "Updating pinned drop..." })
-    ).toBeDisabled();
-  });
+      await userEvent.click(
+        screen.getByRole("button", { name: "Set as pinned drop" })
+      );
+
+      await waitFor(() => {
+        expect(requestAuth).toHaveBeenCalledTimes(1);
+        expect(setPinnedDrop).not.toHaveBeenCalled();
+      });
+    }
+  );
+
+  it.each([false, true])(
+    "shows a pending state for the active drop on mobile=%s",
+    (mobile) => {
+      mockedUseSetWavePinnedDrop.mockReturnValue({
+        setPinnedDrop: jest.fn(),
+        data: undefined,
+        isPending: true,
+        pendingDropId: "drop-1",
+        error: null,
+        errorMessage: null,
+        reset: jest.fn(),
+      });
+
+      renderWithAuth({ mobile });
+
+      expect(
+        screen.getByRole("button", { name: "Updating pinned drop..." })
+      ).toBeDisabled();
+    }
+  );
 });
