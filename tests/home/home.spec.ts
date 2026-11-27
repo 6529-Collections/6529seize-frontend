@@ -132,6 +132,9 @@ test.describe("Coming up local decision time", () => {
     const decision = new Date("2026-10-26T16:00:00Z");
     await page.clock.setFixedTime(now);
     await installComingUpFixture(page);
+    // Settle the synthetic mint instead of retaining live server artwork while
+    // resizing and scrolling to the independently mocked decision timestamp.
+    await installCompletedMintStatus(page);
     let waveRequests = 0;
     await page.route(`**/api/waves/${comingUpWave.id}`, (route) => {
       waveRequests += 1;
@@ -146,6 +149,7 @@ test.describe("Coming up local decision time", () => {
       route.fulfill({ json: comingUpLeaderboard })
     );
     await page.goto("/", { waitUntil: "domcontentloaded" });
+    await waitForComingUpLayoutReady(page, RESPONSE_TIMEOUT_MS);
     const section = page.getByRole("region", {
       name: "Coming up",
       exact: true,
@@ -306,15 +310,15 @@ test("Subscription Minting stays readable with the reference layout @smoke @medi
   }
 });
 
-async function waitForComingUpLayoutReady(page: Page) {
+async function waitForComingUpLayoutReady(page: Page, timeout = 5000) {
   const artwork = page.getByRole("main").first().getByRole("img", {
     name: loadingTestArtwork.name,
     exact: true,
   });
-  await expect(artwork).toBeVisible();
+  await expect(artwork).toBeVisible({ timeout });
   await expect(
     page.getByRole("region", { name: "How to start", exact: true })
-  ).toBeVisible();
+  ).toBeVisible({ timeout });
   await page.evaluate(() => document.fonts.ready);
 }
 
