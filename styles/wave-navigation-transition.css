@@ -87,7 +87,8 @@ html[data-wave-navigation-transition="conversation-entry"]::view-transition-old(
   ) {
   display: block;
   mix-blend-mode: normal;
-  animation: none;
+  animation: wave-underlay-forward var(--wave-navigation-duration, 260ms)
+    var(--wave-navigation-easing, ease-out) both;
 }
 
 html[data-wave-navigation-transition="conversation-entry"]::view-transition-new(
@@ -99,7 +100,9 @@ html[data-wave-navigation-transition="conversation-entry"]::view-transition-new(
 html[data-wave-navigation-transition="conversation-entry"]::view-transition-new(
     wave-navigation
   ) {
-  animation: wave-conversation-enter 260ms cubic-bezier(0.25, 0, 0.25, 1) both;
+  animation: wave-conversation-enter var(--wave-navigation-duration, 260ms)
+    var(--wave-navigation-easing, ease-out) both;
+  box-shadow: -6px 0 22px rgb(0 0 0 / 0.28);
 }
 
 @keyframes wave-conversation-enter {
@@ -115,7 +118,48 @@ html[data-wave-navigation-transition="chevron-back"]::view-transition-old(
     wave-navigation
   ) {
   z-index: 2;
-  animation: wave-chevron-back 260ms cubic-bezier(0.25, 0, 0.25, 1) both;
+  animation: wave-chevron-back var(--wave-navigation-duration, 260ms)
+    var(--wave-navigation-easing, ease-out) both;
+  box-shadow: -6px 0 22px rgb(0 0 0 / 0.28);
+}
+
+html[data-wave-navigation-transition="chevron-back"]::view-transition-new(
+    root
+  ) {
+  animation: wave-underlay-back var(--wave-navigation-duration, 260ms)
+    var(--wave-navigation-easing, ease-out) both;
+}
+
+@keyframes wave-underlay-forward {
+  to {
+    transform: translateX(-33.333%);
+    filter: brightness(0.88);
+  }
+}
+
+@keyframes wave-underlay-back {
+  from {
+    transform: translateX(-33.333%);
+    filter: brightness(0.88);
+  }
+  to {
+    transform: translateX(0);
+    filter: brightness(1);
+  }
+}
+
+@keyframes wave-navigation-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes wave-navigation-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes wave-chevron-back {
@@ -153,8 +197,18 @@ html[data-wave-navigation-transition="chevron-back"]::view-transition-old(
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html[data-wave-navigation-transition]::view-transition-old(wave-navigation),
-  html[data-wave-navigation-transition]::view-transition-new(wave-navigation) {
+  html[data-wave-navigation-transition]::view-transition-old(root),
+  html[data-wave-navigation-transition]::view-transition-new(root) {
     animation: none;
+    transform: none;
+    filter: none;
+  }
+  html[data-wave-navigation-transition]::view-transition-old(wave-navigation) {
+    animation: wave-navigation-fade-out 120ms linear both;
+    box-shadow: none;
+  }
+  html[data-wave-navigation-transition]::view-transition-new(wave-navigation) {
+    animation: wave-navigation-fade-in 120ms linear both;
+    box-shadow: none;
   }
 }

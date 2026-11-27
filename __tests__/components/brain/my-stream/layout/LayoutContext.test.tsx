@@ -1,3 +1,4 @@
+import PhoneListLayoutProvider from "@/components/mobile-navigation/PhoneListLayoutProvider";
 import React, { StrictMode, useCallback, useEffect, useRef } from "react";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import {
@@ -76,6 +77,50 @@ function TestComponent() {
     </>
   );
 }
+
+function ScopedHeaderProbe({
+  name,
+  height,
+}: {
+  readonly name: string;
+  readonly height: number;
+}) {
+  const { registerRef, spaces } = useLayout();
+  const setHeader = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (node)
+        node.getBoundingClientRect = () => new DOMRect(0, 0, 400, height);
+      registerRef("header", node);
+    },
+    [height, registerRef]
+  );
+  return (
+    <>
+      <div ref={setHeader} />
+      <output data-testid={name}>{spaces.headerSpace}</output>
+    </>
+  );
+}
+
+it("isolates retained header measurements and keeps a fallback during loading", () => {
+  const view = (height: number, active: boolean) => (
+    <LayoutProvider>
+      <ScopedHeaderProbe name="outer-header" height={100} />
+      <PhoneListLayoutProvider active={active}>
+        <ScopedHeaderProbe name="retained-header" height={height} />
+      </PhoneListLayoutProvider>
+    </LayoutProvider>
+  );
+  const { rerender } = render(view(0, false));
+  expect(screen.getByTestId("outer-header")).toHaveTextContent("100");
+  expect(screen.getByTestId("retained-header")).toHaveTextContent("64");
+  rerender(view(70, true));
+  expect(screen.getByTestId("outer-header")).toHaveTextContent("100");
+  expect(screen.getByTestId("retained-header")).toHaveTextContent("70");
+  rerender(view(0, false));
+  expect(screen.getByTestId("outer-header")).toHaveTextContent("100");
+  expect(screen.getByTestId("retained-header")).toHaveTextContent("70");
+});
 
 function NavigationRegistrationProbe({
   visible,

@@ -1,6 +1,5 @@
 "use client";
 
-import { Capacitor } from "@capacitor/core";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useTransition } from "react";
@@ -23,11 +22,9 @@ import { useClosingDropId } from "@/hooks/useClosingDropId";
 import { useExitActiveWave } from "./useExitActiveWave";
 import { isCompetitionPathname } from "@/helpers/competition.helpers";
 import { getMissingWaveNavigationRoute } from "@/helpers/waves/missing-wave-navigation.helpers";
-import {
-  isProfileWavesFeed,
-  returnsToProfileWavesFeed,
-} from "@/helpers/waves/profile-feed-navigation";
+import { isProfileWavesFeed } from "@/helpers/waves/profile-feed-navigation";
 import { runPhoneChevronBackTransition } from "@/helpers/waves/wave-navigation-transition";
+import { usePhoneNavigationScreen } from "@/contexts/PhoneNavigationScreenContext";
 
 export default function BackButton({
   returnTo,
@@ -37,8 +34,11 @@ export default function BackButton({
   readonly className?: string | undefined;
 }) {
   const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const currentPathname = usePathname();
+  const currentSearchParams = useSearchParams();
+  const retainedScreen = usePhoneNavigationScreen();
+  const pathname = retainedScreen?.pathname ?? currentPathname;
+  const searchParams = retainedScreen?.searchParams ?? currentSearchParams;
   const searchParamsString = searchParams.toString();
   const [loading, startNavigation] = useTransition();
   const { isApp } = useDeviceInfo();
@@ -47,10 +47,11 @@ export default function BackButton({
   const { goBack, goBackTo } = useNavigationHistoryContext();
   const information = useWaveInformation();
 
-  const waveId =
-    myStream?.activeWave.id ??
-    getActiveWaveIdFromUrl({ pathname, searchParams }) ??
-    null;
+  const waveId = retainedScreen
+    ? null
+    : (myStream?.activeWave.id ??
+      getActiveWaveIdFromUrl({ pathname, searchParams }) ??
+      null);
   const dropIdFromUrl = searchParams.get("drop") ?? undefined;
   const { effectiveDropId: dropId, beginClosingDrop } =
     useClosingDropId(dropIdFromUrl);
@@ -98,15 +99,6 @@ export default function BackButton({
     Boolean(getMessageIdFromPathname(pathname)) ||
     (pathname === getMessagesBaseRoute(isApp) && searchParams.has("wave"));
   const isDirectMessage = isMessageRoute || isDm;
-  const isWaveListReturn =
-    (pathname === "/waves" || pathname.startsWith("/waves/")) &&
-    !isDirectMessage &&
-    !returnsToProfileWavesFeed(searchParams);
-  const shouldAnimateConversationBack =
-    isApp &&
-    Capacitor.getPlatform() === "ios" &&
-    (isMessageRoute || isWaveListReturn);
-
   const handleClick = () => {
     if (loading) return;
     if (information?.returnFromNavigation) {
@@ -145,21 +137,15 @@ export default function BackButton({
 
     // Inside a wave → go back to wave list
     if (waveId) {
-      const leave = () => exitActiveWave(isDirectMessage);
-      if (shouldAnimateConversationBack) {
-        runPhoneChevronBackTransition(
-          getWaveHomeRoute({ isDirectMessage, isApp }),
-          leave
-        );
-      } else {
-        leave();
-      }
+      exitActiveWave(isDirectMessage);
       return;
     }
 
     if (returnTo) {
       if (isClientFeedReturn) {
-        myStream.activeWave.set(null);
+        runPhoneChevronBackTransition("/waves", () =>
+          myStream.activeWave.set(null)
+        );
         return;
       }
       startNavigation(() => goBackTo(returnTo));

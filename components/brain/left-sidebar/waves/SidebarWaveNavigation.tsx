@@ -60,7 +60,9 @@ export function SidebarWaveNavigationControls({
   const searchLoading =
     navigation.searching &&
     navigation.queryText.trim().length >= 3 &&
-    (!navigation.queryEnabled || navigation.results.isFetching);
+    (!navigation.hasMatchingSearch ||
+      navigation.results.isPending ||
+      navigation.results.isFetching);
   return (
     <>
       <div
@@ -188,8 +190,8 @@ export function SidebarWaveSearchResults({
   const { isApp } = useDeviceInfo();
   const locale = useBrowserLocale();
   const { activeWave } = useMyStream();
-  const { queryText, queryEnabled, results, resultWaves } = navigation;
-  const loading = !queryEnabled || results.isPending;
+  const { queryText, hasMatchingSearch, results, resultWaves } = navigation;
+  const loading = !hasMatchingSearch || results.isPending;
   const showResults = queryText.trim().length >= 3 && !loading;
   let feedback = t(locale, "waves.sidebar.searchHint");
   if (queryText.trim().length >= 3) {

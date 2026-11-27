@@ -93,6 +93,7 @@ import { useLayout } from "./my-stream/layout/LayoutContext";
 import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
 import { useContentTab } from "./ContentTabContext";
 import { useOptionalHeaderContext } from "@/contexts/HeaderContext";
+import { usePhoneNavigationScreen } from "@/contexts/PhoneNavigationScreenContext";
 
 interface Props {
   readonly children: ReactNode;
@@ -139,8 +140,11 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
   const navigateTab = useWaveTabNavigation();
   const information = useWaveInformation();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense covered by BrainMobile Suspense wrapper
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
+  const currentSearchParams = useSearchParams();
+  const currentPathname = usePathname();
+  const retainedScreen = usePhoneNavigationScreen();
+  const searchParams = retainedScreen?.searchParams ?? currentSearchParams;
+  const pathname = retainedScreen?.pathname ?? currentPathname;
   const { isApp } = useDeviceInfo();
   const { setActiveContentTab } = useContentTab();
   const requestSubmissionRulesFocus =
@@ -183,10 +187,11 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
   });
 
   // Use MyStreamContext for waveId to support client-side navigation via pushState
-  const waveId =
-    myStream?.activeWave.id ??
-    getActiveWaveIdFromUrl({ pathname, searchParams }) ??
-    null;
+  const waveId = retainedScreen
+    ? null
+    : (myStream?.activeWave.id ??
+      getActiveWaveIdFromUrl({ pathname, searchParams }) ??
+      null);
   const { data: wave } = useWaveData({
     waveId: waveId,
     onWaveNotFound: isCompetitionPathname(pathname)
@@ -404,6 +409,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
   const isDirectMessage = pathname.startsWith("/messages/");
   const isProfileFeed = !hasWave && isProfileWavesFeed(pathname, searchParams);
   const canSwipeBackToWaves =
+    (retainedScreen?.active ?? true) &&
     isApp &&
     (isProfileFeed ||
       (hasWave && (pathname.startsWith("/waves/") || isDirectMessage))) &&
@@ -428,8 +434,8 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     : "list";
   const swipeBackHandlers = useWaveListSwipeBack({
     enabled: canSwipeBackToWaves,
-    edgeSwipeBack: hasWave && !isDirectMessage,
-    includeHeader: isDirectMessage && Capacitor.getPlatform() === "ios",
+    edgeSwipeBack: hasWave && Capacitor.getPlatform() === "ios",
+    includeHeader: true,
     scope: waveId ?? (isProfileFeed ? "profile-feed" : "root"),
     onIntentStart: handleSwipeBackIntent,
     onSwipeBack: handleSwipeBackToWaves,
@@ -511,17 +517,13 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
           )}
         </div>
       )}
-      {canSwipeBackToWaves && (
-        <div
-          aria-hidden="true"
-          className="tw-pointer-events-none tw-absolute tw-inset-0 tw-flex tw-items-center tw-bg-iron-950 tw-pl-6 tw-text-iron-400"
-        >
-          <span className="tw-text-4xl">‹</span>
-        </div>
-      )}
       <div
         {...swipeBackHandlers}
-        data-testid="wave-swipe-surface"
+        data-testid={
+          retainedScreen && !retainedScreen.active
+            ? undefined
+            : "wave-swipe-surface"
+        }
         className={`tw-relative tw-flex tw-min-h-0 tw-flex-1 tw-flex-col ${isApp ? "tw-bg-[#0d0d0e]" : ""}`}
         aria-hidden={!!effectiveDropId}
         inert={effectiveDropId ? true : undefined}

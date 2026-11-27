@@ -20,9 +20,13 @@ let mockLayoutSpaces = {
   measurementsComplete: false,
 };
 
+jest.mock("@/components/mobile-navigation/PhoneNavigationStack", () => ({
+  __esModule: true,
+  default: ({ children }: { readonly children: React.ReactNode }) => children,
+}));
+
 jest.mock("next/dynamic", () => (loader: () => Promise<unknown>) => {
   const loaderSource = loader.toString();
-
   if (loaderSource.includes("../header/AppHeader")) {
     const MockDynamicHeader = () => <div data-testid="header" />;
     MockDynamicHeader.displayName = "MockDynamicHeader";
