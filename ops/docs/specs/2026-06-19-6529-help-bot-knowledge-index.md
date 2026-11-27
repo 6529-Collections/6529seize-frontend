@@ -7,12 +7,11 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
-The Waves record covers touch-only row pinning: swipe right and release while
-armed, reverse below the threshold to cancel, or hold still for the single
-Pin/Unpin menu. It includes the All/Joined pin status mark, bottom-navigation
-clearance, pin-limit toast, top-level personal-view eligibility, and the existing
-thread-header alternative. Pinned reordering requires a brief hold followed by
-vertical movement; stationary holding opens the menu.
+The Waves record covers touch pinning with the visible row button or a right
+swipe. Move below the threshold before release to cancel the swipe. The record
+includes pin button states, the pin limit, eligibility for top-level wave pins,
+and the thread-header pin control. In Pinned, press and hold the wave name, then
+drag it up or down to reorder.
 
 The encrypted chats record explains how to drag pinned chats in the inbox
 or sidebar, including touch and keyboard gestures. It covers the position of

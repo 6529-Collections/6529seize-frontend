@@ -96,15 +96,18 @@ function SortablePinnedWave({
 
   const descriptionId = attributes["aria-describedby"];
   const linkProps = useMemo(
-    () =>
-      listeners && {
+    () => ({
+      // WebKit can lift a link before the reorder sensor sees movement.
+      draggable: false,
+      ...(listeners && {
         ref: setActivatorNodeRef,
         "aria-describedby": descriptionId,
         "aria-keyshortcuts": "Space",
         onKeyDown: (event: ReactKeyboardEvent<HTMLAnchorElement>) => {
           listeners["onKeyDown"]?.(event);
         },
-      },
+      }),
+    }),
     [descriptionId, listeners, setActivatorNodeRef]
   );
 
@@ -120,11 +123,7 @@ function SortablePinnedWave({
       }}
     >
       <div
-        className={
-          controls
-            ? "tw-select-none [-webkit-touch-callout:none] [&_a]:tw-cursor-grab"
-            : undefined
-        }
+        className={`[-webkit-touch-callout:none] [&_img]:[-webkit-user-drag:none] ${controls ? "tw-select-none [&_a]:tw-cursor-grab" : ""}`}
         onMouseDown={controls ? onMouseDown : undefined}
         onTouchStart={controls ? onTouchStart : undefined}
       >
