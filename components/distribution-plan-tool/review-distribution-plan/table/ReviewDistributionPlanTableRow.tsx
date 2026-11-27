@@ -153,9 +153,8 @@ export default function ReviewDistributionPlanTableRow({
   const cell = `tw-px-2 tw-py-2 tw-align-middle tw-text-sm sm:tw-px-3 ${isComponent ? "tw-text-iron-300" : "tw-font-semibold tw-text-iron-100"}`;
 
   return (
-    <tr role="row">
+    <tr>
       <th
-        role="rowheader"
         scope="row"
         className={`${cell} tw-break-words tw-text-left [overflow-wrap:anywhere] ${isComponent ? "tw-pl-3 tw-font-normal sm:tw-pl-5" : ""}`}
       >
@@ -166,13 +165,13 @@ export default function ReviewDistributionPlanTableRow({
           </span>
         )}
       </th>
-      <td role="cell" className={`${cell} tw-break-words tw-tabular-nums`}>
+      <td className={`${cell} tw-break-words tw-tabular-nums`}>
         {isPublic ? "—" : formatCount(item.walletsCount)}
       </td>
-      <td role="cell" className={`${cell} tw-break-words tw-tabular-nums`}>
+      <td className={`${cell} tw-break-words tw-tabular-nums`}>
         {isPublic ? "—" : formatCount(item.spotsCount)}
       </td>
-      <td role="cell" className={cell}>
+      <td className={cell}>
         <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2">
           <ReviewDistributionExports
             name={item.name}

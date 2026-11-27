@@ -59,7 +59,6 @@ export default function ReviewDistributionPlanTable() {
         )}
       >
         <table
-          role="table"
           className={clsx(styles["table"], "tw-divide-y tw-divide-iron-700/60")}
         >
           <ReviewDistributionPlanTableHeader rows={rows} />

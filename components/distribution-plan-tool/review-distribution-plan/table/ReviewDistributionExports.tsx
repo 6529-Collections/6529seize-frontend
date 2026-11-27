@@ -8,7 +8,10 @@ import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/emma";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowDownTrayIcon,
+  ChevronDownIcon,
+} from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import styles from "./ReviewDistributionPlanTable.module.css";
 import { FetchResultsType } from "./ReviewDistributionPlanTable.types";
@@ -64,9 +67,22 @@ export function ReviewDistributionExports({
             aria-label={accessibleName}
             triggerAsChild
             trigger={
-              <Button variant="secondary" size="sm" loading={loading !== null}>
-                {label}
-                <ChevronDownIcon className="tw-size-3" aria-hidden="true" />
+              <Button
+                variant="secondary"
+                size="sm"
+                className={styles["narrowAction"]}
+                loading={loading !== null}
+                hideChildrenWhenLoading
+              >
+                <ArrowDownTrayIcon
+                  className={styles["narrowActionIcon"]}
+                  aria-hidden="true"
+                />
+                <span className={styles["actionLabel"]}>{label}</span>
+                <ChevronDownIcon
+                  className={clsx(styles["actionChevron"], "tw-size-3")}
+                  aria-hidden="true"
+                />
               </Button>
             }
             // File format and product names are the same across locales.

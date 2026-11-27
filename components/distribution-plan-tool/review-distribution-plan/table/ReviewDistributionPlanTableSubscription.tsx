@@ -23,6 +23,9 @@ import {
   getForgePhaseIds,
 } from "@/services/api/drop-forge-process-inputs";
 import { forgeList } from "@/services/api/drop-forge-api";
+import { QueueListIcon } from "@heroicons/react/24/outline";
+import clsx from "clsx";
+import styles from "./ReviewDistributionPlanTable.module.css";
 import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "./constants";
 import {
   ReviewDistributionPlanTableItemType,
@@ -131,10 +134,25 @@ function PreparedSubscriptionLinks({ plan, phase }: SubscriptionLinksProps) {
         void download();
       }}
       aria-busy={downloading}
-      className="tw-flex tw-h-8 tw-shrink-0 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-3 tw-text-xs tw-font-medium tw-text-white disabled:tw-opacity-50"
+      className={clsx(
+        styles["narrowAction"],
+        "tw-flex tw-h-8 tw-shrink-0 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-3 tw-text-xs tw-font-medium tw-text-white disabled:tw-opacity-50"
+      )}
     >
-      {downloading && <CircleLoader size={CircleLoaderSize.SMALL} />}
-      {t(locale, downloading ? "dropForge.downloading" : "dropForge.download")}
+      {downloading ? (
+        <CircleLoader size={CircleLoaderSize.SMALL} />
+      ) : (
+        <QueueListIcon
+          className={styles["narrowActionIcon"]}
+          aria-hidden="true"
+        />
+      )}
+      <span className={styles["actionLabel"]}>
+        {t(
+          locale,
+          downloading ? "dropForge.downloading" : "dropForge.download"
+        )}
+      </span>
     </button>
   );
 }
@@ -162,6 +180,7 @@ function ManualSubscriptionLinks({
   const { setToast } = useContext(AuthContext);
   const [downloading, setDownloading] = useState(false);
   const isPublic = phase.phaseId === PUBLIC_SUBSCRIPTIONS_PHASE_ID;
+  const label = isPublic ? "Public Subscriptions" : "Subscription Lists";
   const contract = MEMES_CONTRACT;
 
   const handleDownload = async () => {
@@ -205,16 +224,22 @@ function ManualSubscriptionLinks({
       onClick={handleDownload}
       disabled={downloading}
       type="button"
-      className="tw-group tw-flex tw-h-8 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-blue-500 tw-px-3 tw-text-xs tw-font-medium tw-text-white tw-ring-1 tw-ring-inset tw-ring-iron-500/50 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-blue-500/50"
+      className={clsx(
+        styles["narrowAction"],
+        "tw-group tw-flex tw-h-8 tw-shrink-0 tw-items-center tw-justify-center tw-gap-2 tw-rounded-full tw-border-none tw-bg-blue-500 tw-px-3 tw-text-xs tw-font-medium tw-text-white tw-ring-1 tw-ring-inset tw-ring-iron-500/50 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-blue-500/50"
+      )}
     >
       {downloading ? (
-        <span className="tw-flex tw-items-center tw-gap-2">
-          <CircleLoader size={CircleLoaderSize.SMALL} />
-          <span>Downloading</span>
-        </span>
+        <CircleLoader size={CircleLoaderSize.SMALL} />
       ) : (
-        <>{isPublic ? "Public Subscriptions" : "Subscription Lists"}</>
+        <QueueListIcon
+          className={styles["narrowActionIcon"]}
+          aria-hidden="true"
+        />
       )}
+      <span className={styles["actionLabel"]}>
+        {downloading ? "Downloading" : label}
+      </span>
     </button>
   );
 }

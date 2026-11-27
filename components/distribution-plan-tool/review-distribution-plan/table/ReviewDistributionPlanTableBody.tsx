@@ -13,10 +13,7 @@ export default function ReviewDistributionPlanTableBody({
   const items = rows.flatMap(({ phase, components }) => [phase, ...components]);
 
   return (
-    <tbody
-      role="rowgroup"
-      className="tw-divide-y tw-divide-iron-700/40 tw-bg-iron-900"
-    >
+    <tbody className="tw-divide-y tw-divide-iron-700/40 tw-bg-iron-900">
       {items.map((item) => (
         <ReviewDistributionPlanTableRow
           key={item.id}

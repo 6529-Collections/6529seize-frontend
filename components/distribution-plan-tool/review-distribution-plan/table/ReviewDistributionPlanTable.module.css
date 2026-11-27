@@ -34,31 +34,62 @@
   }
 }
 
-/* Keep the explicit table roles in the markup for iOS 16.4. Older WebKit can
-   lose native table semantics when these elements switch to block or grid. */
+.table .narrowActionIcon {
+  display: none;
+}
+
 @container emma-review-table (max-width: 34rem) {
-  .table,
-  .table thead,
-  .table tbody {
-    display: block;
+  .table th:nth-child(2) {
+    width: 3.75rem;
   }
 
-  .table tr {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(3.75rem, auto) minmax(
-        3.5rem,
-        auto
-      );
+  .table th:nth-child(3) {
+    width: 3.5rem;
   }
 
-  .table th:nth-child(2),
-  .table th:nth-child(3),
   .table th:last-child:not(:first-child) {
-    width: auto;
+    width: 8.5rem;
   }
 
-  .table tr > :last-child {
-    grid-column: 1 / -1;
-    padding-top: 0;
+  .table .narrowAction {
+    max-width: 100%;
+    min-height: 2rem;
+    height: auto;
+    padding-block: 0.25rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
+
+@container emma-review-table (max-width: 29rem) {
+  .table th:last-child:not(:first-child) {
+    width: 3.5rem;
+  }
+
+  .table .narrowAction {
+    width: 2rem;
+    height: 2rem;
+    padding-inline: 0;
+  }
+
+  .table .narrowActionIcon {
+    display: block;
+    width: 1rem;
+    height: 1rem;
+    flex: none;
+  }
+
+  .table .actionChevron {
+    display: none;
+  }
+
+  .table .actionLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }

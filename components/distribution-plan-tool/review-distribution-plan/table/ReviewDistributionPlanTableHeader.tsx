@@ -103,19 +103,18 @@ export default function ReviewDistributionPlanTableHeader({
     }
   };
   return (
-    <thead role="rowgroup" className="tw-bg-iron-800">
-      <tr role="row">
-        <th role="columnheader" scope="col" className={heading}>
+    <thead className="tw-bg-iron-800">
+      <tr>
+        <th scope="col" className={heading}>
           {t(locale, "emma.review.name")}
         </th>
-        <th role="columnheader" scope="col" className={heading}>
+        <th scope="col" className={heading}>
           {t(locale, "emma.review.wallets")}
         </th>
-        <th role="columnheader" scope="col" className={heading}>
+        <th scope="col" className={heading}>
           {t(locale, "emma.review.spots")}
         </th>
         <th
-          role="columnheader"
           scope="col"
           aria-label={t(locale, "emma.review.exports")}
           className="tw-px-2 tw-py-2 sm:tw-px-3"

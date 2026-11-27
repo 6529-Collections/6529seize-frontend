@@ -2032,18 +2032,29 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     const phase = page.getByRole("rowheader", { name: longName });
     await expect(phase).toBeVisible();
     const table = page.getByRole("table").filter({ has: phase });
-    await expect(
-      table.getByRole("columnheader", { name: "Wallets" })
-    ).toBeVisible();
-    await expect(
-      table.getByRole("button", { name: `Exports for ${longName}` })
-    ).toBeVisible();
-    expect(
-      await table.evaluate(
-        (element) => element.scrollWidth <= element.clientWidth + 1
-      )
-    ).toBe(true);
-    await expectNoHorizontalOverflow(page);
+    const row = table.getByRole("row").filter({ has: phase });
+    const exports = row.getByRole("button", {
+      name: `Exports for ${longName}`,
+    });
+    for (const width of [320, 390]) {
+      await page.setViewportSize({ width, height: 900 });
+      await expect(table).toHaveCSS("display", "table");
+      await expect(row).toHaveCSS("display", "table-row");
+      await expect(
+        table.getByRole("columnheader", { name: "Wallets" })
+      ).toBeVisible();
+      await expect(row.getByRole("cell")).toHaveCount(3);
+      await expect(exports).toBeVisible();
+      expect(
+        await table.evaluate(
+          (element) => element.scrollWidth <= element.clientWidth + 1
+        )
+      ).toBe(true);
+      await expectNoHorizontalOverflow(page);
+    }
+    await exports.press("Enter");
+    await expect(page.getByRole("menuitem", { name: "JSON" })).toBeVisible();
+    await page.keyboard.press("Escape");
 
     await page.reload();
     await expect(phase).toBeVisible();
