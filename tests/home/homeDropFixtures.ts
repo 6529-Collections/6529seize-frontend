@@ -1,5 +1,6 @@
-import type { Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 import { installHomeArtworkFixture } from "../support/homeArtworkFixture";
+import { RESPONSE_TIMEOUT_MS } from "../support/routeReadiness";
 import {
   decodeFunctionData,
   encodeFunctionResult,
@@ -41,6 +42,20 @@ export async function installLoadingTestArtwork(page: Page) {
     // A terminal response exercises the unavailable state without transport retries.
     route.fulfill({ status: 400, json: { error: "Fixture RPC unavailable" } })
   );
+}
+
+/** Browser fixtures must replace the server-seeded drop before layout checks. */
+export async function waitForLoadingTestArtwork(page: Page) {
+  const image = page
+    .locator("[data-home-drop]")
+    .getByRole("img", { name: loadingTestArtwork.name, exact: true });
+  await expect(image).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+  await expect(image).toHaveJSProperty("complete", true);
+  await expect
+    .poll(() =>
+      image.evaluate((element: HTMLImageElement) => element.naturalWidth)
+    )
+    .toBeGreaterThan(0);
 }
 
 export async function installCompletedMintStatus(

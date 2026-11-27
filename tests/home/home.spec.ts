@@ -30,6 +30,7 @@ import {
   installComingUpFixture,
   installCompletedMintStatus,
   loadingTestArtwork,
+  waitForLoadingTestArtwork,
 } from "./homeDropFixtures";
 
 test("Homepage artwork fixture replaces only embedded artwork documents @smoke @medium @large", async ({
@@ -457,6 +458,7 @@ for (const cardCount of [1, 3]) {
     page,
   }, testInfo) => {
     await installComingUpFixture(page);
+    await installCompletedMintStatus(page);
     await page.route("**/coming-up-layout-*.png", (route) => {
       const rank = Number(
         /coming-up-layout-(\d)/.exec(route.request().url())?.[1]
@@ -487,6 +489,7 @@ for (const cardCount of [1, 3]) {
       })
     );
     await page.goto("/", { waitUntil: "domcontentloaded" });
+    await waitForLoadingTestArtwork(page);
     const cards = page
       .getByRole("region", { name: "Coming up", exact: true })
       .getByTestId("coming-up-cards");
@@ -496,7 +499,14 @@ for (const cardCount of [1, 3]) {
     const artworkFrames = cards.getByTestId("coming-up-artwork");
     for (const frame of await artworkFrames.all()) {
       await frame.scrollIntoViewIfNeeded();
-      await expect(frame.getByRole("img")).toHaveCSS("opacity", "1");
+      const image = frame.getByRole("img");
+      await expect(image).toHaveJSProperty("complete", true);
+      await expect
+        .poll(() =>
+          image.evaluate((element: HTMLImageElement) => element.naturalWidth)
+        )
+        .toBeGreaterThan(0);
+      await expect(image).toHaveCSS("opacity", "1");
     }
     const widths = [320, 390, 639, 640, 767, 768, 1024, 1280, 1920];
     for (const width of widths) {
@@ -602,15 +612,22 @@ test.describe("Coming up avatar density", () => {
     page,
   }, testInfo) => {
     await installComingUpFixture(page);
+    await installCompletedMintStatus(page);
     const avatar =
       "https://media.6529usercontent.com/ipfs/coming-up-avatar-fixture";
     const optimizedWidths: number[] = [];
     await page.route(avatar, (route) =>
       route.fulfill({
         status: 206,
-        contentType: "image/jpeg",
+        contentType: "image/png",
         headers: { "access-control-allow-origin": "*" },
-        body: Buffer.from([0xff, 0xd8, 0xff]),
+        // A real decodable image also keeps a probe-timeout fallback meaningful;
+        // three JPEG marker bytes were not an image. Optimizer assertions below
+        // still require the resized path, so fallback cannot silently pass.
+        body: Buffer.from(
+          "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+          "base64"
+        ),
       })
     );
     await page.route("**/_next/image?*", (route) => {
@@ -635,6 +652,7 @@ test.describe("Coming up avatar density", () => {
       })
     );
     await page.goto("/", { waitUntil: "domcontentloaded" });
+    await waitForLoadingTestArtwork(page);
     const section = page.getByRole("region", {
       name: "Coming up",
       exact: true,
@@ -642,6 +660,7 @@ test.describe("Coming up avatar density", () => {
     const artist = section
       .getByRole("link", { name: "coming-up-artist", exact: true })
       .first();
+    await expect(artist).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     const image = section
       .getByRole("link", { name: "coming-up-artist", exact: true })
       .first()
@@ -655,6 +674,16 @@ test.describe("Coming up avatar density", () => {
     await expect
       .poll(() => image.evaluate((img: HTMLImageElement) => img.naturalWidth))
       .toBeGreaterThan(0);
+    // naturalWidth is density-corrected for srcset; inspect the selected
+    // resource to prove a decoded fallback did not replace the optimized image.
+    const selectedSource = new URL(
+      await image.evaluate((img: HTMLImageElement) => img.currentSrc)
+    );
+    expect(selectedSource.pathname).toBe("/_next/image");
+    expect(selectedSource.searchParams.get("url")).toBe(avatar);
+    const selectedWidth = Number(selectedSource.searchParams.get("w"));
+    expect(selectedWidth).toBeGreaterThanOrEqual(84);
+    expect(selectedWidth).toBeLessThanOrEqual(128);
     await expect(image).toHaveCSS("width", "28px");
     await expect(image).toHaveCSS("height", "28px");
     await expect(image).toHaveCSS("object-fit", "cover");
@@ -2366,8 +2395,9 @@ test("collapsed sidebar fits full rows when a desktop update appears @smoke @med
 
     await page.setViewportSize({ width: 1440, height: 600 });
     await page.goto("/notifications", { waitUntil: "domcontentloaded" });
+    await expect(sidebar).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     await expect(share).toHaveCount(0);
-    await expect(update).toBeVisible();
+    await expect(update).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     await expect(about).toHaveCSS("height", "46px");
   } finally {
     releaseVersion();
@@ -2562,10 +2592,11 @@ test("desktop account updates do not move utilities, including in short expanded
 
     // Unsupported Share routes keep Update directly above Search, with no hole.
     await page.goto("/notifications", { waitUntil: "domcontentloaded" });
+    await expect(sidebar).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     await expect(
       sidebar.getByRole("button", { name: "Share this page", exact: true })
     ).toHaveCount(0);
-    await expect(update).toBeVisible();
+    await expect(update).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     const searchBox = await search.boundingBox();
     const updateBox = await update.boundingBox();
     expect(searchBox).not.toBeNull();
@@ -2608,6 +2639,7 @@ for (const { width, stored, expectedWidth } of [
     );
     await page.setViewportSize({ width, height: 900 });
     await seedSidebarCollapsedState(page, stored === "true");
+    await installHomeArtworkFixture(page);
     const hydration = await gateSidebarHydration(page);
     const sidebar = page.getByLabel("Primary sidebar", { exact: true });
     const layout = page.getByRole("main").first().locator("..");

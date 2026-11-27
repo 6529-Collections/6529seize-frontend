@@ -432,6 +432,14 @@ and sandboxed submission renderer are covered; the application document, API
 responses, image requests, and unrelated embeds remain untouched. Dedicated
 media packs retain live artwork coverage and do not install this fixture.
 
+Coming Up layout and avatar-density tests also wait for
+`waitForLoadingTestArtwork` before measuring: server HTML can still contain the
+live drop while hydration and the mocked latest-drop response are pending.
+Keep their mint RPC response deterministic, require decoded card images, and
+use decodable avatar bytes rather than a file signature alone. Avatar density
+must still prove that the optimized response has enough pixels; a successful
+fallback image is not sufficient.
+
 Use `seedSidebarCollapsedState` from `support/sidebarHydration.ts` for sidebar
 session fixtures. Playwright init scripts also run in child frames; the helper
 seeds only the top frame so opaque-origin artwork does not throw a storage
