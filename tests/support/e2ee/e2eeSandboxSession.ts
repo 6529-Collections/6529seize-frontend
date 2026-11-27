@@ -230,8 +230,25 @@ export interface E2eeUserSession {
    * (personal_sign) or a separate encryption grant (typed data).
    */
   signatureCount(): number;
+  /**
+   * Test-only: the next wallet signature prompt in this browser is declined,
+   * as a wallet's "Reject" would (EIP-1193 code 4001). Off by default; one
+   * prompt only.
+   */
+  rejectNextSignature(): void;
   close(): Promise<void>;
 }
+
+/**
+ * A declined prompt crosses the Playwright binding as this marker (bindings
+ * pass only an error's message), and the page-side signer turns it into what
+ * a wallet's "Reject" throws: viem's UserRejectedRequestError, code 4001.
+ */
+const WALLET_REJECTED = { walletRejected: true } as const;
+
+/** Binding names behind the page's test-signer globals. */
+const SANDBOX_SIGN_TYPED_DATA = "__e2eeSandboxWalletSignTypedData";
+const SANDBOX_SIGN_MESSAGE = "__e2eeSandboxWalletSignMessage";
 
 /**
  * Opens a browser for `user` with its own storage (a new device). Closing
@@ -250,6 +267,17 @@ export async function openE2eeUser(
     ...(baseURL === undefined ? {} : { baseURL }),
   });
   let signatures = 0;
+  let rejectNext = false;
+  const answer = async <T>(
+    sign: () => Promise<T>
+  ): Promise<T | typeof WALLET_REJECTED> => {
+    if (rejectNext) {
+      rejectNext = false;
+      return WALLET_REJECTED;
+    }
+    signatures += 1;
+    return sign();
+  };
   await context.addInitScript(
     ({ walletKey, jwtKey, wallet, jwt }) => {
       globalThis.localStorage.setItem(walletKey, wallet);
@@ -263,18 +291,39 @@ export async function openE2eeUser(
     }
   );
   await context.exposeFunction(
-    TEST_SIGNER_GLOBAL,
-    async (typedData: Parameters<PrivateKeyAccount["signTypedData"]>[0]) => {
-      signatures += 1;
-      return user.account.signTypedData(typedData);
-    }
+    SANDBOX_SIGN_TYPED_DATA,
+    async (typedData: Parameters<PrivateKeyAccount["signTypedData"]>[0]) =>
+      answer(() => user.account.signTypedData(typedData))
   );
-  await context.exposeFunction(
-    SIGNED_MESSAGES_TEST_SIGNER_GLOBAL,
-    async (message: string) => {
-      signatures += 1;
-      return user.account.signMessage({ message });
-    }
+  await context.exposeFunction(SANDBOX_SIGN_MESSAGE, async (message: string) =>
+    answer(() => user.account.signMessage({ message }))
+  );
+  // The app's test-signer globals: each signs through its binding, and a
+  // declined prompt throws the wallet's rejection.
+  await context.addInitScript(
+    (names: readonly (readonly [string, string])[]) => {
+      const scope = globalThis as unknown as Record<string, unknown>;
+      for (const [global, binding] of names) {
+        scope[global] = async (...args: unknown[]) => {
+          const sign = scope[binding] as (...a: unknown[]) => Promise<unknown>;
+          const result = await sign(...args);
+          if (
+            typeof result === "object" &&
+            result !== null &&
+            "walletRejected" in result
+          ) {
+            const error = new Error("User rejected the request.");
+            error.name = "UserRejectedRequestError";
+            throw Object.assign(error, { code: 4001 });
+          }
+          return result;
+        };
+      }
+    },
+    [
+      [TEST_SIGNER_GLOBAL, SANDBOX_SIGN_TYPED_DATA],
+      [SIGNED_MESSAGES_TEST_SIGNER_GLOBAL, SANDBOX_SIGN_MESSAGE],
+    ] as const
   );
   await hideNextDevOverlay(context);
   const guard: LocalSandboxBrowserMutationGuard =
@@ -287,6 +336,9 @@ export async function openE2eeUser(
     context,
     page,
     signatureCount: () => signatures,
+    rejectNextSignature: () => {
+      rejectNext = true;
+    },
     async close() {
       guard.assertNoBlockedMutations();
       assertNoPageErrors(diagnostics);

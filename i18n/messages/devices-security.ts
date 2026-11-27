@@ -143,4 +143,5 @@ export const DEVICES_SECURITY_MESSAGES = {
     "Encrypted messages and backup run in one tab at a time. They’re open in another 6529 tab.",
   "devicesSecurity.backup.failed":
     "Couldn’t check your backup. Your messages on this device aren’t affected.",
+  "devicesSecurity.row.new": "New",
 } as const;

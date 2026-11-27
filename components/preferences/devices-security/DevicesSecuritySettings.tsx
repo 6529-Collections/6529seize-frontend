@@ -16,6 +16,7 @@ import { LocalDataAlert } from "./LocalDataAlert";
 import { RenameDeviceDialog } from "./RenameDeviceDialog";
 import { RevokeDeviceDialog } from "./RevokeDeviceDialog";
 import { ThisDeviceCard } from "./ThisDeviceCard";
+import { useAnnouncedDevices } from "./useAnnouncedDevices";
 import {
   DeviceChangedError,
   DeviceNotRevocableError,
@@ -81,6 +82,8 @@ export default function DevicesSecuritySettings() {
   const othersId = useId();
   const earlierId = useId();
   const security = useSecurityDevices();
+  // Marked "New" while the new-device alert announces it.
+  const isNew = useAnnouncedDevices();
   const [target, setTarget] = useState<SecurityDevice | null>(null);
   const [renaming, setRenaming] = useState<SecurityDevice | null>(null);
   // Each clean-up opening is a new run: it starts from the devices listed
@@ -213,6 +216,7 @@ export default function DevicesSecuritySettings() {
                     <DeviceRow
                       key={device.id}
                       device={device}
+                      isNew={isNew(device)}
                       approval={security.approvalFor(device)}
                       engine={security.engine}
                       canRevoke={security.canRevoke(device)}
@@ -259,6 +263,7 @@ export default function DevicesSecuritySettings() {
                     <DeviceRow
                       key={device.id}
                       device={device}
+                      isNew={isNew(device)}
                       approval={security.approvalFor(device)}
                       engine={security.engine}
                       canRevoke={security.canRevoke(device)}

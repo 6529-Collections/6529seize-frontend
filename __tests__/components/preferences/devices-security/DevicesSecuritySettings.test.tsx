@@ -35,6 +35,7 @@ jest.mock(
 jest.mock("@/components/preferences/devices-security/BackupCard", () => ({
   BackupCard: () => null,
 }));
+let mockAnnounced = new Set<string>();
 let mockBackupSnapshot: { phase: string } | null = null;
 jest.mock("@/hooks/e2ee/useE2eeBackup", () => ({
   useE2eeBackup: () => ({ manager: null, snapshot: mockBackupSnapshot }),
@@ -42,6 +43,17 @@ jest.mock("@/hooks/e2ee/useE2eeBackup", () => ({
 jest.mock("@/components/e2ee/devices/E2eeNewDeviceNotice", () => ({
   E2eeNewDeviceNotice: () => null,
 }));
+// The devices the new-device alert announces, by encrypted-DMs device key.
+jest.mock(
+  "@/components/preferences/devices-security/useAnnouncedDevices",
+  () => ({
+    useAnnouncedDevices:
+      () =>
+      (device: { readonly encryptedDevice: { deviceKey: string } | null }) =>
+        device.encryptedDevice !== null &&
+        mockAnnounced.has(device.encryptedDevice.deviceKey),
+  })
+);
 let mockDeviceSecurity = { proof: "on", canEnableEncryption: false };
 jest.mock("@/components/device-signing/DeviceSecurityStatus", () => ({
   useDeviceSecurityState: () => mockDeviceSecurity,
@@ -137,6 +149,18 @@ describe("DevicesSecuritySettings", () => {
   beforeEach(() => {
     mockState = state();
     mockDeviceSecurity = { proof: "on", canEnableEncryption: false };
+    mockAnnounced = new Set();
+  });
+
+  it("marks a device the new-device alert announces as New", () => {
+    mockAnnounced = new Set(["phone"]);
+    render(<DevicesSecuritySettings />);
+    const others = screen.getByRole("list", { name: "Other devices · 1" });
+    expect(within(others).getByText("New")).toBeVisible();
+    const earlier = screen.getByRole("list", {
+      name: "Earlier setups of this browser · 1",
+    });
+    expect(within(earlier).queryByText("New")).not.toBeInTheDocument();
   });
 
   it("pins this browser and groups the rest", () => {

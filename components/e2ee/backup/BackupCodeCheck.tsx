@@ -54,7 +54,7 @@ function Field({
         aria-invalid={invalid || undefined}
         aria-describedby={invalid ? describedBy : undefined}
         onChange={(event) => onChange(event.target.value)}
-        className={inputClass}
+        className={`${inputClass} aria-[invalid=true]:tw-border-rose-400`}
       />
     </div>
   );
@@ -116,7 +116,14 @@ export function CheckForm({
   const errorId = useId();
   const groupNumber = (index: number) => formatInteger(locale, index + 1);
 
-  const check = () => {
+  const check = (form: HTMLFormElement) => {
+    // Nothing typed yet (or a stray submit): point to the first field
+    // instead of reporting a mismatch.
+    const typed = pasting ? whole.trim() !== "" : entries.some((e) => e.trim());
+    if (!typed) {
+      form.querySelector("input")?.focus();
+      return;
+    }
     const wrong = findMismatch({
       pasting,
       code,
@@ -149,7 +156,7 @@ export function CheckForm({
       className="tw-flex tw-flex-col tw-gap-3"
       onSubmit={(event) => {
         event.preventDefault();
-        check();
+        check(event.currentTarget);
       }}
     >
       <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
@@ -212,9 +219,9 @@ export function CheckForm({
           {t(locale, errorKey)}
         </p>
       ) : null}
-      <div className="tw-flex tw-flex-wrap tw-gap-x-4 tw-gap-y-1">
+      <div className="tw-flex tw-flex-wrap tw-gap-2">
         <Button
-          variant="ghost"
+          variant="secondary"
           size="sm"
           onClick={() => {
             setPasting((value) => !value);
@@ -228,7 +235,7 @@ export function CheckForm({
               : "e2ee.backup.setup.check.paste"
           )}
         </Button>
-        <Button variant="ghost" size="sm" onClick={onSeeAgain}>
+        <Button variant="secondary" size="sm" onClick={onSeeAgain}>
           {t(locale, "e2ee.backup.setup.check.seeAgain")}
         </Button>
       </div>
