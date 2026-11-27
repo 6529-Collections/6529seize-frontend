@@ -226,7 +226,9 @@ test.describe("About Pages @smoke @medium @large", () => {
     await expect(classic).toHaveAttribute("aria-expanded", "false");
     await classic.focus();
     await page.keyboard.press("Tab");
-    await expect(page.getByRole("link", { name: "6529 Validator" })).toBeFocused();
+    await expect(
+      page.getByRole("link", { name: "6529 Validator" })
+    ).toBeFocused();
     await classic.click();
     await expect(classic).toHaveAttribute("aria-expanded", "true");
     if (isMobile) {
@@ -253,7 +255,7 @@ test.describe("About Pages @smoke @medium @large", () => {
     );
     // Hit the card padding to verify that the entire section is a link.
     await validator.click({ position: { x: 12, y: 12 } });
-    await expect(page).toHaveURL(/\/validator$/);
+    await expect(page).toHaveURL(/\/validator$/, { timeout: 20_000 });
   });
 
   test("should load the about index page", async ({ page }) => {

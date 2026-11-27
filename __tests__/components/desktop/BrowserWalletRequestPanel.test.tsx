@@ -94,21 +94,24 @@ jest.mock("@/helpers/desktop-navigation", () => ({
 
 const envelope = (
   overrides: Partial<WalletRequestEnvelope> = {}
-): WalletRequestEnvelope => ({
-  v: 1,
-  id: ID,
-  scheme: "localcore6529",
-  origin: globalThis.location.origin,
-  issuedAt: Date.now(),
-  expiresAt: Date.now() + 60_000,
-  request: {
-    method: "personal_sign",
-    params: [toHex(MESSAGE), ADDRESS],
-    address: ADDRESS,
-    chainId: 1,
-  },
-  ...overrides,
-});
+): WalletRequestEnvelope => {
+  const issuedAt = Date.now();
+  return {
+    v: 1,
+    id: ID,
+    scheme: "localcore6529",
+    origin: globalThis.location.origin,
+    issuedAt,
+    expiresAt: issuedAt + 60_000,
+    request: {
+      method: "personal_sign",
+      params: [toHex(MESSAGE), ADDRESS],
+      address: ADDRESS,
+      chainId: 1,
+    },
+    ...overrides,
+  };
+};
 
 async function fragmentFor(
   value: WalletRequestEnvelope | Record<string, unknown>,

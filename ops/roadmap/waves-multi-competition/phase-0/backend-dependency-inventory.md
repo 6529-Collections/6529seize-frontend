@@ -47,11 +47,11 @@ place.
 
 ## API and Route Surface
 
-The frozen OpenAPI contains 183 GET operations. Static traversal of the actual
-Express mount graph finds 296 externally reachable GET route shapes, including
-113 route-only, authenticated operational, health, alias, and raw-contract
-reads. See the [compatibility manifest](./public-get-compatibility-manifest.md)
-and its machine snapshots for the exhaustive list.
+The frozen OpenAPI contains 183 GET operations. The runtime manifest retains
+288 GET route shapes from the Express mount graph, including 105 runtime-only
+reads across operational, health, alias, raw-contract, and other routes. See
+the [compatibility manifest](./public-get-compatibility-manifest.md) for the
+machine-readable records.
 
 Wave-sensitive reads are implemented in:
 

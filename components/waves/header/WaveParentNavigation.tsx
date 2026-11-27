@@ -25,6 +25,7 @@ export default function WaveParentNavigation({
 
   const isCompactHeader = variant === "compact-header";
   const isHeader = variant === "header" || isCompactHeader;
+  const headerAlignment = isCompactHeader ? "tw-items-end" : "md:tw-items-end";
   const linkTitle = t(
     DEFAULT_LOCALE,
     "waves.header.parentNavigation.linkTitle",
@@ -64,7 +65,7 @@ export default function WaveParentNavigation({
           isCompactHeader ? "tw-max-w-full" : "tw-max-w-[60%]"
         } ${
           isHeader
-            ? "desktop-hover:hover:tw-text-primary-200 tw-min-h-6 tw-text-primary-300 md:tw-items-end"
+            ? `desktop-hover:hover:tw-text-primary-200 tw-min-h-6 tw-text-primary-300 ${headerAlignment}`
             : "tw-text-iron-300 desktop-hover:hover:tw-text-iron-100"
         }`}
       >

@@ -4,6 +4,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
 import CreateWaveDropsType from "./CreateWaveDropsType";
 import { ExtendedWaveParticipationRequirement } from "./CreateWaveDropsTypes.constants";
+import { CREATE_WAVE_FORM_STYLES } from "../../utils/createWaveFormStyles";
 
 const REQUIRED_TYPE_LABEL_KEYS = {
   [ExtendedWaveParticipationRequirement.NONE]:
@@ -75,7 +76,7 @@ export default function CreateWaveDropsTypes({
 
   return (
     <fieldset className="tw-m-0 tw-border-0 tw-p-0">
-      <legend className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
+      <legend className={CREATE_WAVE_FORM_STYLES.sectionTitle}>
         {t(locale, "waves.create.drops.requiredTypesLegend")}
       </legend>
       <div className="tw-mt-3 tw-grid tw-grid-cols-2 tw-gap-2 sm:tw-grid-cols-4 sm:tw-gap-3">

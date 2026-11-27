@@ -2,73 +2,78 @@
 
 ## Overview
 
-This page owns wave-level notification mode (`mentions` vs `all messages`) and mute
-behavior across thread header controls and sidebar wave rows.
+One bell menu controls wave notification levels and mute. The bell stays in the
+same place: it rings for `All messages`, stays plain for either mention level,
+and shows a slash when muted with the existing rose-toned muted-control colours.
+The unmuted bell stays neutral.
 
 ## Location in the Site
 
-- Thread header controls:
-  - `/waves/{waveId}`
-  - `/messages/{waveId}`
-- Sidebar wave rows:
-  - `/waves`, `/waves/{waveId}`
-  - `/messages`, `/messages/{waveId}`
+- `About` on `/waves/{waveId}` and `/messages/{waveId}`.
+- Wave rows in the sidebar, collapsed rail, and mobile lists show muted status.
 
-## Control Availability
+## Entry Points
 
-- Header controls require a connected profile handle and no proxy session.
-- The bell notification menu shows only after `Join` changes to `Joined`.
-- If you are not joined, the bell notification menu is hidden but the speaker
-  control can still be shown.
-- The `Mute` / `Unmute` action lives in the dedicated speaker control, not in
-  the overflow menu.
+Open a wave's `About` panel and select the bell labelled `Notification settings`.
+The control requires a connected profile handle and no proxy session.
 
-## Notification Modes
+## User Journey
 
-- The bell button opens notification preferences.
-- On phone layouts, the choices replace the content inside the same `About`
-  sheet, which shrinks to fit the two options. Choose a mode, use Back (including
-  the phone’s Back action), or press Escape to return to `About` with focus on the bell.
-- Close or tapping outside dismisses the whole sheet. Returning from notification
-  settings restores the full `About` height, content, and scroll position.
+1. Open the bell menu.
+2. If joined, choose one level. Rows show labels only, without descriptions:
+   - `All messages`: every new post.
+   - `Mentions and @all`: includes `@contributors`.
+   - `Mentions only`: your mentions and replies.
+3. Choose `Mute` to stop wave alerts, or `Unmute` to restore the saved level.
+4. Choosing a level or Mute/Unmute closes the menu.
+
+Changing a level preserves independently configured group alert preferences,
+including `@dropforgeops`.
+`All messages` also keeps the saved broadcast preference. `Mentions and @all`
+enables both broadcasts; `Mentions only` disables them.
+
+## Common Scenarios
+
+- Exactly one notification level is selected. Direct mentions, replies, and
+  quotes remain eligible at every level, subject to your profile notification
+  preferences. Mute suppresses wave alerts, including direct mentions.
+- Muting keeps the saved level checked and visible, with level choices disabled.
+  `Unmute` remains available.
+- Before joining, the same bell menu offers only Mute/Unmute. Muting does not
+  join or leave a wave.
+- On smaller screens, the choices use the site's standard picker sheet over
+  `About`. Selecting a choice, closing the picker, tapping its backdrop, or
+  pressing Escape restores focus to the bell. About keeps its content and
+  scroll position.
 - Desktop and tablet sidebars show an anchored menu. Arrow keys move between
-  its choices; Escape closes it and returns focus to the bell.
-- Bell and mute tooltips appear with a mouse; touch users can tap the controls
+  enabled choices; Home and End reach the first and last actions. Escape returns
+  focus to the bell.
+- Mouse users can read the bell tooltip. Touch users can open the same choices
   directly without a lingering tooltip.
-- The `Broadcast mentions` row, shown with the `@` icon, turns on notifications
-  for the admin-only `@all` and `@contributors` broadcasts. Toggling this row
-  preserves other group preferences, including `@dropforgeops`.
-- The `All messages` row turns on notifications for every message.
-- While a mode toggle request runs, the clicked button shows a spinner and
-  notification controls are temporarily disabled.
 
-## Mute Behavior
+## Edge Cases
 
-- Before joining, the speaker control can mute the wave without joining it.
-- In joined + muted state, the bell notification menu is replaced by one
-  red `Muted` speaker-muted button that unmutes.
-- In joined + unmuted state, the `Mute` speaker-muted button mutes the wave from
-  the notification control row.
-- Mute is per-wave and does not block opening the wave manually.
-
-## Sidebar and Realtime Effects
-
-- Muted rows show a bell-slash badge on the wave avatar.
-- Muted rows suppress unread-count badges.
-- Muted waves sort after non-muted waves in wave and DM lists, including
-  subwave rows under an expanded parent and in the mobile subwave bar.
-- Muted waves skip websocket unread/new-drop accumulation.
-- Open muted threads still receive realtime drop updates, so visible content
-  stays current without a refresh.
-- Inactive muted threads skip Wave message-store processing and sync when opened.
-- Muted threads keep typing-indicator subscription disabled.
+- Muted wave rows show an icon-only bell-slash in neutral iron colours on the
+  avatar, separate from the wave score and any number.
+- Muted rows hide unread counts and sort after unmuted waves in wave and DM
+  lists, expanded subwaves, and the mobile subwave bar.
+- Muted waves skip realtime unread accumulation. Open muted threads still show
+  new drops live; inactive muted threads sync when opened. Typing indicators
+  remain disabled.
 
 ## Failure and Recovery
 
-- If mode or mute requests fail, the prior state stays and an error toast is
-  shown.
-- If header/list state looks stale after a toggle, reopen the wave thread or
-  refresh.
+- A saving action shows its own spinner and temporarily disables menu actions.
+  The bell remains in place, and reopening it shows the pending action.
+- If preferences cannot load, `Retry` appears inside the menu in place of the
+  levels. Mute/Unmute remains available.
+- A failed save keeps the prior state and shows an error toast.
+- If header or list state appears stale, reopen the thread or refresh.
+
+## Limitations / Notes
+
+Mute is per wave and does not prevent opening its content manually. There are
+no timed mute durations. Joining and leaving remain separate controls.
 
 ## Related Pages
 

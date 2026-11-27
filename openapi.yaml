@@ -3860,6 +3860,14 @@ paths:
                 $ref: "#/components/schemas/ApiCmsSite"
         "401":
           description: Unauthorized - authentication required
+        "410":
+          description: >-
+            Legacy CMS sites are read-only once profile sites follow the 6529
+            chain (code cms_legacy_retired)
+        "423":
+          description: >-
+            The identity freeze is on (code IDENTITY_FROZEN), while profiles
+            move to the 6529 Network.
   /cms/sites/{site_id}/published-packages:
     post:
       tags:
@@ -3893,6 +3901,14 @@ paths:
           description: Forbidden - only site owners can publish
         "404":
           description: CMS site not found
+        "410":
+          description: >-
+            Legacy CMS sites are read-only once profile sites follow the 6529
+            chain (code cms_legacy_retired)
+        "423":
+          description: >-
+            The identity freeze is on (code IDENTITY_FROZEN), while profiles
+            move to the 6529 Network.
   /collect/capabilities:
     get:
       tags:
@@ -15742,7 +15758,7 @@ paths:
           required: true
           schema:
             type: string
-          description: Notification ID or string "all" to mark all notifications as read
+          description: Notification ID
       responses:
         "201":
           description: successful operation
@@ -16644,6 +16660,38 @@ paths:
           description: Missing CMS publish permissions
         "404":
           description: CMS package not found
+        "409":
+          description: >-
+            The pointer changed (expected-current guard). With profile sites on
+            the 6529 chain, publish records the signed publication record and
+            returns the draft with its publication_cid and, in
+            chain_documents, the content core and the record; the person's
+            browser uploads both to the gateway's document store, and the
+            person's PROFILE_REPLACE then makes it primary. Publishing a draft
+            that already has a publication_cid returns it as stored, with its
+            chain_documents, without signing again.
+        "413":
+          description: >-
+            With profile sites on the 6529 chain: the content core or the
+            publication record is larger than the gateway's document store
+            takes, 2 MiB a file (code cms_chain_document_too_large). Nothing
+            was recorded.
+        "423":
+          description: >-
+            The identity freeze is on (code IDENTITY_FROZEN), while profiles
+            move to the 6529 Network.
+        "502":
+          description: >-
+            With profile sites on the 6529 chain, when the draft's publication
+            record was recorded earlier (a second publish, or another click
+            that recorded first): the record read back from storage doesn't
+            match its CID (code cms_publication_mismatch).
+        "503":
+          description: >-
+            With profile sites on the 6529 chain, when the draft's publication
+            record was recorded earlier (a second publish, or another click
+            that recorded first): the record can't be read from storage now
+            (code cms_check_unavailable). Publish again shortly.
   /profile-cms/packages/{id}/rollback:
     post:
       tags:
@@ -16684,6 +16732,28 @@ paths:
           description: Missing CMS publish permissions
         "404":
           description: CMS package not found
+        "409":
+          description: >-
+            The pointer changed (expected-current guard); the version was
+            published under a former handle (code cms_profile_changed), so
+            public reads wouldn't serve it; or profile sites are on the 6529
+            chain and the target passed the check the chain index will run (code
+            cms_pointer_on_chain): move the pointer with PROFILE_REPLACE
+            instead.
+        "422":
+          description: >-
+            Profile sites are on the 6529 chain and the chain index would refuse
+            this version (code cms_rollback_target_refused), so it can't be made
+            the site.
+        "423":
+          description: >-
+            The identity freeze is on (code IDENTITY_FROZEN), while profiles
+            move to the 6529 Network.
+        "503":
+          description: >-
+            Profile sites are on the 6529 chain and this version's files or its
+            Safe signature can't be checked right now (code
+            cms_check_unavailable); try again.
   /profile-cms/packages/{id}/archive:
     post:
       tags:
@@ -16722,6 +16792,10 @@ paths:
           description: Missing CMS publish permissions
         "404":
           description: CMS package not found
+        "423":
+          description: >-
+            The identity freeze is on (code IDENTITY_FROZEN), while profiles
+            move to the 6529 Network.
   /profile-cms/packages/{id}/export:
     get:
       tags:
@@ -16930,7 +17004,14 @@ paths:
         "404":
           description: CMS package not found
         "409":
-          description: Current primary no longer matches the expected version
+          description: >-
+            The current package does not match the guard, or profile sites are
+            on the 6529 chain (code cms_pointer_on_chain): unpublish with
+            PROFILE_REPLACE instead.
+        "423":
+          description: >-
+            The identity freeze is on (code IDENTITY_FROZEN), while profiles
+            move to the 6529 Network.
   /profile-cms/packages/{id}/agent-grants:
     post:
       tags:
@@ -19165,6 +19246,59 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiAvailableRatingCredit"
+  /rememes/add:
+    post:
+      tags:
+        - ReMemes
+      summary: Add ReMemes
+      description: >-
+        Registers NFTs from one Ethereum mainnet contract as ReMemes. The
+        signing wallet must be the contract deployer or meet the configured TDH
+        minimum. A wallet signature authorizes the request without a bearer
+        token. Password-protected deployments also require `x-6529-auth`. A
+        verified structured signature consumes its nonce before the NFT and
+        eligibility checks. Use a fresh signature for each attempt.
+      operationId: addRememe
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiAddRememeRequest"
+      responses:
+        "201":
+          description: ReMemes added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiAddRememeResponse"
+        "400":
+          description: >-
+            Request, signature, contract, or eligibility errors have a top-level
+            error. Per-token validation failures have contract and NFT results,
+            including an error for each affected token.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiAddRememeBadRequest"
+              examples:
+                invalidSignature:
+                  value:
+                    valid: false
+                    error: Invalid signature
+                tokenValidationFailed:
+                  value:
+                    valid: false
+                    contract:
+                      address: "0x1000000000000000000000000000000000000000"
+                    nfts:
+                      - tokenId: "123"
+                        raw:
+                          error: Rememe already exists
+                      - metadataError: >-
+                          Error fetching metadata for token_id 124: metadata
+                          unavailable
   /subscriptions/consolidation/coverage/{consolidation_key}:
     get:
       tags:
@@ -23884,6 +24018,131 @@ components:
           type: string
         device_signature:
           $ref: "#/components/schemas/ApiDeviceSignature"
+    ApiAddRememeBadRequest:
+      oneOf:
+        - $ref: "#/components/schemas/ApiAddRememeError"
+        - $ref: "#/components/schemas/ApiAddRememeTokenErrors"
+    ApiAddRememeError:
+      type: object
+      additionalProperties: false
+      required:
+        - valid
+        - error
+      properties:
+        valid:
+          type: boolean
+          enum:
+            - false
+        error:
+          type: string
+    ApiAddRememeRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - address
+        - signature
+        - rememe
+      properties:
+        address:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Ethereum address of the signing wallet.
+        signature:
+          type: string
+          minLength: 1
+          maxLength: 10000
+          description: >-
+            Ethereum personal-sign signature over the exact text of
+            `signature_message`. Structured messages support externally owned
+            accounts and EIP-1271 contract wallets.
+        signature_message:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 10000
+          description: |-
+            Version 2 action message. Fill in the placeholders and join these
+            lines with LF before signing.
+
+            ```text
+            6529 Action
+            Version: 2
+            Audience: <API host, e.g. api.6529.io>
+            Domain: <client host>
+            Wallet: <address>
+            Chain ID: 1
+            Issued At: <ISO 8601 UTC timestamp>
+            Expiration Time: <ISO 8601 UTC timestamp>
+            Nonce: <fresh UUID>
+            Action: add_rememe
+            Payload Hash: <64 lowercase hex characters>
+            Purpose: Sign this message to add a 6529 ReMeme.
+            ```
+
+            Compute the payload hash from the `rememe` object alone. Use
+            compact JSON with recursively sorted object keys and the original
+            array order. Hash the UTF-8 bytes with SHA-256 and encode the digest
+            as lowercase hex. Send `references` as JSON numbers so the signed
+            values match the validated payload.
+
+            Use a five-minute expiration as the web frontend does. The server
+            accepts a lifetime of up to ten minutes and checks expiry and
+            single use.
+
+            If strict structured signatures are disabled, an externally owned
+            account may omit this field or send null and personal-sign
+            `JSON.stringify(rememe)` with the same key order as the request.
+        rememe:
+          $ref: "#/components/schemas/ApiRememePayload"
+    ApiAddRememeResponse:
+      type: object
+      required:
+        - valid
+        - address
+        - references
+        - contract
+        - nfts
+      properties:
+        valid:
+          type: boolean
+          enum:
+            - true
+        address:
+          type: string
+          description: Wallet that submitted the ReMemes.
+        references:
+          type: array
+          items:
+            type: number
+        contract:
+          $ref: "#/components/schemas/ApiRememeContractMetadata"
+        nfts:
+          type: array
+          description: Alchemy NFT metadata in request order.
+          items:
+            $ref: "#/components/schemas/ApiRememeNftMetadata"
+    ApiAddRememeTokenErrors:
+      type: object
+      additionalProperties: false
+      required:
+        - valid
+        - contract
+        - nfts
+      properties:
+        valid:
+          type: boolean
+          enum:
+            - false
+        contract:
+          $ref: "#/components/schemas/ApiRememeContractMetadata"
+        nfts:
+          type: array
+          description: Results in request order, with at least one token error.
+          items:
+            oneOf:
+              - $ref: "#/components/schemas/ApiRememeNftLookupError"
+              - $ref: "#/components/schemas/ApiRememeNftMetadata"
     ApiAggregatedActivity:
       type: object
       required:
@@ -29802,7 +30061,14 @@ components:
         - ended_at
         - cancelled_at
         - archived_at
+        - stays_on_site
       properties:
+        stays_on_site:
+          type: boolean
+          description: >-
+            The decision's wave's stays_on_site: true when the wave, and with
+            it this decision, stays on 6529.io; false when it moves to the
+            6529 chain.
         main_stage_trait_rules:
           type: array
           description: >-
@@ -29826,6 +30092,14 @@ components:
         id:
           type: string
           format: uuid
+        chain_id:
+          type: string
+          nullable: true
+          pattern: ^0x[0-9a-f]{64}$
+          description: >-
+            The decision's id on the 6529 chain (lowercase), for an imported
+            decision too. Null while 6529.io doesn't know it. Every route that
+            takes a competition id also takes this id.
         wave_id:
           type: string
         type:
@@ -33780,7 +34054,9 @@ components:
           description: The operator can request a retry within the execution window
         wallet_blocked:
           type: boolean
-          description: This pending action is waiting on operational wallet permission or funding
+          description: >-
+            This pending action is waiting on operational wallet permission or
+            funding
         retry_at:
           type: integer
           format: int64
@@ -37044,7 +37320,14 @@ components:
         - created_by
         - visible
         - is_private
+        - stays_on_site
       properties:
+        stays_on_site:
+          type: boolean
+          description: >-
+            True when the group stays on 6529.io: it is hidden, private, a
+            direct message's group, or made after the waves freeze. False
+            when it moves to the 6529 chain.
         id:
           type: string
         name:
@@ -42205,6 +42488,34 @@ components:
                 type: string
             generated_for_external_agents:
               type: boolean
+    ApiProfileCmsChainDocument:
+      type: object
+      required:
+        - cid
+        - bytes_base64
+      properties:
+        cid:
+          type: string
+          description: The file's CID (CIDv1, raw codec, sha2-256).
+        bytes_base64:
+          type: string
+          description: The file's bytes, base64.
+    ApiProfileCmsChainDocuments:
+      type: object
+      description: >-
+        Only in a publish answer with profile sites on the 6529 chain: the two
+        files the person's browser uploads to the gateway's document store,
+        each with its CID, before the PROFILE_REPLACE that names them. With
+        the package, the answer stays under 5 MB for a package at the 2 MiB
+        storage cap.
+      required:
+        - content_core
+        - publication
+      properties:
+        content_core:
+          $ref: "#/components/schemas/ApiProfileCmsChainDocument"
+        publication:
+          $ref: "#/components/schemas/ApiProfileCmsChainDocument"
     ApiProfileCmsPackage:
       type: object
       required:
@@ -42253,6 +42564,15 @@ components:
         published_at:
           type: integer
           format: int64
+        publication_cid:
+          type: string
+          description: >-
+            CID (CIDv1, raw codec, sha2-256) of the package's signed publication
+            record, once the package was signed for publishing. With profile
+            sites on the 6529 chain, a draft that has it waits for the person's
+            PROFILE_REPLACE to name it in their ProfileDoc.
+        chain_documents:
+          $ref: "#/components/schemas/ApiProfileCmsChainDocuments"
     ApiProfileCmsPackageExport:
       type: object
       required:
@@ -43525,6 +43845,71 @@ components:
         platform:
           type: string
           description: Optional platform (ios, android, web)
+    ApiRememeContractMetadata:
+      type: object
+      description: Contract metadata from Alchemy. Additional fields may vary.
+      additionalProperties: true
+      required:
+        - address
+      properties:
+        address:
+          type: string
+        contractDeployer:
+          type: string
+    ApiRememeNftLookupError:
+      type: object
+      additionalProperties: false
+      required:
+        - metadataError
+      properties:
+        metadataError:
+          type: string
+          description: The token lookup failed before returning metadata.
+    ApiRememeNftMetadata:
+      type: object
+      description: NFT metadata from Alchemy. Additional fields may vary.
+      additionalProperties: true
+      required:
+        - tokenId
+      properties:
+        tokenId:
+          type: string
+        raw:
+          type: object
+          additionalProperties: true
+          properties:
+            error:
+              type: string
+              description: >-
+                A provider metadata error or Rememe already exists for a
+                previously registered token.
+    ApiRememePayload:
+      type: object
+      additionalProperties: false
+      required:
+        - contract
+        - token_ids
+        - references
+      properties:
+        contract:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Ethereum mainnet NFT contract address.
+        token_ids:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            type: string
+            minLength: 1
+            maxLength: 100
+        references:
+          type: array
+          description: Referenced Meme IDs. The array may be empty.
+          maxItems: 1000
+          items:
+            type: number
     ApiRenameDeviceRequest:
       type: object
       required:
@@ -45501,10 +45886,31 @@ components:
         - pauses
         - pinned
         - identity_wave
+        - stays_on_site
       properties:
+        stays_on_site:
+          type: boolean
+          description: >-
+            True when the wave stays on 6529.io, served from its database as
+            today. Before the switch-on a wave stays when it is a direct
+            message, the records wave or members-only; when a group it uses
+            stays (hidden, private, a direct message's, missing, or made after
+            the waves freeze); when its chat is off and it has no admin group;
+            when it was made after the freeze; or when a wave above it stays.
+            False when the wave moves to the 6529 chain. After the switch-on a
+            wave stays unless the chain holds it, and a direct message or the
+            records wave always stays.
         id:
           description: The ID of the wave
           type: string
+        chain_id:
+          type: string
+          nullable: true
+          pattern: ^0x[0-9a-f]{64}$
+          description: >-
+            The wave's id on the 6529 chain (lowercase), for an imported wave
+            too; a wave made on the chain has it as its id. Null while 6529.io
+            doesn't know it.
         serial_no:
           description: Sequence number of the wave in Seize
           type: number
@@ -46200,7 +46606,20 @@ components:
         - forbid_negative_votes
         - pinned
         - identity_wave
+        - stays_on_site
       properties:
+        stays_on_site:
+          type: boolean
+          description: >-
+            True when the wave stays on 6529.io, served from its database as
+            today. Before the switch-on a wave stays when it is a direct
+            message, the records wave or members-only; when a group it uses
+            stays (hidden, private, a direct message's, missing, or made after
+            the waves freeze); when its chat is off and it has no admin group;
+            when it was made after the freeze; or when a wave above it stays.
+            False when the wave moves to the 6529 chain. After the switch-on a
+            wave stays unless the chain holds it, and a direct message or the
+            records wave always stays.
         is_direct_message:
           type: boolean
           description: Whether conversation links should open in Messages.

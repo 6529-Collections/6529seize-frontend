@@ -80,6 +80,7 @@ function createInspectableGroup({
     created_by: { handle: "creator" } as ApiGroupFull["created_by"],
     visible: true,
     is_private: isPrivate,
+    stays_on_site: isPrivate,
     group: {
       tdh: {
         min: null,

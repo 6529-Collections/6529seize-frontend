@@ -85,8 +85,15 @@ context-aware `Back`).
 - In an open wave or direct message, drag right across ordinary conversation
   content to return to its list. The view follows your finger. Reverse below the
   gesture threshold before releasing to cancel. A slow, short drag also stays
-  in the conversation; a longer drag or quick flick completes the return.
-- In a wave channel, a rightward swipe starting within 32px of the left edge
+  in the conversation. A slow drag must pass about half the screen width;
+  a quick flick can complete the return from a shorter distance.
+- The destination list stays underneath with its header, bottom navigation and
+  reading position. Opening slides the conversation in from the right. Back
+  slides the full conversation, including its header, away while the list moves
+  into place. Swipe release, the visible Back button and Android system Back
+  share this motion. A new touch can catch a moving page. Reduced Motion uses
+  a short fade without sliding or dimming.
+- In the iPhone app, a rightward swipe starting within 32px of the left edge
   takes Back priority on every tab, including over buttons, links, inputs,
   voting sliders and horizontally scrolling rows. It returns to the same
   destination as the visible Back control. Sheets and editors keep their own
@@ -104,7 +111,8 @@ context-aware `Back`).
   sliders, media controls, selected text and horizontal carousels keep their
   own interactions. Vertical scrolling and multi-touch do not trigger channel
   navigation. Direct messages and browser navigation retain their existing
-  edge behavior.
+  edge behavior. Android keeps its system edge gesture; in-app right drags start
+  within conversation content. Mobile web keeps the browser's edge gesture.
 - Android system Back first dismisses an open keyboard, then the topmost
   dismissible sheet, menu or dialog. A reaction picker returns to its action
   sheet before the sheet closes. Single-drop details close before the wave;

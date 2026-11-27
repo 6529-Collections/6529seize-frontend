@@ -8,7 +8,6 @@ import { useId, useState, type ReactNode } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { PinIcon } from "@/components/common/icons/PinIcon";
 import IconButton from "@/components/utils/button/IconButton";
-import useCapacitor from "@/hooks/useCapacitor";
 import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
 import { runPhoneConversationEntryTransition } from "@/helpers/waves/wave-navigation-transition";
 import {
@@ -314,7 +313,6 @@ function E2eeConversationRow({
     sortable
   );
   const router = useRouter();
-  const { isCapacitor, isIos } = useCapacitor();
   const title = getConversationTitle(locale, conversation, selfProfileId);
   const statusKey = STATUS_KEYS[conversation.status];
   const pinned = conversation.pinned === true;
@@ -342,7 +340,6 @@ function E2eeConversationRow({
   const handleNavigate = (event: { preventDefault: () => void }) => {
     if (
       active ||
-      (isCapacitor && !isIos) ||
       !window.matchMedia(PHONE_WAVES_LAYOUT_QUERY).matches ||
       !["/messages", getEncryptedMessagesRoute()].includes(
         window.location.pathname

@@ -19,8 +19,8 @@ Wave and DM rows in the left list control which thread is open.
   header's right inset. Touch scrolling uses the phone's native scrollbar.
   On touch screens, the visible pin button has a 44px tap area before the score.
   A filled pin means pinned; a muted outline means unpinned.
-  [Swipe and hold shortcuts](feature-pinned-wave-controls.md) remain available.
-  Pin buttons and gestures do not open the wave.
+  [Swipe right to pin or unpin](feature-pinned-wave-controls.md). Tap the wave
+  name to open it.
 - On expanded rows, pin/unpin sits in the trailing metadata cluster
   before the wave score, keeping the score at the far right.
   In the native app, Active Votes scores share that same right edge.
@@ -85,11 +85,10 @@ Wave and DM rows in the left list control which thread is open.
   `Load more waves` to continue. Failed loads keep existing rows and offer
   `Retry`. Expired lists refresh automatically; newly created or newly accessible
   waves appear on refresh. Access permissions are checked for every batch.
-- `Pinned` uses the profile's saved order. Drag the wave row, or touch and hold
-  briefly then move vertically on a touch screen. A stationary hold opens the
-  pin/unpin menu. With a keyboard, focus the
-  wave, press Space, use the arrow keys, and press Space again to save. A wave's
-  subwaves move with it.
+- `Pinned` uses the profile's saved order. Drag the wave row, or press and hold
+  the wave name on a touch screen, then drag it up or down. With a keyboard,
+  focus the wave, press Space, use the arrow keys, and press Space again to save.
+  A wave's subwaves move with it.
 - Joined waves load in batches without skipping a wave when new activity moves
   it higher in the list. The order uses recent wave activity, including joined,
   unmuted subwaves. Muting a wave removes its own activity from the ordering.

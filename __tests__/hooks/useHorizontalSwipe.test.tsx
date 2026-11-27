@@ -22,6 +22,8 @@ function Harness({
   includePostBody = false,
   priorityLeftEdgeWidth = 0,
   replyDirection = -1,
+  velocityWindowMs,
+  backThreshold = 100,
 }: {
   readonly replyEnabled?: boolean;
   readonly onMove: jest.Mock;
@@ -31,15 +33,18 @@ function Harness({
   readonly includePostBody?: boolean;
   readonly priorityLeftEdgeWidth?: number;
   readonly replyDirection?: -1 | 1;
+  readonly velocityWindowMs?: number;
+  readonly backThreshold?: number;
 }) {
   onRender();
   const back = useHorizontalSwipe(
     {
       enabled: true,
       direction: 1,
-      threshold: 100,
+      threshold: backThreshold,
       intentRatio: 1.2,
       flick: true,
+      velocityWindowMs,
       priorityLeftEdgeWidth,
       onMove,
       onEnd: onBack,
@@ -96,8 +101,12 @@ function setup(replyEnabled = true, includePostBody = false) {
 
 beforeEach(() => {
   jest.useFakeTimers();
+  jest
+    .spyOn(Event.prototype, "timeStamp", "get")
+    .mockImplementation(() => performance.now() + 1);
 });
 afterEach(() => {
+  jest.restoreAllMocks();
   jest.useRealTimers();
 });
 
@@ -244,6 +253,108 @@ it("keeps a quick flick when Android interpolates a tiny final move", () => {
   expect(onBack).toHaveBeenCalledWith(
     true,
     expect.closeTo(76.40625),
+    expect.any(Number)
+  );
+});
+
+it("keeps a phone Back flick when WebKit batches moves and slows its final samples", () => {
+  const callbacks = {
+    onMove: jest.fn(),
+    onReply: jest.fn(),
+    onBack: jest.fn(),
+    onRender: jest.fn(),
+  };
+  render(<Harness {...callbacks} velocityWindowMs={80} backThreshold={215} />);
+  const target = screen.getByTestId("text");
+  start(target, 80);
+  for (const [elapsed, x] of [
+    [25, 92.67],
+    [41, 119.33],
+    [17, 130.67],
+    [17, 142],
+    [16, 153.33],
+    [17, 164.67],
+    [17, 175.33],
+    [16, 185],
+    [17, 193.67],
+    [8, 197.33],
+  ] as const) {
+    act(() => jest.advanceTimersByTime(elapsed));
+    move(target, x);
+  }
+  end(target, 197.33);
+  expect(callbacks.onBack).toHaveBeenLastCalledWith(
+    true,
+    expect.any(Number),
+    expect.any(Number)
+  );
+});
+
+it("recognizes a fresh flick after holding the initial touch still", () => {
+  const callbacks = {
+    onMove: jest.fn(),
+    onReply: jest.fn(),
+    onBack: jest.fn(),
+    onRender: jest.fn(),
+  };
+  render(<Harness {...callbacks} velocityWindowMs={80} backThreshold={215} />);
+  const target = screen.getByTestId("text");
+  start(target, 80);
+  act(() => jest.advanceTimersByTime(1000));
+  move(target, 100);
+  act(() => jest.advanceTimersByTime(40));
+  move(target, 200);
+  end(target, 200);
+  expect(callbacks.onBack).toHaveBeenLastCalledWith(true, 120, 2500);
+});
+
+it("uses source time for a slow reversal even when events arrive together", () => {
+  let sourceTime = 1000;
+  jest
+    .spyOn(Event.prototype, "timeStamp", "get")
+    .mockImplementation(() => sourceTime);
+  const callbacks = {
+    onMove: jest.fn(),
+    onReply: jest.fn(),
+    onBack: jest.fn(),
+    onRender: jest.fn(),
+  };
+  render(<Harness {...callbacks} velocityWindowMs={80} backThreshold={215} />);
+  const target = screen.getByTestId("text");
+  start(target, 80);
+  sourceTime += 100;
+  move(target, 360);
+  act(() => jest.advanceTimersByTime(1));
+  sourceTime += 200;
+  move(target, 330);
+  end(target, 330);
+  expect(callbacks.onBack).toHaveBeenLastCalledWith(true, 250, -150);
+});
+
+it("still cancels a sampled phone flick after a hold or a deliberate reversal", () => {
+  const callbacks = {
+    onMove: jest.fn(),
+    onReply: jest.fn(),
+    onBack: jest.fn(),
+    onRender: jest.fn(),
+  };
+  render(<Harness {...callbacks} velocityWindowMs={80} backThreshold={215} />);
+  const target = screen.getByTestId("text");
+  start(target, 80);
+  act(() => jest.advanceTimersByTime(40));
+  move(target, 200);
+  act(() => jest.advanceTimersByTime(200));
+  end(target, 200);
+  expect(callbacks.onBack).toHaveBeenLastCalledWith(false, 120, 0);
+  start(target, 80);
+  act(() => jest.advanceTimersByTime(40));
+  move(target, 360);
+  act(() => jest.advanceTimersByTime(20));
+  move(target, 330);
+  end(target, 330);
+  expect(callbacks.onBack).toHaveBeenLastCalledWith(
+    false,
+    250,
     expect.any(Number)
   );
 });

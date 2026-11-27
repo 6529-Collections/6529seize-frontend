@@ -5,14 +5,14 @@
 Votes, entries, polls, wave REP, and wave and decision settings move
 from 6529.io's database to the 6529 Network. 6529.io stops taking changes to
 them at the freeze, and the 6529 Network takes them at the switch-on. Chat
-keeps working throughout: posts, replies, edits, deletions of chat posts,
-reactions and direct messages are not affected.
+keeps working throughout: posts, replies, edits and deletions of chat posts
+without a poll, reactions and direct messages are not affected.
 
-Two build settings name the instants in UTC:
-`NEXT_PUBLIC_WAVES_FREEZE_AT` (for example `2026-11-25T00:00:00Z`) and
-`NEXT_PUBLIC_WAVES_SWITCH_ON_AT` (for example `2026-11-26T00:00:00Z`). Unless
-both are set and the switch-on comes after the freeze, nothing below applies:
-the site shows no notice and pauses nothing.
+Two build settings name the instants: `NEXT_PUBLIC_WAVES_FREEZE_AT` (the
+freeze) and `NEXT_PUBLIC_WAVES_SWITCH_ON_AT` (the switch-on), each a UTC
+instant ending in `Z`, such as `YYYY-MM-DDT00:00:00Z`. Unless both are set and
+the switch-on comes after the freeze, nothing below applies: the site shows no
+notice and pauses nothing.
 
 ### Waves That Stay
 
@@ -44,14 +44,14 @@ for a wave a page has read as moving, and a new wave.
 
 ## The Notice
 
-With the freeze at Wednesday 25 November 00:00 UTC and the switch-on at
-Thursday 26 November 00:00 UTC, the notice says:
+The notice takes its weekdays, days and times from the two settings, in UTC.
+It says:
 
-| When                             | What it says                                                                                                                                            |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Before the freeze                | Votes, entries and wave settings move to the 6529 Network. From Wednesday 00:00 UTC you can't change them until Thursday 00:00 UTC. Chat keeps working. |
-| From the freeze to the switch-on | Votes, entries and wave settings are moving to the 6529 Network. You can't change them until Thursday 00:00 UTC. Chat keeps working.                    |
-| After the switch-on              | Votes, entries and wave settings moved to the 6529 Network on Thursday 26 November. You can't change them on this site yet. Chat keeps working.         |
+| When                             | What it says                                                                                                                                                                                                                                                                     |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Before the freeze                | Votes, entries and wave settings move to the 6529 Network. From [freeze weekday] [freeze time] UTC you can't change them until [switch-on weekday] [switch-on time] UTC. Chat keeps working.                                                                                     |
+| From the freeze to the switch-on | Votes, entries and wave settings are moving to the 6529 Network. You can't change them until [switch-on weekday] [switch-on time] UTC. Chat keeps working.                                                                                                                       |
+| After the switch-on              | Votes, entries and wave settings moved to the 6529 Network on [switch-on weekday] [switch-on day] [switch-on month]. You can't change them on this site yet. Chat keeps working. Waves and decisions made outside 6529.io show here once their documents reach the 6529 Network. |
 
 Times are shown in UTC. The notice changes at the freeze and at the switch-on
 while the page stays open. Hiding it is remembered in the browser until the
@@ -59,9 +59,10 @@ notice changes.
 
 6529.io settles no result while waves are frozen. In a wave whose result falls
 due then (the Main Stage's, for one), the notice adds, from the time it is due:
-"The result due Wednesday 16:00 UTC is counted on the 6529 Network after
-Thursday 00:00 UTC." Until the switch-on the wave's leaderboard keeps its
-standings and its countdown moves on to the next result.
+"The result due [result weekday] [result time] UTC is counted on the 6529
+Network after [switch-on weekday] [switch-on time] UTC." Until the switch-on
+the wave's leaderboard keeps its standings and its countdown moves on to the
+next result.
 
 ## What Is Paused From the Freeze
 
@@ -79,22 +80,27 @@ Paused controls are hidden, or disabled with the paused line:
   entries can't be withdrawn.
 - Polls: ballots show results only, with the paused line; new polls can't be
   added to a post, and a post with a poll already drafted is refused when
-  sent.
+  sent. A post with a poll can't be edited or deleted; anyone who could edit
+  or delete it sees why under the poll.
 - Wave REP: the dialog shows the current allocation; Save and Remove are off.
 - Waves: name, picture, access groups, chat settings and custom rules have no
-  edit control; deletion and new subwaves are hidden; the create-wave flow
-  does not go past its first step.
+  edit control; deletion is hidden; setting the pinned drop is closed; New
+  subwave stays in the menu and says new waves aren't open yet; the
+  create-wave flow says the same and does not go past its first step.
+- Entries: an entry can't be edited, and its link previews can't be shown
+  or hidden.
 - Decisions: no new decision (the new-decision page shows the paused line);
   drafts, settings, access, pause, resume, publish, archive and clone are not
   offered.
 - Any of these requests sent anyway is stopped in the browser with the paused
   line. The 6529.io API's own freeze decides what it accepts.
 - The API's freeze (6529seize-backend #2553) also refuses replacing a group
-  that a wave, a decision or a curation uses, and edits to entry posts. The
-  site leaves those controls on, so the API's message shows.
+  that a wave, a decision or a curation uses. The site leaves that control
+  on, so the API's message shows. Editing an entry is closed on the site; see
+  Entries above.
 
-Ratings of chat posts, curations, pins, the pinned drop, boosts, bookmarks,
-mutes, notification settings, meme collaborations, direct-message deletion,
+Ratings of chat posts, curations, pins, boosts, bookmarks, mutes,
+notification settings, meme collaborations, direct-message deletion,
 and groups no wave, decision or curation uses (direct-message preferences,
 network filters) are not affected.
 
@@ -151,10 +157,35 @@ once 6529.io's index lists them:
 
 The notice then gives the switch-on day as the day the move happened, and
 goes on: Your votes, poll ballots, wave REP and entries go there from this
-site. Wave settings can't be changed here yet. Chat keeps working.
+site. Wave settings can't be changed here yet. Chat keeps working. Waves and
+decisions made outside 6529.io show here once their documents reach the 6529
+Network.
 
 Wave and decision settings, deleting someone else's entry, new waves and
 decisions, and new polls stay paused until their own changes reach this site.
+Where something can't be done here yet, the site says so at the control, in
+a wave that moved:
+
+- The poll button stays and says: New polls aren't open yet. Polls made on
+  the 6529 Network don't show on 6529.io yet. The Polls tab says the second
+  sentence too.
+- Creating a wave, a subwave or a profile curation says: New waves aren't
+  open yet while waves move to the 6529 Network. This shows from the freeze.
+- Delete my chat history says: In this wave, delete your posts one at a
+  time. Each delete is signed by your device.
+- Adding a drop to a curation says: Curations stay on 6529.io for now.
+- A post with a poll can't be edited or deleted here from the freeze; anyone
+  who could edit or delete it sees why under the poll. The pinned drop and an
+  entry's link previews close with the wave settings.
+- A group made on the 6529 Network that 6529.io hasn't read yet shows the
+  name "Group" and the first 10 characters of its id, with the line: This
+  group's name shows here once 6529.io has read it from the 6529 Network.
+- A moderator who hides a post sees: Hiding a post here doesn't remove it
+  from the 6529 Network's relays yet.
+- A change 6529.io's API refuses because its wave moved (code
+  WAVES_ON_CHAIN) shows: This wave moved to the 6529 Network, so this change
+  can't be made on this site. Other errors that name the 6529 Network show
+  as written, never as a connection problem.
 
 ## Changing the Dates
 

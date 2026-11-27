@@ -1,6 +1,7 @@
 "use client";
 
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { useWavesWritesPaused } from "@/hooks/useWavesMovePhase";
 import type { WaveMessages } from "@/contexts/wave/hooks/types";
 import type { Listener as WaveMessagesListener } from "@/contexts/wave/hooks/useWaveMessagesStore";
 import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
@@ -10,6 +11,8 @@ import { getLatestEditableChatDrop } from "../utils/getLatestEditableChatDrop";
 type LatestEditableChatDropTarget = {
   readonly id: string;
   readonly serialNo: number;
+  /** The post has a poll, which can't be edited while its wave moves. */
+  readonly hasPoll: boolean;
 };
 
 type ConnectedProfile = Pick<ApiIdentity, "id" | "handle"> | null | undefined;
@@ -50,7 +53,11 @@ const getTargetFromWaveMessages = ({
   });
 
   return latestDrop
-    ? { id: latestDrop.id, serialNo: latestDrop.serial_no }
+    ? {
+        id: latestDrop.id,
+        serialNo: latestDrop.serial_no,
+        hasPoll: !!latestDrop.poll,
+      }
     : null;
 };
 
@@ -110,7 +117,8 @@ export function useLatestEditableChatDropTarget({
             nextState.connectedProfileHandle &&
           currentState.isProxyMode === nextState.isProxyMode &&
           currentState.target?.id === nextState.target?.id &&
-          currentState.target?.serialNo === nextState.target?.serialNo
+          currentState.target?.serialNo === nextState.target?.serialNo &&
+          currentState.target?.hasPoll === nextState.target?.hasPoll
         ) {
           return currentState;
         }
@@ -142,14 +150,15 @@ export function useLatestEditableChatDropTarget({
     waveId,
   ]);
 
-  if (
+  // A post with a poll can't be edited while its wave moves to the 6529
+  // Network, so the arrow key leaves it alone.
+  const pollEditsPaused = useWavesWritesPaused();
+  const target =
     targetState.waveId === waveId &&
     targetState.connectedProfileId === connectedProfileId &&
     targetState.connectedProfileHandle === connectedProfileHandle &&
     targetState.isProxyMode === isProxyMode
-  ) {
-    return targetState.target;
-  }
-
-  return createTargetState(getData(waveId)).target;
+      ? targetState.target
+      : createTargetState(getData(waveId)).target;
+  return pollEditsPaused && target?.hasPoll === true ? null : target;
 }

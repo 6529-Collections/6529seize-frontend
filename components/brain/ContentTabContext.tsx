@@ -20,6 +20,7 @@ import {
   useWaveTabPreference,
 } from "@/hooks/useWaveTabPreference";
 import { usePathname, useSearchParams } from "next/navigation";
+import { usePhoneNavigationScreen } from "@/contexts/PhoneNavigationScreenContext";
 import { useWaveTabNavigation } from "@/hooks/useWaveTabNavigation";
 import {
   getCompetitionRoute,
@@ -170,9 +171,12 @@ export const ContentTabProvider: React.FC<{
   respectCompetitionRoute = true,
   competitionOnly = false,
 }) => {
-  const pathname = usePathname();
+  const currentPathname = usePathname();
+  const retainedScreen = usePhoneNavigationScreen();
+  const pathname = retainedScreen?.pathname ?? currentPathname;
   const navigateTab = useWaveTabNavigation();
-  const search = useSearchParams();
+  const currentSearch = useSearchParams();
+  const search = retainedScreen?.searchParams ?? currentSearch;
   const { flat, nativeCompetition } = useCompetitionNavigation();
   const isCompetitionRoute =
     respectCompetitionRoute &&

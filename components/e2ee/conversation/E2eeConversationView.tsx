@@ -144,7 +144,7 @@ interface ConversationScreenProps {
 function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
   const locale = useBrowserLocale();
   const router = useRouter();
-  const { isCapacitor } = useCapacitor();
+  const { isCapacitor, isIos } = useCapacitor();
   const style = useE2eeViewStyle();
   const searchPanelId = useId();
   const composerInputId = useId();
@@ -154,17 +154,21 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
   const returnRoute = getE2eeChatReturnRoute(
     searchParams.get(E2EE_CHAT_FROM_PARAM)
   );
-  const { ref: swipeBackRef, onTouchStart } = useWaveListSwipeBack<HTMLElement>(
-    {
-      enabled: isCapacitor && conversation !== null,
-      scope: g,
-      onSwipeBack: () => {
-        const input = document.activeElement;
-        if (input instanceof HTMLElement) input.blur();
-        router.push(returnRoute, { scroll: false });
-      },
-    }
-  );
+  const {
+    ref: swipeBackRef,
+    onTouchStart,
+    onTouchStartCapture,
+  } = useWaveListSwipeBack<HTMLElement>({
+    enabled: isCapacitor && conversation !== null,
+    includeHeader: true,
+    edgeSwipeBack: isIos,
+    scope: g,
+    onSwipeBack: () => {
+      const input = document.activeElement;
+      if (input instanceof HTMLElement) input.blur();
+      router.push(returnRoute, { scroll: false });
+    },
+  });
   const lastSeq = messages.at(-1)?.seq ?? 0;
   useOpenConversation(engine, g, conversation !== null, lastSeq);
   const synced = useInitialSync(engine, conversation === null);
@@ -304,6 +308,7 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
     <section
       ref={swipeBackRef}
       onTouchStart={onTouchStart}
+      onTouchStartCapture={onTouchStartCapture}
       style={style}
       className="tw-relative tw-flex tw-min-h-0 tw-w-full tw-flex-col tw-bg-black"
       aria-label={t(locale, "e2ee.composer.dropArea")}

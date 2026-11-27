@@ -4,6 +4,7 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { CreateWaveOutcomeConfig } from "@/types/waves.types";
 import CreateWaveOutcomesRow from "./CreateWaveOutcomesRow";
+import { DECISION_EDITOR_MOBILE_STYLES } from "../../../utils/createWaveFormStyles";
 
 export default function CreateWaveOutcomesRows({
   waveType,
@@ -32,7 +33,9 @@ export default function CreateWaveOutcomesRows({
         ))
       ) : (
         <div className="tw-rounded-lg tw-border tw-border-dashed tw-border-iron-800 tw-bg-iron-900/40 tw-px-4 tw-py-5">
-          <p className="tw-mb-0 tw-mt-0 tw-text-sm tw-font-semibold tw-text-iron-200">
+          <p
+            className={`tw-mb-0 tw-mt-0 tw-text-sm tw-font-semibold tw-text-iron-200 ${DECISION_EDITOR_MOBILE_STYLES.heading}`}
+          >
             {t(DEFAULT_LOCALE, "waves.create.outcomes.empty.title")}
           </p>
           <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400">

@@ -25,6 +25,7 @@ import {
   type ApiWaveMinWithChatLinkSettings,
 } from "@/helpers/waves/wave.helpers";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
+import { withStaysOnSite } from "@/lib/waves-move/scope";
 
 type ApiProfileMinWithBadges = ApiProfileMin & {
   readonly badges?: ApiIdentityOverviewBadges;
@@ -88,70 +89,76 @@ export const mapPriorityMetadataV2ToDropMetadata = (
 
 export const mapApiWaveOverviewToApiWaveMin = (
   wave: ApiWaveOverviewWithVoteRestrictions
-): ApiWaveMinWithChatLinkSettings => ({
-  id: wave.id,
-  name: wave.name,
-  picture: wave.pfp ?? null,
-  description_drop_id: "",
-  last_drop_time: wave.last_drop_time,
-  submission_type: null,
-  authenticated_user_eligible_to_vote: true,
-  authenticated_user_eligible_to_participate: true,
-  authenticated_user_eligible_to_chat:
-    wave.context_profile_context?.can_chat ?? true,
-  authenticated_user_eligible_to_reply:
-    wave.context_profile_context?.can_reply ??
-    wave.context_profile_context?.can_chat ??
-    true,
-  authenticated_user_can_delete_replies:
-    wave.context_profile_context?.can_delete_replies ?? false,
-  authenticated_user_admin: false,
-  visibility_group_id: wave.is_private ? "private" : null,
-  participation_group_id: null,
-  chat_group_id: null,
-  voting_group_id: null,
-  admin_group_id: null,
-  voting_period_start: null,
-  voting_period_end: null,
-  voting_credit_type: ApiWaveCreditType.Tdh,
-  voting_credit_nfts: null,
-  admin_drop_deletion_enabled: false,
-  forbid_negative_votes: wave.forbid_negative_votes === true,
-  pinned: wave.context_profile_context?.pinned ?? false,
-  identity_wave: false,
-  links_disabled: wave.links_disabled,
-  has_competition: wave.has_competition,
-  voting_credit_scope: ApiWaveCreditScope.Wave,
-});
+): ApiWaveMinWithChatLinkSettings =>
+  withStaysOnSite(
+    {
+      id: wave.id,
+      name: wave.name,
+      picture: wave.pfp ?? null,
+      description_drop_id: "",
+      last_drop_time: wave.last_drop_time,
+      submission_type: null,
+      authenticated_user_eligible_to_vote: true,
+      authenticated_user_eligible_to_participate: true,
+      authenticated_user_eligible_to_chat:
+        wave.context_profile_context?.can_chat ?? true,
+      authenticated_user_eligible_to_reply:
+        wave.context_profile_context?.can_reply ??
+        wave.context_profile_context?.can_chat ??
+        true,
+      authenticated_user_can_delete_replies:
+        wave.context_profile_context?.can_delete_replies ?? false,
+      authenticated_user_admin: false,
+      visibility_group_id: wave.is_private ? "private" : null,
+      participation_group_id: null,
+      chat_group_id: null,
+      voting_group_id: null,
+      admin_group_id: null,
+      voting_period_start: null,
+      voting_period_end: null,
+      voting_credit_type: ApiWaveCreditType.Tdh,
+      voting_credit_nfts: null,
+      admin_drop_deletion_enabled: false,
+      forbid_negative_votes: wave.forbid_negative_votes === true,
+      pinned: wave.context_profile_context?.pinned ?? false,
+      identity_wave: false,
+      links_disabled: wave.links_disabled,
+      has_competition: wave.has_competition,
+      voting_credit_scope: ApiWaveCreditScope.Wave,
+    } satisfies Omit<ApiWaveMinWithChatLinkSettings, "stays_on_site">,
+    wave
+  ) as ApiWaveMinWithChatLinkSettings;
 
-export const createFallbackWaveMin = (waveId: string): ApiWaveMin => ({
-  id: waveId,
-  name: waveId,
-  picture: null,
-  description_drop_id: "",
-  last_drop_time: 0,
-  submission_type: null,
-  authenticated_user_eligible_to_vote: true,
-  authenticated_user_eligible_to_participate: true,
-  authenticated_user_eligible_to_chat: true,
-  authenticated_user_eligible_to_reply: true,
-  authenticated_user_can_delete_replies: false,
-  authenticated_user_admin: false,
-  visibility_group_id: null,
-  participation_group_id: null,
-  chat_group_id: null,
-  voting_group_id: null,
-  admin_group_id: null,
-  voting_period_start: null,
-  voting_period_end: null,
-  voting_credit_type: ApiWaveCreditType.Tdh,
-  voting_credit_nfts: null,
-  admin_drop_deletion_enabled: false,
-  forbid_negative_votes: false,
-  pinned: false,
-  identity_wave: false,
-  voting_credit_scope: ApiWaveCreditScope.Wave,
-});
+// Synthetic waves omit the API's move signal so they inherit the enclosing scope.
+export const createFallbackWaveMin = (waveId: string): ApiWaveMin =>
+  ({
+    id: waveId,
+    name: waveId,
+    picture: null,
+    description_drop_id: "",
+    last_drop_time: 0,
+    submission_type: null,
+    authenticated_user_eligible_to_vote: true,
+    authenticated_user_eligible_to_participate: true,
+    authenticated_user_eligible_to_chat: true,
+    authenticated_user_eligible_to_reply: true,
+    authenticated_user_can_delete_replies: false,
+    authenticated_user_admin: false,
+    visibility_group_id: null,
+    participation_group_id: null,
+    chat_group_id: null,
+    voting_group_id: null,
+    admin_group_id: null,
+    voting_period_start: null,
+    voting_period_end: null,
+    voting_credit_type: ApiWaveCreditType.Tdh,
+    voting_credit_nfts: null,
+    admin_drop_deletion_enabled: false,
+    forbid_negative_votes: false,
+    pinned: false,
+    identity_wave: false,
+    voting_credit_scope: ApiWaveCreditScope.Wave,
+  }) satisfies Omit<ApiWaveMin, "stays_on_site"> as ApiWaveMin;
 
 export const normalizeWaveMin = (wave: ApiWave | ApiWaveMin): ApiWaveMin =>
   "description_drop" in wave ? toApiWaveMin(wave) : wave;

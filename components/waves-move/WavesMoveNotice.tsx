@@ -77,13 +77,15 @@ const getWavesMoveNoticeText = (
         switchOnTime: formatTime(locale, switchOnMs),
       });
     case "moved":
-      return t(
+      // Waves and decisions made by other clients show only once 6529.io
+      // can read their documents on the 6529 Network.
+      return `${t(
         locale,
         isChainWavesEnabled() ? "wavesMove.movedChain" : "wavesMove.moved",
         {
           switchOnDay: formatDay(locale, switchOnMs),
         }
-      );
+      )} ${t(locale, "wavesMove.movedDocuments")}`;
     case "none":
       return null;
   }

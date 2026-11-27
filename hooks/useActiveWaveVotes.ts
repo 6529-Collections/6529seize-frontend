@@ -6,9 +6,11 @@ import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/que
 import type { ApiActiveWaveVotesPage } from "@/generated/models/ApiActiveWaveVotesPage";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useWaveDiscoveryViewer } from "./useWaveDiscoveryViewer";
+import { usePhoneNavigationScreenActive } from "@/contexts/PhoneNavigationScreenContext";
 
 export function useActiveWaveVotes(pageSize = 20) {
   const viewer = useWaveDiscoveryViewer();
+  const screenActive = usePhoneNavigationScreenActive();
   const query = useInfiniteQuery({
     queryKey: [QueryKey.ACTIVE_WAVE_VOTES, viewer.key, pageSize],
     queryFn: ({ pageParam, signal }) =>
@@ -20,7 +22,7 @@ export function useActiveWaveVotes(pageSize = 20) {
     initialPageParam: 1,
     getNextPageParam: (lastPage) =>
       lastPage.next ? lastPage.page + 1 : undefined,
-    enabled: viewer.enabled,
+    enabled: viewer.enabled && screenActive,
     refetchInterval: 60_000,
     ...getDefaultQueryRetry(),
   });
