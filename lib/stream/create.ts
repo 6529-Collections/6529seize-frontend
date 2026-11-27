@@ -1,4 +1,8 @@
-import { bytesToHex, parseEventLogs, type Abi, type Address, type Hex, type TransactionReceipt } from "viem";
+import {
+  BaseError,
+  bytesToHex,
+  ContractFunctionRevertedError,
+  parseEventLogs, type Abi, type Address, type Hex, type TransactionReceipt } from "viem";
 
 import { accountsAbi } from "./generated/Accounts";
 import { contentStoreAbi } from "./generated/ContentStore";
@@ -100,7 +104,13 @@ export async function storeFile(
   const registered = await client
     .readContract({ address: store, abi: contentStoreAbi, functionName: "fileInfo", args: [fileId] })
     .then(() => true)
-    .catch(() => false);
+    .catch((error: unknown) => {
+      // Only the store's own refusal means "not registered"; an RPC failure stops the step.
+      if (error instanceof BaseError && error.walk((cause) => cause instanceof ContractFunctionRevertedError)) {
+        return false;
+      }
+      throw error;
+    });
   if (!registered) {
     await io.send({
       address: store,

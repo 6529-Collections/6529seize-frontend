@@ -343,7 +343,7 @@ function BidComposer({ detail }: { readonly detail: EditionDetail }) {
               <button type="button" className={STEPPER_BUTTON} disabled={step <= 0} aria-label={t(locale, "streamSepolia.ed.stepDown")} onClick={() => {
                 setTypedPrice(null);
                 setStep((s) => Math.max(0, s - 1));
-              }}>−</button>
+              }}><span aria-hidden="true">−</span></button>
               <input
                 id={priceId}
                 className={STEPPER_INPUT}
@@ -359,7 +359,7 @@ function BidComposer({ detail }: { readonly detail: EditionDetail }) {
               <button type="button" className={STEPPER_BUTTON} disabled={step >= prices.length - 1} aria-label={t(locale, "streamSepolia.ed.stepUp")} onClick={() => {
                 setTypedPrice(null);
                 setStep((s) => Math.min(prices.length - 1, s + 1));
-              }}>+</button>
+              }}><span aria-hidden="true">+</span></button>
             </div>
           </div>
           <div>
@@ -367,7 +367,7 @@ function BidComposer({ detail }: { readonly detail: EditionDetail }) {
               {t(locale, "streamSepolia.ed.editions")}
             </label>
             <div className={STEPPER}>
-              <button type="button" className={STEPPER_BUTTON} disabled={quantity <= 1} aria-label={t(locale, "streamSepolia.ed.fewer")} onClick={() => setQuantity((q) => Math.max(1, q - 1))}>−</button>
+              <button type="button" className={STEPPER_BUTTON} disabled={quantity <= 1} aria-label={t(locale, "streamSepolia.ed.fewer")} onClick={() => setQuantity((q) => Math.max(1, q - 1))}><span aria-hidden="true">−</span></button>
               <input
                 id={qtyId}
                 className={STEPPER_INPUT}
@@ -379,7 +379,7 @@ function BidComposer({ detail }: { readonly detail: EditionDetail }) {
                   setQuantity(Number.isFinite(next) && next > 0 ? Math.min(next, 10_000) : 1);
                 }}
               />
-              <button type="button" className={STEPPER_BUTTON} aria-label={t(locale, "streamSepolia.ed.more")} onClick={() => setQuantity((q) => q + 1)}>+</button>
+              <button type="button" className={STEPPER_BUTTON} aria-label={t(locale, "streamSepolia.ed.more")} onClick={() => setQuantity((q) => q + 1)}><span aria-hidden="true">+</span></button>
             </div>
           </div>
           <div aria-live="polite" className="tw-rounded-lg tw-bg-white/[0.04] tw-p-3 tw-text-sm tw-text-iron-300">
@@ -460,7 +460,7 @@ function YourBids({
       <ul className="tw-m-0 tw-mt-3 tw-list-none tw-p-0">
         {mine.map((bid, index) => {
           const standing = bidStanding({ step: bid.step, clearingStep, rationed });
-          const outcome = outcomes.data?.[open.indexOf(bid)];
+          const outcome = bid.claimed ? undefined : outcomes.data?.[open.indexOf(bid)];
           return (
             <li key={bid.bidId.toString()} className="tw-flex tw-flex-col tw-gap-2 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-py-3">
               <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-text-sm">
@@ -530,7 +530,8 @@ function RaiseAction({ detail, bid }: { readonly detail: EditionDetail; readonly
       }),
   });
   if (!target.data?.[0]) return null;
-  const step = Math.max(Number(target.data[1]), bid.step + 1);
+  const step = Math.min(Math.max(Number(target.data[1]), bid.step + 1), detail.prices.length - 1);
+  if (step <= bid.step) return null;
   const extra = ((detail.prices[step] ?? 0n) - (detail.prices[bid.step] ?? 0n)) * BigInt(bid.quantity);
   return (
     <TxAction

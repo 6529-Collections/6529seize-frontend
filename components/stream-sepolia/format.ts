@@ -1,5 +1,6 @@
 import { formatEther } from "viem";
 
+import { formatDate, formatInteger, formatNumber } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
 import "@/i18n/namespaces/stream-sepolia";
@@ -7,13 +8,13 @@ import "@/i18n/namespaces/stream-sepolia";
 /** An ETH amount with up to six decimals, in the viewer's number format. */
 export function formatEth(wei: bigint, locale: SupportedLocale): string {
   const value = Number(formatEther(wei));
-  return new Intl.NumberFormat(locale, {
+  return formatNumber(locale, value, {
     maximumFractionDigits: value !== 0 && Math.abs(value) < 0.001 ? 8 : 6,
-  }).format(value);
+  });
 }
 
 export function formatCount(value: number | bigint, locale: SupportedLocale): string {
-  return new Intl.NumberFormat(locale).format(value);
+  return formatInteger(locale, Number(value));
 }
 
 /** "2h 05m", "4m 09s", "12s". */
@@ -38,11 +39,11 @@ export function formatDuration(seconds: number, locale: SupportedLocale): string
 
 /** A clock time in the viewer's locale and time zone. */
 export function formatClock(unixSeconds: number | bigint, locale: SupportedLocale): string {
-  return new Intl.DateTimeFormat(locale, {
+  return formatDate(locale, new Date(Number(unixSeconds) * 1000), {
     weekday: "short",
     hour: "2-digit",
     minute: "2-digit",
-  }).format(new Date(Number(unixSeconds) * 1000));
+  });
 }
 
 export function shortAddress(address: string): string {

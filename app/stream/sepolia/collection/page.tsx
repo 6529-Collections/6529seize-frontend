@@ -4,7 +4,7 @@ import { CollectionPage } from "@/components/stream-sepolia/CollectionPage";
 
 import { streamSepoliaMetadata } from "../metadata";
 
-export default function StreamSepoliaCollectionPagePage() {
+export default function StreamSepoliaCollectionPage() {
   return <CollectionPage />;
 }
 
