@@ -570,17 +570,7 @@ export const registerPushNotificationWithRetry = async (
 ): Promise<boolean> => {
   const registrationJwt = connectedJwt ?? getUsablePushAuthJwt();
   if (!registrationJwt) {
-    Sentry.addBreadcrumb({
-      category: "notifications",
-      level: "warning",
-      message: "Push registration skipped (auth token unavailable).",
-      data: {
-        component: "NotificationsProvider",
-        operation: "registerPushNotification",
-        profile_id: profileId,
-        platform: deviceInfo.platform,
-      },
-    });
+    reportUnavailablePushAuth(profileId, deviceInfo.platform);
     return false;
   }
   let installation: Awaited<
@@ -656,12 +646,10 @@ const registerPreparedPushNotificationWithRetry = async (
 
   for (let attempt = 0; attempt < PUSH_REGISTRATION_TOTAL_ATTEMPTS; attempt++) {
     if (!isPushRegistrationAuthCurrent(registration)) {
-      reportUnavailablePushAuth(
-        attempt,
-        profileId,
-        deviceInfo.platform,
-        PUSH_REGISTRATION_TOTAL_ATTEMPTS
-      );
+      reportUnavailablePushAuth(profileId, deviceInfo.platform, {
+        attempt: attempt + 1,
+        maxAttempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
+      });
       return false;
     }
 
