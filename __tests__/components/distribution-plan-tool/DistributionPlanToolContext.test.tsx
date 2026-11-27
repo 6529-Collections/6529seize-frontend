@@ -4,6 +4,12 @@ import DistributionPlanToolContextWrapper, {
   DistributionPlanToolContext,
   DistributionPlanToolStep,
 } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
+import { AllowlistOperationCode } from "@/components/allowlist-tool/allowlist-tool.types";
+import {
+  getRequestedEmmaPlanStep,
+  restoreEmmaPlanStep,
+} from "@/components/distribution-plan-tool/emma-plan-step";
+import { getEmmaReturnPath } from "@/components/distribution-plan-tool/emma-route";
 
 jest.mock("@/services/distribution-plan-api", () => ({
   distributionPlanApiFetch: jest.fn(),
@@ -98,6 +104,33 @@ const phases = [
     components: [],
   },
 ];
+
+test("restores the requested step from saved progress and clamps premature Review links", () => {
+  const review = getRequestedEmmaPlanStep("?step=review");
+  const build = getRequestedEmmaPlanStep("?step=build-phases");
+  expect(restoreEmmaPlanStep(review, [], phases, [])).toBe(
+    DistributionPlanToolStep.REVIEW
+  );
+  expect(restoreEmmaPlanStep(build, [], phases, [])).toBe(
+    DistributionPlanToolStep.BUILD_PHASES
+  );
+  expect(restoreEmmaPlanStep(review, [], [], [])).toBe(
+    DistributionPlanToolStep.CREATE_SNAPSHOTS
+  );
+  const operation = {
+    ...operations[0]!,
+    code: AllowlistOperationCode.MAP_RESULTS_TO_DELEGATED_WALLETS,
+  };
+  expect(restoreEmmaPlanStep(review, [operation], phases, [])).toBe(
+    DistributionPlanToolStep.MAP_DELEGATIONS
+  );
+  expect(getEmmaReturnPath("/emma/plans/1?step=review")).toBe(
+    "/emma/plans/1?step=review"
+  );
+  expect(
+    getEmmaReturnPath("/emma/plans/1?step=review&next=https://example.com")
+  ).toBe("/emma/plans");
+});
 
 function ContextReader() {
   const context = React.useContext(DistributionPlanToolContext);

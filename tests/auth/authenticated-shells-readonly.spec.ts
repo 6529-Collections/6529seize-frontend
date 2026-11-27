@@ -1977,6 +1977,71 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
   });
 
   // Plans now require a session; retain the layout contract in the authenticated pack.
+  test("restores EMMA Review after refresh and keeps long phase rows in view", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 900 });
+    const routePath = `/allowlists/${plan.id}`;
+    const longName = `Top collectors ${"x".repeat(120)}`;
+    const phases = [
+      {
+        id: "phase-0",
+        allowlistId: plan.id,
+        name: longName,
+        walletsCount: 242,
+        components: [],
+      },
+    ];
+    let ready = true;
+    await page.route(
+      (url) =>
+        url.pathname === routePath || url.pathname.startsWith(`${routePath}/`),
+      async (route) => {
+        if (route.request().method() !== "GET") {
+          await route.abort("blockedbyclient");
+          return;
+        }
+        const path = new URL(route.request().url()).pathname;
+        await route.fulfill({
+          json:
+            path === routePath
+              ? plan
+              : path === `${routePath}/phases` && ready
+                ? phases
+                : [],
+        });
+      }
+    );
+
+    await page.goto(`/emma/plans/${plan.id}?step=review`);
+    const phase = page.getByRole("rowheader", { name: longName });
+    await expect(phase).toBeVisible();
+    const table = page.getByRole("table").filter({ has: phase });
+    await expect(
+      table.getByRole("columnheader", { name: "Wallets" })
+    ).toBeVisible();
+    await expect(
+      table.getByRole("button", { name: `Exports for ${longName}` })
+    ).toBeVisible();
+    expect(
+      await table.evaluate(
+        (element) => element.scrollWidth <= element.clientWidth + 1
+      )
+    ).toBe(true);
+    await expectNoHorizontalOverflow(page);
+
+    await page.reload();
+    await expect(phase).toBeVisible();
+    await expect(page).toHaveURL(/\?step=review$/);
+
+    ready = false;
+    await page.reload();
+    await expect(
+      page.getByRole("heading", { name: "Create Snapshots" })
+    ).toBeVisible();
+    await expect(page).toHaveURL(/\?step=create-snapshots$/);
+  });
+
   for (const width of [320, 768, 1440]) {
     test(`contains long plan text and controls at ${width}px`, async ({
       page,

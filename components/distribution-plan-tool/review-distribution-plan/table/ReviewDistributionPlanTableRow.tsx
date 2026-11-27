@@ -1,11 +1,7 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import type { AllowlistResult } from "@/components/allowlist-tool/allowlist-tool.types";
-import DistributionPlanTableRowWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableRowWrapper";
-import RoundedCsvIconButton from "@/components/distribution-plan-tool/common/RoundedCsvIconButton";
-import RoundedJsonIconButton from "@/components/distribution-plan-tool/common/RoundedJsonIconButton";
-import RoundedManifoldIconButton from "@/components/distribution-plan-tool/common/RoundedManifoldIconButton";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { buildCsvFromRecords } from "@/helpers/csv-export.helpers";
@@ -24,6 +20,8 @@ import type {
   ReviewDistributionPlanTablePhase,
 } from "./ReviewDistributionPlanTable.types";
 
+import { ReviewDistributionExports } from "./ReviewDistributionExports";
+
 export default function ReviewDistributionPlanTableRow({
   item,
   rows,
@@ -36,16 +34,6 @@ export default function ReviewDistributionPlanTableRow({
   const { distributionPlan } = useContext(DistributionPlanToolContext);
 
   const [loadingType, setLoadingType] = useState<FetchResultsType | null>(null);
-  const [isLoadingJson, setIsLoadingJson] = useState(false);
-  const [isLoadingCsv, setIsLoadingCsv] = useState(false);
-  const [isLoadingManifold, setIsLoadingManifold] = useState(false);
-
-  useEffect(() => {
-    setIsLoadingJson(loadingType === FetchResultsType.JSON);
-    setIsLoadingCsv(loadingType === FetchResultsType.CSV);
-    setIsLoadingManifold(loadingType === FetchResultsType.MANIFOLD);
-  }, [loadingType]);
-
   const getEndpoint = (distributionPlanId: string): string => {
     switch (item.type) {
       case ReviewDistributionPlanTableItemType.PHASE:
@@ -158,57 +146,38 @@ export default function ReviewDistributionPlanTableRow({
     }
   };
 
-  const [nameClasses, setNameClasses] = useState<string>(
-    "tw-whitespace-nowrap tw-py-4 tw-pr-3 tw-text-sm tw-text-white tw-pl-8 sm:tw-pl-12 tw-font-light"
-  );
-  const [commonClasses, setCommonClasses] = useState<string>(
-    "tw-whitespace-nowrap tw-px-3 tw-py-4 tw-text-sm tw-text-white tw-font-light"
-  );
-  useEffect(() => {
-    if (item.type === ReviewDistributionPlanTableItemType.COMPONENT) {
-      setNameClasses(
-        "tw-whitespace-nowrap tw-py-4 tw-pr-3 tw-text-sm  tw-text-white tw-pl-8 sm:tw-pl-12 tw-font-light"
-      );
-      setCommonClasses(
-        "tw-whitespace-nowrap tw-pl-3 tw-pr-4 tw-py-4 tw-text-sm tw-text-iron-300 tw-font-light"
-      );
-    } else {
-      setNameClasses(
-        "tw-whitespace-nowrap tw-py-4 tw-pr-3 tw-text-sm tw-text-iron-50 tw-pl-4 sm:tw-pl-6 tw-font-bold"
-      );
-      setCommonClasses(
-        "tw-whitespace-nowrap tw-pl-3 tw-pr-4 tw-py-4 tw-text-sm tw-text-iron-50 tw-font-bold"
-      );
-    }
-  }, [item.type]);
-
   const isPublic = item.phaseId === PUBLIC_SUBSCRIPTIONS_PHASE_ID;
+  const isComponent =
+    item.type === ReviewDistributionPlanTableItemType.COMPONENT;
+  const description = item.description.trim();
+  const cell = `tw-px-2 tw-py-2 tw-align-middle tw-text-sm sm:tw-px-3 ${isComponent ? "tw-text-iron-300" : "tw-font-semibold tw-text-iron-100"}`;
 
   return (
-    <DistributionPlanTableRowWrapper>
-      <td className={nameClasses}>{item.name}</td>
-      <td className={commonClasses}>{item.description}</td>
-      <td className={commonClasses}>
-        {isPublic ? "-" : formatCount(item.walletsCount)}
+    <tr role="row">
+      <th
+        role="rowheader"
+        scope="row"
+        className={`${cell} tw-break-words tw-text-left [overflow-wrap:anywhere] ${isComponent ? "tw-pl-3 tw-font-normal sm:tw-pl-5" : ""}`}
+      >
+        {item.name}
+        {description && description !== item.name.trim() && (
+          <span className="tw-mt-0.5 tw-block tw-text-xs tw-font-normal tw-text-iron-400">
+            {description}
+          </span>
+        )}
+      </th>
+      <td role="cell" className={`${cell} tw-break-words tw-tabular-nums`}>
+        {isPublic ? "—" : formatCount(item.walletsCount)}
       </td>
-      <td className={commonClasses}>
-        {isPublic ? "-" : formatCount(item.spotsCount)}
+      <td role="cell" className={`${cell} tw-break-words tw-tabular-nums`}>
+        {isPublic ? "—" : formatCount(item.spotsCount)}
       </td>
-      <td className={`${commonClasses} tw-align-middle`}>
-        <div className="tw-flex tw-items-center tw-gap-x-3">
-          <RoundedJsonIconButton
-            onClick={() => fetchResults(FetchResultsType.JSON)}
-            loading={isLoadingJson}
-            disabled={isPublic}
-          />
-          <RoundedCsvIconButton
-            onClick={() => fetchResults(FetchResultsType.CSV)}
-            loading={isLoadingCsv}
-            disabled={isPublic}
-          />
-          <RoundedManifoldIconButton
-            onClick={() => fetchResults(FetchResultsType.MANIFOLD)}
-            loading={isLoadingManifold}
+      <td role="cell" className={cell}>
+        <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2">
+          <ReviewDistributionExports
+            name={item.name}
+            loading={loadingType}
+            onExport={(type) => void fetchResults(type)}
             disabled={isPublic}
           />
           {distributionPlan && (
@@ -220,6 +189,6 @@ export default function ReviewDistributionPlanTableRow({
           )}
         </div>
       </td>
-    </DistributionPlanTableRowWrapper>
+    </tr>
   );
 }

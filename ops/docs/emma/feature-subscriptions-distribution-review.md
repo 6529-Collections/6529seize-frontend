@@ -8,7 +8,7 @@ The Memes token distribution outputs.
 
 ## Location in the Site
 
-- Route: `/emma/plans/{planId}`
+- Route: `/emma/plans/{planId}?step=review`
 - Step: `Review`
 - Surfaces: review table, subscriptions footer (admin only), token confirmation
   modal
@@ -40,6 +40,7 @@ The Memes token distribution outputs.
 
 1. Inspect phase and component rows.
 2. Export baseline results (`JSON` / `CSV` / `Manifold`) for normal rows.
+   On narrow screens, use the **Exports** menu.
 3. If you are a subscriptions admin, confirm token ID.
 4. Use the footer controls to upload artist/team allocations and distribution photos.
 5. Choose a preparation mode for the confirmed token.
@@ -49,11 +50,14 @@ The Memes token distribution outputs.
      Finalize** before the first manual write succeeds.
    - **Process and Finalize** starts a background job. The preparation row shows
      the current step out of five, and refreshing restores progress.
+     If EMMA couldn’t load processing status, use **Retry status check**.
      If authorization expires before input capture, click `Sign in to resume`.
      `Download lists` appears in each phase and Public row once the job
      completes with matching phase inputs. The preparation row then says
      **Completed · Lists ready to download**.
-6. In manual mode, `Finalize Distribution` and `Publish to GitHub` share
+6. Use **Finalized distribution counts** above **Distribution Photos** to see
+   subscription cards and wallets, and allowlist spots and wallets for each phase.
+7. In manual mode, `Finalize Distribution` and `Publish to GitHub` share
    the finishing row. A red × beside `Finalize Distribution` indicates that
    the distribution still needs finalization, and a green check shows it is
    finalized. In background mode, finalization is part of processing.

@@ -1,0 +1,62 @@
+.frame {
+  container: emma-review-table / inline-size;
+}
+
+.table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.table th:nth-child(2),
+.table th:nth-child(3) {
+  width: 4.5rem;
+}
+
+.table th:last-child:not(:first-child) {
+  width: 15.5rem;
+}
+
+.table .compactExports {
+  display: none;
+}
+
+@container emma-review-table (max-width: 48rem) {
+  .table th:last-child:not(:first-child) {
+    width: 14rem;
+  }
+
+  .table .formatButtons {
+    display: none;
+  }
+
+  .table .compactExports {
+    display: inline-flex;
+  }
+}
+
+@container emma-review-table (max-width: 34rem) {
+  .table,
+  .table thead,
+  .table tbody {
+    display: block;
+  }
+
+  .table tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(3.75rem, auto) minmax(
+        3.5rem,
+        auto
+      );
+  }
+
+  .table th:nth-child(2),
+  .table th:nth-child(3),
+  .table th:last-child:not(:first-child) {
+    width: auto;
+  }
+
+  .table tr > :last-child {
+    grid-column: 1 / -1;
+    padding-top: 0;
+  }
+}

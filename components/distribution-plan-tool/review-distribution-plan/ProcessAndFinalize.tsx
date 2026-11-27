@@ -17,6 +17,7 @@ import { formatInteger, formatList } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/drop-forge";
+import "@/i18n/namespaces/emma";
 import {
   forgeProcessInputsMatch,
   isForgeProcessTargetValid,
@@ -165,7 +166,15 @@ export default function ProcessAndFinalize({
     }
   }, [completed, job, onCompleted]);
   async function run() {
-    if (disabled || pending || completed || requiresReset || !hasRequiredInputs)
+    if (
+      disabled ||
+      operation.isError ||
+      operation.isLoading ||
+      pending ||
+      completed ||
+      requiresReset ||
+      !hasRequiredInputs
+    )
       return;
     setSubmitting(true);
     setError(null);
@@ -208,21 +217,33 @@ export default function ProcessAndFinalize({
   } else if (awaitingAuth) {
     statusMessage = t(locale, "dropForge.authRequired");
   }
-  const failure = error ?? job?.error ?? getToastErrorDetails(operation.error);
+  if (operation.isError) {
+    return (
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+        <p role="alert" className="tw-m-0 tw-text-sm tw-text-error">
+          {t(locale, "emma.review.processStatusError")}
+        </p>
+        <Button
+          variant="secondary"
+          size="sm"
+          loading={operation.isFetching}
+          onClick={() => void operation.refetch()}
+        >
+          {t(locale, "emma.review.retryProcessStatus")}
+        </Button>
+      </div>
+    );
+  }
+  const failure = error ?? job?.error;
   return (
     <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-2 @[36rem]:tw-items-end">
-      {!showProgress && (
+      {!showProgress && (!operation.isLoading || !hasRequiredInputs) && (
         <Button
           variant="action"
           onClick={() => {
             void run();
           }}
-          disabled={
-            disabled ||
-            requiresReset ||
-            !hasRequiredInputs ||
-            operation.isLoading
-          }
+          disabled={disabled || requiresReset || !hasRequiredInputs}
           aria-describedby={statusMessage ? statusId : undefined}
         >
           {t(
@@ -230,6 +251,11 @@ export default function ProcessAndFinalize({
             awaitingAuth ? "dropForge.resumeAuth" : "dropForge.process"
           )}
         </Button>
+      )}
+      {operation.isLoading && hasRequiredInputs && (
+        <output className="tw-text-sm tw-text-iron-300">
+          {t(locale, "emma.review.checkingProcessStatus")}
+        </output>
       )}
       <PreparationStatus
         id={statusId}

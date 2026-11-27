@@ -29,6 +29,9 @@ import {
   DialogTitle,
 } from "@headlessui/react";
 import Image from "next/image";
+import Link from "next/link";
+import { FinalizedDistributionCounts } from "./FinalizedDistributionCounts";
+import type { EmmaDistributionOverview } from "./emma-distribution-overview";
 import {
   type ComponentProps,
   type ReactElement,
@@ -44,6 +47,7 @@ import { ConfirmTokenIdModal } from "./ReviewDistributionPlanTableSubscriptionFo
 import { DistributionPhaseAirdropsViewerModal } from "./ReviewDistributionPlanTableSubscriptionFooterPhaseAirdropsViewer";
 import {
   GithubUploadModal,
+  getDistributionGithubUrl,
   type GithubUploadResult,
 } from "./ReviewDistributionPlanTableSubscriptionFooterGithubUploadModal";
 import { DistributionPhotosViewerModal } from "./ReviewDistributionPlanTableSubscriptionFooterPhotosViewer";
@@ -457,7 +461,7 @@ export function SubscriptionFooterMain({
   contract: string;
   confirmedTokenId: string;
   distributionPlan: AllowlistDescription | null;
-  overview: DistributionOverview | null;
+  overview: EmmaDistributionOverview | null;
   isLoadingOverview: boolean;
   isResetting: boolean;
   isUploading: boolean;
@@ -517,6 +521,11 @@ export function SubscriptionFooterMain({
   const publishStatusKey = isLoadingOverview
     ? "emma.review.checkingDistribution"
     : publishBlockReason;
+  const publication = overview?.github_publication;
+  const published =
+    publication?.folder === `card${Number(confirmedTokenId)}`
+      ? publication
+      : undefined;
 
   return (
     <div className="tw-min-w-0 tw-py-3 tw-@container">
@@ -570,6 +579,9 @@ export function SubscriptionFooterMain({
               onDownload={() => onDownloadAirdrops(phase)}
             />
           ))}
+          {overview?.is_normalized && (
+            <FinalizedDistributionCounts claim={Number(confirmedTokenId)} />
+          )}
           <AssetRow
             label={t(locale, "emma.review.assetPhotos")}
             count={formatAssetCount(
@@ -616,6 +628,35 @@ export function SubscriptionFooterMain({
                 {t(locale, publishStatusKey)}
               </p>
             )}
+            {published && (
+              <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-sm">
+                <span
+                  className={
+                    published.photos_changed
+                      ? "tw-text-iron-200"
+                      : "tw-text-emerald-400"
+                  }
+                >
+                  {t(
+                    locale,
+                    published.photos_changed
+                      ? "emma.review.photosChanged"
+                      : "emma.review.published"
+                  )}
+                </span>
+                <span aria-hidden="true" className="tw-text-iron-400">
+                  ·
+                </span>
+                <Link
+                  href={getDistributionGithubUrl(published.folder)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="tw-text-primary-300"
+                >
+                  {t(locale, "emma.review.viewOnGitHub")}
+                </Link>
+              </div>
+            )}
           </div>
           <div className={footerActionsClass}>
             {showManualFinalize && (
@@ -651,7 +692,12 @@ export function SubscriptionFooterMain({
                   unoptimized
                   className="tw-shrink-0 tw-invert"
                 />
-                {t(locale, "emma.review.publishToGithub")}
+                {t(
+                  locale,
+                  published
+                    ? "emma.review.republish"
+                    : "emma.review.publishToGithub"
+                )}
               </StableLabel>
             </Button>
           </div>

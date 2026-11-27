@@ -4,6 +4,16 @@ import { ReviewDistributionPlanTableSubscriptionFooter } from "@/components/dist
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useMemo, useState } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  getMemesMintingAirdrops,
+  getMemesMintingAllowlists,
+} from "@/services/api/memes-minting-claims-api";
+
+jest.mock("@/services/api/memes-minting-claims-api", () => ({
+  getMemesMintingAirdrops: jest.fn(),
+  getMemesMintingAllowlists: jest.fn(),
+}));
 
 let mockSavedPreparationMode: "UNSTARTED" | "MANUAL" | "BACKGROUND";
 const mockRefreshPreparation = jest.fn().mockResolvedValue(undefined);
@@ -169,6 +179,8 @@ beforeEach(() => {
   mockGetStagingAuth.mockReturnValue(null);
   mockGetAuthJwt.mockReturnValue(null);
   mockFetchAllPages.mockResolvedValue([]);
+  jest.mocked(getMemesMintingAirdrops).mockResolvedValue([]);
+  jest.mocked(getMemesMintingAllowlists).mockResolvedValue([]);
   mockUseDownloader.mockReturnValue({
     download: mockDownload,
     error: null,
@@ -188,6 +200,9 @@ function TestWrapper({
   readonly initialTokenId?: string | null | undefined;
 }) {
   const [showManual, setShowManual] = useState(false);
+  const [queryClient] = useState(
+    () => new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  );
   const [confirmedTokenId, setConfirmedTokenId] = useState<string | null>(
     initialTokenId
   );
@@ -208,11 +223,13 @@ function TestWrapper({
   return (
     <DistributionPlanToolContext.Provider value={distCtx}>
       <AuthContext.Provider value={authCtx}>
-        <ReviewDistributionPlanTableSubscriptionFooter
-          showManual={showManual}
-          onChooseManual={() => setShowManual(true)}
-          onClearManualChoice={() => setShowManual(false)}
-        />
+        <QueryClientProvider client={queryClient}>
+          <ReviewDistributionPlanTableSubscriptionFooter
+            showManual={showManual}
+            onChooseManual={() => setShowManual(true)}
+            onClearManualChoice={() => setShowManual(false)}
+          />
+        </QueryClientProvider>
       </AuthContext.Provider>
     </DistributionPlanToolContext.Provider>
   );
@@ -826,7 +843,7 @@ test("keeps manual finalization for a plan with saved manual work", async () => 
   expect(publish).toHaveAccessibleName("Publish to GitHub");
   await waitFor(() =>
     expect(publish).toHaveAccessibleDescription(
-      "Finalize and normalize the distribution first"
+      "Finish preparing the distribution before publishing"
     )
   );
   expect(finalize).toHaveAccessibleDescription("Not finalized");
@@ -853,6 +870,57 @@ test("describes a finalized manual distribution without changing the button name
     expect(finalize).toHaveAccessibleDescription("Finalized")
   );
 });
+
+test("shows finalized Craft totals above the photos row", async () => {
+  jest
+    .spyOn(require("@/services/api/common-api"), "commonApiFetch")
+    .mockResolvedValue(createOverview({ is_normalized: true }));
+  jest
+    .mocked(getMemesMintingAirdrops)
+    .mockResolvedValue([{ phase: "Phase 0", addresses: 46, total: 70 }]);
+  jest
+    .mocked(getMemesMintingAllowlists)
+    .mockResolvedValue([{ phase: "Phase 0", addresses: 196, total: 196 }]);
+  render(<TestWrapper initialTokenId="123" />);
+  const phase = within(await screen.findByRole("row", { name: /^Phase 0/ }));
+  expect(phase.getByText("70 cards")).toBeVisible();
+  expect(phase.getByText("46 wallets")).toBeVisible();
+  expect(phase.getByText("196 spots")).toBeVisible();
+  expect(phase.getByText("196 wallets")).toBeVisible();
+  expect(
+    screen.getByRole("button", { name: "Publish to GitHub" })
+  ).toHaveAccessibleDescription("Upload distribution photos first");
+});
+
+test.each([
+  { changed: false, message: "Published" },
+  { changed: true, message: "Photos changed since last publish" },
+])(
+  "shows $message from a shared publish receipt",
+  async ({ changed, message }) => {
+    const post = jest.spyOn(
+      require("@/services/api/common-api"),
+      "commonApiPost"
+    );
+    jest
+      .spyOn(require("@/services/api/common-api"), "commonApiFetch")
+      .mockResolvedValue(
+        createOverview({
+          is_normalized: true,
+          photos_count: 8,
+          artist_airdrops_count: 20,
+          github_publication: { folder: "card123", photos_changed: changed },
+        })
+      );
+    render(<TestWrapper initialTokenId="123" />);
+    expect(await screen.findByText(message)).toBeVisible();
+    expect(
+      screen.getByRole("link", { name: "View on GitHub" })
+    ).toHaveAttribute("href", expect.stringMatching(/\/card123$/));
+    expect(screen.getByRole("button", { name: "Republish" })).toBeEnabled();
+    expect(post).not.toHaveBeenCalled();
+  }
+);
 
 test("keeps the background job controls visible for a plan with a saved job", async () => {
   mockSavedPreparationMode = "BACKGROUND";

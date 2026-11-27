@@ -7,7 +7,6 @@ import { MEMES_CONTRACT } from "@/constants/constants";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { ApiDistributionAirdropsCsvUploadRequest } from "@/generated/models/ApiDistributionAirdropsCsvUploadRequest";
 import { ApiDistributionAirdropsUploadResponse } from "@/generated/models/ApiDistributionAirdropsUploadResponse";
-import { DistributionOverview } from "@/generated/models/DistributionOverview";
 import { DistributionPhoto } from "@/generated/models/DistributionPhoto";
 import { PhaseAirdrop } from "@/generated/models/PhaseAirdrop";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
@@ -39,6 +38,7 @@ import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/drop-forge";
 import "@/i18n/namespaces/emma";
 import { isSubscriptionsAdmin } from "./ReviewDistributionPlanTableSubscription.utils";
+import type { EmmaDistributionOverview } from "./emma-distribution-overview";
 
 function getErrorMessage(error: unknown): string {
   if (typeof error === "string") {
@@ -103,7 +103,9 @@ export function ReviewDistributionPlanTableSubscriptionFooter({
   const [githubUploadError, setGithubUploadError] = useState<string | null>(
     null
   );
-  const [overview, setOverview] = useState<DistributionOverview | null>(null);
+  const [overview, setOverview] = useState<EmmaDistributionOverview | null>(
+    null
+  );
   const [isLoadingOverview, setIsLoadingOverview] = useState(false);
   const [viewingPhotos, setViewingPhotos] = useState(false);
   const [viewedPhotos, setViewedPhotos] = useState<DistributionPhoto[]>([]);
@@ -164,7 +166,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter({
       setOverview(null);
       setIsLoadingOverview(true);
       try {
-        const data = await commonApiFetch<DistributionOverview>({
+        const data = await commonApiFetch<EmmaDistributionOverview>({
           endpoint: `distributions/${contract}/${tokenId}/overview`,
         });
         if (overviewRequestIdRef.current !== requestId) {
@@ -323,6 +325,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter({
         body: {},
       });
       setGithubUploadResult(response);
+      if (response.success) void refreshOverview(contract, tokenId);
     } catch (error: unknown) {
       setGithubUploadError(getErrorMessage(error));
     } finally {

@@ -8,6 +8,10 @@ import { ReviewDistributionPlanTableSubscriptionFooterModal } from "./ReviewDist
 const GITHUB_BASE =
   "https://github.com/6529-Collections/thememecards/tree/main";
 
+export function getDistributionGithubUrl(folder: string) {
+  return `${GITHUB_BASE}/${folder.split("/").map(encodeURIComponent).join("/")}`;
+}
+
 export type GithubUploadResult = {
   success: boolean;
   message?: string;
@@ -94,10 +98,7 @@ export function GithubUploadModal(
             {result.github_folder && (
               <div className="tw-flex tw-items-center tw-gap-2">
                 <Link
-                  href={`${GITHUB_BASE}/${result.github_folder
-                    .split("/")
-                    .map((seg) => encodeURIComponent(seg))
-                    .join("/")}`}
+                  href={getDistributionGithubUrl(result.github_folder)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-lg tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-100 tw-no-underline tw-ring-1 tw-ring-iron-600 tw-transition hover:tw-bg-iron-700 hover:tw-text-white hover:tw-no-underline"

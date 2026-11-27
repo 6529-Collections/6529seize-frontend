@@ -1,12 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import DistributionPlanTableBodyWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableBodyWrapper";
 import ReviewDistributionPlanTableRow from "./ReviewDistributionPlanTableRow";
-import type {
-  ReviewDistributionPlanTableItem,
-  ReviewDistributionPlanTablePhase,
-} from "./ReviewDistributionPlanTable.types";
+import type { ReviewDistributionPlanTablePhase } from "./ReviewDistributionPlanTable.types";
 
 export default function ReviewDistributionPlanTableBody({
   rows,
@@ -15,18 +10,13 @@ export default function ReviewDistributionPlanTableBody({
   rows: ReviewDistributionPlanTablePhase[];
   showManual?: boolean;
 }) {
-  const [items, setItems] = useState<ReviewDistributionPlanTableItem[]>([]);
-
-  useEffect(() => {
-    setItems(
-      rows.flatMap((row) => {
-        return [row.phase, ...row.components];
-      })
-    );
-  }, [rows]);
+  const items = rows.flatMap(({ phase, components }) => [phase, ...components]);
 
   return (
-    <DistributionPlanTableBodyWrapper>
+    <tbody
+      role="rowgroup"
+      className="tw-divide-y tw-divide-iron-700/40 tw-bg-iron-900"
+    >
       {items.map((item) => (
         <ReviewDistributionPlanTableRow
           key={item.id}
@@ -35,6 +25,6 @@ export default function ReviewDistributionPlanTableBody({
           showManual={showManual}
         />
       ))}
-    </DistributionPlanTableBodyWrapper>
+    </tbody>
   );
 }
