@@ -10,7 +10,9 @@ import {
 import { MEMES_MANIFOLD_PROXY_ABI } from "../../abis/abis";
 
 export const loadingTestArtwork = {
-  id: 536,
+  // The app retains newer server-rendered mints when the client data is stale.
+  // Keep this synthetic mint ahead of live data so browser fixtures can settle.
+  id: 10_000,
   name: "Homepage loading test artwork",
   artist: "Test artist",
   artist_seize_handle: "",
@@ -23,6 +25,10 @@ export const loadingTestArtwork = {
 };
 
 export async function installLoadingTestArtwork(page: Page) {
+  await page.route(
+    `**/api/minting-claims/*/${loadingTestArtwork.id}/roots`,
+    (route) => route.fulfill({ json: [] })
+  );
   await page.route("**/home-loading-fixture.png", (route) =>
     route.fulfill({
       contentType: "image/svg+xml",

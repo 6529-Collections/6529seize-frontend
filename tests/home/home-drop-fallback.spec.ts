@@ -1,5 +1,6 @@
 import { expect, expectNoHorizontalOverflow, test } from "../testHelpers";
 import { RESPONSE_TIMEOUT_MS } from "../support/routeReadiness";
+import { getLatestDropTransitionTime } from "../../helpers/mint-visibility.helpers";
 import {
   comingUpLeaderboard,
   comingUpLeaderboardPattern,
@@ -334,6 +335,11 @@ test("homepage keeps newer artwork when old roots finish after back navigation @
 test("homepage selects Next Drop without flashing the previous heading or artwork @smoke @medium @large", async ({
   page,
 }) => {
+  const transitionTime = getLatestDropTransitionTime(loadingTestArtwork.id);
+  if (transitionTime === null) {
+    throw new Error("The fixture mint must have a scheduled transition");
+  }
+  await page.clock.setFixedTime(new Date(transitionTime + 1_000));
   await installComingUpFixture(page);
   const winner = {
     ...comingUpLeaderboard.drops[0],
@@ -349,7 +355,7 @@ test("homepage selects Next Drop without flashing the previous heading or artwor
       pfp: loadingTestArtwork.image,
     })),
     submission_context: {
-      meme_card_id: 537,
+      meme_card_id: loadingTestArtwork.id + 1,
       voting: { current_calculated_vote: 0 },
     },
   };
