@@ -77,6 +77,13 @@ clock after this fixture mint's scheduled grace period. Sidebar storage init
 scripts run only in the top frame so sandboxed artwork frames retain their
 storage isolation.
 
+The Coming Up visitor-timezone scenario also supplies a completed mint and
+waits for the controlled artwork, signed-out sections and fonts before resizing
+or scrolling. Its fixed clock and Shanghai midnight assertions remain separate
+from live mint selection; seeing the decision label alone is not page readiness.
+The scenario uses the existing data-response readiness budget rather than
+changing the overall test timeout or adding retries.
+
 The profile pages sandbox also checks Collected personal actions against its
 isolated API. Anonymous and visitor profiles omit the entire action row. Owners
 retain action alignment, browser/native Back, filter and focus restoration;
