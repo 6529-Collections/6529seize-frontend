@@ -34,11 +34,27 @@ const ROOT_ROUTES = new Set([
   "/the-memes",
 ]);
 const BACK_REPEAT_INTERVAL_MS = 250;
+// A hiding keyboard normally finishes within the native animation. Past this,
+// treat the phase as stale so a lost hide event cannot swallow every Back.
+// Keep it longer than NATIVE_KEYBOARD_HIDE_FALLBACK_MS (500 ms) in
+// hooks/useNativeKeyboard.ts, which normally ends the phase first.
+const KEYBOARD_HIDING_BACK_WINDOW_MS = 600;
 
 function dismissKeyboard(
-  keyboard: ReturnType<typeof useNativeKeyboard>
+  keyboard: ReturnType<typeof useNativeKeyboard>,
+  hidingSince: number | null
 ): boolean {
-  if (!keyboard.isVisible && keyboard.phase !== "hiding") return false;
+  if (keyboard.phase === "hiding") {
+    // A stale hiding phase must not consume Back, even if it reports visible.
+    if (
+      hidingSince === null ||
+      Date.now() - hidingSince >= KEYBOARD_HIDING_BACK_WINDOW_MS
+    ) {
+      return false;
+    }
+  } else if (!keyboard.isVisible) {
+    return false;
+  }
   // Android normally dismisses the IME before dispatching Back. Also cover
   // shells that deliver the callback while their keyboard is hiding.
   if (document.activeElement instanceof HTMLElement) {
@@ -89,9 +105,14 @@ export default function AndroidBackNavigation() {
   const myStream = useMyStreamOptional();
   const exitActiveWave = useExitActiveWave();
   const keyboard = useNativeKeyboard();
+  const keyboardHidingSince = useRef<number | null>(null);
+  useLayoutEffect(() => {
+    keyboardHidingSince.current =
+      keyboard.phase === "hiding" ? Date.now() : null;
+  }, [keyboard.phase]);
 
   const handleBack = useCallback(() => {
-    if (dismissKeyboard(keyboard)) return;
+    if (dismissKeyboard(keyboard, keyboardHidingSince.current)) return;
     if (dismissAndroidBackLayer()) return;
 
     const url = new URL(globalThis.location.href);

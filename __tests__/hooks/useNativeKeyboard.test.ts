@@ -377,6 +377,29 @@ describe("useNativeKeyboard", () => {
       }
     );
 
+    it("finishes an Android hide when the viewport still reports the keyboard", async () => {
+      const { result } = await renderNativeKeyboardHook();
+      jest.useFakeTimers();
+      try {
+        act(() => {
+          input.focus();
+          listeners["keyboardWillShow"]?.({ keyboardHeight: 320 });
+          listeners["keyboardDidShow"]?.({ keyboardHeight: 320 });
+          listeners["keyboardWillHide"]?.();
+        });
+        flushViewportResize(800, 480);
+        expect(result.current.isVisible).toBe(false);
+        expect(result.current.phase).toBe("hiding");
+
+        act(() => {
+          jest.advanceTimersByTime(500);
+        });
+        expect(result.current.phase).toBe("hidden");
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
     it("avoids duplicate Android visibility mutations while preserving geometry and lifecycle updates", async () => {
       const mutations: MutationRecord[] = [];
       const observer = new MutationObserver((records) => {
@@ -1008,11 +1031,46 @@ describe("useNativeKeyboard", () => {
     }
   );
 
-  it("preserves Android hide fallback cancellation when a range gains focus", async () => {
+  it.each(["range", "text", "contenteditable"] as const)(
+    "finishes Android hiding after focus moves to a %s without did-hide",
+    async (control) => {
+      mockGetPlatform.mockReturnValue("android");
+      const { result } = await renderNativeKeyboardHook();
+      const input = document.createElement(
+        control === "contenteditable" ? "div" : "input"
+      );
+      if (input instanceof HTMLInputElement) input.type = control;
+      else {
+        input.setAttribute("contenteditable", "true");
+        input.tabIndex = 0;
+      }
+      document.body.append(input);
+      jest.useFakeTimers();
+      try {
+        act(() => {
+          listeners["keyboardWillShow"]?.({ keyboardHeight: 320 });
+          listeners["keyboardWillHide"]?.();
+          input.focus();
+        });
+        expect(document.activeElement).toBe(input);
+        expect(result.current.phase).toBe("hiding");
+
+        act(() => {
+          jest.advanceTimersByTime(500);
+        });
+        expect(result.current.isVisible).toBe(false);
+        expect(result.current.phase).toBe("hidden");
+      } finally {
+        input.remove();
+        jest.useRealTimers();
+      }
+    }
+  );
+
+  it("keeps an Android reopen after focus moves during hiding", async () => {
     mockGetPlatform.mockReturnValue("android");
     const { result } = await renderNativeKeyboardHook();
     const input = document.createElement("input");
-    input.type = "range";
     document.body.append(input);
     jest.useFakeTimers();
     try {
@@ -1020,11 +1078,11 @@ describe("useNativeKeyboard", () => {
         listeners["keyboardWillShow"]?.({ keyboardHeight: 320 });
         listeners["keyboardWillHide"]?.();
         input.focus();
+        listeners["keyboardWillShow"]?.({ keyboardHeight: 300 });
         jest.advanceTimersByTime(500);
       });
-      expect(result.current.phase).toBe("hiding");
-      act(() => listeners["keyboardDidHide"]?.());
-      expect(result.current.phase).toBe("hidden");
+      expect(result.current.isVisible).toBe(true);
+      expect(result.current.phase).toBe("showing");
     } finally {
       input.remove();
       jest.useRealTimers();

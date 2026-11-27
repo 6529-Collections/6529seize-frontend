@@ -4,6 +4,10 @@ import { Capacitor } from "@capacitor/core";
 import type { PluginListenerHandle } from "@capacitor/core";
 import { Keyboard } from "@capacitor/keyboard";
 import { useSyncExternalStore } from "react";
+import {
+  isEditableElement,
+  isKeyboardTextEntryElement,
+} from "@/hooks/nativeKeyboardFocus";
 
 type NativeKeyboardPhase = "hidden" | "showing" | "visible" | "hiding";
 
@@ -352,42 +356,6 @@ function getViewportKeyboardHeight(): number {
   );
 }
 
-function isEditableElement(element: Element | null): boolean {
-  if (!(element instanceof HTMLElement)) {
-    return false;
-  }
-
-  return (
-    element.isContentEditable ||
-    element.matches(
-      'input:not([disabled]):not([readonly]), textarea:not([disabled]):not([readonly]), select:not([disabled]), [contenteditable="true"], [contenteditable="plaintext-only"]'
-    )
-  );
-}
-
-function isKeyboardTextEntryElement(element: Element | null): boolean {
-  if (!isEditableElement(element)) return false;
-  if (element instanceof HTMLInputElement) {
-    return [
-      "text",
-      "search",
-      "email",
-      "url",
-      "tel",
-      "password",
-      "number",
-    ].includes(element.type);
-  }
-  return (
-    element instanceof HTMLTextAreaElement ||
-    (element instanceof HTMLElement &&
-      (element.isContentEditable ||
-        element.matches(
-          '[contenteditable="true"], [contenteditable="plaintext-only"]'
-        )))
-  );
-}
-
 function hasEditableFocus(): boolean {
   const documentRef = globalThis.document as Document | undefined;
 
@@ -413,6 +381,11 @@ function markKeyboardHiddenFromFallback(): void {
     phase: "hidden",
   });
   rememberKeyboardClosedViewportHeight();
+}
+
+/** A native will-hide arrived and its did-hide (or fallback) is still due. */
+function isNativeHidePending(): boolean {
+  return nativeKeyboardLifecycleActive && currentState.phase === "hiding";
 }
 
 function syncKeyboardVisibilityFromViewport(): void {
@@ -444,6 +417,13 @@ function syncKeyboardVisibilityFromViewport(): void {
     // lifecycle events remain authoritative when focus is in transition.
     if (viewportWidthChanged || !hasKeyboardEvidence) {
       markKeyboardHiddenFromFallback();
+      return;
+    }
+
+    // During a native hide the viewport can still report the old keyboard
+    // height. Keep the published closed layout and the pending fallback: only
+    // a native show reopens it, so the hide always finishes.
+    if (isNativeHidePending()) {
       return;
     }
 
@@ -480,8 +460,7 @@ function syncKeyboardVisibilityFromViewport(): void {
 
 function scheduleKeyboardHideFallback(): void {
   clearHiddenFallbackTimeout();
-  const nativeHideIsPending =
-    nativeKeyboardLifecycleActive && currentState.phase === "hiding";
+  const nativeHideIsPending = isNativeHidePending();
   const fallbackDelay = nativeKeyboardLifecycleActive
     ? NATIVE_KEYBOARD_HIDE_FALLBACK_MS
     : FOCUSOUT_KEYBOARD_HIDE_FALLBACK_MS;
@@ -515,13 +494,15 @@ function setupBrowserKeyboardFallbackListeners(): void {
   let viewportAnimationFrame: number | null = null;
 
   const handleFocusIn = () => {
-    // iOS focus restoration to non-text controls must not cancel recovery
-    // from a missing did-hide.
+    // Focus must not cancel recovery from a missing did-hide. iOS focus
+    // restoration to non-text controls keeps it; on Android only a native
+    // show event (which clears it) means the keyboard actually reopened.
     if (
-      currentState.isIos &&
       nativeKeyboardLifecycleActive &&
       currentState.phase === "hiding" &&
-      !isKeyboardTextEntryElement(documentRef.activeElement)
+      (currentState.isAndroid ||
+        (currentState.isIos &&
+          !isKeyboardTextEntryElement(documentRef.activeElement)))
     ) {
       return;
     }
