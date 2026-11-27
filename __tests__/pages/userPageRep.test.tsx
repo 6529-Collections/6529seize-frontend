@@ -1,5 +1,10 @@
 jest.mock("@/contexts/TitleContext", () => ({ useSetTitle: jest.fn() }));
 jest.mock("@/components/user/layout/UserPageDropModal", () => () => null);
+jest.mock("@/components/user/rep/UserPageRepWrapper", () => () => null);
+jest.mock("next/headers", () => ({
+  headers: async () => new Map([["sec-fetch-mode", "navigate"]]),
+}));
+jest.mock("next/server", () => ({ userAgent: () => ({ device: {} }) }));
 import { render, screen } from "@testing-library/react";
 import React from "react";
 
@@ -45,12 +50,15 @@ jest.mock("next/navigation", () => ({
 }));
 
 // Import after mocks
+import ProfilePage from "@/app/[user]/(profile)/page";
 import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
 import { getAppMetadata } from "@/components/providers/metadata";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import {
   getUserProfile,
   userPageNeedsRedirect,
 } from "@/helpers/server.helpers";
+import { commonApiFetch } from "@/services/api/common-api";
 
 // Dummy Rep tab
 function DummyRepTab({ profile }: { readonly profile: any }) {
@@ -59,6 +67,43 @@ function DummyRepTab({ profile }: { readonly profile: any }) {
 
 const buildFactory = () =>
   createUserTabPage({ subroute: "", Tab: DummyRepTab });
+
+describe("profile ratings prefetch", () => {
+  const wallet = "0x0000000000000000000000000000000000000529";
+
+  it.each([
+    { id: null, handle: null, user: wallet, ratings: [] },
+    {
+      id: "profile-id",
+      handle: "alice",
+      user: "alice",
+      ratings: ["rep/overview", "rep/categories", "cic/overview"],
+    },
+  ])(
+    "prefetches ratings according to the profile ID for $user",
+    async ({ id, handle, user, ratings }) => {
+      const fetchApi = jest.mocked(commonApiFetch);
+      fetchApi.mockClear();
+      jest.mocked(getUserProfile).mockResolvedValueOnce({
+        id,
+        handle,
+        primary_wallet: wallet,
+        wallets: [{ wallet }],
+      } as ApiIdentity);
+
+      await ProfilePage({ params: Promise.resolve({ user }) });
+
+      const endpoints = fetchApi.mock.calls.map(([{ endpoint }]) => endpoint);
+      expect(
+        endpoints.filter((endpoint) =>
+          /\/(?:rep|cic)\/(?:overview|categories)$/.test(endpoint)
+        )
+      ).toEqual(ratings.map((suffix) => `profiles/${user}/${suffix}`));
+      expect(endpoints).toContain(`profiles/${user}/cic/statements`);
+      expect(endpoints).toContain("profile-logs");
+    }
+  );
+});
 
 describe("rep page via createUserTabPage", () => {
   beforeEach(() => {
