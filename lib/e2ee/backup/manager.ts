@@ -37,6 +37,7 @@ import { generateRecoveryCode, parseRecoveryCode } from "./recovery-code";
 import type { BackupLocalState } from "./state";
 import { backupPinIds, changedHistory, startNewChain } from "./local-chain";
 import type {
+  BackupCounts,
   BackupScheduler,
   E2eeBackupManagerDeps,
   E2eeBackupPhase,
@@ -81,6 +82,15 @@ export type {
 
 const DEFAULT_DEBOUNCE_MS = 30_000;
 const RETRY_MS = 5 * 60_000;
+
+/** Chats and messages this device has put in (or restored from) the backup. */
+const countsOf = (local: BackupLocalState | null): BackupCounts | null =>
+  local
+    ? {
+        chats: Object.keys(local.groupPrints).length,
+        messages: Object.keys(local.messagePrints).length,
+      }
+    : null;
 const DEFAULT_COMPACT_AT = 1000;
 /**
  * Read positions ride along with other changes; on their own they go up at
@@ -275,6 +285,7 @@ export class E2eeBackupManager {
       quotaBytes: status.quota_bytes,
       lastBackupAt: local?.lastBackupAt ?? null,
       uploading: local !== null && !local.activated,
+      counts: countsOf(local),
     });
     return active;
   }
@@ -446,7 +457,13 @@ export class E2eeBackupManager {
   /** How the run ended (see RunOutcome); null when it couldn't run. */
   private async runIncremental(): Promise<RunOutcome | null> {
     const local = this.local;
-    if (!local || this.deps.engine.getStatus() !== "ready") {
+    // The engine reports ready before GET /e2ee/me names this device. That
+    // isn't a failure: the engine's next change schedules another run.
+    if (
+      !local ||
+      this.deps.engine.getStatus() !== "ready" ||
+      this.deps.engine.getThisDevice() === null
+    ) {
       return null;
     }
     const deviceKey = this.deviceKey();
@@ -455,7 +472,8 @@ export class E2eeBackupManager {
     this.update({ busy: true });
     try {
       const segments = await this.pendingSegments(local);
-      for (const segment of segments) {
+      for (const [index, segment] of segments.entries()) {
+        this.update({ progress: { done: index, total: segments.length } });
         if (await appendSegment(this.chainIo, local, deviceKey, segment)) {
           // The chain forked (a server without the append precondition) or
           // other devices kept appending first: the next run starts a new
@@ -526,10 +544,11 @@ export class E2eeBackupManager {
         quotaBytes: status.quota_bytes,
         backupCreatedAt: active.created_at,
         backupUpdatedAt: active.updated_at,
+        counts: countsOf(local),
       });
       return changed ? "changed" : "complete";
     } finally {
-      this.update({ busy: false });
+      this.update({ busy: false, progress: null });
     }
   }
 
@@ -644,6 +663,7 @@ export class E2eeBackupManager {
           phase: "on",
           lastBackupAt: local.lastBackupAt,
           lastError: null,
+          counts: countsOf(local),
         });
         this.schedule(this.deps.debounceMs ?? DEFAULT_DEBOUNCE_MS);
         return result;
