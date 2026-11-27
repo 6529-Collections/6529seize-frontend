@@ -42,7 +42,9 @@ institutional record and custody are intended to move further on-chain.
    institutional proposition, and the public record.
 6. The About page explains the Museum of the Network, its network-native
    structure, the current operating state, the next stage, and the permanence
-   objective.
+   objective. It shows one work from each accessioned gift with the work's
+   credit line, and it states the next stage's status: contract design in
+   progress, deployment and activation pending.
 
 ## Common Scenarios
 
@@ -70,7 +72,9 @@ accession requirements are complete.
 
 Homepage and About-page links lead to the Museum Safe, Museum decisions, the
 public repository, and the exact institutional source documents used by the
-current verified publication.
+current verified publication. On the About page, the Custody card explains the
+Museum Safe and links it on Etherscan, and the Public record card links the
+GitHub repository; each destination is linked once.
 
 ## Edge Cases
 

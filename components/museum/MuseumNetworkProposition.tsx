@@ -31,6 +31,12 @@ const OPERATING_RECORDS = [
     href: "/museum/network/about/governance",
   },
   {
+    titleKey: "museum.network.proposition.today.custody.title",
+    bodyKey: "museum.network.proposition.today.custody.body",
+    actionKey: "museum.network.proposition.today.custody.action",
+    href: MUSEUM_SAFE_ETHERSCAN_URL,
+  },
+  {
     titleKey: "museum.network.proposition.today.record.title",
     bodyKey: "museum.network.proposition.today.record.body",
     actionKey: "museum.network.proposition.today.record.action",
@@ -117,6 +123,8 @@ function MuseumAboutArtworkFigure({
   const displayTitle = /^6529NM[-.]/u.test(work.title.trim())
     ? t(DEFAULT_LOCALE, "museum.network.collection.untitledWork")
     : work.title;
+  const creditLine =
+    media?.credit.creditLine ?? presentation?.credit.creditLine;
   let alt = displayTitle;
   if (presentationAlt !== undefined && presentationAlt.length > 0) {
     alt = presentationAlt;
@@ -133,8 +141,10 @@ function MuseumAboutArtworkFigure({
       href={museumWorkHref(work.id)}
       title={displayTitle}
       {...(artistName === undefined ? {} : { byline: artistName })}
+      {...(creditLine === undefined ? {} : { qualifier: creditLine })}
+      alignTitleToTop
       eager={eager}
-      sizes="(min-width: 1280px) 30vw, (min-width: 640px) 50vw, 100vw"
+      sizes="(min-width: 768px) 30vw, 100vw"
     />
   );
 }
@@ -155,10 +165,10 @@ export function MuseumNetworkProposition({
         <h1 className="tw-m-0 tw-mt-4 tw-max-w-4xl tw-text-4xl tw-font-semibold tw-leading-[1.06] tw-tracking-tight tw-text-iron-50 sm:tw-text-5xl xl:tw-text-6xl">
           {t(DEFAULT_LOCALE, "museum.network.proposition.title")}
         </h1>
-        <p className="tw-m-0 tw-mt-7 tw-max-w-4xl tw-text-lg tw-leading-8 tw-text-iron-200 sm:tw-text-xl sm:tw-leading-9">
+        <p className="tw-m-0 tw-mt-7 tw-max-w-prose tw-text-lg tw-leading-8 tw-text-iron-200 sm:tw-text-xl sm:tw-leading-9">
           {t(DEFAULT_LOCALE, "museum.network.proposition.intro")}
         </p>
-        <p className="tw-m-0 tw-mt-5 tw-max-w-4xl tw-text-lg tw-leading-8 tw-text-iron-300 sm:tw-text-lg sm:tw-leading-8">
+        <p className="tw-m-0 tw-mt-5 tw-max-w-prose tw-text-lg tw-leading-8 tw-text-iron-300 sm:tw-text-lg sm:tw-leading-8">
           {t(DEFAULT_LOCALE, "museum.network.proposition.principle")}
         </p>
       </header>
@@ -178,10 +188,13 @@ export function MuseumNetworkProposition({
               </h2>
             </div>
             <Link href="/museum/network/collection" className={TEXT_LINK_CLASS}>
-              {t(DEFAULT_LOCALE, "museum.network.proposition.art.action")}
+              {t(
+                DEFAULT_LOCALE,
+                "museum.network.proposition.actions.collection"
+              )}
             </Link>
           </div>
-          <div className="tw-mt-8 tw-grid tw-gap-x-6 tw-gap-y-10 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
+          <div className="tw-mt-8 tw-grid tw-gap-x-6 tw-gap-y-10 md:tw-grid-cols-3">
             {featuredWorks.map(({ work, artistName }, index) => (
               <MuseumAboutArtworkFigure
                 key={work.id}
@@ -204,7 +217,7 @@ export function MuseumNetworkProposition({
         >
           {t(DEFAULT_LOCALE, "museum.network.proposition.collection.title")}
         </h2>
-        <div className="tw-max-w-3xl tw-space-y-5 tw-text-base tw-leading-7 tw-text-iron-300">
+        <div className="tw-max-w-prose tw-space-y-5 tw-text-base tw-leading-7 tw-text-iron-300">
           <p className="tw-m-0 tw-text-lg tw-leading-8 tw-text-iron-100">
             {t(DEFAULT_LOCALE, "museum.network.proposition.collection.body")}
           </p>
@@ -214,23 +227,15 @@ export function MuseumNetworkProposition({
               "museum.network.proposition.collection.acquisitions"
             )}
           </p>
-          <div className="tw-flex tw-flex-wrap tw-gap-x-6 tw-gap-y-2">
-            <Link href="/museum/network/collection" className={TEXT_LINK_CLASS}>
-              {t(
-                DEFAULT_LOCALE,
-                "museum.network.proposition.collection.action"
-              )}
-            </Link>
-            <Link
-              href="/museum/network/acquisition-programs"
-              className={TEXT_LINK_CLASS}
-            >
-              {t(
-                DEFAULT_LOCALE,
-                "museum.network.proposition.collection.programsAction"
-              )}
-            </Link>
-          </div>
+          <Link
+            href="/museum/network/acquisition-programs"
+            className={TEXT_LINK_CLASS}
+          >
+            {t(
+              DEFAULT_LOCALE,
+              "museum.network.proposition.collection.programsAction"
+            )}
+          </Link>
         </div>
       </section>
 
@@ -244,7 +249,7 @@ export function MuseumNetworkProposition({
         >
           {t(DEFAULT_LOCALE, "museum.network.proposition.scholarship.title")}
         </h2>
-        <div className="tw-max-w-3xl tw-space-y-5 tw-text-base tw-leading-7 tw-text-iron-300">
+        <div className="tw-max-w-prose tw-space-y-5 tw-text-base tw-leading-7 tw-text-iron-300">
           <p className="tw-m-0 tw-text-lg tw-leading-8 tw-text-iron-100">
             {t(DEFAULT_LOCALE, "museum.network.proposition.scholarship.body")}
           </p>
@@ -264,7 +269,7 @@ export function MuseumNetworkProposition({
         >
           {t(DEFAULT_LOCALE, "museum.network.proposition.public.title")}
         </h2>
-        <div className="tw-max-w-3xl tw-space-y-5 tw-text-base tw-leading-7 tw-text-iron-300">
+        <div className="tw-max-w-prose tw-space-y-5 tw-text-base tw-leading-7 tw-text-iron-300">
           <p className="tw-m-0 tw-text-lg tw-leading-8 tw-text-iron-100">
             {t(DEFAULT_LOCALE, "museum.network.proposition.public.body1")}
           </p>
@@ -290,7 +295,7 @@ export function MuseumNetworkProposition({
 
       <section
         aria-labelledby="museum-works-title"
-        className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10 sm:tw-pt-14"
+        className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
       >
         <div className="tw-grid tw-gap-8 lg:tw-grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)] lg:tw-gap-16">
           <div>
@@ -304,11 +309,11 @@ export function MuseumNetworkProposition({
               {t(DEFAULT_LOCALE, "museum.network.proposition.working.title")}
             </h2>
           </div>
-          <div className="tw-max-w-3xl tw-space-y-5 tw-text-base tw-leading-7 tw-text-iron-300">
+          <div className="tw-max-w-prose tw-space-y-5 tw-text-base tw-leading-7 tw-text-iron-300">
             <p className="tw-m-0">
               {t(DEFAULT_LOCALE, "museum.network.proposition.working.intro")}
             </p>
-            <div className="tw-grid tw-gap-x-8 tw-gap-y-8 md:tw-grid-cols-2">
+            <div className="tw-grid tw-gap-8">
               {OPERATING_RECORDS.map((item) => {
                 const external = item.href.startsWith("http");
                 return (
@@ -349,45 +354,50 @@ export function MuseumNetworkProposition({
 
       <section
         aria-labelledby="museum-next-title"
-        className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
+        className="tw-grid tw-gap-8 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10 lg:tw-grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)] lg:tw-gap-16"
       >
         <h2
           id="museum-next-title"
-          className="tw-m-0 tw-text-2xl tw-font-semibold tw-leading-tight tw-text-iron-50 sm:tw-text-3xl"
+          className="tw-m-0 tw-max-w-md tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl"
         >
           {t(DEFAULT_LOCALE, "museum.network.proposition.next.title")}
         </h2>
-        <p className="tw-m-0 tw-mt-4 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-300">
-          {t(DEFAULT_LOCALE, "museum.network.proposition.next.intro")}
-        </p>
-        <div className="tw-mt-8 tw-grid tw-gap-x-8 tw-gap-y-8 lg:tw-grid-cols-3">
-          {NEXT_STAGE.map((item) => (
-            <article
-              key={item.titleKey}
-              className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-5"
-            >
-              <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-100">
-                {t(DEFAULT_LOCALE, item.titleKey)}
-              </h3>
-              <p className="tw-m-0 tw-mt-3 tw-text-base tw-leading-7 tw-text-iron-400">
-                {t(DEFAULT_LOCALE, item.bodyKey)}
-              </p>
-            </article>
-          ))}
+        <div className="tw-max-w-prose tw-space-y-5 tw-text-base tw-leading-7 tw-text-iron-300">
+          <p className="tw-m-0">
+            {t(DEFAULT_LOCALE, "museum.network.proposition.next.intro")}
+          </p>
+          <p className="tw-m-0 tw-text-iron-100">
+            {t(DEFAULT_LOCALE, "museum.network.proposition.next.status")}
+          </p>
+          <div className="tw-grid tw-gap-8">
+            {NEXT_STAGE.map((item) => (
+              <article
+                key={item.titleKey}
+                className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-5"
+              >
+                <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-100">
+                  {t(DEFAULT_LOCALE, item.titleKey)}
+                </h3>
+                <p className="tw-m-0 tw-mt-3 tw-text-base tw-leading-7 tw-text-iron-400">
+                  {t(DEFAULT_LOCALE, item.bodyKey)}
+                </p>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 
       <section
         aria-labelledby="museum-permanence-title"
-        className="tw-grid tw-gap-8 tw-border-y tw-border-solid tw-border-iron-800 tw-py-10 lg:tw-grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)] lg:tw-gap-16"
+        className="tw-grid tw-gap-8 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10 lg:tw-grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)] lg:tw-gap-16"
       >
         <h2
           id="museum-permanence-title"
-          className="tw-m-0 tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50"
+          className="tw-m-0 tw-max-w-md tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl"
         >
           {t(DEFAULT_LOCALE, "museum.network.proposition.permanence.title")}
         </h2>
-        <div className="tw-max-w-3xl tw-space-y-5 tw-text-base tw-leading-7 tw-text-iron-300">
+        <div className="tw-max-w-prose tw-space-y-5 tw-text-base tw-leading-7 tw-text-iron-300">
           <p className="tw-m-0">
             {t(DEFAULT_LOCALE, "museum.network.proposition.permanence.body1")}
           </p>
@@ -425,22 +435,6 @@ export function MuseumNetworkProposition({
           <ExactDocumentLink commit={commit} document={transition}>
             {t(DEFAULT_LOCALE, "museum.network.proposition.sources.transition")}
           </ExactDocumentLink>
-          <a
-            href={MUSEUM_SAFE_ETHERSCAN_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={TEXT_LINK_CLASS}
-          >
-            {t(DEFAULT_LOCALE, "museum.network.proposition.sources.safe")}
-          </a>
-          <a
-            href={MUSEUM_REPOSITORY_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={TEXT_LINK_CLASS}
-          >
-            {t(DEFAULT_LOCALE, "museum.network.proposition.actions.record")}
-          </a>
         </div>
       </nav>
     </div>

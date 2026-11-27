@@ -5,10 +5,7 @@ import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { buildImmutableMuseumBlobUrl } from "@/lib/museum/publication";
-import {
-  isMuseumPermanentCollectionWork,
-  MUSEUM_MAGNUM_ACQUISITION_ID,
-} from "@/lib/museum/publication/collectionSemantics";
+import { isMuseumPermanentCollectionWork } from "@/lib/museum/publication/collectionSemantics";
 import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 import type { MuseumPublication } from "@/lib/museum/publication/types";
@@ -86,18 +83,20 @@ function selectAboutWorks(publication: MuseumPublication) {
       ...(artistName === undefined ? {} : { artistName }),
     });
   };
-  const caseyArtistId = publication.artists.find(
-    (artist) => artist.slug === "casey-reas"
-  )?.id;
-
-  if (caseyArtistId !== undefined) {
-    add(collectionWorks.find((work) => work.artistId === caseyArtistId));
+  // One principal work from each accessioned gift, in accession order.
+  const representedAcquisitions = new Set<string>();
+  for (const work of collectionWorks) {
+    if (result.length >= 3) break;
+    const acquisitionId = work.acquisitionIds[0];
+    if (
+      acquisitionId === undefined ||
+      representedAcquisitions.has(acquisitionId)
+    ) {
+      continue;
+    }
+    representedAcquisitions.add(acquisitionId);
+    add(work);
   }
-  add(
-    collectionWorks.find((work) =>
-      work.acquisitionIds.includes(MUSEUM_MAGNUM_ACQUISITION_ID)
-    )
-  );
   for (const work of collectionWorks) {
     if (result.length >= 3) break;
     add(work);
