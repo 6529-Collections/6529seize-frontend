@@ -457,6 +457,7 @@ for (const cardCount of [1, 3]) {
     page,
   }, testInfo) => {
     await installComingUpFixture(page);
+    await installCompletedMintStatus(page);
     await page.route("**/coming-up-layout-*.png", (route) => {
       const rank = Number(
         /coming-up-layout-(\d)/.exec(route.request().url())?.[1]
@@ -487,6 +488,16 @@ for (const cardCount of [1, 3]) {
       })
     );
     await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(
+      page.getByRole("main").first().getByRole("img", {
+        name: loadingTestArtwork.name,
+        exact: true,
+      })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("region", { name: "How to start", exact: true })
+    ).toBeVisible();
+    await page.evaluate(() => document.fonts.ready);
     const cards = page
       .getByRole("region", { name: "Coming up", exact: true })
       .getByTestId("coming-up-cards");
@@ -602,6 +613,7 @@ test.describe("Coming up avatar density", () => {
     page,
   }, testInfo) => {
     await installComingUpFixture(page);
+    await installCompletedMintStatus(page);
     const avatar =
       "https://media.6529usercontent.com/ipfs/coming-up-avatar-fixture";
     const optimizedWidths: number[] = [];
@@ -635,6 +647,16 @@ test.describe("Coming up avatar density", () => {
       })
     );
     await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(
+      page.getByRole("main").first().getByRole("img", {
+        name: loadingTestArtwork.name,
+        exact: true,
+      })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("region", { name: "How to start", exact: true })
+    ).toBeVisible();
+    await page.evaluate(() => document.fonts.ready);
     const section = page.getByRole("region", {
       name: "Coming up",
       exact: true,
