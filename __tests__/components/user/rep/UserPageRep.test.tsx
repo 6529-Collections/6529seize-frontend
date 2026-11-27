@@ -121,19 +121,19 @@ describe("UserPageRep", () => {
       infiniteQueryMock.mock.calls.map(([options]) => options.enabled)
     ).toEqual([false, false, false, false]);
   });
+
+  it.each([null, "profile-id"])(
+    "gates the NIC Given query with profile ID %s",
+    (id) => {
+      const profile = { id, primary_wallet: "0xabc", cic: 7 } as ApiIdentity;
+      const { result } = renderHook(() => useNicRatingsOverview(profile, null));
+
+      expect(result.current.score).toBe(profile.cic);
+      act(() => result.current.setDirection("given"));
+
+      expect(queryMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({ enabled: !!id })
+      );
+    }
+  );
 });
-
-it.each([null, "profile-id"])(
-  "gates the NIC Given query with profile ID %s",
-  (id) => {
-    const profile = { id, primary_wallet: "0xabc" } as ApiIdentity;
-    const queryMock = jest.mocked(useQuery);
-    const { result } = renderHook(() => useNicRatingsOverview(profile, null));
-
-    act(() => result.current.setDirection("given"));
-
-    expect(queryMock).toHaveBeenLastCalledWith(
-      expect.objectContaining({ enabled: !!id })
-    );
-  }
-);
