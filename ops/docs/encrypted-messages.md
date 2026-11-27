@@ -769,6 +769,14 @@ restore it on a new device.
 
 - Unread and mention counts appear on encrypted chats and count toward the
   Messages badge.
+- **Read sync across your own devices.** Reading an encrypted chat on one of
+  your devices marks it read on your other devices too, usually within a
+  minute. Your devices share read positions through a hidden encrypted chat
+  that only your own devices are in; 6529 cannot read it. A device joins once
+  it runs the current version and its wallet is trusted on your other devices
+  (see [Device trust](#device-trust)); a device added very recently can take a
+  few minutes longer. Encrypted backups include read positions, so a restore
+  brings them back. The bell and app-icon badge work as before.
 - Phone message pushes use title **New encrypted message** and body
   **Open 6529 Mobile to view** in production or **Open 6529 Staging to view**
   on staging. Invitation pushes say that you were added to an encrypted chat.
