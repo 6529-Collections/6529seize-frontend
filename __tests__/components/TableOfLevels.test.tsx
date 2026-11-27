@@ -1,6 +1,5 @@
 import { render, screen, within } from "@testing-library/react";
 import TableOfLevels from "@/components/levels/TableOfLevels";
-import levels from "@/constants/levels.json";
 
 describe("TableOfLevels", () => {
   // Mock toLocaleString to ensure consistent behavior across different locales
@@ -30,19 +29,20 @@ describe("TableOfLevels", () => {
       "tw-sticky",
       "tw-top-0"
     );
-    // header row + one row per level
-    expect(rows).toHaveLength(levels.length + 1);
+    // header row + one row per level, from 0 through 200
+    expect(rows).toHaveLength(202);
 
-    // check first and last rows
+    // check the first row, levels 100 and 101, and the last row
     const firstRowCells = within(rows[1]).getAllByRole("cell");
     expect(firstRowCells[0]).toHaveTextContent("0");
     expect(firstRowCells[1]).toHaveTextContent("0");
 
-    const lastRowCells = within(rows[rows.length - 1]).getAllByRole("cell");
-    const last = levels[levels.length - 1];
-    expect(lastRowCells[0]).toHaveTextContent(last.level.toString());
-    expect(lastRowCells[1]).toHaveTextContent(
-      last.threshold.toLocaleString("en-US")
-    );
+    const levelRow = (level: number) =>
+      within(rows[level + 1]!)
+        .getAllByRole("cell")
+        .map((cell) => cell.textContent);
+    expect(levelRow(100)).toEqual(["100", "25,000,000"]);
+    expect(levelRow(101)).toEqual(["101", "26,000,000"]);
+    expect(levelRow(200)).toEqual(["200", "1,262,623,144"]);
   });
 });

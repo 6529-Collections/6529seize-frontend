@@ -1,4 +1,4 @@
-import levels from "@/constants/levels.json";
+import { getNextLevelThreshold } from "@/components/levels/levelThresholds";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { formatInteger } from "@/i18n/format";
@@ -6,32 +6,26 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/network-tdh";
 
-interface LevelData {
-  readonly level: number;
-  readonly threshold: number;
-}
-
 type LevelSummaryProfile =
   | Pick<ApiIdentity, "level" | "rep" | "tdh">
   | Pick<ApiProfileMin, "level" | "rep" | "tdh">;
 
+interface LevelTarget {
+  readonly level: number;
+  readonly tdhRepNeeded: number;
+}
+
 interface LevelProgress {
   readonly combinedTdhRep: number;
   readonly currentLevel: number;
-  readonly nextLevel: LevelData | null;
-  readonly tdhRepNeeded: number | null;
+  readonly target: LevelTarget | null;
 }
 
-const LEVELS = levels as readonly LevelData[];
-
-function getLevelProgress(
-  profile: LevelSummaryProfile
-): LevelProgress | null {
+function getLevelProgress(profile: LevelSummaryProfile): LevelProgress | null {
   const { level, rep, tdh } = profile;
-  const isKnownLevel = LEVELS.some((entry) => entry.level === level);
   if (
     !Number.isInteger(level) ||
-    !isKnownLevel ||
+    level < 0 ||
     !Number.isFinite(rep) ||
     !Number.isFinite(tdh)
   ) {
@@ -45,16 +39,16 @@ function getLevelProgress(
 
   // The API-assigned profile Level is authoritative. Local thresholds only
   // provide the next target and the remaining TDH + Rep shown beside it.
-  const nextLevel = LEVELS.find((entry) => entry.level > level) ?? null;
+  // When the score already reaches the next threshold, the API's Level is
+  // behind it (not yet recomputed, or set by an older rule), so no target is
+  // shown. From level 602 up there is no exact next threshold.
+  const next = getNextLevelThreshold(level);
+  const target =
+    next && next.threshold > combinedTdhRep
+      ? { level: next.level, tdhRepNeeded: next.threshold - combinedTdhRep }
+      : null;
 
-  return {
-    combinedTdhRep,
-    currentLevel: level,
-    nextLevel,
-    tdhRepNeeded: nextLevel
-      ? Math.max(nextLevel.threshold - combinedTdhRep, 0)
-      : null,
-  };
+  return { combinedTdhRep, currentLevel: level, target };
 }
 
 export default function YourLevelSummary({
@@ -81,7 +75,7 @@ export default function YourLevelSummary({
         >
           {t(locale, "network.levels.yourLevel.title")}
         </h2>
-        <p className="tw-m-0 tw-mt-0.5 tw-text-sm tw-font-semibold tw-leading-5 tw-tabular-nums tw-text-primary-300">
+        <p className="tw-m-0 tw-mt-0.5 tw-text-sm tw-font-semibold tw-tabular-nums tw-leading-5 tw-text-primary-300">
           {formatInteger(locale, progress.currentLevel)}
         </p>
       </div>
@@ -91,31 +85,22 @@ export default function YourLevelSummary({
           <dt className="tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-500">
             {t(locale, "network.levels.yourLevel.combined")}
           </dt>
-          <dd className="tw-m-0 tw-mt-0.5 tw-text-sm tw-font-semibold tw-leading-5 tw-tabular-nums tw-text-iron-100">
+          <dd className="tw-m-0 tw-mt-0.5 tw-text-sm tw-font-semibold tw-tabular-nums tw-leading-5 tw-text-iron-100">
             {formatInteger(locale, progress.combinedTdhRep)}
           </dd>
         </div>
 
-        {progress.nextLevel ? (
+        {progress.target && (
           <div className="tw-col-span-2 tw-min-w-0 md:tw-col-span-1">
             <dt className="tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-500">
               {t(locale, "network.levels.yourLevel.target", {
-                level: formatInteger(locale, progress.nextLevel.level),
+                level: formatInteger(locale, progress.target.level),
               })}
             </dt>
-            <dd className="tw-m-0 tw-mt-0.5 tw-text-sm tw-font-semibold tw-leading-5 tw-tabular-nums tw-text-iron-100">
+            <dd className="tw-m-0 tw-mt-0.5 tw-text-sm tw-font-semibold tw-tabular-nums tw-leading-5 tw-text-iron-100">
               {t(locale, "network.levels.yourLevel.targetGap", {
-                amount: formatInteger(locale, progress.tdhRepNeeded),
+                amount: formatInteger(locale, progress.target.tdhRepNeeded),
               })}
-            </dd>
-          </div>
-        ) : (
-          <div className="tw-col-span-2 tw-min-w-0 md:tw-col-span-1">
-            <dt className="tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-500">
-              {t(locale, "network.levels.yourLevel.highest")}
-            </dt>
-            <dd className="tw-m-0 tw-mt-0.5 tw-min-w-0 tw-text-sm tw-leading-5 tw-text-iron-200">
-              {t(locale, "network.levels.yourLevel.highestDescription")}
             </dd>
           </div>
         )}

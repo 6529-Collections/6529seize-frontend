@@ -12,7 +12,10 @@ import {
   LogarithmicScale,
   type TooltipItem,
 } from "chart.js";
-import levels from "@/constants/levels.json";
+import {
+  LAST_LEVEL_LISTED,
+  LISTED_LEVEL_THRESHOLDS,
+} from "@/components/levels/levelThresholds";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
@@ -29,11 +32,6 @@ ChartJS.register(
   LogarithmicScale
 );
 
-interface LevelData {
-  level: number;
-  threshold: number;
-}
-
 export default function ProgressChart() {
   const locale = useBrowserLocale();
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -47,11 +45,11 @@ export default function ProgressChart() {
   }, []);
 
   const data = {
-    labels: (levels as LevelData[]).map((l) => l.level),
+    labels: LISTED_LEVEL_THRESHOLDS.map((l) => l.level),
     datasets: [
       {
         label: t(locale, "network.levels.table.tdhRep"),
-        data: (levels as LevelData[]).map((l) => l.threshold),
+        data: LISTED_LEVEL_THRESHOLDS.map((l) => l.threshold),
         fill: "start" as const,
         tension: 0.15,
         borderColor: "#84ADFF",
@@ -91,7 +89,9 @@ export default function ProgressChart() {
     animation: prefersReducedMotion ? (false as const) : undefined,
   };
 
-  const accessibleLabel = t(locale, "network.levels.chart.accessibleLabel");
+  const accessibleLabel = t(locale, "network.levels.chart.accessibleLabel", {
+    level: formatInteger(locale, LAST_LEVEL_LISTED),
+  });
 
   return (
     <div className="tw-h-[180px] tw-w-full md:tw-h-[280px]">

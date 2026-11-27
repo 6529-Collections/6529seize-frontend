@@ -3002,7 +3002,8 @@
       "keywords": ["levels", "level", "tdh", "rep", "network", "thresholds"],
       "facts": [
         "Network Levels are an integrated signal based on TDH and REP.",
-        "The levels page presents its explanation above a full-width table of all Level 0 through 100 thresholds.",
+        "The levels page presents its explanation above a full-width table of Level 0 through 200 thresholds.",
+        "There is no top level. Levels 0 to 100 use set thresholds. Above Level 100, each level needs 4% more TDH + REP than the one before, rounded down: Level 101 needs 26,000,000 and Level 150 needs 177,667,015.",
         "When a signed-in active profile is available, the levels page shows its current Level, combined TDH and REP, next Level, and additional amount needed; an active proxy profile takes precedence.",
         "Signed-out users and users whose profile data is unavailable see the general reference page without a personalized empty state or calculator.",
         "Levels are shown across profile and Network surfaces where relevant."
@@ -4801,7 +4802,7 @@
         "An identity must meet every configured group criterion unless explicitly included. Inclusion bypasses criteria, but exclusion takes priority over inclusion and criteria.",
         "A group with only an inclusion list contains the listed identities. A group with only an exclusion list contains everyone except excluded identities. A restored legacy group with no criteria and neither identity list has no members; this differs from choosing Everyone for a wave access row. The editor requires at least one criterion or a nonempty identity list before saving a new group.",
         "Zero is a configured bound, not an absent criterion. A minimum Level of 0 allows every Level, including profiles with a negative combined score whose Level is still 0; other configured criteria still apply. A maximum Level of 0 allows only Level 0 profiles.",
-        "Level bounds include the named Levels. Maximum Level 1 includes Level 1 and stops before Level 2. Level 100 is the highest Level.",
+        "Level bounds include the named Levels. Maximum Level 1 includes Level 1 and stops before Level 2. There is no top level, so a Level bound can be above 100.",
         "REP and NIC bounds include both endpoints, and missing rating totals count as zero. NIC is the group-editor label for CIC rating values.",
         "A rating rule filtered by identity or REP category, or using ratings sent, requires a nonzero matching total when neither bound is set. Ratings that cancel each other to zero do not satisfy that unbounded filtered rule.",
         "Fractional xTDH rounds down before a group comparison, including its contribution to combined TDH and xTDH criteria. For example, 12.9 xTDH contributes 12 to the eligibility calculation.",

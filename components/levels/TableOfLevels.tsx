@@ -1,13 +1,8 @@
-import levels from "@/constants/levels.json";
+import { LISTED_LEVEL_THRESHOLDS } from "@/components/levels/levelThresholds";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/network-tdh";
-
-interface LevelData {
-  level: number;
-  threshold: number;
-}
 
 export default function TableOfLevels() {
   const locale = useBrowserLocale();
@@ -40,7 +35,7 @@ export default function TableOfLevels() {
             </tr>
           </thead>
           <tbody className="tw-divide-y tw-divide-white/[0.04] tw-bg-iron-950/40">
-            {(levels as LevelData[]).map((level) => {
+            {LISTED_LEVEL_THRESHOLDS.map((level) => {
               const isMilestone = level.level !== 0 && level.level % 10 === 0;
               const isSubMilestone =
                 level.level !== 0 && !isMilestone && level.level % 5 === 0;

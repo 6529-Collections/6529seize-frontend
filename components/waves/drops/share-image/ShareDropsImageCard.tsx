@@ -25,6 +25,9 @@ export interface ShareImageInclude {
 /** Width in CSS pixels; the PNG is rendered at twice this. */
 export const SHARE_IMAGE_WIDTH = 540;
 const MAX_TEXT_CHARS = 1200;
+// A level of three digits needs a smaller font to stay inside the level
+// badge's border. 8px fits levels 100 to 199.
+const THREE_DIGIT_LEVEL_TEXT_CLASS = "tw-text-[8px]";
 
 function firstImage(drop: ExtendedDrop) {
   for (const part of drop.parts) {
@@ -142,7 +145,13 @@ const ShareDropsImageCard = forwardRef<
               <div className="tw-min-w-0 tw-flex-1">
                 <p className="tw-m-0 tw-flex tw-items-center tw-gap-1.5 tw-text-sm">
                   <span className="tw-truncate tw-font-semibold">{handle}</span>
-                  <span className="tw-flex tw-size-[19px] tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-[1.5px] tw-border-solid tw-border-[#3CCB7F] tw-text-[9px] tw-font-bold tw-text-[#3CCB7F]">
+                  <span
+                    className={`tw-flex tw-size-[19px] tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-[1.5px] tw-border-solid tw-border-[#3CCB7F] tw-font-bold tw-text-[#3CCB7F] ${
+                      drop.author.level >= 100
+                        ? THREE_DIGIT_LEVEL_TEXT_CLASS
+                        : "tw-text-[9px]"
+                    }`}
+                  >
                     {drop.author.level}
                   </span>
                   {timeLabel && (

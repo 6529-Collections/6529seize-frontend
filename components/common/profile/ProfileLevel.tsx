@@ -22,6 +22,15 @@ const LEVEL_SIZE_CLASSES: Record<ProfileLevelSize, string> = {
   [ProfileLevelSize.XLARGE]: "tw-h-8 tw-w-8 tw-text-[1rem]",
 };
 
+// Levels of three digits need a smaller font to stay inside the ring. These
+// sizes fit levels 100 to 199 in Montserrat Bold.
+const THREE_DIGIT_LEVEL_SIZE_CLASSES: Record<ProfileLevelSize, string> = {
+  [ProfileLevelSize.SMALL]: "tw-h-4 tw-w-4 tw-text-[7px]",
+  [ProfileLevelSize.MEDIUM]: "tw-h-5 tw-w-5 tw-text-[9px]",
+  [ProfileLevelSize.LARGE]: "tw-h-6 tw-w-6 tw-text-[11.5px]",
+  [ProfileLevelSize.XLARGE]: "tw-h-8 tw-w-8 tw-text-[15.5px]",
+};
+
 const CIC_SIZE_CLASSES: Record<ProfileLevelSize, string> = {
   [ProfileLevelSize.SMALL]: "-tw-top-[0.1875rem] tw-h-2 tw-w-2",
   [ProfileLevelSize.MEDIUM]: "-tw-top-1 tw-h-2 tw-w-2",
@@ -52,11 +61,14 @@ export default function ProfileLevel({
 }: ProfileLevelProps) {
   const mainColorClass =
     TEXT_COLOR_CLASSES[color ?? "iron-300"] ?? TEXT_COLOR_CLASSES["iron-300"];
+  const sizeClasses = (
+    level >= 100 ? THREE_DIGIT_LEVEL_SIZE_CLASSES : LEVEL_SIZE_CLASSES
+  )[size];
 
   return (
     <div className="tw-relative">
       <div
-        className={`${LEVEL_SIZE_CLASSES[size]} tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-900 tw-font-bold tw-leading-3 tw-ring-1 tw-ring-inset tw-ring-iron-700 ${mainColorClass}`}
+        className={`${sizeClasses} tw-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-900 tw-font-bold tw-leading-3 tw-ring-1 tw-ring-inset tw-ring-iron-700 ${mainColorClass}`}
       >
         {level}
       </div>
