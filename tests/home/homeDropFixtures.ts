@@ -47,6 +47,8 @@ export async function installLoadingTestArtwork(page: Page) {
 /** Browser fixtures must replace the server-seeded drop before layout checks. */
 export async function waitForLoadingTestArtwork(page: Page) {
   const image = page
+    .getByRole("main")
+    .first()
     .locator("[data-home-drop]")
     .getByRole("img", { name: loadingTestArtwork.name, exact: true });
   await expect(image).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
