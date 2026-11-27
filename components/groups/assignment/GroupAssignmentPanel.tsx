@@ -430,6 +430,7 @@ function SharedGroupAssignmentPanel({
   const {
     canReplaceCriteria,
     currentGroupLabel,
+    currentGroupNamePending,
     isCriteriaReplacementActive,
     isSearchPanel,
     onClearAll,
@@ -474,6 +475,7 @@ function SharedGroupAssignmentPanel({
             >
               <CreateWaveInlineGroupHeader
                 currentGroupLabel={currentGroupLabel}
+                currentGroupNamePending={currentGroupNamePending}
                 showCurrentGroupTitle={
                   isCriteriaReplacementActive && !simplifyCriteriaCopy
                 }

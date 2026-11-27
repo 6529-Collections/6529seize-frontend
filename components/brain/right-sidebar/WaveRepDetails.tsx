@@ -6,6 +6,7 @@ import CircleLoader, {
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/query-utils";
 import Button from "@/components/utils/button/Button";
+import { WAVE_PANEL_SECTION_HEADING_CLASS_NAME } from "@/components/waves/groups/WavePanelSection";
 import type { ProfileActivityLogRatingEdit } from "@/entities/IProfile";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveRepCategoriesPage } from "@/generated/models/ApiWaveRepCategoriesPage";
@@ -332,27 +333,37 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
   const isShowingPreviousContributors = contributorsQuery.isPlaceholderData;
 
   return (
-    <div className="tw-flex tw-min-h-full tw-flex-col tw-gap-[13px] tw-p-4 tw-@container/rep">
+    <div className="tw-flex tw-min-h-full tw-flex-col tw-gap-6 tw-p-4 tw-@container/rep md:tw-gap-5">
       <section aria-label={detailText("waves.rep.details.summary.title")}>
-        <div className="tw-overflow-hidden tw-border-x-0 tw-border-y tw-border-solid tw-border-white/5">
-          <div className="tw-flex tw-items-end tw-justify-between tw-gap-4 tw-px-2 tw-py-2.5">
+        <div className="tw-flex tw-flex-col tw-gap-1">
+          <div className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-rounded-lg tw-bg-white/[0.04] tw-px-3 tw-py-2.5">
             <div className="tw-min-w-0">
-              <p className="tw-mb-1 tw-mt-0 tw-text-[13px] tw-font-normal tw-normal-case tw-leading-5 tw-tracking-normal tw-text-iron-500">
+              <p className="tw-mb-0.5 tw-mt-0 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-500">
                 {detailText("waves.rep.details.summary.total")}
               </p>
               <p
-                className={`tw-mb-0 tw-mt-0 tw-text-[13px] tw-font-semibold tw-normal-nums tw-leading-5 ${getRepTextClass(
+                className={`tw-m-0 tw-text-sm tw-font-medium tw-leading-5 ${getRepTextClass(
                   summary.totalRep
                 )}`}
               >
                 {formatSignedRep(summary.totalRep)}
               </p>
             </div>
-            <span className="tw-max-w-32 tw-text-right tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-500">
+            <span className="tw-text-right tw-text-[13px] tw-leading-[18px] tw-text-iron-500">
               {getContributorCountLabel(summary.contributorCount)}
             </span>
           </div>
-          <div className="tw-grid tw-grid-cols-1 tw-gap-1 tw-border-0 tw-bg-transparent @[18rem]/rep:tw-grid-cols-3">
+          <div className="tw-grid tw-grid-cols-1 tw-gap-1 @[18rem]/rep:tw-grid-cols-3">
+            <SummaryStat
+              label={detailText("waves.rep.details.summary.positive")}
+              value={formatSignedRep(summary.positiveRep)}
+              toneClassName={getRepTextClass(summary.positiveRep)}
+            />
+            <SummaryStat
+              label={detailText("waves.rep.details.summary.negative")}
+              value={formatSignedRep(summary.negativeRep)}
+              toneClassName={getRepTextClass(summary.negativeRep)}
+            />
             <SummaryStat
               label={detailText("waves.rep.details.summary.yourRep")}
               value={
@@ -364,25 +375,16 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
                 summary.authenticatedUserContribution ?? 0
               )}
             />
-            <SummaryStat
-              label={detailText("waves.rep.details.summary.positive")}
-              value={formatSignedRep(summary.positiveRep)}
-              toneClassName={getRepTextClass(summary.positiveRep)}
-            />
-            <SummaryStat
-              label={detailText("waves.rep.details.summary.negative")}
-              value={formatSignedRep(summary.negativeRep)}
-              toneClassName={getRepTextClass(summary.negativeRep)}
-            />
           </div>
         </div>
       </section>
 
       <section aria-labelledby="wave-rep-categories-heading">
-        <div className="tw-mb-2 tw-flex tw-items-center tw-justify-between tw-gap-3">
+        <div className="tailwind-scope tw-mb-2 tw-flex tw-items-center tw-justify-between tw-gap-3">
           <h2
             id="wave-rep-categories-heading"
-            className="tw-mb-0 !tw-text-[13px] !tw-font-medium tw-normal-case !tw-leading-5 tw-tracking-normal !tw-text-iron-400"
+            data-wave-typography="preserve"
+            className={WAVE_PANEL_SECTION_HEADING_CLASS_NAME}
           >
             {detailText("waves.rep.details.categories.title")}
           </h2>
@@ -398,11 +400,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
 
         {categoryViewState.showList && (
           <>
-            <div
-              className={`tw-divide-y tw-divide-solid tw-divide-white/5 tw-border-x-0 tw-border-y tw-border-solid tw-border-white/5 ${
-                categoryViewState.isEmpty ? "" : "tw-mt-2"
-              }`}
-            >
+            <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-0.5">
               <CategoryRow
                 label={detailText("waves.rep.details.categories.all")}
                 totalRep={summary.totalRep}
@@ -440,14 +438,14 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
                 />
               ))}
               {categoryViewState.showNoMatches && (
-                <p className="tw-mb-0 tw-px-1 tw-py-3 tw-text-xs tw-font-medium tw-text-iron-500">
+                <p className="tw-mb-0 tw-px-2 tw-py-3 tw-text-sm tw-italic tw-text-iron-500">
                   {detailText("waves.rep.details.categories.noMatches")}
                 </p>
               )}
               {categoryViewState.showPagination && (
                 <div>
                   {categoriesQuery.isFetchNextPageError && (
-                    <p className="tw-mb-0 tw-px-1 tw-py-2 tw-text-xs tw-text-rose-300">
+                    <p className="tw-mb-0 tw-px-2 tw-py-2 tw-text-xs tw-text-rose-300">
                       {detailText("waves.rep.details.categories.loadMoreError")}
                     </p>
                   )}
@@ -456,7 +454,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
                     aria-busy={categoriesQuery.isFetchingNextPage}
                     onClick={fetchNextCategoriesPage}
                     disabled={categoriesQuery.isFetchingNextPage}
-                    className="tw-min-h-11 tw-w-full tw-cursor-pointer tw-border-0 tw-bg-transparent tw-px-1 tw-py-2 tw-text-center tw-text-xs tw-font-semibold tw-text-iron-300 tw-transition hover:tw-bg-white/[0.025] hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 disabled:tw-cursor-wait disabled:tw-text-iron-500"
+                    className="tw-min-h-11 tw-w-full tw-cursor-pointer tw-border-0 tw-bg-transparent tw-px-2 tw-py-2 tw-text-center tw-text-xs tw-font-semibold tw-text-iron-300 tw-transition hover:tw-bg-white/[0.025] hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 disabled:tw-cursor-wait disabled:tw-text-iron-500"
                   >
                     {categoriesQuery.isFetchingNextPage
                       ? detailText("waves.rep.details.categories.loadingMore")
@@ -466,7 +464,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
               )}
             </div>
             {categoryViewState.isEmpty && (
-              <p className="tw-mb-0 tw-mt-2 tw-border-0 tw-px-1 tw-py-1 tw-text-xs tw-italic tw-text-iron-500">
+              <p className="tw-mb-0 tw-mt-2 tw-border-0 tw-py-1 tw-text-sm tw-italic tw-text-iron-500">
                 {detailText("waves.rep.details.categories.empty")}
               </p>
             )}
@@ -489,8 +487,8 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
         )}
       </section>
 
-      <div className="tw-sticky tw-top-0 tw-z-20 tw-flex tw-flex-col tw-bg-iron-950/95 tw-backdrop-blur">
-        <fieldset className="tw-m-0 tw-flex tw-min-w-0 tw-gap-1 tw-border-0 tw-p-0">
+      <div className="tw-sticky tw-top-0 tw-z-20 tw-flex tw-flex-col tw-bg-iron-950">
+        <fieldset className="tailwind-scope tw-m-0 tw-flex tw-min-w-0 tw-gap-1 tw-border-0 tw-p-0">
           <legend className="tw-sr-only">
             {detailText("waves.rep.details.view.ariaLabel")}
           </legend>
@@ -498,7 +496,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
             type="button"
             aria-pressed={activeView === "contributors"}
             onClick={() => setActiveView("contributors")}
-            className={`tw-h-11 tw-cursor-pointer tw-rounded-full tw-border-0 tw-px-3 tw-py-0 !tw-text-[13px] tw-font-medium tw-transition focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:tw-h-8 ${
+            className={`tw-h-11 tw-cursor-pointer tw-rounded-full tw-border-0 tw-px-3 tw-py-0 tw-text-[13px] tw-font-medium tw-transition focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:tw-h-8 ${
               activeView === "contributors"
                 ? "tw-bg-white/[0.08] tw-text-white"
                 : "tw-bg-transparent tw-text-iron-500 hover:tw-text-iron-300"
@@ -510,7 +508,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
             type="button"
             aria-pressed={activeView === "activity"}
             onClick={showActivity}
-            className={`tw-h-11 tw-cursor-pointer tw-rounded-full tw-border-0 tw-px-3 tw-py-0 !tw-text-[13px] tw-font-medium tw-transition focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:tw-h-8 ${
+            className={`tw-h-11 tw-cursor-pointer tw-rounded-full tw-border-0 tw-px-3 tw-py-0 tw-text-[13px] tw-font-medium tw-transition focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:tw-h-8 ${
               activeView === "activity"
                 ? "tw-bg-white/[0.08] tw-text-white"
                 : "tw-bg-transparent tw-text-iron-500 hover:tw-text-iron-300"
@@ -523,15 +521,16 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
 
       {activeView === "contributors" && (
         <section aria-labelledby="wave-rep-contributors-heading">
-          <div className="tw-mb-3 tw-flex tw-items-center tw-justify-between tw-gap-3">
+          <div className="tailwind-scope tw-mb-3 tw-flex tw-items-center tw-justify-between tw-gap-3">
             <div className="tw-min-w-0">
               <h2
                 id="wave-rep-contributors-heading"
-                className="tw-mb-0 !tw-text-[13px] !tw-font-medium tw-normal-case !tw-leading-5 tw-tracking-normal !tw-text-iron-400"
+                data-wave-typography="preserve"
+                className={WAVE_PANEL_SECTION_HEADING_CLASS_NAME}
               >
                 {contributorHeading}
               </h2>
-              <p className="tw-mb-0 tw-mt-0.5 tw-truncate tw-text-xs tw-text-iron-500">
+              <p className="tw-mb-0 tw-mt-0.5 tw-truncate tw-text-xs tw-leading-4 tw-text-iron-500">
                 {contributorDescription}
               </p>
             </div>
@@ -566,7 +565,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
           {contributorsQuery.status === "success" &&
             !isShowingPreviousContributors &&
             contributors.length === 0 && (
-              <p className="tw-mb-0 tw-border-0 tw-px-1 tw-py-1 tw-text-xs tw-italic tw-text-iron-500">
+              <p className="tw-mb-0 tw-border-0 tw-py-1 tw-text-sm tw-italic tw-text-iron-500">
                 {selectedCategory
                   ? detailText(
                       "waves.rep.details.contributors.empty.category",
@@ -628,15 +627,16 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
 
       {activeView === "activity" && (
         <section aria-labelledby="wave-rep-activity-heading">
-          <div className="tw-mb-3 tw-flex tw-items-center tw-justify-between tw-gap-3">
+          <div className="tailwind-scope tw-mb-3 tw-flex tw-items-center tw-justify-between tw-gap-3">
             <div>
               <h2
                 id="wave-rep-activity-heading"
-                className="tw-mb-0 !tw-text-[13px] !tw-font-medium tw-normal-case !tw-leading-5 tw-tracking-normal !tw-text-iron-400"
+                data-wave-typography="preserve"
+                className={WAVE_PANEL_SECTION_HEADING_CLASS_NAME}
               >
                 {detailText("waves.rep.details.activity.title")}
               </h2>
-              <p className="tw-mb-0 tw-mt-0.5 tw-text-xs tw-text-iron-500">
+              <p className="tw-mb-0 tw-mt-0.5 tw-text-xs tw-leading-4 tw-text-iron-500">
                 {detailText("waves.rep.details.activity.description")}
               </p>
             </div>
@@ -663,7 +663,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
           )}
 
           {logsQuery.status === "success" && logs.length === 0 && (
-            <p className="tw-mb-0 tw-border-0 tw-px-1 tw-py-1 tw-text-xs tw-italic tw-text-iron-500">
+            <p className="tw-mb-0 tw-border-0 tw-py-1 tw-text-sm tw-italic tw-text-iron-500">
               {detailText("waves.rep.details.activity.empty")}
             </p>
           )}

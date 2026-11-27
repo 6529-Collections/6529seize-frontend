@@ -1,6 +1,6 @@
-import { withStaysOnSite } from "@/lib/waves-move/scope";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
+import { withStaysOnSite } from "@/lib/waves-move/scope";
 
 interface WaveDetailsLike {
   readonly chat?:
@@ -73,7 +73,7 @@ export const isPublicNonDirectMessageWave = (
   );
 
 export const toApiWaveMin = (wave: ApiWave): ApiWaveMin => {
-  const waveMin: ApiWaveMinWithChatLinkSettings = {
+  const waveMin: Omit<ApiWaveMinWithChatLinkSettings, "stays_on_site"> = {
     id: wave.id,
     name: wave.name,
     picture: wave.picture,
@@ -110,7 +110,6 @@ export const toApiWaveMin = (wave: ApiWave): ApiWaveMin => {
     is_direct_message: wave.chat.scope.group?.is_direct_message ?? false,
   };
 
-  // Whether the wave stays on 6529.io: a drop rebuilt from the full wave
-  // keeps the API's word on it.
-  return withStaysOnSite(waveMin, wave);
+  // Older API responses can omit the move signal.
+  return withStaysOnSite(waveMin, wave) as ApiWaveMin;
 };

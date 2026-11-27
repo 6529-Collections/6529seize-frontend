@@ -132,6 +132,9 @@ test.describe("Coming up local decision time", () => {
     const decision = new Date("2026-10-26T16:00:00Z");
     await page.clock.setFixedTime(now);
     await installComingUpFixture(page);
+    // Settle the synthetic mint instead of retaining live server artwork while
+    // resizing and scrolling to the independently mocked decision timestamp.
+    await installCompletedMintStatus(page);
     let waveRequests = 0;
     await page.route(`**/api/waves/${comingUpWave.id}`, (route) => {
       waveRequests += 1;
@@ -146,6 +149,7 @@ test.describe("Coming up local decision time", () => {
       route.fulfill({ json: comingUpLeaderboard })
     );
     await page.goto("/", { waitUntil: "domcontentloaded" });
+    await waitForComingUpLayoutReady(page, RESPONSE_TIMEOUT_MS);
     const section = page.getByRole("region", {
       name: "Coming up",
       exact: true,
@@ -306,11 +310,24 @@ test("Subscription Minting stays readable with the reference layout @smoke @medi
   }
 });
 
+async function waitForComingUpLayoutReady(page: Page, timeout = 5000) {
+  const artwork = page.getByRole("main").first().getByRole("img", {
+    name: loadingTestArtwork.name,
+    exact: true,
+  });
+  await expect(artwork).toBeVisible({ timeout });
+  await expect(
+    page.getByRole("region", { name: "How to start", exact: true })
+  ).toBeVisible({ timeout });
+  await page.evaluate(() => document.fonts.ready);
+}
+
 for (const cardCount of [1, 3]) {
   test(`Coming Up sizes ${cardCount} cards for the available width @smoke @medium @large`, async ({
     page,
   }, testInfo) => {
     await installComingUpFixture(page);
+    await installCompletedMintStatus(page);
     await page.route("**/coming-up-layout-*.png", (route) => {
       const rank = Number(
         /coming-up-layout-(\d)/.exec(route.request().url())?.[1]
@@ -341,6 +358,7 @@ for (const cardCount of [1, 3]) {
       })
     );
     await page.goto("/", { waitUntil: "domcontentloaded" });
+    await waitForComingUpLayoutReady(page);
     const cards = page
       .getByRole("region", { name: "Coming up", exact: true })
       .getByTestId("coming-up-cards");
@@ -456,6 +474,7 @@ test.describe("Coming up avatar density", () => {
     page,
   }, testInfo) => {
     await installComingUpFixture(page);
+    await installCompletedMintStatus(page);
     const avatar =
       "https://media.6529usercontent.com/ipfs/coming-up-avatar-fixture";
     const optimizedWidths: number[] = [];
@@ -489,6 +508,7 @@ test.describe("Coming up avatar density", () => {
       })
     );
     await page.goto("/", { waitUntil: "domcontentloaded" });
+    await waitForComingUpLayoutReady(page);
     const section = page.getByRole("region", {
       name: "Coming up",
       exact: true,
@@ -2152,7 +2172,9 @@ test("collapsed sidebar fits full rows when a desktop update appears @smoke @med
   );
   await page.setViewportSize({ width: 1440, height: 600 });
   await page.addInitScript(() => {
-    globalThis.sessionStorage.setItem("sidebarCollapsed", "true");
+    if (globalThis.top === globalThis.window) {
+      globalThis.sessionStorage.setItem("sidebarCollapsed", "true");
+    }
   });
   let releaseVersion!: () => void;
   const versionReady = new Promise<void>((resolve) => {
@@ -2464,7 +2486,9 @@ for (const { width, stored, expectedWidth } of [
     );
     await page.setViewportSize({ width, height: 900 });
     await page.addInitScript((value) => {
-      globalThis.sessionStorage.setItem("sidebarCollapsed", value);
+      if (globalThis.top === globalThis.window) {
+        globalThis.sessionStorage.setItem("sidebarCollapsed", value);
+      }
     }, stored);
     const hydration = await gateSidebarHydration(page);
     const sidebar = page.getByLabel("Primary sidebar", { exact: true });

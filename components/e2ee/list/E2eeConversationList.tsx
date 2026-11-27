@@ -7,7 +7,6 @@ import { useId, useState, type ReactNode } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { PinIcon } from "@/components/common/icons/PinIcon";
 import IconButton from "@/components/utils/button/IconButton";
-import useCapacitor from "@/hooks/useCapacitor";
 import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
 import { runPhoneConversationEntryTransition } from "@/helpers/waves/wave-navigation-transition";
 import {
@@ -20,6 +19,7 @@ import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, tRich, type MessageKey } from "@/i18n/messages";
 import type { DisplayTimeZone } from "@/lib/display-time-zone/displayTimeZone";
+import { comparePinPositions } from "@/lib/e2ee/conversation-pins";
 import { groupConversationThreads } from "@/lib/e2ee/dm-conversations";
 import type { E2eeConversation, E2eeEngine } from "@/lib/e2ee/types";
 import { E2eeEmojiProvider } from "../conversation/E2eeEmojiProvider";
@@ -37,6 +37,7 @@ import {
 import { useMutedE2eeChats } from "../e2eeMutedChats";
 import { useE2eeContext } from "../E2eeContext";
 import { E2eeAvatar } from "../ui/E2eeAvatar";
+import { E2eePinSorting, useSortableChatPin } from "./E2eePinSorting";
 
 const STATUS_KEYS: Partial<Record<E2eeConversation["status"], MessageKey>> = {
   invalid: "e2ee.list.status.invalid",
@@ -203,6 +204,8 @@ function UnreadBadges({
 interface E2eeConversationRowProps {
   readonly conversation: E2eeConversation;
   readonly pinGroup: string;
+  readonly threadKey: string;
+  readonly sortable: boolean;
   readonly selfProfileId: string | null;
   readonly active: boolean;
   readonly collapsed: boolean;
@@ -283,6 +286,8 @@ function ConversationPinButton({
 function E2eeConversationRow({
   conversation,
   pinGroup,
+  threadKey,
+  sortable,
   selfProfileId,
   active,
   collapsed,
@@ -292,8 +297,11 @@ function E2eeConversationRow({
   const locale = useBrowserLocale();
   const timestampId = useId();
   const { engine } = useE2eeContext();
+  const { rowProps, linkProps, isDragging } = useSortableChatPin(
+    threadKey,
+    sortable
+  );
   const router = useRouter();
-  const { isCapacitor, isIos } = useCapacitor();
   const title = getConversationTitle(locale, conversation, selfProfileId);
   const statusKey = STATUS_KEYS[conversation.status];
   const pinned = conversation.pinned === true;
@@ -305,6 +313,11 @@ function E2eeConversationRow({
   const rowClass = active
     ? "tw-bg-iron-900 tw-text-iron-50"
     : "tw-text-iron-200 desktop-hover:group-hover/conversation:tw-bg-iron-900/60";
+  const dragClass = sortable
+    ? "tw-select-none [-webkit-touch-callout:none] motion-reduce:tw-!transition-none"
+    : "";
+  const draggedClass = isDragging ? "tw-z-20 tw-bg-iron-950" : "";
+  const instructionsId = linkProps?.["aria-describedby"];
   const pinButton = engine ? (
     <ConversationPinButton
       engine={engine}
@@ -318,7 +331,6 @@ function E2eeConversationRow({
   const handleNavigate = (event: { preventDefault: () => void }) => {
     if (
       active ||
-      (isCapacitor && !isIos) ||
       !window.matchMedia(PHONE_WAVES_LAYOUT_QUERY).matches ||
       !["/messages", getEncryptedMessagesRoute()].includes(
         window.location.pathname
@@ -333,8 +345,12 @@ function E2eeConversationRow({
 
   if (collapsed) {
     return (
-      <li className="tw-group/conversation tw-relative">
+      <li
+        {...rowProps}
+        className={`tw-group/conversation tw-relative ${dragClass} ${draggedClass}`}
+      >
         <Link
+          {...linkProps}
           href={href}
           onNavigate={handleNavigate}
           aria-current={active ? "page" : undefined}
@@ -363,13 +379,17 @@ function E2eeConversationRow({
 
   return (
     <li
-      className={`tw-group/conversation tw-relative tw-isolate tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-rounded-lg tw-px-3 tw-transition-colors ${rowClass}`}
+      {...rowProps}
+      className={`tw-group/conversation tw-relative tw-isolate tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-rounded-lg tw-px-3 tw-transition-colors ${rowClass} ${dragClass} ${draggedClass}`}
     >
       <Link
+        {...linkProps}
         href={href}
         onNavigate={handleNavigate}
         aria-current={active ? "page" : undefined}
-        aria-describedby={timestampId}
+        aria-describedby={
+          instructionsId ? `${timestampId} ${instructionsId}` : timestampId
+        }
         className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-3 tw-py-2 tw-text-inherit tw-no-underline before:tw-absolute before:tw-inset-0 before:tw-z-[5] before:tw-rounded-lg before:tw-content-[''] focus-visible:tw-outline-none focus-visible:before:tw-ring-2 focus-visible:before:tw-ring-inset focus-visible:before:tw-ring-primary-400"
       >
         <ConversationAvatar
@@ -442,55 +462,78 @@ export function E2eeConversationList({
 }: E2eeConversationListProps) {
   const muted = useMutedE2eeChats(selfProfileId);
   const zone = useDisplayTimeZone();
+  const { engine } = useE2eeContext();
   const threads = groupConversationThreads(conversations, selfProfileId).sort(
-    (a, b) =>
-      Number(b.current.pinned === true) - Number(a.current.pinned === true)
+    (a, b) => {
+      if (a.current.pinned && b.current.pinned) {
+        return comparePinPositions(
+          a.current.pinPosition,
+          b.current.pinPosition,
+          a.key,
+          b.key
+        );
+      }
+      return (
+        Number(b.current.pinned === true) - Number(a.current.pinned === true)
+      );
+    }
   );
   const visible = limit === undefined ? threads : threads.slice(0, limit);
+  const pinKeys = visible.flatMap(({ current, key }) =>
+    current.pinned ? [key] : []
+  );
   return (
     <E2eeEmojiProvider>
-      <ul
-        aria-label={label}
-        className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-0.5 tw-p-0"
-      >
-        {visible.map((thread) => {
-          const activeSessions = thread.sessions.filter(
-            (session) => session.status === "active"
-          );
-          const countedSessions =
-            activeSessions.length > 0 ? activeSessions : [thread.current];
-          const unmuted = countedSessions.filter(
-            (session) => !muted.has(session.g)
-          );
-          const incoming = unmuted
-            .filter((session) => session.unread > 0 || session.mentions > 0)
-            .sort((a, b) => b.updatedAt - a.updatedAt)[0];
-          const target = incoming ?? unmuted[0] ?? thread.current;
-          const conversation = {
-            ...target,
-            pinned: thread.current.pinned === true,
-            unread: unmuted.reduce((sum, session) => sum + session.unread, 0),
-            mentions: unmuted.reduce(
-              (sum, session) => sum + session.mentions,
-              0
-            ),
-          };
-          return (
-            <E2eeConversationRow
-              key={thread.key}
-              conversation={conversation}
-              pinGroup={thread.current.g}
-              selfProfileId={selfProfileId}
-              active={thread.sessions.some(
-                (session) => session.g === activeGroup
-              )}
-              collapsed={collapsed}
-              muted={unmuted.length === 0}
-              zone={zone}
-            />
-          );
-        })}
-      </ul>
+      <E2eePinSorting pins={pinKeys}>
+        <ul
+          aria-label={label}
+          className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-0.5 tw-p-0"
+        >
+          {visible.map((thread) => {
+            const activeSessions = thread.sessions.filter(
+              (session) => session.status === "active"
+            );
+            const countedSessions =
+              activeSessions.length > 0 ? activeSessions : [thread.current];
+            const unmuted = countedSessions.filter(
+              (session) => !muted.has(session.g)
+            );
+            const incoming = unmuted
+              .filter((session) => session.unread > 0 || session.mentions > 0)
+              .sort((a, b) => b.updatedAt - a.updatedAt)[0];
+            const target = incoming ?? unmuted[0] ?? thread.current;
+            const conversation = {
+              ...target,
+              pinned: thread.current.pinned === true,
+              unread: unmuted.reduce((sum, session) => sum + session.unread, 0),
+              mentions: unmuted.reduce(
+                (sum, session) => sum + session.mentions,
+                0
+              ),
+            };
+            return (
+              <E2eeConversationRow
+                key={thread.key}
+                conversation={conversation}
+                pinGroup={thread.current.g}
+                threadKey={thread.key}
+                sortable={
+                  Boolean(engine) &&
+                  pinKeys.length > 1 &&
+                  thread.current.pinned === true
+                }
+                selfProfileId={selfProfileId}
+                active={thread.sessions.some(
+                  (session) => session.g === activeGroup
+                )}
+                collapsed={collapsed}
+                muted={unmuted.length === 0}
+                zone={zone}
+              />
+            );
+          })}
+        </ul>
+      </E2eePinSorting>
     </E2eeEmojiProvider>
   );
 }

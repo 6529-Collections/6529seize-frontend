@@ -2420,8 +2420,13 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     page,
   }, testInfo) => {
     await seedSession(page);
+    const viewport = { width: 390, height: 844 };
+    // Native layout viewports must be initialized before hydration.
+    if (isCapacitorSimulationProject(testInfo.project.name)) {
+      await page.setViewportSize(viewport);
+    }
     await openOwnProfile(page);
-    await page.setViewportSize({ width: 390, height: 844 });
+    await page.setViewportSize(viewport);
     await page
       .getByRole("button", { name: "Edit profile", exact: true })
       .click();

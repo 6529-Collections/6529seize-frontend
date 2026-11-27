@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import CompetitionDetail from "@/components/competitions/CompetitionDetail";
 import type { ApiCreateWaveMetadataRequest } from "@/generated/models/ApiCreateWaveMetadataRequest";
 import { WAVE_DISPLAY_METADATA_KEYS } from "@/helpers/waves/wave-metadata.helpers";
+import type { ReactNode } from "react";
 let mockPrimary: string | null = null;
 let mockSearch = "edit=1";
 const mockPush = jest.fn();
@@ -45,9 +46,18 @@ jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
 jest.mock("@/components/brain/my-stream/MyStreamWave", () => () => (
   <div>Original primary experience</div>
 ));
-jest.mock("@/components/competitions/CompetitionAdmin", () => () => (
-  <button>Manage native competition</button>
-));
+jest.mock(
+  "@/components/competitions/CompetitionAdmin",
+  () =>
+    ({
+      renderActions,
+    }: {
+      readonly renderActions?: (actions: ReactNode) => ReactNode;
+    }) => {
+      const actions = <button>Manage native competition</button>;
+      return renderActions ? renderActions(actions) : actions;
+    }
+);
 jest.mock(
   "@/components/competitions/CompetitionResources",
   () =>

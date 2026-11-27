@@ -26,7 +26,7 @@ export interface BackupLocalState {
   readsSent?: Record<string, number>;
   /** When read positions last went up (ms). */
   readsAt?: number;
-  /** Id of the last decision uploaded for each pinned or unpinned thread. */
+  /** Latest uploaded pin and rank decision IDs. Rank keys are prefixed. */
   pinIds?: Record<string, string>;
 }
 

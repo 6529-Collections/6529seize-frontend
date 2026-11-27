@@ -1,6 +1,7 @@
 "use client";
 
 import { useTimeAgoShort } from "@/hooks/useDisplayTimeZone";
+import { usePageVisible, useVisibleInterval } from "@/hooks/usePageVisibility";
 import React, { useEffect, useState } from "react";
 
 interface BrainLeftSidebarWaveDropTimeProps {
@@ -12,36 +13,25 @@ const BrainLeftSidebarWaveDropTime: React.FC<
 > = ({ time }) => {
   const timeAgoShort = useTimeAgoShort();
   const [now, setNow] = useState(() => Date.now());
+  const visible = usePageVisible();
+
+  useVisibleInterval(() => setNow(Date.now()), 60_000);
 
   useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      setNow(Date.now());
-    }, 60000);
+    if (!visible) return;
+
+    const refreshIfVisible = () => {
+      if (document.visibilityState === "visible") setNow(Date.now());
+    };
+
+    document.addEventListener("visibilitychange", refreshIfVisible);
+    window.addEventListener("focus", refreshIfVisible);
 
     return () => {
-      window.clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", refreshIfVisible);
+      window.removeEventListener("focus", refreshIfVisible);
     };
-  }, []);
-
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        setNow(Date.now());
-      }
-    };
-
-    const handleFocus = () => {
-      setNow(Date.now());
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("focus", handleFocus);
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("focus", handleFocus);
-    };
-  }, []);
+  }, [visible]);
 
   const label = timeAgoShort(time, now);
 

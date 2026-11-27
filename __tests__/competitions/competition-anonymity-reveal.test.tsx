@@ -89,6 +89,7 @@ const mockCompetition: ApiCompetition = {
   ended_at: null,
   cancelled_at: null,
   archived_at: null,
+  stays_on_site: true,
 };
 jest.mock("@/contexts/CompetitionContext", () => ({
   useCompetition: () => ({ competition: mockCompetition }),
@@ -177,6 +178,7 @@ const drop = (entryId: string, revealed = false, waveId = "wave"): ApiDrop => ({
     forbid_negative_votes: false,
     pinned: false,
     identity_wave: false,
+    stays_on_site: true,
   },
   created_at: 1,
   updated_at: null,

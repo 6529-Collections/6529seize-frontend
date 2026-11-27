@@ -8,6 +8,9 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import { isChainGroupNamePending } from "@/lib/waves-move/chainGroupName";
 
 export type CreateWaveGroupSearchResultsLayout = "popover" | "inline";
 
@@ -113,6 +116,7 @@ function CreateWaveGroupSearchResultOption({
   readonly onHover: (index: number) => void;
   readonly onSelect: (group: ApiGroupFull) => void;
 }) {
+  const locale = useBrowserLocale();
   const optionStateClasses = getDropdownOptionStateClasses(
     isActive || isSelected
   );
@@ -131,6 +135,11 @@ function CreateWaveGroupSearchResultOption({
         <span className="tw-truncate tw-text-sm tw-font-semibold tw-text-iron-50">
           <HighlightedText text={group.name} query={searchCriteria} />
         </span>
+        {isChainGroupNamePending(group) && (
+          <span className="tw-text-xs tw-font-normal tw-text-iron-400">
+            {t(locale, "wavesMove.groupNamePending")}
+          </span>
+        )}
         <span className="tw-truncate tw-text-xs tw-text-iron-400">
           <HighlightedText
             text={`@${group.created_by.handle ?? "unknown"}`}

@@ -286,6 +286,13 @@ export const E2EE_MESSAGES = {
   "e2ee.list.pinned": "Pinned",
   "e2ee.list.pinnedChat": "{title}, pinned",
   "e2ee.list.pinChat": "Pin {title} to top",
+  "e2ee.list.pinDragInstructions":
+    "Press Space to pick up this chat. Use the arrow keys to move it, Space to drop, or Escape to cancel.",
+  "e2ee.list.pinDragStarted": "Picked up pinned chat.",
+  "e2ee.list.pinDragPosition": "Position {position}.",
+  "e2ee.list.pinDragCancelled": "Reordering canceled.",
+  "e2ee.list.pinOrderSaved": "Pinned chat order saved.",
+  "e2ee.list.pinOrderError": "Couldn’t save the pinned chat order. Try again.",
   "e2ee.list.status.left": "You left",
   "e2ee.list.status.removed": "Removed",
   "e2ee.list.status.restored": "From backup",

@@ -38,6 +38,9 @@ Shared tab routing and owner-mode rules are documented in:
 - Open `/{user}/xtdh?tab=granted` directly.
 - Open `/{user}/xtdh?tab=<active|pending|revoked|failed>` deep links.
 - Switch to `Granted` from `Received`.
+- Use `+ Grant` beside the Granted/Received switch (owner mode only). It uses the
+  same shortcut as Outbound, switches to Granted, scrolls to Create New Grant,
+  and focuses its first input.
 - Use the `Outbound` quick action in the stats header (owner mode only):
   it switches to `Granted`, then scrolls to `Create New Grant`.
 
@@ -52,13 +55,15 @@ Shared tab routing and owner-mode rules are documented in:
 
 ## Granted List Behavior
 
-- Status tabs:
+- Grants are separate cards. Status badges use sentence case and retain their
+  status colors and symbols.
+- Status tabs are compact, horizontally scrollable pills on all screen sizes:
   - `Active`, `Pending`, `Revoked`, `Failed`.
   - `Pending` shows a live count badge while pending grants exist.
 - `Active` sub-filter appears only on `Active`.
 - `Load More` paginates grant rows.
 - Granted rows can show derived badges from validity dates:
-  `ACTIVE`, `SCHEDULED`, or `ENDED`.
+  `Active`, `Scheduled`, or `Ended`.
 - Grants with an end time show `Last grant`: the final daily xTDH run that can
   add xTDH for the grant. xTDH accrues in whole UTC days at the 00:00 UTC run,
   so this is 00:00 UTC on the UTC date of the grant's end (for example
@@ -90,6 +95,10 @@ Grant actions are shown only when both are true:
 
 - owner mode is enabled,
 - row status is `Pending` or `Granted`.
+
+Below medium widths, open the bare three-dot `Grant actions` button on an eligible
+grant to choose `Stop Grant` or `Revoke Grant` in a bottom sheet. Desktop keeps
+the individual buttons and tooltips. Both paths open the same confirmations.
 
 Actions:
 

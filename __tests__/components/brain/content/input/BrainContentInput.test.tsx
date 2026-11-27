@@ -17,11 +17,21 @@ jest.mock("@/hooks/useCapacitor", () => ({
 
 jest.mock("@/components/waves/PrivilegedDropCreator", () => ({
   __esModule: true,
-  default: ({ wave, fixedDropMode }: any) => (
-    <div data-testid="creator" data-mode={fixedDropMode}>
-      {wave.id}
-    </div>
-  ),
+  default: function MockCreator({ wave, fixedDropMode }: any) {
+    // The scope the composer reads, as its pause and lines do.
+    const scope = jest
+      .requireActual("@/components/waves-move/WavesMoveScope")
+      .useWavesMoveScope();
+    return (
+      <div
+        data-testid="creator"
+        data-mode={fixedDropMode}
+        data-waves-move-scope={scope}
+      >
+        {wave.id}
+      </div>
+    );
+  },
   DropMode: { BOTH: "BOTH", CHAT: "CHAT" },
 }));
 
@@ -49,6 +59,29 @@ describe("BrainContentInput", () => {
     );
     expect(container.firstChild).toBeNull();
   });
+
+  it.each([
+    [false, "moves"],
+    [true, "stays"],
+  ])(
+    "gives the reply composer its wave's scope (stays_on_site %s)",
+    (staysOnSite, expected) => {
+      capacitorMock.mockReturnValue({ isCapacitor: false });
+      useWaveDataMock.mockReturnValue({
+        data: { id: "w1", stays_on_site: staysOnSite },
+      });
+      renderInput(
+        <BrainContentInput
+          activeDrop={{ drop: { wave: { id: "w1" } } } as any}
+          onCancelReplyQuote={jest.fn()}
+        />
+      );
+      expect(screen.getByTestId("creator")).toHaveAttribute(
+        "data-waves-move-scope",
+        expected
+      );
+    }
+  );
 
   it("renders creator and passes wave id", () => {
     capacitorMock.mockReturnValue({ isCapacitor: false });

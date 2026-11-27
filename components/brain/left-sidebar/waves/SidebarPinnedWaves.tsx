@@ -1,23 +1,12 @@
 "use client";
 
 import "@/i18n/namespaces/wave-sidebar";
-import {
-  DndContext,
-  KeyboardCode,
-  KeyboardSensor,
-  MouseSensor,
-  closestCenter,
-  useSensor,
-  useSensors,
-  type DragCancelEvent,
-  type DragEndEvent,
-} from "@dnd-kit/core";
+import { DndContext, closestCenter, type DragEndEvent } from "@dnd-kit/core";
 import {
   SortableContext,
   arrayMove,
   useSortable,
   verticalListSortingStrategy,
-  sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
@@ -36,7 +25,11 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { PinnedWaveLinkContext } from "./PinnedWaveLinkContext";
 import { SidebarWaveTreeRowTransition } from "./SidebarWaveTreeRowTransition";
-import { PinnedWaveTouchSensor } from "./PinnedWaveTouchSensor";
+import {
+  canDragPinnedRowFrom,
+  suppressPinnedRowDropClick,
+  usePinnedRowSensors,
+} from "./pinnedRowDrag";
 
 interface PinnedWaveGroup {
   readonly id: string;
@@ -69,35 +62,6 @@ function groupPinnedRows(
   return groups;
 }
 
-function canDragFrom(target: EventTarget) {
-  return (
-    target instanceof Element &&
-    !target.closest("button, input, select, textarea, [role='button']")
-  );
-}
-
-function suppressDropClick({ activatorEvent }: DragEndEvent | DragCancelEvent) {
-  if (activatorEvent instanceof KeyboardEvent) return;
-
-  // dnd-kit stops the release click from bubbling, but the link still has a
-  // browser default action. Cancel it until the next pointer gesture.
-  const controller = new AbortController();
-  const options = { capture: true, signal: controller.signal };
-  const clear = () => controller.abort();
-  document.addEventListener(
-    "click",
-    (event) => {
-      if (event.detail > 0) {
-        event.preventDefault();
-        clear();
-      }
-    },
-    options
-  );
-  document.addEventListener("pointerdown", clear, options);
-  globalThis.setTimeout(clear, 100);
-}
-
 function SortablePinnedWave({
   group,
   controls,
@@ -119,28 +83,31 @@ function SortablePinnedWave({
   const { parent, children } = group;
 
   function onMouseDown(event: MouseEvent<HTMLDivElement>) {
-    if (event.button === 0 && canDragFrom(event.target)) {
+    if (event.button === 0 && canDragPinnedRowFrom(event.target)) {
       listeners?.["onMouseDown"]?.(event);
     }
   }
 
   function onTouchStart(event: TouchEvent<HTMLDivElement>) {
-    if (canDragFrom(event.target)) {
+    if (canDragPinnedRowFrom(event.target)) {
       listeners?.["onTouchStart"]?.(event);
     }
   }
 
   const descriptionId = attributes["aria-describedby"];
   const linkProps = useMemo(
-    () =>
-      listeners && {
+    () => ({
+      // WebKit can lift a link before the reorder sensor sees movement.
+      draggable: false,
+      ...(listeners && {
         ref: setActivatorNodeRef,
         "aria-describedby": descriptionId,
         "aria-keyshortcuts": "Space",
         onKeyDown: (event: ReactKeyboardEvent<HTMLAnchorElement>) => {
           listeners["onKeyDown"]?.(event);
         },
-      },
+      }),
+    }),
     [descriptionId, listeners, setActivatorNodeRef]
   );
 
@@ -156,11 +123,7 @@ function SortablePinnedWave({
       }}
     >
       <div
-        className={
-          controls
-            ? "tw-select-none [-webkit-touch-callout:none] [&_a]:tw-cursor-grab"
-            : undefined
-        }
+        className={`[-webkit-touch-callout:none] [&_img]:[-webkit-user-drag:none] ${controls ? "tw-select-none [&_a]:tw-cursor-grab" : ""}`}
         onMouseDown={controls ? onMouseDown : undefined}
         onTouchStart={controls ? onTouchStart : undefined}
       >
@@ -193,18 +156,7 @@ function SidebarPinnedWaves({
   const dragStartIds = useRef<readonly string[]>([]);
   const saving = useRef(false);
   const [status, setStatus] = useState<"saved" | "error" | null>(null);
-  const sensors = useSensors(
-    useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(PinnedWaveTouchSensor, { delay: 200 }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-      keyboardCodes: {
-        start: [KeyboardCode.Space],
-        end: [KeyboardCode.Space, KeyboardCode.Enter, KeyboardCode.Tab],
-        cancel: [KeyboardCode.Esc],
-      },
-    })
-  );
+  const sensors = usePinnedRowSensors();
 
   async function move(from: number, to: number) {
     if (
@@ -231,7 +183,7 @@ function SidebarPinnedWaves({
   }
 
   function endDrag(event: DragEndEvent) {
-    suppressDropClick(event);
+    suppressPinnedRowDropClick(event);
     const { active, over } = event;
     if (
       !over ||
@@ -280,7 +232,7 @@ function SidebarPinnedWaves({
             dragStartIds.current = ids;
           }}
           onDragEnd={endDrag}
-          onDragCancel={suppressDropClick}
+          onDragCancel={suppressPinnedRowDropClick}
         >
           <SortableContext items={ids} strategy={verticalListSortingStrategy}>
             {groups.map((group) => (

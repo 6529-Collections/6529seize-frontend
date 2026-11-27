@@ -1,4 +1,8 @@
 import {
+  expectNativeNavigation,
+  sampleNativeNavigation,
+} from "../support/nativePhoneNavigation";
+import {
   dropEncryptedAttachment,
   checkEncryptedImageActions,
 } from "../support/e2ee/attachmentMedia";
@@ -46,7 +50,12 @@ import {
   openGifPicker,
 } from "../support/e2ee/giphyFixture";
 import { checkEncryptedPoll } from "../support/e2ee/polls";
-import { expectPinBeforeTimestamp } from "../support/e2ee/pinLayout";
+import {
+  dragPinnedChat,
+  encryptedInbox,
+  expectPinBeforeTimestamp,
+  pinEncryptedChat,
+} from "../support/e2ee/pinLayout";
 
 /** A valid 1x1 RGBA PNG (raster images are the only inline type). */
 const PIXEL_PNG_BASE64 =
@@ -110,6 +119,22 @@ async function tapEncryptedBackAndExpectSlide(page: Page) {
   await expect(
     page.getByRole("button", { name: /^(Back|Go back)$/u })
   ).toHaveCount(0);
+  const retainedInbox = page
+    .getByRole("main", { includeHidden: true })
+    .locator('xpath=ancestor::*[@data-phone-navigation-screen="encrypted"]');
+  if (await retainedInbox.count()) {
+    const underlay = await retainedInbox.elementHandle();
+    if (!underlay) throw new Error("Missing retained encrypted inbox");
+    const frames = sampleNativeNavigation(page, ENCRYPTED_ROUTE, false);
+    await back.tap();
+    expectNativeNavigation(await frames);
+    await expect(page).toHaveURL(new RegExp(`${ENCRYPTED_ROUTE}$`, "u"));
+    expect(await underlay.evaluate((element) => element.isConnected)).toBe(
+      true
+    );
+    await underlay.dispose();
+    return;
+  }
   await page.evaluate(() => {
     const root = document.documentElement;
     const start = document.startViewTransition.bind(document);
@@ -163,6 +188,86 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     const open = sessions;
     sessions = [];
     await closeE2eeUsers(open);
+  });
+
+  test("pinned chat rows reorder by drag and keep their order after reload", async ({
+    baseURL,
+    browser,
+  }, testInfo) => {
+    const users = await resetE2eeSandbox(baseURL);
+    const alice = await openE2eeUser(browser, testInfo, baseURL, users.alice);
+    const bob = await openE2eeUser(browser, testInfo, baseURL, users.bob);
+    const carol = await openE2eeUser(browser, testInfo, baseURL, users.carol);
+    sessions = [alice, bob, carol];
+    await Promise.all(sessions.map((session) => enroll(session)));
+    const { page } = alice;
+    const mobile = isMobileWebProject(testInfo.project.name);
+    const groupTitle = "Pinned group";
+    await startChat(alice, ["bob"], { kind: "dm" });
+    await startChat(alice, ["bob", "carol"], {
+      kind: "group",
+      name: groupTitle,
+    });
+    await startChat(alice, ["carol"], { kind: "dm" });
+    await page.bringToFront();
+    await gotoPath(page, ENCRYPTED_ROUTE);
+    const inbox = encryptedInbox(page);
+    const links = inbox.getByRole("link");
+    const bobLink = conversationListRow(page, "bob");
+    const groupLink = conversationListRow(page, groupTitle);
+    const carolLink = conversationListRow(page, "carol");
+    const original = [/bob/u, /Pinned group/u, /carol/u];
+    const reordered = [/Pinned group/u, /bob/u, /carol/u];
+    await pinEncryptedChat(inbox, "bob");
+    await pinEncryptedChat(inbox, groupTitle);
+    await expect(links).toHaveText(original);
+    await expect(carolLink).not.toHaveAttribute("aria-keyshortcuts", "Space");
+    await expect(groupLink).toHaveAttribute("aria-keyshortcuts", "Space");
+    if (mobile) {
+      await dragPinnedChat(page, groupLink, bobLink, true);
+    } else {
+      const moveGroupUp = async () => {
+        await groupLink.focus();
+        await page.keyboard.press("Space");
+        await expect(
+          page.getByText("Position 2.", { exact: true })
+        ).toHaveCount(1);
+        // The keyboard sensor attaches its listener after pickup.
+        await page.evaluate(
+          () =>
+            new Promise<void>((resolve) =>
+              requestAnimationFrame(() =>
+                requestAnimationFrame(() => resolve())
+              )
+            )
+        );
+        await page.keyboard.press("ArrowUp");
+        await expect(
+          page.getByText("Position 1.", { exact: true })
+        ).toHaveCount(1);
+      };
+      await moveGroupUp();
+      await page.keyboard.press("Escape");
+      await expect(
+        page.getByText("Reordering canceled.", { exact: true })
+      ).toHaveCount(1);
+      await expect(groupLink).toBeFocused();
+      await expect(links).toHaveText(original);
+      await moveGroupUp();
+      await page.keyboard.press("Space");
+      await expect(links).toHaveText(reordered);
+      await dragPinnedChat(page, bobLink, groupLink);
+    }
+    const expected = mobile ? reordered : original;
+    await expect(links).toHaveText(expected);
+    await expect(page).toHaveURL(new RegExp(`${ENCRYPTED_ROUTE}$`, "u"));
+    await page.reload();
+    await expect(links).toHaveText(expected, {
+      timeout: E2EE_UI_TIMEOUT_MS,
+    });
+    await inbox.screenshot({
+      path: testInfo.outputPath("pinned-encrypted-chats.png"),
+    });
   });
 
   test("both participants can create and vote in encrypted DM polls", async ({
@@ -571,7 +676,7 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     ).toBeVisible();
     await alice.page.keyboard.press("Escape");
 
-    const releaseBack = await dragEncryptedMessage(alice.page, body, 130);
+    const releaseBack = await dragEncryptedMessage(alice.page, body, 240);
     await releaseBack();
     await expect(alice.page).toHaveURL(new RegExp(`${ENCRYPTED_ROUTE}$`, "u"));
     const bobRow = conversationListRow(alice.page, "bob");
@@ -582,11 +687,13 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     await expect(bobRow).toBeVisible();
     await tapEncryptedBackAndExpectSlide(bob.page);
     await expect(conversationListRow(bob.page, "alice")).toBeVisible();
-    await bobRow.tap();
-    await expect(alice.page.locator("html")).toHaveAttribute(
-      "data-test-encrypted-entry-slide",
-      "ready"
+    const entryFrames = sampleNativeNavigation(
+      alice.page,
+      ENCRYPTED_ROUTE,
+      true
     );
+    await bobRow.tap();
+    expectNativeNavigation(await entryFrames, { headerMayLoad: true });
     await expectMessage(alice.page, incoming);
     await conversationListRow(bob.page, "alice").tap();
     await expect(bob.page.locator("html")).toHaveAttribute(

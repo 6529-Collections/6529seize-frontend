@@ -172,6 +172,7 @@ function createFullGroup(
     visible: true,
     is_private: false,
     is_direct_message: false,
+    stays_on_site: false,
   };
 }
 

@@ -19,6 +19,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
 import CompactMenuMobileBottomSheet from "@/components/compact-menu/CompactMenuMobileBottomSheet";
+import { DEFAULT_TRIGGER_CLASSES } from "@/components/compact-menu/constants";
+import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
 import { useAuth } from "@/components/auth/Auth";
 import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
 import Button from "@/components/utils/button/Button";
@@ -31,10 +33,12 @@ import { invalidateProfileWaveQueries } from "@/hooks/useProfileWave";
 import { getWaveCurationsQueryKey } from "@/hooks/waves/useWaveCurations";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useProfileWaveMutation } from "@/hooks/useProfileWaveMutation";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { commonApiDelete } from "@/services/api/common-api";
+import clsx from "clsx";
 import MyStreamWaveCurationCreateDialog from "./MyStreamWaveCurationCreateDialog";
 
 interface MyStreamWaveCurationTabMenuProps {
@@ -242,6 +246,7 @@ export default function MyStreamWaveCurationTabMenu({
   const editTriggerRef = useRef<HTMLButtonElement>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const isMobileLayoutViewport = useIsMobileLayoutViewport();
+  const isPhone = useMediaQuery(PHONE_WAVES_LAYOUT_QUERY);
   const isSettingProfileCuration =
     isSetAsProfileCurationPending || isProfileWavePending;
 
@@ -371,7 +376,7 @@ export default function MyStreamWaveCurationTabMenu({
         }))
       : menuItems;
   const shouldUseMobileBottomSheet =
-    hasProfileActions && isMobileLayoutViewport;
+    isPhone || (hasProfileActions && isMobileLayoutViewport);
   const mobileMenuItems =
     permissionMode === "profile"
       ? menuItems.map((item) => {
@@ -395,6 +400,9 @@ export default function MyStreamWaveCurationTabMenu({
   const phoneDetails =
     useContext(WaveInformationPanelContext)?.isPhone === true;
   const isConfiguration = triggerVariant === "configuration";
+  const menuAriaLabel = isConfiguration
+    ? triggerAriaLabel
+    : t(locale, "profileCuration.manage.menuAria");
   const baseTriggerClassName = getTriggerClassName({
     isConfiguration,
     hasTriggerLabel: Boolean(triggerLabel),
@@ -431,9 +439,17 @@ export default function MyStreamWaveCurationTabMenu({
     <>
       {shouldUseMobileBottomSheet ? (
         <CompactMenuMobileBottomSheet
-          title={triggerLabel ?? t(locale, "profileCuration.header.manage")}
+          title={
+            hasProfileActions
+              ? (triggerLabel ?? t(locale, "profileCuration.header.manage"))
+              : t(locale, "profileCuration.manage.menuAria")
+          }
           titleClassName={dialogTypography?.title}
-          ariaLabel={triggerLabel ?? t(locale, "profileCuration.header.manage")}
+          ariaLabel={
+            hasProfileActions
+              ? (triggerLabel ?? t(locale, "profileCuration.header.manage"))
+              : menuAriaLabel
+          }
           items={mobileMenuItems}
           trigger={triggerContent}
           renderTriggerButton={({
@@ -441,18 +457,59 @@ export default function MyStreamWaveCurationTabMenu({
             ariaExpanded,
             disabled,
             onClick,
-          }) => (
-            <IconButton
-              layout="profile-menu"
-              aria-label={ariaLabel}
-              aria-haspopup="dialog"
-              aria-expanded={ariaExpanded}
-              disabled={disabled}
-              onClick={onClick}
-            >
-              <EllipsisVerticalIcon aria-hidden="true" className="tw-size-5" />
-            </IconButton>
-          )}
+          }) => {
+            if (hasProfileActions) {
+              return (
+                <IconButton
+                  ref={editTriggerRef}
+                  layout="profile-menu"
+                  aria-label={ariaLabel}
+                  aria-haspopup="dialog"
+                  aria-expanded={ariaExpanded}
+                  disabled={disabled}
+                  onClick={onClick}
+                >
+                  <EllipsisVerticalIcon
+                    aria-hidden="true"
+                    className="tw-size-5"
+                  />
+                </IconButton>
+              );
+            }
+            if (!triggerLabel) {
+              return (
+                <button
+                  type="button"
+                  ref={editTriggerRef}
+                  className={clsx(
+                    !isConfiguration && DEFAULT_TRIGGER_CLASSES,
+                    triggerClassName
+                  )}
+                  aria-label={ariaLabel}
+                  aria-haspopup="dialog"
+                  aria-expanded={ariaExpanded}
+                  disabled={disabled}
+                  onClick={onClick}
+                >
+                  {triggerContent}
+                </button>
+              );
+            }
+            return (
+              <Button
+                ref={editTriggerRef}
+                variant="tertiary"
+                size="sm"
+                aria-label={ariaLabel}
+                aria-haspopup="dialog"
+                aria-expanded={ariaExpanded}
+                disabled={disabled}
+                onClick={onClick}
+              >
+                {triggerContent}
+              </Button>
+            );
+          }}
           disabled={isMenuDisabled}
         />
       ) : (
@@ -460,11 +517,7 @@ export default function MyStreamWaveCurationTabMenu({
           triggerClassName={triggerClassName}
           trigger={menuTrigger}
           triggerAsChild={isConfiguration || !!triggerLabel}
-          aria-label={
-            isConfiguration
-              ? triggerAriaLabel
-              : t(locale, "profileCuration.manage.menuAria")
-          }
+          aria-label={menuAriaLabel}
           items={styledMenuItems}
           menuClassName={editPanel.isInSheet ? "tw-z-[1020]" : undefined}
           itemsWrapperClassName={hasProfileActions ? "tw-pt-2" : undefined}

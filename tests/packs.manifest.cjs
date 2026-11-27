@@ -516,7 +516,7 @@ const PACKS = [
       {
         ...AUTH_SANDBOX_ENV,
         PLAYWRIGHT_BASE_URL: "http://localhost:3297",
-        PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3297",
+        PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3297/api/version",
         PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT: "4297",
         NEXT_DEV_DIST_DIR: ".next-playwright-native-competition",
       },
@@ -627,6 +627,7 @@ const PACKS = [
         "tests/social/profile-following-sandbox.spec.ts",
         "tests/social/profile-rep-edit-sandbox.spec.ts",
         "tests/social/profile-about-sandbox.spec.ts",
+        "tests/social/profile-xtdh-sandbox.spec.ts",
       ],
       {
         ...AUTH_SANDBOX_ENV,
@@ -695,7 +696,10 @@ const PACKS = [
       "test:e2e:e2ee-sandbox",
       "Encrypted DMs and groups across several local browsers against the fake delivery service.",
       ["tests/e2ee"],
-      E2EE_SANDBOX_ENV,
+      {
+        ...E2EE_SANDBOX_ENV,
+        PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3299/api/version",
+      },
       [DESKTOP, MOBILE]
     ),
     timeoutMinutes: 30,

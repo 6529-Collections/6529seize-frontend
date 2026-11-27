@@ -110,6 +110,8 @@ function applyEffectiveAppPrCiPlan(plan) {
         "components/brain/my-stream/tabs/MainStageNominationPopover.tsx" ||
       file === "i18n/messages/identityGettingStarted.en-US.json" ||
       file.startsWith("components/user/rep/") ||
+      file.startsWith("components/user/xtdh/") ||
+      file.startsWith("components/xtdh/") ||
       file.startsWith("components/user/user-page-header/about/") ||
       file === "components/user/user-page-header/UserPageHeaderClient.tsx" ||
       file === "components/user/brain/UserPageBrainSidebarMobileStrip.tsx" ||
@@ -127,7 +129,8 @@ function applyEffectiveAppPrCiPlan(plan) {
       file === "components/react-query-wrapper/ReactQueryWrapper.tsx" ||
       file === "hooks/useRepAllocation.ts" ||
       file === "tests/social/profile-rep-edit-sandbox.spec.ts" ||
-      file === "tests/social/profile-about-sandbox.spec.ts"
+      file === "tests/social/profile-about-sandbox.spec.ts" ||
+      file === "tests/social/profile-xtdh-sandbox.spec.ts"
   );
 
   const playwrightDropReactions = files.some(
@@ -214,6 +217,7 @@ function applyEffectiveAppPrCiPlan(plan) {
         "hooks/useSidebarWavePin.ts",
         "components/brain/left-sidebar/waves/SidebarWaveTouchActions.tsx",
         "components/brain/left-sidebar/waves/PinnedWaveTouchSensor.ts",
+        "components/brain/left-sidebar/waves/pinnedRowDrag.ts",
         "components/brain/left-sidebar/waves/SidebarPinnedWaves.tsx",
         "components/brain/left-sidebar/waves/BrainLeftSidebarWave.tsx",
         "components/brain/left-sidebar/web/WebBrainLeftSidebarWave/index.tsx",
@@ -227,6 +231,11 @@ function applyEffectiveAppPrCiPlan(plan) {
         "components/navigation/AndroidBackNavigation.tsx",
         "services/capacitor/android-back-layers.ts",
         "components/brain/mobile/useWaveListSwipeBack.ts",
+        "components/mobile-navigation/PhoneNavigationStack.tsx",
+        "components/mobile-navigation/PhoneListLayoutProvider.tsx",
+        "contexts/PhoneNavigationScreenContext.tsx",
+        "helpers/waves/phone-navigation-route.ts",
+        "lib/motion/phone-navigation.ts",
         "components/brain/mobile/useWaveNavigationTransition.ts",
         "helpers/waves/wave-navigation-transition.ts",
         "styles/wave-navigation-transition.css",

@@ -2,6 +2,7 @@
 
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/emma";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
 import { useEffect, useState } from "react";

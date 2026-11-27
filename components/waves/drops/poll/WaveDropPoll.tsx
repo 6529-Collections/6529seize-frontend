@@ -191,7 +191,8 @@ const useUpdatedVoteStatus = () => {
 export default function WaveDropPoll({ drop }: WaveDropPollProps) {
   const locale = useBrowserLocale();
   const queryClient = useQueryClient();
-  const { requestAuth, setToast } = useAuth();
+  const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
+    useAuth();
   const { getEligibility } = useWaveEligibility();
   const myStream = useMyStreamActionsOptional();
   const { clearUpdatedVoteStatus, flashUpdatedVoteStatus, showUpdated } =
@@ -220,6 +221,20 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
   // Poll ballots move to the 6529 Network: the results stay readable. A
   // poll in a wave that stays on 6529.io (direct messages too) keeps working.
   const pollBallotsPaused = useWavesWritesPaused("polls");
+  // Whoever could edit or delete the post can't while the wave moves; say
+  // so where those options would be missed.
+  const isAuthor =
+    !!connectedProfile?.handle &&
+    !activeProfileProxy &&
+    !drop.author.is_anonymous &&
+    connectedProfile.handle === drop.author.handle;
+  const canRemovePost =
+    isAuthor ||
+    (drop.wave.authenticated_user_admin &&
+      drop.wave.admin_drop_deletion_enabled) ||
+    (!!drop.reply_to &&
+      drop.wave.authenticated_user_can_delete_replies === true);
+  const pollPostLocked = useWavesWritesPaused() && canRemovePost;
   const canRespondToPoll =
     !pollBallotsPaused &&
     getCanRespondToPoll({
@@ -738,6 +753,13 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
         <div className={POLL_FOOTER_CLASS_NAME}>
           <p className="tw-m-0 tw-text-xs tw-text-iron-400">
             {t(locale, "wavesMove.paused")}
+          </p>
+        </div>
+      )}
+      {pollPostLocked && (
+        <div className={POLL_FOOTER_CLASS_NAME}>
+          <p className="tw-m-0 tw-text-xs tw-text-iron-400">
+            {t(locale, "wavesMove.pollPostLocked")}
           </p>
         </div>
       )}

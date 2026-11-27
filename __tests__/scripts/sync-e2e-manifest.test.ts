@@ -131,6 +131,7 @@ describe("E2E pack manifest", () => {
       projects: ["web-desktop-chromium", "web-mobile-chromium"],
       env: {
         PLAYWRIGHT_BASE_URL: "http://localhost:3297",
+        PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3297/api/version",
       },
     });
     const workflow = fs.readFileSync(
@@ -164,7 +165,7 @@ describe("E2E pack manifest", () => {
         PLAYWRIGHT_E2EE_SANDBOX: "1",
         USE_DEV_AUTH: "true",
         PLAYWRIGHT_BASE_URL: "http://localhost:3299",
-        PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3299",
+        PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3299/api/version",
         PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT: "4299",
         NEXT_DEV_DIST_DIR: ".next-playwright-e2ee",
         PLAYWRIGHT_WEB_SERVER_COMMAND:

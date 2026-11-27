@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+import { usePhoneNavigationScreen } from "@/contexts/PhoneNavigationScreenContext";
 import type { MouseEvent, PointerEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useTitleActions } from "@/contexts/TitleContext";
@@ -187,9 +188,12 @@ const NavItemContent = ({
   } | null>(null);
   const recoveryClickInProgressRef = useRef(false);
   const suppressPointerClickUntilRef = useRef(0);
-  const pathname = usePathname();
+  const currentPathname = usePathname();
+  const retainedScreen = usePhoneNavigationScreen();
+  const pathname = retainedScreen?.pathname ?? currentPathname;
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
-  const searchParams = useSearchParams();
+  const currentSearchParams = useSearchParams();
+  const searchParams = retainedScreen?.searchParams ?? currentSearchParams;
   const activeWaveId = getActiveWaveIdFromUrl({ pathname, searchParams });
   const activeView = getActiveViewFromUrl({
     activeWaveId,

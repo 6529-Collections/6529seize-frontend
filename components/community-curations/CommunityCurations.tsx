@@ -11,8 +11,16 @@ import { t } from "@/i18n/messages";
 import { usePersistentScrollOffset } from "@/components/token-list/hooks/usePersistentScrollOffset";
 import { PROFILE_WAVES_FEED_SCROLL_KEY } from "@/helpers/waves/profile-feed-navigation";
 import { commitWaveNavigationContent } from "@/helpers/waves/wave-navigation-transition";
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffectEvent,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import type { CSSProperties, ReactNode } from "react";
+import { usePhoneNavigationScreen } from "@/contexts/PhoneNavigationScreenContext";
+import { useScrollPositionContext } from "@/contexts/ScrollPositionContext";
 
 const COMMUNITY_CURATIONS_SKELETON_COLUMNS = [
   {
@@ -149,6 +157,8 @@ export default function CommunityCurations({
   const hasTopContent = Boolean(topContent);
   const { waveViewStyle } = useLayout();
   const scrollContainerRef = useRef<HTMLElement | null>(null);
+  const retainedScreen = usePhoneNavigationScreen();
+  const { getPosition } = useScrollPositionContext();
   const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(
     null
   );
@@ -157,6 +167,16 @@ export default function CommunityCurations({
     scrollContainerRef
   );
   const hasRestoredScrollOffsetRef = useRef(initialScrollOffset === 0);
+  const resetFreshEntry = useEffectEvent(() => {
+    // Explicit Feed entry clears the saved offset; a retained Feed must follow it too.
+    if (getPosition(PROFILE_WAVES_FEED_SCROLL_KEY) === 0) {
+      hasRestoredScrollOffsetRef.current = true;
+      scrollContainerRef.current?.scrollTo({ top: 0 });
+    }
+  });
+  useLayoutEffect(() => {
+    if (retainedScreen?.active) resetFreshEntry();
+  }, [retainedScreen?.active]);
   const cancelScrollRestore = () => {
     hasRestoredScrollOffsetRef.current = true;
   };

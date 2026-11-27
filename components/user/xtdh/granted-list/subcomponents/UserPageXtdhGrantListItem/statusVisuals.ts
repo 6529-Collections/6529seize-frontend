@@ -18,31 +18,31 @@ interface StatusVisuals {
 
 const STATUS_VISUALS: Record<KnownGrantStatus, StatusVisuals> = {
   GRANTED: {
-    label: "GRANTED",
+    label: "Granted",
     icon: faCircle,
-    badgeClassName: "tw-bg-green/15 tw-text-green",
+    badgeClassName: "tw-text-green",
   },
   DISABLED: {
-    label: "REVOKED",
+    label: "Revoked",
     icon: faTimes,
-    badgeClassName: "tw-bg-red/15 tw-text-red",
+    badgeClassName: "tw-text-red",
   },
   PENDING: {
-    label: "PENDING",
+    label: "Pending",
     icon: faEllipsisH,
-    badgeClassName: "tw-bg-primary-400/15 tw-text-primary-300",
+    badgeClassName: "tw-text-primary-300",
   },
   FAILED: {
-    label: "FAILED",
+    label: "Failed",
     icon: faTimes,
-    badgeClassName: "tw-bg-red/15 tw-text-red",
+    badgeClassName: "tw-text-red",
   },
 };
 
 const DEFAULT_STATUS_VISUALS: StatusVisuals = {
-  label: "STATUS",
+  label: "Status",
   icon: faDotCircle,
-  badgeClassName: "tw-bg-iron-700/50 tw-text-iron-300",
+  badgeClassName: "tw-text-iron-300",
 };
 
 export function getStatusVisuals(
@@ -65,24 +65,22 @@ export function getStatusVisuals(
     if (to && to < now) {
       return {
         ...visuals,
-        label: "ENDED",
-        badgeClassName:
-          "tw-border-iron-600/50 tw-bg-iron-600/10 tw-text-iron-400 tw-shadow-[0_0_20px_rgba(100,100,100,0.15)]",
+        label: "Ended",
+        badgeClassName: "tw-text-iron-400",
       };
     }
 
     if (from > now) {
       return {
         ...visuals,
-        label: "SCHEDULED",
-        badgeClassName:
-          "tw-border-blue-400/50 tw-bg-blue-400/10 tw-text-blue-200 tw-shadow-[0_0_20px_rgba(82,139,255,0.15)]",
+        label: "Scheduled",
+        badgeClassName: "tw-text-blue-200",
       };
     }
 
     return {
       ...visuals,
-      label: "ACTIVE",
+      label: "Active",
     };
   }
 

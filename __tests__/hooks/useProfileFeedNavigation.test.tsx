@@ -23,6 +23,8 @@ jest.mock("@/components/navigation/ViewContext", () => ({
 jest.mock("@/helpers/waves/wave-navigation-transition", () => ({
   runWaveNavigationTransition: (_screen: string, navigate: () => void) =>
     navigate(),
+  runPhoneChevronBackTransition: (_pathname: string, navigate: () => void) =>
+    navigate(),
 }));
 
 beforeEach(() => {

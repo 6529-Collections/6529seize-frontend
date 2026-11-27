@@ -9,6 +9,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { createFallbackWaveMin } from "@/services/api/drop-v2-mappers";
 import { mapLeaderboardDropV2 } from "@/services/api/wave-drops-v2-api";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { usePhoneNavigationScreenActive } from "@/contexts/PhoneNavigationScreenContext";
 import { useMemo } from "react";
 
 export const COMMUNITY_CURATIONS_DROPS_QUERY_KEY =
@@ -91,6 +92,7 @@ export function useCommunityCurationsDrops({
   limit,
   enabled = true,
 }: UseCommunityCurationsDropsProps) {
+  const screenActive = usePhoneNavigationScreenActive();
   const query = useInfiniteQuery({
     queryKey: [COMMUNITY_CURATIONS_DROPS_QUERY_KEY, { limit }],
     queryFn: ({ pageParam }: { pageParam: number }) =>
@@ -98,7 +100,7 @@ export function useCommunityCurationsDrops({
         limit,
         page: pageParam,
       }),
-    enabled,
+    enabled: enabled && screenActive,
     initialPageParam: 1,
     getNextPageParam: (lastPage) =>
       lastPage.next ? lastPage.page + 1 : undefined,

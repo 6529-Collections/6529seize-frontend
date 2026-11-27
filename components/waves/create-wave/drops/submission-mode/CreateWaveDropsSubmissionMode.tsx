@@ -11,7 +11,10 @@ import {
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { ReactNode } from "react";
-import { CREATE_WAVE_FORM_STYLES } from "../../utils/createWaveFormStyles";
+import {
+  CREATE_WAVE_FORM_STYLES,
+  DECISION_EDITOR_MOBILE_STYLES,
+} from "../../utils/createWaveFormStyles";
 
 enum CreateWaveSubmissionMode {
   STANDARD = "STANDARD",
@@ -94,7 +97,7 @@ function SubmissionOptionRow<T extends string>({
           isSelected
             ? "tw-border-primary-400 tw-bg-primary-500/10"
             : "tw-border-iron-600 tw-bg-transparent group-hover:tw-border-iron-500"
-        } ${hasDescription ? "tw-mt-1" : ""}`}
+        } ${hasDescription ? "tw-mt-1" : ""} ${DECISION_EDITOR_MOBILE_STYLES.optionRadio}`}
       >
         <span
           className={`tw-h-2 tw-w-2 tw-rounded-full tw-bg-primary-400 tw-transition tw-duration-200 ${
@@ -102,19 +105,21 @@ function SubmissionOptionRow<T extends string>({
           }`}
         />
       </span>
-      <div className="tw-flex tw-min-w-0 tw-flex-col">
+      <div
+        className={`tw-flex tw-min-w-0 tw-flex-col ${DECISION_EDITOR_MOBILE_STYLES.optionText}`}
+      >
         <span
           id={titleId}
           className={`${labelClasses} tw-min-h-4 tw-font-semibold ${
             hasPreview ? "tw-text-xs sm:tw-text-sm" : "tw-text-sm"
-          }`}
+          } ${DECISION_EDITOR_MOBILE_STYLES.optionTitle}`}
         >
           {label}
         </span>
         {description && (
           <span
             id={descriptionId}
-            className={`${descriptionClasses} tw-mt-1 tw-text-xs tw-font-normal tw-leading-4`}
+            className={`${descriptionClasses} tw-mt-1 tw-text-xs tw-font-normal tw-leading-4 ${DECISION_EDITOR_MOBILE_STYLES.helper}`}
           >
             {description}
           </span>
@@ -126,10 +131,12 @@ function SubmissionOptionRow<T extends string>({
   if (hasPreview) {
     return (
       <label
-        className={`${wrapperClasses} tw-group tw-flex tw-w-full tw-cursor-pointer tw-flex-col tw-gap-y-2 tw-rounded-xl tw-border tw-border-solid tw-p-2 tw-transition tw-duration-300 tw-ease-out focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 sm:tw-gap-y-3 sm:tw-p-3`}
+        className={`${wrapperClasses} tw-group tw-flex tw-w-full tw-cursor-pointer tw-flex-col tw-gap-y-2 tw-rounded-xl tw-border tw-border-solid tw-p-2 tw-transition tw-duration-300 tw-ease-out focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 sm:tw-gap-y-3 sm:tw-p-3 ${DECISION_EDITOR_MOBILE_STYLES.optionCard}`}
       >
         {preview}
-        <div className="tw-flex tw-w-full tw-min-w-0 tw-items-center tw-gap-x-2 sm:tw-gap-x-3">
+        <div
+          className={`tw-flex tw-w-full tw-min-w-0 tw-items-center tw-gap-x-2 sm:tw-gap-x-3 ${DECISION_EDITOR_MOBILE_STYLES.optionContent}`}
+        >
           {control}
         </div>
       </label>
@@ -140,7 +147,7 @@ function SubmissionOptionRow<T extends string>({
     <label
       className={`${wrapperClasses} tw-group tw-flex tw-w-full tw-cursor-pointer tw-gap-x-3 tw-rounded-xl tw-border tw-border-solid tw-px-3 tw-py-3 tw-transition tw-duration-300 tw-ease-out focus-within:tw-ring-2 focus-within:tw-ring-inset focus-within:tw-ring-primary-400 ${
         hasDescription ? "tw-items-start" : "tw-items-center"
-      }`}
+      } ${DECISION_EDITOR_MOBILE_STYLES.optionContent}`}
     >
       {control}
     </label>
@@ -159,10 +166,12 @@ function SubmissionModePreview({
   return (
     <div
       aria-hidden="true"
-      className="tw-h-16 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/70 tw-p-2 sm:tw-h-20 sm:tw-p-3"
+      className={`tw-h-16 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/70 tw-p-2 sm:tw-h-20 sm:tw-p-3 ${DECISION_EDITOR_MOBILE_STYLES.preview}`}
     >
       {mode === CreateWaveSubmissionMode.STANDARD ? (
-        <div className="tw-flex tw-h-full tw-flex-col tw-justify-center">
+        <div
+          className={`tw-flex tw-h-full tw-flex-col tw-justify-center ${DECISION_EDITOR_MOBILE_STYLES.previewContent}`}
+        >
           <div className="tw-flex tw-items-center tw-gap-1.5 sm:tw-gap-2">
             <span
               className={`tw-size-3 tw-flex-shrink-0 tw-rounded-full sm:tw-size-4 ${accentClass}`}
@@ -179,7 +188,9 @@ function SubmissionModePreview({
           </div>
         </div>
       ) : (
-        <div className="tw-flex tw-h-full tw-items-center tw-justify-center">
+        <div
+          className={`tw-flex tw-h-full tw-items-center tw-justify-center ${DECISION_EDITOR_MOBILE_STYLES.previewContent}`}
+        >
           <div className="tw-flex tw-w-full tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-1.5 sm:tw-w-4/5 sm:tw-gap-3 sm:tw-p-2">
             <span
               className={`tw-size-7 tw-flex-shrink-0 tw-rounded-full sm:tw-size-9 ${accentClass}`}
@@ -291,7 +302,7 @@ export default function CreateWaveDropsSubmissionMode({
   return (
     <div className="tw-flex tw-flex-col">
       <div className="tw-space-y-1">
-        <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
+        <h3 className={CREATE_WAVE_FORM_STYLES.sectionTitle}>
           Submission type
         </h3>
         <p className={CREATE_WAVE_FORM_STYLES.compactSupportingText}>
@@ -299,7 +310,9 @@ export default function CreateWaveDropsSubmissionMode({
         </p>
       </div>
 
-      <div className="tw-mt-4 tw-grid tw-grid-cols-2 tw-gap-3">
+      <div
+        className={`tw-mt-4 tw-grid tw-grid-cols-2 tw-gap-3 ${DECISION_EDITOR_MOBILE_STYLES.optionGrid}`}
+      >
         {submissionModeOptions.map((option) => {
           const isSelected = selectedMode === option.type;
 
@@ -329,7 +342,9 @@ export default function CreateWaveDropsSubmissionMode({
         {submissionStrategy && (
           <div className="tw-flex tw-flex-col tw-gap-y-6">
             <div>
-              <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-100">
+              <p
+                className={`tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-100 ${DECISION_EDITOR_MOBILE_STYLES.heading}`}
+              >
                 Which identities can a participant submit?
               </p>
               <div className="tw-mt-3 tw-grid tw-grid-cols-1 tw-gap-3">
@@ -370,7 +385,9 @@ export default function CreateWaveDropsSubmissionMode({
             </div>
 
             <div>
-              <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-100">
+              <p
+                className={`tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-100 ${DECISION_EDITOR_MOBILE_STYLES.heading}`}
+              >
                 When can the same identity be submitted again?
               </p>
               <div className="tw-mt-3 tw-grid tw-grid-cols-1 tw-gap-3">
