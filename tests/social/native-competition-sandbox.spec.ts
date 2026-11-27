@@ -1930,7 +1930,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
           .getByRole("button", { name: "Edit Chat access", exact: true })
           .click();
         const editor = page.getByRole("dialog").filter({
-          has: page.locator("[data-wave-access-footer]"),
+          has: page.getByRole("button", { name: "Save changes", exact: true }),
         });
         const save = editor.getByRole("button", {
           name: "Save changes",
@@ -1965,10 +1965,11 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
             name: /Remove playwright, wallet/,
           });
           await expect(remove).toHaveCSS("width", "44px");
-          await expect(remove.locator("..")).toHaveCSS(
-            "background-color",
-            "rgba(0, 0, 0, 0)"
-          );
+          await expect(
+            editor
+              .getByRole("button", { name: /Remove playwright, wallet/ })
+              .locator("..")
+          ).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
         }
         const includeMe = editor.getByRole("switch", {
           name: "Include me",
@@ -1978,8 +1979,14 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
           await expect
             .poll(() =>
               editor
-                .locator("[data-mobile-navigation-view]")
-                .evaluate((el) => Math.round(el.getBoundingClientRect().left))
+                .getByRole("heading", { name: "Identities", exact: true })
+                .evaluate((el) =>
+                  Math.round(
+                    el
+                      .closest("[data-mobile-navigation-view]")!
+                      .getBoundingClientRect().left
+                  )
+                )
             )
             .toBe(0);
         }
@@ -2031,8 +2038,15 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         await expect(save).toBeInViewport({ ratio: 1 });
         if (!phone)
           await expect(
-            editor.locator("[data-wave-access-footer]").getByRole("switch")
-          ).toHaveCount(1);
+            editor
+              .getByRole("switch", {
+                name: "Hide criteria and members",
+                exact: true,
+              })
+              .evaluate(
+                (el) => el.closest("[data-wave-access-footer]") !== null
+              )
+          ).resolves.toBe(true);
         await editor
           .getByText("Hide criteria and members", { exact: true })
           .click();

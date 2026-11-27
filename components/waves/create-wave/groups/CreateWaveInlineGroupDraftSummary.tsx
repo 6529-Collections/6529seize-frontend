@@ -32,6 +32,7 @@ export default function CreateWaveInlineGroupDraftSummary({
   readonly draftMembersPreview?: ReactNode | undefined;
   readonly onCreateAndUse: () => void;
   readonly quiet?: boolean;
+  /** Undefined keeps actions inline; null waits for the pinned footer to mount. */
   readonly actionsContainer?: HTMLElement | null | undefined;
 }) {
   const locale = useBrowserLocale();
@@ -141,7 +142,10 @@ export default function CreateWaveInlineGroupDraftSummary({
           </div>
         </div>
         {(!pinnedActions || mobilePresentation) && privacyControl}
-        {actionsContainer ? createPortal(actions, actionsContainer) : actions}
+        {actionsContainer !== null &&
+          (actionsContainer
+            ? createPortal(actions, actionsContainer)
+            : actions)}
       </div>
     </div>
   );

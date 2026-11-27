@@ -23,8 +23,14 @@ it.each([false, true])(
       actionsContainer: footer,
       onCreateAndUse: onSave,
     };
-    const view = render(<CreateWaveInlineGroupDraftSummary {...props} />);
+    const view = render(
+      <CreateWaveInlineGroupDraftSummary {...props} actionsContainer={null} />
+    );
     try {
+      expect(
+        screen.queryByRole("button", { name: "Save changes" })
+      ).not.toBeInTheDocument();
+      view.rerender(<CreateWaveInlineGroupDraftSummary {...props} />);
       expect(within(view.container).getByText("After editing")).toBeVisible();
       expect(
         screen.getAllByRole("button", { name: "Save changes" })
@@ -43,8 +49,13 @@ it.each([false, true])(
       );
       expect(onSave).toHaveBeenCalledTimes(1);
       view.rerender(
-        <CreateWaveInlineGroupDraftSummary {...props} canCreateDraft={false} />
+        <CreateWaveInlineGroupDraftSummary
+          {...props}
+          isValid={false}
+          canCreateDraft={false}
+        />
       );
+      expect(screen.getByText("Not ready yet.", { exact: true })).toBeVisible();
       expect(
         within(footer).getByRole("button", { name: "Save changes" })
       ).toBeDisabled();
