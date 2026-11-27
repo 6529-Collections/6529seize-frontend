@@ -16268,6 +16268,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           .getByRole("link", { name: "New decision", exact: true })
           .locator(":scope > span")
       ).toHaveCSS("font-weight", "500");
+      await expect(newCuration).toBeVisible();
       const [curationAction, decisionAction] = await Promise.all([
         newCuration.boundingBox(),
         newDecision.boundingBox(),
