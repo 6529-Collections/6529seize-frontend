@@ -13,7 +13,7 @@ import {
   type ReactNode,
 } from "react";
 
-export interface MobilePageNavigation {
+interface MobilePageNavigation {
   readonly title: string;
   readonly back: () => void;
   readonly protectDrafts: boolean;

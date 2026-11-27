@@ -1979,7 +1979,14 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       path: testInfo.outputPath("access-identities-resized-phone.png"),
       style: "nextjs-portal { visibility: hidden; }",
     });
-    await editor.getByRole("button", { name: "Back", exact: true }).click();
+    await expect(
+      editor.getByRole("heading", { name: "Identities", exact: true })
+    ).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(
+      editor.getByRole("tab", { name: "Excluded", exact: true })
+    ).toBeFocused();
+    await page.keyboard.press("Escape");
     await expect(editor).toHaveAccessibleName("Edit Chat access");
     await editor.getByRole("button", { name: "Back", exact: true }).click();
     await page
