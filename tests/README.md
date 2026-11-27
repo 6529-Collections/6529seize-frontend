@@ -77,12 +77,53 @@ clock after this fixture mint's scheduled grace period. Sidebar storage init
 scripts run only in the top frame so sandboxed artwork frames retain their
 storage isolation.
 
+Installing the synthetic homepage artwork also isolates direct child-frame
+documents inside the homepage's `data-home-drop` slot. Server-rendered live
+interactive art can start before browser API mocks settle, starving fixture
+hydration and fake-clock/layout operations. The helper fulfills only those
+artwork document GETs with inert HTML; it leaves the main document, other
+iframes, images, APIs and mutation guard unchanged. Initial-HTML and dedicated
+artwork/media checks that do not install this fixture retain real media
+behavior. Do not use this isolation in tests of the interactive artwork itself.
+
+The delayed Coming Up response scenarios wait for the held endpoint to start
+before advancing the browser clock. The leaderboard case also establishes its
+initial loading UI first, then verifies that it survives the full simulated
+delay. Hydration startup is not part of that delay. The original one-request,
+loading, recovery and overflow assertions remain in place.
+
+The card-sizing scenario likewise waits for the existing page-scroll movement
+assertion after scrolling, instead of sampling the position only once. It still
+requires the same upward grid movement and checks the original responsive card
+geometry.
+
 The Coming Up visitor-timezone scenario also supplies a completed mint and
 waits for the controlled artwork, signed-out sections and fonts before resizing
 or scrolling. Its fixed clock and Shanghai midnight assertions remain separate
 from live mint selection; seeing the decision label alone is not page readiness.
-The scenario uses the existing data-response readiness budget rather than
-changing the overall test timeout or adding retries.
+All consumers of this layout-readiness helper use the existing data-response
+budget, so fixture hydration is not constrained by the default five-second
+assertion deadline. The overall test timeout and configured retries are
+unchanged.
+The initial Coming Up card/credit assertions use that data-response budget too;
+cached-return, delayed-response recovery and interaction assertions retain
+their existing deadlines.
+
+Mint metadata layout checks read the date, price, values, statistics and links
+in one browser task. Async trading content and viewport changes can move the
+whole block between separate bounding-box requests; mixing those coordinates
+is not evidence of overlap. The checks still require the original desktop and
+phone ordering at all five widths. A synthetic regression schedules a layout
+shift between browser tasks and separately proves real link overlap remains
+detectable. Initial client detail data uses the existing response budget;
+geometry assertions keep their five-second convergence budget.
+
+The sidebar update layout scenario waits for its controlled version response
+after each full document navigation, before checking Update and the unchanged
+row/account geometry. An SSR sidebar alone does not mean the new version
+provider has hydrated. Messages keyboard coverage likewise establishes the
+initial selected tab and lazy panel, then sends real keyboard input to the
+verified focus target while continuing to assert both focus and selection.
 
 The profile pages sandbox also checks Collected personal actions against its
 isolated API. Anonymous and visitor profiles omit the entire action row. Owners
@@ -429,15 +470,12 @@ the contract; rendered rows may also come from cached data. Use the existing
 hydration-ready marker when checking the transition from server HTML to
 interactive chrome.
 
-Homepage layout fixtures and homepage-based header-search tests install
-`support/homeArtworkFixture.ts` before navigation. It replaces only GET iframe
-documents inside the current-drop and Coming Up artwork containers with inert
-HTML. Browser API routes cannot intercept the server's initial drop read, so a
-newer server-seeded artwork can otherwise survive the client fixture and execute
-changing third-party scripts during unrelated assertions. Both the NFT iframe
-and sandboxed submission renderer are covered; the application document, API
-responses, image requests, and unrelated embeds remain untouched. Dedicated
-media packs retain live artwork coverage and do not install this fixture.
+Homepage fixture artwork isolation uses `support/homeArtworkIsolation.ts`
+through `installLoadingTestArtwork`, including homepage-based header-search
+journeys. This replaces the superseded staging-only artwork fixture rather
+than installing two overlapping route handlers. Its direct-child current-drop
+document boundary and untouched requests are described with the homepage pack
+below; dedicated media coverage remains real.
 
 Use `seedSidebarCollapsedState` from `support/sidebarHydration.ts` for sidebar
 session fixtures. Playwright init scripts also run in child frames; the helper
