@@ -1,6 +1,7 @@
 import type { ApiDeviceGrant } from "@/generated/models/ApiDeviceGrant";
 import type { ApiDeviceSignature } from "@/generated/models/ApiDeviceSignature";
 import type { StoredDeviceKey } from "@/lib/device-signing/device-key-storage";
+import type { IndexedDbFailureHandler } from "@/lib/storage/idb-keyval";
 import { installNodeWebCrypto, VECTORS } from "./device-signing-test-utils";
 
 const mockRecords = new Map<string, StoredDeviceKey>();
@@ -8,9 +9,12 @@ const mockRecords = new Map<string, StoredDeviceKey>();
 let mockReadGate: Promise<void> | null = null;
 jest.mock("@/lib/device-signing/device-key-storage", () => ({
   deviceKeyStorage: {
-    read: async (address: string) => {
+    read: async (address: string, onFailure?: IndexedDbFailureHandler) => {
       if (mockReadGate) {
-        await mockReadGate;
+        await mockReadGate.catch((error: unknown) => {
+          onFailure?.("read");
+          throw error;
+        });
       }
       return mockRecords.get(address);
     },
@@ -675,6 +679,14 @@ describe("device-signed drop writes", () => {
       expect(prompts).toEqual([
         expect.objectContaining({ reason: "storage-error" }),
       ]);
+      expect(mockReportFallback).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: "post",
+          reason: "storage-error",
+          phase: "storage",
+          storageOperation: "read",
+        })
+      );
       expect(sentSignature(postMock)).toBeUndefined();
     });
 
