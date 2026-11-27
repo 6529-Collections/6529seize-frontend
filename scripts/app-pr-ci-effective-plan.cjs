@@ -184,6 +184,8 @@ function applyEffectiveAppPrCiPlan(plan) {
         "i18n/messages/competitions.ts",
         "tests/social/native-competition-sandbox.spec.ts",
         "tests/social/wave-media-processing-sandbox.spec.ts",
+        "tests/social/wave-time-zone-sandbox.spec.ts",
+        "lib/display-time-zone/displayTimeZoneStore.ts",
         "components/waves/drops/wave-drops-all/hooks/useDeferredNewestDrops.ts",
         "components/waves/drops/wave-drops-all/index.tsx",
         "helpers/waves/drop-media-reconciliation.ts",
