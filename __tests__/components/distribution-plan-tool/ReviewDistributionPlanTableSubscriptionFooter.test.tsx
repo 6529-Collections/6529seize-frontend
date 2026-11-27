@@ -831,13 +831,42 @@ test("shows an admin-facing error when the downloader reports one", async () => 
   });
 });
 
-test("keeps manual finalization for a plan with saved manual work", async () => {
+test("places manual finalization in Prepare distribution before photo upload and publishing", async () => {
   mockSavedPreparationMode = "MANUAL";
   render(<TestWrapper initialTokenId="123" />);
-  const finishing = within(
-    screen.getByRole("region", { name: "Finish distribution" })
-  );
-  const [finalize, publish] = finishing.getAllByRole("button");
+  const preparation = screen.getByRole("region", {
+    name: "Prepare distribution",
+  });
+  const photos = screen.getByRole("region", { name: "Distribution Photos" });
+  const publishing = screen.getByRole("region", {
+    name: "Publish distribution",
+  });
+  const sections = [
+    screen.getByRole("region", { name: "Distribution assets" }),
+    preparation,
+    photos,
+    publishing,
+  ];
+  expect(
+    screen.getAllByRole("region").filter((region) => sections.includes(region))
+  ).toEqual(sections);
+  const finalize = within(preparation).getByRole("button", {
+    name: "Finalize Distribution",
+  });
+  const publish = within(publishing).getByRole("button", {
+    name: "Publish to GitHub",
+  });
+  expect(
+    within(photos).getByRole("button", { name: "Upload Distribution Photos" })
+  ).toBeEnabled();
+  expect(
+    within(photos).queryByRole("table", {
+      name: "Finalized distribution counts",
+    })
+  ).toBeNull();
+  expect(
+    within(publishing).queryByRole("button", { name: "Finalize Distribution" })
+  ).toBeNull();
   expect(finalize).toHaveAccessibleName("Finalize Distribution");
   expect(finalize).toBeEnabled();
   expect(publish).toHaveAccessibleName("Publish to GitHub");
@@ -871,7 +900,7 @@ test("describes a finalized manual distribution without changing the button name
   );
 });
 
-test("shows finalized Craft totals above the photos row", async () => {
+test("shows finalized Craft totals above the controls in Distribution Photos", async () => {
   jest
     .spyOn(require("@/services/api/common-api"), "commonApiFetch")
     .mockResolvedValue(createOverview({ is_normalized: true }));
@@ -882,7 +911,19 @@ test("shows finalized Craft totals above the photos row", async () => {
     .mocked(getMemesMintingAllowlists)
     .mockResolvedValue([{ phase: "Phase 0", addresses: 196, total: 196 }]);
   render(<TestWrapper initialTokenId="123" />);
-  const phase = within(await screen.findByRole("row", { name: /^Phase 0/ }));
+  const photos = within(
+    screen.getByRole("region", { name: "Distribution Photos" })
+  );
+  const counts = await photos.findByRole("table", {
+    name: "Finalized distribution counts",
+  });
+  const upload = photos.getByRole("button", {
+    name: "Upload Distribution Photos",
+  });
+  expect(
+    counts.compareDocumentPosition(upload) & Node.DOCUMENT_POSITION_FOLLOWING
+  ).toBeTruthy();
+  const phase = within(within(counts).getByRole("row", { name: /^Phase 0/ }));
   expect(phase.getByText("70 cards")).toBeVisible();
   expect(phase.getByText("46 wallets")).toBeVisible();
   expect(phase.getByText("196 spots")).toBeVisible();
