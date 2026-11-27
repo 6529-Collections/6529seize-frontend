@@ -1,9 +1,31 @@
-import type { Page } from "@playwright/test";
+import type { Frame, Page } from "@playwright/test";
 
 const installedFixtures = new WeakMap<
   Page,
   { readonly documentsReplaced: () => number }
 >();
+
+async function isHomeArtworkFrame(frame: Frame): Promise<boolean> {
+  if (frame.parentFrame() === null) return false;
+  try {
+    // frameElement throws (rather than returning null) if the frame detaches.
+    const element = await frame.frameElement();
+    try {
+      return await element.evaluate(
+        (iframe) =>
+          iframe instanceof Element &&
+          iframe.closest(
+            '[data-home-drop], [data-home-section="Coming up"]'
+          ) !== null
+      );
+    } finally {
+      await element.dispose();
+    }
+  } catch (error) {
+    if (!frame.isDetached()) throw error;
+    return false;
+  }
+}
 
 /**
  * Layout/search tests must not execute changing, third-party HTML artwork.
@@ -27,25 +49,7 @@ export async function installHomeArtworkFixture(page: Page) {
       await route.fallback();
       return;
     }
-    const frame = request.frame();
-    if (frame.parentFrame() === null) {
-      await route.fallback();
-      return;
-    }
-    const element = await frame.frameElement();
-    let isHomeArtwork: boolean;
-    try {
-      isHomeArtwork = await element.evaluate(
-        (iframe) =>
-          iframe instanceof Element &&
-          iframe.closest(
-            '[data-home-drop], [data-home-section="Coming up"]'
-          ) !== null
-      );
-    } finally {
-      await element.dispose();
-    }
-    if (!isHomeArtwork) {
+    if (!(await isHomeArtworkFrame(request.frame()))) {
       await route.fallback();
       return;
     }
