@@ -32,7 +32,7 @@ function Figure({ label, value }: { readonly label: string; readonly value: stri
   return (
     <div>
       <p className={LABEL}>{label}</p>
-      <p className="tw-m-0 tw-mt-1 tw-text-3xl tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl">
+      <p className="tw-m-0 tw-mt-1 tw-whitespace-nowrap tw-text-2xl tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50 sm:tw-text-3xl xl:tw-text-4xl">
         {value}
       </p>
     </div>

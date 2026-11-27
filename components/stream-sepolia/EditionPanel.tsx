@@ -70,7 +70,7 @@ function Result({
       </div>
       {count > 0 && clearing ? (
         <>
-          <p className="tw-m-0 tw-mt-2 tw-text-3xl tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl">
+          <p className="tw-m-0 tw-mt-2 tw-text-2xl tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl">
             {t(locale, "streamSepolia.ed.result", {
               count: formatCount(count, locale),
               price: formatEth(clearing.price, locale),
@@ -187,7 +187,7 @@ function Book({
                   scope="col"
                   className={`tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.07] tw-pb-2 tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500 ${
                     index === 3 ? "tw-text-right" : "tw-pr-3 tw-text-left"
-                  }`}
+                  } ${column === "bidder" ? "tw-hidden sm:tw-table-cell" : ""}`}
                 >
                   {t(locale, `streamSepolia.ed.col.${column}`)}
                 </th>
@@ -208,7 +208,7 @@ function Book({
                     <td className="tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.07] tw-py-2 tw-pr-3 tw-tabular-nums">
                       {formatCount(row.quantity, locale)}
                     </td>
-                    <td className="tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.07] tw-py-2 tw-pr-3">
+                    <td className="tw-hidden tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.07] tw-py-2 tw-pr-3 sm:tw-table-cell">
                       {mine ? (
                         <span className="tw-font-semibold tw-text-primary-300">{t(locale, "streamSepolia.you")}</span>
                       ) : (
