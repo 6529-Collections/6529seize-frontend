@@ -7,6 +7,7 @@ import { installNodeWebCrypto, VECTORS } from "./device-signing-test-utils";
 const mockRecords = new Map<string, StoredDeviceKey>();
 /** When set, record reads wait for (or fail with) this promise. */
 let mockReadGate: Promise<void> | null = null;
+let mockWriteError: Error | null = null;
 jest.mock("@/lib/device-signing/device-key-storage", () => ({
   deviceKeyStorage: {
     read: async (address: string, onFailure?: IndexedDbFailureHandler) => {
@@ -18,7 +19,14 @@ jest.mock("@/lib/device-signing/device-key-storage", () => ({
       }
       return mockRecords.get(address);
     },
-    write: async (record: StoredDeviceKey) => {
+    write: async (
+      record: StoredDeviceKey,
+      onFailure?: IndexedDbFailureHandler
+    ) => {
+      if (mockWriteError) {
+        onFailure?.("write");
+        throw mockWriteError;
+      }
       mockRecords.set(record.address, record);
     },
     readAll: async () => [...mockRecords.values()],
@@ -263,6 +271,7 @@ describe("device-signed drop writes", () => {
   beforeEach(() => {
     mockRecords.clear();
     mockReadGate = null;
+    mockWriteError = null;
     globalThis.localStorage.clear();
     mockEnabled = true;
     mockWalletAddress = ADDRESS;
@@ -670,25 +679,32 @@ describe("device-signed drop writes", () => {
       expect(sentSignature(postMock)).toBeDefined();
     });
 
-    it("asks with a storage reason when IndexedDB fails", async () => {
-      await setUpGrant();
-      answers = ["unsigned"];
-      failRecordReads();
+    it.each(["read", "write"] as const)(
+      "asks with a storage reason and reports a failed IndexedDB %s",
+      async (operation) => {
+        await setUpGrant();
+        answers = ["unsigned"];
+        if (operation === "read") {
+          failRecordReads();
+        } else {
+          mockWriteError = new Error("IndexedDB write failed");
+        }
 
-      await postDrop(createBody());
-      expect(prompts).toEqual([
-        expect.objectContaining({ reason: "storage-error" }),
-      ]);
-      expect(mockReportFallback).toHaveBeenCalledWith(
-        expect.objectContaining({
-          action: "post",
-          reason: "storage-error",
-          phase: "storage",
-          storageOperation: "read",
-        })
-      );
-      expect(sentSignature(postMock)).toBeUndefined();
-    });
+        await postDrop(createBody());
+        expect(prompts).toEqual([
+          expect.objectContaining({ reason: "storage-error" }),
+        ]);
+        expect(mockReportFallback).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: "post",
+            reason: "storage-error",
+            phase: "storage",
+            storageOperation: operation,
+          })
+        );
+        expect(sentSignature(postMock)).toBeUndefined();
+      }
+    );
 
     it("cancels a waiting write when its request is aborted", async () => {
       await setUpGrant();

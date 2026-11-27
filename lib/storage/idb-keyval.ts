@@ -145,6 +145,7 @@ export function createStore(dbName: string, storeName: string): StoreFn {
       try {
         db = await getDbPromise(dbName, storeName);
       } catch (error) {
+        // Concurrent callers can share the same in-flight database open.
         diagnostics?.onFailure("open");
         throw error;
       }
