@@ -99,6 +99,9 @@
   - `Validating preview...` while checks run
   - sandboxed preview when valid
   - inline error guidance when invalid.
+- A valid interactive submission preview fills the available area below its
+  host banner and resizes with the preview panel. The artwork controls how its
+  content fits inside that area.
 - Editing or clearing the submission hash resets preview state and triggers a
   fresh validation cycle.
 - Home `Latest Drop` HTML on an approved Arweave URL can recover automatically

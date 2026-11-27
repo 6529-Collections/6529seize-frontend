@@ -493,7 +493,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
                     key={externalPreviewUrl}
                     src={externalPreviewUrl}
                     title="Interactive artwork preview"
-                    className="tw-bg-transparent"
+                    className="tw-absolute tw-inset-0 tw-bg-transparent"
                     containerClassName="tw-flex-1 tw-flex tw-flex-col"
                     showFullscreenControl
                     fallback={renderPreviewMessage(
