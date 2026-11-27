@@ -11,17 +11,16 @@ export const getUsablePushAuthJwt = (): string | null => {
 };
 
 export function reportUnavailablePushAuth(
-  attempt: number,
   profileId: string,
   platform: DeviceInfo["platform"],
-  maxAttempts: number
+  retryContext?: { attempt: number; maxAttempts: number }
 ): void {
-  console.warn("Skipping push registration: auth token is missing or expired", {
-    attempt: attempt + 1,
-    maxAttempts,
-    profileId,
-    platform,
-  });
+  if (retryContext) {
+    console.warn(
+      "Skipping push registration: auth token is missing or expired",
+      { ...retryContext, profileId, platform }
+    );
+  }
   Sentry.addBreadcrumb({
     category: "notifications",
     level: "warning",
@@ -29,8 +28,10 @@ export function reportUnavailablePushAuth(
     data: {
       component: "NotificationsProvider",
       operation: "registerPushNotification",
-      attempt: attempt + 1,
-      max_attempts: maxAttempts,
+      ...(retryContext && {
+        attempt: retryContext.attempt,
+        max_attempts: retryContext.maxAttempts,
+      }),
       profile_id: profileId,
       platform,
     },

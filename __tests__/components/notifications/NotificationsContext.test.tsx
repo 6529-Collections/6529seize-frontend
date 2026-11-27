@@ -11,6 +11,7 @@ import {
   NotificationsProvider,
   useNotificationsContext,
 } from "@/components/notifications/NotificationsContext";
+import { PushInstallationPreparationError } from "@/services/notifications/push-installation-errors";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import React from "react";
 
@@ -563,9 +564,14 @@ describe("push registration behavior", () => {
     { label: "object", failure: { message: "sensitive storage error" } },
     { label: "null", failure: null },
     { label: "undefined", failure: undefined },
+    {
+      label: "device identity change",
+      failure: new PushInstallationPreparationError("identity_changed"),
+      reason: "identity_changed",
+    },
   ])(
     "allows a waiting registration to continue after a $label preparation failure",
-    async ({ failure }) => {
+    async ({ failure, reason }) => {
       const {
         preparePushInstallationRegistration,
       } = require("@/services/notifications/push-installation");
@@ -600,10 +606,46 @@ describe("push registration behavior", () => {
         expect.objectContaining({
           tags: expect.objectContaining({
             operation: "preparePushInstallationRegistration",
-            push_failure_reason: "storage_or_identity_failure",
+            push_failure_reason: reason ?? "storage_or_identity_failure",
           }),
         })
       );
+    }
+  );
+
+  it.each(["ios", "android"])(
+    "records stale auth during push preparation as a breadcrumb on %s",
+    async (platform) => {
+      const {
+        preparePushInstallationRegistration,
+      } = require("@/services/notifications/push-installation");
+      const { commonApiPost } = require("@/services/api/common-api");
+      const { Device } = require("@capacitor/device");
+      const sentry = require("@sentry/nextjs");
+      mockIsIos = platform === "ios";
+      Device.getInfo.mockResolvedValueOnce({ platform });
+      preparePushInstallationRegistration.mockRejectedValueOnce(
+        new PushInstallationPreparationError("auth_changed")
+      );
+
+      const { registrationCallback } = await setupRegistrationCallback();
+      await act(async () => {
+        await registrationCallback({ value: "test-token" });
+      });
+
+      expect(sentry.addBreadcrumb).toHaveBeenCalledWith({
+        category: "notifications",
+        level: "info",
+        message: "Push registration skipped (auth changed).",
+        data: {
+          component: "NotificationsProvider",
+          operation: "preparePushInstallationRegistration",
+          push_failure_reason: "auth_changed",
+          platform,
+        },
+      });
+      expect(sentry.captureException).not.toHaveBeenCalled();
+      expect(commonApiPost).not.toHaveBeenCalled();
     }
   );
 
@@ -668,6 +710,32 @@ describe("push registration behavior", () => {
       );
     }
   );
+
+  it("includes attempt metadata when auth is lost after push preparation", async () => {
+    const { getAuthJwt } = require("@/services/auth/auth.utils");
+    const {
+      preparePushInstallationRegistration,
+    } = require("@/services/notifications/push-installation");
+    const { commonApiPost } = require("@/services/api/common-api");
+    const sentry = require("@sentry/nextjs");
+    preparePushInstallationRegistration.mockImplementationOnce(async () => {
+      getAuthJwt.mockReturnValue(null);
+      return {};
+    });
+
+    const { registrationCallback } = await setupRegistrationCallback();
+    await act(async () => {
+      await registrationCallback({ value: "test-token" });
+    });
+
+    expect(sentry.addBreadcrumb).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "Push registration skipped (auth token unavailable).",
+        data: expect.objectContaining({ attempt: 1, max_attempts: 3 }),
+      })
+    );
+    expect(commonApiPost).not.toHaveBeenCalled();
+  });
 
   it("reinitializes registration when auth becomes usable", async () => {
     const { PushNotifications } = require("@capacitor/push-notifications");
