@@ -82,6 +82,7 @@ it("fulfills only a direct homepage artwork document with script-free HTML", asy
 it.each([
   { method: "POST" },
   { resourceType: "image" },
+  { resourceType: "fetch", navigation: true },
   { resourceType: "fetch", navigation: false },
   { navigation: false },
   { parent: "none" as const },

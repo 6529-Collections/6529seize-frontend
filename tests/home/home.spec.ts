@@ -345,6 +345,7 @@ test("Subscription Minting stays readable with the reference layout @smoke @medi
   }
 });
 
+// Initial fixture data uses the response budget, not the interaction deadline.
 async function waitForComingUpLayoutReady(
   page: Page,
   timeout = RESPONSE_TIMEOUT_MS
