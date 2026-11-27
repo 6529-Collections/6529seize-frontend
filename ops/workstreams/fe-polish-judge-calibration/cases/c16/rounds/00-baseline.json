@@ -1,0 +1,207 @@
+{
+  "rubric_version": "fe-polish-judge/2.1",
+  "candidate": "04d8b1e250984d73c2c537794e6b83e2ed1f6721",
+  "coverage": [
+    {
+      "route": "/museum/network/about",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-1440x1000-04.png",
+        "evidence/page-1440x1000-05.png"
+      ]
+    },
+    {
+      "route": "/museum/network/about",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": [
+        "evidence/page-390x844-01.png",
+        "evidence/page-390x844-02.png",
+        "evidence/page-390x844-03.png",
+        "evidence/page-390x844-04.png",
+        "evidence/page-390x844-05.png",
+        "evidence/page-390x844-06.png",
+        "evidence/page-390x844-07.png",
+        "evidence/page-390x844-08.png",
+        "evidence/page-390x844-09.png"
+      ]
+    }
+  ],
+  "dimensions": {
+    "J01": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png"
+      ],
+      "findings": [],
+      "note": "The hero says plainly what the Museum is. Real works, holdings and acquisition status, governance, and next-step links follow in a sensible order. The opaque how-it-works wording is charged to J07."
+    },
+    "J02": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-04.png",
+        "evidence/page-1440x1000-05.png"
+      ],
+      "findings": [],
+      "note": "The Museum subnav shows About as active. Sections run from identity to art, holdings, scholarship, access, governance, roadmap, and sources. The Collection link repeats three times, and Related works and context is tucked into the footer bar."
+    },
+    "J03": {
+      "score": 8.0,
+      "evidence": [
+        "evidence/page-1440x1000-04.png",
+        "evidence/page-390x844-08.png"
+      ],
+      "findings": ["F-001"],
+      "note": "The H1 and art row lead correctly. Collection care is the only framed panel on an otherwise divider-led page, so it reads as a callout even though its content is no more important than its sibling sections."
+    },
+    "J04": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-03.png"
+      ],
+      "findings": [],
+      "note": "The page is dark and editorial, led by real works, with primary-blue actions and a museum register. It has no casino, web3-template, or SaaS tropes and looks native next to the other Museum routes."
+    },
+    "J05": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png"
+      ],
+      "findings": [],
+      "note": "Editorial spacing suits an About page, and related copy and links stay grouped. The left heading column leaves large empty areas on desktop, and the third card in the two-column How the Museum works grid sits alone."
+    },
+    "J06": {
+      "score": 7.0,
+      "evidence": [
+        "evidence/page-1440x1000-04.png",
+        "evidence/page-390x844-08.png",
+        "evidence/page-1440x1000-02.png"
+      ],
+      "findings": ["F-001", "F-003"],
+      "note": "Type roles, link style, and dividers are consistent elsewhere. The Collection care frame has no horizontal padding, so its text butts against the left border at both widths and against the right border at 390 px. Its border weight is uneven and its corners are square. The art captions do not top-align."
+    },
+    "J07": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-1440x1000-04.png",
+        "evidence/page-390x844-06.png",
+        "evidence/page-390x844-07.png"
+      ],
+      "findings": ["F-002", "F-004"],
+      "note": "Holdings copy is precise (accessioned works, completed gifts, Keys and Gates kept separate). The how-it-works copy uses unexplained TDH and 'Adopted effects', and the three next-stage cards are abstract ('will have a form that can be independently verified', 'a reliable path to an authorized Ethereum action')."
+    },
+    "J10": {
+      "score": 8.0,
+      "evidence": [
+        "evidence/page-390x844-01.png",
+        "evidence/page-390x844-05.png",
+        "evidence/page-390x844-08.png",
+        "evidence/page-390x844-09.png"
+      ],
+      "findings": ["F-001", "F-005"],
+      "note": "At 390 px the layout collapses cleanly to one column: the subnav fits on one row, buttons stack, and art fills the width. The Collection care text touches both frame edges, and the shared footer wraps with orphaned '|' separators."
+    }
+  },
+  "checks": {
+    "I1": "pass",
+    "I2": "pass",
+    "I3": "pass"
+  },
+  "findings": [
+    {
+      "id": "F-001",
+      "targets": ["J06", "J10", "J03"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000 and 390x844 · en-US",
+      "evidence": "evidence/page-390x844-08.png",
+      "observation": "The Collection care section is the only bordered box on the page. It has generous top and bottom padding but almost none at the sides. At 1440 the heading 'Collection care' starts against the left border (page-1440x1000-04.png). At 390 every line starts against the left border and the longest lines reach the right border, for example 'Future stewards should be able to reconstruct the'. The vertical edges render heavier and lighter than the 1px top and bottom edges, and the corners are square. Every sibling section uses a top hairline divider with no frame.",
+      "consequence": "Text colliding with a frame reads as a broken layout, especially on phones. The lone frame also gives this section accidental emphasis that breaks the page's divider rhythm.",
+      "change": "Smallest fix: drop the frame and give Collection care the same top-hairline divider and two-column grid as its sibling sections. If a framed callout is intended, keep one uniform 1px border (tw-border-iron-800 or tw-border-white/10), tw-rounded-xl corners, and even inline padding at least equal to the existing vertical padding (for example tw-p-6 on mobile and tw-p-8 on desktop).",
+      "acceptance_check": "At 1440x1000 and 390x844, no Collection care text sits within 16 px of any frame edge, or the frame is gone and the section matches its siblings' divider treatment. If a border remains, it has equal weight on all four sides and rounded-xl corners. The section causes no horizontal overflow at 390 px.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-002",
+      "targets": ["J07"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000 and 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-03.png",
+      "observation": "The governance card says 'The Network uses TDH-weighted voting for major collecting and policy decisions' without saying what TDH is or who votes. It continues with 'Adopted effects and proposals awaiting adoption remain separate in the public record.', where 'effects' is unexplained internal vocabulary. The next-stage cards in page-1440x1000-04.png are abstract: 'Approved Museum decisions will have a form that can be independently verified on Ethereum and in the institutional record' and 'Valid decisions will have a reliable path to an authorized Ethereum action'.",
+      "consequence": "The stated audience is visitors who are new to the Museum. They cannot tell who decides, what an adopted effect is, or what will concretely change in the next stage. That undercuts the 'how it works' half of the primary task, which the rest of the page sets up well.",
+      "change": "Gloss TDH at first use, for example: 'Major collecting and policy decisions are put to a Network vote weighted by TDH (Total Days Held), with a link to the existing TDH explainer.' Confirm the gloss against the current TDH docs. Replace the effects sentence with plain words, for example: 'Adopted decisions and open proposals are listed separately in the public record.' Have each next-stage card name its object and action in one plain sentence, keeping the future tense and only the mechanisms the linked On-chain transition record describes. For example: 'Each approved decision will be recorded on Ethereum, so anyone can check it against the institutional record.' Add every string through i18n message keys.",
+      "acceptance_check": "TDH is explained or linked where it first appears. The word 'effects' no longer appears as an unexplained term. Each of the three next-stage cards names a concrete object (decision record, Museum Safe transaction, acquisition, transfer, or mint) and stays clearly future-tense. No new present-tense capability claims are introduced. The edited copy wraps cleanly at 390 px.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-003",
+      "targets": ["J06"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000 · en-US",
+      "evidence": "evidence/page-1440x1000-02.png",
+      "observation": "In the Works held and studied row, the David Seymour caption has a two-line title that starts about 10 px higher than the single-line CENTURY #31 and CENTURY #724 titles, and its rule line sits about 4 px lower. The captions show title and artist but no date.",
+      "consequence": "There is a small alignment wobble in the first art row. The art itself is unaffected.",
+      "change": "Top-align the caption blocks under the shared image baseline, and let the rules follow the content or align them to the tallest caption. Optionally add the work's date to each caption when the record has one.",
+      "acceptance_check": "The three caption titles share a top edge at 1440x1000.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-004",
+      "targets": ["J07"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000 and 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-03.png",
+      "observation": "The page links to the Collection three times: 'View the Collection', 'Explore the Collection', and the primary button 'Explore the collection'. The button lowercases 'collection', although the page treats 'Collection' as a proper noun everywhere else.",
+      "consequence": "The repetition is minor and the capitalization is inconsistent. Neither blocks the task.",
+      "change": "Capitalize the button as 'Explore the Collection'. Optionally drop one of the two text links so the primary button stands as the main Collection entry.",
+      "acceptance_check": "Every Collection link uses 'Collection' with a capital C.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-005",
+      "targets": ["J10"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/about · default · 390x844 · en-US",
+      "evidence": "evidence/page-390x844-09.png",
+      "observation": "The shared site footer wraps its link list with orphaned separators. '@6529Collections |' ends a line, and the lines '| Cookie Policy | License ...' and '| Contact Us | Status' begin with '|'.",
+      "consequence": "This is a cosmetic wrapping artifact in shared chrome below the Museum content.",
+      "change": "Render the separators as CSS gaps or pseudo-elements that disappear at line starts, or switch to a wrapping gap layout at narrow widths.",
+      "acceptance_check": "At 390x844 no footer line starts or ends with a '|' separator.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "Museum subnav (Collection, Artists, Acquisitions, Research, About) with the About active underline, fitting on one row at 390 px",
+    "Hero eyebrow, H1, and lead paragraph that state in plain museum language what the Museum is and that accessioned works are 'intended to remain'",
+    "The Works held and studied row: real works at their native aspect ratios (Seymour portrait not cropped) with title and artist captions",
+    "Precise holdings and status copy: formally accessioned works, completed gifts from Casey Reas and Magnum Photos, and Keys and Gates kept explicitly separate from the permanent Collection",
+    "Divider-led two-column editorial sections that collapse cleanly to one column on mobile",
+    "A single primary action ('Explore the collection') paired with a secondary 'Participate in the Network', stacked on mobile",
+    "Governance and public-record cards that pair each claim with an inspectable link (View Museum decisions, View the Museum repository, Visit the rights handbook)",
+    "The future-tense framing of The next stage, which keeps planned on-chain mechanisms distinct from current behavior",
+    "Institutional sources links and the Source and contribute bar (Read the source, Propose an edit, Contributor guide)"
+  ]
+}

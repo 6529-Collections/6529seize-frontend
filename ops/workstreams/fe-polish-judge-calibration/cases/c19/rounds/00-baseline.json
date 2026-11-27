@@ -1,0 +1,186 @@
+{
+  "rubric_version": "fe-polish-judge/2.1",
+  "candidate": "04d8b1e250984d73c2c537794e6b83e2ed1f6721",
+  "coverage": [
+    {
+      "route": "/museum/network/about",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-1440x1000-04.png",
+        "evidence/page-1440x1000-05.png"
+      ]
+    },
+    {
+      "route": "/museum/network/about",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "unverified",
+      "evidence": [
+        "evidence/page-390x844-01.png",
+        "evidence/page-390x844-02.png",
+        "evidence/page-390x844-03.png",
+        "evidence/page-390x844-04.png",
+        "evidence/page-390x844-05.png",
+        "evidence/page-390x844-06.png",
+        "evidence/page-390x844-07.png",
+        "evidence/page-390x844-08.png",
+        "evidence/page-390x844-09.png"
+      ],
+      "reason": "The capture ends before the page does: tile 09 cuts off mid-link at 'View the public record', before the 'Source and contribute' strip and site footer that the 1440x1000 capture shows. The tiles also show the desktop left icon rail at 390 px, which suggests a narrow desktop window rather than mobile device emulation. Needed: a complete full-page 390x844 capture taken with mobile device emulation (touch input, mobile user agent)."
+    }
+  ],
+  "dimensions": {
+    "J01": {
+      "score": 8.0,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png"
+      ],
+      "findings": ["F-001"],
+      "note": "The page covers what the Museum holds (accessioned Casey Reas and Magnum Photos gifts, Keys and Gates acquisition work), how it works (TDH-weighted voting, version-controlled public record) and where to go next (Collection, research, decisions, sources). But the lede, the spot where a visitor expects to learn what the Museum is, is leaked brief copy."
+    },
+    "J02": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-1440x1000-04.png"
+      ],
+      "findings": [],
+      "note": "The sections run in a sensible order (art, holdings, scholarship, public access, governance, next stage, care, sources), and each has a matching link. The only minor issue is redundancy: three near-identical links to the Collection ('View the Collection', 'Explore the Collection', 'Explore the collection')."
+    },
+    "J03": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png"
+      ],
+      "findings": [],
+      "note": "The title and the three-work art row lead. Sections use a consistent layout (heading on the left, text on the right, separated by rules), and the links, sources and contribute strip recede. Eyebrow labels appear on only some sections."
+    },
+    "J04": {
+      "score": 8.0,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-04.png"
+      ],
+      "findings": ["F-001", "F-002"],
+      "note": "Native dark iron surface, primary-blue links, captioned art and mechanisms rather than adjectives in the governance cards. Two things hold it back: the 'premium, curator-grade' lede praises itself in marketing terms, and the square-cornered Collection care frame is the only boxed section, so it looks non-native next to its rule-separated siblings."
+    },
+    "J05": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-1440x1000-04.png"
+      ],
+      "findings": [],
+      "note": "Generous editorial spacing suits an About page. Related text and links stay together, and the governance and next-stage cards scan quickly. The large empty left columns below the section headings are acceptable for this register."
+    },
+    "J06": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-04.png",
+        "evidence/page-390x844-08.png"
+      ],
+      "findings": ["F-002", "F-004"],
+      "note": "Type roles and link styling are consistent. However, the Collection care frame has no left inner padding, so the heading (and the body text at 390 px) touches the border. In the art row, the caption title tops and divider rules do not line up across the three cards."
+    },
+    "J07": {
+      "score": 7.0,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png"
+      ],
+      "findings": ["F-001", "F-003"],
+      "note": "Most of the copy is specific and factual (Casey Reas and Magnum Photos gifts, Keys and Gates, TDH-weighted voting, version-controlled record). The most prominent sentence on the page, however, is brief leakage describing the interface's own qualities."
+    },
+    "J10": {
+      "status": "unverified",
+      "note": "The only 390x844 capture is truncated before the footer and appears to lack mobile device emulation (it shows the desktop icon rail). A complete emulated phone capture is needed to judge the touch layout, the Museum sub-nav wrapping, and the stacked art and card sections."
+    }
+  },
+  "checks": {
+    "I1": "pass",
+    "I2": "fail",
+    "I3": "pass"
+  },
+  "findings": [
+    {
+      "id": "F-001",
+      "targets": ["I2", "J07", "J01", "J04"],
+      "severity": "P1",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000 · en-US",
+      "evidence": "evidence/page-1440x1000-01.png",
+      "observation": "The lede directly under the H1 'The 6529 Network Museum' reads 'A calm, premium, curator-grade experience: clear hierarchy, considered pacing, and actionable insight into the collection.' It describes the interface's own qualities in build-brief vocabulary and says nothing about the Museum. The same text appears at 390 px (page-390x844-01.png).",
+      "consequence": "On an About page, the largest body sentence, which is where a visitor expects to learn what the Museum is, reads as leaked design instructions and self-praise. This undercuts the institutional credibility the rest of the page builds and pushes the answer to 'what is this?' down to later sections.",
+      "change": "Replace the lede through its i18n message key for every supported locale with a sentence that says what the Museum is, using only facts the page already supports. Draft: 'The 6529 Network Museum holds art in a permanent Collection for long-term stewardship, research, and public access, and publishes the decisions and records behind it.' An alternative repair is to remove the lede and promote the existing stewardship paragraph ('The Collection is held for long-term stewardship…') to lede size.",
+      "acceptance_check": "At 1440x1000 and 390x844 in en-US, the first paragraph under 'The 6529 Network Museum' states what the Museum is or does. No copy on the page describes the interface's own qualities or contains 'calm', 'premium', 'curator-grade', 'clear hierarchy', 'considered pacing', or 'actionable insight'.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-002",
+      "targets": ["J06", "J04"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000 · en-US",
+      "evidence": "evidence/page-1440x1000-04.png",
+      "observation": "'Collection care' is the only section drawn inside a bordered, square-cornered frame, and the frame has no left inner padding. The heading 'Collection care' sits flush against the left border, while the top, right and bottom have clear padding. At 390 px the body paragraphs also touch the left border (page-390x844-08.png). Every other section uses a top divider rule instead of a frame.",
+      "consequence": "Text colliding with its frame reads as a rendering bug on a page meant to show museum care. The unrounded frame also breaks the card radius hierarchy and makes the section look foreign to its neighbors.",
+      "change": "Choose one repair. Either drop the frame so the section matches its siblings (top divider rule, same two-column grid), or make it a deliberate panel with equal inner padding on all sides (for example tw-p-6 md:tw-p-8), tw-rounded-xl corners, and a tw-border-white/10 or iron border consistent with nearby framed surfaces.",
+      "acceptance_check": "At 1440x1000 and 390x844, no Collection care text touches its container edge. If the section is framed, its inner padding is visibly equal on all four sides and its corners use the card radius. Otherwise it uses the same divider treatment as the adjacent sections.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-003",
+      "targets": ["J07"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000 · en-US",
+      "evidence": "evidence/page-1440x1000-03.png",
+      "observation": "The governance card uses 'TDH-weighted voting' with no gloss and the phrase 'Adopted effects and proposals awaiting adoption remain separate in the public record'. Both are internal terms for a visitor audience.",
+      "consequence": "A first-time visitor cannot tell what TDH is or what an 'effect' is, which slightly weakens an otherwise concrete description of the decision mechanism.",
+      "change": "Gloss the terms in place, for example: 'Network members vote on major collecting and policy decisions, with votes weighted by TDH (a measure of how long they have held Meme Cards). Adopted decisions and open proposals are listed separately in the public record.'",
+      "acceptance_check": "The governance card explains TDH in a few plain words where it first appears and uses 'decisions' (or another plain term) instead of 'effects'.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-004",
+      "targets": ["J06"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000 · en-US",
+      "evidence": "evidence/page-1440x1000-02.png",
+      "observation": "In the three-work art row, the middle caption title starts about 10 px higher below its image than the outer two titles, and its divider rule sits a few pixels lower than theirs. The caption tops and rules therefore do not share a line across the row.",
+      "consequence": "There is a small visible misalignment in the row that introduces the art.",
+      "change": "Give all three caption blocks the same top offset from the image and align their bottom rules, for example with a shared grid row or equal caption min-height.",
+      "acceptance_check": "At 1440x1000, the three caption titles start at the same y-position below their images and the three divider rules sit on one line.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "The three-work art row near the top: square works shown whole and the portrait photograph at its native aspect ratio, each with a title and artist caption and a 'View the Collection' link",
+    "The concrete holdings paragraph naming the Casey Reas and Magnum Photos gifts and separating Keys and Gates acquisition work from the permanent Collection",
+    "The governance and public-record cards, which pair each claim with its mechanism and an inspection link ('View Museum decisions', 'View the Museum repository'); these are the basis for the I3 pass",
+    "'The next stage' written in future tense and kept distinct from current capability",
+    "The Institutional sources link row and the 'Source and contribute' strip (Read the source, Propose an edit, Contributor guide)",
+    "The stewardship sentence 'The Collection is held for long-term stewardship, research, interpretation, and public access.'",
+    "Dark iron surface, primary-blue underlined text links, one filled primary button paired with a secondary outline button, and the Museum sub-nav with an active About state"
+  ]
+}

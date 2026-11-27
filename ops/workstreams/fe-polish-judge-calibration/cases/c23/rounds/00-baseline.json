@@ -1,0 +1,136 @@
+{
+  "rubric_version": "fe-polish-judge/2.1",
+  "candidate": "mint-success-modal-review",
+  "coverage": [
+    {
+      "route": "/the-memes/mint",
+      "state": "success",
+      "viewport": "1440x900",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/success-1440x900-01.png"
+    },
+    {
+      "route": "/the-memes/mint",
+      "state": "success",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/success-390x844-01.png"
+    }
+  ],
+  "dimensions": {
+    "J01": {
+      "score": 9,
+      "evidence": [
+        "evidence/success-1440x900-01.png",
+        "evidence/success-390x844-01.png"
+      ],
+      "findings": [],
+      "note": "The success modal leads with the outcome, then the minted card (artwork, The Memes #547, full title), quantity and recipient, with a single Done exit; the collector can tell what happened at a glance."
+    },
+    "J02": {
+      "score": 9,
+      "evidence": [
+        "evidence/success-1440x900-01.png",
+        "evidence/success-390x844-01.png"
+      ],
+      "findings": [],
+      "note": "Sequence is status, object, receipt details, primary exit, secondary explorer link; grouping is separated by one divider and matches how a receipt is read."
+    },
+    "J03": {
+      "score": 8.5,
+      "evidence": ["evidence/success-1440x900-01.png"],
+      "findings": [],
+      "note": "Heading, card title and Done dominate correctly; the recipient address is set in bold full-white mono and carries as much weight as the card title, pulling attention slightly from the artwork and title."
+    },
+    "J04": {
+      "score": 9,
+      "evidence": [
+        "evidence/success-1440x900-01.png",
+        "evidence/success-390x844-01.png"
+      ],
+      "findings": [],
+      "note": "Native dark modal: iron surfaces, rounded-xl frame, rounded-lg button, success-green heading, artwork thumbnail at correct aspect; established SEIZED brand language with no confetti, neon or hype."
+    },
+    "J05": {
+      "score": 9,
+      "evidence": [
+        "evidence/success-1440x900-01.png",
+        "evidence/success-390x844-01.png"
+      ],
+      "findings": [],
+      "note": "Compact and task-appropriate: receipt rows sit together under one divider with no filler or empty space inside the modal."
+    },
+    "J06": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/success-1440x900-01.png",
+        "evidence/success-390x844-01.png"
+      ],
+      "findings": [],
+      "note": "Consistent label/value roles, clean title wrapping and correct mono for the address; the unbroken 42-character bold mono address is the heaviest small text block and reads dense next to the lighter labels."
+    },
+    "J07": {
+      "score": 9,
+      "evidence": ["evidence/success-1440x900-01.png"],
+      "findings": [],
+      "note": "Plain, specific copy: 'Your mint is confirmed.', 'Quantity', 'Minted to', 'Done', 'View transaction'; the brand heading 'SEIZED!' is immediately explained by the subtitle."
+    },
+    "J09": {
+      "score": 9,
+      "evidence": [
+        "evidence/success-1440x900-01.png",
+        "evidence/success-390x844-01.png"
+      ],
+      "findings": [],
+      "note": "The only pinned state, success, is deliberate: it names the object, amount and destination and offers a clear exit plus a secondary place to check the transaction."
+    },
+    "J10": {
+      "score": 9,
+      "evidence": ["evidence/success-390x844-01.png"],
+      "findings": [],
+      "note": "At 390 the modal keeps a 16px gutter, the card title wraps to three clean lines, the address fits on one line, and Done is a full-width touch target; no overflow or clipping."
+    },
+    "J13": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/success-1440x900-01.png",
+        "evidence/success-390x844-01.png"
+      ],
+      "findings": ["F-001"],
+      "note": "Receipt states what arrived, how many and where, with the explorer link secondary; the recipient appears only as a raw address and the modal gives no pointer to where the card can be seen in 6529, so a newcomer relies on the explorer. The submitted-to-confirmed transition is not in evidence (see S3)."
+    }
+  },
+  "checks": {
+    "I1": "pass",
+    "I2": "pass",
+    "I3": "pass",
+    "S3": "unverified",
+    "S6": "pass"
+  },
+  "findings": [
+    {
+      "id": "F-001",
+      "targets": ["J13"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/the-memes/mint · success · 1440x900, 390x844 · en-US",
+      "evidence": "evidence/success-1440x900-01.png",
+      "observation": "After 'Done' and 'View transaction' (explorer), the receipt offers no in-app place to see the minted card; the recipient is a bare address without a 'your wallet' or profile cue.",
+      "consequence": "A collector new to wallets may not recognize the address as their own or know where the card now appears, and has to leave for the block explorer to confirm ownership.",
+      "change": "Optional: add a secondary link to the card or the collector's collection (for example 'View The Memes #547'), and/or a muted 'Your wallet' cue beside the recipient when it is the connected wallet.",
+      "acceptance_check": "The success modal offers an in-app destination for the minted card that is visually secondary to Done, and the recipient row identifies the connected wallet when applicable, at 1440x900 and 390x844.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "Outcome heading with the explanatory subtitle 'Your mint is confirmed.'",
+    "Artwork thumbnail at correct aspect ratio with collection and token number above the full card title",
+    "Receipt rows for quantity and recipient, with the address in mono",
+    "Single primary 'Done' action with the explorer link ('View transaction' plus external icon) kept secondary",
+    "No confetti, countdowns, upsell or urgency on the success state",
+    "Mobile modal with 16px gutter, clean title wrapping and full-width Done"
+  ]
+}

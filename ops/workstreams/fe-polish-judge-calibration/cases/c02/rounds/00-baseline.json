@@ -1,0 +1,194 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "04d8b1e250984d73c2c537794e6b83e2ed1f6721",
+  "coverage": [
+    {
+      "route": "/museum/network/about",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/page-1440x1000-01.png through evidence/page-1440x1000-05.png"
+    },
+    {
+      "route": "/museum/network/about",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/page-390x844-01.png through evidence/page-390x844-09.png"
+    }
+  ],
+  "dimensions": {
+    "J01": {
+      "score": 8.0,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-390x844-01.png"
+      ],
+      "findings": ["F-001"],
+      "note": "The page covers what the Museum holds (real works, completed gifts, Keys and Gates kept separate), how it works (TDH voting, repository, rights), and where to go next (a link per section). But the first sentence a visitor reads is brief text and never says what the Museum is."
+    },
+    "J02": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-1440x1000-04.png"
+      ],
+      "findings": ["F-003"],
+      "note": "The order is logical: intro, art, collection, scholarship, public access, how it works, next stage, care, sources. Each section ends with one next-step link. The primary CTA pair sits mid-page and repeats a collection link from the section just above."
+    },
+    "J03": {
+      "score": 8.0,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-04.png"
+      ],
+      "findings": ["F-001", "F-002"],
+      "note": "The largest body text in the hero is the empty brief-leak line, while the substantive stewardship sentence recedes in muted type. Collection care is the only framed section, which gives a secondary topic callout emphasis."
+    },
+    "J04": {
+      "score": 8.0,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-1440x1000-04.png"
+      ],
+      "findings": ["F-001", "F-002"],
+      "note": "Native dark iron and primary token use. Art leads early, at native aspect ratio, with artist credits. The governance copy is backed by mechanisms. Deficits: the brief-register lede, and a square-cornered accidental frame that breaks the radius hierarchy."
+    },
+    "J05": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-390x844-04.png"
+      ],
+      "findings": [],
+      "note": "Generous editorial spacing suits an About page, and related text and links stay grouped. Desktop leaves large empty left columns and section gaps of about 130 px, which is acceptable for this register."
+    },
+    "J06": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/page-1440x1000-04.png",
+        "evidence/page-390x844-08.png",
+        "evidence/page-1440x1000-02.png"
+      ],
+      "findings": ["F-002", "F-003"],
+      "note": "Type roles are consistent across eyebrows, H2s, body, and muted secondary text. The Collection care frame has no inner padding: its heading and paragraphs touch the left border, and that edge renders heavier than the others. On the portrait photo card, the caption aligns to the column while the image is centred."
+    },
+    "J07": {
+      "score": 6.5,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-390x844-01.png",
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-1440x1000-04.png"
+      ],
+      "findings": ["F-001", "F-003", "F-004", "F-005"],
+      "note": "The hero lede is pure brief leakage ('A calm, premium, curator-grade experience: clear hierarchy, considered pacing, and actionable insight…'). The rest of the copy is specific and accurate, and states future plans in the future tense."
+    },
+    "J10": {
+      "score": 8.0,
+      "evidence": [
+        "evidence/page-390x844-01.png",
+        "evidence/page-390x844-05.png",
+        "evidence/page-390x844-08.png",
+        "evidence/page-390x844-09.png"
+      ],
+      "findings": ["F-002"],
+      "note": "Clean single-column reflow at 390: works fill the width, CTAs stack, and no horizontal overflow is visible. The Collection care text touches the frame edges. The app icon rail still takes about 80 px and the Museum nav wraps to two rows. The final tile ends mid-link at 'View the public record', so the 390 Source-and-contribute row and the site footer are not in evidence."
+    }
+  },
+  "checks": {
+    "I1": "pass",
+    "I2": "fail",
+    "I3": "pass"
+  },
+  "findings": [
+    {
+      "id": "F-001",
+      "targets": ["I2", "J07", "J01", "J03", "J04"],
+      "severity": "P1",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-01.png",
+      "observation": "Directly under the H1 'The 6529 Network Museum', the lede is set in the largest body type: 'A calm, premium, curator-grade experience: clear hierarchy, considered pacing, and actionable insight into the collection.' The same line leads the 390 view (evidence/page-390x844-01.png).",
+      "consequence": "The first sentence a visitor reads echoes the build brief and describes the interface's qualities instead of the institution. It tells a newcomer nothing about what the Museum is or holds, and it undercuts the credibility of the page's otherwise precise institutional copy.",
+      "change": "Replace the lede, through i18n message keys, with a sentence that names the institution and its holdings using facts already on the page. Draft: 'The 6529 Network Museum holds art for the public commons. Its permanent Collection includes completed gifts from Casey Reas and Magnum Photos.' Keep the existing stewardship paragraph as the second line.",
+      "acceptance_check": "At 1440x1000 and 390x844, the hero lede contains none of 'calm', 'premium', 'curator-grade', 'clear hierarchy', 'considered pacing', or 'actionable insight'. It states what the Museum is and what it holds using only page-backed facts, and it wraps within the content column at 390 with no overlap.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-002",
+      "targets": ["J06", "J04", "J03", "J10"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-04.png",
+      "observation": "The 'Collection care' section is wrapped in a square-cornered outline whose left edge renders as a heavier double rule. The heading and paragraphs sit flush against the left border with no inner padding. At 390 (evidence/page-390x844-08.png), every paragraph line starts against the left border and runs to within a few pixels of the right border. No other section on the page is framed.",
+      "consequence": "It reads as an accidental box or a rendering defect, not a deliberate callout. It breaks the divider-based section rhythm, gives a secondary topic undue emphasis, violates the radius hierarchy for framed surfaces, and makes the text feel cramped on mobile.",
+      "change": "Preferred: remove the outline so Collection care uses the same top divider and heading-left/text-right pattern as its sibling sections. If a callout is intended, use tw-rounded-xl with a single subtle edge (tw-border-white/10 or an iron border) and inner padding of about tw-p-6 at desktop and tw-p-4 at 390.",
+      "acceptance_check": "At 1440x1000 and 390x844, Collection care either matches the sibling section pattern (top divider, no frame), or sits in a uniformly bordered tw-rounded-xl frame with at least 16 px of padding on every side. No heading or paragraph text touches a border.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-003",
+      "targets": ["J07", "J06"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-03.png",
+      "observation": "Within two screens the page offers 'View the Collection', 'Explore the Collection' (link), and 'Explore the collection' (primary button). The button lowercases 'collection', while the page treats 'the Collection' as a proper noun everywhere else.",
+      "consequence": "A minor inconsistency and some redundant navigation. It slightly dilutes the primary CTA.",
+      "change": "Capitalize the button as 'Explore the Collection'. Optionally drop the duplicate 'Explore the Collection' text link in Collection and acquisition, so 'See acquisition programs' stands alone there.",
+      "acceptance_check": "Every collection link and button on the page capitalizes 'Collection' consistently.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-004",
+      "targets": ["J07"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-03.png",
+      "observation": "The governance card says 'Adopted effects and proposals awaiting adoption remain separate in the public record.' Its heading reads 'The governance'.",
+      "consequence": "'Adopted effects' is internal vocabulary that a first-time visitor cannot decode, and the article in 'The governance' reads awkwardly beside 'Rights education'.",
+      "change": "Draft: heading 'Governance'; body '…Adopted decisions and open proposals are listed separately in the public record.' Adjust the wording to match the actual record.",
+      "acceptance_check": "The governance card uses visitor-facing terms (decisions, proposals) without 'effects', and its heading style matches its sibling cards.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-005",
+      "targets": ["J07"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-04.png",
+      "observation": "Collection care states, in the present tense, 'The Museum is built to survive changes in websites, software, operators, signers, and service providers.' The section just above lists decision-constrained custody of the Museum Safe as a future 'next stage'.",
+      "consequence": "Mild tension between a present-tense durability claim and the page's own roadmap. Careful readers may question which protections exist today.",
+      "change": "Use 'is designed to survive…', or link the claim to the preservation and public-record sources listed below it.",
+      "acceptance_check": "The Collection care durability sentence is phrased as a design goal, or it links to the record that shows the mechanism.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "Museum sub-navigation (Collection, Artists, Acquisitions, Research, About) with the active About state in a primary underline",
+    "Art-led 'Works held and studied' section near the top: real works shown whole at native aspect ratio, with title and artist captions and a 'View the Collection' link",
+    "Consistent editorial section pattern: top divider, heading left, text right, one next-step link per section",
+    "Mechanism-backed governance copy: TDH-weighted voting linked to 'View Museum decisions', version-controlled repository linked to 'View the Museum repository', and the rights handbook link",
+    "Honest future tense in 'The next stage' that separates the planned on-chain record, custody, and execution from current state",
+    "Explicit separation of Keys and Gates acquisition work from the permanent Collection",
+    "Institutional sources link row and the 'Source and contribute' footer (Read the source, Propose an edit, Contributor guide)",
+    "Token use: primary-blue eyebrows, links, and primary button; outlined rounded-lg secondary button; iron greys on black",
+    "Mobile single-column reflow with full-width works and stacked CTA buttons"
+  ]
+}
