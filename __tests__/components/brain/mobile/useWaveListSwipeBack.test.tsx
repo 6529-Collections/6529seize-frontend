@@ -2,9 +2,13 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { animate } from "framer-motion";
 import { useWaveListSwipeBack } from "@/components/brain/mobile/useWaveListSwipeBack";
 import * as waveNavigation from "@/helpers/waves/wave-navigation-transition";
+import * as phoneMotion from "@/lib/motion/phone-navigation-registry";
 import { MOTION_SPRINGS } from "@/lib/motion/springs";
+import { Capacitor } from "@capacitor/core";
+import { Keyboard } from "@capacitor/keyboard";
 
 jest.mock("framer-motion", () => ({ animate: jest.fn() }));
+jest.mock("@capacitor/keyboard", () => ({ Keyboard: { hide: jest.fn() } }));
 
 const touch = (clientX: number, clientY = 100) => ({
   clientX,
@@ -75,6 +79,10 @@ function SwipeHarness({
 
 beforeEach(() => {
   jest.useFakeTimers();
+  // React substitutes Date.now() for a zero event time; keep the source clock positive.
+  jest
+    .spyOn(Event.prototype, "timeStamp", "get")
+    .mockImplementation(() => performance.now() + 1);
   jest.mocked(animate).mockReset();
 });
 
@@ -127,6 +135,32 @@ function setup(enabled = true, targetScreen?: waveNavigation.WaveScreen) {
     content: screen.getByTestId("content"),
   };
 }
+
+it("keeps the first native swipe when keyboard dismissal would blur the WebView", () => {
+  jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(true);
+  jest.spyOn(Capacitor, "isPluginAvailable").mockReturnValue(true);
+  jest.mocked(Keyboard.hide).mockImplementation(async () => {
+    globalThis.dispatchEvent(new Event("blur"));
+  });
+  const { content, onSwipeBack } = setup();
+  fireEvent.touchStart(content, { touches: [touch(160)] });
+  fireEvent.touchMove(content, { touches: [touch(740)] });
+  act(() => jest.advanceTimersByTime(20));
+  fireEvent.touchEnd(content, { touches: [], changedTouches: [touch(740)] });
+  expect(onSwipeBack).toHaveBeenCalledTimes(1);
+});
+
+it("blurs the focused text input when dragging starts", () => {
+  const { content } = setup();
+  const input = screen.getByRole("textbox", { name: "Amount" });
+  input.focus();
+  expect(document.activeElement).toBe(input);
+  fireEvent.touchStart(content, { touches: [touch(160)] });
+  fireEvent.touchMove(content, { touches: [touch(220)] });
+  act(() => jest.advanceTimersByTime(20));
+  expect(document.activeElement).not.toBe(input);
+  fireEvent.touchCancel(content);
+});
 
 it("carries release velocity into the shared spring and reveals the list before its invisible tail", async () => {
   const now = jest.spyOn(performance, "now").mockReturnValue(0);
@@ -216,7 +250,7 @@ it("catches a returning spring without jumping and cancels safely on unmount", a
   expect(animate).toHaveBeenCalledWith(
     40,
     0,
-    expect.objectContaining({ ...MOTION_SPRINGS.spatial.default, velocity: 40 })
+    expect.objectContaining({ ...MOTION_SPRINGS.spatial.default, velocity: 0 })
   );
   const options = jest.mocked(animate).mock.calls[0]![2]!;
   act(() => options.onUpdate?.(20));
@@ -236,6 +270,65 @@ it("catches a returning spring without jumping and cancels safely on unmount", a
     await finished;
   });
   expect(onSwipeBack).not.toHaveBeenCalled();
+});
+
+it.each([
+  [-20, true],
+  [-80, false],
+] as const)(
+  "releases a caught Back at its absolute page position after a %spx slow reversal",
+  (distance, committed) => {
+    const end = jest.fn();
+    jest.spyOn(phoneMotion, "beginPhoneBackGesture").mockReturnValue({
+      origin: 250,
+      width: 400,
+      move: jest.fn(),
+      end,
+    });
+    render(
+      <SwipeHarness
+        edgeSwipeBack
+        targetScreen="list"
+        onIntentStart={jest.fn()}
+        onSwipeBack={jest.fn()}
+      />
+    );
+    const target = screen.getByTestId("content");
+    fireEvent.touchStart(target, { touches: [touch(100)] });
+    act(() => jest.advanceTimersByTime(1000));
+    fireEvent.touchMove(target, { touches: [touch(100 + distance)] });
+    fireEvent.touchEnd(target, {
+      touches: [],
+      changedTouches: [touch(100 + distance)],
+    });
+    expect(end).toHaveBeenCalledWith(committed, distance, expect.any(Function));
+  }
+);
+
+it("clamps a reversed fallback drag at the resting edge", () => {
+  jest.mocked(animate).mockReturnValue({
+    stop: jest.fn(),
+    cancel: jest.fn(),
+    then: () => Promise.resolve(),
+  } as unknown as ReturnType<typeof animate>);
+  render(
+    <SwipeHarness
+      edgeSwipeBack
+      targetScreen="list"
+      onIntentStart={jest.fn()}
+      onSwipeBack={jest.fn()}
+    />
+  );
+  const target = screen.getByTestId("content");
+  fireEvent.touchStart(target, { touches: [touch(16)] });
+  fireEvent.touchMove(target, { touches: [touch(56)] });
+  act(() => jest.advanceTimersByTime(20));
+  fireEvent.touchMove(target, { touches: [touch(0)] });
+  act(() => jest.advanceTimersByTime(20));
+  expect(screen.getByTestId("surface").style.transform).toBe(
+    "translate3d(0px, 0, 0)"
+  );
+  fireEvent.touchCancel(target);
 });
 
 it("skips the channel release spring with reduced motion", () => {

@@ -1191,4 +1191,6 @@ see Join, signed-in profiles see Validator, and unresolved sessions reserve the
 slot across desktop, mobile web, native menus, and page search.
 
 The Wave list navigation record describes paired phone conversation entry and
-Back slides, including the complete header, a stationary list and Reduced Motion.
+Back motion, the complete header, the live list and its reading position,
+the half-screen slow-drag threshold, quick flicks, Android system Back and the
+Reduced Motion fade.

@@ -9,6 +9,7 @@ import {
 } from "react";
 import { useDebounce } from "react-use";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { usePhoneNavigationScreenActive } from "@/contexts/PhoneNavigationScreenContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { ApiWavesV2ListType } from "@/generated/models/ApiWavesV2ListType";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
@@ -78,6 +79,7 @@ export function useSidebarWaveNavigation({
   readonly activeWaveId?: string | null | undefined;
   readonly pinnedWaveOrder?: readonly string[] | undefined;
 }) {
+  const screenActive = usePhoneNavigationScreenActive();
   const viewer = useWaveDiscoveryViewer();
   const leftWaveIds = useWaveSidebarMembership(viewer.key);
   const [savedCollection, setCollection] = useWaveSidebarCollection();
@@ -87,11 +89,12 @@ export function useSidebarWaveNavigation({
   const [debounced, setDebounced] = useState("");
   useDebounce(() => setDebounced(queryText.trim()), 350, [queryText]);
   const searching = enabled && queryText.trim().length > 0;
-  const queryEnabled =
+  const hasMatchingSearch =
     searching &&
     viewer.enabled &&
     debounced.length >= 3 &&
     debounced === queryText.trim();
+  const queryEnabled = screenActive && hasMatchingSearch;
   const results = useInfiniteQuery({
     queryKey: [
       QueryKey.WAVES_SEARCH,
@@ -137,7 +140,7 @@ export function useSidebarWaveNavigation({
   const restoredKey = useRef<string | null>(null);
   useLayoutEffect(() => {
     const container = scrollContainerRef.current;
-    if (!enabled || !container) return;
+    if (!screenActive || !enabled || !container) return;
     const desired = positions.current.get(scrollKey) ?? 0;
     if (restoredKey.current !== scrollKey) {
       restoreSidebarScroll(container, desired);
@@ -178,6 +181,7 @@ export function useSidebarWaveNavigation({
         container.removeEventListener(event, onInteraction);
     };
   }, [
+    screenActive,
     enabled,
     scrollContainerRef,
     scrollKey,
@@ -196,10 +200,11 @@ export function useSidebarWaveNavigation({
     queryText,
     setQueryText,
     results,
-    resultWaves: queryEnabled
+    resultWaves: hasMatchingSearch
       ? (results.data?.pages.flatMap((page) => page.waves) ?? [])
       : [],
     queryEnabled,
+    hasMatchingSearch,
     scrollKey,
     viewKey,
   };

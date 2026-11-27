@@ -9,6 +9,7 @@ import React, {
   useEffectEvent,
   useMemo,
 } from "react";
+import { usePhoneNavigationScreenActive } from "@/contexts/PhoneNavigationScreenContext";
 import type { UnifiedWavesListWavesHandle } from "../left-sidebar/waves/UnifiedWavesListWaves";
 import UnifiedWavesListWaves from "../left-sidebar/waves/UnifiedWavesListWaves";
 import { UnifiedWavesListLoader } from "../left-sidebar/waves/UnifiedWavesListLoader";
@@ -29,6 +30,7 @@ interface DirectMessagesListProps {
 const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
   scrollContainerRef,
 }) => {
+  const screenActive = usePhoneNavigationScreenActive();
   const { hasValidWalletAuth, connectionState } = useSeizeConnectContext();
   const { connectedProfile, fetchingProfile } = useContext(AuthContext);
   const { isApp } = useDeviceInfo();
@@ -60,7 +62,7 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
     const listHandle = listRef.current;
     const sentinel = listHandle?.sentinelRef.current;
 
-    if (!sentinel || !hasNextPage || isFetchingNextPage) {
+    if (!screenActive || !sentinel || !hasNextPage || isFetchingNextPage) {
       return;
     }
 
@@ -79,7 +81,7 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
     observer.observe(sentinel);
 
     return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, hasDirectMessages]);
+  }, [screenActive, hasNextPage, isFetchingNextPage, hasDirectMessages]);
 
   const shouldShowPlaceholder =
     !hasValidWalletAuth || !connectedProfile?.handle;
