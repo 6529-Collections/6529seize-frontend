@@ -306,6 +306,18 @@ test("Subscription Minting stays readable with the reference layout @smoke @medi
   }
 });
 
+async function waitForComingUpLayoutReady(page: Page) {
+  const artwork = page.getByRole("main").first().getByRole("img", {
+    name: loadingTestArtwork.name,
+    exact: true,
+  });
+  await expect(artwork).toBeVisible();
+  await expect(
+    page.getByRole("region", { name: "How to start", exact: true })
+  ).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+}
+
 for (const cardCount of [1, 3]) {
   test(`Coming Up sizes ${cardCount} cards for the available width @smoke @medium @large`, async ({
     page,
@@ -342,16 +354,7 @@ for (const cardCount of [1, 3]) {
       })
     );
     await page.goto("/", { waitUntil: "domcontentloaded" });
-    await expect(
-      page.getByRole("main").first().getByRole("img", {
-        name: loadingTestArtwork.name,
-        exact: true,
-      })
-    ).toBeVisible();
-    await expect(
-      page.getByRole("region", { name: "How to start", exact: true })
-    ).toBeVisible();
-    await page.evaluate(() => document.fonts.ready);
+    await waitForComingUpLayoutReady(page);
     const cards = page
       .getByRole("region", { name: "Coming up", exact: true })
       .getByTestId("coming-up-cards");
@@ -501,16 +504,7 @@ test.describe("Coming up avatar density", () => {
       })
     );
     await page.goto("/", { waitUntil: "domcontentloaded" });
-    await expect(
-      page.getByRole("main").first().getByRole("img", {
-        name: loadingTestArtwork.name,
-        exact: true,
-      })
-    ).toBeVisible();
-    await expect(
-      page.getByRole("region", { name: "How to start", exact: true })
-    ).toBeVisible();
-    await page.evaluate(() => document.fonts.ready);
+    await waitForComingUpLayoutReady(page);
     const section = page.getByRole("region", {
       name: "Coming up",
       exact: true,
