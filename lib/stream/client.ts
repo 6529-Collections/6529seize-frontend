@@ -7,6 +7,8 @@ import { CW_PROJECT_ID } from "@/constants/constants";
  * Public Sepolia RPCs for reading 6529 Stream state. The first two serve
  * `eth_getLogs` across the whole instance range (publicnode only sometimes);
  * the WalletConnect RPC the site already uses is the last fallback for plain reads.
+ * Requests are sent one per HTTP call (viem's default): the Tenderly gateway
+ * can hang on batched JSON-RPC arrays.
  */
 const SEPOLIA_LOG_RPCS = [
   "https://sepolia.gateway.tenderly.co",
