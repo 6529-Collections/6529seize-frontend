@@ -71,6 +71,30 @@ describe("device signing monitoring", () => {
     );
   });
 
+  it("tags the failed operation on the existing storage fallback issue", () => {
+    reportSignedWriteFallback({
+      action: "react",
+      reason: "storage-error",
+      phase: "storage",
+      storageOperation: "write",
+    });
+
+    expect(Sentry.captureMessage).toHaveBeenCalledWith(
+      "Signed write fallback (storage-error)"
+    );
+    expect(scope["setFingerprint"]).toHaveBeenCalledWith([
+      "device-signing",
+      "storage-error",
+      "storage",
+    ]);
+    const processor = scope["addEventProcessor"]!.mock.calls[0]![0] as (
+      event: Record<string, unknown>
+    ) => Record<string, unknown>;
+    expect(processor({})).toMatchObject({
+      tags: { signing_storage_operation: "write" },
+    });
+  });
+
   it("reports a dropped key store with coarse codes only", () => {
     reportDeviceKeyStoreLoss({
       browser: "Brave on Windows",
@@ -82,9 +106,7 @@ describe("device signing monitoring", () => {
       hintAge: "1-24h",
     });
 
-    expect(Sentry.captureMessage).toHaveBeenCalledWith(
-      "Device key store lost"
-    );
+    expect(Sentry.captureMessage).toHaveBeenCalledWith("Device key store lost");
     expect(scope["setFingerprint"]).toHaveBeenCalledWith([
       "device-signing",
       "key-store-lost",
