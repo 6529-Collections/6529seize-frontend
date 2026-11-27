@@ -1,0 +1,95 @@
+.frame {
+  container: emma-review-table / inline-size;
+}
+
+.table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.table th:nth-child(2),
+.table th:nth-child(3) {
+  width: 4.5rem;
+}
+
+.table th:last-child:not(:first-child) {
+  width: 15.5rem;
+}
+
+.table .compactExports {
+  display: none;
+}
+
+@container emma-review-table (max-width: 48rem) {
+  .table th:last-child:not(:first-child) {
+    width: 14rem;
+  }
+
+  .table .formatButtons {
+    display: none;
+  }
+
+  .table .compactExports {
+    display: inline-flex;
+  }
+}
+
+.table .narrowActionIcon {
+  display: none;
+}
+
+@container emma-review-table (max-width: 34rem) {
+  .table th:nth-child(2) {
+    width: 3.75rem;
+  }
+
+  .table th:nth-child(3) {
+    width: 3.5rem;
+  }
+
+  .table th:last-child:not(:first-child) {
+    width: 8.5rem;
+  }
+
+  .table .narrowAction {
+    max-width: 100%;
+    min-height: 2rem;
+    height: auto;
+    padding-block: 0.25rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
+
+@container emma-review-table (max-width: 29rem) {
+  .table th:last-child:not(:first-child) {
+    width: 3.5rem;
+  }
+
+  .table .narrowAction {
+    width: 2rem;
+    height: 2rem;
+    padding-inline: 0;
+  }
+
+  .table .narrowActionIcon {
+    display: block;
+    width: 1rem;
+    height: 1rem;
+    flex: none;
+  }
+
+  .table .actionChevron {
+    display: none;
+  }
+
+  .table .actionLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}

@@ -365,6 +365,36 @@ it.each(["Phase 1", "phase1", "P 1", "p1", " 1 "])(
   }
 );
 
+it("offers a read-only retry when processing status is unavailable", async () => {
+  jest
+    .mocked(latestForgeProcess)
+    .mockRejectedValue(new Error("Status unavailable"));
+  renderUI(
+    <ProcessAndFinalize
+      contract="0xcreator"
+      claim={123}
+      plan="plan"
+      phaseIds={["p0", "p1", "p2"]}
+    />
+  );
+  expect(
+    await screen.findByText(
+      "Couldn’t load processing status",
+      {},
+      { timeout: 5000 }
+    )
+  ).toBeVisible();
+  expect(
+    screen.queryByRole("button", { name: "Process and Finalize" })
+  ).not.toBeInTheDocument();
+  jest.mocked(latestForgeProcess).mockResolvedValue(null);
+  fireEvent.click(screen.getByRole("button", { name: "Retry status check" }));
+  expect(
+    await screen.findByRole("button", { name: "Process and Finalize" })
+  ).toBeEnabled();
+  expect(startForgeProcess).not.toHaveBeenCalled();
+});
+
 it("explains missing and duplicate phases without submitting a job", async () => {
   jest.mocked(latestForgeProcess).mockResolvedValue(null);
   const phases = resolveForgePhaseInputs([

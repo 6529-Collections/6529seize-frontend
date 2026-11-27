@@ -57,6 +57,9 @@
 - If the plan is accessible, EMMA initializes plan state and moves into plan
   steps.
 - Deep links to `/emma/plans/{planId}` work when the plan is accessible.
+- The active step is part of the URL, for example `?step=review`. Refresh or
+  open a shared step link to resume there after signing in. EMMA checks the saved
+  plan and opens the first step that needs attention when prerequisites are missing.
 - If plan load fails, EMMA routes back to `/emma`.
 
 ## Failures and Recovery

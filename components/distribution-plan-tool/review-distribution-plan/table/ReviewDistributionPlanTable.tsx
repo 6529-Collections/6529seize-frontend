@@ -2,11 +2,12 @@
 
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/components/auth/Auth";
-import DistributionPlanTableWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableWrapper";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import ReviewDistributionPlanTableBody from "./ReviewDistributionPlanTableBody";
 import ReviewDistributionPlanTableHeader from "./ReviewDistributionPlanTableHeader";
+import styles from "./ReviewDistributionPlanTable.module.css";
+import clsx from "clsx";
 import { ReviewDistributionPlanTableSubscriptionFooter } from "./ReviewDistributionPlanTableSubscriptionFooter";
 import {
   buildReviewDistributionPlanTableRows,
@@ -51,10 +52,22 @@ export default function ReviewDistributionPlanTable() {
   }, [phases, connectedProfile, seizeSettings.distribution_admin_wallets]);
   return (
     <>
-      <DistributionPlanTableWrapper>
-        <ReviewDistributionPlanTableHeader rows={rows} />
-        <ReviewDistributionPlanTableBody rows={rows} showManual={showManual} />
-      </DistributionPlanTableWrapper>
+      <div
+        className={clsx(
+          styles["frame"],
+          "tw-min-w-0 tw-rounded-lg tw-ring-1 tw-ring-white/10"
+        )}
+      >
+        <table
+          className={clsx(styles["table"], "tw-divide-y tw-divide-iron-700/60")}
+        >
+          <ReviewDistributionPlanTableHeader rows={rows} />
+          <ReviewDistributionPlanTableBody
+            rows={rows}
+            showManual={showManual}
+          />
+        </table>
+      </div>
       <ReviewDistributionPlanTableSubscriptionFooter
         showManual={showManual}
         onChooseManual={chooseManual}

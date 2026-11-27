@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useState } from "react";
+import { createContext, useCallback, useEffect, useRef, useState } from "react";
 
 import type { AppToastInput } from "@/components/utils/toast/AppToast";
 import { showAppToast, showAppToasts } from "@/components/utils/toast/AppToast";
@@ -12,21 +12,28 @@ import type {
   AllowlistPhaseWithComponentAndItems,
   AllowlistTokenPool,
   AllowlistTransferPool,
+  DistributionPlanTokenPoolDownload,
 } from "../allowlist-tool/allowlist-tool.types";
-import RunOperations from "./run-operations/RunOperations";
+import RunOperations, {
+  isAnalysisRunning,
+} from "./run-operations/RunOperations";
 import {
   distributionPlanApiFetch,
   distributionPlanApiPost,
 } from "@/services/distribution-plan-api";
 
-export enum DistributionPlanToolStep {
-  CREATE_PLAN = "CREATE_PLAN",
-  CREATE_SNAPSHOTS = "CREATE_SNAPSHOTS",
-  CREATE_CUSTOM_SNAPSHOT = "CREATE_CUSTOM_SNAPSHOT",
-  CREATE_PHASES = "CREATE_PHASES",
-  BUILD_PHASES = "BUILD_PHASES",
-  MAP_DELEGATIONS = "MAP_DELEGATIONS",
-  REVIEW = "REVIEW",
+import {
+  DistributionPlanToolStep,
+  getRequestedEmmaPlanStep,
+  restoreEmmaPlanStep,
+  writeEmmaPlanStep,
+} from "./emma-plan-step";
+
+export { DistributionPlanToolStep } from "./emma-plan-step";
+
+async function readPlanData<T>(endpoint: string): Promise<T | null> {
+  const result = await distributionPlanApiFetch<T>(endpoint);
+  return result.success ? result.data : null;
 }
 
 type DistributionPlanToolContextType = {
@@ -99,9 +106,30 @@ export default function DistributionPlanToolContextWrapper({
 }: {
   children: React.ReactNode;
 }) {
-  const [step, setStep] = useState<DistributionPlanToolStep>(
+  const [activeStep, setActiveStep] = useState<DistributionPlanToolStep>(
     DistributionPlanToolStep.CREATE_PLAN
   );
+  const stepRef = useRef(DistributionPlanToolStep.CREATE_PLAN);
+  const planRequest = useRef(0);
+  const activePlanId = useRef<string | null>(null);
+  const runSubmission = useRef<{ pending: boolean } | null>(null);
+
+  useEffect(
+    () => () => {
+      planRequest.current += 1;
+      activePlanId.current = null;
+      runSubmission.current = null;
+    },
+    []
+  );
+
+  const setStep = useCallback((next: DistributionPlanToolStep) => {
+    stepRef.current = next;
+    setActiveStep(next);
+    if (activePlanId.current !== null) {
+      writeEmmaPlanStep(activePlanId.current, next);
+    }
+  }, []);
   const [fetching, setFetching] = useState(false);
   const [operations, setOperations] = useState<AllowlistOperation[]>([]);
   const [distributionPlan, setDistributionPlan] =
@@ -119,102 +147,151 @@ export default function DistributionPlanToolContextWrapper({
   const [confirmedTokenId, setConfirmedTokenId] = useState<string | null>(null);
 
   const runOperations = async () => {
-    if (!distributionPlan) return;
-    const endpoint = `/allowlists/${distributionPlan.id}/runs`;
+    const planId = distributionPlan?.id;
+    if (
+      planId === undefined ||
+      activePlanId.current !== planId ||
+      runSubmission.current?.pending === true
+    )
+      return;
+
+    const submission = { pending: true };
+    runSubmission.current = submission;
     setFetching(true);
-    const { success, data } =
-      await distributionPlanApiPost<AllowlistDescription>({
-        endpoint,
-        body: {
-          allowlistId: distributionPlan.id,
-        },
-      });
-    if (success && data) {
-      setState(data);
-    }
-    setFetching(false);
-  };
-
-  const fetchTransferPools = async (distributionPlanId: string) => {
-    const endpoint = `/allowlists/${distributionPlanId}/transfer-pools`;
-    const { success, data } =
-      await distributionPlanApiFetch<AllowlistTransferPool[]>(endpoint);
-    if (success && data) {
-      setTransferPools(data);
-    }
-  };
-
-  const fetchTokenPools = async (distributionPlanId: string) => {
-    const endpoint = `/allowlists/${distributionPlanId}/token-pools`;
-    const { success, data } =
-      await distributionPlanApiFetch<AllowlistTokenPool[]>(endpoint);
-    if (success && data) {
-      setTokenPools(data);
+    try {
+      const { success, data } =
+        await distributionPlanApiPost<AllowlistDescription>({
+          endpoint: `/allowlists/${planId}/runs`,
+          body: { allowlistId: planId },
+        });
+      if (
+        runSubmission.current === submission &&
+        success &&
+        data?.id === planId
+      ) {
+        await setState(data);
+      }
+    } finally {
+      if (runSubmission.current === submission) {
+        submission.pending = false;
+        setFetching(false);
+      }
     }
   };
 
-  const fetchCustomTokenPools = async (distributionPlanId: string) => {
-    const endpoint = `/allowlists/${distributionPlanId}/custom-token-pools`;
-    const { success, data } =
-      await distributionPlanApiFetch<AllowlistCustomTokenPool[]>(endpoint);
-    if (success && data) {
-      setCustomTokenPools(data);
+  const pollRunStatus = async (planId: string) => {
+    const submission = runSubmission.current;
+    if (activePlanId.current !== planId || submission?.pending === true) return;
+
+    const request = planRequest.current;
+    const data = await readPlanData<AllowlistDescription>(
+      `/allowlists/${planId}`
+    );
+    // A poll from before a submission must never replace the new run's state.
+    if (request !== planRequest.current || submission !== runSubmission.current)
+      return;
+
+    const status = data?.activeRun?.status;
+    if (
+      data?.id === planId &&
+      status !== undefined &&
+      !isAnalysisRunning(status)
+    ) {
+      await setState(data);
     }
   };
 
   const fetchOperations = async (distributionPlanId: string) => {
-    const endpoint = `/allowlists/${distributionPlanId}/operations`;
-    const { success, data } =
-      await distributionPlanApiFetch<AllowlistOperation[]>(endpoint);
-    if (success && data) {
-      setOperations(data);
-    }
+    if (distributionPlanId !== activePlanId.current) return;
+    // A newer plan load owns the operation list once setState starts it.
+    const request = planRequest.current;
+    const data = await readPlanData<AllowlistOperation[]>(
+      `/allowlists/${distributionPlanId}/operations`
+    );
+    if (request === planRequest.current && data) setOperations(data);
   };
 
-  const fetchPhases = async (distributionPlanId: string) => {
-    const endpoint = `/allowlists/${distributionPlanId}/phases?withComponentsAndItems=true`;
-    const { success, data } =
-      await distributionPlanApiFetch<AllowlistPhaseWithComponentAndItems[]>(
-        endpoint
-      );
-    if (success && data) {
-      setPhases(data);
-    }
-  };
+  const setState = useCallback(
+    async (plan: AllowlistDescription | null) => {
+      const request = ++planRequest.current;
+      const planId = plan?.id ?? null;
+      if (activePlanId.current !== planId) runSubmission.current = null;
+      activePlanId.current = planId;
+      if (!plan) {
+        setStep(DistributionPlanToolStep.CREATE_PLAN);
+        setDistributionPlan(null);
+        setTransferPools([]);
+        setTokenPools([]);
+        setCustomTokenPools([]);
+        setOperations([]);
+        setPhases([]);
+        setFetching(false);
+        return;
+      }
 
-  const initState = async (distributionPlanId: string) => {
-    setFetching(true);
-    await fetchTransferPools(distributionPlanId);
-    await fetchTokenPools(distributionPlanId);
-    await fetchCustomTokenPools(distributionPlanId);
-    await fetchOperations(distributionPlanId);
-    await fetchPhases(distributionPlanId);
-    setFetching(false);
-  };
+      const restoring =
+        stepRef.current === DistributionPlanToolStep.CREATE_PLAN;
+      const requested = restoring
+        ? getRequestedEmmaPlanStep(window.location.search)
+        : undefined;
+      const endpoint = `/allowlists/${plan.id}`;
+      setDistributionPlan(plan);
+      setFetching(true);
+      const [
+        transfers,
+        tokens,
+        customTokens,
+        savedOperations,
+        savedPhases,
+        downloads,
+      ] = await Promise.all([
+        readPlanData<AllowlistTransferPool[]>(`${endpoint}/transfer-pools`),
+        readPlanData<AllowlistTokenPool[]>(`${endpoint}/token-pools`),
+        readPlanData<AllowlistCustomTokenPool[]>(
+          `${endpoint}/custom-token-pools`
+        ),
+        readPlanData<AllowlistOperation[]>(`${endpoint}/operations`),
+        readPlanData<AllowlistPhaseWithComponentAndItems[]>(
+          `${endpoint}/phases?withComponentsAndItems=true`
+        ),
+        requested !== undefined &&
+        requested !== DistributionPlanToolStep.CREATE_PLAN &&
+        requested !== DistributionPlanToolStep.CREATE_SNAPSHOTS
+          ? readPlanData<DistributionPlanTokenPoolDownload[]>(
+              `${endpoint}/token-pool-downloads`
+            )
+          : null,
+      ]);
+      if (request !== planRequest.current) return;
 
-  const setState = async (distributionPlan: AllowlistDescription | null) => {
-    if (!distributionPlan) {
-      setStep(DistributionPlanToolStep.CREATE_PLAN);
-      setDistributionPlan(null);
-      setTransferPools([]);
-      setTokenPools([]);
-      setCustomTokenPools([]);
-      setOperations([]);
-      setPhases([]);
-      return;
-    }
-    setDistributionPlan(distributionPlan);
-    await initState(distributionPlan.id);
-    if (step === DistributionPlanToolStep.CREATE_PLAN) {
-      setStep(DistributionPlanToolStep.CREATE_SNAPSHOTS);
-    }
-  };
+      if (transfers) setTransferPools(transfers);
+      if (tokens) setTokenPools(tokens);
+      if (customTokens) setCustomTokenPools(customTokens);
+      if (savedOperations) setOperations(savedOperations);
+      if (savedPhases) setPhases(savedPhases);
+      if (
+        restoring &&
+        stepRef.current === DistributionPlanToolStep.CREATE_PLAN
+      ) {
+        setStep(
+          restoreEmmaPlanStep(
+            requested,
+            savedOperations,
+            savedPhases,
+            downloads
+          )
+        );
+      }
+      setFetching(runSubmission.current?.pending === true);
+    },
+    [setStep]
+  );
 
   return (
     <>
       <DistributionPlanToolContext.Provider
         value={{
-          step,
+          step: activeStep,
           setStep,
           fetching,
           runOperations,
@@ -237,7 +314,12 @@ export default function DistributionPlanToolContextWrapper({
         }}
       >
         <div>{children}</div>
-        <RunOperations />
+        <RunOperations
+          distributionPlan={distributionPlan}
+          fetching={fetching}
+          isOpeningPlan={activeStep === DistributionPlanToolStep.CREATE_PLAN}
+          pollRunStatus={pollRunStatus}
+        />
       </DistributionPlanToolContext.Provider>
     </>
   );

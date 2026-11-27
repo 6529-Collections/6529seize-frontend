@@ -19,7 +19,7 @@ import StepHeader from "../common/StepHeader";
 export default function CreatePlan({ id }: { readonly id: string }) {
   const router = useRouter();
 
-  const { setState } = useContext(DistributionPlanToolContext);
+  const { setState, step } = useContext(DistributionPlanToolContext);
 
   const { data: distributionPlanResponse, isError } = useQuery({
     queryKey: ["distribution-plan", id],
@@ -61,9 +61,11 @@ export default function CreatePlan({ id }: { readonly id: string }) {
   return (
     <div>
       <StepHeader step={DistributionPlanToolStep.CREATE_PLAN} />
-      <div className="tw-mt-12 tw-text-center">
-        <AllowlistToolLoader size={AllowlistToolLoaderSize.LARGE} />
-      </div>
+      {step === DistributionPlanToolStep.CREATE_PLAN && (
+        <div className="tw-mt-12 tw-text-center">
+          <AllowlistToolLoader size={AllowlistToolLoaderSize.LARGE} />
+        </div>
+      )}
     </div>
   );
 }

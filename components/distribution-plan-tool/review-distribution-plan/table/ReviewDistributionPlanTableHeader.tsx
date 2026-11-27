@@ -1,21 +1,25 @@
 "use client";
 
 import type { AllowlistResult } from "@/components/allowlist-tool/allowlist-tool.types";
-import DistributionPlanTableHeaderWrapper from "@/components/distribution-plan-tool/common/DistributionPlanTableHeaderWrapper";
-import RoundedCsvIconButton from "@/components/distribution-plan-tool/common/RoundedCsvIconButton";
-import RoundedJsonIconButton from "@/components/distribution-plan-tool/common/RoundedJsonIconButton";
-import RoundedManifoldIconButton from "@/components/distribution-plan-tool/common/RoundedManifoldIconButton";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { buildCsvFromRecords } from "@/helpers/csv-export.helpers";
 import { downloadJsonFile } from "@/helpers/json-download.helpers";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import type {
   FullResultWallet,
   ReviewDistributionPlanTablePhase,
 } from "./ReviewDistributionPlanTable.types";
 import { FetchResultsType } from "./ReviewDistributionPlanTable.types";
+
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/emma";
+import { ReviewDistributionExports } from "./ReviewDistributionExports";
+
+const heading =
+  "tw-px-2 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-iron-300 sm:tw-px-3";
 
 export default function ReviewDistributionPlanTableHeader({
   rows,
@@ -24,15 +28,7 @@ export default function ReviewDistributionPlanTableHeader({
 }) {
   const { distributionPlan } = useContext(DistributionPlanToolContext);
   const [loadingType, setLoadingType] = useState<FetchResultsType | null>(null);
-  const [isLoadingJson, setIsLoadingJson] = useState(false);
-  const [isLoadingCsv, setIsLoadingCsv] = useState(false);
-  const [isLoadingManifold, setIsLoadingManifold] = useState(false);
-
-  useEffect(() => {
-    setIsLoadingJson(loadingType === FetchResultsType.JSON);
-    setIsLoadingCsv(loadingType === FetchResultsType.CSV);
-    setIsLoadingManifold(loadingType === FetchResultsType.MANIFOLD);
-  }, [loadingType]);
+  const locale = useBrowserLocale();
 
   const getFullResults = (results: AllowlistResult[]): FullResultWallet[] =>
     results.map<FullResultWallet>((result) => {
@@ -107,49 +103,28 @@ export default function ReviewDistributionPlanTableHeader({
     }
   };
   return (
-    <DistributionPlanTableHeaderWrapper>
-      <th
-        scope="col"
-        className="tw-whitespace-nowrap tw-py-3 tw-pl-4 tw-pr-3 tw-text-left tw-text-[0.6875rem] tw-font-medium tw-uppercase tw-leading-[1.125rem] tw-tracking-[0.25px] tw-text-iron-400 sm:tw-pl-6"
-      >
-        Name
-      </th>
-
-      <th
-        scope="col"
-        className="tw-whitespace-nowrap tw-px-3 tw-py-3 tw-text-left tw-text-[0.6875rem] tw-font-medium tw-uppercase tw-leading-[1.125rem] tw-tracking-[0.25px] tw-text-iron-400"
-      >
-        Description
-      </th>
-      <th
-        scope="col"
-        className="tw-whitespace-nowrap tw-px-3 tw-py-3 tw-text-left tw-text-[0.6875rem] tw-font-medium tw-uppercase tw-leading-[1.125rem] tw-tracking-[0.25px] tw-text-iron-400"
-      >
-        Wallets
-      </th>
-      <th
-        scope="col"
-        className="tw-whitespace-nowrap tw-px-3 tw-py-3 tw-text-left tw-text-[0.6875rem] tw-font-medium tw-uppercase tw-leading-[1.125rem] tw-tracking-[0.25px] tw-text-iron-400"
-      >
-        Spots
-      </th>
-      <th
-        scope="col"
-        className="tw-flex tw-justify-start tw-gap-x-3 tw-whitespace-nowrap tw-py-3 tw-pl-3 tw-pr-4"
-      >
-        <RoundedJsonIconButton
-          onClick={() => fetchResults(FetchResultsType.JSON)}
-          loading={isLoadingJson}
-        />
-        <RoundedCsvIconButton
-          onClick={() => fetchResults(FetchResultsType.CSV)}
-          loading={isLoadingCsv}
-        />
-        <RoundedManifoldIconButton
-          onClick={() => fetchResults(FetchResultsType.MANIFOLD)}
-          loading={isLoadingManifold}
-        />
-      </th>
-    </DistributionPlanTableHeaderWrapper>
+    <thead className="tw-bg-iron-800">
+      <tr>
+        <th scope="col" className={heading}>
+          {t(locale, "emma.review.name")}
+        </th>
+        <th scope="col" className={heading}>
+          {t(locale, "emma.review.wallets")}
+        </th>
+        <th scope="col" className={heading}>
+          {t(locale, "emma.review.spots")}
+        </th>
+        <th
+          scope="col"
+          aria-label={t(locale, "emma.review.exports")}
+          className="tw-px-2 tw-py-2 sm:tw-px-3"
+        >
+          <ReviewDistributionExports
+            loading={loadingType}
+            onExport={(type) => void fetchResults(type)}
+          />
+        </th>
+      </tr>
+    </thead>
   );
 }
