@@ -1,6 +1,15 @@
+export type IndexedDbOperation = "open" | "transaction" | "read" | "write";
+export type IndexedDbFailureHandler = (operation: IndexedDbOperation) => void;
+
+interface RequestDiagnostics {
+  readonly operation: "read" | "write";
+  readonly onFailure: IndexedDbFailureHandler;
+}
+
 type StoreFn = <T>(
   txMode: IDBTransactionMode,
-  callback: (store: IDBObjectStore) => Promise<T> | T
+  callback: (store: IDBObjectStore) => Promise<T> | T,
+  diagnostics?: RequestDiagnostics
 ) => Promise<T>;
 
 type RequestLike<T = unknown> = {
@@ -130,9 +139,16 @@ function resetDbPromise(dbName: string, storeName: string): void {
 }
 
 export function createStore(dbName: string, storeName: string): StoreFn {
-  return async (txMode, callback) => {
+  return async (txMode, callback, diagnostics) => {
     for (let attempt = 0; attempt < 2; attempt++) {
-      const db = await getDbPromise(dbName, storeName);
+      let db: IDBDatabase;
+      try {
+        db = await getDbPromise(dbName, storeName);
+      } catch (error) {
+        // Concurrent callers can share the same in-flight database open.
+        diagnostics?.onFailure("open");
+        throw error;
+      }
 
       let store: IDBObjectStore;
       try {
@@ -142,6 +158,7 @@ export function createStore(dbName: string, storeName: string): StoreFn {
           resetDbPromise(dbName, storeName);
           continue;
         }
+        diagnostics?.onFailure("transaction");
         throw error;
       }
 
@@ -152,6 +169,7 @@ export function createStore(dbName: string, storeName: string): StoreFn {
           resetDbPromise(dbName, storeName);
           continue;
         }
+        diagnostics?.onFailure(diagnostics.operation);
         throw error;
       }
     }
@@ -169,26 +187,34 @@ function defaultGetStore(): StoreFn {
 
 export function get<T = unknown>(
   key: IDBValidKey,
-  customStore?: StoreFn
+  customStore?: StoreFn,
+  onFailure?: IndexedDbFailureHandler
 ): Promise<T | undefined> {
   const runInStore = customStore ?? defaultGetStore();
-  return runInStore("readonly", (store) =>
-    promisifyRequest<T>(store.get(key) as unknown as RequestLike<T>)
+  return runInStore(
+    "readonly",
+    (store) => promisifyRequest<T>(store.get(key) as unknown as RequestLike<T>),
+    onFailure && { operation: "read", onFailure }
   );
 }
 
 export function set<T = unknown>(
   key: IDBValidKey,
   value: T,
-  customStore?: StoreFn
+  customStore?: StoreFn,
+  onFailure?: IndexedDbFailureHandler
 ): Promise<void> {
   const runInStore = customStore ?? defaultGetStore();
-  return runInStore("readwrite", (store) => {
-    store.put(value, key);
-    return promisifyRequest<void>(
-      store.transaction as unknown as RequestLike<void>
-    );
-  });
+  return runInStore(
+    "readwrite",
+    (store) => {
+      store.put(value, key);
+      return promisifyRequest<void>(
+        store.transaction as unknown as RequestLike<void>
+      );
+    },
+    onFailure && { operation: "write", onFailure }
+  );
 }
 
 export function setMany(

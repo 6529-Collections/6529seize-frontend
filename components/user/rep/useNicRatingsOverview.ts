@@ -18,7 +18,10 @@ export function useNicRatingsOverview(
   const viewer = useProfileQueryViewer();
   const given = useQuery({
     ...nicOverviewQueryOptions(identity, "outgoing", viewer),
-    enabled: direction === "given" && viewer !== PENDING_PROFILE_QUERY_VIEWER,
+    enabled:
+      !!profile.id &&
+      direction === "given" &&
+      viewer !== PENDING_PROFILE_QUERY_VIEWER,
   });
   const overview = direction === "received" ? cicOverview : given.data;
   const score =

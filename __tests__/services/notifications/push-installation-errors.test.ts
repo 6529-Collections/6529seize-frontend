@@ -63,3 +63,8 @@ it.each(["logout_pending", "installation_changed", "auth_changed"] as const)(
     );
   }
 );
+
+it("preserves the installation identity failure reason", () => {
+  const error = new PushInstallationPreparationError("identity_changed");
+  expect(getPushPreparationFailureReason(error)).toBe("identity_changed");
+});

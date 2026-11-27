@@ -16,15 +16,41 @@ const isMobileLayoutViewport = () => {
   );
 };
 
-/** Subscribes viewport layout consumers to resize changes. */
+const subscribers = new Set<() => void>();
+// Tracks the last layout seen by the resize listener. Snapshots read the live width.
+let lastIsMobile = false;
+
+const handleMobileLayoutResize = () => {
+  const isMobile = isMobileLayoutViewport();
+  if (isMobile === lastIsMobile) {
+    return;
+  }
+
+  lastIsMobile = isMobile;
+  for (const subscriber of subscribers) {
+    subscriber();
+  }
+};
+
+/** Shares one resize listener and notifies consumers only on a layout change. */
 const subscribe = (onStoreChange: () => void) => {
   const browserWindow = getBrowserWindow();
   if (browserWindow === undefined) {
     return () => undefined;
   }
 
-  browserWindow.addEventListener("resize", onStoreChange);
-  return () => browserWindow.removeEventListener("resize", onStoreChange);
+  if (subscribers.size === 0) {
+    browserWindow.addEventListener("resize", handleMobileLayoutResize);
+    lastIsMobile = isMobileLayoutViewport();
+  }
+
+  subscribers.add(onStoreChange);
+  return () => {
+    subscribers.delete(onStoreChange);
+    if (subscribers.size === 0) {
+      browserWindow.removeEventListener("resize", handleMobileLayoutResize);
+    }
+  };
 };
 
 /** Tracks whether the active browser viewport should use mobile drop actions. */

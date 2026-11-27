@@ -92,7 +92,8 @@ export default function UserPageRep({
   );
 
   const viewer = useProfileQueryViewer();
-  const canLoadRatings = !!user && viewer !== PENDING_PROFILE_QUERY_VIEWER;
+  const canLoadRatings =
+    !!profile.id && !!user && viewer !== PENDING_PROFILE_QUERY_VIEWER;
   const canLoadGivenRep = canLoadRatings && repDirection === "given";
 
   const { data: repOverview, isFetching: isFetchingOverview } = useQuery({
