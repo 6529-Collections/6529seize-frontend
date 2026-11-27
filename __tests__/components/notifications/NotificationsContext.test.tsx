@@ -11,6 +11,7 @@ import {
   NotificationsProvider,
   useNotificationsContext,
 } from "@/components/notifications/NotificationsContext";
+import { PushInstallationPreparationError } from "@/services/notifications/push-installation-errors";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import React from "react";
 
@@ -563,9 +564,14 @@ describe("push registration behavior", () => {
     { label: "object", failure: { message: "sensitive storage error" } },
     { label: "null", failure: null },
     { label: "undefined", failure: undefined },
+    {
+      label: "device identity change",
+      failure: new PushInstallationPreparationError("identity_changed"),
+      reason: "identity_changed",
+    },
   ])(
     "allows a waiting registration to continue after a $label preparation failure",
-    async ({ failure }) => {
+    async ({ failure, reason }) => {
       const {
         preparePushInstallationRegistration,
       } = require("@/services/notifications/push-installation");
@@ -600,12 +606,42 @@ describe("push registration behavior", () => {
         expect.objectContaining({
           tags: expect.objectContaining({
             operation: "preparePushInstallationRegistration",
-            push_failure_reason: "storage_or_identity_failure",
+            push_failure_reason: reason ?? "storage_or_identity_failure",
           }),
         })
       );
     }
   );
+
+  it("records stale auth during push preparation as a breadcrumb", async () => {
+    const {
+      preparePushInstallationRegistration,
+    } = require("@/services/notifications/push-installation");
+    const { commonApiPost } = require("@/services/api/common-api");
+    const sentry = require("@sentry/nextjs");
+    preparePushInstallationRegistration.mockRejectedValueOnce(
+      new PushInstallationPreparationError("auth_changed")
+    );
+
+    const { registrationCallback } = await setupRegistrationCallback();
+    await act(async () => {
+      await registrationCallback({ value: "test-token" });
+    });
+
+    expect(sentry.addBreadcrumb).toHaveBeenCalledWith({
+      category: "notifications",
+      level: "info",
+      message: "Push registration skipped (auth changed).",
+      data: {
+        component: "NotificationsProvider",
+        operation: "preparePushInstallationRegistration",
+        push_failure_reason: "auth_changed",
+        platform: "ios",
+      },
+    });
+    expect(sentry.captureException).not.toHaveBeenCalled();
+    expect(commonApiPost).not.toHaveBeenCalled();
+  });
 
   it("skips registration when auth token is unavailable", async () => {
     const { commonApiPost } = require("@/services/api/common-api");

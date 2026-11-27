@@ -594,14 +594,25 @@ export const registerPushNotificationWithRetry = async (
       connectedJwt ? profileId : undefined
     );
   } catch (error) {
+    const tags = {
+      component: "NotificationsProvider",
+      operation: "preparePushInstallationRegistration",
+      push_failure_reason: getPushPreparationFailureReason(error),
+    };
+    if (tags.push_failure_reason === "auth_changed") {
+      Sentry.addBreadcrumb({
+        category: "notifications",
+        level: "info",
+        message: "Push registration skipped (auth changed).",
+        data: { ...tags, platform: deviceInfo.platform },
+      });
+      return false;
+    }
+
     // Storage/proof failures must settle the shared registration promise without
     // logging potentially sensitive storage contents.
     Sentry.captureException(new Error("Push installation preparation failed"), {
-      tags: {
-        component: "NotificationsProvider",
-        operation: "preparePushInstallationRegistration",
-        push_failure_reason: getPushPreparationFailureReason(error),
-      },
+      tags,
       extra: { profile_id: profileId, platform: deviceInfo.platform },
     });
     return false;
