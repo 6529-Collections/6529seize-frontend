@@ -114,9 +114,11 @@ it("cancels back to the same page and leaves the destination mounted", () => {
 it("catches an in-flight Back and prevents its old completion from navigating", () => {
   const { motion, page } = setup();
   const navigate = jest.fn();
+  expect(motion.canCatch()).toBe(false);
   motion.transition("back", navigate);
   const outgoing = options();
   outgoing.onUpdate?.(140);
+  expect(motion.canCatch()).toBe(true);
   const gesture = motion.begin();
   expect(stop).toHaveBeenCalled();
   expect(gesture?.origin).toBe(140);
@@ -126,6 +128,7 @@ it("catches an in-flight Back and prevents its old completion from navigating", 
   expect(navigate).not.toHaveBeenCalled();
   gesture?.end(false, -500, navigate);
   options().onComplete?.();
+  expect(motion.canCatch()).toBe(false);
   expect(navigate).not.toHaveBeenCalled();
   motion.dispose();
 });

@@ -20,7 +20,8 @@ interface HorizontalSwipeOptions {
   /** Average recent source events for phone Back; other gestures keep their timing. */
   readonly velocityWindowMs?: number | undefined;
   /** Catch a running animation at touch-down, before axis intent is known. */
-  readonly captureOnPress?: boolean;
+  readonly captureOnPress?: boolean | (() => boolean);
+  /** Continue past the starting position, or start in reverse after catching motion. */
   readonly allowReverse?: boolean;
   /** Rightward navigation from this left-edge zone outranks content gestures. */
   readonly priorityLeftEdgeWidth?: number;
@@ -37,6 +38,7 @@ interface Candidate {
   readonly element: HTMLElement;
   readonly options: { current: HorizontalSwipeOptions };
   readonly priorityEdge: boolean;
+  readonly capturedOnPress: boolean;
 }
 
 interface Gesture {
@@ -135,7 +137,7 @@ function finish(commit: boolean, timestamp?: number) {
   if (!current) return;
   if (current.frame !== null) globalThis.cancelAnimationFrame(current.frame);
   for (const candidate of current.candidates) {
-    if (candidate !== current.owner && candidate.options.current.captureOnPress)
+    if (candidate !== current.owner && candidate.capturedOnPress)
       candidate.options.current.onEnd(false, 0, 0);
   }
   const options = current.owner?.options.current;
@@ -231,10 +233,10 @@ function claimGesture(current: Gesture, deltaX: number, deltaY: number) {
         priorityEdge && options.current.enabled && deltaX > 0
     ) ??
     current.candidates.find(
-      ({ options }) =>
+      ({ options, capturedOnPress }) =>
         options.current.enabled &&
         (deltaX * options.current.direction > 0 ||
-          options.current.allowReverse === true)
+          (capturedOnPress && options.current.allowReverse === true))
     );
   if (
     !candidate?.priorityEdge &&
@@ -256,8 +258,7 @@ function claimGesture(current: Gesture, deltaX: number, deltaY: number) {
   if (absoluteDeltaX < deltaY * intentRatio) return;
   current.owner = candidate;
   suppressClick(current.owner.element);
-  if (!current.owner.options.current.captureOnPress)
-    current.owner.options.current.onStart?.();
+  if (!current.owner.capturedOnPress) current.owner.options.current.onStart?.();
 }
 
 function track(current: Gesture, touch: Touch, timestamp: number) {
@@ -336,8 +337,7 @@ function removeCandidate(candidate: Candidate | null) {
   const index = gesture.candidates.indexOf(candidate);
   if (index >= 0) {
     gesture.candidates.splice(index, 1);
-    if (candidate.options.current.captureOnPress)
-      candidate.options.current.onEnd(false, 0, 0);
+    if (candidate.capturedOnPress) candidate.options.current.onEnd(false, 0, 0);
   }
   if (gesture.candidates.length === 0) cancel();
 }
@@ -410,13 +410,19 @@ export function useHorizontalSwipe(
       });
       globalThis.addEventListener("blur", cancel);
     }
+    const captureOnPress = latest.current.captureOnPress;
+    const capturedOnPress =
+      typeof captureOnPress === "function"
+        ? captureOnPress()
+        : captureOnPress === true;
     const next = {
       element: event.currentTarget,
       options: latest,
       priorityEdge,
+      capturedOnPress,
     };
     candidate.current = next;
     gesture.candidates.push(next);
-    if (latest.current.captureOnPress) latest.current.onStart?.();
+    if (capturedOnPress) latest.current.onStart?.();
   }, []);
 }
