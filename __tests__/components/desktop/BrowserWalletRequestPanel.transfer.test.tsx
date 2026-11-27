@@ -112,20 +112,23 @@ const envelope = (
   to: string,
   data: Hex,
   chainId: number
-): WalletRequestEnvelope => ({
-  v: 1,
-  id: ID,
-  scheme: "localcore6529",
-  origin: globalThis.location.origin,
-  issuedAt: Date.now(),
-  expiresAt: Date.now() + 300_000,
-  request: {
-    method: "eth_sendTransaction",
-    params: [{ from: ADDRESS, to, data, value: "0x0" }],
-    address: ADDRESS,
-    chainId,
-  },
-});
+): WalletRequestEnvelope => {
+  const issuedAt = Date.now();
+  return {
+    v: 1,
+    id: ID,
+    scheme: "localcore6529",
+    origin: globalThis.location.origin,
+    issuedAt,
+    expiresAt: issuedAt + 300_000,
+    request: {
+      method: "eth_sendTransaction",
+      params: [{ from: ADDRESS, to, data, value: "0x0" }],
+      address: ADDRESS,
+      chainId,
+    },
+  };
+};
 
 async function fragmentFor(value: WalletRequestEnvelope): Promise<string> {
   const bytes = new TextEncoder().encode(JSON.stringify(value));

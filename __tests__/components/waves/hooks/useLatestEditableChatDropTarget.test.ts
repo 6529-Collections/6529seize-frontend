@@ -15,6 +15,11 @@ let mockWaveMessagesStore: {
   readonly unsubscribe: jest.Mock<void, [string, Listener]>;
 };
 
+let mockWritesPaused = false;
+jest.mock("@/hooks/useWavesMovePhase", () => ({
+  useWavesWritesPaused: () => mockWritesPaused,
+}));
+
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStreamActions: () => mockUseMyStream(),
 }));
@@ -84,6 +89,55 @@ describe("useLatestEditableChatDropTarget", () => {
     });
   });
 
+  it("leaves a latest post with a poll alone while its wave moves", () => {
+    mockWritesPaused = true;
+    try {
+      mockWaveMessagesById["wave-1"] = createWaveMessages([
+        createDrop({ id: "older-own", serial_no: 10 }),
+        createDrop({
+          id: "poll-own",
+          serial_no: 12,
+          poll: {} as NonNullable<ExtendedDrop["poll"]>,
+        }),
+      ]);
+      const { result } = renderHook(() =>
+        useLatestEditableChatDropTarget({
+          waveId: "wave-1",
+          connectedProfile,
+          isProxyMode: false,
+        })
+      );
+      expect(result.current).toBeNull();
+    } finally {
+      mockWritesPaused = false;
+    }
+  });
+
+  it("says when the latest own post has a poll", () => {
+    mockWaveMessagesById["wave-1"] = createWaveMessages([
+      createDrop({ id: "older-own", serial_no: 10 }),
+      createDrop({
+        id: "poll-own",
+        serial_no: 12,
+        poll: {} as NonNullable<ExtendedDrop["poll"]>,
+      }),
+    ]);
+
+    const { result } = renderHook(() =>
+      useLatestEditableChatDropTarget({
+        waveId: "wave-1",
+        connectedProfile,
+        isProxyMode: false,
+      })
+    );
+
+    expect(result.current).toEqual({
+      id: "poll-own",
+      serialNo: 12,
+      hasPoll: true,
+    });
+  });
+
   it("returns the latest own chat drop target from current store data", () => {
     mockWaveMessagesById["wave-1"] = createWaveMessages([
       createDrop({ id: "older-own", serial_no: 10 }),
@@ -98,7 +152,11 @@ describe("useLatestEditableChatDropTarget", () => {
       })
     );
 
-    expect(result.current).toEqual({ id: "newer-own", serialNo: 12 });
+    expect(result.current).toEqual({
+      id: "newer-own",
+      serialNo: 12,
+      hasPoll: false,
+    });
   });
 
   it("does not rerender when another user posts a newer drop", () => {
@@ -132,7 +190,11 @@ describe("useLatestEditableChatDropTarget", () => {
       );
     });
 
-    expect(result.current).toEqual({ id: "own-drop", serialNo: 10 });
+    expect(result.current).toEqual({
+      id: "own-drop",
+      serialNo: 10,
+      hasPoll: false,
+    });
     expect(renderSpy).toHaveBeenCalledTimes(renderCountAfterMount);
   });
 
@@ -157,7 +219,11 @@ describe("useLatestEditableChatDropTarget", () => {
       );
     });
 
-    expect(result.current).toEqual({ id: "newer-own", serialNo: 20 });
+    expect(result.current).toEqual({
+      id: "newer-own",
+      serialNo: 20,
+      hasPoll: false,
+    });
   });
 
   it("moves to the previous own chat drop when the latest target is removed", () => {
@@ -176,13 +242,21 @@ describe("useLatestEditableChatDropTarget", () => {
       })
     );
 
-    expect(result.current).toEqual({ id: "latest-own", serialNo: 20 });
+    expect(result.current).toEqual({
+      id: "latest-own",
+      serialNo: 20,
+      hasPoll: false,
+    });
 
     act(() => {
       emitWaveMessages(createWaveMessages([olderOwnDrop]));
     });
 
-    expect(result.current).toEqual({ id: "older-own", serialNo: 10 });
+    expect(result.current).toEqual({
+      id: "older-own",
+      serialNo: 10,
+      hasPoll: false,
+    });
   });
 
   it("returns null when the removed target was the only own chat drop", () => {
@@ -197,7 +271,11 @@ describe("useLatestEditableChatDropTarget", () => {
       })
     );
 
-    expect(result.current).toEqual({ id: "latest-own", serialNo: 20 });
+    expect(result.current).toEqual({
+      id: "latest-own",
+      serialNo: 20,
+      hasPoll: false,
+    });
 
     act(() => {
       emitWaveMessages(createWaveMessages([]));

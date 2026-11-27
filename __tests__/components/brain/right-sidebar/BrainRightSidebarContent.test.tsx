@@ -1,19 +1,45 @@
 import { render, screen } from "@testing-library/react";
 import BrainRightSidebarContent from "@/components/brain/right-sidebar/BrainRightSidebarContent";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { CompactModeProvider } from "@/contexts/CompactModeContext";
 
-jest.mock("@/components/waves/drops/Drop", () => ({
-  __esModule: true,
-  default: ({ drop }: { drop: { id: string } }) => (
-    <div data-testid="pinned-drop">{drop.id}</div>
-  ),
-  DropLocation: { WAVE: "WAVE" },
-}));
+jest.mock("@/components/waves/drops/Drop", () => {
+  const { useCompactMode } = jest.requireActual<
+    typeof import("@/contexts/CompactModeContext")
+  >("@/contexts/CompactModeContext");
+  return {
+    __esModule: true,
+    default: function MockPinnedDrop({ drop }: { drop: { id: string } }) {
+      const compact = useCompactMode();
+      return (
+        <div data-testid="pinned-drop" data-compact={String(compact)}>
+          {drop.id}
+        </div>
+      );
+    },
+    DropLocation: { WAVE: "WAVE" },
+  };
+});
 
 const makeWave = (dropId: string): ApiWave =>
   ({ description_drop: { id: dropId, parts: [] } }) as unknown as ApiWave;
 
 describe("BrainRightSidebarContent", () => {
+  it.each([false, true])(
+    "preserves the parent chat mode for pinned-post interactions (%s)",
+    (compact) => {
+      render(
+        <CompactModeProvider compact={compact}>
+          <BrainRightSidebarContent wave={makeWave("drop-1")} />
+        </CompactModeProvider>
+      );
+      expect(screen.getByTestId("pinned-drop")).toHaveAttribute(
+        "data-compact",
+        String(compact)
+      );
+    }
+  );
+
   it("shows the current pinned drop instead of the overview", () => {
     const { rerender } = render(
       <BrainRightSidebarContent wave={makeWave("drop-1")} />

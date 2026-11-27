@@ -226,8 +226,8 @@ async function tryAppend(
     };
     local.readsAt = io.now();
   }
-  if (segment.pins.length > 0) {
-    local.pinIds = { ...local.pinIds, ...backupPinIds(segment.pins) };
+  if (segment.pins.length > 0 || segment.pinRanks.length > 0) {
+    local.pinIds = { ...local.pinIds, ...backupPinIds(segment) };
   }
   let forked = false;
   if (link.index === 0) {

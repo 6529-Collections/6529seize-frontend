@@ -64,6 +64,7 @@ const createCriteria = ({
     created_by: { id: "author" } as any,
     visible: true,
     is_private: false,
+    stays_on_site: false,
   },
   includedWallets,
   excludedWallets: ["0xC"],

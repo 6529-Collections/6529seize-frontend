@@ -280,8 +280,8 @@ Threat-model at least:
   claims/minting, special IDs, migrations, deployable workers, creation,
   generated models, timers, tabs, navigation, rules, query state, entry/winner
   context, presentation, deep links, and responsive states.
-- **GET compatibility:** complete. The census freezes 296 mounted GET route
-  shapes, including every one of the 183 OpenAPI GET operations, plus actual
+- **GET compatibility:** complete. The runtime census records 288 GET route
+  shapes, including all 183 OpenAPI GET operations, plus actual
   authentication and projection rules. Machine schemas and synthetic fixtures
   are sufficient to implement structural, golden, adapter-parity, and old-client
   CI tests without redefining semantics.

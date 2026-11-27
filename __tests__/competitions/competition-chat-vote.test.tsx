@@ -1254,7 +1254,7 @@ describe("a chain vote from a wallet with no identity on the 6529 Network", () =
     fireEvent.click(screen.getByRole("button", { name: voteButtonName }));
     const alert = await screen.findByRole("alert");
     expect(alert).toHaveTextContent(
-      "This wallet has no identity on the 6529 Network yet. Set one up on your identity page."
+      "This wallet has no identity on the 6529 Network yet. Create one on your identity page."
     );
     expect(
       screen.getByRole("link", { name: "your identity page" })

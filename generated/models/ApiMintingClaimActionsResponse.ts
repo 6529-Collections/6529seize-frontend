@@ -18,6 +18,10 @@ export class ApiMintingClaimActionsResponse {
     'contract': string;
     'claim_id': number;
     'actions': Array<ApiMintingClaimAction>;
+    /**
+    * Whether this claim has a Drop Forge launch record in the current environment.
+    */
+    'drop_forge_launch_exists'?: boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -40,6 +44,12 @@ export class ApiMintingClaimActionsResponse {
             "name": "actions",
             "baseName": "actions",
             "type": "Array<ApiMintingClaimAction>",
+            "format": ""
+        },
+        {
+            "name": "drop_forge_launch_exists",
+            "baseName": "drop_forge_launch_exists",
+            "type": "boolean",
             "format": ""
         }    ];
 

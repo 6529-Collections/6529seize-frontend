@@ -26,6 +26,10 @@ import { HttpFile } from '../http/http';
 
 export class ApiCompetition {
     /**
+    * The decision\'s wave\'s stays_on_site: true when the wave, and with it this decision, stays on 6529.io; false when it moves to the 6529 chain.
+    */
+    'stays_on_site': boolean;
+    /**
     * Artwork trait rules for an enabled Main Stage decision. Points must be finite and nonzero.
     */
     'main_stage_trait_rules'?: Array<ApiMainStageTraitRule>;
@@ -35,6 +39,10 @@ export class ApiCompetition {
     'your_active_entries_count'?: number | null;
     'presentation'?: Array<ApiCreateWaveMetadataRequest>;
     'id': string;
+    /**
+    * The decision\'s id on the 6529 chain (lowercase), for an imported decision too. Null while 6529.io doesn\'t know it. Every route that takes a competition id also takes this id.
+    */
+    'chain_id'?: string | null;
     'wave_id': string;
     'type': ApiCompetitionType;
     'title': string;
@@ -62,6 +70,12 @@ export class ApiCompetition {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
+            "name": "stays_on_site",
+            "baseName": "stays_on_site",
+            "type": "boolean",
+            "format": ""
+        },
+        {
             "name": "main_stage_trait_rules",
             "baseName": "main_stage_trait_rules",
             "type": "Array<ApiMainStageTraitRule>",
@@ -84,6 +98,12 @@ export class ApiCompetition {
             "baseName": "id",
             "type": "string",
             "format": "uuid"
+        },
+        {
+            "name": "chain_id",
+            "baseName": "chain_id",
+            "type": "string",
+            "format": ""
         },
         {
             "name": "wave_id",

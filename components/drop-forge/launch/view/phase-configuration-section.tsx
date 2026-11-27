@@ -1,5 +1,10 @@
 import DropForgeFieldBox from "@/components/drop-forge/DropForgeFieldBox";
 import {
+  DropForgeInlineStatus,
+  getLaunchInlineStatuses,
+} from "@/components/drop-forge/launch/DropForgeInlineStatus";
+import type { ApiDropForgeLaunch } from "@/generated/models/ApiDropForgeLaunch";
+import {
   findBestMatchingLaunchActionName,
   getRootAddressesCount,
   getRootTotalSpots,
@@ -199,6 +204,7 @@ function DropForgePhaseRootInfoSection({
 }
 
 function DropForgePhaseConfigurationSection({
+  automationLaunch,
   manifoldClaim,
   selectedPhaseDiffs,
   changedFieldBoxClassName,
@@ -232,6 +238,7 @@ function DropForgePhaseConfigurationSection({
   subscriptionAirdropSections,
 }: Readonly<{
   manifoldClaim: ManifoldClaim | null;
+  automationLaunch?: ApiDropForgeLaunch | null | undefined;
   selectedPhaseDiffs: LaunchPhaseDiffsView;
   changedFieldBoxClassName: string;
   changedFieldBoxLabelClassName: string;
@@ -266,10 +273,17 @@ function DropForgePhaseConfigurationSection({
   ) => Promise<void>;
   subscriptionAirdropSections: LaunchSubscriptionAirdropSectionView[];
 }>) {
+  const inlineStatuses = getLaunchInlineStatuses(
+    automationLaunch,
+    selectedPhase
+  );
   return (
     <div className="tw-space-y-5 tw-pt-2">
-      <div className="tw-text-base tw-font-medium tw-text-white">
-        Phase Configuration
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
+        <span className="tw-text-base tw-font-medium tw-text-white">
+          Phase Configuration
+        </span>
+        <DropForgeInlineStatus status={inlineStatuses?.setup} />
       </div>
       <div className="tw-grid tw-grid-cols-1 tw-gap-4 lg:tw-grid-cols-2 lg:tw-gap-x-5">
         <DropForgeFieldBox label="Remaining Editions">
@@ -334,6 +348,7 @@ function DropForgePhaseConfigurationSection({
       </div>
 
       <DropForgePhase0AirdropsSection
+        inlineStatuses={inlineStatuses}
         visible={showPhase0AirdropSections}
         phase0AirdropsError={phase0AirdropsError}
         phase0AirdropsLoading={phase0AirdropsLoading}
@@ -350,6 +365,7 @@ function DropForgePhaseConfigurationSection({
       />
 
       <DropForgeSubscriptionAirdropSections
+        inlineStatuses={inlineStatuses}
         sections={subscriptionAirdropSections}
         isInitialized={isInitialized}
         claimWritePending={claimWritePending}

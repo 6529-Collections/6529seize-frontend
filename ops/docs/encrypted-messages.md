@@ -116,6 +116,12 @@ conversation when it continues in a new encryption session. Pins sync privately
 to your other trusted devices after they connect. If encrypted sync is off, the
 pin is saved on this device until sync is available.
 
+Drag a pinned chat row to move it among your pins. On a touchscreen, hold
+briefly, then drag vertically. With a keyboard, focus the chat, press Space,
+move it with the arrow keys, then press Space again to save. Press Escape to
+cancel. New pins and re-pins go to the bottom. Your order syncs privately to
+your trusted devices and is included in encrypted backup when enabled.
+
 On mobile web and in the app, open **+** beside the message input for **Attach**,
 **Poll** when available, and **GIF**. The tray opens below the input and closes
 when you pick an action, start typing, or tap outside it. On desktop, these

@@ -22,6 +22,7 @@ interface TimeWeightedVotingProps {
   readonly onChange: (config: TimeWeightedVotingConfig) => void;
   /** Whether to show the enable/disable toggle */
   readonly showToggle?: boolean;
+  readonly decisionEditor?: boolean;
 }
 
 const getIntervalValidationError = (
@@ -57,6 +58,7 @@ export default function TimeWeightedVoting({
   errorMessage,
   onChange,
   showToggle = true,
+  decisionEditor = false,
 }: TimeWeightedVotingProps) {
   // State for tracking input value during editing
   const [inputValue, setInputValue] = useState<string>(() =>
@@ -160,7 +162,11 @@ export default function TimeWeightedVoting({
   return (
     <section className={sectionClassName} data-testid="time-weighted-voting">
       {showToggle && (
-        <TimeWeightedToggle enabled={config.enabled} onToggle={handleToggle} />
+        <TimeWeightedToggle
+          decisionEditor={decisionEditor}
+          enabled={config.enabled}
+          onToggle={handleToggle}
+        />
       )}
 
       {(config.enabled || !showToggle) && (

@@ -1,4 +1,5 @@
 "use client";
+import { usePhoneNavigationScreenActive } from "@/contexts/PhoneNavigationScreenContext";
 
 import CircleLoader, {
   CircleLoaderSize,
@@ -190,21 +191,22 @@ function usePanelViewport(
   scrollContainer: HTMLElement | null,
   gridElement: HTMLElement | null
 ) {
+  const screenActive = usePhoneNavigationScreenActive();
   const [viewport, setViewport] = useState<PanelViewport>(EMPTY_VIEWPORT);
 
   // Cached Feed returns need their visible range before the first paint, not
   // an empty viewport followed by a passive effect and another animation frame.
   useLayoutEffect(() => {
-    if (scrollContainer) {
+    if (screenActive && scrollContainer) {
       setPanelViewport(
         setViewport,
         readPanelViewport(scrollContainer, gridElement, false)
       );
     }
-  }, [gridElement, scrollContainer]);
+  }, [gridElement, screenActive, scrollContainer]);
 
   useEffect(() => {
-    if (!scrollContainer) {
+    if (!screenActive || !scrollContainer) {
       return;
     }
 
@@ -257,7 +259,7 @@ function usePanelViewport(
         cancelAnimationFrame(frameId);
       }
     };
-  }, [gridElement, scrollContainer]);
+  }, [gridElement, screenActive, scrollContainer]);
 
   return scrollContainer ? viewport : EMPTY_VIEWPORT;
 }
@@ -269,6 +271,7 @@ function CommunityCurationsInfiniteScrollTrigger({
   readonly onIntersection: (isIntersecting: boolean) => void;
   readonly scrollContainer: HTMLElement | null;
 }) {
+  const screenActive = usePhoneNavigationScreenActive();
   const triggerRef = useRef<HTMLDivElement>(null);
   const handleIntersection = useCallback(
     (entry: IntersectionObserverEntry) => onIntersection(entry.isIntersecting),
@@ -283,7 +286,7 @@ function CommunityCurationsInfiniteScrollTrigger({
       threshold: 0,
     },
     handleIntersection,
-    Boolean(scrollContainer)
+    Boolean(scrollContainer) && screenActive
   );
 
   return <div ref={triggerRef} aria-hidden="true" className="tw-h-px" />;

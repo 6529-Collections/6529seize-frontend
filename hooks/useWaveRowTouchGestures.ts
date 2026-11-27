@@ -3,14 +3,12 @@
 import { useEffect, useLayoutEffect, useRef, type RefObject } from "react";
 
 export const WAVE_PIN_SWIPE_THRESHOLD = 64;
-const WAVE_ROW_LONG_PRESS_MS = 450;
 const INTENT_DISTANCE = 8;
 
 interface Options {
   readonly enabled: boolean;
   readonly scope: string;
   readonly rowRef: RefObject<HTMLDivElement | null>;
-  readonly onLongPress: () => void;
   readonly onTogglePin: () => void;
   readonly onSwipe: (distance: number, releasing: boolean) => void;
 }
@@ -20,7 +18,6 @@ interface Gesture {
   readonly x: number;
   readonly y: number;
   swiping: boolean;
-  held: boolean;
 }
 
 function blockReleaseClick() {
@@ -67,20 +64,7 @@ export function useWaveRowTouchGestures(options: Options) {
     const row = rowRef.current;
     if (!row) return;
     let gesture: Gesture | null = null;
-    let timer: ReturnType<typeof setTimeout> | undefined;
     let releaseClick: ReturnType<typeof blockReleaseClick> | undefined;
-    let suppressed = false;
-
-    function suppressNavigation() {
-      if (suppressed) return;
-      suppressed = true;
-      releaseClick = blockReleaseClick();
-    }
-
-    function clearTimer() {
-      globalThis.clearTimeout(timer);
-      timer = undefined;
-    }
 
     function detach() {
       document.removeEventListener("pointermove", move);
@@ -91,7 +75,6 @@ export function useWaveRowTouchGestures(options: Options) {
     }
 
     function finish() {
-      clearTimer();
       releaseClick?.expire();
       gesture = null;
       detach();
@@ -120,28 +103,16 @@ export function useWaveRowTouchGestures(options: Options) {
         return;
       cancel();
       releaseClick?.clear();
-      suppressed = false;
+      releaseClick = undefined;
       // Leave the browser/OS edge-back gesture available.
       if (event.clientX < 20 || event.clientX > globalThis.innerWidth - 20)
         return;
-      const current: Gesture = {
+      gesture = {
         id: event.pointerId,
         x: event.clientX,
         y: event.clientY,
         swiping: false,
-        held: false,
       };
-      gesture = current;
-      timer = globalThis.setTimeout(() => {
-        if (gesture !== current) return;
-        if (!latest.current.enabled) {
-          cancel();
-          return;
-        }
-        current.held = true;
-        suppressNavigation();
-        latest.current.onLongPress();
-      }, WAVE_ROW_LONG_PRESS_MS);
       document.addEventListener("pointermove", move);
       document.addEventListener("pointerup", end);
       document.addEventListener("pointercancel", cancel);
@@ -155,13 +126,13 @@ export function useWaveRowTouchGestures(options: Options) {
         return;
       }
       const current = gesture;
-      if (current?.id !== event.pointerId || current.held) return;
+      if (current?.id !== event.pointerId) return;
       const dx = event.clientX - current.x;
       const dy = Math.abs(event.clientY - current.y);
       if (!current.swiping) {
         if (Math.max(Math.abs(dx), dy) < INTENT_DISTANCE) return;
-        clearTimer();
-        suppressNavigation();
+        // A moved touch should never open the row on release.
+        releaseClick = blockReleaseClick();
         if (dx < INTENT_DISTANCE || dx < dy * 1.5) {
           finish();
           return;

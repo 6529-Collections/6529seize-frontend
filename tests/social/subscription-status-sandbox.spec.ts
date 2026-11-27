@@ -489,6 +489,7 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
               [
                 "not-set-up",
                 "no-selections",
+                "covered",
                 "zero-funded",
                 "one-funded",
                 "plan-top-up",
@@ -683,6 +684,285 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
               })
               .locator('#profile-subscriptions-overview [aria-busy="true"]')
           ).toHaveCount(0, { timeout: RESPONSE_TIMEOUT_MS });
+        if (phase !== "before" && name === "no-selections" && owner) {
+          const figures = await page
+            .getByRole("region", { name: "Subscription minting", exact: true })
+            .locator("#subscription-overview-actions")
+            .boundingBox();
+          const choose = await overview
+            .getByRole("link", { name: "Choose drops", exact: true })
+            .boundingBox();
+          expect(figures).not.toBeNull();
+          expect(choose).not.toBeNull();
+          if ((page.viewportSize()?.width ?? 1280) < 640) {
+            await expect(
+              overview.getByRole("heading", {
+                name: "No upcoming drops selected",
+                exact: true,
+              })
+            ).toHaveCSS("font-size", "20px");
+            expect(choose!.y).toBeGreaterThanOrEqual(
+              figures!.y + figures!.height + 19
+            );
+            await overview
+              .getByRole("button", { name: "Forecast use", exact: true })
+              .focus();
+            await page.keyboard.press("Tab");
+            await expect(
+              overview.getByRole("link", { name: "Choose drops", exact: true })
+            ).toBeFocused();
+          } else {
+            expect(choose!.y + choose!.height).toBeLessThanOrEqual(figures!.y);
+            await overview
+              .getByRole("link", { name: "Choose drops", exact: true })
+              .focus();
+            for (const name of ["Top up", "Refresh balance", "Forecast use"]) {
+              await page.keyboard.press("Tab");
+              await expect(
+                overview.getByRole("button", { name, exact: true })
+              ).toBeFocused();
+            }
+          }
+        }
+        if (
+          phase !== "before" &&
+          name === "covered" &&
+          (page.viewportSize()?.width ?? 1280) < 768
+        ) {
+          const upcoming = page.getByRole("region", {
+            name: "Upcoming Drops",
+            exact: true,
+          });
+          const drop = upcoming.getByRole("link", {
+            name: "The Memes #576",
+            exact: true,
+          });
+          await expect(drop).toBeVisible();
+          const row = upcoming
+            .getByRole("link", { name: "The Memes #576", exact: true })
+            .locator(
+              "xpath=ancestor::div[contains(@class, 'tw-@container/drop-row')]"
+            );
+          if (owner) await expect(row.getByRole("combobox")).toBeEnabled();
+          else
+            await expect(
+              row.getByRole("group", {
+                name: "Subscription quantity for The Memes #576",
+                exact: true,
+              })
+            ).toBeVisible();
+          const geometry = await drop.evaluate((link) => {
+            const grid = link.parentElement!.parentElement!;
+            const date = grid.querySelector("time")!;
+            const metadata = date.parentElement!;
+            const controls =
+              grid.querySelector('[role="switch"]')?.closest("label")
+                ?.parentElement ??
+              grid.querySelector('[role="group"]')?.parentElement;
+            const dateRect = date.getBoundingClientRect();
+            const metadataRect = metadata.getBoundingClientRect();
+            const controlRect = controls!.getBoundingClientRect();
+            const name = link.getBoundingClientRect();
+            const gridRect = grid.getBoundingClientRect();
+            return {
+              visibleDate: date.innerText,
+              dateTime: date.getAttribute("datetime"),
+              dateHeight: dateRect.height,
+              metadataTop: metadataRect.top,
+              metadataBottom: metadataRect.bottom,
+              nameTop: name.top,
+              nameBottom: name.bottom,
+              nameRight: name.right,
+              controlsCenter: controlRect.y + controlRect.height / 2,
+              controlsTop: controlRect.top,
+              controlsLeft: controlRect.left,
+              controlsRight: controlRect.right,
+              metadataRight: metadataRect.right,
+              gridRight: gridRect.right,
+              leadingWidth:
+                grid.previousElementSibling?.getBoundingClientRect().width ?? 0,
+              nameFont: getComputedStyle(link.parentElement!).fontSize,
+              dateFont: getComputedStyle(date).fontSize,
+            };
+          });
+          expect(geometry.leadingWidth).toBe(48);
+          expect(geometry.nameFont).toBe("15px");
+          expect(geometry.dateFont).toBe("13px");
+          expect(geometry.dateHeight).toBeLessThanOrEqual(18);
+          expect(geometry.nameTop).toBeLessThan(geometry.metadataTop);
+          expect(geometry.metadataRight).toBeLessThanOrEqual(
+            geometry.gridRight
+          );
+          expect(geometry.controlsRight).toBeLessThanOrEqual(
+            geometry.gridRight
+          );
+          if (geometry.controlsTop < geometry.metadataTop) {
+            expect(
+              Math.abs(
+                (geometry.nameTop + geometry.nameBottom) / 2 -
+                  geometry.controlsCenter
+              )
+            ).toBeLessThanOrEqual(1);
+            expect(geometry.nameRight).toBeLessThanOrEqual(
+              geometry.controlsLeft
+            );
+          } else {
+            expect(geometry.controlsTop).toBeGreaterThanOrEqual(
+              geometry.metadataBottom
+            );
+          }
+          const instant = new Date(geometry.dateTime!);
+          const fullDate = new Intl.DateTimeFormat("en-US", {
+            weekday: "short",
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            timeZone: "UTC",
+          }).format(instant);
+          expect(geometry.visibleDate).toBe(
+            new Intl.DateTimeFormat("en-US", {
+              weekday: "short",
+              timeZone: "UTC",
+            }).format(instant)
+          );
+          const dateColumn = upcoming.getByRole("button", {
+            name: fullDate,
+            exact: true,
+          });
+          await dateColumn.focus();
+          await expect(
+            page.getByRole("tooltip", { name: fullDate })
+          ).toBeVisible();
+          await page.keyboard.press("Escape");
+          await dateColumn.blur();
+          await dateColumn.tap();
+          await expect(
+            page.getByRole("tooltip", { name: fullDate })
+          ).toBeVisible();
+          await page.keyboard.press("Escape");
+          await dateColumn.blur();
+          if (owner) {
+            const mintingRow = upcoming
+              .getByRole("button", { name: "Minting Today", exact: true })
+              .locator(
+                "xpath=ancestor::div[contains(@class, 'tw-@container/drop-row')]"
+              );
+            await expect(mintingRow.getByRole("switch")).toBeDisabled();
+            await expect(
+              mintingRow.getByText("No changes allowed on minting day", {
+                exact: true,
+              })
+            ).toBeVisible();
+            expect(
+              await drop.evaluate(
+                (link) =>
+                  link.parentElement!.parentElement!.querySelector("select")
+                    ?.disabled
+              )
+            ).toBe(false);
+          }
+          await upcoming.screenshot({
+            path: testInfo.outputPath(
+              `compact-drops-${owner ? "owner" : "visitor"}.png`
+            ),
+            animations: "disabled",
+          });
+          await upcoming
+            .getByRole("button", { name: "Show More", exact: true })
+            .click();
+          const expanded =
+            (page.viewportSize()?.width ?? 1280) < 640
+              ? page.getByRole("dialog", {
+                  name: "Upcoming Drops",
+                  exact: true,
+                })
+              : upcoming;
+          await expect(
+            expanded.getByRole("link", { name: "The Memes #579", exact: true })
+          ).toBeVisible();
+          await expanded
+            .getByRole("button", { name: "Show Less", exact: true })
+            .click();
+          await expect(
+            upcoming.getByRole("button", { name: "Show More", exact: true })
+          ).toBeVisible();
+        }
+        if (
+          phase !== "before" &&
+          name === "covered" &&
+          (page.viewportSize()?.width ?? 1280) >= 768
+        ) {
+          const drop = page.getByRole("link", {
+            name: "The Memes #576",
+            exact: true,
+          });
+          await expect(drop).toBeVisible();
+          const desktop = await drop.evaluate((link) => {
+            const grid = link.parentElement!.parentElement!;
+            const date = grid.querySelector("time")!;
+            return {
+              date: date.innerText,
+              dateFont: getComputedStyle(date).fontSize,
+              nameFont: getComputedStyle(link.parentElement!).fontSize,
+              dateFirst:
+                date.getBoundingClientRect().bottom <=
+                link.getBoundingClientRect().top,
+              leadingWidth:
+                grid.previousElementSibling?.getBoundingClientRect().width ?? 0,
+            };
+          });
+          expect(desktop.date).toMatch(/\d{4}/);
+          expect(desktop.dateFont).toBe("16px");
+          expect(desktop.nameFont).toBe("14px");
+          expect(desktop.dateFirst).toBe(true);
+          expect(desktop.leadingWidth).toBe(0);
+        }
+        if (
+          phase !== "before" &&
+          name === "mint-paid" &&
+          (page.viewportSize()?.width ?? 1280) < 768
+        ) {
+          const upcoming = page.getByRole("region", {
+            name: "Upcoming Drops",
+            exact: true,
+          });
+          const more = upcoming.getByRole("button", {
+            name: "More",
+            exact: true,
+          });
+          await expect(more).toHaveAttribute("aria-expanded", "false");
+          if (!owner) {
+            const alignment = await more.evaluate((button) => {
+              const grid = button.parentElement!;
+              const name = grid.querySelector("a")!.getBoundingClientRect();
+              const controls = grid
+                .querySelector('[role="group"]')!
+                .parentElement!.getBoundingClientRect();
+              const more = button.getBoundingClientRect();
+              return {
+                nameBottom: name.bottom,
+                moreTop: more.top,
+                controlsBottom: controls.bottom,
+                moreWidth: more.width,
+                gridWidth: grid.getBoundingClientRect().width,
+              };
+            });
+            expect(alignment.moreTop).toBeGreaterThanOrEqual(
+              alignment.nameBottom
+            );
+            expect(alignment.moreTop).toBeGreaterThanOrEqual(
+              alignment.controlsBottom
+            );
+            expect(alignment.moreWidth).toBeCloseTo(alignment.gridWidth, 0);
+          }
+          await more.click();
+          await expect(more).toHaveAttribute("aria-expanded", "true");
+          await expect(
+            upcoming.getByText("Subscription Count: x1", { exact: true })
+          ).toBeVisible();
+          await more.click();
+          await expect(more).toHaveAttribute("aria-expanded", "false");
+        }
         await expectNoHorizontalOverflow(page);
         await overview.screenshot({
           path: testInfo.outputPath(

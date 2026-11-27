@@ -165,6 +165,8 @@ export const PROFILE_CURATION_MESSAGES = {
   "profileCuration.actions.removeConfirm": "Remove",
   "profileCuration.actions.authorOnly":
     "Only the post author can edit this post.",
+  "profileCuration.actions.winnerNotEditable":
+    "A winning entry can't be edited here.",
   "profileCuration.quickPost.title": "Add post",
   "profileCuration.quickPost.subtitle": "to {curationName}",
   "profileCuration.quickPost.retrySuccess": "Post added to Curation.",

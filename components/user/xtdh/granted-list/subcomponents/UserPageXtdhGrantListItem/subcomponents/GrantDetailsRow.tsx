@@ -3,9 +3,10 @@ import type { ReactNode } from "react";
 export function GrantDetailsRow({
   label,
   value,
-}: Readonly<{ label: string; value: ReactNode }>) {
+  className,
+}: Readonly<{ label: string; value: ReactNode; className?: string }>) {
   return (
-    <div className="tw-flex tw-flex-col">
+    <div className={`tw-flex tw-flex-col ${className ?? ""}`}>
       <dt className="tw-mb-1 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
         {label}
       </dt>

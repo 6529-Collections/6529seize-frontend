@@ -78,9 +78,13 @@ const getIsWaveResolving = ({
   (isLoading || isFetching || wave?.id !== waveId);
 
 export const useHeaderActiveWave = (
-  myStream: ReturnType<typeof useMyStreamOptional>
+  myStream: ReturnType<typeof useMyStreamOptional>,
+  screenWaveId?: string | null
 ) => {
-  const waveId = myStream?.activeWave.id ?? null;
+  const waveId =
+    screenWaveId === undefined
+      ? (myStream?.activeWave.id ?? null)
+      : screenWaveId;
   const { wave, isLoading, isFetching } = useWaveById(waveId);
   const activeWave = getActiveApiWave(waveId, wave);
   const streamWaves = myStream?.waves.list ?? EMPTY_MINIMAL_WAVES;

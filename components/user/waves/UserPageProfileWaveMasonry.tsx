@@ -49,6 +49,10 @@ import { useCurationMasonryPositioner } from "@/hooks/useCurationMasonryPosition
 import { useCurationOrderReveal } from "@/hooks/useCurationOrderReveal";
 import { useCurationPagination } from "@/hooks/useCurationPagination";
 import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
+import { useWavesMovePhase } from "@/hooks/useWavesMovePhase";
+import { isWavesWritePausedPhase } from "@/lib/waves-move/schedule";
+import { waveMoveSignal } from "@/lib/waves-move/scope";
+import { editPostRefusal } from "@/components/brain/my-stream/editPostRequest";
 
 interface UserPageProfileWaveMasonryProps {
   readonly order: CurationOrder;
@@ -208,10 +212,20 @@ function CurationMasonryActions({
       dropId: drop.id,
       waveId: drop.wave.id,
     });
+  // The menu offers "Edit post" only where the link opens the editor: the
+  // author's own chat post and, while its own wave moves to the 6529
+  // Network, not one with a poll.
+  const movePhase = useWavesMovePhase();
   const canEdit =
-    !activeProfileProxy &&
-    drop.drop_type !== ApiDropType.Participatory &&
-    areSameProfileIdentity({ left: drop.author, right: connectedProfile });
+    editPostRefusal({
+      post: drop,
+      waveId: drop.wave.id,
+      isProxy: !!activeProfileProxy,
+      connectedProfile,
+      pollEditsPaused:
+        isWavesWritePausedPhase(movePhase) &&
+        waveMoveSignal(drop.wave) === true,
+    }) === null;
   const menuItems: CompactMenuItem[] = [
     {
       id: "open",

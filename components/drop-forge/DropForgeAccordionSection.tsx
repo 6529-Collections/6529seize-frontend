@@ -3,9 +3,10 @@
 import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
-
-const SECTION_CARD_CLASS =
-  "tw-rounded-xl tw-bg-iron-950 tw-p-4 tw-ring-1 tw-ring-inset tw-ring-iron-800 sm:tw-p-5";
+import {
+  dropForgePanelClassName,
+  dropForgePanelTitleClassName,
+} from "@/components/drop-forge/drop-forge-section-styles";
 
 type SectionTone = "neutral" | "success" | "warning" | "danger";
 
@@ -105,7 +106,7 @@ export default function DropForgeAccordionSection({
   }, [disabled]);
 
   return (
-    <div className={`${SECTION_CARD_CLASS} ${className}`}>
+    <div className={`${dropForgePanelClassName} ${className}`}>
       <div className="tw-flex tw-min-h-10 tw-w-full tw-items-center tw-justify-between tw-gap-2">
         <button
           type="button"
@@ -135,7 +136,7 @@ export default function DropForgeAccordionSection({
               />
             </span>
             <span
-              className={`tw-min-w-0 tw-whitespace-normal tw-break-words tw-text-base tw-font-semibold tw-leading-tight ${
+              className={`${dropForgePanelTitleClassName} ${
                 disabled ? "tw-text-iron-400" : "tw-text-iron-50"
               }`}
             >

@@ -43,7 +43,7 @@ export function useWaveCreateMenuActions({
   readonly mobile: boolean;
   readonly includeCuration?: boolean;
 }) {
-  const { connectedProfile, activeProfileProxy } = useAuth();
+  const { connectedProfile, activeProfileProxy, setToast } = useAuth();
   const locale = useBrowserLocale();
   const [action, setAction] = useState<{
     readonly waveId: string;
@@ -67,14 +67,14 @@ export function useWaveCreateMenuActions({
   const isWaveAdmin =
     waveConfig?.authenticated_user_eligible_for_admin === true;
   const canCreateCuration = includeCuration && isWaveAdmin;
-  const canCreateSubwave =
+  const mayCreateSubwave =
     isWaveAdmin &&
     Boolean(connectedProfile) &&
     !activeProfileProxy &&
     !isDirectMessage &&
     !wave?.parent_wave &&
-    !wavesWritesPaused &&
     Boolean(parentAdminGroupId);
+  const canCreateSubwave = mayCreateSubwave && !wavesWritesPaused;
 
   const iconClassName = mobile
     ? MOBILE_ACTION_ICON_CLASSES
@@ -129,6 +129,37 @@ export function useWaveCreateMenuActions({
             ),
             onSelect: () => openAction("subwave"),
             deferUntilClosed: true,
+          },
+        ]
+      : []),
+    // While waves move, the item stays, says why it can't open, and says it
+    // again when chosen, so keyboard users reach the reason too.
+    ...(mayCreateSubwave && wavesWritesPaused
+      ? [
+          {
+            id: "create-subwave",
+            iconClassName,
+            icon: (
+              <ChatBubbleLeftRightIcon
+                className={iconSizeClassName}
+                aria-hidden="true"
+              />
+            ),
+            label: (
+              <span className="tw-flex tw-flex-col tw-gap-0.5 tw-opacity-60">
+                <span className={ACTION_LABEL_CLASSES}>
+                  {t(locale, "waves.create.actions.newSubwave")}
+                </span>
+                <span className="tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-400">
+                  {t(locale, "wavesMove.newWavesClosed")}
+                </span>
+              </span>
+            ),
+            onSelect: () =>
+              setToast({
+                message: t(locale, "wavesMove.newWavesClosed"),
+                type: "warning",
+              }),
           },
         ]
       : []),

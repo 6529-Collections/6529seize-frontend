@@ -1,6 +1,6 @@
 "use client";
 import { ApiCompetitionLifecycle } from "@/generated/models/ApiCompetitionLifecycle";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { PauseIcon, PlayIcon } from "@heroicons/react/24/outline";
 import { useQueryClient } from "@tanstack/react-query";
@@ -52,10 +52,12 @@ export default function CompetitionAdmin({
   paused = null,
   onEdit,
   archiveOnly = false,
+  renderActions,
 }: {
   readonly paused?: boolean | null;
   readonly onEdit?: () => void;
   readonly archiveOnly?: boolean;
+  readonly renderActions?: (actions: ReactNode) => ReactNode;
 }) {
   const { competition } = useCompetition();
   const { requestAuth } = useAuth();
@@ -76,6 +78,26 @@ export default function CompetitionAdmin({
   const [actionInput, setActionInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
+  const archiveTriggerRef = useRef<HTMLButtonElement>(null);
+  const archiveFieldRef = useRef<HTMLTextAreaElement | null>(null);
+  const restoreFieldFocus = useRef(false);
+  const preserveActionFocus = Boolean(renderActions);
+  const retainArchiveField = useCallback(
+    (node: HTMLTextAreaElement | null) => {
+      if (node === null) {
+        restoreFieldFocus.current =
+          preserveActionFocus &&
+          archiveFieldRef.current === globalThis.document.activeElement;
+      } else if (restoreFieldFocus.current) {
+        restoreFieldFocus.current = false;
+        globalThis.requestAnimationFrame(() => {
+          node.focus({ preventScroll: true });
+        });
+      }
+      archiveFieldRef.current = node;
+    },
+    [preserveActionFocus]
+  );
   const pending = useRef<{
     action: CompetitionAction;
     reason: string;
@@ -111,6 +133,7 @@ export default function CompetitionAdmin({
     return "competitions.actionConsequences";
   };
   const openAction = (command: CompetitionAction) => {
+    restoreFieldFocus.current = false;
     setActionSnapshot({
       version: competition.config_version,
       lifecycle: competition.lifecycle,
@@ -164,7 +187,7 @@ export default function CompetitionAdmin({
       setBusy(false);
     }
   };
-  return (
+  const content = (
     <>
       {!archiveOnly && (
         <CompetitionPauseHistory
@@ -221,6 +244,7 @@ export default function CompetitionAdmin({
             {actions.map((command) => (
               <button
                 key={command}
+                ref={command === "archive" ? archiveTriggerRef : undefined}
                 type="button"
                 className={
                   command === "archive"
@@ -251,7 +275,14 @@ export default function CompetitionAdmin({
           confirmText={t(locale, "competitions.confirm")}
           cancelText={t(locale, "competitions.dismiss")}
           onClose={() => {
-            if (!busy) setAction(null);
+            if (!busy) {
+              setAction(null);
+              if (renderActions && action === "archive") {
+                globalThis.requestAnimationFrame(() => {
+                  archiveTriggerRef.current?.focus();
+                });
+              }
+            }
           }}
           onConfirm={() => {
             void execute();
@@ -282,6 +313,7 @@ export default function CompetitionAdmin({
               </p>
               <textarea
                 id="competition-archive-name"
+                ref={retainArchiveField}
                 className={`${COMPETITION_INPUT} tw-min-h-11 tw-resize-y`}
                 rows={1}
                 value={actionInput}
@@ -333,4 +365,5 @@ export default function CompetitionAdmin({
       )}
     </>
   );
+  return <>{renderActions ? renderActions(content) : content}</>;
 }

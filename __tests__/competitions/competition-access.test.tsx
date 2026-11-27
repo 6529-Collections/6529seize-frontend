@@ -9,6 +9,7 @@ import {
   updateCompetition,
 } from "@/services/api/competitions-api";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import type { ReactNode } from "react";
 
 const mockCompetition = {
   id: "competition",
@@ -109,7 +110,16 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
 }));
 jest.mock("@/components/competitions/CompetitionBackLink", () => () => null);
 jest.mock("@/components/competitions/CompetitionResources", () => () => null);
-jest.mock("@/components/competitions/CompetitionAdmin", () => () => null);
+jest.mock(
+  "@/components/competitions/CompetitionAdmin",
+  () =>
+    ({
+      renderActions,
+    }: {
+      readonly renderActions?: (actions: ReactNode) => ReactNode;
+    }) =>
+      renderActions?.(null) ?? null
+);
 jest.mock("@/components/competitions/CompetitionEntryForm", () => () => null);
 jest.mock("@/components/brain/my-stream/MyStreamWave", () => () => null);
 jest.mock("@/components/competitions/CompetitionDraftEditor", () => ({

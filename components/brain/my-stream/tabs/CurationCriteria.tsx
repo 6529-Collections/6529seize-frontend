@@ -64,8 +64,10 @@ export function CurationCriteriaSummary({
   disabled,
   onEdit,
   onRetry,
+  membersAppearance = "details",
 }: {
   readonly target: GroupMembersPreviewTarget | null;
+  readonly membersAppearance?: "details" | "inline";
   readonly fallback: string;
   readonly editButtonRef: Ref<HTMLButtonElement>;
   readonly disabled: boolean;
@@ -79,14 +81,17 @@ export function CurationCriteriaSummary({
 
   return (
     <>
-      <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-900/40 tw-p-4">
-        <div className="tw-min-w-0 tw-flex-1 tw-basis-40">
+      <div className="tw-flex tw-min-w-0 tw-flex-nowrap tw-items-center tw-justify-between tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-900/40 tw-p-3 tw-pl-3.5 md:tw-flex-wrap md:tw-p-4">
+        <div className="tw-min-w-0 tw-flex-1 tw-basis-auto md:tw-basis-40">
           {target ? (
-            <GroupMembersPreviewTrigger
-              target={target}
-              disabled={disabled}
-              onOpen={() => setPreviewTarget(target)}
-            />
+            <div className="max-md:[&>div>p]:tw-basis-full">
+              <GroupMembersPreviewTrigger
+                target={target}
+                appearance={membersAppearance}
+                disabled={disabled}
+                onOpen={() => setPreviewTarget(target)}
+              />
+            </div>
           ) : (
             <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2">
               <p
@@ -112,6 +117,7 @@ export function CurationCriteriaSummary({
           ref={editButtonRef}
           variant="secondary"
           size="sm"
+          className="tw-shrink-0"
           disabled={disabled}
           onClick={onEdit}
         >

@@ -176,7 +176,7 @@ describe("a quick vote sent to the 6529 Network", () => {
     };
     render(<p data-testid="description">{toast.description}</p>);
     expect(screen.getByTestId("description")).toHaveTextContent(
-      "This wallet has no identity on the 6529 Network yet. Set one up on your identity page."
+      "This wallet has no identity on the 6529 Network yet. Create one on your identity page."
     );
     expect(
       screen.getByRole("link", { name: "your identity page" })

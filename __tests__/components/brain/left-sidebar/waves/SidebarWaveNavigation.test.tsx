@@ -80,6 +80,7 @@ function navigation(
     canUseCollections: true,
     queryText: "rare pepe",
     queryEnabled: true,
+    hasMatchingSearch: true,
     searching: true,
     setQueryText: jest.fn(),
     setSearchOpen: jest.fn(),
@@ -126,6 +127,7 @@ function HydrationSearch({ viewerKey }: { viewerKey: string }) {
     setQueryText,
     searching: Boolean(query),
     queryEnabled: false,
+    hasMatchingSearch: false,
     canUseCollections: false,
   });
   return (
@@ -228,7 +230,7 @@ it("shows input loading only for a searchable query waiting or fetching", () => 
   ).toHaveLength(1);
   rerender(
     <SidebarWaveNavigationControls
-      navigation={{ ...state, queryEnabled: false }}
+      navigation={{ ...state, queryEnabled: false, hasMatchingSearch: false }}
     />
   );
   expect(input).toHaveAttribute("aria-busy", "true");
@@ -242,17 +244,76 @@ it("shows input loading only for a searchable query waiting or fetching", () => 
   expect(input).toHaveAttribute("aria-busy", "false");
   rerender(
     <SidebarWaveNavigationControls
-      navigation={{ ...state, queryText: "xx", queryEnabled: false }}
+      navigation={{
+        ...state,
+        queryText: "xx",
+        queryEnabled: false,
+        hasMatchingSearch: false,
+      }}
     />
   );
   expect(input).toHaveAttribute("aria-busy", "false");
   fireEvent.click(screen.getByRole("button", { name: "Close wave search" }));
   expect(state.setQueryText).toHaveBeenCalledWith("");
 });
+it("keeps the same cached search rows and idle indicator while fetching is paused", () => {
+  const state = navigation();
+  const view = (paused: boolean) => (
+    <>
+      <SidebarWaveNavigationControls
+        navigation={{ ...state, queryEnabled: !paused }}
+      />
+      <SidebarWaveSearchResults
+        navigation={{ ...state, queryEnabled: !paused }}
+      />
+    </>
+  );
+  const { rerender } = render(view(false));
+  const row = screen.getByRole("link", { name: /Rare Pepe acquisition/ });
+  rerender(view(true));
+  expect(screen.getByRole("link", { name: /Rare Pepe acquisition/ })).toBe(row);
+  expect(screen.getByRole("searchbox")).toHaveAttribute("aria-busy", "false");
+  expect(screen.getByRole("status")).toHaveTextContent("Waves shown: 1");
+  rerender(view(false));
+  expect(screen.getByRole("link", { name: /Rare Pepe acquisition/ })).toBe(row);
+});
+
+it("shows loading for a matching paused search without cached data", () => {
+  const state = navigation();
+  const pending = navigation({
+    queryEnabled: false,
+    resultWaves: [],
+    results: {
+      ...state.results,
+      data: undefined,
+      error: null,
+      status: "pending",
+      isPending: true,
+      isError: false,
+      isSuccess: false,
+      isLoadingError: false,
+      isRefetchError: false,
+      isFetchNextPageError: false,
+      isFetchPreviousPageError: false,
+      isPlaceholderData: false,
+    },
+  });
+  render(
+    <>
+      <SidebarWaveNavigationControls navigation={pending} />
+      <SidebarWaveSearchResults navigation={pending} />
+    </>
+  );
+  expect(screen.getByRole("searchbox")).toHaveAttribute("aria-busy", "true");
+  expect(screen.getByRole("status")).toHaveTextContent(/Loading/);
+});
+
 it("keeps one live status node through debounce, results, empty and failure", () => {
   const state = navigation();
   const { rerender } = render(
-    <SidebarWaveSearchResults navigation={{ ...state, queryEnabled: false }} />
+    <SidebarWaveSearchResults
+      navigation={{ ...state, queryEnabled: false, hasMatchingSearch: false }}
+    />
   );
   const status = screen.getByRole("status");
   expect(status).toHaveAttribute("aria-live", "polite");
