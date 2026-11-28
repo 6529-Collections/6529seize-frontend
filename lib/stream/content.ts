@@ -84,7 +84,7 @@ export async function prepareMedia(
 ): Promise<{ bytes: Uint8Array; mimeType: string } | null> {
   const original = new Uint8Array(await file.arrayBuffer());
   const mimeType = file.type.toLowerCase();
-  if (original.length <= MAX_MEDIA_BYTES && /^image\//.test(mimeType)) {
+  if (original.length <= MAX_MEDIA_BYTES && mimeType.startsWith("image/")) {
     return { bytes: original, mimeType };
   }
   if (!/^image\/(png|jpeg|webp|gif)$/.test(mimeType)) {
@@ -116,6 +116,6 @@ export async function prepareMedia(
 /** A data URL for stored media bytes, for showing a work's art. */
 export function mediaDataUrl(bytes: Uint8Array, mimeType: string): string {
   let binary = "";
-  for (const byte of bytes) binary += String.fromCharCode(byte);
+  for (const byte of bytes) binary += String.fromCodePoint(byte);
   return `data:${mimeType};base64,${btoa(binary)}`;
 }

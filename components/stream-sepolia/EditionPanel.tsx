@@ -313,7 +313,7 @@ function BidComposer({ detail }: { readonly detail: EditionDetail }) {
   const [step, setStep] = useState(startStep);
   // Typed text shows until it is committed to a ladder step; then the step's price shows.
   const [typedPrice, setTypedPrice] = useState<string | null>(null);
-  const priceText = typedPrice ?? formatEth(prices[step] ?? 0n, "en-US").replace(/,/g, "");
+  const priceText = typedPrice ?? formatEth(prices[step] ?? 0n, "en-US").replaceAll(",", "");
   const [quantity, setQuantity] = useState(1);
   const quote = useQuery({
     queryKey: [QueryKey.STREAM_SEPOLIA, "quote", detail.saleId.toString(), detail.sale.bidCount, step, quantity],
@@ -460,7 +460,7 @@ function YourBids({
       {/* Claims and raises need the wallet on Sepolia: the gate asks to switch first. */}
       <WalletGate>
       <ul className="tw-m-0 tw-mt-3 tw-list-none tw-p-0">
-        {mine.map((bid, index) => {
+        {mine.map((bid) => {
           const standing = bidStanding({ step: bid.step, clearingStep, rationed });
           const outcome = bid.claimed ? undefined : outcomes.data?.[open.indexOf(bid)];
           return (
@@ -517,7 +517,7 @@ function YourBids({
                 />
               ) : null}
               {!bid.claimed && view.canBid && standing !== "in" ? (
-                <RaiseAction detail={detail} bid={bid} key={`raise-${index}`} />
+                <RaiseAction detail={detail} bid={bid} key={`raise-${bid.bidId.toString()}`} />
               ) : null}
             </li>
           );

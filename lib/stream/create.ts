@@ -69,7 +69,7 @@ function manifestOf(file: StoredFile) {
 }
 
 /** A stored file's ID, computed by the content store from its manifest. */
-async function fileIdOf(file: StoredFile): Promise<Hex> {
+function fileIdOf(file: StoredFile): Promise<Hex> {
   return getStreamClient().readContract({
     address: getStreamInstance().addresses.contentStore,
     abi: contentStoreAbi,
@@ -123,7 +123,7 @@ export async function storeFile(
   return { fileId, sent };
 }
 
-async function cc0TextFileId(): Promise<Hex> {
+function cc0TextFileId(): Promise<Hex> {
   return getStreamClient().readContract({
     address: getStreamInstance().addresses.workFacts,
     abi: workFactsAbi,

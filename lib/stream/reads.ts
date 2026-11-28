@@ -67,7 +67,8 @@ async function contractLogs(address: Address): Promise<Log[]> {
       const client = getStreamLogClient();
       const latest = await client.getBlockNumber();
       for (let start = current.to + 1n; start <= latest; start += LOG_WINDOW) {
-        const end = start + LOG_WINDOW - 1n > latest ? latest : start + LOG_WINDOW - 1n;
+        const windowEnd = start + LOG_WINDOW - 1n;
+        const end = windowEnd > latest ? latest : windowEnd;
         const logs = await client.getLogs({ address, fromBlock: start, toBlock: end });
         current.logs.push(...(logs as Log[]));
         current.to = end;
@@ -562,7 +563,7 @@ export async function readEdition(
 }
 
 /** What a bid would win if placed now, from `quote(saleId, step, quantity)`. */
-export async function quoteEditionBid(
+export function quoteEditionBid(
   address: Address,
   saleId: bigint,
   step: number,
@@ -640,7 +641,7 @@ export async function readWorkArt(args: {
       args: [primary.fileId],
     })
     .catch(() => null);
-  if (!info || !/^image\//.test(info.mimeType) || info.length > 262_144n) return null;
+  if (!info?.mimeType.startsWith("image/") || info.length > 262_144n) return null;
   const bytes = await client
     .readContract({
       address: instance.addresses.contentStore,

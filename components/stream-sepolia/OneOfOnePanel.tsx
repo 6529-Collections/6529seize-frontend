@@ -139,7 +139,7 @@ function BidBox({ detail }: { readonly detail: OneOfOneDetail }) {
   const wallet = useStreamWallet();
   const minimum = detail.minimumBid ?? 0n;
   // The box shows the minimum until the bidder types; a typed value stays.
-  const [typed, setValue] = useState<string | null>(null);
+  const [typed, setTyped] = useState<string | null>(null);
   // The exact minimum, never rounded: a rounded figure can fall below it.
   const value = typed ?? formatEther(minimum);
   let amount: bigint | null = null;
@@ -165,7 +165,7 @@ function BidBox({ detail }: { readonly detail: OneOfOneDetail }) {
             autoComplete="off"
             value={value}
             aria-describedby={`${inputId}-hint`}
-            onChange={(event) => setValue(event.target.value)}
+            onChange={(event) => setTyped(event.target.value)}
           />
           <span className="tw-pointer-events-none tw-absolute tw-right-4 tw-top-1/2 -tw-translate-y-1/2 tw-text-sm tw-text-iron-500">
             ETH

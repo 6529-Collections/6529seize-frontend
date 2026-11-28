@@ -54,9 +54,6 @@ interface WorkDraft {
   readonly edition?: { readonly maxCount: number } | undefined;
 }
 
-function artistIdOf(artist: Address): bigint {
-  return BigInt(artist);
-}
 
 export function mediaListOf(draft: WorkDraft): MediaFile[] {
   return [
@@ -86,7 +83,7 @@ export function buildItem(draft: WorkDraft): PackageItem {
     parties: [{ account: draft.artist, role: PARTY_ROLE.ARTIST }],
     payees: [
       {
-        artistId: artistIdOf(draft.artist),
+        artistId: BigInt(draft.artist),
         account: CURRENCY_ETH,
         share: RATE_DENOMINATOR,
       },
