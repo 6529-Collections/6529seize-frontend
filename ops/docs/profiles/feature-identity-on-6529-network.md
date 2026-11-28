@@ -32,7 +32,7 @@ that the page says when changes open.
 | Handle                      | Claims a free handle in place of the current one                                                                                                           | The identity                            |
 | Profile                     | Saves classification, about, website, picture URL and banner colors as a new profile document                                                              | The identity                            |
 | REP and NIC                 | Shows the REP and the NIC left to give: your TDH less what you have given in each. REP and NIC are given on profile pages                                  | No fee to look                          |
-| Wallets                     | Removes a wallet (not the last), or adds one: this wallet signs, and 6529.io holds its signature until the new wallet signs in on any device and signs too | The identity                            |
+| Wallets                     | This wallet leaves (unless it is the last), or adds a wallet: it signs first, and 6529.io holds that signature until the new wallet signs in and signs too | The identity                            |
 | Requests to add this wallet | Shown to a wallet with no identity, signed in to 6529.io, that an identity's wallet asked to add: review, sign or decline                                  | The asking identity                     |
 | Sign on this browser        | The wallet signs once to give this browser a key for 30 days that signs REP, NIC and profile changes without a wallet prompt                               | The identity, within the budget shown   |
 | Delegations                 | Registers and revokes delegations with the Delegation Center's collections and use cases, for the identity or one wallet                                   | The identity, or the wallet for its own |
@@ -62,10 +62,12 @@ can't read.
 - Your TDH is the most REP you can give across everyone, and the most NIC.
   You can always lower a rating. The REP and NIC forms on profile pages show
   what is left, read from the 6529 Network.
-- A removed wallet can rejoin its identity at any time, but waits before it
-  can join a different identity or create one. The wait is the 6529
-  Network's rule; the page shows its end date before you sign, and when you
-  check a wallet to add.
+- For now a wallet can leave its identity only by signing for itself;
+  removing an identity's other wallets comes later, so add only a wallet you
+  control. A wallet that left can rejoin its identity at any time, but waits
+  before it can join a different identity or create one. The wait is the 6529
+  Network's rule; when the 6529 Network gives it, the page shows its end date
+  before you sign, and when you check a wallet to add.
 - The 6529 Network caps how many wallets an identity holds.
 - The browser's key stays in this browser and can't be copied out. Turn it
   off on this page to end it on the 6529 Network.

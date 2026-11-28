@@ -176,7 +176,7 @@ it("shows an identity's sections and its handle", async () => {
     expect(screen.getByRole("heading", { name: heading })).toBeInTheDocument();
   }
   expect(
-    screen.queryByRole("button", { name: "Remove" })
+    screen.queryByRole("button", { name: "Leave this identity" })
   ).not.toBeInTheDocument();
 });
 

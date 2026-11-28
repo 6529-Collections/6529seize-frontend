@@ -58,6 +58,28 @@ describe("the 6529 Network's refusals in plain words", () => {
         )
       )
     ).toBe("That wallet already belongs to an identity.");
+    expect(
+      chainErrorMessage(
+        L,
+        new ChainGatewayError(422, "inadmissible", "0x2112 REMOVE_NOT_SELF")
+      )
+    ).toBe(
+      'For now only the wallet that is leaving can sign this. Switch to that wallet and use "Leave this identity" on its row.'
+    );
+    expect(
+      chainErrorMessage(
+        L,
+        new ChainOperationError("failed", "refused", "LAST_WALLET")
+      )
+    ).toBe("An identity's last wallet can't leave it.");
+    expect(
+      chainErrorMessage(
+        L,
+        new ChainOperationError("failed", "refused", "IDENTITY_FULL")
+      )
+    ).toBe(
+      "Your identity has as many wallets as the 6529 Network allows. One of its wallets has to leave before you can add another."
+    );
   });
 
   it("says what went wrong with the gateway itself", () => {

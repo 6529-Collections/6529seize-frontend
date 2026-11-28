@@ -216,7 +216,11 @@ export const identityJoin = (
     wallet: joining.toLowerCase(),
   });
 
-/** IDENTITY_REMOVE: a bound wallet removes any wallet of its identity. */
+/**
+ * IDENTITY_REMOVE: a bound wallet removes a wallet of its identity. The 6529
+ * Network takes it only when `removing` is the signer itself; another wallet
+ * is refused with 0x2112 REMOVE_NOT_SELF.
+ */
 export const identityRemove = (
   principal: Hex,
   signer: Hex,
