@@ -36,6 +36,9 @@ export function TxAction({
   const { state, send } = useStreamTx();
   // A request that cannot be built (a read failed) is reported like a failed send.
   const [buildFailed, setBuildFailed] = useState(false);
+  // The result line is fixed when pressed: after the transaction the page refetches,
+  // and amounts it was built from (a balance, a minimum) change.
+  const [pressedDoneText, setPressedDoneText] = useState<string | undefined>(undefined);
   const busy = state.phase === "wallet" || state.phase === "pending" || state.phase === "slow";
   return (
     <div>
@@ -50,6 +53,7 @@ export function TxAction({
         disabled={disabled || busy}
         onClick={async () => {
           setBuildFailed(false);
+          setPressedDoneText(doneText);
           let next;
           try {
             next = await request();
@@ -66,7 +70,7 @@ export function TxAction({
       >
         {label}
       </Button>
-      <TxStatus state={buildFailed ? { phase: "error", error: "other" } : state} doneText={doneText} />
+      <TxStatus state={buildFailed ? { phase: "error", error: "other" } : state} doneText={pressedDoneText} />
     </div>
   );
 }
