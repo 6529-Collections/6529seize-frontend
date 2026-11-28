@@ -29,6 +29,9 @@ import {
   DialogTitle,
 } from "@headlessui/react";
 import Image from "next/image";
+import Link from "next/link";
+import { FinalizedDistributionCounts } from "./FinalizedDistributionCounts";
+import type { EmmaDistributionOverview } from "./emma-distribution-overview";
 import {
   type ComponentProps,
   type ReactElement,
@@ -44,6 +47,7 @@ import { ConfirmTokenIdModal } from "./ReviewDistributionPlanTableSubscriptionFo
 import { DistributionPhaseAirdropsViewerModal } from "./ReviewDistributionPlanTableSubscriptionFooterPhaseAirdropsViewer";
 import {
   GithubUploadModal,
+  getDistributionGithubUrl,
   type GithubUploadResult,
 } from "./ReviewDistributionPlanTableSubscriptionFooterGithubUploadModal";
 import { DistributionPhotosViewerModal } from "./ReviewDistributionPlanTableSubscriptionFooterPhotosViewer";
@@ -148,28 +152,68 @@ function ManualFinalizeButton({
   );
 }
 
-function AssetRow({
-  label,
-  count,
-  loadingCount,
-  viewing,
-  uploading,
-  uploadDisabled = false,
-  onView,
-  onUpload,
-  download,
-}: Readonly<{
+type AssetActionProps = {
   label: string;
-  count: string;
-  loadingCount: boolean;
   viewing: boolean;
   uploading: boolean;
   uploadDisabled?: boolean;
   onView: () => void;
   onUpload: () => void;
-  download?: ReactNode;
-}>) {
+};
+
+function AssetActions({
+  label,
+  viewing,
+  uploading,
+  uploadDisabled = false,
+  onView,
+  onUpload,
+}: Readonly<AssetActionProps>) {
   const locale = useBrowserLocale();
+  return (
+    <>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="tw-text-iron-200"
+        loading={viewing}
+        hideChildrenWhenLoading
+        aria-label={t(locale, "emma.review.viewAsset", { asset: label })}
+        aria-haspopup="dialog"
+        onClick={onView}
+      >
+        {t(locale, "emma.review.view")}
+      </Button>
+      <Button
+        variant="secondary"
+        size="sm"
+        disabled={uploadDisabled}
+        loading={uploading}
+        hideChildrenWhenLoading
+        aria-label={t(locale, "emma.review.uploadAsset", { asset: label })}
+        aria-haspopup="dialog"
+        onClick={onUpload}
+      >
+        <FontAwesomeIcon icon={faUpload} className="tw-size-3.5" />
+        {t(locale, "emma.review.upload")}
+      </Button>
+    </>
+  );
+}
+
+function AssetRow({
+  label,
+  count,
+  loadingCount,
+  download,
+  ...actions
+}: Readonly<
+  AssetActionProps & {
+    count: string;
+    loadingCount: boolean;
+    download?: ReactNode;
+  }
+>) {
   return (
     <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-4 tw-gap-y-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-py-2.5 first:tw-border-t-0 @[36rem]:tw-grid-cols-[minmax(0,1fr)_minmax(9rem,24%)_auto]">
       <span className="tw-text-sm tw-font-medium tw-text-iron-100">
@@ -179,31 +223,7 @@ function AssetRow({
         {loadingCount ? "…" : count}
       </span>
       <div className="tw-col-span-2 tw-grid tw-grid-cols-[3.5rem_5.5rem_2.25rem] tw-gap-2 @[36rem]:tw-col-span-1">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="tw-text-iron-200"
-          loading={viewing}
-          hideChildrenWhenLoading
-          aria-label={t(locale, "emma.review.viewAsset", { asset: label })}
-          aria-haspopup="dialog"
-          onClick={onView}
-        >
-          {t(locale, "emma.review.view")}
-        </Button>
-        <Button
-          variant="secondary"
-          size="sm"
-          disabled={uploadDisabled}
-          loading={uploading}
-          hideChildrenWhenLoading
-          aria-label={t(locale, "emma.review.uploadAsset", { asset: label })}
-          aria-haspopup="dialog"
-          onClick={onUpload}
-        >
-          <FontAwesomeIcon icon={faUpload} className="tw-size-3.5" />
-          {t(locale, "emma.review.upload")}
-        </Button>
+        <AssetActions label={label} {...actions} />
         {download}
       </div>
     </div>
@@ -306,10 +326,12 @@ function AirdropAssetRow({
 function PreparationSection({
   choice,
   processingControl,
+  finalizeControl,
   status,
 }: Readonly<{
   choice: ReactElement | undefined;
   processingControl: ReactElement | undefined;
+  finalizeControl: ReactElement | undefined;
   status: string | undefined;
 }>) {
   const locale = useBrowserLocale();
@@ -341,10 +363,13 @@ function PreparationSection({
               />
             </Button>
           </div>
-          {(choice !== undefined || processingControl !== undefined) && (
+          {(choice !== undefined ||
+            processingControl !== undefined ||
+            finalizeControl !== undefined) && (
             <div className={footerActionsClass}>
               {choice}
               {processingControl}
+              {finalizeControl}
             </div>
           )}
         </div>
@@ -457,7 +482,7 @@ export function SubscriptionFooterMain({
   contract: string;
   confirmedTokenId: string;
   distributionPlan: AllowlistDescription | null;
-  overview: DistributionOverview | null;
+  overview: EmmaDistributionOverview | null;
   isLoadingOverview: boolean;
   isResetting: boolean;
   isUploading: boolean;
@@ -512,11 +537,15 @@ export function SubscriptionFooterMain({
 }>) {
   const locale = useBrowserLocale();
   const publishStatusId = useId();
+  const photosHeadingId = useId();
+  const photosLabel = t(locale, "emma.review.assetPhotos");
   const photoCount = overview?.photos_count ?? 0;
   const publishBlockReason = getPublishBlockReason(overview);
   const publishStatusKey = isLoadingOverview
     ? "emma.review.checkingDistribution"
     : publishBlockReason;
+  const published = overview?.github_publication;
+  const claim = Number(confirmedTokenId);
 
   return (
     <div className="tw-min-w-0 tw-py-3 tw-@container">
@@ -570,43 +599,61 @@ export function SubscriptionFooterMain({
               onDownload={() => onDownloadAirdrops(phase)}
             />
           ))}
-          <AssetRow
-            label={t(locale, "emma.review.assetPhotos")}
-            count={formatAssetCount(
-              locale,
-              "emma.review.photosOne",
-              "emma.review.photosOther",
-              photoCount
-            )}
-            loadingCount={isLoadingOverview}
-            viewing={viewingPhotos}
-            uploading={isUploading}
-            onView={onShowViewPhotos}
-            onUpload={onShowUploadPhotos}
-          />
         </div>
       </section>
       <PreparationSection
         choice={preparationChoice}
         processingControl={processingControl}
+        finalizeControl={
+          showManualFinalize ? (
+            <ManualFinalizeButton
+              normalized={overview?.is_normalized}
+              loadingOverview={isLoadingOverview}
+              finalizing={isFinalizing}
+              resetting={isResetting}
+              onFinalize={onFinalize}
+            />
+          ) : undefined
+        }
         status={preparationStatus}
       />
+      <section aria-labelledby={photosHeadingId} className={footerSectionClass}>
+        <h3 id={photosHeadingId} className={footerHeadingClass}>
+          {photosLabel}
+        </h3>
+        {overview?.is_normalized &&
+          Number.isSafeInteger(claim) &&
+          claim > 0 && <FinalizedDistributionCounts claim={claim} />}
+        <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2">
+          <span className="tw-text-sm tw-tabular-nums tw-text-iron-400">
+            {isLoadingOverview
+              ? "…"
+              : formatAssetCount(
+                  locale,
+                  "emma.review.photosOne",
+                  "emma.review.photosOther",
+                  photoCount
+                )}
+          </span>
+          <div className="tw-ml-auto tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+            <AssetActions
+              label={photosLabel}
+              viewing={viewingPhotos}
+              uploading={isUploading}
+              onView={onShowViewPhotos}
+              onUpload={onShowUploadPhotos}
+            />
+          </div>
+        </div>
+      </section>
       <section
-        aria-label={t(
-          locale,
-          showManualFinalize ? "emma.review.finish" : "emma.review.publish"
-        )}
+        aria-label={t(locale, "emma.review.publish")}
         className={footerSectionClass}
       >
         <div className={footerActionRowClass}>
           <div className="tw-flex tw-min-h-11 tw-flex-col tw-justify-center tw-gap-1">
             <h3 className={footerHeadingClass}>
-              {t(
-                locale,
-                showManualFinalize
-                  ? "emma.review.finish"
-                  : "emma.review.publish"
-              )}
+              {t(locale, "emma.review.publish")}
             </h3>
             {publishStatusKey && (
               <p
@@ -616,17 +663,37 @@ export function SubscriptionFooterMain({
                 {t(locale, publishStatusKey)}
               </p>
             )}
+            {published && (
+              <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-sm">
+                <span
+                  className={
+                    published.photos_changed
+                      ? "tw-text-iron-200"
+                      : "tw-text-emerald-400"
+                  }
+                >
+                  {t(
+                    locale,
+                    published.photos_changed
+                      ? "emma.review.photosChanged"
+                      : "emma.review.published"
+                  )}
+                </span>
+                <span aria-hidden="true" className="tw-text-iron-400">
+                  ·
+                </span>
+                <Link
+                  href={getDistributionGithubUrl(published.folder)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="tw-text-primary-300"
+                >
+                  {t(locale, "emma.review.viewOnGitHub")}
+                </Link>
+              </div>
+            )}
           </div>
           <div className={footerActionsClass}>
-            {showManualFinalize && (
-              <ManualFinalizeButton
-                normalized={overview?.is_normalized}
-                loadingOverview={isLoadingOverview}
-                finalizing={isFinalizing}
-                resetting={isResetting}
-                onFinalize={onFinalize}
-              />
-            )}
             <Button
               variant="secondary"
               onClick={onUploadToGithub}
@@ -651,7 +718,12 @@ export function SubscriptionFooterMain({
                   unoptimized
                   className="tw-shrink-0 tw-invert"
                 />
-                {t(locale, "emma.review.publishToGithub")}
+                {t(
+                  locale,
+                  published
+                    ? "emma.review.republish"
+                    : "emma.review.publishToGithub"
+                )}
               </StableLabel>
             </Button>
           </div>

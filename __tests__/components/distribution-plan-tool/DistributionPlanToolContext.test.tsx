@@ -4,6 +4,17 @@ import DistributionPlanToolContextWrapper, {
   DistributionPlanToolContext,
   DistributionPlanToolStep,
 } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
+import {
+  AllowlistOperationCode,
+  AllowlistRunStatus,
+  type AllowlistDescription,
+  DistributionPlanTokenPoolDownloadStatus,
+} from "@/components/allowlist-tool/allowlist-tool.types";
+import {
+  getRequestedEmmaPlanStep,
+  restoreEmmaPlanStep,
+} from "@/components/distribution-plan-tool/emma-plan-step";
+import { getEmmaReturnPath } from "@/components/distribution-plan-tool/emma-route";
 
 jest.mock("@/services/distribution-plan-api", () => ({
   distributionPlanApiFetch: jest.fn(),
@@ -19,6 +30,7 @@ jest.mock("react-use", () => ({
   useInterval: jest.fn(),
 }));
 import type { TypeOptions } from "react-toastify";
+import { useInterval } from "react-use";
 
 const mockShowAppToast = jest.fn();
 const mockShowAppToasts = jest.fn(
@@ -42,6 +54,11 @@ jest.mock("@/components/utils/toast/AppToast", () => ({
 }));
 
 const plan = { id: "1", name: "Plan", description: "desc", createdAt: 0 };
+const analysisPlan = (status: AllowlistRunStatus): AllowlistDescription => ({
+  ...plan,
+  activeRun: { status, createdAt: 1, errorReason: null },
+});
+
 const transferPools = [
   {
     id: "tp1",
@@ -99,14 +116,94 @@ const phases = [
   },
 ];
 
+test("restores the requested step from saved progress and clamps premature Review links", () => {
+  const review = getRequestedEmmaPlanStep("?step=review");
+  const build = getRequestedEmmaPlanStep("?step=build-phases");
+  expect(restoreEmmaPlanStep(review, [], phases, [])).toBe(
+    DistributionPlanToolStep.REVIEW
+  );
+  expect(restoreEmmaPlanStep(build, [], phases, [])).toBe(
+    DistributionPlanToolStep.CREATE_PHASES
+  );
+  const phaseOperation = {
+    ...operations[0]!,
+    code: AllowlistOperationCode.ADD_PHASE,
+    hasRan: true,
+  };
+  expect(restoreEmmaPlanStep(build, [phaseOperation], phases, [])).toBe(
+    DistributionPlanToolStep.BUILD_PHASES
+  );
+  expect(restoreEmmaPlanStep(review, [], [], [])).toBe(
+    DistributionPlanToolStep.CREATE_SNAPSHOTS
+  );
+  const snapshot = {
+    ...operations[0]!,
+    code: AllowlistOperationCode.CREATE_TOKEN_POOL,
+    hasRan: true,
+    params: { id: "tok1" },
+  };
+  const completed = DistributionPlanTokenPoolDownloadStatus.COMPLETED;
+  const download = {
+    contract: "",
+    tokenPoolId: "tok1",
+    allowlistId: plan.id,
+    blockNo: 1,
+    status: completed,
+    rawStatus: completed,
+    stale: false,
+    retryable: false,
+    attemptCount: 1,
+    failureCount: 0,
+  };
+  expect(restoreEmmaPlanStep(review, [snapshot], [], [download])).toBe(
+    DistributionPlanToolStep.CREATE_PHASES
+  );
+  expect(restoreEmmaPlanStep(review, [snapshot], phases, [download])).toBe(
+    DistributionPlanToolStep.REVIEW
+  );
+  for (const incompleteDownloads of [
+    null,
+    [],
+    [{ ...download, tokenPoolId: "another-pool" }],
+    [{ ...download, status: DistributionPlanTokenPoolDownloadStatus.PENDING }],
+    [{ ...download, status: DistributionPlanTokenPoolDownloadStatus.FAILED }],
+  ]) {
+    expect(
+      restoreEmmaPlanStep(review, [snapshot], phases, incompleteDownloads)
+    ).toBe(DistributionPlanToolStep.CREATE_SNAPSHOTS);
+  }
+  const operation = {
+    ...operations[0]!,
+    code: AllowlistOperationCode.MAP_RESULTS_TO_DELEGATED_WALLETS,
+  };
+  expect(restoreEmmaPlanStep(review, [operation], phases, [])).toBe(
+    DistributionPlanToolStep.MAP_DELEGATIONS
+  );
+  expect(getEmmaReturnPath("/emma/plans/1?step=review")).toBe(
+    "/emma/plans/1?step=review"
+  );
+  expect(
+    getEmmaReturnPath("/emma/plans/1?step=review&next=https://example.com")
+  ).toBe("/emma/plans");
+});
+
 function ContextReader() {
   const context = React.useContext(DistributionPlanToolContext);
   return (
     <>
       <div data-testid="step">{context.step}</div>
+      <div data-testid="run-status">
+        {context.distributionPlan?.activeRun?.status}
+      </div>
       <button data-testid="run" onClick={context.runOperations} />
       <button data-testid="set-null" onClick={() => context.setState(null)} />
       <button data-testid="set-plan" onClick={() => context.setState(plan)} />
+      <button
+        data-testid="set-claimed"
+        onClick={() =>
+          context.setState(analysisPlan(AllowlistRunStatus.CLAIMED))
+        }
+      />
       <button
         data-testid="toast"
         onClick={() =>
@@ -161,6 +258,50 @@ describe("DistributionPlanToolContext", () => {
     mockShowAppToasts.mockClear();
   });
 
+  afterEach(() => {
+    window.history.replaceState(null, "", "/");
+  });
+
+  it("writes a restored step back to the same plan's URL", async () => {
+    window.history.replaceState(null, "", "/emma/plans/1?step=review");
+    setup();
+
+    await act(async () => {
+      screen.getByTestId("set-plan").click();
+    });
+
+    expect(window.location.search).toBe("?step=create-snapshots");
+  });
+
+  it.each([
+    {
+      scenario: "after navigating to another plan",
+      nextPath: "/emma/plans/2?step=review",
+      unmount: false,
+    },
+    {
+      scenario: "after unmounting",
+      nextPath: "/emma/plans/1?step=review",
+      unmount: true,
+    },
+  ])("ignores a late restore $scenario", async ({ nextPath, unmount }) => {
+    window.history.replaceState(null, "", "/emma/plans/1?step=review");
+    const pending = Promise.withResolvers<{ success: boolean; data: [] }>();
+    jest.mocked(distributionPlanApiFetch).mockReturnValueOnce(pending.promise);
+    const view = setup();
+
+    await act(async () => {
+      screen.getByTestId("set-plan").click();
+    });
+    if (unmount) view.unmount();
+    window.history.replaceState(null, "", nextPath);
+    await act(async () => {
+      pending.resolve({ success: true, data: [] });
+    });
+
+    expect(window.location.pathname + window.location.search).toBe(nextPath);
+  });
+
   it("renders children and default step", () => {
     setup();
     expect(screen.getByTestId("step").textContent).toBe(
@@ -200,6 +341,78 @@ describe("DistributionPlanToolContext", () => {
       DistributionPlanToolStep.CREATE_SNAPSHOTS
     );
   });
+
+  it("ignores an older poll when a retry has been submitted", async () => {
+    setup();
+    await act(async () => {
+      screen.getByTestId("set-claimed").click();
+    });
+
+    const oldPoll = Promise.withResolvers<{
+      success: boolean;
+      data: AllowlistDescription;
+    }>();
+    jest.mocked(distributionPlanApiFetch).mockReturnValueOnce(oldPoll.promise);
+    const tick = jest.mocked(useInterval).mock.lastCall?.[0];
+    if (!tick) throw new Error("Expected the plan to poll a claimed run");
+    act(() => {
+      tick();
+    });
+
+    expect(distributionPlanApiFetch).toHaveBeenCalledWith(
+      `/allowlists/${plan.id}`
+    );
+
+    jest.mocked(distributionPlanApiPost).mockResolvedValueOnce({
+      success: true,
+      data: analysisPlan(AllowlistRunStatus.PENDING),
+    });
+    await act(async () => {
+      screen.getByTestId("run").click();
+    });
+    await act(async () => {
+      oldPoll.resolve({
+        success: true,
+        data: analysisPlan(AllowlistRunStatus.FAILED),
+      });
+    });
+
+    expect(screen.getByTestId("run-status")).toHaveTextContent(
+      AllowlistRunStatus.PENDING
+    );
+    expect(jest.mocked(useInterval).mock.lastCall?.[1]).toBe(2000);
+  });
+
+  it.each([
+    { step: "set-plan", expected: AllowlistRunStatus.PENDING },
+    { step: "set-null", expected: "" },
+  ])(
+    "applies the retry only to the same plan after $step",
+    async ({ step, expected }) => {
+      setup();
+      await act(async () => {
+        screen.getByTestId("set-plan").click();
+      });
+      const response = Promise.withResolvers<{
+        success: boolean;
+        data: AllowlistDescription;
+      }>();
+      jest
+        .mocked(distributionPlanApiPost)
+        .mockReturnValueOnce(response.promise);
+      act(() => {
+        screen.getByTestId("run").click();
+      });
+      await act(async () => {
+        screen.getByTestId(step).click();
+        response.resolve({
+          success: true,
+          data: analysisPlan(AllowlistRunStatus.PENDING),
+        });
+      });
+      expect(screen.getByTestId("run-status").textContent).toBe(expected);
+    }
+  );
 
   it("displays toasts for messages", () => {
     setup();

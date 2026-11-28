@@ -15,6 +15,7 @@ import {
 import { ApiSubscriptionCoverageStatus } from "../../generated/models/ApiSubscriptionCoverageStatus";
 import { ApiSubscriptionCoverageMode } from "../../generated/models/ApiSubscriptionCoverageMode";
 import { isCapacitorSimulationProject } from "../support/surfaceSimulation";
+import { expectUrlState } from "../support/urlState";
 
 const plan = {
   id: "emma-layout-fixture",
@@ -1977,6 +1978,106 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
   });
 
   // Plans now require a session; retain the layout contract in the authenticated pack.
+  test("restores EMMA Review after refresh and keeps long phase rows in view", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 900 });
+    const routePath = `/allowlists/${plan.id}`;
+    const longName = `Top collectors ${"x".repeat(120)}`;
+    const phases = [
+      {
+        id: "phase-0",
+        allowlistId: plan.id,
+        name: longName,
+        walletsCount: 242,
+        components: [],
+      },
+    ];
+    let ready = true;
+    const initialPhases = Promise.withResolvers<void>();
+    await page.route(
+      (url) =>
+        url.pathname === routePath || url.pathname.startsWith(`${routePath}/`),
+      async (route) => {
+        if (route.request().method() !== "GET") {
+          await route.abort("blockedbyclient");
+          return;
+        }
+        const path = new URL(route.request().url()).pathname;
+        if (path === `${routePath}/phases`) await initialPhases.promise;
+        await route.fulfill({
+          json:
+            path === routePath
+              ? plan
+              : path === `${routePath}/phases` && ready
+                ? phases
+                : [],
+        });
+      }
+    );
+
+    const phasesRequested = page.waitForRequest(
+      (request) => new URL(request.url()).pathname === `${routePath}/phases`
+    );
+    try {
+      await page.goto(`/emma/plans/${plan.id}?step=review`);
+      await phasesRequested;
+      await expect(
+        page.getByText(/^Loading your distribution plan/)
+      ).toBeVisible();
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+    } finally {
+      initialPhases.resolve();
+    }
+    const phase = page.getByRole("rowheader", { name: longName });
+    await expect(phase).toBeVisible();
+    const table = page.getByRole("table").filter({ has: phase });
+    const row = table.getByRole("row").filter({ has: phase });
+    const exports = row.getByRole("button", {
+      name: `Exports for ${longName}`,
+    });
+    for (const width of [320, 390]) {
+      await page.setViewportSize({ width, height: 900 });
+      await expect(table).toHaveCSS("display", "table");
+      await expect(row).toHaveCSS("display", "table-row");
+      await expect(
+        table.getByRole("columnheader", { name: "Wallets" })
+      ).toBeVisible();
+      await expect(row.getByRole("cell")).toHaveCount(3);
+      await expect(exports).toBeVisible();
+      expect(
+        await table.evaluate(
+          (element) => element.scrollWidth <= element.clientWidth + 1
+        )
+      ).toBe(true);
+      await expectNoHorizontalOverflow(page);
+    }
+    await exports.press("Enter");
+    await expect(page.getByRole("menuitem", { name: "JSON" })).toBeVisible();
+    await page.keyboard.press("Escape");
+
+    await page.reload();
+    await expect(phase).toBeVisible();
+    await expectUrlState(
+      page,
+      (url) =>
+        url.pathname === `/emma/plans/${plan.id}` &&
+        url.searchParams.get("step") === "review"
+    );
+
+    ready = false;
+    await page.reload();
+    await expect(
+      page.getByRole("heading", { name: "Create Snapshots" })
+    ).toBeVisible();
+    await expectUrlState(
+      page,
+      (url) =>
+        url.pathname === `/emma/plans/${plan.id}` &&
+        url.searchParams.get("step") === "create-snapshots"
+    );
+  });
+
   for (const width of [320, 768, 1440]) {
     test(`contains long plan text and controls at ${width}px`, async ({
       page,
