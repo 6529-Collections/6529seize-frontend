@@ -78,6 +78,8 @@ describe("oneOfOneView", () => {
       one({
         state: AUCTION_STATE.ENDED,
         independent: true,
+        bidder: ALICE,
+        bid: 5n,
         refusableAt: BigInt(NOW - 1),
         endTime: BigInt(NOW - 200_000),
       })

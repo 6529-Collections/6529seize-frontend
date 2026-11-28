@@ -144,8 +144,9 @@ export function oneOfOneView(input: OneOfOneInput): OneOfOneView {
 type ViewBase = Omit<OneOfOneView, "screen">;
 
 function endedView(input: OneOfOneInput, base: ViewBase): OneOfOneView {
+  // Only a sale with a bid has something to return.
   const refusable =
-    input.independent && input.refusableAt > 0n && input.now >= Number(input.refusableAt);
+    base.hasBid && input.independent && input.refusableAt > 0n && input.now >= Number(input.refusableAt);
   return {
     ...base,
     screen: "ended",

@@ -107,7 +107,7 @@ export const STREAM_SEPOLIA_MESSAGES = registerSourceMessages({
   "streamSepolia.one.soldFor": "Sold for",
   "streamSepolia.one.timeLeft": "Time left",
   "streamSepolia.one.endedShort": "Ended",
-  "streamSepolia.one.status.live": "Ends {end}. A bid in the last {minutes} minutes adds {minutes} minutes.",
+  "streamSepolia.one.status.live": "Ends {end}. A bid in the last {minutes} minutes moves the end to {minutes} minutes after it.",
   "streamSepolia.one.status.closing": "Closing minutes. Each bid now moves the end to {minutes} minutes after it.",
   "streamSepolia.one.status.ended": "Bidding has ended. Anyone can finish the sale.",
   "streamSepolia.one.status.sold": "Sold.",
