@@ -104,6 +104,10 @@ export function useClaimable(viewer: Address | undefined) {
 /** Seconds the chain's latest block time is ahead of this device's clock. */
 let chainOffsetSeconds = 0;
 
+function recordChainTime(blockSeconds: number): void {
+  chainOffsetSeconds = blockSeconds - Date.now() / 1000;
+}
+
 function chainNowSeconds(): number {
   return Math.floor(Date.now() / 1000 + chainOffsetSeconds);
 }
@@ -117,7 +121,7 @@ export function useChainClock() {
     queryKey: [...KEY, "chainClock"],
     queryFn: async () => {
       const block = await getStreamClient().getBlock({ blockTag: "latest" });
-      chainOffsetSeconds = Number(block.timestamp) - Date.now() / 1000;
+      recordChainTime(Number(block.timestamp));
       return Number(block.timestamp);
     },
     refetchInterval: 12_000,
