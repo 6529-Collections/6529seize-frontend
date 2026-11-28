@@ -596,6 +596,7 @@ function SettleAction({ detail, view }: { readonly detail: EditionDetail; readon
               fullWidth
               label={view.screen === "settling" ? t(locale, "streamSepolia.ed.continueSettle") : t(locale, "streamSepolia.ed.settle")}
               description={t(locale, "streamSepolia.ed.settleHelp")}
+              doneText={t(locale, "streamSepolia.ed.settleDone")}
               request={async () => {
                 if (!wallet.address) return null;
                 const client = getStreamClient();
@@ -628,6 +629,7 @@ function SettleAction({ detail, view }: { readonly detail: EditionDetail; readon
               variant="secondary"
               label={t(locale, "streamSepolia.ed.abandon")}
               description={t(locale, "streamSepolia.ed.abandonHelp")}
+              doneText={t(locale, "streamSepolia.ed.abandonDone")}
               request={() =>
                 streamTx({ address: detail.auctionAddress, abi: editionAuctionAbi, functionName: "abandon", args: [detail.saleId] })
               }
@@ -658,6 +660,7 @@ function OpenEdition({
         <WalletGate reason={t(locale, "streamSepolia.one.connectToAct")}>
           <TxAction
             label={t(locale, "streamSepolia.ed.open")}
+            doneText={t(locale, "streamSepolia.ed.openDone")}
             description={t(locale, "streamSepolia.ed.openHelp")}
             request={async () => {
               if (!firstStartTx) return null;
