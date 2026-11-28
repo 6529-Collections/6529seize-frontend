@@ -145,6 +145,7 @@ function BidBox({ detail }: { readonly detail: OneOfOneDetail }) {
     amount = null;
   }
   const tooLow = amount !== null && amount < minimum;
+  const [sent, setSent] = useState<bigint | null>(null);
   const inputId = `stream-bid-${detail.saleId.toString().slice(0, 8)}`;
   return (
     <WalletGate reason={t(locale, "streamSepolia.one.connectToBid")}>
@@ -171,16 +172,18 @@ function BidBox({ detail }: { readonly detail: OneOfOneDetail }) {
         </p>
         <TxAction
           label={t(locale, "streamSepolia.one.bid")}
-          doneText={amount === null ? undefined : t(locale, "streamSepolia.one.bidDone", { amount: formatEth(amount, locale) })}
+          doneText={sent === null ? undefined : t(locale, "streamSepolia.one.bidDone", { amount: formatEther(sent) })}
           fullWidth
           disabled={amount === null || tooLow}
           description={
             amount !== null && !tooLow
-              ? t(locale, "streamSepolia.one.bidCost", { amount: formatEth(amount, locale) })
+              ? t(locale, "streamSepolia.one.bidCost", { amount: formatEther(amount) })
               : undefined
           }
-          request={() =>
-            amount === null || !wallet.address
+          request={() => {
+            // The result line names the amount sent, not the next minimum the page shows after.
+            setSent(amount);
+            return amount === null || !wallet.address
               ? null
               : {
                   address: getStreamInstance().addresses.englishAuction,
@@ -188,8 +191,8 @@ function BidBox({ detail }: { readonly detail: OneOfOneDetail }) {
                   functionName: "bid",
                   args: [detail.saleId, wallet.address],
                   value: amount,
-                }
-          }
+                };
+          }}
         />
       </div>
     </WalletGate>
