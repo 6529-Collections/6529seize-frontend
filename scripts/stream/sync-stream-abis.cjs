@@ -90,7 +90,6 @@ function optionValue(args, name) {
 /**
  * Writes an instance's addresses.ts from its deployment record.
  * Exported for its unit test (__tests__/scripts/syncStreamAbis.test.ts).
- * @api
  */
 function writeAddresses({ source, record, gate, outDir, commit }) {
   const data = JSON.parse(fs.readFileSync(path.join(source, record), "utf8"));
