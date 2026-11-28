@@ -7,7 +7,7 @@ import { CURRENCY_ETH } from "./item";
 const SHARE_DENOMINATOR = 100_000;
 
 /** The 1/1 auction's terms on this instance, read from the contracts (never hard-coded). */
-export interface SaleTerms {
+interface SaleTerms {
   /** How long a sale runs, in seconds. */
   readonly duration: number;
   /** A bid this close to the end moves the end to this long after the bid, in seconds. */

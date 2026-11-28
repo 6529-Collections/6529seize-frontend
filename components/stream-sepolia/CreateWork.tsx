@@ -28,7 +28,7 @@ import { useStreamWallet, WalletGate } from "./WalletGate";
 import { EMPTY_DRAFT, WorkForm } from "./WorkForm";
 import { WorkPreview } from "./WorkPreview";
 
-export type Door = "stream" | "independent";
+type Door = "stream" | "independent";
 
 function reviewLine(draft: Draft, locale: SupportedLocale): string {
   if (!draft.editions) return t(locale, "streamSepolia.create.reviewOne");
