@@ -2,7 +2,9 @@
  * @jest-environment node
  */
 // Runs the shared vectors of @6529-collections/provenance-core against the copy in
-// lib/provenance-core/, the same files the package and the 6529-client Rust core check.
+// lib/provenance-core/, the same files the package and the 6529-client Rust core check. The
+// profile's own integer vectors (profile/vectors/integers.json) are not copied here; the package's
+// tests run them.
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -20,9 +22,11 @@ import {
   type RecordInput,
 } from "@/lib/provenance-core/actions";
 import {
+  cidProblem,
   cidToString,
   decodeCidBytes,
   rawCidV1,
+  unixfsFileCidV1,
 } from "@/lib/provenance-core/cid";
 import type { RegistryPin } from "@/lib/provenance-core/config/registries";
 import {
@@ -123,9 +127,20 @@ describe("vectors/cid.json", () => {
       ]).toEqual([c.version, c.codec, c.hashCode, c.digest, c.text]);
     });
   }
+  for (const c of f.unixfs.cases) {
+    it(`UnixFS: ${c.name}`, () => {
+      const bytes = Uint8Array.from({ length: c.length }, (_, k) => k % 251);
+      const cid = unixfsFileCidV1(bytes);
+      expect(bytesToHex(cid)).toBe(c.cid);
+      expect(cidToString(cid)).toBe(c.text);
+    });
+  }
   for (const c of f.invalid)
     it(`rejects ${c.name}`, () =>
       expect(() => decodeCidBytes(c.cid)).toThrow());
+  for (const c of f.registry)
+    it(`registry rule: ${c.name}`, () =>
+      expect(cidProblem(c.cid) === undefined).toBe(c.accepted));
 });
 
 describe("vectors/verify.json", () => {
@@ -134,16 +149,23 @@ describe("vectors/verify.json", () => {
       const r = verifyBytes(
         hexToBytes(c.fetched),
         { ...c.expected, canonicalizationLiteral: c.expected.canonicalization },
-        c.pointer
+        c.options ?? {}
       );
+      expect(r.verdict).toBe(c.result.verdict);
+      expect(r.verified).toBe(c.result.verified);
+      expect(r.form).toBe(c.result.form);
       expect(r.digestMatch).toBe(c.result.digestMatch);
+      expect(r.canonicalDigestMatch).toBe(c.result.canonicalDigestMatch);
+      expect(r.scope).toBe(c.result.scope);
       expect(Boolean(r.error)).toBe(c.result.error);
+      expect(r.computedDigest).toBe(c.result.computedDigest);
+      expect(r.canonicalDigest).toBe(c.result.canonicalDigest);
       if (!c.result.error) {
-        expect(r.computedDigest).toBe(c.result.computedDigest);
         expect(r.canonical.pointer ?? null).toBe(c.result.pointer);
         expect(r.canonical.alreadyCanonical).toBe(c.result.alreadyCanonical);
       }
       expect(r.cid.status).toBe(c.result.cid);
+      expect(r.canonicalCid?.status ?? null).toBe(c.result.canonicalCid);
     });
   }
 });

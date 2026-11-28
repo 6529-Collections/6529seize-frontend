@@ -386,6 +386,31 @@
     "type": "error"
   },
   {
+    "id": "0xfce94a75",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "subjectId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "caller",
+        "type": "address"
+      }
+    ],
+    "name": "RestoreNeedsOwner",
+    "signature": "RestoreNeedsOwner(bytes32,address)",
+    "type": "error"
+  },
+  {
+    "id": "0x524ede64",
+    "inputs": [],
+    "name": "SSTORE2ReadOutOfBounds",
+    "signature": "SSTORE2ReadOutOfBounds()",
+    "type": "error"
+  },
+  {
     "id": "0xfbad885d",
     "inputs": [],
     "name": "SSTORE2WriteFailed",
@@ -416,6 +441,19 @@
     ],
     "name": "SubjectIsDeleted",
     "signature": "SubjectIsDeleted(bytes32)",
+    "type": "error"
+  },
+  {
+    "id": "0x4c246bc6",
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "successor",
+        "type": "address"
+      }
+    ],
+    "name": "SuccessorAlreadyDeclared",
+    "signature": "SuccessorAlreadyDeclared(address)",
     "type": "error"
   },
   {
@@ -618,7 +656,7 @@
   },
   {
     "anonymous": false,
-    "id": "0x648949aa6ef134f2af2f94e8ad5e891b0eb4ace35ce9c5d92bd1699c1508cb43",
+    "id": "0xb081ca5284530ac38c56ad96c8246308183d80e6414933f9dcfb9d468995bc44",
     "inputs": [
       {
         "indexed": true,
@@ -634,9 +672,9 @@
       },
       {
         "indexed": false,
-        "internalType": "uint32",
+        "internalType": "uint256",
         "name": "ownerIndex",
-        "type": "uint32"
+        "type": "uint256"
       },
       {
         "indexed": false,
@@ -646,7 +684,7 @@
       }
     ],
     "name": "OwnerChanged",
-    "signature": "OwnerChanged(address,address,uint32,uint40)",
+    "signature": "OwnerChanged(address,address,uint256,uint40)",
     "type": "event"
   },
   {
@@ -672,7 +710,7 @@
   },
   {
     "anonymous": false,
-    "id": "0x0e23ee231e4019104caa584486890914b3296926e2395adc89e0ebc7c601e2df",
+    "id": "0x87ff5e5a75056e92d98c6420ad154a6d3c25cdcc97bf456dd16c4e865251b7fd",
     "inputs": [
       {
         "indexed": true,
@@ -688,9 +726,9 @@
       },
       {
         "indexed": false,
-        "internalType": "uint32",
+        "internalType": "uint256",
         "name": "changeIndex",
-        "type": "uint32"
+        "type": "uint256"
       },
       {
         "indexed": false,
@@ -700,7 +738,7 @@
       }
     ],
     "name": "PublisherSet",
-    "signature": "PublisherSet(address,bool,uint32,uint40)",
+    "signature": "PublisherSet(address,bool,uint256,uint40)",
     "type": "event"
   },
   {
@@ -937,13 +975,19 @@
   },
   {
     "anonymous": false,
-    "id": "0x24c6c0b0784634b47c1369adc8e812075c2d766a5bcc601d65c9916a3c080e2b",
+    "id": "0xf03fd782140c8e1dfab0f305603bc8796287e88ba0e5ebf5ffac41d43386c898",
     "inputs": [
       {
         "indexed": true,
         "internalType": "uint32",
         "name": "releaseId",
         "type": "uint32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "sealedBy",
+        "type": "address"
       },
       {
         "indexed": false,
@@ -959,7 +1003,7 @@
       }
     ],
     "name": "ReleaseSealed",
-    "signature": "ReleaseSealed(uint32,uint32,uint40)",
+    "signature": "ReleaseSealed(uint32,address,uint32,uint40)",
     "type": "event"
   },
   {
@@ -1077,17 +1121,23 @@
   },
   {
     "anonymous": false,
-    "id": "0xdd321306ca6df6bb811a98d8553907cc13d8b854fd64c8fbe5f3237a16b55090",
+    "id": "0x2f1ec56c6266e382132f57129cb2f56c078c94043432ad620729f9c26487b248",
     "inputs": [
       {
         "indexed": true,
         "internalType": "address",
         "name": "successor",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint40",
+        "name": "declaredAt",
+        "type": "uint40"
       }
     ],
     "name": "SuccessorDeclared",
-    "signature": "SuccessorDeclared(address)",
+    "signature": "SuccessorDeclared(address,uint40)",
     "type": "event"
   },
   {
@@ -1511,6 +1561,42 @@
     "type": "function"
   },
   {
+    "id": "0xd1747ba6",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "subjectId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "fromVersion",
+        "type": "uint32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "maxVersions",
+        "type": "uint32"
+      }
+    ],
+    "name": "findCurrent",
+    "outputs": [
+      {
+        "internalType": "uint32",
+        "name": "version",
+        "type": "uint32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "resumeAt",
+        "type": "uint32"
+      }
+    ],
+    "signature": "findCurrent(bytes32,uint32,uint32)",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "id": "0x62a5af3b",
     "inputs": [],
     "name": "freeze",
@@ -1595,6 +1681,11 @@
           {
             "internalType": "address",
             "name": "openedBy",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "sealedBy",
             "type": "address"
           },
           {
@@ -2798,6 +2889,21 @@
       }
     ],
     "signature": "successor()",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0x36f8b2a7",
+    "inputs": [],
+    "name": "successorDeclaredAt",
+    "outputs": [
+      {
+        "internalType": "uint40",
+        "name": "",
+        "type": "uint40"
+      }
+    ],
+    "signature": "successorDeclaredAt()",
     "stateMutability": "view",
     "type": "function"
   },

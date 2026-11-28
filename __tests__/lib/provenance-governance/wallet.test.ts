@@ -1,17 +1,56 @@
 /**
  * @jest-environment node
  */
-import { hashTypedData } from "viem";
+import { hashTypedData, type PublicClient } from "viem";
 import { registryPins } from "@/lib/provenance-core/config/registries";
-import { buildGovernanceSafeTxs } from "@/lib/provenance-core/governance";
+import {
+  buildGovernanceSafeTxs,
+  GovernanceCheckError,
+} from "@/lib/provenance-core/governance";
 import {
   ensureChain,
   isUserRejection,
   signWithWallet,
 } from "@/lib/provenance-governance/wallet";
 
+// The registry's runtime code stands in for the v1.0.0-rc.2 build the Museum registry runs.
+jest.mock("@/lib/provenance-core/config/builds", () => {
+  const actual = jest.requireActual("@/lib/provenance-core/config/builds");
+  const { keccak256 } = jest.requireActual("viem");
+  return {
+    ...actual,
+    buildForCodeHash: (hash: string | undefined) =>
+      hash === keccak256("0x6001") ? actual.knownBuilds[1] : undefined,
+  };
+});
+
 const SIGNER = "0x56ec02E81f5Cd36E49cA5382A5f55a00A4906F94";
 const pin = registryPins[1]!;
+
+/** Sepolia as the test Safe and Museum registry stand: owner is the Safe, nonce 19. */
+function mockChain(owners: string[] = [SIGNER]): PublicClient {
+  return {
+    getChainId: async () => 11155111,
+    getBlockNumber: async () => 100n,
+    getCode: async () => "0x6001",
+    readContract: async ({ functionName }: { functionName: string }) => {
+      switch (functionName) {
+        case "owner":
+          return pin.safe;
+        case "pendingOwner":
+          return "0x0000000000000000000000000000000000000000";
+        case "getOwners":
+          return owners;
+        case "nonce":
+          return 19n;
+        case "VERSION":
+          return "1.4.1";
+        default:
+          throw new Error(functionName);
+      }
+    },
+  } as unknown as PublicClient;
+}
 
 /** A wallet that records requests. It signs nothing: the "signature" is a fixed placeholder. */
 function mockWallet(
@@ -88,9 +127,16 @@ describe("signWithWallet", () => {
 
   it("asks for eth_signTypedData_v4 over the SafeTx whose hash the page shows", async () => {
     const w = mockWallet();
-    expect(await signWithWallet(w.provider, SIGNER, pin, g!)).toBe(
-      "0xplaceholder"
+    const signed = await signWithWallet(
+      mockChain(),
+      w.provider,
+      SIGNER,
+      pin,
+      g!
     );
+    expect(signed.signature).toBe("0xplaceholder");
+    expect(signed.check.problems).toEqual([]);
+    expect(signed.check.decoded.map((c) => c.functionName)).toEqual(["freeze"]);
     const req = w.calls.find((c) => c.method === "eth_signTypedData_v4")!;
     const [signer, json] = req.params as [string, string];
     expect(signer).toBe(SIGNER);
@@ -112,9 +158,27 @@ describe("signWithWallet", () => {
 
   it("reports a declined signature as a rejection", async () => {
     const w = mockWallet({ reject: true });
-    const error = await signWithWallet(w.provider, SIGNER, pin, g!).catch(
-      (e: unknown) => e
-    );
+    const error = await signWithWallet(
+      mockChain(),
+      w.provider,
+      SIGNER,
+      pin,
+      g!
+    ).catch((e: unknown) => e);
     expect(isUserRejection(error)).toBe(true);
+  });
+
+  it("sends nothing to sign when the checks find a problem", async () => {
+    const w = mockWallet();
+    const error = await signWithWallet(
+      mockChain(["0x000000000000000000000000000000000000bEEF"]),
+      w.provider,
+      SIGNER,
+      pin,
+      g!
+    ).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(GovernanceCheckError);
+    expect((error as GovernanceCheckError).check.signerIsSafeOwner).toBe(false);
+    expect(w.calls.map((c) => c.method)).not.toContain("eth_signTypedData_v4");
   });
 });

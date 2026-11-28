@@ -4,7 +4,10 @@ import "@/i18n/namespaces/provenance-governance";
 import { useState } from "react";
 import type { PublicClient } from "viem";
 import type { RegistryPin } from "@/lib/provenance-core/config/registries";
-import type { GovernanceSafeTx } from "@/lib/provenance-core/governance";
+import {
+  decodeGovernanceSafeTx,
+  type GovernanceSafeTx,
+} from "@/lib/provenance-core/governance";
 import { simulatePlan } from "@/lib/provenance-core/simulate";
 import { errorText } from "@/lib/provenance-governance/checks";
 import SafeTxCard, { type SimResult } from "./SafeTxCard";
@@ -45,7 +48,10 @@ export default function SafeTxList({
           nonce: first.tx.nonce,
           chainId: pin.chainId,
         },
-        txs.map((g) => ({ actions: g.actions })),
+        // The calls each SafeTx's own calldata makes, the calls its signers sign.
+        txs.map((g) => ({
+          actions: decodeGovernanceSafeTx(pin, g.tx).map((c) => c.action),
+        })),
         SIMULATION_GAS_LIMIT
       );
       setSims(

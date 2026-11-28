@@ -1,8 +1,20 @@
-// Copied from 6529-Collections/6529-provenance-app src/registry.ts at commit 512b6629470e06981905f3a94cff3f381d181478.
+// Copied from 6529-Collections/6529-provenance-app src/registry.ts at commit 906377e17438133e8a61f154edf9c6a5792b9f3f.
 // Do not edit here: change the package and run ops/scripts/sync-provenance-core.mjs.
 // Replaced by @6529-collections/provenance-core from npm once that is published.
-import { keccak256, type Address, type ContractFunctionReturnType, type Hex, type PublicClient } from "viem";
+// SPDX-License-Identifier: Apache-2.0
+import {
+  ContractFunctionExecutionError,
+  ContractFunctionRevertedError,
+  ContractFunctionZeroDataError,
+  keccak256,
+  zeroAddress,
+  type Address,
+  type ContractFunctionReturnType,
+  type Hex,
+  type PublicClient,
+} from "viem";
 import { provenanceRegistryAbi as abi } from "./abi/provenanceRegistry";
+import { rc2GetReleaseAbi } from "./abi/legacy";
 import {
   buildForCodeHash,
   ERC165_ID,
@@ -23,22 +35,95 @@ export type HashRef = Version["contentHash"];
 /** Calls per eth_call through Multicall3. The public Sepolia endpoint caps a call at 50M gas. */
 const MULTICALL_CHUNK = 100;
 
+// Every read takes an optional block number. Reads made in several calls, such as a page of
+// subjects and then their versions, give one consistent state only when they share a block.
 async function multi<T>(
   client: PublicClient,
   contracts: readonly {
     address: Address;
-    abi: typeof abi;
+    abi: typeof abi | typeof rc2GetReleaseAbi;
     functionName: string;
     args?: readonly unknown[];
   }[],
+  blockNumber?: bigint,
 ): Promise<T[]> {
   const out: T[] = [];
   for (let i = 0; i < contracts.length; i += MULTICALL_CHUNK) {
     const chunk = contracts.slice(i, i + MULTICALL_CHUNK);
-    const res = await client.multicall({ contracts: chunk as never, allowFailure: false, batchSize: 0 });
+    const res = await client.multicall({
+      contracts: chunk as never,
+      allowFailure: false,
+      batchSize: 0,
+      ...(blockNumber === undefined ? {} : { blockNumber }),
+    });
     out.push(...(res as T[]));
   }
   return out;
+}
+
+type Call = {
+  address: Address;
+  abi: typeof abi | typeof rc2GetReleaseAbi;
+  functionName: string;
+  args?: readonly unknown[];
+};
+
+// Like multi, for calls 0 to count - 1 made by `make`: each chunk's calls are built when it is sent,
+// so a long list never sits in memory as call objects.
+async function multiRange<T>(
+  client: PublicClient,
+  count: number,
+  make: (i: number) => Call,
+  blockNumber?: bigint,
+): Promise<T[]> {
+  const out: T[] = [];
+  for (let i = 0; i < count; i += MULTICALL_CHUNK) {
+    const n = Math.min(MULTICALL_CHUNK, count - i);
+    out.push(
+      ...(await multi<T>(
+        client,
+        Array.from({ length: n }, (_, k) => make(i + k)),
+        blockNumber,
+      )),
+    );
+  }
+  return out;
+}
+
+const at = (blockNumber: bigint | undefined) => (blockNumber === undefined ? {} : { blockNumber });
+
+// One block for a read made of several calls: the given block, or the latest block when the read starts.
+const blockFor = async (client: PublicClient, blockNumber: bigint | undefined): Promise<bigint> =>
+  blockNumber ?? (await client.getBlockNumber({ cacheTime: 0 }));
+
+/** Thrown when a client is on another chain than the one a registry or pin names. */
+export class ChainMismatchError extends Error {
+  constructor(
+    readonly expected: number,
+    readonly actual: number,
+  ) {
+    super(`The RPC endpoint is on chain ${actual}, not chain ${expected}.`);
+    this.name = "ChainMismatchError";
+  }
+}
+
+/**
+ * Throws ChainMismatchError unless the client's endpoint answers eth_chainId with `expected`. A
+ * registry and a Safe can sit at the same addresses on two chains, so the address alone does not
+ * say which chain a read came from.
+ */
+export async function assertChain(client: PublicClient, expected: number): Promise<void> {
+  const actual = await client.getChainId();
+  if (actual !== expected) throw new ChainMismatchError(expected, actual);
+}
+
+// A revert or an empty return means the call is not supported; anything else, such as a dropped
+// request, is an error the caller retries.
+function isRevert(e: unknown): boolean {
+  return (
+    e instanceof ContractFunctionExecutionError &&
+    (e.cause instanceof ContractFunctionRevertedError || e.cause instanceof ContractFunctionZeroDataError)
+  );
 }
 
 export interface RegistryCheck {
@@ -52,16 +137,32 @@ export interface RegistryCheck {
   interfaces: { build: KnownBuild; supported?: boolean | undefined }[];
 }
 
-/** Checks an address the way docs/integrators.md describes: ERC-165 detection, then the runtime code hash. */
-export async function checkRegistry(client: PublicClient, address: Address): Promise<RegistryCheck> {
-  const code = await client.getCode({ address });
+/**
+ * Checks an address the way the contract's integrator guide describes: ERC-165 detection, then the
+ * runtime code hash. With `chainId`, it first throws ChainMismatchError when the client is on
+ * another chain. A transport error throws; only a revert counts as "not supported".
+ */
+export async function checkRegistry(
+  client: PublicClient,
+  address: Address,
+  options: { chainId?: number; blockNumber?: bigint } = {},
+): Promise<RegistryCheck> {
+  if (options.chainId !== undefined) await assertChain(client, options.chainId);
+  const code = await client.getCode({ address, ...at(options.blockNumber) });
   if (!code || code === "0x") return { hasCode: false, codeBytes: 0, interfaces: [] };
   const codeHash = keccak256(code);
   const call = async (id: Hex) => {
     try {
-      return await client.readContract({ address, abi, functionName: "supportsInterface", args: [id] });
-    } catch {
-      return undefined;
+      return await client.readContract({
+        address,
+        abi,
+        functionName: "supportsInterface",
+        args: [id],
+        ...at(options.blockNumber),
+      });
+    } catch (e) {
+      if (isRevert(e)) return undefined;
+      throw e;
     }
   };
   const [erc165, invalid, ...ifaces] = await Promise.all([
@@ -116,10 +217,17 @@ const OVERVIEW_FIELDS = [
   "publisherChangeCount",
 ] as const;
 
-export async function readOverview(client: PublicClient, address: Address): Promise<Overview> {
+/** Reads the registry's counters and state. With `chainId`, throws ChainMismatchError first on another chain. */
+export async function readOverview(
+  client: PublicClient,
+  address: Address,
+  options: { chainId?: number; blockNumber?: bigint } = {},
+): Promise<Overview> {
+  if (options.chainId !== undefined) await assertChain(client, options.chainId);
   const values = await multi<unknown>(
     client,
     OVERVIEW_FIELDS.map((functionName) => ({ address, abi, functionName })),
+    options.blockNumber,
   );
   const o: Record<string, unknown> = {};
   OVERVIEW_FIELDS.forEach((k, i) => {
@@ -154,25 +262,27 @@ export async function readRegistrations(
   client: PublicClient,
   address: Address,
   o: Overview,
+  block?: bigint,
 ): Promise<Registrations> {
-  const range = (n: number) => Array.from({ length: n }, (_, i) => BigInt(i));
+  const blockNumber = await blockFor(client, block);
   const [canonIds, typeIds, schemaIds] = await Promise.all([
-    multi<Hex>(
+    multiRange<Hex>(
       client,
-      range(o.canonicalizationCount).map((i) => ({
-        address,
-        abi,
-        functionName: "canonicalizationAt",
-        args: [i],
-      })),
+      o.canonicalizationCount,
+      (i) => ({ address, abi, functionName: "canonicalizationAt", args: [BigInt(i)] }),
+      blockNumber,
     ),
-    multi<Hex>(
+    multiRange<Hex>(
       client,
-      range(o.recordTypeCount).map((i) => ({ address, abi, functionName: "recordTypeAt", args: [i] })),
+      o.recordTypeCount,
+      (i) => ({ address, abi, functionName: "recordTypeAt", args: [BigInt(i)] }),
+      blockNumber,
     ),
-    multi<Hex>(
+    multiRange<Hex>(
       client,
-      range(o.schemaCount).map((i) => ({ address, abi, functionName: "schemaAt", args: [i] })),
+      o.schemaCount,
+      (i) => ({ address, abi, functionName: "schemaAt", args: [BigInt(i)] }),
+      blockNumber,
     ),
   ]);
   type C = { literal: string; specCid: Hex; registeredAt: number };
@@ -181,14 +291,17 @@ export async function readRegistrations(
     multi<C>(
       client,
       canonIds.map((id) => ({ address, abi, functionName: "canonicalization", args: [id] })),
+      blockNumber,
     ),
     multi<T>(
       client,
       typeIds.map((id) => ({ address, abi, functionName: "recordType", args: [id] })),
+      blockNumber,
     ),
     multi<Schema>(
       client,
       schemaIds.map((id) => ({ address, abi, functionName: "schema", args: [id] })),
+      blockNumber,
     ),
   ]);
   return {
@@ -235,28 +348,35 @@ export async function readSubjectPage(
   address: Address,
   offset: number,
   limit: number,
+  blockNumber?: bigint,
 ): Promise<SubjectSummary[]> {
+  const block = blockNumber ?? (await client.getBlockNumber({ cacheTime: 0 }));
   const ids = (await client.readContract({
     address,
     abi,
     functionName: "subjects",
     args: [BigInt(offset), BigInt(limit)],
+    blockNumber: block,
   })) as readonly Hex[];
-  return readSubjectSummaries(client, address, ids);
+  return readSubjectSummaries(client, address, ids, block);
 }
 
 export async function readSubjectSummaries(
   client: PublicClient,
   address: Address,
   ids: readonly Hex[],
+  blockNumber?: bigint,
 ): Promise<SubjectSummary[]> {
+  const block = blockNumber ?? (await client.getBlockNumber({ cacheTime: 0 }));
   const subjects = await multi<Subject>(
     client,
     ids.map((id) => ({ address, abi, functionName: "subject", args: [id] })),
+    block,
   );
   const latest = await multi<Version>(
     client,
     ids.map((id) => ({ address, abi, functionName: "latest", args: [id] })),
+    block,
   );
   return ids.map((id, i) => ({ id, subject: subjects[i]!, latest: latest[i] }));
 }
@@ -266,7 +386,9 @@ export async function readVersions(
   address: Address,
   subjectId: Hex,
   versionCount: number,
+  blockNumber?: bigint,
 ): Promise<Version[]> {
+  const block = blockNumber ?? (await client.getBlockNumber({ cacheTime: 0 }));
   const out: Version[] = [];
   const page = 50;
   for (let from = 1; from <= versionCount; from += page) {
@@ -275,31 +397,90 @@ export async function readVersions(
       abi,
       functionName: "getVersions",
       args: [subjectId, from, page],
+      blockNumber: block,
     })) as readonly Version[];
     out.push(...res);
   }
   return out;
 }
 
+/**
+ * The known build at `address`, from its runtime code hash, or undefined for unknown code.
+ */
+export async function readBuild(
+  client: PublicClient,
+  address: Address,
+  blockNumber?: bigint,
+): Promise<KnownBuild | undefined> {
+  const code = await client.getCode({ address, ...at(blockNumber) });
+  return code ? buildForCodeHash(keccak256(code)) : undefined;
+}
+
+/**
+ * Whether `getRelease` at a registry of this build returns `sealedBy`. Builds before v1.0.0-rc.3
+ * do not; unknown code is read with the pinned ABI.
+ */
+export function releaseHasSealedBy(build: KnownBuild | undefined): boolean {
+  return build === undefined || build.sealedBy;
+}
+
+/**
+ * Releases `from` to `from + count - 1`, a page at a time, all read at one block: `blockNumber`, or
+ * the latest block when the first page is read. Memory holds one page. A registry of a build
+ * before v1.0.0-rc.3 does not record who sealed a release, so `sealedBy` reads as the zero address
+ * there.
+ */
+export async function* iterateReleases(
+  client: PublicClient,
+  address: Address,
+  count: number,
+  o: { from?: number | undefined; pageSize?: number | undefined; blockNumber?: bigint | undefined } = {},
+): AsyncGenerator<Release[]> {
+  const blockNumber = await blockFor(client, o.blockNumber);
+  const withSealedBy = releaseHasSealedBy(await readBuild(client, address, blockNumber));
+  const first = o.from ?? 1;
+  const pageSize = o.pageSize ?? 500;
+  for (let start = 0; start < count; start += pageSize) {
+    const n = Math.min(pageSize, count - start);
+    const page = await multiRange<Release>(
+      client,
+      n,
+      (k) => ({
+        address,
+        abi: withSealedBy ? abi : rc2GetReleaseAbi,
+        functionName: "getRelease",
+        args: [first + start + k],
+      }),
+      blockNumber,
+    );
+    yield withSealedBy ? page : page.map((r) => ({ ...r, sealedBy: zeroAddress }));
+  }
+}
+
+/** Releases 1 to `count`, read at one block. `iterateReleases` reads them a page at a time. */
 export async function readReleases(
   client: PublicClient,
   address: Address,
   count: number,
+  blockNumber?: bigint,
 ): Promise<Release[]> {
-  return multi<Release>(
-    client,
-    Array.from({ length: count }, (_, i) => ({ address, abi, functionName: "getRelease", args: [i + 1] })),
-  );
+  const out: Release[] = [];
+  for await (const page of iterateReleases(client, address, count, { blockNumber })) out.push(...page);
+  return out;
 }
 
 export async function readDeletions(
   client: PublicClient,
   address: Address,
   count: number,
+  blockNumber?: bigint,
 ): Promise<Deletion[]> {
-  return multi<Deletion>(
+  const block = await blockFor(client, blockNumber);
+  return multiRange<Deletion>(
     client,
-    Array.from({ length: count }, (_, i) => ({ address, abi, functionName: "deletion", args: [i + 1] })),
+    count,
+    (i) => ({ address, abi, functionName: "deletion", args: [i + 1] }),
+    block,
   );
 }
 
@@ -307,20 +488,20 @@ export async function readPublisherLog(
   client: PublicClient,
   address: Address,
   count: number,
+  blockNumber?: bigint,
 ): Promise<{ log: PublisherChange[]; current: Map<Address, boolean> }> {
-  const log = await multi<PublisherChange>(
+  const block = await blockFor(client, blockNumber);
+  const log = await multiRange<PublisherChange>(
     client,
-    Array.from({ length: count }, (_, i) => ({
-      address,
-      abi,
-      functionName: "publisherChangeAt",
-      args: [BigInt(i)],
-    })),
+    count,
+    (i) => ({ address, abi, functionName: "publisherChangeAt", args: [BigInt(i)] }),
+    block,
   );
   const keys = [...new Set(log.map((c) => c.publisher))];
   const flags = await multi<boolean>(
     client,
     keys.map((k) => ({ address, abi, functionName: "isPublisher", args: [k] })),
+    block,
   );
   return { log, current: new Map(keys.map((k, i) => [k, flags[i]!])) };
 }
@@ -329,10 +510,14 @@ export async function readOwnerLog(
   client: PublicClient,
   address: Address,
   count: number,
+  blockNumber?: bigint,
 ): Promise<OwnerRecord[]> {
-  return multi<OwnerRecord>(
+  const block = await blockFor(client, blockNumber);
+  return multiRange<OwnerRecord>(
     client,
-    Array.from({ length: count }, (_, i) => ({ address, abi, functionName: "ownerAt", args: [BigInt(i)] })),
+    count,
+    (i) => ({ address, abi, functionName: "ownerAt", args: [BigInt(i)] }),
+    block,
   );
 }
 
@@ -342,35 +527,33 @@ export interface IndexedVersion extends Version {
 }
 
 /**
- * Every version of every subject, from state. A release's records are the versions whose
- * sequence falls in its range; no read function lists them directly, so the app reads the whole
- * registry. That costs one call per 50 versions of each subject, batched through Multicall3.
+ * Every version of every subject, from state, a page of subjects at a time, in subject order. Memory
+ * holds one page of subject IDs and their versions. Every call reads the same block,
+ * `blockNumber` or the latest block when the first page is read, so a publish during the read
+ * cannot mix two states. A page's versions are in subject order, not sequence order.
  */
-export async function readAllVersions(
+export async function* iterateAllVersions(
   client: PublicClient,
   address: Address,
   subjectCount: number,
-  onProgress?: (done: number, total: number) => void,
-): Promise<IndexedVersion[]> {
-  const ids: Hex[] = [];
-  for (let off = 0; off < subjectCount; off += 500) {
-    const page = (await client.readContract({
+  o: { blockNumber?: bigint | undefined; subjectsPerPage?: number | undefined } = {},
+): AsyncGenerator<IndexedVersion[]> {
+  const block = await blockFor(client, o.blockNumber);
+  const perPage = o.subjectsPerPage ?? 100;
+  for (let off = 0; off < subjectCount; off += perPage) {
+    const chunk = (await client.readContract({
       address,
       abi,
       functionName: "subjects",
-      args: [BigInt(off), 500n],
+      args: [BigInt(off), BigInt(Math.min(perPage, subjectCount - off))],
+      blockNumber: block,
     })) as readonly Hex[];
-    ids.push(...page);
-  }
-  const out: IndexedVersion[] = [];
-  const step = 100;
-  for (let i = 0; i < ids.length; i += step) {
-    const chunk = ids.slice(i, i + step);
     const subjects = await multi<Subject>(
       client,
       chunk.map((id) => ({ address, abi, functionName: "subject", args: [id] })),
+      block,
     );
-    const calls: { address: Address; abi: typeof abi; functionName: string; args: readonly unknown[] }[] = [];
+    const calls: Call[] = [];
     const owners: { id: Hex; recordType: Hex }[] = [];
     chunk.forEach((id, k) => {
       const s = subjects[k]!;
@@ -379,11 +562,39 @@ export async function readAllVersions(
         owners.push({ id, recordType: s.recordType });
       }
     });
-    const pages = await multi<readonly Version[]>(client, calls);
+    const pages = await multi<readonly Version[]>(client, calls, block);
+    const out: IndexedVersion[] = [];
     pages.forEach((page, k) => {
       for (const v of page) out.push({ ...v, subjectId: owners[k]!.id, recordType: owners[k]!.recordType });
     });
-    onProgress?.(Math.min(i + step, ids.length), ids.length);
+    yield out;
+  }
+}
+
+/**
+ * Every version of every subject, from state, sorted by sequence. A release's records are the
+ * versions whose sequence falls in its range; no read function lists them directly, so this reads
+ * the whole registry and holds it in memory. For a registry too large for that, use
+ * `iterateAllVersions`. Pass the block `subjectCount` was read at.
+ */
+export async function readAllVersions(
+  client: PublicClient,
+  address: Address,
+  subjectCount: number,
+  onProgress?: (done: number, total: number) => void,
+  blockNumber?: bigint,
+): Promise<IndexedVersion[]> {
+  const out: IndexedVersion[] = [];
+  const subjectsPerPage = 100;
+  let done = 0;
+  for await (const page of iterateAllVersions(client, address, subjectCount, {
+    blockNumber,
+    subjectsPerPage,
+  })) {
+    out.push(...page);
+    // Each page covers subjectsPerPage subjects, the last one the remainder.
+    done = Math.min(done + subjectsPerPage, subjectCount);
+    onProgress?.(done, subjectCount);
   }
   out.sort((a, b) => a.sequence - b.sequence);
   return out;
@@ -393,11 +604,13 @@ export async function readSchemaDocument(
   client: PublicClient,
   address: Address,
   schemaId: Hex,
+  blockNumber?: bigint,
 ): Promise<Hex> {
   return (await client.readContract({
     address,
     abi,
     functionName: "schemaDocument",
     args: [schemaId],
+    ...at(blockNumber),
   })) as Hex;
 }

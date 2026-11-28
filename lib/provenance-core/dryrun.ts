@@ -1,6 +1,7 @@
-// Copied from 6529-Collections/6529-provenance-app src/dryrun.ts at commit 512b6629470e06981905f3a94cff3f381d181478.
+// Copied from 6529-Collections/6529-provenance-app src/dryrun.ts at commit 906377e17438133e8a61f154edf9c6a5792b9f3f.
 // Do not edit here: change the package and run ops/scripts/sync-provenance-core.mjs.
 // Replaced by @6529-collections/provenance-core from npm once that is published.
+// SPDX-License-Identifier: Apache-2.0
 import type { Address, PublicClient } from "viem";
 import type { Action } from "./actions";
 import type { Measure } from "./pack";
@@ -14,15 +15,20 @@ import { planCalls, simulatePlan, type Actor, type PlannedTx, type TxSimulation 
  * eth_simulateV1 request, and some public endpoints cap a request at 50 million gas in total.
  * Publish calls depend on each other only through their subjects (expectedVersion, record type,
  * the unchanged-record rule), so the prefix keeps every call that is not a publish, and from the
- * publish calls only the records of subjects the candidate touches.
+ * publish calls only the records of subjects the candidate touches. Each prefix transaction keeps
+ * its own boundary, minus the calls it drops: a publisher key sends one call per transaction, so
+ * merging calls would make a plan the key cannot send.
  *
- * One rule depends on every record: sealRelease checks the release's record count. In a compact
- * run the seal's expected count is replaced with the count that run produces; the plan's own
- * count comes from countRecords and is checked again by the in-sequence run when it fits.
+ * One rule depends on every record: sealRelease checks the release's record count (REL-6). In a
+ * compact run the seal's expected count is replaced with the count that run produces: the records
+ * a release already holds on-chain, from `recordsSoFar`, plus the records the run publishes to it.
+ * The plan's own count is checked by sealCountProblems and again by the in-sequence run when it
+ * fits.
  */
 export function compactPrefix(
   prefix: readonly PlannedTx[],
   candidate: PlannedTx,
+  recordsSoFar: ReadonlyMap<number, number> = new Map(),
 ): { prefix: PlannedTx[]; candidate: PlannedTx } {
   const touched = new Set<string>();
   for (const a of candidate.actions) {
@@ -30,12 +36,17 @@ export function compactPrefix(
     if (a.kind === "deleteVersion" || a.kind === "deleteVersions" || a.kind === "deleteSubject")
       touched.add(a.subjectId.toLowerCase());
   }
-  const kept: Action[] = [];
-  const perRelease = new Map<number, number>();
+  const perRelease = new Map<number, number>(recordsSoFar);
+  const fixSeal = (a: Action, extra = 0): Action => {
+    if (a.kind !== "sealRelease") return a;
+    return { ...a, expectedRecordCount: (perRelease.get(a.releaseId) ?? 0) + extra };
+  };
+  const keptTxs: PlannedTx[] = [];
   for (const t of prefix) {
+    const kept: Action[] = [];
     for (const a of t.actions) {
       if (a.kind !== "publish") {
-        kept.push(a);
+        kept.push(fixSeal(a));
         continue;
       }
       const records = a.records.filter((r) => touched.has(r.subjectId.toLowerCase()));
@@ -44,12 +55,8 @@ export function compactPrefix(
         perRelease.set(a.releaseId, (perRelease.get(a.releaseId) ?? 0) + records.length);
       }
     }
+    if (kept.length) keptTxs.push({ actions: kept });
   }
-  const fixSeal = (a: Action, extra = 0): Action => {
-    if (a.kind !== "sealRelease") return a;
-    return { ...a, expectedRecordCount: (perRelease.get(a.releaseId) ?? 0) + extra };
-  };
-  const prefixActions = kept.map((a) => fixSeal(a));
   let candidateCount = 0;
   const actions = candidate.actions.map((a) => {
     if (a.kind === "publish") {
@@ -58,12 +65,12 @@ export function compactPrefix(
     }
     return a.kind === "sealRelease" ? fixSeal(a, candidateCount) : a;
   });
-  return { prefix: prefixActions.length ? [{ actions: prefixActions }] : [], candidate: { actions } };
+  return { prefix: keptTxs, candidate: { actions } };
 }
 
 /**
  * Whether a release opened by this plan is sealed with a count that differs from the records the
- * plan publishes to it. The compact dry run cannot see this, so the app checks it directly.
+ * plan publishes to it. The compact dry run cannot see this, so it is checked here directly.
  */
 export function sealCountProblems(
   plan: readonly PlannedTx[],
@@ -84,16 +91,22 @@ export function sealCountProblems(
   return problems;
 }
 
-/** The planner's measure: the candidate after its compact prefix, at the budget as gas limit. */
+/**
+ * The planner's measure: the candidate after its compact prefix, at the budget as gas limit.
+ * `recordsSoFar` gives the records each existing release already holds, so a simulated seal of a
+ * partly filled release expects the right count.
+ */
 export function chainMeasure(
   client: PublicClient,
   registry: Address,
   actor: Actor,
   gasLimit: bigint,
+  recordsSoFar: ReadonlyMap<number, number> = new Map(),
+  block?: bigint,
 ): Measure {
   return async (prefix, candidate) => {
-    const c = compactPrefix(prefix, candidate);
-    const sim = await simulatePlan(client, registry, actor, [...c.prefix, c.candidate], gasLimit);
+    const c = compactPrefix(prefix, candidate, recordsSoFar);
+    const sim = await simulatePlan(client, registry, actor, [...c.prefix, c.candidate], gasLimit, block);
     const last = sim.txs.at(-1)!;
     const firstFail = sim.txs.find((t) => !t.ok);
     if (firstFail && firstFail !== last) {
@@ -139,7 +152,8 @@ export const ENDPOINT_CAP_HINT = 45_000_000n;
 /**
  * The dry run shown before anything is proposed: every transaction after its compact prefix,
  * then the whole plan in sequence. The per-transaction results decide; the sequence run adds a
- * check of the order and of rules the compact run cannot see.
+ * check of the order and of rules the compact run cannot see. Every run simulates on the same base
+ * block, `block` or the latest block when the dry run starts, and the result reports that block.
  */
 export async function dryRun(
   client: PublicClient,
@@ -149,16 +163,16 @@ export async function dryRun(
   gasLimit: bigint,
   recordsSoFar?: Map<number, number>,
   onProgress?: (message: string) => void,
+  block?: bigint,
 ): Promise<DryRun> {
   const txs: DryRunTx[] = [];
-  let block = 0n;
+  const base = block ?? (await client.getBlockNumber({ cacheTime: 0 }));
   for (let k = 0; k < plan.length; k++) {
     onProgress?.(`Simulating transaction ${k + 1} of ${plan.length}`);
-    const c = compactPrefix(plan.slice(0, k), plan[k]!);
+    const c = compactPrefix(plan.slice(0, k), plan[k]!, recordsSoFar);
     // The approved-hash signature does not cover the nonce, so the compact run's nonces do not
     // change the result; the real ones are filled in below.
-    const sim = await simulatePlan(client, registry, actor, [...c.prefix, c.candidate], gasLimit);
-    block = sim.block;
+    const sim = await simulatePlan(client, registry, actor, [...c.prefix, c.candidate], gasLimit, base);
     const last = sim.txs.at(-1)!;
     const prefixFail = sim.txs.slice(0, -1).find((t) => !t.ok);
     txs.push({
@@ -186,7 +200,7 @@ export async function dryRun(
   if (plan.length > 1) {
     onProgress?.("Simulating the whole plan in sequence");
     try {
-      const sim = await simulatePlan(client, registry, actor, plan, gasLimit);
+      const sim = await simulatePlan(client, registry, actor, plan, gasLimit, base);
       const stop = sim.txs.findIndex((t) => !t.ok);
       const upTo = stop === -1 ? sim.txs : sim.txs.slice(0, stop + 1);
       const cumulativeGas = upTo.reduce((g, t) => g + t.gasUsed, 0n);
@@ -208,5 +222,5 @@ export async function dryRun(
       };
     }
   }
-  return { block, gasLimit, txs, sequence, sealProblems: sealCountProblems(plan, recordsSoFar) };
+  return { block: base, gasLimit, txs, sequence, sealProblems: sealCountProblems(plan, recordsSoFar) };
 }

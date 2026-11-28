@@ -1,6 +1,7 @@
-// Copied from 6529-Collections/6529-provenance-app src/safe.ts at commit 512b6629470e06981905f3a94cff3f381d181478.
+// Copied from 6529-Collections/6529-provenance-app src/safe.ts at commit 906377e17438133e8a61f154edf9c6a5792b9f3f.
 // Do not edit here: change the package and run ops/scripts/sync-provenance-core.mjs.
 // Replaced by @6529-collections/provenance-core from npm once that is published.
+// SPDX-License-Identifier: Apache-2.0
 import {
   concat,
   encodeFunctionData,
@@ -286,8 +287,15 @@ export function proposalUrl(serviceBase: string, safe: Address): string {
 export function decodeMultiSendTransactions(packed: Hex): (Call & { operation: number })[] {
   const out: (Call & { operation: number })[] = [];
   const b = packed.slice(2);
+  if (b.length % 2 !== 0)
+    throw new Error("MultiSend: the packed transactions have an odd number of hex digits");
   let i = 0;
   while (i < b.length) {
+    // Each transaction starts with an 85-byte header: operation, to, value and data length.
+    if (b.length - i < 170)
+      throw new Error(
+        `MultiSend: ${(b.length - i) / 2} bytes left, too few for an 85-byte transaction header`,
+      );
     const operation = Number.parseInt(b.slice(i, i + 2), 16);
     const to = `0x${b.slice(i + 2, i + 42)}` as Address;
     const value = BigInt(`0x${b.slice(i + 42, i + 106)}`);

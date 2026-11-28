@@ -1,6 +1,7 @@
-// Copied from 6529-Collections/6529-provenance-app src/jcs.ts at commit 512b6629470e06981905f3a94cff3f381d181478.
+// Copied from 6529-Collections/6529-provenance-app src/jcs.ts at commit 906377e17438133e8a61f154edf9c6a5792b9f3f.
 // Do not edit here: change the package and run ops/scripts/sync-provenance-core.mjs.
 // Replaced by @6529-collections/provenance-core from npm once that is published.
+// SPDX-License-Identifier: Apache-2.0
 /**
  * RFC 8785 JSON Canonicalization Scheme (JCS).
  *
@@ -9,6 +10,11 @@
  * RFC 8785 specifies; a number literal that a double cannot hold exactly is accepted and rounded,
  * so its canonical form differs from the input, and the canonical-form check then reports the
  * bytes as not canonical.
+ *
+ * Profile payloads are stricter. The 6529 provenance profile allows only integers from
+ * -(2^53 - 1) to 2^53 - 1, written without a fraction or exponent, so every implementation reads
+ * the same value; a larger number, such as a token ID, is a string. `parseProfileJson` checks that
+ * rule on each number's original text, before it becomes a double and could be rounded.
  */
 
 export type JsonValue = null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue };
@@ -25,8 +31,16 @@ export class JcsError extends Error {
 
 const WS = new Set([0x20, 0x09, 0x0a, 0x0d]);
 
+/** The largest integer magnitude the profile allows in a payload: 2^53 - 1. */
+export const PROFILE_MAX_INTEGER = 2n ** 53n - 1n;
+
+export interface ParseOptions {
+  /** Refuse any number that is not an integer within ±PROFILE_MAX_INTEGER, written plainly. */
+  profileNumbers?: boolean | undefined;
+}
+
 /** Parses JSON text under I-JSON rules. Throws JcsError with the character position. */
-export function parseStrictJson(text: string): JsonValue {
+export function parseStrictJson(text: string, options: ParseOptions = {}): JsonValue {
   let i = 0;
 
   const skip = () => {
@@ -103,6 +117,13 @@ export function parseStrictJson(text: string): JsonValue {
   const parseNumber = (): number => {
     const m = /^-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?/.exec(text.slice(i));
     if (!m) throw new JcsError("bad number", i);
+    if (options.profileNumbers) {
+      if (m[2] !== undefined || m[3] !== undefined)
+        throw new JcsError(`profile numbers are integers without a fraction or exponent: ${m[0]}`, i);
+      const big = BigInt(m[0]);
+      if (big > PROFILE_MAX_INTEGER || big < -PROFILE_MAX_INTEGER)
+        throw new JcsError(`${m[0]} is outside -(2^53 - 1) to 2^53 - 1; write it as a string`, i);
+    }
     i += m[0].length;
     const n = Number(m[0]);
     if (!Number.isFinite(n)) throw new JcsError("number out of range", i - m[0].length);
@@ -179,7 +200,7 @@ export function parseStrictJson(text: string): JsonValue {
   return value;
 }
 
-function assertWellFormed(s: string, position: number) {
+function assertWellFormed(s: string, position?: number) {
   for (let k = 0; k < s.length; k++) {
     const c = s.charCodeAt(k);
     if (c >= 0xd800 && c <= 0xdbff) {
@@ -194,7 +215,8 @@ function assertWellFormed(s: string, position: number) {
 
 /**
  * Serializes a value under RFC 8785: members sorted by their UTF-16 code units, no whitespace,
- * strings and numbers as ECMAScript JSON.stringify writes them.
+ * strings and numbers as ECMAScript JSON.stringify writes them. Throws JcsError for a string or
+ * member name with a lone surrogate, which I-JSON forbids and UTF-8 cannot encode.
  */
 export function canonicalizeValue(value: JsonValue): string {
   if (value === null) return "null";
@@ -204,11 +226,15 @@ export function canonicalizeValue(value: JsonValue): string {
     // ECMAScript Number::toString is the number serialization RFC 8785 section 3.2.2.3 requires.
     return JSON.stringify(value);
   }
-  if (typeof value === "string") return JSON.stringify(value);
+  if (typeof value === "string") {
+    assertWellFormed(value);
+    return JSON.stringify(value);
+  }
   if (Array.isArray(value)) return `[${value.map(canonicalizeValue).join(",")}]`;
   // RFC 8785 section 3.2.3 orders keys by UTF-16 code units, which is what < compares; localeCompare
   // would not.
   const keys = Object.keys(value).sort(compareCodeUnits);
+  for (const k of keys) assertWellFormed(k);
   return `{${keys.map((k) => `${JSON.stringify(k)}:${canonicalizeValue(value[k] as JsonValue)}`).join(",")}}`;
 }
 
@@ -225,6 +251,14 @@ export function decodeUtf8Strict(bytes: Uint8Array): string {
   } catch {
     throw new JcsError("the bytes are not valid UTF-8");
   }
+}
+
+/**
+ * Parses JSON text under I-JSON rules and the profile's number rule (`PROFILE_MAX_INTEGER`).
+ * Throws JcsError naming the first number that breaks the rule.
+ */
+export function parseProfileJson(text: string): JsonValue {
+  return parseStrictJson(text, { profileNumbers: true });
 }
 
 /** Parses JSON bytes and returns their RFC 8785 canonical UTF-8 bytes. */

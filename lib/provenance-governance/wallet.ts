@@ -1,7 +1,7 @@
-import type { Address, Hex } from "viem";
+import type { Address, PublicClient } from "viem";
 import type { RegistryPin } from "@/lib/provenance-core/config/registries";
 import {
-  signSafeTx,
+  signCheckedSafeTx,
   type Eip1193Provider,
   type GovernanceSafeTx,
 } from "@/lib/provenance-core/governance";
@@ -64,13 +64,18 @@ export async function ensureChain(
     throw new Error(`The wallet is on chain ${after}, not ${chainId}.`);
 }
 
-/** Switches the wallet to the pin's chain, then asks it for the owner's SafeTx signature. */
+/**
+ * Switches the wallet to the pin's chain, then asks it for the owner's SafeTx signature through
+ * `signCheckedSafeTx`: the checks run again on the SafeTx the wallet signs, at the moment it
+ * signs, and any problem throws `GovernanceCheckError` before the signature request is sent.
+ */
 export async function signWithWallet(
+  client: PublicClient,
   provider: Eip1193Provider,
   signer: Address,
   pin: RegistryPin,
   g: GovernanceSafeTx
-): Promise<Hex> {
+): ReturnType<typeof signCheckedSafeTx> {
   await ensureChain(provider, pin.chainId);
-  return signSafeTx(provider, signer, pin.chainId, pin.safe, g.tx);
+  return signCheckedSafeTx(client, provider, pin, signer, g);
 }

@@ -1,10 +1,16 @@
-// Copied from 6529-Collections/6529-provenance-app src/governance.ts at commit 512b6629470e06981905f3a94cff3f381d181478.
+// Copied from 6529-Collections/6529-provenance-app src/governance.ts at commit 906377e17438133e8a61f154edf9c6a5792b9f3f.
 // Do not edit here: change the package and run ops/scripts/sync-provenance-core.mjs.
 // Replaced by @6529-collections/provenance-core from npm once that is published.
+// SPDX-License-Identifier: Apache-2.0
 import {
+  ContractFunctionExecutionError,
+  ContractFunctionRevertedError,
+  ContractFunctionZeroDataError,
   decodeFunctionData,
+  encodeFunctionData,
   getAddress,
   isAddressEqual,
+  keccak256,
   size,
   zeroAddress,
   type Address,
@@ -13,6 +19,9 @@ import {
 } from "viem";
 import { provenanceRegistryAbi as abi } from "./abi/provenanceRegistry";
 import { decodeAction, describeAction, encodeAction, literalProblem, type Action } from "./actions";
+import { cidProblem } from "./cid";
+import { buildForCodeHash } from "./config/builds";
+import { assertChain } from "./registry";
 import type { RegistryPin } from "./config/registries";
 import {
   decodeMultiSendTransactions,
@@ -61,7 +70,6 @@ const GOVERNANCE_KINDS = new Set<Action["kind"]>([
 export const MAX_TYPED_DATA_CHARS = 16 * 1024;
 export const MAX_BATCH_CALLS = 16;
 export const MIN_BATCH_CALLS = 2;
-const MAX_CID_BYTES = 128;
 const MAX_NONCE = 2n ** 53n - 1n;
 
 const ZERO32 = `0x${"00".repeat(32)}`;
@@ -93,10 +101,7 @@ export function governanceCallProblem(a: Action): string | undefined {
   }
   switch (a.kind) {
     case "registerCanonicalization":
-      return (
-        literalProblem(a.literal) ??
-        (size(a.specCid) > MAX_CID_BYTES ? "The specification CID is over 128 bytes." : undefined)
-      );
+      return literalProblem(a.literal) ?? specCidProblem(a.specCid);
     case "registerRecordType":
       return literalProblem(a.literal);
     case "registerSchema":
@@ -104,7 +109,9 @@ export function governanceCallProblem(a: Action): string | undefined {
       if (a.documentHash.algorithm !== 1 && a.documentHash.algorithm !== 2)
         return "The document hash algorithm is 1 or 2.";
       if (a.documentHash.digest.toLowerCase() === ZERO32) return "The document digest is zero.";
-      if (size(a.cid) > MAX_CID_BYTES) return "The schema CID is over 128 bytes.";
+      // REG-4 needs a CID or a stored document, and a SafeTx never carries the document.
+      if (size(a.cid) === 0) return "A schema registered from a SafeTx needs its CID.";
+      if (cidProblem(a.cid)) return `Schema CID: ${cidProblem(a.cid)}`;
       if (a.document !== "0x")
         return "Register the schema by hash and CID only; its document is not stored on-chain from a SafeTx.";
       return undefined;
@@ -121,11 +128,14 @@ export function governanceCallProblem(a: Action): string | undefined {
       return a.subjectId.toLowerCase() === ZERO32 ? "The subject ID is zero." : undefined;
     case "declareSuccessor":
       return isAddressEqual(a.successor, zeroAddress) ? "The successor is the zero address." : undefined;
-    case "transferOwnership":
-      return isAddressEqual(a.newOwner, zeroAddress) ? "The new owner is the zero address." : undefined;
     default:
       return undefined;
   }
+}
+
+function specCidProblem(cid: Hex): string | undefined {
+  const p = cidProblem(cid);
+  return p ? `Specification CID: ${p}` : undefined;
 }
 
 export interface GovernanceSafeTx {
@@ -146,6 +156,7 @@ export function buildGovernanceSafeTxs(
   actions: readonly Action[],
   nonce: bigint,
 ): GovernanceSafeTx[] {
+  if (nonce < 0n || nonce > MAX_NONCE) throw new Error(`The nonce ${nonce} is outside 0 to 2^53 - 1.`);
   actions.forEach((a, i) => {
     const p = governanceCallProblem(a);
     if (p) throw new Error(`Call ${i + 1} (${a.kind}): ${p}`);
@@ -170,6 +181,8 @@ export function buildGovernanceSafeTxs(
     }
   }
   flush();
+  if (nonce + BigInt(groups.length) - 1n > MAX_NONCE)
+    throw new Error(`${groups.length} SafeTxs from nonce ${nonce} pass the largest nonce, 2^53 - 1.`);
   return groups.map((g, i) => {
     const tx = safeTxFor(
       g.map((a) => ({ to: pin.registry, value: 0n, data: encodeAction(a) })),
@@ -251,6 +264,8 @@ export function decodeGovernanceSafeTx(pin: RegistryPin, tx: SafeTx): DecodedCal
     throw new Error("operation 1 must delegatecall MultiSendCallOnly v1.4.1");
   const { functionName, args } = decodeFunctionData({ abi: multiSendAbi, data: tx.data });
   if (functionName !== "multiSend") throw new Error("data is not multiSend(bytes)");
+  if (encodeFunctionData({ abi: multiSendAbi, functionName, args }).toLowerCase() !== tx.data.toLowerCase())
+    throw new Error("the multiSend calldata is not in canonical ABI encoding");
   const inner = decodeMultiSendTransactions(args[0]);
   if (inner.length < MIN_BATCH_CALLS || inner.length > MAX_BATCH_CALLS) {
     throw new Error(`a batch holds 2 to 16 calls; this one holds ${inner.length}`);
@@ -305,7 +320,11 @@ export interface Eip1193Provider {
   request(args: { method: string; params?: readonly unknown[] | object }): Promise<unknown>;
 }
 
-/** Asks an EIP-1193 wallet (browser, WalletConnect, Desktop forwarding) for the owner's SafeTx signature. */
+/**
+ * Asks an EIP-1193 wallet (browser, WalletConnect, Desktop forwarding) for the owner's SafeTx
+ * signature. It checks nothing: use `signCheckedSafeTx`, which runs `checkBeforeSigning` on the
+ * same SafeTx first, unless the caller has just run those checks itself.
+ */
 export async function signSafeTx(
   provider: Eip1193Provider,
   signer: Address,
@@ -320,6 +339,21 @@ export async function signSafeTx(
 }
 
 export interface GovernanceCheck {
+  /** The chain the client's endpoint answered with. */
+  chainId: number;
+  /** The block every read was made at. */
+  block: bigint;
+  /**
+   * The calls `g.tx` makes, decoded from its calldata, or empty when it does not decode. A signing
+   * screen shows these, never `g.actions`, which the caller supplies and the hash does not cover.
+   */
+  decoded: DecodedCall[];
+  /** The risk of the decoded calls. */
+  risk: GovernanceRisk;
+  /** The registry's runtime code matches a build in `knownBuilds`. */
+  knownBuild: boolean;
+  /** The Safe's VERSION(), or undefined when the call reverted. */
+  safeVersion?: string | undefined;
   ownerIsPinnedSafe: boolean;
   signerIsSafeOwner: boolean;
   safeNonce: bigint;
@@ -328,10 +362,28 @@ export interface GovernanceCheck {
   problems: string[];
 }
 
+/** Whether a Safe VERSION() string such as "1.4.1" is at least 1.3.0. */
+export function safeVersionAtLeast130(version: string | undefined): boolean {
+  const m = /^(\d+)\.(\d+)\.(\d+)/.exec(version ?? "");
+  if (!m) return false;
+  const [major, minor] = [Number(m[1]), Number(m[2])];
+  return major > 1 || (major === 1 && minor >= 3);
+}
+
 /**
  * The checks before a signer signs. Any RPC failure throws: governance is not urgent, so the page
- * blocks instead of signing unchecked. For acceptOwnership the registry's pendingOwner must be the
- * Safe in place of its owner.
+ * blocks instead of signing unchecked. The client must be on the pin's chain, since a Safe and a
+ * registry can sit at the same addresses on two chains; on another chain this throws
+ * ChainMismatchError before reading anything else.
+ *
+ * Everything is decided from `g.tx`, the SafeTx whose hash is signed: its calls are decoded from
+ * its calldata, and whether it accepts ownership, its risk and the calls a screen shows come from
+ * that decoding. `g.actions` and `g.risk` are only compared with it: when they differ, `problems`
+ * says so. For acceptOwnership the registry's pendingOwner must be the Safe in place of its owner.
+ *
+ * `problems` also lists: a SafeTx hash that is not the hash of `g.tx` for the pin, registry code
+ * that matches no known build, and a Safe whose VERSION() is below 1.3.0, the first version whose
+ * EIP-712 domain is {chainId, verifyingContract}, the domain the typed data uses.
  */
 export async function checkBeforeSigning(
   client: PublicClient,
@@ -339,18 +391,51 @@ export async function checkBeforeSigning(
   signer: Address,
   g: GovernanceSafeTx,
 ): Promise<GovernanceCheck> {
-  const accepting = g.actions.some((a) => a.kind === "acceptOwnership");
-  const [owner, pendingOwner, owners, safeNonce] = await Promise.all([
-    client.readContract({ address: pin.registry, abi, functionName: "owner" }),
-    client.readContract({ address: pin.registry, abi, functionName: "pendingOwner" }),
-    client.readContract({ address: pin.safe, abi: safeAbi, functionName: "getOwners" }),
-    client.readContract({ address: pin.safe, abi: safeAbi, functionName: "nonce" }),
+  await assertChain(client, pin.chainId);
+  let decoded: DecodedCall[] = [];
+  try {
+    decoded = decodeGovernanceSafeTx(pin, g.tx);
+  } catch {
+    // checkGovernanceSafeTx below reports why it does not decode.
+  }
+  const accepting = decoded.some((c) => c.action.kind === "acceptOwnership");
+  const risk: GovernanceRisk = decoded.some((c) => c.risk === "high") ? "high" : "normal";
+  const block = await client.getBlockNumber({ cacheTime: 0 });
+  const read = { blockNumber: block } as const;
+  const [owner, pendingOwner, owners, safeNonce, code, safeVersion] = await Promise.all([
+    client.readContract({ address: pin.registry, abi, functionName: "owner", ...read }),
+    client.readContract({ address: pin.registry, abi, functionName: "pendingOwner", ...read }),
+    client.readContract({ address: pin.safe, abi: safeAbi, functionName: "getOwners", ...read }),
+    client.readContract({ address: pin.safe, abi: safeAbi, functionName: "nonce", ...read }),
+    client.getCode({ address: pin.registry, ...read }),
+    client
+      .readContract({ address: pin.safe, abi: safeAbi, functionName: "VERSION", ...read })
+      .catch((e: unknown) => {
+        if (isRevert(e)) return undefined;
+        throw e;
+      }),
   ]);
+  const knownBuild = Boolean(code && code !== "0x" && buildForCodeHash(keccak256(code)));
   const ownerIsPinnedSafe = isAddressEqual(owner as Address, pin.safe);
   const pendingOwnerIsSafe = isAddressEqual(pendingOwner as Address, pin.safe);
   const signerIsSafeOwner = (owners as readonly Address[]).some((o) => isAddressEqual(o, signer));
   const nonce = g.tx.nonce < (safeNonce as bigint) ? "used" : g.tx.nonce === safeNonce ? "current" : "queued";
   const problems: string[] = [...checkGovernanceSafeTx(pin, g.tx)];
+  if (decoded.length) {
+    const said = g.actions.map((a) => encodeAction(a).toLowerCase());
+    const real = decoded.map((c) => encodeAction(c.action).toLowerCase());
+    if (said.length !== real.length || said.some((d, i) => d !== real[i]))
+      problems.push("The calls listed with the SafeTx are not the calls its calldata makes.");
+    if (g.risk !== risk) problems.push(`The SafeTx is marked ${g.risk} risk; its calls are ${risk} risk.`);
+  }
+  const hash = safeTxHash(pin.chainId, pin.safe, g.tx);
+  if (hash.toLowerCase() !== g.hash.toLowerCase())
+    problems.push(`The SafeTx hash ${g.hash} is not the hash of this SafeTx, ${hash}.`);
+  if (!knownBuild) problems.push("The registry's code matches no known ProvenanceRegistry build.");
+  if (!safeVersionAtLeast130(safeVersion))
+    problems.push(
+      `The Safe's version is ${safeVersion ?? "unreadable"}; the typed data needs 1.3.0 or later.`,
+    );
   if (accepting ? !pendingOwnerIsSafe : !ownerIsPinnedSafe) {
     problems.push(
       accepting
@@ -361,6 +446,12 @@ export async function checkBeforeSigning(
   if (!signerIsSafeOwner) problems.push("You are not a signer of this Safe.");
   if (nonce === "used") problems.push(`Nonce ${g.tx.nonce} is already used; the Safe is at ${safeNonce}.`);
   return {
+    chainId: pin.chainId,
+    block,
+    decoded,
+    risk,
+    knownBuild,
+    safeVersion,
     ownerIsPinnedSafe,
     signerIsSafeOwner,
     safeNonce: safeNonce as bigint,
@@ -368,6 +459,40 @@ export async function checkBeforeSigning(
     pendingOwnerIsSafe,
     problems,
   };
+}
+
+/** Thrown by `signCheckedSafeTx` when the checks before signing find a problem. */
+export class GovernanceCheckError extends Error {
+  constructor(readonly check: GovernanceCheck) {
+    super(`Not signing: ${check.problems.join("; ")}`);
+    this.name = "GovernanceCheckError";
+  }
+}
+
+/**
+ * Signs a governance SafeTx only after `checkBeforeSigning` passes for the same pin, signer and
+ * SafeTx, and only the SafeTx that was checked: the typed data comes from `g.tx` and the pin, the
+ * same values the checks read. A nonce already used, or any other problem, throws
+ * GovernanceCheckError with the full check, and nothing reaches the wallet.
+ */
+export async function signCheckedSafeTx(
+  client: PublicClient,
+  provider: Eip1193Provider,
+  pin: RegistryPin,
+  signer: Address,
+  g: GovernanceSafeTx,
+): Promise<{ signature: Hex; check: GovernanceCheck }> {
+  const check = await checkBeforeSigning(client, pin, signer, g);
+  if (check.problems.length) throw new GovernanceCheckError(check);
+  const signature = await signSafeTx(provider, signer, pin.chainId, pin.safe, g.tx);
+  return { signature, check };
+}
+
+function isRevert(e: unknown): boolean {
+  return (
+    e instanceof ContractFunctionExecutionError &&
+    (e.cause instanceof ContractFunctionRevertedError || e.cause instanceof ContractFunctionZeroDataError)
+  );
 }
 
 export interface ProposeInput {
@@ -385,6 +510,9 @@ export interface ProposeInput {
 /** Posts a signed governance SafeTx to the Safe Transaction Service, where the other signers find it. */
 export async function proposeToTxService(p: ProposeInput): Promise<void> {
   const problems = checkGovernanceSafeTx(p.pin, p.g.tx);
+  const hash = safeTxHash(p.pin.chainId, p.pin.safe, p.g.tx);
+  if (hash.toLowerCase() !== p.g.hash.toLowerCase())
+    problems.push(`the hash ${p.g.hash} is not the SafeTx's hash, ${hash}`);
   if (problems.length) throw new Error(`Not a valid governance SafeTx: ${problems.join("; ")}`);
   const f = p.fetchImpl ?? fetch;
   const res = await f(proposalUrl(p.serviceUrl, p.pin.safe), {
@@ -393,9 +521,7 @@ export async function proposeToTxService(p: ProposeInput): Promise<void> {
       "content-type": "application/json",
       ...(p.apiKey ? { authorization: `Bearer ${p.apiKey}` } : {}),
     },
-    body: JSON.stringify(
-      proposalBody(p.g.tx, p.g.hash, p.sender, p.signature, p.origin ?? "6529 Provenance"),
-    ),
+    body: JSON.stringify(proposalBody(p.g.tx, hash, p.sender, p.signature, p.origin ?? "6529 Provenance")),
   });
   if (!res.ok)
     throw new Error(

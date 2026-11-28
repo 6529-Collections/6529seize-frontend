@@ -1,6 +1,7 @@
-// Copied from 6529-Collections/6529-provenance-app src/simulate.ts at commit 512b6629470e06981905f3a94cff3f381d181478.
+// Copied from 6529-Collections/6529-provenance-app src/simulate.ts at commit 906377e17438133e8a61f154edf9c6a5792b9f3f.
 // Do not edit here: change the package and run ops/scripts/sync-provenance-core.mjs.
 // Replaced by @6529-collections/provenance-core from npm once that is published.
+// SPDX-License-Identifier: Apache-2.0
 import {
   decodeErrorResult,
   hexToBigInt,
@@ -13,6 +14,7 @@ import {
   type PublicClient,
 } from "viem";
 import { provenanceRegistryAbi as abi } from "./abi/provenanceRegistry";
+import { rc2EventsAbi, rc3EventsAbi } from "./abi/legacy";
 import { describeAction, encodeAction, toCall, type Action } from "./actions";
 import {
   approvedHashSignatures,
@@ -106,7 +108,10 @@ export async function simulateSequence(
   stateOverrides?: Record<Address, { stateDiff?: Record<Hex, Hex>; code?: Hex }>,
   blockTag: bigint | "latest" = "latest",
 ): Promise<{ block: bigint; results: SimResult[] }> {
-  const block = blockTag === "latest" ? await withRetry(() => client.getBlockNumber()) : blockTag;
+  // viem caches the block number for the client's polling interval; a plan made right after a
+  // send must simulate on the block that holds it.
+  const block =
+    blockTag === "latest" ? await withRetry(() => client.getBlockNumber({ cacheTime: 0 })) : blockTag;
   const blockStateCalls = calls.map((c, i) => ({
     ...(i === 0 && stateOverrides ? { stateOverrides } : {}),
     calls: [{ from: c.from, to: c.to, data: c.data, ...(c.gas ? { gas: numberToHex(c.gas) } : {}) }],
@@ -162,7 +167,8 @@ const SAFE_ERRORS: Record<string, string> = {
 };
 
 function decodeEvents(logs: Log[]) {
-  const reg = parseEventLogs({ abi, logs, strict: false });
+  // The rc.1 and rc.2 events have their own topics, so one parse names the events of every build.
+  const reg = parseEventLogs({ abi: [...abi, ...rc2EventsAbi, ...rc3EventsAbi], logs, strict: false });
   const safe = parseEventLogs({ abi: safeAbi, logs, strict: false });
   return [...reg, ...safe].map((e) => ({
     name: e.eventName as string,
@@ -220,9 +226,10 @@ export async function simulatePlan(
   actor: Actor,
   plan: readonly PlannedTx[],
   gasLimit?: bigint,
+  blockNumber?: bigint,
 ): Promise<PlanSimulation> {
   const { calls, safeTxs, overrides } = planCalls(registry, actor, plan, gasLimit);
-  const { block, results } = await simulateSequence(client, calls, overrides);
+  const { block, results } = await simulateSequence(client, calls, overrides, blockNumber ?? "latest");
   const txs: TxSimulation[] = results.map((r, i) => ({
     index: i,
     ok: r.ok,
