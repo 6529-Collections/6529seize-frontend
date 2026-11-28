@@ -41,6 +41,8 @@ export class StreamTxError extends Error {
 /** The contract error name a failed call carries; "rejected", "chain" or "failed" otherwise. */
 export function errorNameOf(error: unknown): string {
   if (error instanceof StreamTxError) return error.errorName;
+  // Named errors a create step throws before sending anything (CreateRunError).
+  if (error instanceof Error && "errorName" in error && typeof error.errorName === "string") return error.errorName;
   if (error instanceof BaseError) {
     if (error.walk((cause) => cause instanceof UserRejectedRequestError)) return "rejected";
     if (error.name === "ChainMismatchError" || error.walk((cause) => (cause as Error).name === "ChainMismatchError")) {
@@ -51,8 +53,10 @@ export function errorNameOf(error: unknown): string {
       return reverted.data?.errorName ?? reverted.reason ?? "failed";
     }
     if (/user rejected|user denied/i.test(error.message)) return "rejected";
+    return "failed";
   }
-  return "failed";
+  // A plain error (a read or a check failed) means nothing reached the chain.
+  return "notSent";
 }
 
 type WriteContract = (parameters: never) => Promise<Hex>;

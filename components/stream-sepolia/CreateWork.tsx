@@ -25,7 +25,18 @@ import { LISTING_ACTIVE } from "@/lib/stream/independent";
 import { getStreamInstance } from "@/lib/stream/instances";
 import { sameAddress } from "@/lib/stream/state";
 
-import { FIELD_LABEL, HINT, LINK, parseCap, RunHeader, useStoredFiles, type Draft } from "./createShared";
+import {
+  draftReady,
+  FIELD_LABEL,
+  FilesFailed,
+  HINT,
+  LINK,
+  parseCap,
+  parseRoyalty,
+  RunHeader,
+  useStoredFiles,
+  type Draft,
+} from "./createShared";
 import { CollectionField, CuratedRun, type CreatedWork } from "./CuratedRun";
 import { formatCount, shortAddress } from "./format";
 import { CARD } from "./OneOfOnePanel";
@@ -155,13 +166,6 @@ function MediaPicker({
   );
 }
 
-function parseRoyalty(value: string): number | null {
-  const number = Number(value.replace(",", "."));
-  if (!Number.isFinite(number) || number < 0 || number > 25) return null;
-  return Math.round(number * 1000);
-}
-
-
 function reviewLine(draft: Draft, locale: SupportedLocale): string {
   if (!draft.editions) return t(locale, "streamSepolia.create.reviewOne");
   const cap = parseCap(draft.cap) ?? 0;
@@ -177,18 +181,21 @@ function IndependentRun(props: {
   readonly draft: Draft;
   readonly onDone: (work: CreatedWork) => void;
 }) {
-  const files = useStoredFiles(props.draft, props.viewer);
+  const { files, failed, retry } = useStoredFiles(props.draft, props.viewer);
+  if (failed) return <FilesFailed onRetry={retry} />;
   if (!files) return <StreamLoading />;
   return <IndependentSteps {...props} files={files} />;
 }
 
 function IndependentSteps({
+  viewer,
   token,
   editionsToken,
   draft,
   files,
   onDone,
 }: {
+  readonly viewer: Address;
   readonly token: Address;
   readonly editionsToken: Address | null;
   readonly draft: Draft;
@@ -198,6 +205,7 @@ function IndependentSteps({
   const locale = useBrowserLocale();
   // One run's state, created once and filled step by step so "Continue" resumes after a failure.
   const [context] = useState<IndependentWorkContext>(() => ({
+    artist: viewer,
     token,
     editionsToken: draft.editions ? editionsToken : null,
     media: files.media,
@@ -262,7 +270,7 @@ function IndependentSteps({
   });
   return (
     <>
-      <RunHeader media={files.media} record={files.record} />
+      <RunHeader files={files} curated={false} newCollection={false} editions={draft.editions && !!editionsToken} />
       <StepRunner
         steps={steps}
         context={context}
@@ -287,22 +295,20 @@ function EditionsField({
   readonly onChange: (patch: Partial<Draft>) => void;
 }) {
   const locale = useBrowserLocale();
-  const update = onChange;
-  const editionsAvailable = available;
   return (
-      <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-p-3">
+    <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-p-3">
       <label className="tw-flex tw-items-start tw-gap-3 tw-text-sm tw-text-iron-100">
         <input
           type="checkbox"
           className="tw-mt-1 tw-accent-primary-500"
           checked={draft.editions}
-          disabled={!editionsAvailable}
-          onChange={(event) => update({ editions: event.target.checked })}
+          disabled={!available}
+          onChange={(event) => onChange({ editions: event.target.checked })}
         />
         <span>
           <span className="tw-block tw-font-semibold">{t(locale, "streamSepolia.create.editions")}</span>
           <span className="tw-block tw-text-xs tw-text-iron-400">
-            {editionsAvailable ? t(locale, "streamSepolia.create.editionsHelp") : t(locale, "streamSepolia.create.editionsNeedContract")}
+            {available ? t(locale, "streamSepolia.create.editionsHelp") : t(locale, "streamSepolia.create.editionsNeedContract")}
           </span>
         </span>
       </label>
@@ -315,9 +321,12 @@ function EditionsField({
             inputMode="numeric"
             value={draft.cap}
             aria-invalid={!capValid}
-            onChange={(event) => update({ cap: event.target.value })}
+            aria-describedby="stream-create-cap-hint"
+            onChange={(event) => onChange({ cap: event.target.value })}
           />
-          <p className={HINT}>{t(locale, "streamSepolia.create.capHelp")}</p>
+          <p id="stream-create-cap-hint" className={capValid ? HINT : `${HINT} tw-text-red`}>
+            {t(locale, capValid ? "streamSepolia.create.capHelp" : "streamSepolia.create.capInvalid")}
+          </p>
         </div>
       ) : null}
     </div>
@@ -334,13 +343,6 @@ function listedContracts(contracts: readonly IndependentContract[]) {
       )
     : undefined;
   return { oneOfOne, editions };
-}
-
-function draftReady(draft: Draft, curated: boolean, hasContract: boolean): boolean {
-  const capValid = !draft.editions || parseCap(draft.cap) !== null;
-  const base = !!draft.media && draft.title.trim().length > 0 && capValid;
-  if (curated) return base && (draft.collection !== "new" || draft.newCollectionName.trim().length > 0);
-  return base && parseRoyalty(draft.royalty) !== null && hasContract;
 }
 
 function CreateBody({ viewer }: { readonly viewer: Address }) {
@@ -367,7 +369,7 @@ function CreateBody({ viewer }: { readonly viewer: Address }) {
   const { oneOfOne, editions } = listedContracts(collections.data ?? []);
   if (done) {
     return (
-      <section className={CARD}>
+      <section className={CARD} role="status">
         <p className="tw-m-0 tw-text-lg tw-font-semibold tw-text-emerald-400">{t(locale, "streamSepolia.create.done")}</p>
         <Link href={`${STREAM_BASE}/work/${done.token}/${done.tokenId.toString()}`} className={`${LINK} tw-mt-2 tw-inline-block tw-text-sm tw-font-semibold`}>
           {t(locale, "streamSepolia.create.viewWork")}
@@ -381,7 +383,8 @@ function CreateBody({ viewer }: { readonly viewer: Address }) {
   const ready = draftReady(draft, curated, !!oneOfOne);
   const editionsAvailable = curated || !!editions;
   const update = (patch: Partial<Draft>) => setDraft((current) => ({ ...current, ...patch }));
-  if (reviewing && (curated || oneOfOne)) {
+  const independentContract = curated ? undefined : oneOfOne;
+  if (reviewing && (curated || independentContract)) {
     return (
       <section className={CARD} aria-labelledby="stream-create-review">
         <h2 id="stream-create-review" className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50">
@@ -389,10 +392,16 @@ function CreateBody({ viewer }: { readonly viewer: Address }) {
         </h2>
         <p className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-400">{reviewLine(draft, locale)}</p>
         <div className="tw-mt-4">
-          {curated || !oneOfOne ? (
-            <CuratedRun viewer={viewer} draft={draft} onDone={setDone} />
+          {independentContract ? (
+            <IndependentRun
+              viewer={viewer}
+              token={independentContract.token}
+              editionsToken={editions?.token ?? null}
+              draft={draft}
+              onDone={setDone}
+            />
           ) : (
-            <IndependentRun viewer={viewer} token={oneOfOne.token} editionsToken={editions?.token ?? null} draft={draft} onDone={setDone} />
+            <CuratedRun viewer={viewer} draft={draft} onDone={setDone} />
           )}
         </div>
       </section>

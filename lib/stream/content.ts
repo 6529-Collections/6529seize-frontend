@@ -79,15 +79,39 @@ const IMAGE_ATTEMPTS: readonly { size: number; quality: number }[] = [
 
 /** Approximate Sepolia gas for one stored byte, measured on the r8 uploads. */
 const GAS_PER_STORED_BYTE = 1_650n;
-/** Approximate gas of the fixed steps: record, approval, start, edition sale, record publish. */
-const FIXED_CREATE_GAS = 6_000_000n;
+/** Each stored file adds a manifest registration. */
+const GAS_PER_FILE = 600_000n;
+
+/**
+ * Approximate Sepolia gas of the steps after the files, per run. Independent:
+ * approval, start, record publish (measured on r8). Curated: package
+ * registration 284k, first acceptance 842k, SaleStarter.start 2.76M (r9
+ * receipts in 6529-works open-gate.md), a new collection 482k.
+ */
+const STEP_GAS = {
+  independent: 4_500_000n,
+  curated: 284_000n + 842_000n + 2_762_000n + 300_000n,
+  newCollection: 482_000n,
+  editionSale: 1_500_000n,
+} as const;
+/** The Independent run also stores a small start file (about 1.5 KB) so anyone can start the sale. */
+const START_FILE_BYTES = 1_500;
 
 /** A rough total of the gas a create run uses, for the fee shown before it starts. */
-export function estimateCreateGas(mediaBytes: number, recordSize: number): bigint {
-  // The start file is about 1.5 KB; each file adds a manifest registration (~600k gas).
-  const stored = BigInt(mediaBytes + recordSize + 1_500);
-  const files = BigInt(Math.ceil(mediaBytes / CHUNK_SIZE) + 2);
-  return stored * GAS_PER_STORED_BYTE + files * 600_000n + FIXED_CREATE_GAS;
+export function estimateCreateGas(args: {
+  readonly mediaBytes: number;
+  readonly recordBytes: number;
+  readonly curated: boolean;
+  readonly newCollection: boolean;
+  readonly editions: boolean;
+}): bigint {
+  const startFile = args.curated ? 0 : START_FILE_BYTES;
+  const stored = BigInt(args.mediaBytes + args.recordBytes + startFile);
+  const files = BigInt(Math.ceil(args.mediaBytes / CHUNK_SIZE) + (args.curated ? 1 : 2));
+  let steps = args.curated ? STEP_GAS.curated : STEP_GAS.independent;
+  if (args.curated && args.newCollection) steps += STEP_GAS.newCollection;
+  if (args.editions) steps += STEP_GAS.editionSale;
+  return stored * GAS_PER_STORED_BYTE + files * GAS_PER_FILE + steps;
 }
 
 /**

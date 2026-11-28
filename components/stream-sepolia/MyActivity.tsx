@@ -12,7 +12,7 @@ import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/stream-sepolia";
 import { getStreamInstance } from "@/lib/stream/instances";
 import { CURRENCY_ETH, ZERO_HASH } from "@/lib/stream/item";
-import { readMyActivity, soloPayees, type MyEditionBid, type MyOneOfOneBid } from "@/lib/stream/activity";
+import { readMyActivity, type MyEditionBid, type MyOneOfOneBid } from "@/lib/stream/activity";
 import type { SaleSummary } from "@/lib/stream/reads";
 import { AUCTION_STATE, isZeroAddress } from "@/lib/stream/state";
 import { streamTx } from "@/lib/stream/streamTx";
@@ -206,7 +206,7 @@ function ActivityBody({ viewer }: { readonly viewer: Address }) {
                 address: getStreamInstance().addresses.splitLedger,
                 abi: splitLedgerAbi,
                 functionName: "release",
-                args: [soloPayees(viewer), ZERO_HASH, CURRENCY_ETH, 0n],
+                args: [proceeds.payees, ZERO_HASH, CURRENCY_ETH, 0n],
               })
             }
           />

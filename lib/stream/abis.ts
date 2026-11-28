@@ -2,8 +2,10 @@
  * The contract ABIs the pages call, from the current instance (r9). Each
  * instance has its own generated folder (`generated/<instance>/`, written by
  * scripts/stream/sync-stream-abis.cjs). Older instances are read with these
- * ABIs too: every function the pages call on r8 kept its signature in r9,
- * which only added functions.
+ * ABIs too: r9 only added functions, and every function the pages call on r8
+ * kept its signature. The one r9 addition the pages call,
+ * EnglishAuction.sendRescuedToMuseum, is gated by the instance's
+ * `rescuedToMuseum` flag.
  */
 export { accountsAbi } from "./generated/r9/Accounts";
 export { contentStoreAbi } from "./generated/r9/ContentStore";

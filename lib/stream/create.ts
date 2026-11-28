@@ -5,6 +5,8 @@ import {
   ContractFunctionRevertedError,
   parseEventLogs, type Address, type Hex, type TransactionReceipt } from "viem";
 
+import { chainDeadline } from "./chainTime";
+import { assertRunWallet } from "./createErrors";
 import { getStreamClient } from "./client";
 import { ENCODING_IDENTITY, toStoredFile, type StoredFile } from "./content";
 import {
@@ -38,6 +40,8 @@ export interface CreateIo {
 }
 
 export interface IndependentWorkContext {
+  /** The wallet the run was started with. Every step refuses another account. */
+  readonly artist: Address;
   readonly token: Address;
   readonly editionsToken: Address | null;
   readonly media: StoredFile;
@@ -141,6 +145,7 @@ async function prepareIndependentItem(context: IndependentWorkContext, artist: A
 }
 
 export async function approveIndependentItem(context: IndependentWorkContext, io: CreateIo): Promise<boolean> {
+  assertRunWallet(context.artist, io.account);
   if (!context.item) await prepareIndependentItem(context, io.account);
   const registry = getStreamInstance().addresses.independentRegistry;
   const itemHash = itemHashOf(context.item!);
@@ -166,6 +171,7 @@ export async function approveIndependentItem(context: IndependentWorkContext, io
  * the sale already started or the file is already stored.
  */
 export async function storeStartFile(context: IndependentWorkContext, io: CreateIo): Promise<boolean> {
+  assertRunWallet(context.artist, io.account);
   if (!context.item || !context.mediaList) await prepareIndependentItem(context, io.account);
   const minted = await getStreamClient().readContract({
     address: context.token,
@@ -187,6 +193,7 @@ export function tokenIdFromStart(receipt: TransactionReceipt, token: Address): b
 }
 
 export async function startIndependentSale(context: IndependentWorkContext, io: CreateIo): Promise<boolean> {
+  assertRunWallet(context.artist, io.account);
   if (!context.item || !context.mediaList) await prepareIndependentItem(context, io.account);
   const client = getStreamClient();
   const minted = await client.readContract({
@@ -228,6 +235,7 @@ async function ensureStarted(context: IndependentWorkContext, artist: Address) {
 }
 
 export async function openIndependentEdition(context: IndependentWorkContext, io: CreateIo): Promise<boolean> {
+  assertRunWallet(context.artist, io.account);
   if (!context.editionsToken) return false;
   const { item, tokenId } = await ensureStarted(context, io.account);
   const address = getStreamInstance().addresses.independentEditionAuction;
@@ -244,6 +252,7 @@ export async function openIndependentEdition(context: IndependentWorkContext, io
 
 /** Opens the work's on-chain record and marks its media complete, so wallets show the art. */
 export async function openWorkRecord(context: IndependentWorkContext, io: CreateIo): Promise<boolean> {
+  assertRunWallet(context.artist, io.account);
   const { item, mediaList, tokenId } = await ensureStarted(context, io.account);
   const facts = getStreamInstance().addresses.workFacts;
   const client = getStreamClient();
@@ -324,7 +333,7 @@ export async function listIndependent(args: {
   });
   if (listing.status !== 0) return false;
   const account = args.io.account;
-  const deadline = BigInt(Math.floor(Date.now() / 1000) + 86_400);
+  const deadline = await chainDeadline(86_400);
   const artistId = await client.readContract({
     address: instance.addresses.accounts,
     abi: accountsAbi,

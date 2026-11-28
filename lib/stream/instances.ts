@@ -17,11 +17,14 @@ interface StreamInstance {
   /** The first block to scan for this instance's events. */
   readonly startBlock: bigint;
   /**
-   * Whether any wallet can create a curated 6529 Stream work. r9 has a test
-   * gate (SepoliaOpenGate) that approves any package and creates collections;
-   * on r8 curation approval needs keys the website does not hold.
+   * Whether the instance has the test gate (SepoliaOpenGate) that lets any
+   * wallet create curated works. Whether the gate is open right now is read
+   * from the chain before a run (curatedPreflight); on r8 curation approval
+   * needs keys the website does not hold.
    */
   readonly curatedCreationOpen: boolean;
+  /** EnglishAuction.sendRescuedToMuseum exists (added in r9). */
+  readonly rescuedToMuseum: boolean;
   readonly addresses: {
     readonly accounts: Address;
     readonly contentStore: Address;
@@ -55,6 +58,7 @@ const STREAM_INSTANCES: Record<StreamInstanceName, StreamInstance> = {
     record: r9.record,
     startBlock: r9.startBlock,
     curatedCreationOpen: true,
+    rescuedToMuseum: true,
     addresses: r9.addresses,
   },
   r8: {
@@ -62,6 +66,7 @@ const STREAM_INSTANCES: Record<StreamInstanceName, StreamInstance> = {
     record: r8.record,
     startBlock: r8.startBlock,
     curatedCreationOpen: false,
+    rescuedToMuseum: false,
     addresses: r8.addresses,
   },
 };
@@ -72,12 +77,12 @@ export const OLDER_STREAM_INSTANCES: readonly StreamInstanceName[] = ["r8"];
 
 const STORAGE_KEY = "stream-sepolia-instance";
 
-function isInstanceName(value: unknown): value is StreamInstanceName {
+export function isInstanceName(value: unknown): value is StreamInstanceName {
   return value === "r9" || value === "r8";
 }
 
 /** The visitor's choice, kept per browser; anything unreadable means the default. */
-function chosenInstance(): StreamInstanceName {
+export function chosenInstance(): StreamInstanceName {
   if (typeof window === "undefined") return DEFAULT_STREAM_INSTANCE;
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY);

@@ -288,7 +288,7 @@ function Actions({
     );
   }
   // A rescued work the auction still holds can only leave for the museum; anyone may send it.
-  if (detail.closedHow === "rescued" && sameAddress(owner, address)) {
+  if (getStreamInstance().rescuedToMuseum && detail.closedHow === "rescued" && sameAddress(owner, address)) {
     actions.push(
       <TxAction
         key="museum"

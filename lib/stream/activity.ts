@@ -9,6 +9,7 @@ import {
 } from "./abis";
 import { getAbiItem, type Address } from "viem";
 
+import { artistIdFor } from "./accounts";
 import { getStreamClient } from "./client";
 import { getStreamInstance } from "./instances";
 import { CURRENCY_ETH, ZERO_HASH } from "./item";
@@ -26,14 +27,11 @@ import { isZeroAddress, sameAddress, ZERO_ADDRESS } from "./state";
 
 const WORK_MINTED = getAbiItem({ abi: streamAbi, name: "WorkMinted" });
 
-/** Curated 6529 Stream works whose lead artist is this wallet (its artist ID is its address). */
-async function readMyCuratedTokenIds(viewer: Address): Promise<Set<bigint>> {
-  const logs = await scanLogs({ address: getStreamInstance().addresses.stream, event: WORK_MINTED });
-  const artistId = BigInt(viewer);
-  return new Set(logs.filter((log) => log.args.artistId === artistId).map((log) => log.args.tokenId));
+/** Curated 6529 Stream works whose lead artist is this artist ID. */
+async function readMyCuratedTokenIds(artistId: bigint): Promise<Set<bigint>> {
+  const logs = await scanLogs({ address: getStreamInstance().addresses.stream, event: WORK_MINTED, args: { artistId } });
+  return new Set(logs.map((log) => log.args.tokenId));
 }
-
-/** A wallet's own Stream activity: its collections, bids, works and proceeds. */
 
 const DEPLOYED = getAbiItem({ abi: independentDeployerAbi, name: "Deployed" });
 
@@ -114,6 +112,8 @@ export interface MyEditionBid {
 interface MyProceeds {
   readonly available: bigint;
   readonly takenOut: bigint;
+  /** The payee list the release call names (the artist's solo vault). */
+  readonly payees: ReturnType<typeof soloPayees>;
 }
 
 interface MyActivity {
@@ -126,8 +126,9 @@ interface MyActivity {
 }
 
 /** The artist's single-payee seller vault, as the create page sets it up. */
-export function soloPayees(artist: Address) {
-  return [{ artistId: BigInt(artist), account: ZERO_ADDRESS, share: 100_000 }] as const;
+/** The payee list of a solo work: everything to the artist's account (its artist ID). */
+export function soloPayees(artistId: bigint) {
+  return [{ artistId, account: ZERO_ADDRESS, share: 100_000 }] as const;
 }
 
 async function readEditionBids(viewer: Address): Promise<MyEditionBid[]> {
@@ -190,6 +191,7 @@ async function readEditionBids(viewer: Address): Promise<MyEditionBid[]> {
   return bids;
 }
 
+/** A wallet's own Stream activity: its bids, works and proceeds. */
 export async function readMyActivity(viewer: Address): Promise<MyActivity> {
   const instance = getStreamInstance();
   const client = getStreamClient();
@@ -221,7 +223,7 @@ export async function readMyActivity(viewer: Address): Promise<MyActivity> {
       },
     ];
   });
-  const [oneOfOneCredit, editionBids, collections, curatedTokenIds] = await Promise.all([
+  const [oneOfOneCredit, editionBids, collections, curatedWorks] = await Promise.all([
     client.readContract({
       address: instance.addresses.englishAuction,
       abi: englishAuctionAbi,
@@ -230,18 +232,18 @@ export async function readMyActivity(viewer: Address): Promise<MyActivity> {
     }),
     readEditionBids(viewer),
     readMyCollections(viewer),
-    readMyCuratedTokenIds(viewer),
+    artistIdFor(viewer).then(async (artistId) => ({ artistId, tokens: await readMyCuratedTokenIds(artistId) })),
   ]);
 
   const myTokens = collections.filter((c) => !c.editions).map((c) => c.token);
   const works = sales.filter(
     (sale) =>
       myTokens.some((token) => sameAddress(token, sale.token)) ||
-      (sale.curated && curatedTokenIds.has(sale.tokenId))
+      (sale.curated && curatedWorks.tokens.has(sale.tokenId))
   );
   let proceeds: MyProceeds | null = null;
   if (works.length > 0) {
-    const payees = soloPayees(viewer);
+    const payees = soloPayees(curatedWorks.artistId);
     const vault = await client.readContract({
       address: instance.addresses.splitLedger,
       abi: splitLedgerAbi,
@@ -266,7 +268,7 @@ export async function readMyActivity(viewer: Address): Promise<MyActivity> {
         })
         .catch(() => 0n),
     ]);
-    proceeds = { available, takenOut };
+    proceeds = { available, takenOut, payees };
   }
   return { oneOfOneBids, oneOfOneCredit, editionBids, works, proceeds };
 }

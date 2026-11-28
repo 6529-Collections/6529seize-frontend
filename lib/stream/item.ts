@@ -40,8 +40,13 @@ export type PackageItem = AbiParameterToPrimitiveType<typeof ITEM_PARAM>;
 export type MediaFile = AbiParameterToPrimitiveType<typeof MEDIA_PARAM>[number];
 
 interface WorkDraft {
-  /** The artist (lead party). Its artist ID is its address as a number. */
+  /** The artist (lead party). */
   readonly artist: Address;
+  /**
+   * The artist's ID in Accounts. Defaults to the address as a number, which is
+   * the ID a new account gets; an account whose root was replaced keeps its old ID.
+   */
+  readonly artistId?: bigint | undefined;
   readonly collectionId: bigint;
   /** SHA-256 of the primary media file. */
   readonly contentHash: Hex;
@@ -81,7 +86,7 @@ export function buildItem(draft: WorkDraft): PackageItem {
     parties: [{ account: draft.artist, role: PARTY_ROLE.ARTIST }],
     payees: [
       {
-        artistId: BigInt(draft.artist),
+        artistId: draft.artistId ?? BigInt(draft.artist),
         account: CURRENCY_ETH,
         share: RATE_DENOMINATOR,
       },
@@ -99,6 +104,11 @@ export function buildItem(draft: WorkDraft): PackageItem {
         }
       : { maxCount: 0, currency: CURRENCY_ETH, saleKind: ZERO_HASH, params: "0x" },
   };
+}
+
+/** `WorksHashing.leaf`: a one-item package's root is the leaf of its only item. */
+export function oneItemPackageRoot(itemHash: Hex): Hex {
+  return keccak256(itemHash);
 }
 
 /** `WorksHashing.itemHash`. */
