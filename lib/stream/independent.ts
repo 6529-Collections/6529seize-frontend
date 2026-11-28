@@ -99,7 +99,7 @@ export function randomSalt(): Hex {
 
 function accountsDomain() {
   return {
-    name: "6529 Works Artist Registry",
+    name: getStreamInstance().naming.artistRegistryDomain,
     version: "1",
     chainId: STREAM_CHAIN.id,
     verifyingContract: getStreamInstance().addresses.accounts,

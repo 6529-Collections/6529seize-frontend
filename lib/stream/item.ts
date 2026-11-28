@@ -1,4 +1,5 @@
 import { englishAuctionAbi, saleStarterAbi, workFactsAbi } from "./abis";
+import { getStreamInstance } from "./instances";
 import {
   decodeAbiParameters,
   decodeFunctionData,
@@ -12,8 +13,13 @@ import {
 
 
 /** The contracts' constants, as WorksHashing / SaleKind / EconomicsTypes define them. */
-const PACKAGE_ITEM_DOMAIN = keccak256(toBytes("6529WORKS_PACKAGE_ITEM_V1"));
-const MEDIA_DOMAIN = keccak256(toBytes("6529WORKS_MEDIA_V1"));
+/** The instance's hash prefixes (they differ between contract versions; see instances.ts). */
+function packageItemDomain(): Hex {
+  return keccak256(toBytes(getStreamInstance().naming.packageItemPrefix));
+}
+function mediaDomain(): Hex {
+  return keccak256(toBytes(getStreamInstance().naming.mediaPrefix));
+}
 const SALE_KIND_ENGLISH = keccak256(toBytes("ENGLISH_AUCTION"));
 const SALE_KIND_UNIFORM = keccak256(toBytes("UNIFORM_AUCTION"));
 export const CURRENCY_ETH: Address = "0x0000000000000000000000000000000000000000";
@@ -70,7 +76,7 @@ export function mediaListOf(draft: WorkDraft): MediaFile[] {
 
 export function mediaHashOf(media: readonly MediaFile[]): Hex {
   return keccak256(
-    encodeAbiParameters([{ type: "bytes32" }, MEDIA_PARAM], [MEDIA_DOMAIN, media])
+    encodeAbiParameters([{ type: "bytes32" }, MEDIA_PARAM], [mediaDomain(), media])
   );
 }
 
@@ -114,7 +120,7 @@ export function oneItemPackageRoot(itemHash: Hex): Hex {
 /** `WorksHashing.itemHash`. */
 export function itemHashOf(item: PackageItem): Hex {
   return keccak256(
-    encodeAbiParameters([{ type: "bytes32" }, ITEM_PARAM], [PACKAGE_ITEM_DOMAIN, item])
+    encodeAbiParameters([{ type: "bytes32" }, ITEM_PARAM], [packageItemDomain(), item])
   );
 }
 

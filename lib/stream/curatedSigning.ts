@@ -1,10 +1,11 @@
 import type { Address, Hex } from "viem";
 
 import { STREAM_CHAIN } from "./client";
+import { getStreamInstance } from "./instances";
 
 /**
  * The two EIP-712 messages an artist signs on the curated 6529 Stream path, in
- * the PackageRegistry's domain ("6529 Works Package Registry", version 1). The
+ * the PackageRegistry's domain (its name per instance in instances.ts, version 1). The
  * types are copied from 6529-works `src/interfaces/types/Typehashes.sol`;
  * `PackageRegistry.acceptanceDigest` and `moveDigest` answer the digest the
  * contract expects, and the create flow checks against them before asking the
@@ -12,7 +13,7 @@ import { STREAM_CHAIN } from "./client";
  */
 function packageRegistryDomain(packageRegistry: Address) {
   return {
-    name: "6529 Works Package Registry",
+    name: getStreamInstance().naming.packageRegistryDomain,
     version: "1",
     chainId: STREAM_CHAIN.id,
     verifyingContract: packageRegistry,

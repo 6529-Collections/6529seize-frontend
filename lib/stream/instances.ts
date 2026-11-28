@@ -25,6 +25,12 @@ interface StreamInstance {
   readonly curatedCreationOpen: boolean;
   /** EnglishAuction.sendRescuedToMuseum exists (added in r9). */
   readonly rescuedToMuseum: boolean;
+  /**
+   * The names the instance's contracts sign and hash under. They change between
+   * code versions (r10 renames "6529 Works" to "6529 Stream"), so they are set
+   * per instance here and nowhere else.
+   */
+  readonly naming: StreamNaming;
   readonly addresses: {
     readonly accounts: Address;
     readonly contentStore: Address;
@@ -50,6 +56,25 @@ interface StreamInstance {
   };
 }
 
+interface StreamNaming {
+  /** EIP-712 domain name of PackageRegistry (acceptance and move signatures). */
+  readonly packageRegistryDomain: string;
+  /** EIP-712 domain name of Accounts (artist registration and consents). */
+  readonly artistRegistryDomain: string;
+  /** Prefix hashed into every package item hash (WorksHashing / StreamHashing). */
+  readonly packageItemPrefix: string;
+  /** Prefix hashed into every media-list hash. */
+  readonly mediaPrefix: string;
+}
+
+/** The names r8 and r9 were deployed with (6529-stream before the rename). */
+const WORKS_NAMING: StreamNaming = {
+  packageRegistryDomain: "6529 Works Package Registry",
+  artistRegistryDomain: "6529 Works Artist Registry",
+  packageItemPrefix: "6529WORKS_PACKAGE_ITEM_V1",
+  mediaPrefix: "6529WORKS_MEDIA_V1",
+};
+
 type StreamInstanceName = "r9" | "r8";
 
 const STREAM_INSTANCES: Record<StreamInstanceName, StreamInstance> = {
@@ -59,6 +84,7 @@ const STREAM_INSTANCES: Record<StreamInstanceName, StreamInstance> = {
     startBlock: r9.startBlock,
     curatedCreationOpen: true,
     rescuedToMuseum: true,
+    naming: WORKS_NAMING,
     addresses: r9.addresses,
   },
   r8: {
@@ -67,6 +93,7 @@ const STREAM_INSTANCES: Record<StreamInstanceName, StreamInstance> = {
     startBlock: r8.startBlock,
     curatedCreationOpen: false,
     rescuedToMuseum: false,
+    naming: WORKS_NAMING,
     addresses: r8.addresses,
   },
 };
