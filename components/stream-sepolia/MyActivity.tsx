@@ -138,6 +138,7 @@ function ActivityBody({ viewer }: { readonly viewer: Address }) {
           <p className="tw-m-0 tw-mb-3 tw-mt-1 tw-text-sm tw-text-iron-400">{t(locale, "streamSepolia.me.payoutsHelp")}</p>
           <TxAction
             label={t(locale, "streamSepolia.me.release")}
+            doneText={t(locale, "streamSepolia.refund.done", { amount: formatEth(payout.releasable, locale) })}
             disabled={payout.releasable === 0n}
             request={() => ({
               address: getStreamInstance().addresses.splitLedger,
