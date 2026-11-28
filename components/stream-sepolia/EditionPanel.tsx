@@ -316,7 +316,7 @@ function BidComposer({ detail }: { readonly detail: EditionDetail }) {
   const priceText = typedPrice ?? formatEth(prices[step] ?? 0n, "en-US").replace(/,/g, "");
   const [quantity, setQuantity] = useState(1);
   const quote = useQuery({
-    queryKey: [QueryKey.STREAM_SEPOLIA, "quote", detail.saleId.toString(), step, quantity],
+    queryKey: [QueryKey.STREAM_SEPOLIA, "quote", detail.saleId.toString(), detail.sale.bidCount, step, quantity],
     queryFn: () => quoteEditionBid(detail.auctionAddress, detail.saleId, step, quantity),
     enabled: quantity > 0,
   });
@@ -528,7 +528,7 @@ function YourBids({
 function RaiseAction({ detail, bid }: { readonly detail: EditionDetail; readonly bid: EditionBidRow }) {
   const locale = useBrowserLocale();
   const target = useQuery({
-    queryKey: [QueryKey.STREAM_SEPOLIA, "raise", detail.saleId.toString(), bid.bidId.toString(), bid.step],
+    queryKey: [QueryKey.STREAM_SEPOLIA, "raise", detail.saleId.toString(), detail.sale.bidCount, bid.bidId.toString(), bid.step],
     queryFn: () =>
       getStreamClient().readContract({
         address: detail.auctionAddress,
