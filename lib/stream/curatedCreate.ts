@@ -500,7 +500,7 @@ export async function openCuratedEdition(context: CuratedWorkContext, io: Create
   return true;
 }
 
-async function readFacts(tokenId: bigint) {
+function readFacts(tokenId: bigint) {
   const instance = getStreamInstance();
   return getStreamClient().readContract({
     address: instance.addresses.workFacts,

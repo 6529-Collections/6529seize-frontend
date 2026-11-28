@@ -8,7 +8,7 @@ import { AUCTION_STATE, isZeroAddress } from "./state";
  */
 
 /** Names operators gave flow and probe runs ("r1 flows #3", "Copy Test"). */
-const TEST_NAME = /^r\d+\b|\b(?:test|tests|flow|flows|probe|smoke)\b/i;
+const TEST_NAME = /(?:^r\d+\b)|(?:\b(?:test|tests|flow|flows|probe|smoke)\b)/i;
 
 /** A work kept out of the main grids: no art, or a name from an operator's test run. */
 export function isTestWork(work: { readonly name: string | null; readonly hasArt: boolean }): boolean {

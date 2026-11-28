@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
 
 import DotLoader from "@/components/dotLoader/DotLoader";
@@ -31,6 +32,8 @@ const SLOW_MS = 20_000;
 export function StreamLoading({ onRetry }: { readonly onRetry?: (() => void) | undefined }) {
   const locale = useBrowserLocale();
   const hydrated = useHydrated();
+  // Reloads this page; works without the page's JavaScript.
+  const here = usePathname();
   const [slow, setSlow] = useState(false);
   useEffect(() => {
     const timer = setTimeout(() => setSlow(true), SLOW_MS);
@@ -59,7 +62,7 @@ export function StreamLoading({ onRetry }: { readonly onRetry?: (() => void) | u
       <span>{t(locale, "streamSepolia.loading")}</span>
       {hydrated ? null : (
         // A plain link: it works without the page's JavaScript.
-        <a href="" className={`${styles["reloadHint"] ?? ""} tw-text-primary-300 tw-underline tw-underline-offset-4`}>
+        <a href={here} className={`${styles["reloadHint"] ?? ""} tw-text-primary-300 tw-underline tw-underline-offset-4`}>
           {t(locale, "streamSepolia.reloadHint")}
         </a>
       )}
