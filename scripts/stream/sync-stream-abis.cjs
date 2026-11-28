@@ -4,12 +4,14 @@
  * use into typed `as const` modules under lib/stream/generated/.
  *
  * Usage: node scripts/stream/sync-stream-abis.cjs <path-to-6529-works-checkout> [instance=r8]
- *          [--record deployments/11155111/<record>.json] [--gate 0x...]
+ *          [--record deployments/11155111/<record>.json] [--gate 0x...] [--addresses-only]
  *
  * With --record it also writes the instance's addresses (addresses.ts) from the
  * deployment record, so no address is copied by hand. --gate adds the address of
  * a SepoliaOpenGate (a test-instance contract that is not in the record); its
  * ABI then comes from the checkout's build output (out/SepoliaOpenGate.sol/).
+ * --addresses-only writes addresses.ts alone: an older instance is read with the
+ * current instance's ABIs (later instances only add functions).
  *
  * The ABIs are taken from the contracts repository's exported `abi/` folder
  * (the edition auctions from `abi/full/`, which merges their lens views), so
@@ -139,12 +141,14 @@ function main() {
   const record = optionValue(args, "--record");
   const gate = optionValue(args, "--gate");
   if (gate && !ADDRESS.test(gate)) throw new Error(`--gate ${gate} is not an address`);
+  const addressesOnly = args.includes("--addresses-only");
+  if (addressesOnly && !record) throw new Error("--addresses-only needs --record");
   const contracts = gate
     ? [...CONTRACTS, ["SepoliaOpenGate", "out/SepoliaOpenGate.sol/SepoliaOpenGate.json", "openGateAbi"]]
     : CONTRACTS;
   const outDir = path.join(__dirname, "..", "..", "lib", "stream", "generated", instance);
   fs.mkdirSync(outDir, { recursive: true });
-  for (const [name, file, exportName] of contracts) {
+  for (const [name, file, exportName] of addressesOnly ? [] : contracts) {
     const raw = JSON.parse(fs.readFileSync(path.join(source, file), "utf8"));
     const abi = stripInternalTypes(Array.isArray(raw) ? raw : raw.abi);
     const fileName = `${name}.ts`;
@@ -155,7 +159,8 @@ function main() {
     fs.writeFileSync(path.join(outDir, fileName), body);
   }
   if (record) writeAddresses({ source, record, gate, outDir, commit });
-  console.log(`wrote ${contracts.length} ABIs${record ? " and addresses" : ""} from ${commit} to ${outDir}`);
+  const abiCount = addressesOnly ? 0 : contracts.length;
+  console.log(`wrote ${abiCount} ABIs${record ? " and addresses" : ""} from ${commit} to ${outDir}`);
 }
 
 main();
