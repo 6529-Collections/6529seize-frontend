@@ -11,6 +11,7 @@ import { artistAddress } from "@/lib/stream/reads";
 import { AUCTION_STATE, sameAddress } from "@/lib/stream/state";
 
 import { EditionPanel, OpenEdition } from "./EditionPanel";
+import { PublishRecord } from "./PublishRecord";
 import { StreamIdentity } from "./StreamIdentity";
 import { OneOfOnePanel } from "./OneOfOnePanel";
 import { useEdition, useOneOfOne, useWorkMeta } from "./useStreamData";
@@ -105,6 +106,7 @@ function WorkBody({ token, tokenId }: { readonly token: Address; readonly tokenI
             />
           ) : null}
           <OneOfOnePanel detail={oneOfOne.data} independent={!curated} owner={meta.data.owner} />
+          <PublishRecord token={token} tokenId={tokenId} firstStartTx={oneOfOne.data.firstStartTx} curated={curated} />
         </div>
       </div>
       {showEditions && edition.data ? (
