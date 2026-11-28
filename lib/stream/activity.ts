@@ -24,6 +24,15 @@ import {
 } from "./reads";
 import { isZeroAddress, sameAddress, ZERO_ADDRESS } from "./state";
 
+const WORK_MINTED = getAbiItem({ abi: streamAbi, name: "WorkMinted" });
+
+/** Curated 6529 Stream works whose lead artist is this wallet (its artist ID is its address). */
+async function readMyCuratedTokenIds(viewer: Address): Promise<Set<bigint>> {
+  const logs = await scanLogs({ address: getStreamInstance().addresses.stream, event: WORK_MINTED });
+  const artistId = BigInt(viewer);
+  return new Set(logs.filter((log) => log.args.artistId === artistId).map((log) => log.args.tokenId));
+}
+
 /** A wallet's own Stream activity: its collections, bids, works and proceeds. */
 
 const DEPLOYED = getAbiItem({ abi: independentDeployerAbi, name: "Deployed" });
@@ -212,7 +221,7 @@ export async function readMyActivity(viewer: Address): Promise<MyActivity> {
       },
     ];
   });
-  const [oneOfOneCredit, editionBids, collections] = await Promise.all([
+  const [oneOfOneCredit, editionBids, collections, curatedTokenIds] = await Promise.all([
     client.readContract({
       address: instance.addresses.englishAuction,
       abi: englishAuctionAbi,
@@ -221,10 +230,15 @@ export async function readMyActivity(viewer: Address): Promise<MyActivity> {
     }),
     readEditionBids(viewer),
     readMyCollections(viewer),
+    readMyCuratedTokenIds(viewer),
   ]);
 
   const myTokens = collections.filter((c) => !c.editions).map((c) => c.token);
-  const works = sales.filter((sale) => myTokens.some((token) => sameAddress(token, sale.token)));
+  const works = sales.filter(
+    (sale) =>
+      myTokens.some((token) => sameAddress(token, sale.token)) ||
+      (sale.curated && curatedTokenIds.has(sale.tokenId))
+  );
   let proceeds: MyProceeds | null = null;
   if (works.length > 0) {
     const payees = soloPayees(viewer);
