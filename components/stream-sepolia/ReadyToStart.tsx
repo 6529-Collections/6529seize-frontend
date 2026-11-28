@@ -30,7 +30,7 @@ function StartCard({ start }: { readonly start: PendingStart }) {
           // eslint-disable-next-line @next/next/no-img-element
           <img src={preview.data.image} alt={title} className="tw-h-full tw-w-full tw-object-contain" />
         ) : (
-          <span className="tw-text-xs tw-text-iron-600">{t(locale, "streamSepolia.art.none")}</span>
+          <span aria-hidden="true" className="tw-p-6 tw-text-center tw-text-sm tw-font-semibold tw-text-iron-600">{title}</span>
         )}
       </div>
       <div>

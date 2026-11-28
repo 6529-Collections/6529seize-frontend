@@ -37,9 +37,17 @@ function WorkBody({ token, tokenId }: { readonly token: Address; readonly tokenI
   const edition = useEdition(token, tokenId);
 
   if (meta.isLoading || oneOfOne.isLoading) {
-    return <StreamLoading />;
+    return (
+      <StreamLoading
+        onRetry={() => {
+          void meta.refetch();
+          void oneOfOne.refetch();
+        }}
+      />
+    );
   }
-  if (meta.isError || oneOfOne.isError || !meta.data || !oneOfOne.data) {
+  // A failed refresh keeps showing the last good data.
+  if (!meta.data || !oneOfOne.data) {
     return (
       <p role="alert" className="tw-text-sm tw-text-red">
         {t(locale, "streamSepolia.work.notFound")}

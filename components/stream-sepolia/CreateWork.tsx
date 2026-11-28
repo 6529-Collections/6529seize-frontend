@@ -344,7 +344,7 @@ function CreateBody({ viewer }: { readonly viewer: Address }) {
   const [reviewing, setReviewing] = useState(false);
   const [done, setDone] = useState<IndependentWorkContext | null>(null);
   if (collections.isLoading) {
-    return <StreamLoading />;
+    return <StreamLoading onRetry={() => void collections.refetch()} />;
   }
   const contracts = collections.data ?? [];
   const oneOfOne = contracts.find((contract) => !contract.editions && contract.status === LISTING_ACTIVE);

@@ -145,7 +145,7 @@ function ActivityBody({ viewer }: { readonly viewer: Address }) {
     refetchInterval: 30_000,
   });
   if (activity.isLoading) {
-    return <StreamLoading />;
+    return <StreamLoading onRetry={() => void activity.refetch()} />;
   }
   if (!activity.data) {
     return <p role="alert" className="tw-text-sm tw-text-red">{t(locale, "streamSepolia.loadError")}</p>;

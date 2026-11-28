@@ -180,7 +180,7 @@ function CollectionBody({ viewer }: { readonly viewer: Address }) {
   const collections = useMyCollections(viewer);
   const sales = useSales();
   if (collections.isLoading) {
-    return <StreamLoading />;
+    return <StreamLoading onRetry={() => void collections.refetch()} />;
   }
   const contracts = collections.data ?? [];
   const mineTokens = contracts.filter((contract) => !contract.editions).map((contract) => contract.token);

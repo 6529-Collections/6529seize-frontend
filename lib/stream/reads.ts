@@ -39,7 +39,11 @@ interface LogCacheEntry {
   to: bigint;
   logs: Log[];
   pending: Promise<Log[]> | null;
+  pendingSince: number;
 }
+
+/** A scan older than this is abandoned and started again (a hung request must not stall the page). */
+const STUCK_SCAN_MS = 45_000;
 
 const logCache = new Map<string, LogCacheEntry>();
 
@@ -52,11 +56,16 @@ async function contractLogs(address: Address): Promise<Log[]> {
   const key = address.toLowerCase();
   let entry = logCache.get(key);
   if (!entry) {
-    entry = { to: getStreamInstance().startBlock - 1n, logs: [], pending: null };
+    entry = { to: getStreamInstance().startBlock - 1n, logs: [], pending: null, pendingSince: 0 };
     logCache.set(key, entry);
   }
   const current = entry;
-  current.pending ??= (async () => {
+  if (current.pending && Date.now() - current.pendingSince > STUCK_SCAN_MS) current.pending = null;
+  if (current.pending) return current.pending;
+  current.pendingSince = Date.now();
+  // Assigned before the first await inside, so the checks below see this scan.
+  let scan: Promise<Log[]> | null = null;
+  scan = (async () => {
     try {
       const client = getStreamLogClient();
       const latest = await client.getBlockNumber();
@@ -64,15 +73,18 @@ async function contractLogs(address: Address): Promise<Log[]> {
         const windowEnd = start + LOG_WINDOW - 1n;
         const end = windowEnd > latest ? latest : windowEnd;
         const logs = await client.getLogs({ address, fromBlock: start, toBlock: end });
+        // An abandoned scan that finishes late must not add its window twice.
+        if (current.pending !== scan || start !== current.to + 1n) break;
         current.logs.push(...(logs as Log[]));
         current.to = end;
       }
       return current.logs;
     } finally {
-      current.pending = null;
+      if (current.pending === scan) current.pending = null;
     }
   })();
-  return current.pending;
+  current.pending = scan;
+  return scan;
 }
 
 /** One event's logs from a contract, optionally filtered by indexed arguments. */

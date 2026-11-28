@@ -26,7 +26,8 @@ export function useSales() {
   return useQuery({
     queryKey: [...KEY, "sales"],
     queryFn: listSales,
-    refetchInterval: LIVE_REFRESH_MS,
+    // The list only needs to follow the chain loosely; work pages poll by the block.
+    refetchInterval: 30_000,
   });
 }
 

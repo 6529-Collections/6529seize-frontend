@@ -178,9 +178,10 @@ export function StreamHome() {
   const now = useNow();
   const sales = useSales();
   if (sales.isLoading) {
-    return <StreamLoading />;
+    return <StreamLoading onRetry={() => void sales.refetch()} />;
   }
-  if (sales.isError || !sales.data) {
+  // A failed refresh keeps showing the last good list.
+  if (!sales.data) {
     return (
       <p role="alert" className="tw-text-sm tw-text-red">
         {t(locale, "streamSepolia.loadError")}
@@ -191,13 +192,14 @@ export function StreamHome() {
   const independent = sales.data.filter((sale) => !sale.curated);
   return (
     <div>
-      <ProductSection title={t(locale, "streamSepolia.product.stream")} sales={curated} now={now} />
+      {/* Independent first while curated works on this instance are test tokens without art. */}
       <ProductSection
         title={t(locale, "streamSepolia.product.independent")}
         sales={independent}
         now={now}
         extra={<ReadyToStart />}
       />
+      <ProductSection title={t(locale, "streamSepolia.product.stream")} sales={curated} now={now} />
     </div>
   );
 }

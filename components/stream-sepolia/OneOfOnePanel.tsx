@@ -91,7 +91,7 @@ function StatusLine({ view, detail }: { readonly view: OneOfOneView; readonly de
   const locale = useBrowserLocale();
   const end = formatClock(detail.auction.endTime, locale);
   const window = Math.round(detail.extensionWindow / 60);
-  let text: string;
+  let text: string | null;
   switch (view.screen) {
     case "live":
       text = t(locale, "streamSepolia.one.status.live", { end, minutes: window });
@@ -106,7 +106,8 @@ function StatusLine({ view, detail }: { readonly view: OneOfOneView; readonly de
       text = t(locale, "streamSepolia.one.status.ended");
       break;
     case "sold":
-      text = t(locale, "streamSepolia.one.status.sold");
+      // The headline already says "Sold for"; the owner line follows.
+      text = null;
       break;
     case "unsold_museum":
       text = t(locale, "streamSepolia.one.status.museum");
@@ -136,9 +137,11 @@ function StatusLine({ view, detail }: { readonly view: OneOfOneView; readonly de
     // say only what the chain proves.
     text = t(locale, "streamSepolia.one.status.delisted");
   }
+  const shown = view.halted && view.screen.startsWith("unsold_") ? t(locale, "streamSepolia.one.status.halted") : text;
+  if (!shown) return null;
   return (
     <p className={`tw-m-0 tw-text-sm ${view.screen === "closing" ? "tw-text-amber-300" : "tw-text-iron-300"}`}>
-      {view.halted && view.screen.startsWith("unsold_") ? t(locale, "streamSepolia.one.status.halted") : text}
+      {shown}
     </p>
   );
 }

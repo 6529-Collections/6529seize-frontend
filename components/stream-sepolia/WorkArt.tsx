@@ -54,11 +54,21 @@ export function WorkArt({
       </div>
     );
   }
+  if (!large) {
+    // A card without on-chain art: a quiet tile with the title, nothing to read as an error.
+    const loading = art.isLoading || art.fetchStatus === "fetching";
+    return (
+      <div
+        aria-hidden="true"
+        className="tw-flex tw-aspect-square tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-bg-iron-950 tw-p-6 tw-text-center tw-text-sm tw-font-semibold tw-text-iron-600"
+      >
+        {loading ? null : title}
+      </div>
+    );
+  }
   return (
     <div
-      className={`tw-flex tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-dashed tw-border-white/[0.07] tw-text-xs tw-text-iron-600 ${
-        large ? "tw-aspect-[4/3]" : "tw-aspect-square"
-      }`}
+      className="tw-flex tw-aspect-[4/3] tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-dashed tw-border-white/[0.07] tw-text-xs tw-text-iron-600"
     >
       {art.isLoading || art.fetchStatus === "fetching"
         ? t(locale, "streamSepolia.art.loading")
