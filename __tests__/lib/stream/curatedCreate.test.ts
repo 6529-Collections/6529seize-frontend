@@ -28,7 +28,6 @@ function preparedContext(): CuratedWorkContext {
     media: {} as never,
     record: {} as never,
     collectionId: 1n,
-    newCollectionName: "",
     editionCap: null,
     item: {} as never,
     mediaList: [],

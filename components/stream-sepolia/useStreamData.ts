@@ -6,7 +6,6 @@ import type { Address, Hex } from "viem";
 
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { getStreamClient } from "@/lib/stream/client";
-import { englishAuctionAbi } from "@/lib/stream/abis";
 import { getStreamInstance } from "@/lib/stream/instances";
 import {
   listSales,
@@ -17,6 +16,7 @@ import {
   readWorkMeta,
 } from "@/lib/stream/reads";
 import { readMyCollections } from "@/lib/stream/activity";
+import { readSaleTerms } from "@/lib/stream/saleTerms";
 import { findStartableItems, readStartPreview, type PendingStart } from "@/lib/stream/startFile";
 
 // Read once on the client: switching instance reloads the page.
@@ -150,18 +150,11 @@ export function useMyCollections(viewer: Address | undefined) {
   });
 }
 
-/** How long every 1/1 sale on this instance runs, in seconds (the auction's own config). */
-export function useSaleDuration() {
+/** The 1/1 auction's terms on this instance (length, extension, bid step, opening bid), read live. */
+export function useSaleTerms() {
   return useQuery({
-    queryKey: [...KEY, "saleDuration"],
-    queryFn: async () => {
-      const config = await getStreamClient().readContract({
-        address: getStreamInstance().addresses.englishAuction,
-        abi: englishAuctionAbi,
-        functionName: "config",
-      });
-      return Number(config.duration);
-    },
+    queryKey: [...KEY, "saleTerms"],
+    queryFn: readSaleTerms,
     staleTime: 10 * 60_000,
   });
 }

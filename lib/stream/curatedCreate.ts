@@ -1,7 +1,6 @@
 import {
   BaseError,
   ContractFunctionRevertedError,
-  getAbiItem,
   hashTypedData,
   keccak256,
   parseEventLogs,
@@ -39,7 +38,7 @@ import {
   type MediaFile,
   type PackageItem,
 } from "./item";
-import { editionSaleExists, saleIdOf, scanLogs } from "./reads";
+import { editionSaleExists, saleIdOf } from "./reads";
 import { sameAddress } from "./state";
 import { streamTx } from "./streamTx";
 
@@ -56,9 +55,8 @@ export interface CuratedWorkContext {
   readonly artist: Address;
   readonly media: StoredFile;
   readonly record: StoredFile;
-  /** An existing collection, or null to create one named `newCollectionName`. */
+  /** The instance's shared test collection, or null until it is created (once, by the first run). */
   collectionId: bigint | null;
-  readonly newCollectionName: string;
   /** Edition cap (0 = none), or null for a 1/1 only. */
   readonly editionCap: number | null;
   /** The artist's ID in Accounts, read from the chain (an address's own number only for a new account). */
@@ -77,8 +75,6 @@ const SIGNATURE_LIFETIME_S = 3_600;
 /** Move nonces are read 32 at a time (one multicall) from 0 up to this bound. */
 const MOVE_NONCE_BATCH = 32n;
 const MAX_MOVE_NONCE = 1_024n;
-/** Collection names are shown at most this long (the page's own input limit). */
-const COLLECTION_NAME_MAX = 64;
 
 function gate(): Address {
   const address = getStreamInstance().addresses.openGate;
@@ -102,41 +98,26 @@ async function ensureArtistId(context: CuratedWorkContext): Promise<bigint> {
   return context.artistId;
 }
 
-/** Control characters (C0, DEL, C1) and bidi marks, overrides and isolates make a list unreadable or misleading. */
-function isHiddenCharacter(code: number): boolean {
-  return (
-    code <= 0x1f ||
-    (code >= 0x7f && code <= 0x9f) ||
-    code === 0x200e ||
-    code === 0x200f ||
-    (code >= 0x202a && code <= 0x202e) ||
-    (code >= 0x2066 && code <= 0x2069)
-  );
-}
+/**
+ * Every curated work on a test instance goes into one shared collection
+ * (collections are a network matter, not the artist's). It is found by this
+ * name, and created through the gate only by the first run on an instance.
+ */
+const SHARED_COLLECTION_NAME = "6529 Stream test works";
 
-/** Display form of a collection name from the chain: no control or bidi characters, at most 64 characters. */
-function displayCollectionName(name: string): string {
-  const cleaned = Array.from(name)
-    .filter((character) => !isHiddenCharacter(character.codePointAt(0) ?? 0))
-    .join("")
-    .trim();
-  return cleaned.length > COLLECTION_NAME_MAX ? `${cleaned.slice(0, COLLECTION_NAME_MAX - 1)}…` : cleaned;
-}
-
-/** The newest collections shown in the picker; older ones are still valid on chain. */
-const COLLECTIONS_SHOWN = 100n;
-
-/** Collections on the current instance, newest first, at most 100. Collections have no owner: any work may name any. */
-export async function readCollections(): Promise<{ id: bigint; name: string }[]> {
+/** The shared test collection's ID, or null if nobody has created it yet. Reads the chain, so a reload or lost receipt finds it. */
+async function findSharedCollection(): Promise<bigint | null> {
   const client = getStreamClient();
   const stream = getStreamInstance().addresses.stream;
   const count = await client.readContract({ address: stream, abi: streamAbi, functionName: "collectionCount" });
   const ids: bigint[] = [];
-  for (let id = count; id >= 1n && BigInt(ids.length) < COLLECTIONS_SHOWN; id--) ids.push(id);
+  for (let id = count; id >= 1n; id--) ids.push(id);
   const collections = await Promise.all(
     ids.map((id) => client.readContract({ address: stream, abi: streamAbi, functionName: "collectionOf", args: [id] }))
   );
-  return ids.map((id, index) => ({ id, name: displayCollectionName(collections[index]!.name) }));
+  // IDs are newest first; the oldest match wins if two were ever created at the same moment.
+  const matches = ids.filter((_id, at) => collections[at]!.name === SHARED_COLLECTION_NAME);
+  return matches.at(-1) ?? null;
 }
 
 /**
@@ -145,7 +126,10 @@ export async function readCollections(): Promise<{ id: bigint; name: string }[]>
  * work on this instance (a content hash mints once). An image already minted
  * passes only when the same artist minted it, so a resumed run can finish.
  */
-export async function curatedPreflight(args: { readonly media: StoredFile; readonly account: Address }): Promise<void> {
+export async function curatedPreflight(args: {
+  readonly media: StoredFile;
+  readonly account: Address;
+}): Promise<{ sharedCollectionId: bigint | null }> {
   const client = getStreamClient();
   const instance = getStreamInstance();
   const probeRoot = keccak256(toBytes(`6529 stream page gate check ${args.account}`));
@@ -184,28 +168,23 @@ export async function curatedPreflight(args: { readonly media: StoredFile; reado
     functionName: "tokenOfContent",
     args: [args.media.sha256],
   });
-  if (minted === 0n) return;
+  const sharedCollectionId = await findSharedCollection();
+  if (minted === 0n) return { sharedCollectionId };
   const work = await client.readContract({ address: instance.addresses.stream, abi: streamAbi, functionName: "workOf", args: [minted] });
   if (work.artistId !== (await artistIdFor(args.account))) {
     throw new CreateRunError("contentMinted", "this image is already a work on this instance");
   }
+  return { sharedCollectionId };
 }
 
-const COLLECTION_OPENED = getAbiItem({ abi: openGateAbi, name: "CollectionOpened" });
-
-/**
- * Creates the collection through the gate, unless the artist picked an
- * existing one. A collection this wallet already created through the gate with
- * the same name is reused, so a lost receipt or a reload never makes a second.
- */
+/** Uses the shared test collection, creating it through the gate only if nobody has yet. */
 export async function ensureCollection(context: CuratedWorkContext, io: CreateIo): Promise<boolean> {
   assertArtist(context, io.account);
   if (context.collectionId !== null) return false;
-  const name = context.newCollectionName.trim();
-  const mine = await scanLogs({ address: gate(), event: COLLECTION_OPENED, args: { creator: io.account } });
-  const earlier = mine.filter((log) => log.args.name === name).at(-1);
-  if (earlier) {
-    context.collectionId = earlier.args.collectionId;
+  // Read the chain again: another run (or this one, before a lost receipt or a reload) may have made it.
+  const existing = await findSharedCollection();
+  if (existing !== null) {
+    context.collectionId = existing;
     return false;
   }
   const receipt = await io.send(
@@ -215,7 +194,7 @@ export async function ensureCollection(context: CuratedWorkContext, io: CreateIo
       functionName: "createCollection",
       // The gate records this as the hash of a metadata document; the test pages have none,
       // so it is the name's hash (not read on chain).
-      args: [name, keccak256(toBytes(name))],
+      args: [SHARED_COLLECTION_NAME, keccak256(toBytes(SHARED_COLLECTION_NAME))],
     })
   );
   const stream = getStreamInstance().addresses.stream;

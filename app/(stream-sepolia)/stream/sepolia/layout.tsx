@@ -26,9 +26,10 @@ export default function StreamSepoliaLayout({ children }: { readonly children: R
       >
         {t(DEFAULT_LOCALE, "streamSepolia.notice")}
       </div>
-      <div className="tw-mx-auto tw-max-w-6xl tw-px-4 sm:tw-px-6 lg:tw-px-8">
-        <div className="tw-flex tw-flex-col tw-gap-4 tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.07] tw-pt-6 sm:tw-flex-row sm:tw-items-end sm:tw-justify-between">
-          <p className="tw-m-0 tw-pb-3 tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-400 sm:tw-pb-2.5">
+      <div className="tw-mx-auto tw-max-w-7xl tw-px-4 sm:tw-px-6 lg:tw-px-8">
+        {/* The nav has its own full-width row, so it never competes with the eyebrow for space. */}
+        <div className="tw-flex tw-flex-col tw-gap-3 tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.07] tw-pt-6">
+          <p className="tw-m-0 tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-400">
             {t(DEFAULT_LOCALE, "streamSepolia.eyebrow")}
           </p>
           <StreamNav />

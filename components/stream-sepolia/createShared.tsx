@@ -13,8 +13,7 @@ import { estimateCreateGas, recordBytes, toStoredFile, type StoredFile } from "@
 
 import type { Draft } from "@/lib/stream/createDraft";
 
-import { formatDuration, formatEth, shortAddress } from "./format";
-import { useSaleDuration } from "./useStreamData";
+import { formatEth, shortAddress } from "./format";
 
 export const FIELD_LABEL = "tw-mb-1.5 tw-block tw-text-sm tw-font-semibold tw-text-iron-200";
 export const HINT = "tw-m-0 tw-mt-1.5 tw-text-xs tw-text-iron-500";
@@ -91,20 +90,24 @@ export function FilesFailed({ onRetry }: { readonly onRetry: () => void }) {
 /** Below this the estimate rounds to nothing useful: say "less than" instead. */
 const TINY_FEE = 10_000_000_000_000n;
 
-/** The sale length and the estimated network fee of this run's steps, shown before the first one. */
+/**
+ * Said before the first confirmation: how many wallet confirmations follow at
+ * most (steps already done are skipped) and roughly what they cost in test ETH.
+ */
 export function RunHeader({
   files,
   curated,
   newCollection,
   editions,
+  confirmations,
 }: {
   readonly files: StoredFiles;
   readonly curated: boolean;
   readonly newCollection: boolean;
   readonly editions: boolean;
+  readonly confirmations: number;
 }) {
   const locale = useBrowserLocale();
-  const duration = useSaleDuration();
   const gasPrice = useQuery({
     queryKey: [QueryKey.STREAM_SEPOLIA, "gasPrice"],
     queryFn: () => getStreamClient().getGasPrice(),
@@ -120,20 +123,17 @@ export function RunHeader({
           newCollection,
           editions,
         }) * gasPrice.data;
+  let fee: string | null = null;
+  if (estimatedFee !== null) {
+    fee =
+      estimatedFee < TINY_FEE
+        ? t(locale, "streamSepolia.create.feeTiny", { amount: formatEth(TINY_FEE, locale) })
+        : t(locale, "streamSepolia.create.feeEstimate", { amount: formatEth(estimatedFee, locale) });
+  }
   return (
-    <>
-      {duration.data !== undefined && duration.data > 0 ? (
-        <p className="tw-m-0 tw-mb-1 tw-text-sm tw-text-iron-300">
-          {t(locale, "streamSepolia.saleLength", { duration: formatDuration(duration.data, locale) })}
-        </p>
-      ) : null}
-      {estimatedFee === null ? null : (
-        <p className="tw-m-0 tw-mb-3 tw-text-sm tw-text-iron-300">
-          {estimatedFee < TINY_FEE
-            ? t(locale, "streamSepolia.create.feeTiny", { amount: formatEth(TINY_FEE, locale) })
-            : t(locale, "streamSepolia.create.feeEstimate", { amount: formatEth(estimatedFee, locale) })}
-        </p>
-      )}
-    </>
+    <p className="tw-m-0 tw-mb-3 tw-text-sm tw-text-iron-300">
+      {t(locale, "streamSepolia.create.confirmations", { count: confirmations })}
+      {fee ? ` ${fee}` : null}
+    </p>
   );
 }

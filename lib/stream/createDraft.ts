@@ -3,9 +3,6 @@
  * tested on their own.
  */
 
-/** "new" creates a collection with the typed name; otherwise an existing collection ID. */
-export type CollectionChoice = "new" | `${bigint}`;
-
 export interface Draft {
   readonly media: { bytes: Uint8Array; mimeType: string } | null;
   readonly title: string;
@@ -14,9 +11,6 @@ export interface Draft {
   readonly royalty: string;
   readonly editions: boolean;
   readonly cap: string;
-  /** Curated only. */
-  readonly collection: CollectionChoice;
-  readonly newCollectionName: string;
 }
 
 /** The largest edition cap the contracts take (uint32). */
@@ -44,10 +38,9 @@ export function parseRoyalty(value: string): number | null {
   return Math.round(number * 1000);
 }
 
-/** Whether the form can go to review: art, a title, a valid cap, and the product's own fields. */
-export function draftReady(draft: Draft, curated: boolean, hasContract: boolean): boolean {
+/** Whether the form can go to review: art, a title, a valid cap, and (Independent) a valid royalty. */
+export function draftReady(draft: Draft, curated: boolean): boolean {
   const capValid = !draft.editions || parseCap(draft.cap) !== null;
   const base = !!draft.media && draft.title.trim().length > 0 && capValid;
-  if (curated) return base && (draft.collection !== "new" || draft.newCollectionName.trim().length > 0);
-  return base && parseRoyalty(draft.royalty) !== null && hasContract;
+  return curated ? base : base && parseRoyalty(draft.royalty) !== null;
 }

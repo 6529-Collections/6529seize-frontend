@@ -9,6 +9,7 @@ import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import type { MessageKey } from "@/i18n/messages/en-US.complete";
 import "@/i18n/namespaces/stream-sepolia";
 import { getStreamInstance } from "@/lib/stream/instances";
 import { CURRENCY_ETH, ZERO_HASH } from "@/lib/stream/item";
@@ -216,15 +217,42 @@ function ActivityBody({ viewer }: { readonly viewer: Address }) {
   );
 }
 
+/** What the page holds, shown before a wallet is connected. */
+function ActivityIntro() {
+  const locale = useBrowserLocale();
+  const items: [MessageKey, MessageKey][] = [
+    ["streamSepolia.me.introBidsTitle", "streamSepolia.me.introBids"],
+    ["streamSepolia.me.introWorksTitle", "streamSepolia.me.introWorks"],
+    ["streamSepolia.me.introProceedsTitle", "streamSepolia.me.introProceeds"],
+  ];
+  return (
+    <div className="tw-grid tw-gap-4 md:tw-grid-cols-3">
+      {items.map(([title, text]) => (
+        <section key={title} className={CARD}>
+          <h2 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">{t(locale, title)}</h2>
+          <p className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-400">{t(locale, text)}</p>
+        </section>
+      ))}
+    </div>
+  );
+}
+
 export function MyActivity() {
   const locale = useBrowserLocale();
   const wallet = useStreamWallet();
   return (
-    <div className="tw-max-w-3xl">
-      <h1 className="tw-m-0 tw-mb-6 tw-text-3xl tw-font-semibold tw-text-iron-50">{t(locale, "streamSepolia.me.title")}</h1>
-      <WalletGate reason={t(locale, "streamSepolia.me.connect")}>
-        {wallet.address ? <ActivityBody viewer={wallet.address} /> : null}
-      </WalletGate>
+    <div className="tw-flex tw-flex-col tw-gap-6">
+      <h1 className="tw-m-0 tw-text-3xl tw-font-semibold tw-text-iron-50">{t(locale, "streamSepolia.me.title")}</h1>
+      {wallet.address ? (
+        <div className="tw-max-w-4xl">
+          <ActivityBody viewer={wallet.address} />
+        </div>
+      ) : (
+        <>
+          <ActivityIntro />
+          <WalletGate reason={t(locale, "streamSepolia.me.connect")}>{null}</WalletGate>
+        </>
+      )}
     </div>
   );
 }

@@ -15,8 +15,8 @@ import { streamTx } from "@/lib/stream/streamTx";
 
 import { workHref } from "./StreamNav";
 import { TxAction } from "./TxAction";
-import { formatDuration } from "./format";
-import { usePendingStarts, useSaleDuration, useStartPreview } from "./useStreamData";
+import { formatSpan } from "./format";
+import { usePendingStarts, useSaleTerms, useStartPreview } from "./useStreamData";
 import { WalletGate } from "./WalletGate";
 
 const LABEL =
@@ -26,7 +26,7 @@ function StartCard({ start }: { readonly start: PendingStart }) {
   const locale = useBrowserLocale();
   const router = useRouter();
   const preview = useStartPreview(start);
-  const duration = useSaleDuration();
+  const terms = useSaleTerms();
   const title = preview.data?.title ?? t(locale, "streamSepolia.start.untitled");
   return (
     <li className="tw-flex tw-flex-col tw-gap-3">
@@ -40,9 +40,9 @@ function StartCard({ start }: { readonly start: PendingStart }) {
       <div>
         <p className="tw-m-0 tw-truncate tw-text-base tw-font-semibold tw-text-iron-50">{title}</p>
         <p className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-400">{t(locale, "streamSepolia.start.status")}</p>
-        {duration.data !== undefined && duration.data > 0 ? (
+        {terms.data !== undefined && terms.data.duration > 0 ? (
           <p className="tw-m-0 tw-mt-1 tw-text-xs tw-text-iron-500">
-            {t(locale, "streamSepolia.saleLength", { duration: formatDuration(duration.data, locale) })}
+            {t(locale, "streamSepolia.saleLength", { duration: formatSpan(terms.data.duration, locale) })}
           </p>
         ) : null}
       </div>

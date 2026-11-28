@@ -60,7 +60,7 @@ export function TxAction({
       ) : null}
       <Button
         variant={variant}
-        size="lg"
+        size="md"
         fullWidth={fullWidth}
         loading={busy}
         disabled={disabled || busy}

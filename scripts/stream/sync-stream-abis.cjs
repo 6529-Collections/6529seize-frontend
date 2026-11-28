@@ -53,6 +53,7 @@ const CONTRACTS = [
   ["EconomicsResolver", "abi/EconomicsResolver.json", "economicsAbi"],
   ["SplitLedger", "abi/SplitLedger.json", "splitLedgerAbi"],
   ["PackageRegistry", "abi/PackageRegistry.json", "packageRegistryAbi"],
+  ["AssetAllowlist", "abi/AssetAllowlist.json", "assetAllowlistAbi"],
 ];
 
 /** Record name -> the key the test pages use. */

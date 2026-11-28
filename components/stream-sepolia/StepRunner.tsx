@@ -14,7 +14,7 @@ import "@/i18n/namespaces/stream-sepolia";
 import { sepoliaTxUrl } from "./format";
 import { TxStatus } from "./TxStatus";
 import { errorNameOf, sendStreamTx, StreamTxError, type TxRequest, type TxState } from "./sendStreamTx";
-import { useStreamWallet } from "./WalletGate";
+import { useStreamWallet, WalletGate } from "./WalletGate";
 
 export interface StepIo {
   readonly account: Address;
@@ -212,15 +212,18 @@ function StepRunnerView<Context>({
       </ol>
       {finished ? null : (
         <div className="tw-mt-4">
-          <Button
-            variant="action"
-            size="lg"
-            loading={running}
-            disabled={running || disabled || !account}
-            onClick={() => account && onRun(account)}
-          >
-            {label}
-          </Button>
+          {/* The wallet is asked for here, when the steps are about to start. */}
+          <WalletGate reason={t(locale, "streamSepolia.steps.connect")}>
+            <Button
+              variant="action"
+              size="md"
+              loading={running}
+              disabled={running || disabled || !account}
+              onClick={() => account && onRun(account)}
+            >
+              {label}
+            </Button>
+          </WalletGate>
         </div>
       )}
     </div>

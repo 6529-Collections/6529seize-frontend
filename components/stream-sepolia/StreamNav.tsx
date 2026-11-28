@@ -18,7 +18,8 @@ export function workHref(work: { readonly token: string; readonly tokenId: bigin
 const LINKS: readonly { href: string; key: MessageKey }[] = [
   { href: STREAM_BASE, key: "streamSepolia.nav.works" },
   { href: `${STREAM_BASE}/create`, key: "streamSepolia.nav.create" },
-  { href: `${STREAM_BASE}/collection`, key: "streamSepolia.nav.collection" },
+  { href: `${STREAM_BASE}/how-it-works`, key: "streamSepolia.nav.howItWorks" },
+  { href: `${STREAM_BASE}/contract`, key: "streamSepolia.nav.contract" },
   { href: `${STREAM_BASE}/me`, key: "streamSepolia.nav.me" },
 ];
 

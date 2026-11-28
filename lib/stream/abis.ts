@@ -22,3 +22,4 @@ export { workFactsAbi } from "./generated/r9/StreamWorkFacts6529";
 export { editionAuctionAbi } from "./generated/r9/UniformEditionAuction";
 export { packageRegistryAbi } from "./generated/r9/PackageRegistry";
 export { openGateAbi } from "./generated/r9/SepoliaOpenGate";
+export { assetAllowlistAbi } from "./generated/r9/AssetAllowlist";

@@ -8,8 +8,6 @@ const draft: Draft = {
   royalty: "6.529",
   editions: false,
   cap: "",
-  collection: "new",
-  newCollectionName: "Field Notes",
 };
 
 describe("parseCap", () => {
@@ -40,22 +38,19 @@ describe("parseRoyalty", () => {
 
 describe("draftReady", () => {
   it("needs art and a title for both products", () => {
-    expect(draftReady({ ...draft, media: null }, true, true)).toBe(false);
-    expect(draftReady({ ...draft, title: "  " }, false, true)).toBe(false);
+    expect(draftReady({ ...draft, media: null }, true)).toBe(false);
+    expect(draftReady({ ...draft, title: "  " }, false)).toBe(false);
   });
-  it("curated: needs a collection, ignores royalty and contracts", () => {
-    expect(draftReady(draft, true, false)).toBe(true);
-    expect(draftReady({ ...draft, newCollectionName: " " }, true, false)).toBe(false);
-    expect(draftReady({ ...draft, newCollectionName: "", collection: "3" }, true, false)).toBe(true);
-    expect(draftReady({ ...draft, royalty: "99" }, true, false)).toBe(true);
+  it("6529 Stream: ignores the royalty (the network sets the terms)", () => {
+    expect(draftReady(draft, true)).toBe(true);
+    expect(draftReady({ ...draft, royalty: "99" }, true)).toBe(true);
   });
-  it("Independent: needs a listed contract and a valid royalty", () => {
-    expect(draftReady(draft, false, true)).toBe(true);
-    expect(draftReady(draft, false, false)).toBe(false);
-    expect(draftReady({ ...draft, royalty: "99" }, false, true)).toBe(false);
+  it("Independent Stream: needs a valid royalty", () => {
+    expect(draftReady(draft, false)).toBe(true);
+    expect(draftReady({ ...draft, royalty: "99" }, false)).toBe(false);
   });
   it("checks the edition cap only when editions are on", () => {
-    expect(draftReady({ ...draft, editions: true, cap: "12abc" }, true, false)).toBe(false);
-    expect(draftReady({ ...draft, editions: false, cap: "12abc" }, true, false)).toBe(true);
+    expect(draftReady({ ...draft, editions: true, cap: "12abc" }, true)).toBe(false);
+    expect(draftReady({ ...draft, editions: false, cap: "12abc" }, true)).toBe(true);
   });
 });

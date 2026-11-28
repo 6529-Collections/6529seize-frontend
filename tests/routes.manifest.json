@@ -2140,11 +2140,15 @@
       "classification": "exempt",
       "exemptReason": "Sepolia test pages for 6529 Stream: they return 404 unless the build enables Sepolia (staging, local) and render live Sepolia contract state."
     },
-    "/stream/sepolia/collection": {
+    "/stream/sepolia/contract": {
       "classification": "exempt",
       "exemptReason": "Sepolia test pages for 6529 Stream: they return 404 unless the build enables Sepolia (staging, local) and render live Sepolia contract state."
     },
     "/stream/sepolia/create": {
+      "classification": "exempt",
+      "exemptReason": "Sepolia test pages for 6529 Stream: they return 404 unless the build enables Sepolia (staging, local) and render live Sepolia contract state."
+    },
+    "/stream/sepolia/how-it-works": {
       "classification": "exempt",
       "exemptReason": "Sepolia test pages for 6529 Stream: they return 404 unless the build enables Sepolia (staging, local) and render live Sepolia contract state."
     },

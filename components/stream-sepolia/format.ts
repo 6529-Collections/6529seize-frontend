@@ -37,6 +37,23 @@ export function formatDuration(seconds: number, locale: SupportedLocale): string
   return t(locale, "streamSepolia.time.seconds", { seconds: secs });
 }
 
+/**
+ * A length of time stated as a term ("1 hour", "15 minutes", "1 hour 30 minutes"):
+ * whole units, no seconds column, for sale terms rather than a countdown.
+ */
+export function formatSpan(seconds: number, locale: SupportedLocale): string {
+  const total = Math.max(0, Math.round(seconds));
+  const hours = Math.floor(total / 3_600);
+  const minutes = Math.floor((total % 3_600) / 60);
+  const parts: string[] = [];
+  if (hours > 0) parts.push(t(locale, hours === 1 ? "streamSepolia.span.hour" : "streamSepolia.span.hours", { hours }));
+  if (minutes > 0) {
+    parts.push(t(locale, minutes === 1 ? "streamSepolia.span.minute" : "streamSepolia.span.minutes", { minutes }));
+  }
+  if (parts.length === 0) return formatDuration(total, locale);
+  return parts.join(" ");
+}
+
 /** A clock time in the viewer's locale and time zone. */
 export function formatClock(unixSeconds: number | bigint, locale: SupportedLocale): string {
   return formatDate(locale, new Date(Number(unixSeconds) * 1000), {

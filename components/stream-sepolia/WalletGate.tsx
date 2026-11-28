@@ -40,9 +40,9 @@ export function WalletGate({
   const wallet = useStreamWallet();
   if (!wallet.address) {
     return (
-      <div className="tw-flex tw-flex-col tw-gap-2">
+      <div className="tw-flex tw-flex-col tw-items-start tw-gap-2">
         {reason ? <p className="tw-m-0 tw-text-sm tw-text-iron-400">{reason}</p> : null}
-        <Button variant="action" size="lg" onClick={() => wallet.connect()}>
+        <Button variant="action" size="md" onClick={() => wallet.connect()}>
           {t(locale, "streamSepolia.wallet.connect")}
         </Button>
       </div>
@@ -50,13 +50,13 @@ export function WalletGate({
   }
   if (!wallet.onSepolia) {
     return (
-      <div className="tw-flex tw-flex-col tw-gap-2">
+      <div className="tw-flex tw-flex-col tw-items-start tw-gap-2">
         <p className="tw-m-0 tw-text-sm tw-text-iron-400">
           {t(locale, "streamSepolia.wallet.wrongChain")}
         </p>
         <Button
           variant="action"
-          size="lg"
+          size="md"
           loading={wallet.switching}
           onClick={wallet.switchToSepolia}
         >
