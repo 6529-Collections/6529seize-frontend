@@ -42,6 +42,8 @@ import { useMyCollections } from "./useStreamData";
 import { useStreamWallet, WalletGate } from "./WalletGate";
 import { StreamLoading } from "./StreamLoading";
 
+/** Below this the estimate rounds to nothing useful: say "less than" instead. */
+const TINY_FEE = 10_000_000_000_000n;
 const FIELD_LABEL = "tw-mb-1.5 tw-block tw-text-sm tw-font-semibold tw-text-iron-200";
 const HINT = "tw-m-0 tw-mt-1.5 tw-text-xs tw-text-iron-500";
 const LINK = "tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-400";
@@ -311,7 +313,9 @@ function IndependentRun({
     <>
       {estimatedFee === null ? null : (
         <p className="tw-m-0 tw-mb-3 tw-text-sm tw-text-iron-300">
-          {t(locale, "streamSepolia.create.feeEstimate", { amount: formatEth(estimatedFee, locale) })}
+          {estimatedFee < TINY_FEE
+            ? t(locale, "streamSepolia.create.feeTiny", { amount: formatEth(TINY_FEE, locale) })
+            : t(locale, "streamSepolia.create.feeEstimate", { amount: formatEth(estimatedFee, locale) })}
         </p>
       )}
     <StepRunner

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { TransactionReceipt } from "viem";
 
 import Button from "@/components/utils/button/Button";
 import type { ButtonVariant } from "@/components/utils/button/buttonStyles";
@@ -29,7 +30,7 @@ export function TxAction({
   readonly disabled?: boolean | undefined;
   readonly variant?: ButtonVariant | undefined;
   readonly fullWidth?: boolean | undefined;
-  readonly onDone?: (() => void) | undefined;
+  readonly onDone?: ((receipt: TransactionReceipt) => void) | undefined;
   /** What happened, said after the transaction lands. */
   readonly doneText?: string | undefined;
 }) {
@@ -65,7 +66,7 @@ export function TxAction({
             return;
           }
           const receipt = await send(next);
-          if (receipt) onDone?.();
+          if (receipt) onDone?.(receipt);
         }}
       >
         {label}
