@@ -8,6 +8,7 @@ export interface PhoneBackGesture {
 
 export interface PhoneNavigationMotion {
   transition(direction: "forward" | "back", navigate: () => void): boolean;
+  canCatch(): boolean;
   begin(): PhoneBackGesture | null;
   commit(entering: boolean): void;
   dispose(): void;
@@ -32,4 +33,8 @@ export function runPhoneNavigationMotion(
 
 export function beginPhoneBackGesture() {
   return activeMotion?.begin() ?? null;
+}
+
+export function canCatchPhoneBackGesture() {
+  return activeMotion?.canCatch() ?? false;
 }
