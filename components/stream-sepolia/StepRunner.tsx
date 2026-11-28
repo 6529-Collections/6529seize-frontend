@@ -179,7 +179,7 @@ function StepRunnerView<Context>({
             >
               <span
                 aria-hidden="true"
-                className={`tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-text-xs tw-font-semibold ${STATUS_TONE[status]}`}
+                className={`tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-md tw-text-xs tw-font-semibold ${STATUS_TONE[status]}`}
               >
                 {status === "done" || status === "skipped" ? "✓" : index + 1}
               </span>

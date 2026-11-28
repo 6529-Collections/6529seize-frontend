@@ -13,7 +13,7 @@ import { splitLedgerAbi } from "@/lib/stream/generated/SplitLedger";
 import { getStreamInstance } from "@/lib/stream/instances";
 import { CURRENCY_ETH, ZERO_HASH } from "@/lib/stream/item";
 import { readMyActivity, soloPayees, type MyOneOfOneBid, type SaleSummary } from "@/lib/stream/reads";
-import { AUCTION_STATE } from "@/lib/stream/state";
+import { AUCTION_STATE, isZeroAddress } from "@/lib/stream/state";
 
 import { formatCount, formatEth } from "./format";
 import { CARD, LABEL } from "./OneOfOnePanel";
@@ -44,7 +44,8 @@ function bidState(bid: MyOneOfOneBid, now: number, locale: SupportedLocale): { t
 
 function workStatus(sale: SaleSummary, locale: SupportedLocale): string {
   if (sale.state !== AUCTION_STATE.SETTLED) return t(locale, "streamSepolia.me.onSale");
-  return sale.bid > 0n
+  // Sold means a buyer: an unsold sale can keep a withdrawn bid as its reserve.
+  return !isZeroAddress(sale.bidder)
     ? t(locale, "streamSepolia.card.sold", { amount: formatEth(sale.bid, locale) })
     : t(locale, "streamSepolia.card.unsold");
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { parseEther, type Abi, type Address } from "viem";
+import { formatEther, parseEther, type Abi, type Address } from "viem";
 
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -136,7 +136,8 @@ function BidBox({ detail }: { readonly detail: OneOfOneDetail }) {
   const minimum = detail.minimumBid ?? 0n;
   // The box shows the minimum until the bidder types; a typed value stays.
   const [typed, setValue] = useState<string | null>(null);
-  const value = typed ?? formatEth(minimum, "en-US").replace(/,/g, "");
+  // The exact minimum, never rounded: a rounded figure can fall below it.
+  const value = typed ?? formatEther(minimum);
   let amount: bigint | null = null;
   try {
     amount = value ? parseEther(value.replace(",", ".")) : null;
@@ -166,7 +167,7 @@ function BidBox({ detail }: { readonly detail: OneOfOneDetail }) {
           </span>
         </div>
         <p id={`${inputId}-hint`} className={`tw-mb-3 tw-mt-1.5 tw-text-xs ${tooLow ? "tw-text-red" : "tw-text-iron-500"}`}>
-          {t(locale, "streamSepolia.one.minimum", { amount: formatEth(minimum, locale) })}
+          {t(locale, "streamSepolia.one.minimum", { amount: formatEther(minimum) })}
         </p>
         <TxAction
           label={t(locale, "streamSepolia.one.bid")}
