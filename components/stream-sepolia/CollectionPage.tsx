@@ -22,11 +22,10 @@ import { sameAddress } from "@/lib/stream/state";
 import { sepoliaAddressUrl, shortAddress } from "./format";
 import { CARD, LABEL } from "./OneOfOnePanel";
 import { StepRunner, type Step } from "./StepRunner";
-import { STREAM_BASE } from "./StreamNav";
+import { STREAM_BASE, workHref } from "./StreamNav";
 import { useMyCollections, useSales } from "./useStreamData";
 import { WorkTitle } from "./WorkTitle";
 import { useStreamWallet, WalletGate } from "./WalletGate";
-import { workHref } from "./StreamNav";
 import { StreamLoading } from "./StreamLoading";
 
 const LINK = "tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-400";
