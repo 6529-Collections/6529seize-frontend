@@ -20,6 +20,7 @@ import { CARD, LABEL } from "./OneOfOnePanel";
 import { STREAM_BASE } from "./StreamNav";
 import { TxAction } from "./TxAction";
 import { useNow } from "./useStreamData";
+import { WorkTitle } from "./WorkTitle";
 import { useStreamWallet, WalletGate } from "./WalletGate";
 
 const LINK = "tw-text-iron-100 tw-underline tw-decoration-white/20 tw-underline-offset-4 hover:tw-text-white";
@@ -85,7 +86,7 @@ function ActivityBody({ viewer }: { readonly viewer: Address }) {
             return (
               <li key={bid.saleId.toString()} className={ROW}>
                 <Link href={workLink(bid.token, bid.tokenId)} className={LINK}>
-                  {t(locale, "streamSepolia.work.untitled", { id: bid.tokenId.toString() })}
+                  <WorkTitle token={bid.token} tokenId={bid.tokenId} />
                 </Link>
                 <span className="tw-tabular-nums tw-text-iron-300">
                   {t(locale, "streamSepolia.me.yourHighest", { amount: formatEth(bid.highest, locale) })}{" "}
@@ -101,7 +102,7 @@ function ActivityBody({ viewer }: { readonly viewer: Address }) {
           {editionBids.map((bid) => (
             <li key={`${bid.master}-${bid.tokenId}-${bid.bidId}`} className={ROW}>
               <Link href={workLink(bid.master, bid.tokenId)} className={LINK}>
-                {t(locale, "streamSepolia.work.untitled", { id: bid.tokenId.toString() })}
+                <WorkTitle token={bid.master} tokenId={bid.tokenId} />
               </Link>
               <span className="tw-text-iron-300">
                 {t(locale, "streamSepolia.me.editionBid", { count: formatCount(bid.quantity, locale) })}{" "}
@@ -118,7 +119,7 @@ function ActivityBody({ viewer }: { readonly viewer: Address }) {
           {works.map((sale) => (
             <li key={sale.saleId.toString()} className={ROW}>
               <Link href={workLink(sale.token, sale.tokenId)} className={LINK}>
-                {t(locale, "streamSepolia.work.untitled", { id: sale.tokenId.toString() })}
+                <WorkTitle token={sale.token} tokenId={sale.tokenId} />
               </Link>
               <span className="tw-tabular-nums tw-text-iron-300">
                 {workStatus(sale, locale)}

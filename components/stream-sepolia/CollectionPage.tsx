@@ -23,6 +23,7 @@ import { CARD, LABEL } from "./OneOfOnePanel";
 import { StepRunner, type Step } from "./StepRunner";
 import { STREAM_BASE } from "./StreamNav";
 import { useMyCollections, useSales } from "./useStreamData";
+import { WorkTitle } from "./WorkTitle";
 import { useStreamWallet, WalletGate } from "./WalletGate";
 import { workHref } from "./StreamHome";
 
@@ -213,7 +214,7 @@ function CollectionBody({ viewer }: { readonly viewer: Address }) {
             {works.map((sale) => (
               <li key={sale.saleId.toString()} className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-py-2.5 tw-text-sm">
                 <Link href={workHref(sale)} className={LINK}>
-                  {t(locale, "streamSepolia.work.untitled", { id: sale.tokenId.toString() })}
+                  <WorkTitle token={sale.token} tokenId={sale.tokenId} />
                 </Link>
               </li>
             ))}
