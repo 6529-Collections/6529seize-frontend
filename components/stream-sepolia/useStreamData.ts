@@ -16,7 +16,7 @@ import {
   readWorkMeta,
 } from "@/lib/stream/reads";
 import { readMyCollections } from "@/lib/stream/activity";
-import { readPendingStarts, readStartPreview, type PendingStart } from "@/lib/stream/startFile";
+import { findStartableItems, readStartPreview, type PendingStart } from "@/lib/stream/startFile";
 
 const KEY = [QueryKey.STREAM_SEPOLIA, ACTIVE_STREAM_INSTANCE] as const;
 /** Live sales change by the block (12 s on Sepolia). */
@@ -150,7 +150,7 @@ export function useMyCollections(viewer: Address | undefined) {
 export function usePendingStarts() {
   return useQuery({
     queryKey: [...KEY, "pendingStarts"],
-    queryFn: readPendingStarts,
+    queryFn: findStartableItems,
     refetchInterval: 30_000,
   });
 }

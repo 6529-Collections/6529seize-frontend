@@ -132,7 +132,8 @@ function StatusLine({ view, detail }: { readonly view: OneOfOneView; readonly de
   if (view.screen.startsWith("unsold_") && detail.closedHow) {
     text = t(locale, detail.closedHow === "rescued" ? "streamSepolia.one.status.rescued" : "streamSepolia.one.status.refused");
   } else if (view.screen.startsWith("unsold_") && detail.bids.length > 0) {
-    // Bids but no buyer and neither event: the collection was no longer listed at the end.
+    // Bids but no buyer and neither event (most likely a delisted collection):
+    // say only what the chain proves.
     text = t(locale, "streamSepolia.one.status.delisted");
   }
   return (

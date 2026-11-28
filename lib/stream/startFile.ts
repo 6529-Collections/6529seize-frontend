@@ -1,4 +1,4 @@
-import { contentStoreAbi, independentRegistryAbi } from "./abis";
+import { contentStoreAbi, englishAuctionAbi, independentRegistryAbi } from "./abis";
 import {
   decodeAbiParameters,
   encodeAbiParameters,
@@ -20,6 +20,13 @@ import { scanLogs } from "./reads";
  * the start request itself as a small public file in the content store, under
  * this type. Any page can find it, check that the item is still approved and
  * unused, and offer "Start the sale" to everyone.
+ *
+ * TEST-PAGE CONVENTION, NOT PROTOCOL. In production the start request will
+ * come from the site's backend / Main Stage; only findStartableItems below
+ * should need to change. Every stored file is untrusted input: it is decoded
+ * defensively, its item hash is recomputed, the item must be approved and
+ * unused for that token, and the start call must simulate cleanly. Anything
+ * that fails is skipped silently.
  */
 export const START_FILE_MIME = "application/vnd.6529.stream-start";
 
@@ -52,7 +59,7 @@ function decodeStartFile(data: Hex): PendingStart | null {
 const MANIFEST_REGISTERED = getAbiItem({ abi: contentStoreAbi, name: "ManifestRegistered" });
 
 /** Works their artists approved whose sale nobody has started yet. */
-export async function readPendingStarts(): Promise<PendingStart[]> {
+export async function findStartableItems(): Promise<PendingStart[]> {
   const instance = getStreamInstance();
   const client = getStreamClient();
   const manifests = await scanLogs({ address: instance.addresses.contentStore, event: MANIFEST_REGISTERED });
@@ -83,10 +90,25 @@ export async function readPendingStarts(): Promise<PendingStart[]> {
         .catch(() => null)
     )
   );
-  return candidates.filter((_entry, index) => {
+  const approved = candidates.filter((_entry, index) => {
     const approval = approvals[index];
     return !!approval && approval.approved && !approval.used;
   });
+  // Offer only starts the contract would accept right now.
+  const simulated = await Promise.all(
+    approved.map((entry) =>
+      client
+        .simulateContract({
+          address: instance.addresses.englishAuction,
+          abi: englishAuctionAbi,
+          functionName: "start",
+          args: [entry.token, entry.request],
+        })
+        .then(() => true)
+        .catch(() => false)
+    )
+  );
+  return approved.filter((_entry, index) => simulated[index]);
 }
 
 async function readFileBytes(fileId: Hex, maxBytes: bigint): Promise<{ bytes: Hex; mimeType: string } | null> {
