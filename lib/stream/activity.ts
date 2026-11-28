@@ -127,7 +127,7 @@ interface MyActivity {
 
 /** The artist's single-payee seller vault, as the create page sets it up. */
 /** The payee list of a solo work: everything to the artist's account (its artist ID). */
-export function soloPayees(artistId: bigint) {
+function soloPayees(artistId: bigint) {
   return [{ artistId, account: ZERO_ADDRESS, share: 100_000 }] as const;
 }
 

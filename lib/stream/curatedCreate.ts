@@ -78,7 +78,7 @@ const SIGNATURE_LIFETIME_S = 3_600;
 const MOVE_NONCE_BATCH = 32n;
 const MAX_MOVE_NONCE = 1_024n;
 /** Collection names are shown at most this long (the page's own input limit). */
-export const COLLECTION_NAME_MAX = 64;
+const COLLECTION_NAME_MAX = 64;
 
 function gate(): Address {
   const address = getStreamInstance().addresses.openGate;
@@ -115,7 +115,7 @@ function isHiddenCharacter(code: number): boolean {
 }
 
 /** Display form of a collection name from the chain: no control or bidi characters, at most 64 characters. */
-export function displayCollectionName(name: string): string {
+function displayCollectionName(name: string): string {
   const cleaned = Array.from(name)
     .filter((character) => !isHiddenCharacter(character.codePointAt(0) ?? 0))
     .join("")
