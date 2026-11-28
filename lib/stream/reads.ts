@@ -230,7 +230,8 @@ export async function readWorkMeta(token: Address, tokenId: bigint): Promise<Wor
   return {
     name: stringField(json?.["name"]),
     description: hasRecord ? stringField(json["description"]) : null,
-    image: image && /^(data:image\/|https:\/\/)/.test(image) ? image : null,
+    // On-chain art only: an outside image URL would let a work track its viewers.
+    image: image?.startsWith("data:image/") ? image : null,
     artistId: BigInt(work.artistId),
     kind: work.kind,
     owner,

@@ -457,6 +457,8 @@ function YourBids({
           {t(locale, "streamSepolia.ed.held", { amount: formatEth(held, locale) })}
         </p>
       ) : null}
+      {/* Claims and raises need the wallet on Sepolia: the gate asks to switch first. */}
+      <WalletGate>
       <ul className="tw-m-0 tw-mt-3 tw-list-none tw-p-0">
         {mine.map((bid, index) => {
           const standing = bidStanding({ step: bid.step, clearingStep, rationed });
@@ -521,6 +523,7 @@ function YourBids({
           );
         })}
       </ul>
+      </WalletGate>
     </section>
   );
 }
