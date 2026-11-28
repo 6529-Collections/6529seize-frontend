@@ -1,6 +1,7 @@
 "use client";
 
 import { englishAuctionAbi } from "@/lib/stream/abis";
+import { useRouter } from "next/navigation";
 
 import { THE_MEMES_GRID_CLASS_NAME } from "@/components/the-memes/theMemesLayout";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -9,8 +10,10 @@ import "@/i18n/namespaces/stream-sepolia";
 import { getStreamInstance } from "@/lib/stream/instances";
 import type { PendingStart } from "@/lib/stream/startFile";
 
+import { tokenIdFromStart } from "@/lib/stream/create";
 import { streamTx } from "@/lib/stream/streamTx";
 
+import { workHref } from "./StreamNav";
 import { TxAction } from "./TxAction";
 import { formatDuration } from "./format";
 import { usePendingStarts, useSaleDuration, useStartPreview } from "./useStreamData";
@@ -21,6 +24,7 @@ const LABEL =
 
 function StartCard({ start }: { readonly start: PendingStart }) {
   const locale = useBrowserLocale();
+  const router = useRouter();
   const preview = useStartPreview(start);
   const duration = useSaleDuration();
   const title = preview.data?.title ?? t(locale, "streamSepolia.start.untitled");
@@ -50,6 +54,11 @@ function StartCard({ start }: { readonly start: PendingStart }) {
           label={t(locale, "streamSepolia.start.button")}
           description={t(locale, "streamSepolia.start.help")}
           doneText={t(locale, "streamSepolia.start.done")}
+          onDone={(receipt) => {
+            // Straight to the work, where opening its edition sale is the next action.
+            const tokenId = tokenIdFromStart(receipt, start.token);
+            if (tokenId !== null) router.push(workHref({ token: start.token, tokenId }));
+          }}
           request={() => (streamTx({
             address: getStreamInstance().addresses.englishAuction,
             abi: englishAuctionAbi,

@@ -10,7 +10,7 @@ import { ITEM_KIND } from "@/lib/stream/item";
 import { artistAddress } from "@/lib/stream/reads";
 import { AUCTION_STATE, sameAddress } from "@/lib/stream/state";
 
-import { EditionPanel } from "./EditionPanel";
+import { EditionPanel, OpenEdition } from "./EditionPanel";
 import { StreamIdentity } from "./StreamIdentity";
 import { OneOfOnePanel } from "./OneOfOnePanel";
 import { useEdition, useOneOfOne, useWorkMeta } from "./useStreamData";
@@ -64,6 +64,8 @@ function WorkBody({ token, tokenId }: { readonly token: Address; readonly tokenI
     ? t(locale, "streamSepolia.product.streamEditions")
     : t(locale, "streamSepolia.product.independentEditions");
   const masterOpen = oneOfOne.data.auction.state === AUCTION_STATE.ACTIVE;
+  // The edition sale is not open yet and can be: make it the next action.
+  const openable = !!edition.data && edition.data.sale.status === 0 && isMaster && masterOpen;
   const showEditions =
     edition.data && (edition.data.sale.status !== 0 || (isMaster && masterOpen));
 
@@ -94,15 +96,20 @@ function WorkBody({ token, tokenId }: { readonly token: Address; readonly tokenI
               <p className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">{meta.data.description}</p>
             ) : null}
           </div>
+          {openable && edition.data ? (
+            <OpenEdition
+              detail={edition.data}
+              tokenId={tokenId}
+              firstStartTx={oneOfOne.data.firstStartTx}
+              curated={curated}
+            />
+          ) : null}
           <OneOfOnePanel detail={oneOfOne.data} independent={!curated} owner={meta.data.owner} />
         </div>
       </div>
       {showEditions && edition.data ? (
         <EditionPanel
           detail={edition.data}
-          tokenId={tokenId}
-          firstStartTx={oneOfOne.data.firstStartTx}
-          curated={curated}
           masterOpen={masterOpen}
           productLabel={editionLabel}
         />

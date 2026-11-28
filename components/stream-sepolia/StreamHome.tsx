@@ -14,17 +14,13 @@ import { THE_MEMES_GRID_CLASS_NAME } from "@/components/the-memes/theMemesLayout
 
 import { formatCount, formatDuration, formatEth } from "./format";
 import { ReadyToStart } from "./ReadyToStart";
-import { STREAM_BASE } from "./StreamNav";
+import { workHref } from "./StreamNav";
 import { useNow, useSales, useWorkMeta } from "./useStreamData";
 import { WorkArt } from "./WorkArt";
 import { StreamLoading } from "./StreamLoading";
 
 const LABEL =
   "tw-m-0 tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500";
-
-export function workHref(sale: Pick<SaleSummary, "token" | "tokenId">): string {
-  return `${STREAM_BASE}/work/${sale.token}/${sale.tokenId.toString()}`;
-}
 
 function statusLine(sale: SaleSummary, now: number, locale: SupportedLocale): string {
   const left = Number(sale.endTime) - now;

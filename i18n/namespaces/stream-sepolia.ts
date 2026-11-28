@@ -237,7 +237,9 @@ export const STREAM_SEPOLIA_MESSAGES = registerSourceMessages({
   "streamSepolia.ed.openDone": "The edition sale is open.",
   "streamSepolia.ed.abandon": "Call off the edition sale",
   "streamSepolia.ed.abandonHelp": "The 1/1 never finished, so every edition bid is returned in full.",
-  "streamSepolia.ed.notOpen": "Editions of this work can be sold beside the 1/1.",
+  "streamSepolia.ed.openNext": "Next: open the edition sale",
+  "streamSepolia.ed.notOpen": "This work also sells editions. Until someone opens the edition sale, nobody can bid on them. It closes 15 minutes after the 1/1.",
+  "streamSepolia.ed.openAbove": "Not open yet: use \"Open the edition sale\" above.",
   "streamSepolia.ed.open": "Open the edition sale",
   "streamSepolia.ed.openHelp": "Anyone can open it while the 1/1 is on sale. You pay only the network fee.",
 

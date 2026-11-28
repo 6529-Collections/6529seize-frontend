@@ -10,6 +10,11 @@ import "@/i18n/namespaces/stream-sepolia";
 
 export const STREAM_BASE = "/stream/sepolia";
 
+/** A work's page under the test pages. */
+export function workHref(work: { readonly token: string; readonly tokenId: bigint }): string {
+  return `${STREAM_BASE}/work/${work.token}/${work.tokenId.toString()}`;
+}
+
 const LINKS: readonly { href: string; key: MessageKey }[] = [
   { href: STREAM_BASE, key: "streamSepolia.nav.works" },
   { href: `${STREAM_BASE}/create`, key: "streamSepolia.nav.create" },

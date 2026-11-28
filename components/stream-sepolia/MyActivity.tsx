@@ -19,7 +19,7 @@ import { streamTx } from "@/lib/stream/streamTx";
 
 import { formatCount, formatEth } from "./format";
 import { CARD, LABEL } from "./OneOfOnePanel";
-import { workHref } from "./StreamHome";
+import { workHref } from "./StreamNav";
 import { TxAction } from "./TxAction";
 import { useNow } from "./useStreamData";
 import { WorkTitle } from "./WorkTitle";

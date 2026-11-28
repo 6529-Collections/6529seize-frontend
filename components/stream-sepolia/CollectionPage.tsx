@@ -26,7 +26,7 @@ import { STREAM_BASE } from "./StreamNav";
 import { useMyCollections, useSales } from "./useStreamData";
 import { WorkTitle } from "./WorkTitle";
 import { useStreamWallet, WalletGate } from "./WalletGate";
-import { workHref } from "./StreamHome";
+import { workHref } from "./StreamNav";
 import { StreamLoading } from "./StreamLoading";
 
 const LINK = "tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-400";

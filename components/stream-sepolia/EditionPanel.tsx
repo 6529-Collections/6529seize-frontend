@@ -641,7 +641,12 @@ function SettleAction({ detail, view }: { readonly detail: EditionDetail; readon
   );
 }
 
-function OpenEdition({
+/**
+ * Opening the edition sale is a separate call after the 1/1 starts and easy to
+ * miss, so the work page shows it as the next action, right under the work's
+ * description, while the 1/1 runs.
+ */
+export function OpenEdition({
   detail,
   tokenId,
   firstStartTx,
@@ -654,8 +659,11 @@ function OpenEdition({
 }) {
   const locale = useBrowserLocale();
   return (
-    <section className={CARD}>
-      <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">{t(locale, "streamSepolia.ed.notOpen")}</p>
+    <section className={`${CARD} tw-border-primary-400/40`} aria-labelledby="stream-ed-open-next">
+      <h2 id="stream-ed-open-next" className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
+        {t(locale, "streamSepolia.ed.openNext")}
+      </h2>
+      <p className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-300">{t(locale, "streamSepolia.ed.notOpen")}</p>
       <div className="tw-mt-3">
         <WalletGate reason={t(locale, "streamSepolia.one.connectToAct")}>
           <TxAction
@@ -682,20 +690,15 @@ function OpenEdition({
 
 export function EditionPanel({
   detail,
-  tokenId,
-  firstStartTx,
-  curated,
   masterOpen,
   productLabel,
 }: {
   readonly detail: EditionDetail;
-  readonly tokenId: bigint;
-  readonly firstStartTx: Hex | null;
-  readonly curated: boolean;
   /** The 1/1 is running now, so an edition sale may still be opened beside it. */
   readonly masterOpen: boolean;
   readonly productLabel: string;
 }) {
+  const locale = useBrowserLocale();
   const now = useNow();
   const view = editionView({
     status: detail.sale.status,
@@ -723,9 +726,8 @@ export function EditionPanel({
     <section aria-label={productLabel} className="tw-mt-10">
       <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-text-iron-50">{productLabel}</h2>
       {view.screen === "openable" ? (
-        <div className="tw-mt-4">
-          <OpenEdition detail={detail} tokenId={tokenId} firstStartTx={firstStartTx} curated={curated} />
-        </div>
+        // The open button itself sits under the work's description, as the next action.
+        <p className="tw-m-0 tw-mt-2 tw-text-sm tw-text-iron-400">{t(locale, "streamSepolia.ed.openAbove")}</p>
       ) : null}
       {view.screen === "openable" || view.screen === "not_open" ? null : (
         // Phones: one column, the numbers and the bid box first. Desktop: two columns.
