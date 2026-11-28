@@ -1,11 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 import DotLoader from "@/components/dotLoader/DotLoader";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/stream-sepolia";
+
+import styles from "./StreamLoading.module.css";
+
+const subscribeNever = () => () => undefined;
+
+/** False in the server render (and in a page whose JavaScript never ran), true once hydrated. */
+function useHydrated(): boolean {
+  return useSyncExternalStore(
+    subscribeNever,
+    () => true,
+    () => false
+  );
+}
 
 /** After this long a read is treated as stuck: say so and offer to try again. */
 const SLOW_MS = 20_000;
@@ -17,6 +30,7 @@ const SLOW_MS = 20_000;
  */
 export function StreamLoading({ onRetry }: { readonly onRetry?: (() => void) | undefined }) {
   const locale = useBrowserLocale();
+  const hydrated = useHydrated();
   const [slow, setSlow] = useState(false);
   useEffect(() => {
     const timer = setTimeout(() => setSlow(true), SLOW_MS);
@@ -43,6 +57,12 @@ export function StreamLoading({ onRetry }: { readonly onRetry?: (() => void) | u
     <div role="status" className="tw-flex tw-items-center tw-gap-3 tw-py-2 tw-text-sm tw-text-iron-400">
       <DotLoader />
       <span>{t(locale, "streamSepolia.loading")}</span>
+      {hydrated ? null : (
+        // A plain link: it works without the page's JavaScript.
+        <a href="" className={`${styles["reloadHint"] ?? ""} tw-text-primary-300 tw-underline tw-underline-offset-4`}>
+          {t(locale, "streamSepolia.reloadHint")}
+        </a>
+      )}
     </div>
   );
 }

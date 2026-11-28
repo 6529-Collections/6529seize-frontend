@@ -20,6 +20,7 @@ export const STREAM_SEPOLIA_MESSAGES = registerSourceMessages({
   "streamSepolia.loading": "Reading Sepolia…",
   "streamSepolia.slow": "Sepolia is slow to answer right now.",
   "streamSepolia.retry": "Try again",
+  "streamSepolia.reloadHint": "Taking long? Reload the page",
   "streamSepolia.instance.current": "Test instance {name} (current).",
   "streamSepolia.instance.showOlder": "See works made on {name}",
   "streamSepolia.instance.older": "You are looking at {name}, an older test instance. Its works stay viewable; new works go on the current one.",

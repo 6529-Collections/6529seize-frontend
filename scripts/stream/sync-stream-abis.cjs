@@ -81,13 +81,17 @@ const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
 
 function optionValue(args, name) {
   const index = args.indexOf(name);
-  return index === -1 ? null : args[index + 1] ?? null;
+  if (index === -1) return null;
+  const value = args[index + 1];
+  if (value === undefined || value.startsWith("--")) throw new Error(`${name} needs a value`);
+  return value;
 }
 
 function writeAddresses({ source, record, gate, outDir, commit }) {
   const data = JSON.parse(fs.readFileSync(path.join(source, record), "utf8"));
   if (Number(data.chainId) !== 11155111) throw new Error(`${record} is not a Sepolia record`);
   if (data.confirmed !== true) throw new Error(`${record} is not confirmed`);
+  if (data.startBlock === undefined) throw new Error(`${record} has no startBlock`);
   const lines = [];
   for (const [recordName, key] of RECORD_ADDRESSES) {
     const value = data[recordName];

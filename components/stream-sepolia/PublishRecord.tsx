@@ -10,6 +10,7 @@ import "@/i18n/namespaces/stream-sepolia";
 import { workFactsAbi } from "@/lib/stream/abis";
 import { getStreamClient } from "@/lib/stream/client";
 import { getStreamInstance } from "@/lib/stream/instances";
+import { isRevert } from "@/lib/stream/curatedCreate";
 import { readStartItem } from "@/lib/stream/reads";
 import { streamTx } from "@/lib/stream/streamTx";
 
@@ -18,6 +19,12 @@ import { TxAction } from "./TxAction";
 import { WalletGate } from "./WalletGate";
 
 type PublishStep = "open" | "complete";
+
+/** A contract refusal means "not possible now"; an RPC failure is thrown so the read is retried. */
+function refusedOrThrow(error: unknown): false {
+  if (isRevert(error)) return false;
+  throw error;
+}
 
 /**
  * The next publish step the contract would accept now, or null. Media that was
@@ -40,21 +47,23 @@ async function nextPublishStep(
     const ok = await client
       .simulateContract({ address, abi: workFactsAbi, functionName: "open", args: [token, tokenId, started.item, [...started.media]] })
       .then(() => true)
-      .catch(() => false);
+      .catch(refusedOrThrow);
     return ok ? "open" : null;
   }
   if (facts.onChainComplete) return null;
   const ok = await client
     .simulateContract({ address, abi: workFactsAbi, functionName: "markOnChainComplete", args: [token, tokenId] })
     .then(() => true)
-    .catch(() => false);
+    .catch(refusedOrThrow);
   return ok ? "complete" : null;
 }
 
 /**
  * A work started from the shelf has no published record yet (a curated start
  * through SaleStarter opens it; EnglishAuction.start does not), so wallets and
- * these pages cannot show its title. Opening the record and marking its media
+ * these pages cannot show its title. Only an Independent start can be opened
+ * here: its calldata carries the media list, a curated EnglishAuction start's
+ * does not, so this shows nothing for that case. Opening the record and marking its media
  * complete are open to anyone; this offers whichever is next.
  */
 export function PublishRecord({

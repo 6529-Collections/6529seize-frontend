@@ -55,16 +55,8 @@ export function WorkArt({
     );
   }
   if (!large) {
-    // A card without on-chain art: a quiet tile with the title, nothing to read as an error.
-    const loading = art.isLoading || art.fetchStatus === "fetching";
-    return (
-      <div
-        aria-hidden="true"
-        className="tw-flex tw-aspect-square tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-bg-iron-950 tw-p-6 tw-text-center tw-text-sm tw-font-semibold tw-text-iron-600"
-      >
-        {loading ? null : title}
-      </div>
-    );
+    // A card without on-chain art: a quiet blank tile (the title is printed right under it).
+    return <div aria-hidden="true" className="tw-aspect-square tw-w-full tw-rounded-lg tw-bg-iron-950" />;
   }
   return (
     <div

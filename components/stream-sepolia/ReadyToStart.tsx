@@ -35,9 +35,7 @@ function StartCard({ start }: { readonly start: PendingStart }) {
           // Art is a data URL read from the chain; next/image cannot optimise it.
           // eslint-disable-next-line @next/next/no-img-element
           <img src={preview.data.image} alt={title} className="tw-h-full tw-w-full tw-object-contain" />
-        ) : (
-          <span aria-hidden="true" className="tw-p-6 tw-text-center tw-text-sm tw-font-semibold tw-text-iron-600">{title}</span>
-        )}
+        ) : null}
       </div>
       <div>
         <p className="tw-m-0 tw-truncate tw-text-base tw-font-semibold tw-text-iron-50">{title}</p>

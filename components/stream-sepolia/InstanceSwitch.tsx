@@ -13,7 +13,7 @@ import {
 } from "@/lib/stream/instances";
 
 const LINK =
-  "tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-400";
+  "tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
 
 /** The choice changes only by a reload, so there is nothing to subscribe to. */
 const subscribeNever = () => () => undefined;

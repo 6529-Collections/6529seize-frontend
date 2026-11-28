@@ -1,5 +1,7 @@
 import type { Address, Hex } from "viem";
 
+import { STREAM_CHAIN } from "./client";
+
 /**
  * The two EIP-712 messages an artist signs on the curated 6529 Stream path, in
  * the PackageRegistry's domain ("6529 Works Package Registry", version 1). The
@@ -12,7 +14,7 @@ function packageRegistryDomain(packageRegistry: Address) {
   return {
     name: "6529 Works Package Registry",
     version: "1",
-    chainId: 11_155_111,
+    chainId: STREAM_CHAIN.id,
     verifyingContract: packageRegistry,
   } as const;
 }
