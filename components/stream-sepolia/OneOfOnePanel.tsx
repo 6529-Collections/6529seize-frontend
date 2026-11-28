@@ -10,7 +10,7 @@ import "@/i18n/namespaces/stream-sepolia";
 import { englishAuctionAbi } from "@/lib/stream/generated/EnglishAuction";
 import { getStreamInstance } from "@/lib/stream/instances";
 import type { OneOfOneDetail } from "@/lib/stream/reads";
-import { oneOfOneView, type OneOfOneView } from "@/lib/stream/state";
+import { isZeroAddress, oneOfOneView, type OneOfOneView } from "@/lib/stream/state";
 
 import { formatClock, formatDuration, formatEth, sepoliaTxUrl } from "./format";
 import { StreamIdentity } from "./StreamIdentity";
@@ -341,6 +341,9 @@ export function OneOfOnePanel({
     viewer: wallet.address,
   });
   const top = headline(view, detail, locale);
+  // While the work waits to be claimed the auction holds it; the buyer is the owner that matters.
+  const shownOwner =
+    !isZeroAddress(detail.pendingDelivery) && detail.settlement ? detail.settlement.buyer : owner;
   return (
     <section aria-labelledby="stream-one-title" className={CARD}>
       <h2 id="stream-one-title" className={LABEL}>
@@ -357,10 +360,10 @@ export function OneOfOnePanel({
             {t(locale, "streamSepolia.one.youLead")}
           </p>
         ) : null}
-        {view.screen === "sold" && owner ? (
+        {view.screen === "sold" && shownOwner ? (
           <p className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-300">
             {t(locale, "streamSepolia.one.owner")}{" "}
-            <StreamIdentity address={owner} />
+            <StreamIdentity address={shownOwner} />
             {detail.settlement ? (
               <>
                 {" · "}
