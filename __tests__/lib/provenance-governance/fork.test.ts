@@ -17,6 +17,7 @@ import {
   checkBeforeSigning,
   proposeToTxService,
 } from "@/lib/provenance-core/governance";
+import { checkRegistry } from "@/lib/provenance-core/registry";
 import { readSafe } from "@/lib/provenance-core/safeInfo";
 import { simulatePlan } from "@/lib/provenance-core/simulate";
 import { signWithWallet } from "@/lib/provenance-governance/wallet";
@@ -28,6 +29,28 @@ const pin = { ...registryPins[1]!, chainId: 31337 };
 run("governance flow on a fork", () => {
   jest.setTimeout(120_000);
   const client = makeClient(31337, RPC ?? "");
+
+  it("recognizes every pinned registry's build and passes the checks before signing", async () => {
+    // The Sepolia registries run v1.0.0-rc.1 and rc.2, older than the ABI the copy pins.
+    for (const p of registryPins.map((x) => ({ ...x, chainId: 31337 }))) {
+      const reg = await checkRegistry(client, p.registry, { chainId: 31337 });
+      expect([p.name, reg.build?.tag]).toEqual([
+        p.name,
+        expect.stringMatching(/^v1\.0\.0-rc\.[12]$/),
+      ]);
+      const safe = (await readSafe(client, p.safe))!;
+      const [g] = buildGovernanceSafeTxs(p, [{ kind: "freeze" }], safe.nonce);
+      const check = await checkBeforeSigning(
+        client,
+        p,
+        safe.owners[0] as Address,
+        g!
+      );
+      expect([p.name, check.problems]).toEqual([p.name, []]);
+      expect(check.decoded.map((c) => c.functionName)).toEqual(["freeze"]);
+      expect(check.risk).toBe("high");
+    }
+  });
 
   it("checks, simulates, signs and proposes a publisher grant and a registration batch", async () => {
     const safe = (await readSafe(client, pin.safe))!;
@@ -74,7 +97,19 @@ run("governance flow on a fork", () => {
       request: async ({ method }: { method: string }) =>
         method === "eth_chainId" ? "0x7a69" : "0xplaceholder",
     };
-    const signature = await signWithWallet(wallet, signer, pin, txs[0]!);
+    const { signature, check } = await signWithWallet(
+      client,
+      wallet,
+      signer,
+      pin,
+      txs[0]!
+    );
+    expect(check.knownBuild).toBe(true);
+    expect(check.decoded.map((c) => c.functionName)).toEqual([
+      "registerRecordType",
+      "registerRecordType",
+      "setPublisher",
+    ]);
     const posted: string[] = [];
     await proposeToTxService({
       serviceUrl: "https://service.invalid",

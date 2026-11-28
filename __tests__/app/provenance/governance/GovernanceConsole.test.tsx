@@ -2,7 +2,10 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { Address } from "viem";
 import GovernanceConsole from "@/app/provenance/governance/_components/GovernanceConsole";
+import SafeTxCard from "@/app/provenance/governance/_components/SafeTxCard";
+import { makeClient } from "@/lib/provenance-core/client";
 import { registryPins } from "@/lib/provenance-core/config/registries";
+import { buildGovernanceSafeTxs } from "@/lib/provenance-core/governance";
 
 const SAFE = registryPins[1]!.safe;
 const OWNERS: Address[] = [
@@ -13,6 +16,8 @@ const OWNERS: Address[] = [
 const ZERO = "0x0000000000000000000000000000000000000000";
 
 let connected: Address | undefined = OWNERS[0];
+// "0x6001" stands for the v1.0.0-rc.2 build the Museum registry runs; any other code is unknown.
+let registryCode = "0x6001";
 const walletCalls: { method: string; params?: unknown }[] = [];
 const provider = {
   request: jest.fn(
@@ -34,9 +39,21 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
     seizeConnect: jest.fn(),
   }),
 }));
+jest.mock("@/lib/provenance-core/config/builds", () => {
+  const actual = jest.requireActual("@/lib/provenance-core/config/builds");
+  const { keccak256 } = jest.requireActual("viem");
+  return {
+    ...actual,
+    buildForCodeHash: (hash: string | undefined) =>
+      hash === keccak256("0x6001") ? actual.knownBuilds[1] : undefined,
+  };
+});
 // The chain, as the test Safe and Museum registry stand: owner is the Safe, nonce 19.
 jest.mock("@/lib/provenance-core/client", () => ({
   makeClient: () => ({
+    getChainId: async () => 11155111,
+    getBlockNumber: async () => 100n,
+    getCode: async () => registryCode,
     readContract: async ({ functionName }: { functionName: string }) => {
       switch (functionName) {
         case "owner":
@@ -47,6 +64,8 @@ jest.mock("@/lib/provenance-core/client", () => ({
           return OWNERS;
         case "nonce":
           return 19n;
+        case "VERSION":
+          return "1.4.1";
         default:
           throw new Error(functionName);
       }
@@ -72,6 +91,7 @@ const fetchMock = jest.fn(async () => ({
 
 beforeEach(() => {
   connected = OWNERS[0];
+  registryCode = "0x6001";
   walletCalls.length = 0;
   fetchMock.mockClear();
   global.fetch = fetchMock as unknown as typeof fetch;
@@ -208,5 +228,50 @@ describe("GovernanceConsole", () => {
     expect(
       c.queryByRole("button", { name: "Propose" })
     ).not.toBeInTheDocument();
+  });
+
+  it("shows calldata that does not decode as high impact and blocks signing it", async () => {
+    const pin = registryPins[1]!;
+    const [g] = buildGovernanceSafeTxs(pin, [{ kind: "freeze" }], 19n);
+    // The same freeze calldata sent to another address than the pinned registry.
+    const tampered = { ...g!, tx: { ...g!.tx, to: OWNERS[1]! } };
+    const user = userEvent.setup();
+    render(
+      <SafeTxCard
+        pin={pin}
+        g={tampered}
+        index={0}
+        count={1}
+        client={makeClient(11155111, "")}
+      />
+    );
+    expect(
+      screen.getByText(/does not decode as governance calls for this registry/)
+    ).toBeInTheDocument();
+    expect(screen.getByText("High impact")).toBeInTheDocument();
+    expect(screen.queryByText("freeze")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Check and sign" }));
+    expect(
+      await screen.findByText("operation 0 must call the pinned registry")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "The safeTxHash shown is not the hash of this Safe transaction."
+      )
+    ).toBeInTheDocument();
+    expect(walletCalls).toEqual([]);
+  });
+
+  it("blocks signing when the registry's code matches no known build", async () => {
+    registryCode = "0x6002";
+    const { user, card } = await buildFreeze();
+    const c = within(card);
+    await user.click(c.getByRole("button", { name: "Check and sign" }));
+    expect(
+      await c.findByText(
+        "The registry's code matches no known ProvenanceRegistry build."
+      )
+    ).toBeInTheDocument();
+    expect(walletCalls).toEqual([]);
   });
 });

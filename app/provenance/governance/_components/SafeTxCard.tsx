@@ -14,14 +14,18 @@ import type { RegistryPin } from "@/lib/provenance-core/config/registries";
 import {
   checkBeforeSigning,
   decodeGovernanceSafeTx,
+  GovernanceCheckError,
   proposeToTxService,
-  riskOf,
   type DecodedCall,
   type Eip1193Provider,
   type GovernanceCheck,
   type GovernanceSafeTx,
 } from "@/lib/provenance-core/governance";
-import { errorText, signingProblems } from "@/lib/provenance-governance/checks";
+import {
+  errorText,
+  signingProblems,
+  type SigningProblem,
+} from "@/lib/provenance-governance/checks";
 import { formatArg } from "@/lib/provenance-governance/forms";
 import {
   isUserRejection,
@@ -64,6 +68,10 @@ function simMessage(sim: SimResult): string {
   return tr("provenance.governance.simulate.fail", {
     reason: sim.reason ?? "",
   });
+}
+
+function problemText({ key, ...values }: SigningProblem): string {
+  return tr(key, values);
 }
 
 function argNames(functionName: string): string[] {
@@ -232,6 +240,8 @@ function SignPanel({
   const [error, setError] = useState<string>();
   const signer = address as Address | undefined;
 
+  // The checks run first without the wallet, so a blocked SafeTx never asks the wallet to switch
+  // chains. signWithWallet then checks again and signs only the SafeTx it checked.
   const sign = async () => {
     if (signer === undefined) return;
     setBusy(true);
@@ -246,20 +256,24 @@ function SignPanel({
           | undefined;
         if (provider === undefined)
           throw new Error(tr("provenance.governance.wallet.unavailable"));
-        setSignature(await signWithWallet(provider, signer, pin, g));
+        const signed = await signWithWallet(client, provider, signer, pin, g);
+        setCheck(signed.check);
+        setSignature(signed.signature);
       }
     } catch (e) {
-      setError(
-        isUserRejection(e)
-          ? tr("provenance.governance.sign.rejected")
-          : tr("provenance.governance.sign.error", { reason: errorText(e) })
-      );
+      if (e instanceof GovernanceCheckError) setCheck(e.check);
+      else
+        setError(
+          isUserRejection(e)
+            ? tr("provenance.governance.sign.rejected")
+            : tr("provenance.governance.sign.error", { reason: errorText(e) })
+        );
     } finally {
       setBusy(false);
     }
   };
 
-  const problems = check === undefined ? [] : signingProblems(check, g);
+  const problems = check === undefined ? [] : signingProblems(check, pin, g);
   return (
     <div
       className="tw-flex tw-flex-col tw-gap-2 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-3"
@@ -296,13 +310,9 @@ function SignPanel({
         <div role="alert" className="tw-text-sm tw-text-error">
           <p className="tw-m-0">{tr("provenance.governance.sign.blocked")}</p>
           <ul className="tw-m-0 tw-pl-5">
-            {problems.map((p) => {
-              const text =
-                p.key === "provenance.governance.sign.problem.nonce"
-                  ? tr(p.key, { nonce: p.nonce, current: p.current })
-                  : tr(p.key);
-              return <li key={p.key}>{text}</li>;
-            })}
+            {problems.map((p, i) => (
+              <li key={`${p.key}-${i}`}>{problemText(p)}</li>
+            ))}
           </ul>
         </div>
       ) : null}
@@ -332,6 +342,19 @@ function SignPanel({
   );
 }
 
+/** The SafeTx's calls decoded from its own calldata, or why they do not decode. */
+type Decoding =
+  | { calls: DecodedCall[]; error?: undefined }
+  | { calls: []; error: string };
+
+function decodeCalls(pin: RegistryPin, g: GovernanceSafeTx): Decoding {
+  try {
+    return { calls: decodeGovernanceSafeTx(pin, g.tx) };
+  } catch (e) {
+    return { calls: [], error: errorText(e) };
+  }
+}
+
 export default function SafeTxCard({
   pin,
   g,
@@ -348,14 +371,19 @@ export default function SafeTxCard({
   sim?: SimResult | undefined;
 }) {
   const id = useId();
-  const decoded = useMemo(() => decodeGovernanceSafeTx(pin, g.tx), [pin, g]);
-  const high = g.risk === "high";
+  // The risk, the warnings and the calls shown all come from the calldata whose hash is signed,
+  // never from the actions the SafeTx was built from. Calldata that does not decode shows as high
+  // impact, and the checks block signing it.
+  const decoding = useMemo(() => decodeCalls(pin, g), [pin, g]);
+  const decoded = decoding.calls;
+  const high =
+    decoding.error !== undefined || decoded.some((c) => c.risk === "high");
   // A batch can grant a publisher key, so warn for every high-impact call it holds, once each.
   const warnings = [
     ...new Set(
-      g.actions
-        .filter((a) => riskOf(a) === "high")
-        .map((a) => WARNING_KEYS[a.kind])
+      decoded
+        .filter((c) => c.risk === "high")
+        .map((c) => WARNING_KEYS[c.action.kind])
         .filter((k): k is MessageKey => k !== undefined)
     ),
   ];
@@ -401,12 +429,24 @@ export default function SafeTxCard({
           {tr(warning)}
         </p>
       ))}
-      <p className="tw-m-0 tw-text-sm tw-text-iron-300">
-        {g.tx.operation === 1
-          ? tr("provenance.governance.safeTx.batch", { count: decoded.length })
-          : tr("provenance.governance.safeTx.direct")}
-      </p>
-      <DecodedCalls calls={decoded} />
+      {decoding.error === undefined ? (
+        <>
+          <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+            {g.tx.operation === 1
+              ? tr("provenance.governance.safeTx.batch", {
+                  count: decoded.length,
+                })
+              : tr("provenance.governance.safeTx.direct")}
+          </p>
+          <DecodedCalls calls={decoded} />
+        </>
+      ) : (
+        <p role="alert" className={ERROR_TEXT}>
+          {tr("provenance.governance.safeTx.undecodable", {
+            reason: decoding.error,
+          })}
+        </p>
+      )}
       <div className="tw-flex tw-flex-col tw-gap-1">
         <span className="tw-text-xs tw-font-semibold tw-text-iron-400">
           {tr("provenance.governance.safeTx.hash")}
