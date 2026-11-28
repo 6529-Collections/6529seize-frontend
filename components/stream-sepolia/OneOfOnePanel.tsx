@@ -1,5 +1,6 @@
 "use client";
 
+import { darkInputClassName } from "@/components/utils/input/dark-input-styles";
 import { englishAuctionAbi } from "@/lib/stream/abis";
 import { useState } from "react";
 import { formatEther, parseEther, type Address } from "viem";
@@ -26,8 +27,7 @@ export const CARD =
   "tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950 tw-p-4 sm:tw-p-5";
 const LINK =
   "tw-text-iron-200 tw-underline tw-decoration-white/20 tw-underline-offset-4 hover:tw-text-white";
-const INPUT =
-  "tw-block tw-h-12 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-black/25 tw-px-4 tw-text-lg tw-font-semibold tw-tabular-nums tw-text-iron-50 placeholder:tw-text-iron-600 focus:tw-border-primary-400/70 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/20";
+const INPUT = `${darkInputClassName} tw-h-12 tw-text-lg tw-font-semibold tw-tabular-nums`;
 
 
 function Figure({ label, value }: { readonly label: string; readonly value: string }) {

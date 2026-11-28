@@ -15,6 +15,7 @@ import { StreamIdentity } from "./StreamIdentity";
 import { OneOfOnePanel } from "./OneOfOnePanel";
 import { useEdition, useOneOfOne, useWorkMeta } from "./useStreamData";
 import { WorkArt } from "./WorkArt";
+import { StreamLoading } from "./StreamLoading";
 
 const LABEL =
   "tw-m-0 tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500";
@@ -36,7 +37,7 @@ function WorkBody({ token, tokenId }: { readonly token: Address; readonly tokenI
   const edition = useEdition(token, tokenId);
 
   if (meta.isLoading || oneOfOne.isLoading) {
-    return <p className="tw-text-sm tw-text-iron-400">{t(locale, "streamSepolia.loading")}</p>;
+    return <StreamLoading />;
   }
   if (meta.isError || oneOfOne.isError || !meta.data || !oneOfOne.data) {
     return (

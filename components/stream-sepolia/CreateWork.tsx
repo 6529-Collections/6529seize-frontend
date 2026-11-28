@@ -1,5 +1,7 @@
 "use client";
 
+import { darkInputClassName } from "@/components/utils/input/dark-input-styles";
+import CommonBorderedRadioButton from "@/components/utils/radio/CommonBorderedRadioButton";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -38,9 +40,8 @@ import { StepRunner, type Step } from "./StepRunner";
 import { STREAM_BASE } from "./StreamNav";
 import { useMyCollections } from "./useStreamData";
 import { useStreamWallet, WalletGate } from "./WalletGate";
+import { StreamLoading } from "./StreamLoading";
 
-const INPUT =
-  "tw-block tw-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-black/25 tw-px-4 tw-text-base tw-text-iron-100 placeholder:tw-text-iron-600 focus:tw-border-primary-400/70 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/20";
 const FIELD_LABEL = "tw-mb-1.5 tw-block tw-text-sm tw-font-semibold tw-text-iron-200";
 const HINT = "tw-m-0 tw-mt-1.5 tw-text-xs tw-text-iron-500";
 const LINK = "tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-400";
@@ -89,25 +90,20 @@ function ProductChoice({
       </legend>
       <div className="tw-flex tw-flex-col tw-gap-2">
         {options.map((option) => (
-          <label
+          <CommonBorderedRadioButton
             key={option.id}
-            className={`tw-flex tw-cursor-pointer tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-p-3 ${
-              value === option.id ? "tw-border-primary-400/60 tw-bg-primary-500/[0.06]" : "tw-border-white/[0.08]"
-            } ${option.disabled ? "tw-cursor-not-allowed tw-opacity-60" : ""}`}
+            type={option.id}
+            selected={value}
+            name="stream-product"
+            variant="subtle"
+            nativeSelection
+            multiline
+            disabled={option.disabled}
+            onChange={onChange}
           >
-            <input
-              type="radio"
-              name="stream-product"
-              className="tw-mt-1 tw-accent-primary-500"
-              checked={value === option.id}
-              disabled={option.disabled}
-              onChange={() => onChange(option.id)}
-            />
-            <span>
-              <span className="tw-block tw-text-sm tw-font-semibold tw-text-iron-50">{option.title}</span>
-              <span className="tw-block tw-text-xs tw-text-iron-400">{option.help}</span>
-            </span>
-          </label>
+            <span className="tw-block tw-text-sm tw-font-semibold tw-text-iron-50">{option.title}</span>
+            <span className="tw-block tw-text-xs tw-font-normal tw-text-iron-400">{option.help}</span>
+          </CommonBorderedRadioButton>
         ))}
       </div>
     </fieldset>
@@ -251,7 +247,7 @@ function IndependentRun({
       active = false;
     };
   }, [draft, token, editionsToken, viewer]);
-  if (!context) return <p className="tw-text-sm tw-text-iron-400">{t(locale, "streamSepolia.loading")}</p>;
+  if (!context) return <StreamLoading />;
   const chunks = context.media.chunks.length;
   const estimatedFee =
     gasPrice.data === undefined
@@ -344,7 +340,7 @@ function CreateBody({ viewer }: { readonly viewer: Address }) {
   const [reviewing, setReviewing] = useState(false);
   const [done, setDone] = useState<IndependentWorkContext | null>(null);
   if (collections.isLoading) {
-    return <p className="tw-text-sm tw-text-iron-400">{t(locale, "streamSepolia.loading")}</p>;
+    return <StreamLoading />;
   }
   const contracts = collections.data ?? [];
   const oneOfOne = contracts.find((contract) => !contract.editions && contract.status === LISTING_ACTIVE);
@@ -401,13 +397,13 @@ function CreateBody({ viewer }: { readonly viewer: Address }) {
       <MediaPicker media={draft.media} onChange={(media) => update({ media })} />
       <div>
         <label htmlFor="stream-create-title" className={FIELD_LABEL}>{t(locale, "streamSepolia.create.titleField")}</label>
-        <input id="stream-create-title" className={INPUT} maxLength={80} value={draft.title} onChange={(event) => update({ title: event.target.value })} />
+        <input id="stream-create-title" className={darkInputClassName} maxLength={80} value={draft.title} onChange={(event) => update({ title: event.target.value })} />
       </div>
       <div>
         <label htmlFor="stream-create-description" className={FIELD_LABEL}>{t(locale, "streamSepolia.create.description")}</label>
         <textarea
           id="stream-create-description"
-          className={`${INPUT} tw-h-24 tw-py-2.5`}
+          className={`${darkInputClassName} tw-h-24 tw-py-2.5`}
           maxLength={600}
           value={draft.description}
           onChange={(event) => update({ description: event.target.value })}
@@ -418,7 +414,7 @@ function CreateBody({ viewer }: { readonly viewer: Address }) {
           <label htmlFor="stream-create-artist" className={FIELD_LABEL}>{t(locale, "streamSepolia.create.artistName")}</label>
           <input
             id="stream-create-artist"
-            className={INPUT}
+            className={darkInputClassName}
             maxLength={48}
             placeholder={shortAddress(viewer)}
             value={draft.artistName}
@@ -429,7 +425,7 @@ function CreateBody({ viewer }: { readonly viewer: Address }) {
           <label htmlFor="stream-create-royalty" className={FIELD_LABEL}>{t(locale, "streamSepolia.create.royalty")}</label>
           <input
             id="stream-create-royalty"
-            className={INPUT}
+            className={darkInputClassName}
             inputMode="decimal"
             value={draft.royalty}
             aria-invalid={!royaltyValid}
@@ -460,7 +456,7 @@ function CreateBody({ viewer }: { readonly viewer: Address }) {
             <label htmlFor="stream-create-cap" className={FIELD_LABEL}>{t(locale, "streamSepolia.create.cap")}</label>
             <input
               id="stream-create-cap"
-              className={INPUT}
+              className={darkInputClassName}
               inputMode="numeric"
               value={draft.cap}
               aria-invalid={!capValid}

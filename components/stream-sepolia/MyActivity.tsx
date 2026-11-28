@@ -24,6 +24,7 @@ import { TxAction } from "./TxAction";
 import { useNow } from "./useStreamData";
 import { WorkTitle } from "./WorkTitle";
 import { useStreamWallet, WalletGate } from "./WalletGate";
+import { StreamLoading } from "./StreamLoading";
 
 const LINK = "tw-text-iron-100 tw-underline tw-decoration-white/20 tw-underline-offset-4 hover:tw-text-white";
 const ROW =
@@ -144,7 +145,7 @@ function ActivityBody({ viewer }: { readonly viewer: Address }) {
     refetchInterval: 30_000,
   });
   if (activity.isLoading) {
-    return <p className="tw-text-sm tw-text-iron-400">{t(locale, "streamSepolia.loading")}</p>;
+    return <StreamLoading />;
   }
   if (!activity.data) {
     return <p role="alert" className="tw-text-sm tw-text-red">{t(locale, "streamSepolia.loadError")}</p>;

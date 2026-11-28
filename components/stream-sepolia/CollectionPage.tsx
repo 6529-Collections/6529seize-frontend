@@ -1,5 +1,6 @@
 "use client";
 
+import { darkInputClassName } from "@/components/utils/input/dark-input-styles";
 import Link from "next/link";
 import { useState } from "react";
 import type { Address } from "viem";
@@ -26,9 +27,8 @@ import { useMyCollections, useSales } from "./useStreamData";
 import { WorkTitle } from "./WorkTitle";
 import { useStreamWallet, WalletGate } from "./WalletGate";
 import { workHref } from "./StreamHome";
+import { StreamLoading } from "./StreamLoading";
 
-const INPUT =
-  "tw-block tw-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-black/25 tw-px-4 tw-text-base tw-text-iron-100 placeholder:tw-text-iron-600 focus:tw-border-primary-400/70 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/20";
 const LINK = "tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-400";
 
 interface PairContext {
@@ -156,7 +156,7 @@ function PairSetup({
           </label>
           <input
             id="stream-collection-name"
-            className={INPUT}
+            className={darkInputClassName}
             value={name}
             maxLength={48}
             onChange={(event) => setName(event.target.value)}
@@ -180,7 +180,7 @@ function CollectionBody({ viewer }: { readonly viewer: Address }) {
   const collections = useMyCollections(viewer);
   const sales = useSales();
   if (collections.isLoading) {
-    return <p className="tw-text-sm tw-text-iron-400">{t(locale, "streamSepolia.loading")}</p>;
+    return <StreamLoading />;
   }
   const contracts = collections.data ?? [];
   const mineTokens = contracts.filter((contract) => !contract.editions).map((contract) => contract.token);

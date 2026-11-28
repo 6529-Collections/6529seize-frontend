@@ -16,6 +16,7 @@ import { ReadyToStart } from "./ReadyToStart";
 import { STREAM_BASE } from "./StreamNav";
 import { useNow, useSales, useWorkMeta } from "./useStreamData";
 import { WorkArt } from "./WorkArt";
+import { StreamLoading } from "./StreamLoading";
 
 const LABEL =
   "tw-m-0 tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500";
@@ -177,7 +178,7 @@ export function StreamHome() {
   const now = useNow();
   const sales = useSales();
   if (sales.isLoading) {
-    return <p className="tw-text-sm tw-text-iron-400">{t(locale, "streamSepolia.loading")}</p>;
+    return <StreamLoading />;
   }
   if (sales.isError || !sales.data) {
     return (
