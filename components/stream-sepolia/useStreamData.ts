@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import type { Address, Hex } from "viem";
 
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
+import { getStreamClient } from "@/lib/stream/client";
 import { ACTIVE_STREAM_INSTANCE } from "@/lib/stream/instances";
 import {
   listSales,
@@ -59,11 +60,23 @@ export function useWorkArt(args: {
   return { meta, art };
 }
 
+/** Inside the closing window (or just past the end) the page reads every block. */
+const CLOSING_REFRESH_MS = 4_000;
+
+function nearEnd(endTime: bigint | undefined, windowSeconds: number): boolean {
+  if (endTime === undefined) return false;
+  const left = Number(endTime) - chainNowSeconds();
+  return left <= windowSeconds && left > -120;
+}
+
 export function useOneOfOne(token: Address, tokenId: bigint) {
   return useQuery({
     queryKey: [...KEY, "oneOfOne", token.toLowerCase(), tokenId.toString()],
     queryFn: () => readOneOfOne(token, tokenId),
-    refetchInterval: LIVE_REFRESH_MS,
+    refetchInterval: (query) =>
+      nearEnd(query.state.data?.auction.endTime, query.state.data?.extensionWindow ?? 0)
+        ? CLOSING_REFRESH_MS
+        : LIVE_REFRESH_MS,
   });
 }
 
@@ -71,7 +84,10 @@ export function useEdition(token: Address, tokenId: bigint) {
   return useQuery({
     queryKey: [...KEY, "edition", token.toLowerCase(), tokenId.toString()],
     queryFn: () => readEdition(token, tokenId),
-    refetchInterval: LIVE_REFRESH_MS,
+    refetchInterval: (query) =>
+      nearEnd(query.state.data?.endTimes.endTime, query.state.data?.sale.terms.softWindow ?? 0)
+        ? CLOSING_REFRESH_MS
+        : LIVE_REFRESH_MS,
   });
 }
 
@@ -84,11 +100,35 @@ export function useClaimable(viewer: Address | undefined) {
   });
 }
 
-/** Unix seconds, ticking once a second, for countdowns. */
+/** Seconds the chain's latest block time is ahead of this device's clock. */
+let chainOffsetSeconds = 0;
+
+function chainNowSeconds(): number {
+  return Math.floor(Date.now() / 1000 + chainOffsetSeconds);
+}
+
+/**
+ * Keeps the countdown on the chain's time: the contracts decide "ended" by
+ * block time, so a visitor's fast or slow clock must not.
+ */
+export function useChainClock() {
+  return useQuery({
+    queryKey: [...KEY, "chainClock"],
+    queryFn: async () => {
+      const block = await getStreamClient().getBlock({ blockTag: "latest" });
+      chainOffsetSeconds = Number(block.timestamp) - Date.now() / 1000;
+      return Number(block.timestamp);
+    },
+    refetchInterval: 12_000,
+  });
+}
+
+/** Chain time in Unix seconds, ticking once a second, for countdowns. */
 export function useNow(): number {
-  const [now, setNow] = useState(() => Math.floor(Date.now() / 1000));
+  useChainClock();
+  const [now, setNow] = useState(chainNowSeconds);
   useEffect(() => {
-    const timer = window.setInterval(() => setNow(Math.floor(Date.now() / 1000)), 1000);
+    const timer = window.setInterval(() => setNow(chainNowSeconds()), 1000);
     return () => window.clearInterval(timer);
   }, []);
   return now;

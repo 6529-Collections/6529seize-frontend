@@ -57,6 +57,7 @@ function headline(view: OneOfOneView, detail: OneOfOneDetail, locale: SupportedL
         left: { label: t(locale, "streamSepolia.one.soldFor"), value: `${bid} ETH` },
         right: null,
       };
+    case "ending":
     case "ended":
       return {
         left: {
@@ -96,6 +97,9 @@ function StatusLine({ view, detail }: { readonly view: OneOfOneView; readonly de
       break;
     case "closing":
       text = t(locale, "streamSepolia.one.status.closing", { minutes: window });
+      break;
+    case "ending":
+      text = t(locale, "streamSepolia.one.status.ending");
       break;
     case "ended":
       text = t(locale, "streamSepolia.one.status.ended");

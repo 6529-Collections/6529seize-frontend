@@ -59,10 +59,10 @@ describe("oneOfOneView", () => {
     expect(oneOfOneView(one({ bidder: ALICE, bid: 5n, viewer: BOB })).viewerLeads).toBe(false);
   });
 
-  it("treats an ACTIVE read past its end as ended and settleable", () => {
+  it("waits for the chain before offering to finish when the clock passes the end", () => {
     const view = oneOfOneView(one({ endTime: BigInt(NOW - 1) }));
-    expect(view.screen).toBe("ended");
-    expect(view.canSettle).toBe(true);
+    expect(view.screen).toBe("ending");
+    expect(view.canSettle).toBe(false);
     expect(view.canBid).toBe(false);
   });
 

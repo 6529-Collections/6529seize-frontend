@@ -62,6 +62,7 @@ export type OneOfOneScreen =
   | "not_started"
   | "live"
   | "closing"
+  | "ending"
   | "ended"
   | "sold"
   | "unsold_museum"
@@ -118,9 +119,10 @@ export function oneOfOneView(input: OneOfOneInput): OneOfOneView {
     case AUCTION_STATE.NONE:
       return { ...base, screen: "not_started" };
     case AUCTION_STATE.ACTIVE: {
-      // The derived state stays ACTIVE until the end; guard against a stale read.
+      // The clock says ended but the last read said ACTIVE: wait for the chain to agree
+      // (a last-second bid may have moved the end) before offering to finish the sale.
       if (secondsLeft === 0) {
-        return { ...base, screen: "ended", canSettle: true };
+        return { ...base, screen: "ending" };
       }
       return {
         ...base,
