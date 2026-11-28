@@ -93,3 +93,38 @@ export function nearestStep(prices: readonly bigint[], wei: bigint): number {
   });
   return best;
 }
+
+/**
+ * The lowest price step a bid can be raised to so that all of it would win
+ * if bidding closed now. The bid's own units are moved, not counted twice.
+ * Returns null when no higher step would get it in.
+ */
+export function raiseTargetStep(args: {
+  readonly prices: readonly bigint[];
+  readonly unitsByStep: readonly number[];
+  readonly cap: number;
+  readonly marginShare: number;
+  readonly fromStep: number;
+  readonly quantity: number;
+}): number | null {
+  const base = Array.from({ length: args.prices.length }, (_, step) => args.unitsByStep[step] ?? 0);
+  base[args.fromStep] = Math.max(0, (base[args.fromStep] ?? 0) - args.quantity);
+  for (let step = args.fromStep + 1; step < args.prices.length; step++) {
+    const units = base.slice();
+    units[step] = (units[step] ?? 0) + args.quantity;
+    const { candidates, pick } = clearingCandidates({
+      prices: args.prices,
+      unitsByStep: units,
+      cap: args.cap,
+      marginShare: args.marginShare,
+    });
+    const chosen = candidates[pick];
+    if (!chosen) continue;
+    // A raised bid joins the back of its new step, so with a cap every other unit at or
+    // above that step comes first.
+    const othersAtOrAbove = base.slice(step).reduce((sum, value) => sum + value, 0);
+    const fits = args.cap === 0 || othersAtOrAbove + args.quantity <= args.cap;
+    if (chosen.step <= step && fits) return step;
+  }
+  return null;
+}

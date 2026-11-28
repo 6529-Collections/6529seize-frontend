@@ -130,6 +130,9 @@ function StatusLine({ view, detail }: { readonly view: OneOfOneView; readonly de
   // A sale that ended with no buyer for another reason says so instead of "No one bid".
   if (view.screen.startsWith("unsold_") && detail.closedHow) {
     text = t(locale, detail.closedHow === "rescued" ? "streamSepolia.one.status.rescued" : "streamSepolia.one.status.refused");
+  } else if (view.screen.startsWith("unsold_") && detail.bids.length > 0) {
+    // Bids but no buyer and neither event: the collection was no longer listed at the end.
+    text = t(locale, "streamSepolia.one.status.delisted");
   }
   return (
     <p className={`tw-m-0 tw-text-sm ${view.screen === "closing" ? "tw-text-amber-300" : "tw-text-iron-300"}`}>

@@ -16,6 +16,7 @@ import {
   bidStanding,
   clearingCandidates,
   nearestStep,
+  raiseTargetStep,
   unitsByStepFrom,
   type BidStanding,
 } from "@/lib/stream/editions";
@@ -43,6 +44,11 @@ function standingLabel(standing: BidStanding, final: boolean, locale: SupportedL
   if (standing === "in") return t(locale, final ? "streamSepolia.ed.won" : "streamSepolia.ed.in");
   if (standing === "part") return t(locale, final ? "streamSepolia.ed.partWon" : "streamSepolia.ed.part");
   return t(locale, final ? "streamSepolia.ed.lost" : "streamSepolia.ed.out");
+}
+
+function standingFromUnits(won: number, quantity: number): BidStanding {
+  if (won >= quantity) return "in";
+  return won > 0 ? "part" : "out";
 }
 
 /** Whether the edition result is final (bidding has closed). */
@@ -416,7 +422,14 @@ function BidComposer({ detail }: { readonly detail: EditionDetail }) {
 
 function useBidOutcomes(detail: EditionDetail, bids: readonly EditionBidRow[], enabled: boolean) {
   return useQuery({
-    queryKey: [QueryKey.STREAM_SEPOLIA, "outcomes", detail.saleId.toString(), bids.map((b) => b.bidId.toString()).join(",")],
+    queryKey: [
+      QueryKey.STREAM_SEPOLIA,
+      "outcomes",
+      detail.saleId.toString(),
+      detail.sale.bidCount,
+      detail.sale.status,
+      bids.map((b) => b.bidId.toString()).join(","),
+    ],
     enabled: enabled && bids.length > 0,
     queryFn: () =>
       Promise.all(
@@ -445,7 +458,8 @@ function YourBids({
   const wallet = useStreamWallet();
   const mine = detail.bids.filter((bid) => sameAddress(bid.bidder, wallet.address));
   const open = mine.filter((bid) => !bid.claimed);
-  const outcomes = useBidOutcomes(detail, open, view.canClaim);
+  // The contract's own answer for each of your bids, live or final (exact at a cut price).
+  const outcomes = useBidOutcomes(detail, open, true);
   if (mine.length === 0) return null;
   const rationed = detail.clearing?.rationed ?? false;
   const held = open.reduce((sum, bid) => sum + (detail.prices[bid.step] ?? 0n) * BigInt(bid.quantity), 0n);
@@ -461,8 +475,10 @@ function YourBids({
       <WalletGate>
       <ul className="tw-m-0 tw-mt-3 tw-list-none tw-p-0">
         {mine.map((bid) => {
-          const standing = bidStanding({ step: bid.step, clearingStep, rationed });
           const outcome = bid.claimed ? undefined : outcomes.data?.[open.indexOf(bid)];
+          const standing = outcome
+            ? standingFromUnits(Number(outcome.unitsWon), bid.quantity)
+            : bidStanding({ step: bid.step, clearingStep, rationed });
           return (
             <li key={bid.bidId.toString()} className="tw-flex tw-flex-col tw-gap-2 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-py-3">
               <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-text-sm">
@@ -530,25 +546,26 @@ function YourBids({
 
 function RaiseAction({ detail, bid }: { readonly detail: EditionDetail; readonly bid: EditionBidRow }) {
   const locale = useBrowserLocale();
-  const target = useQuery({
-    queryKey: [QueryKey.STREAM_SEPOLIA, "raise", detail.saleId.toString(), detail.sale.bidCount, bid.bidId.toString(), bid.step],
-    queryFn: () =>
-      getStreamClient().readContract({
-        address: detail.auctionAddress,
-        abi: editionAuctionAbi,
-        functionName: "lowestWinningStep",
-        args: [detail.saleId, BigInt(bid.quantity)],
-      }),
+  const step = raiseTargetStep({
+    prices: detail.prices,
+    unitsByStep: unitsByStepFrom(detail.lowStep, detail.unitsByStep),
+    cap: detail.sale.maxCount,
+    marginShare: detail.sale.terms.marginShare,
+    fromStep: bid.step,
+    quantity: bid.quantity,
   });
-  if (!target.data?.[0]) return null;
-  const step = Math.min(Math.max(Number(target.data[1]), bid.step + 1), detail.prices.length - 1);
-  if (step <= bid.step) return null;
-  const extra = ((detail.prices[step] ?? 0n) - (detail.prices[bid.step] ?? 0n)) * BigInt(bid.quantity);
+  if (step === null) return null;
+  const price = detail.prices[step] ?? 0n;
+  const extra = (price - (detail.prices[bid.step] ?? 0n)) * BigInt(bid.quantity);
   return (
     <TxAction
       variant="secondary"
-      label={t(locale, "streamSepolia.ed.raise", { price: formatEth(detail.prices[step] ?? 0n, locale) })}
-      description={t(locale, "streamSepolia.ed.raiseHelp", { amount: formatEth(extra, locale) })}
+      label={t(locale, "streamSepolia.ed.raise", { price: formatEth(price, locale) })}
+      description={t(locale, "streamSepolia.ed.raiseHelp", {
+        amount: formatEth(extra, locale),
+        count: formatCount(bid.quantity, locale),
+      })}
+      doneText={t(locale, "streamSepolia.ed.raiseDone", { price: formatEth(price, locale) })}
       request={() => ({
         address: detail.auctionAddress,
         abi,

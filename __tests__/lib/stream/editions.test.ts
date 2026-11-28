@@ -2,6 +2,7 @@ import {
   bidStanding,
   clearingCandidates,
   nearestStep,
+  raiseTargetStep,
   unitsByStepFrom,
 } from "@/lib/stream/editions";
 
@@ -68,5 +69,50 @@ describe("nearestStep", () => {
     expect(nearestStep(PRICES, 120_000_000_000_000n)).toBe(4);
     expect(nearestStep(PRICES, 102_500_000_000_000n)).toBe(0);
     expect(nearestStep(PRICES, 1n)).toBe(0);
+  });
+});
+
+describe("raiseTargetStep", () => {
+  it("moves the bid instead of counting it twice", () => {
+    // Bids: 1 at step 9 (others), 1 at step 0 (mine). Clearing picks step 0 with 2 units
+    // only if 2 x 100 >= 0.9 x best; best is 154 (1 at step 9) vs 200 (2 at step 0) -> 2 at step 0.
+    // Mine is already in; a raise target from step 0 for my 1 unit should be step 1 at most.
+    const target = raiseTargetStep({
+      prices: PRICES,
+      unitsByStep: [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      cap: 0,
+      marginShare: 10_000,
+      fromStep: 0,
+      quantity: 1,
+    });
+    expect(target).toBe(1);
+  });
+
+  it("finds the step that gets an out bid in", () => {
+    // Others: 10 at step 9 (1540). Mine: 1 at step 0. Out today (11 x 100 = 1100 < 0.9 x 1540).
+    const target = raiseTargetStep({
+      prices: PRICES,
+      unitsByStep: [1, 0, 0, 0, 0, 0, 0, 0, 0, 10],
+      cap: 0,
+      marginShare: 10_000,
+      fromStep: 0,
+      quantity: 1,
+    });
+    // At step 9 it joins the 10 there: 11 x 154 wins.
+    expect(target).not.toBeNull();
+    expect(target!).toBeGreaterThan(0);
+  });
+
+  it("returns null when a cap leaves no room", () => {
+    expect(
+      raiseTargetStep({
+        prices: PRICES,
+        unitsByStep: [1, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+        cap: 3,
+        marginShare: 10_000,
+        fromStep: 0,
+        quantity: 1,
+      })
+    ).toBeNull();
   });
 });
