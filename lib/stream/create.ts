@@ -32,7 +32,7 @@ import { editionSaleExists, saleIdOf } from "./reads";
 import { ZERO_ADDRESS } from "./state";
 
 /** What a create step may send. Matches the UI's transaction request shape. */
-interface CreateIo {
+export interface CreateIo {
   readonly account: Address;
   send(request: StreamTxRequest): Promise<TransactionReceipt>;
 }
@@ -58,7 +58,7 @@ function manifestOf(file: StoredFile) {
 }
 
 /** A stored file's ID, computed by the content store from its manifest. */
-function fileIdOf(file: StoredFile): Promise<Hex> {
+export function fileIdOf(file: StoredFile): Promise<Hex> {
   return getStreamClient().readContract({
     address: getStreamInstance().addresses.contentStore,
     abi: contentStoreAbi,
@@ -112,7 +112,7 @@ export async function storeFile(
   return { fileId, sent };
 }
 
-function cc0TextFileId(): Promise<Hex> {
+export function cc0TextFileId(): Promise<Hex> {
   return getStreamClient().readContract({
     address: getStreamInstance().addresses.workFacts,
     abi: workFactsAbi,
@@ -180,7 +180,7 @@ export async function storeStartFile(context: IndependentWorkContext, io: Create
 }
 
 /** The token a sale start minted, from its SaleStarted log. */
-function tokenIdFromStart(receipt: TransactionReceipt, token: Address): bigint | null {
+export function tokenIdFromStart(receipt: TransactionReceipt, token: Address): bigint | null {
   const logs = parseEventLogs({ abi: englishAuctionAbi, logs: receipt.logs, eventName: "SaleStarted" });
   const match = logs.find((log) => log.args.token.toLowerCase() === token.toLowerCase());
   return match ? match.args.tokenId : null;
@@ -275,7 +275,7 @@ export async function openWorkRecord(context: IndependentWorkContext, io: Create
   return sent;
 }
 
-interface SigningIo extends CreateIo {
+export interface SigningIo extends CreateIo {
   signTypedData(data: unknown): Promise<Hex>;
 }
 

@@ -2,25 +2,15 @@
 
 import { darkInputClassName } from "@/components/utils/input/dark-input-styles";
 import CommonBorderedRadioButton from "@/components/utils/radio/CommonBorderedRadioButton";
-import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { Address } from "viem";
 
-import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/stream-sepolia";
-import {
-  estimateCreateGas,
-  MAX_MEDIA_BYTES,
-  mediaDataUrl,
-  prepareMedia,
-  recordBytes,
-  toStoredFile,
-} from "@/lib/stream/content";
-import { getStreamClient } from "@/lib/stream/client";
+import { MAX_MEDIA_BYTES, mediaDataUrl, prepareMedia, type StoredFile } from "@/lib/stream/content";
 import {
   approveIndependentItem,
   openIndependentEdition,
@@ -30,35 +20,22 @@ import {
   storeFile,
   type IndependentWorkContext,
 } from "@/lib/stream/create";
+import type { IndependentContract } from "@/lib/stream/activity";
 import { LISTING_ACTIVE } from "@/lib/stream/independent";
 import { getStreamInstance } from "@/lib/stream/instances";
 import { sameAddress } from "@/lib/stream/state";
 
-import { formatCount, formatDuration, formatEth, shortAddress } from "./format";
+import { FIELD_LABEL, HINT, LINK, parseCap, RunHeader, useStoredFiles, type Draft } from "./createShared";
+import { CollectionField, CuratedRun, type CreatedWork } from "./CuratedRun";
+import { formatCount, shortAddress } from "./format";
 import { CARD } from "./OneOfOnePanel";
 import { StepRunner, type Step } from "./StepRunner";
 import { STREAM_BASE } from "./StreamNav";
-import { useMyCollections, useSaleDuration } from "./useStreamData";
+import { useMyCollections } from "./useStreamData";
 import { useStreamWallet, WalletGate } from "./WalletGate";
 import { StreamLoading } from "./StreamLoading";
 
-/** Below this the estimate rounds to nothing useful: say "less than" instead. */
-const TINY_FEE = 10_000_000_000_000n;
-const FIELD_LABEL = "tw-mb-1.5 tw-block tw-text-sm tw-font-semibold tw-text-iron-200";
-const HINT = "tw-m-0 tw-mt-1.5 tw-text-xs tw-text-iron-500";
-const LINK = "tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-400";
-
 type Product = "stream" | "independent";
-
-interface Draft {
-  readonly media: { bytes: Uint8Array; mimeType: string } | null;
-  readonly title: string;
-  readonly description: string;
-  readonly artistName: string;
-  readonly royalty: string;
-  readonly editions: boolean;
-  readonly cap: string;
-}
 
 function ProductChoice({
   value,
@@ -184,11 +161,6 @@ function parseRoyalty(value: string): number | null {
   return Math.round(number * 1000);
 }
 
-function parseCap(value: string): number | null {
-  if (value.trim() === "") return 0;
-  const number = Number.parseInt(value, 10);
-  return Number.isFinite(number) && number > 0 && number < 4_294_967_295 ? number : null;
-}
 
 function reviewLine(draft: Draft, locale: SupportedLocale): string {
   if (!draft.editions) return t(locale, "streamSepolia.create.reviewOne");
@@ -198,64 +170,42 @@ function reviewLine(draft: Draft, locale: SupportedLocale): string {
   });
 }
 
-function IndependentRun({
-  token,
-  editionsToken,
-  draft,
-  viewer,
-  onDone,
-}: {
+function IndependentRun(props: {
   readonly viewer: Address;
   readonly token: Address;
   readonly editionsToken: Address | null;
   readonly draft: Draft;
-  readonly onDone: (context: IndependentWorkContext) => void;
+  readonly onDone: (work: CreatedWork) => void;
+}) {
+  const files = useStoredFiles(props.draft, props.viewer);
+  if (!files) return <StreamLoading />;
+  return <IndependentSteps {...props} files={files} />;
+}
+
+function IndependentSteps({
+  token,
+  editionsToken,
+  draft,
+  files,
+  onDone,
+}: {
+  readonly token: Address;
+  readonly editionsToken: Address | null;
+  readonly draft: Draft;
+  readonly files: { readonly media: StoredFile; readonly record: StoredFile };
+  readonly onDone: (work: CreatedWork) => void;
 }) {
   const locale = useBrowserLocale();
-  // One run's state, filled step by step so "Continue" resumes after a failure.
-  const [context, setContext] = useState<IndependentWorkContext | null>(null);
-  const duration = useSaleDuration();
-  const gasPrice = useQuery({
-    queryKey: [QueryKey.STREAM_SEPOLIA, "gasPrice"],
-    queryFn: () => getStreamClient().getGasPrice(),
-    staleTime: 60_000,
-  });
-  useEffect(() => {
-    let active = true;
-    const media = draft.media!;
-    void Promise.all([
-      toStoredFile(media.bytes, media.mimeType),
-      toStoredFile(
-        recordBytes({
-          name: draft.title.trim(),
-          description: draft.description.trim(),
-          artist: draft.artistName.trim() || shortAddress(viewer),
-          year: new Date().getUTCFullYear(),
-        }),
-        "application/json"
-      ),
-    ]).then(([mediaFile, recordFile]) => {
-      if (!active) return;
-      // A run keeps its first context, so a re-render never drops what earlier steps learned.
-      setContext((current) => current ?? {
-        token,
-        editionsToken: draft.editions ? editionsToken : null,
-        media: mediaFile,
-        record: recordFile,
-        royaltyRate: parseRoyalty(draft.royalty) ?? 6529,
-        editionCap: draft.editions ? (parseCap(draft.cap) ?? 0) : null,
-      });
-    });
-    return () => {
-      active = false;
-    };
-  }, [draft, token, editionsToken, viewer]);
-  if (!context) return <StreamLoading />;
+  // One run's state, created once and filled step by step so "Continue" resumes after a failure.
+  const [context] = useState<IndependentWorkContext>(() => ({
+    token,
+    editionsToken: draft.editions ? editionsToken : null,
+    media: files.media,
+    record: files.record,
+    royaltyRate: parseRoyalty(draft.royalty) ?? 6529,
+    editionCap: draft.editions ? (parseCap(draft.cap) ?? 0) : null,
+  }));
   const chunks = context.media.chunks.length;
-  const estimatedFee =
-    gasPrice.data === undefined
-      ? null
-      : estimateCreateGas(context.media.bytes.length, context.record.bytes.length) * gasPrice.data;
   const steps: Step<IndependentWorkContext>[] = [
     {
       id: "media",
@@ -312,32 +262,92 @@ function IndependentRun({
   });
   return (
     <>
-      {duration.data !== undefined && duration.data > 0 ? (
-        <p className="tw-m-0 tw-mb-1 tw-text-sm tw-text-iron-300">
-          {t(locale, "streamSepolia.saleLength", { duration: formatDuration(duration.data, locale) })}
-        </p>
-      ) : null}
-      {estimatedFee === null ? null : (
-        <p className="tw-m-0 tw-mb-3 tw-text-sm tw-text-iron-300">
-          {estimatedFee < TINY_FEE
-            ? t(locale, "streamSepolia.create.feeTiny", { amount: formatEth(TINY_FEE, locale) })
-            : t(locale, "streamSepolia.create.feeEstimate", { amount: formatEth(estimatedFee, locale) })}
-        </p>
-      )}
-    <StepRunner
-      steps={steps}
-      context={context}
-      startLabel={t(locale, "streamSepolia.create.go")}
-      onFinished={onDone}
-    />
+      <RunHeader media={files.media} record={files.record} />
+      <StepRunner
+        steps={steps}
+        context={context}
+        startLabel={t(locale, "streamSepolia.create.go")}
+        onFinished={(ctx) => {
+          if (ctx.tokenId !== undefined) onDone({ token: ctx.token, tokenId: ctx.tokenId, editions: draft.editions });
+        }}
+      />
     </>
   );
+}
+
+function EditionsField({
+  draft,
+  available,
+  capValid,
+  onChange,
+}: {
+  readonly draft: Draft;
+  readonly available: boolean;
+  readonly capValid: boolean;
+  readonly onChange: (patch: Partial<Draft>) => void;
+}) {
+  const locale = useBrowserLocale();
+  const update = onChange;
+  const editionsAvailable = available;
+  return (
+      <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-p-3">
+      <label className="tw-flex tw-items-start tw-gap-3 tw-text-sm tw-text-iron-100">
+        <input
+          type="checkbox"
+          className="tw-mt-1 tw-accent-primary-500"
+          checked={draft.editions}
+          disabled={!editionsAvailable}
+          onChange={(event) => update({ editions: event.target.checked })}
+        />
+        <span>
+          <span className="tw-block tw-font-semibold">{t(locale, "streamSepolia.create.editions")}</span>
+          <span className="tw-block tw-text-xs tw-text-iron-400">
+            {editionsAvailable ? t(locale, "streamSepolia.create.editionsHelp") : t(locale, "streamSepolia.create.editionsNeedContract")}
+          </span>
+        </span>
+      </label>
+      {draft.editions ? (
+        <div className="tw-mt-3 tw-max-w-xs">
+          <label htmlFor="stream-create-cap" className={FIELD_LABEL}>{t(locale, "streamSepolia.create.cap")}</label>
+          <input
+            id="stream-create-cap"
+            className={darkInputClassName}
+            inputMode="numeric"
+            value={draft.cap}
+            aria-invalid={!capValid}
+            onChange={(event) => update({ cap: event.target.value })}
+          />
+          <p className={HINT}>{t(locale, "streamSepolia.create.capHelp")}</p>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+/** The artist's listed 1/1 contract and its editions partner, if any. */
+function listedContracts(contracts: readonly IndependentContract[]) {
+  const oneOfOne = contracts.find((contract) => !contract.editions && contract.status === LISTING_ACTIVE);
+  const editions = oneOfOne
+    ? contracts.find(
+        (contract) =>
+          contract.editions && contract.status === LISTING_ACTIVE && sameAddress(contract.partner, oneOfOne.token)
+      )
+    : undefined;
+  return { oneOfOne, editions };
+}
+
+function draftReady(draft: Draft, curated: boolean, hasContract: boolean): boolean {
+  const capValid = !draft.editions || parseCap(draft.cap) !== null;
+  const base = !!draft.media && draft.title.trim().length > 0 && capValid;
+  if (curated) return base && (draft.collection !== "new" || draft.newCollectionName.trim().length > 0);
+  return base && parseRoyalty(draft.royalty) !== null && hasContract;
 }
 
 function CreateBody({ viewer }: { readonly viewer: Address }) {
   const locale = useBrowserLocale();
   const collections = useMyCollections(viewer);
-  const [product, setProduct] = useState<Product>("independent");
+  // Curated first where any wallet can create curated works (r9 on).
+  const [product, setProduct] = useState<Product>(getStreamInstance().curatedCreationOpen ? "stream" : "independent");
   const [draft, setDraft] = useState<Draft>({
     media: null,
     title: "",
@@ -346,21 +356,16 @@ function CreateBody({ viewer }: { readonly viewer: Address }) {
     royalty: "6.529",
     editions: false,
     cap: "",
+    collection: "new",
+    newCollectionName: "",
   });
   const [reviewing, setReviewing] = useState(false);
-  const [done, setDone] = useState<IndependentWorkContext | null>(null);
+  const [done, setDone] = useState<CreatedWork | null>(null);
   if (collections.isLoading) {
     return <StreamLoading onRetry={() => void collections.refetch()} />;
   }
-  const contracts = collections.data ?? [];
-  const oneOfOne = contracts.find((contract) => !contract.editions && contract.status === LISTING_ACTIVE);
-  const editions = oneOfOne
-    ? contracts.find(
-        (contract) =>
-          contract.editions && contract.status === LISTING_ACTIVE && sameAddress(contract.partner, oneOfOne.token)
-      )
-    : undefined;
-  if (done?.tokenId !== undefined) {
+  const { oneOfOne, editions } = listedContracts(collections.data ?? []);
+  if (done) {
     return (
       <section className={CARD}>
         <p className="tw-m-0 tw-text-lg tw-font-semibold tw-text-emerald-400">{t(locale, "streamSepolia.create.done")}</p>
@@ -372,9 +377,11 @@ function CreateBody({ viewer }: { readonly viewer: Address }) {
   }
   const royaltyValid = parseRoyalty(draft.royalty) !== null;
   const capValid = !draft.editions || parseCap(draft.cap) !== null;
-  const ready = !!draft.media && draft.title.trim().length > 0 && royaltyValid && capValid && !!oneOfOne;
+  const curated = product === "stream";
+  const ready = draftReady(draft, curated, !!oneOfOne);
+  const editionsAvailable = curated || !!editions;
   const update = (patch: Partial<Draft>) => setDraft((current) => ({ ...current, ...patch }));
-  if (reviewing && oneOfOne) {
+  if (reviewing && (curated || oneOfOne)) {
     return (
       <section className={CARD} aria-labelledby="stream-create-review">
         <h2 id="stream-create-review" className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50">
@@ -382,7 +389,11 @@ function CreateBody({ viewer }: { readonly viewer: Address }) {
         </h2>
         <p className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-400">{reviewLine(draft, locale)}</p>
         <div className="tw-mt-4">
-          <IndependentRun viewer={viewer} token={oneOfOne.token} editionsToken={editions?.token ?? null} draft={draft} onDone={setDone} />
+          {curated || !oneOfOne ? (
+            <CuratedRun viewer={viewer} draft={draft} onDone={setDone} />
+          ) : (
+            <IndependentRun viewer={viewer} token={oneOfOne.token} editionsToken={editions?.token ?? null} draft={draft} onDone={setDone} />
+          )}
         </div>
       </section>
     );
@@ -403,6 +414,9 @@ function CreateBody({ viewer }: { readonly viewer: Address }) {
             {t(locale, "streamSepolia.create.makeCollection")}
           </Link>
         </p>
+      ) : null}
+      {curated ? (
+        <CollectionField choice={draft.collection} newName={draft.newCollectionName} onChange={update} />
       ) : null}
       <MediaPicker media={draft.media} onChange={(media) => update({ media })} />
       <div>
@@ -431,6 +445,7 @@ function CreateBody({ viewer }: { readonly viewer: Address }) {
             onChange={(event) => update({ artistName: event.target.value })}
           />
         </div>
+        {curated ? null : (
         <div>
           <label htmlFor="stream-create-royalty" className={FIELD_LABEL}>{t(locale, "streamSepolia.create.royalty")}</label>
           <input
@@ -444,38 +459,9 @@ function CreateBody({ viewer }: { readonly viewer: Address }) {
           />
           <p id="stream-create-royalty-hint" className={HINT}>{t(locale, "streamSepolia.create.royaltyHelp")}</p>
         </div>
+        )}
       </div>
-      <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-p-3">
-        <label className="tw-flex tw-items-start tw-gap-3 tw-text-sm tw-text-iron-100">
-          <input
-            type="checkbox"
-            className="tw-mt-1 tw-accent-primary-500"
-            checked={draft.editions}
-            disabled={!editions}
-            onChange={(event) => update({ editions: event.target.checked })}
-          />
-          <span>
-            <span className="tw-block tw-font-semibold">{t(locale, "streamSepolia.create.editions")}</span>
-            <span className="tw-block tw-text-xs tw-text-iron-400">
-              {editions ? t(locale, "streamSepolia.create.editionsHelp") : t(locale, "streamSepolia.create.editionsNeedContract")}
-            </span>
-          </span>
-        </label>
-        {draft.editions ? (
-          <div className="tw-mt-3 tw-max-w-xs">
-            <label htmlFor="stream-create-cap" className={FIELD_LABEL}>{t(locale, "streamSepolia.create.cap")}</label>
-            <input
-              id="stream-create-cap"
-              className={darkInputClassName}
-              inputMode="numeric"
-              value={draft.cap}
-              aria-invalid={!capValid}
-              onChange={(event) => update({ cap: event.target.value })}
-            />
-            <p className={HINT}>{t(locale, "streamSepolia.create.capHelp")}</p>
-          </div>
-        ) : null}
-      </div>
+      <EditionsField draft={draft} available={editionsAvailable} capValid={capValid} onChange={update} />
       <div>
         <button
           type="submit"

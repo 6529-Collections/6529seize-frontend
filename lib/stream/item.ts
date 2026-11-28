@@ -147,6 +147,26 @@ const STREAM_MINT_PARAMS = [
   },
 ] as const;
 
+/** `abi.encode(StreamMintRequest)`: what a curated start carries, with the artist's signed move. */
+export function encodeStreamMint(args: {
+  readonly packageRoot: Hex;
+  readonly item: PackageItem;
+  readonly proof: readonly Hex[];
+  readonly nonce: bigint;
+  readonly deadline: bigint;
+  /** The wallet's 20 bytes followed by its 65-byte signature. */
+  readonly signature: Hex;
+}): Hex {
+  return encodeAbiParameters(STREAM_MINT_PARAMS, [
+    {
+      packageRoot: args.packageRoot,
+      item: args.item,
+      proof: args.proof,
+      move: { nonce: args.nonce, deadline: args.deadline, signature: args.signature },
+    },
+  ]);
+}
+
 /** Decodes `abi.encode(IIndependentStream.IndependentMint)`. */
 export function decodeIndependentMint(
   request: Hex
