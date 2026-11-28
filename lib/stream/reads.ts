@@ -255,7 +255,7 @@ export async function readWorkMeta(token: Address, tokenId: bigint): Promise<Wor
  * its ID when its root wallet changes, so the root is read, not derived. Falls
  * back to the ID as an address only if the account cannot be read.
  */
-async function readArtistWallet(artistId: bigint): Promise<Address> {
+export async function readArtistWallet(artistId: bigint): Promise<Address> {
   const fallback = getAddress(`0x${artistId.toString(16).padStart(40, "0")}`);
   const account = await getStreamClient()
     .readContract({ address: getStreamInstance().addresses.accounts, abi: accountsAbi, functionName: "artist", args: [artistId] })
@@ -465,6 +465,11 @@ export interface EditionDetail {
   readonly abandonable: boolean;
   readonly contractPaused: boolean;
   readonly bids: readonly EditionBidRow[];
+  /**
+   * The cap the sale opened with (`AuctionOpened.maxCount`, 0 = none). Once the
+   * supply is sealed the contract reports the final count as `maxCount`.
+   */
+  readonly openedCap: number | null;
 }
 
 /**
@@ -534,9 +539,10 @@ export async function readEdition(
       abandonable: false,
       contractPaused: await read<boolean>("paused", []),
       bids: [],
+      openedCap: null,
     };
   }
-  const [endTimes, clearing, prices, totals, abandonable, paused, placed, raised, claimed] =
+  const [endTimes, clearing, prices, totals, abandonable, paused, placed, raised, claimed, opened] =
     await Promise.all([
       read<EditionDetail["endTimes"]>("endTimes"),
       read<NonNullable<EditionDetail["clearing"]>>("clearing").catch(() => null),
@@ -547,6 +553,7 @@ export async function readEdition(
       scanLogs({ address, event: EDITION_BID_PLACED, args: { saleId } }),
       scanLogs({ address, event: EDITION_BID_RAISED, args: { saleId } }),
       scanLogs({ address, event: EDITION_BID_CLAIMED, args: { saleId } }),
+      scanLogs({ address, event: AUCTION_OPENED, args: { saleId } }),
     ]);
   const stepOf = new Map<bigint, number>();
   const rows = new Map<bigint, { bidder: Address; step: number; quantity: number }>();
@@ -582,6 +589,7 @@ export async function readEdition(
     abandonable: abandonable[0],
     contractPaused: paused,
     bids,
+    openedCap: opened[0] ? Number(opened[0].args.maxCount) : null,
   };
 }
 

@@ -50,11 +50,14 @@ function ProductSection({
   title,
   sales,
   now,
+  explainFinish,
   extra,
 }: {
   readonly title: string;
   readonly sales: readonly SaleSummary[];
   readonly now: number;
+  /** Explain "Finish a sale" here (said once per page, in the first section that has one). */
+  readonly explainFinish: boolean;
   /** Shown last (works approved and waiting for someone to start the sale). */
   readonly extra?: ReactNode;
 }) {
@@ -71,7 +74,7 @@ function ProductSection({
       <Shelf title={t(locale, "streamSepolia.home.unsold")} sales={shelves.unsold} now={now} />
       <Shelf
         title={t(locale, "streamSepolia.home.finish")}
-        intro={t(locale, "streamSepolia.home.finishIntro")}
+        intro={explainFinish ? t(locale, "streamSepolia.home.finishIntro") : undefined}
         sales={shelves.finish}
         now={now}
       />
@@ -104,15 +107,17 @@ function Works({ sales, now }: { readonly sales: readonly SaleSummary[]; readonl
   const { shown, tests } = useShowcase(sales);
   const curated = shown.filter((sale) => sale.curated);
   const independent = shown.filter((sale) => !sale.curated);
+  const curatedHasFinish = arrangeShelves(curated, now).finish.length > 0;
   // 6529 Stream always leads, then Independent Stream, on every instance.
   return (
     <div className="tw-flex tw-flex-col tw-gap-2">
       <StreamHero featured={pickFeatured(shown, now)} now={now} />
-      <ProductSection title={t(locale, "streamSepolia.product.stream")} sales={curated} now={now} />
+      <ProductSection title={t(locale, "streamSepolia.product.stream")} sales={curated} now={now} explainFinish />
       <ProductSection
         title={t(locale, "streamSepolia.product.independent")}
         sales={independent}
         now={now}
+        explainFinish={!curatedHasFinish}
         extra={<ReadyToStart />}
       />
       <TestTokens sales={tests} now={now} />

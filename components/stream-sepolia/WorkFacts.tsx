@@ -14,6 +14,7 @@ import { readWorkPageFacts, type WorkPageFacts } from "@/lib/stream/workPage";
 
 import { formatCount, sepoliaAddressUrl, shortAddress } from "./format";
 import { CARD, LABEL } from "./OneOfOnePanel";
+import { StreamIdentity } from "./StreamIdentity";
 
 const LINK = "tw-text-primary-300 tw-underline tw-underline-offset-4 hover:tw-text-primary-400";
 
@@ -177,7 +178,7 @@ export function WorkFacts({
             })}
           </Row>
           <Row term={t(locale, "streamSepolia.facts.royaltyTo")}>
-            <AddressLink address={data.royalty.receiver} />
+            <StreamIdentity address={data.royalty.receiver} />
           </Row>
           {data.split ? (
             <>
@@ -186,9 +187,14 @@ export function WorkFacts({
               </Row>
               {data.split.payees.map((payee) => (
                 <Row key={`${payee.artistId}-${payee.account}`} term={t(locale, "streamSepolia.facts.payee")}>
-                  {t(locale, "streamSepolia.facts.payeeValue", { percent: percent(payee.percent, locale) })}{" "}
-                  <span className="tw-text-iron-400">{t(locale, "streamSepolia.facts.artistId")}</span>{" "}
-                  <Hash value={`0x${payee.artistId.toString(16).padStart(40, "0")}`} />
+                  <span className="tw-block">
+                    {t(locale, "streamSepolia.facts.payeeValue", { percent: percent(payee.percent, locale) })}{" "}
+                    <StreamIdentity address={payee.wallet} />
+                  </span>
+                  <span className="tw-block tw-text-xs tw-text-iron-500">
+                    {t(locale, "streamSepolia.facts.artistId")}{" "}
+                    <Hash value={`0x${payee.artistId.toString(16).padStart(40, "0")}`} />
+                  </span>
                 </Row>
               ))}
             </>

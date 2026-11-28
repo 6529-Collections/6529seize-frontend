@@ -41,8 +41,14 @@ function Figure({ label, value }: { readonly label: string; readonly value: stri
   );
 }
 
+/**
+ * The big figures: a live bid and countdown, a winning bid, or the sold price.
+ * Null when there is no such figure (no bids, unsold, paused): then the state
+ * leads in plain words at normal size instead of a non-event in large type.
+ */
 function headline(view: OneOfOneView, detail: OneOfOneDetail, locale: SupportedLocale) {
   const bid = formatEth(detail.auction.bid, locale);
+  if (!view.hasBid && view.screen !== "live" && view.screen !== "closing") return null;
   switch (view.screen) {
     case "live":
     case "closing":
@@ -60,34 +66,41 @@ function headline(view: OneOfOneView, detail: OneOfOneDetail, locale: SupportedL
       };
     case "ending":
     case "ended":
-      return {
-        left: {
-          label: view.hasBid ? t(locale, "streamSepolia.one.winningBid") : t(locale, "streamSepolia.one.result"),
-          value: view.hasBid ? `${bid} ETH` : t(locale, "streamSepolia.one.noBidsShort"),
-        },
-        right: { label: t(locale, "streamSepolia.one.timeLeft"), value: t(locale, "streamSepolia.one.endedShort") },
-      };
+      return { left: { label: t(locale, "streamSepolia.one.winningBid"), value: `${bid} ETH` }, right: null };
     case "unsold_museum":
     case "unsold_waiting":
     case "unsold_restartable":
-      return {
-        left: { label: t(locale, "streamSepolia.one.result"), value: t(locale, "streamSepolia.one.unsold") },
-        right: null,
-      };
+      return null;
     case "paused":
     case "cancelled":
     case "not_started":
-      return {
-        left: {
-          label: view.hasBid ? t(locale, "streamSepolia.one.topBid") : t(locale, "streamSepolia.one.result"),
-          value: view.hasBid ? `${bid} ETH` : t(locale, "streamSepolia.one.noBidsShort"),
-        },
-        right: null,
-      };
+      return { left: { label: t(locale, "streamSepolia.one.topBid"), value: `${bid} ETH` }, right: null };
   }
 }
 
-function StatusLine({ view, detail }: { readonly view: OneOfOneView; readonly detail: OneOfOneDetail }) {
+/** Why a sale ended with no buyer, when the chain says more than "No one bid". */
+function noBuyerText(view: OneOfOneView, detail: OneOfOneDetail, locale: SupportedLocale): string | null {
+  const unsold = view.screen.startsWith("unsold_");
+  if (view.halted && unsold) return t(locale, "streamSepolia.one.status.halted");
+  // On r9 a rescued sale ends cancelled; on r8 it ended settled with no buyer.
+  if ((unsold || view.screen === "cancelled") && detail.closedHow) {
+    return t(locale, detail.closedHow === "rescued" ? "streamSepolia.one.status.rescued" : "streamSepolia.one.status.refused");
+  }
+  // Bids but no buyer and neither event (most likely a delisted collection): say only what the chain proves.
+  if (unsold && detail.bids.length > 0) return t(locale, "streamSepolia.one.status.delisted");
+  return null;
+}
+
+function StatusLine({
+  view,
+  detail,
+  lead = false,
+}: {
+  readonly view: OneOfOneView;
+  readonly detail: OneOfOneDetail;
+  /** No big figure above: the state itself leads, a little larger. */
+  readonly lead?: boolean;
+}) {
   const locale = useBrowserLocale();
   const end = formatClock(detail.auction.endTime, locale);
   const window = Math.round(detail.extensionWindow / 60);
@@ -103,7 +116,7 @@ function StatusLine({ view, detail }: { readonly view: OneOfOneView; readonly de
       text = t(locale, "streamSepolia.one.status.ending");
       break;
     case "ended":
-      text = t(locale, "streamSepolia.one.status.ended");
+      text = view.hasBid ? t(locale, "streamSepolia.one.status.ended") : t(locale, "streamSepolia.one.status.endedNoBids");
       break;
     case "sold":
       // The headline already says "Sold for"; the owner line follows.
@@ -129,19 +142,14 @@ function StatusLine({ view, detail }: { readonly view: OneOfOneView; readonly de
     case "not_started":
       text = t(locale, "streamSepolia.one.status.notStarted");
   }
-  // A sale that ended with no buyer for another reason says so instead of "No one bid".
-  // On r9 a rescued sale ends cancelled; on r8 it ended settled with no buyer.
-  if ((view.screen.startsWith("unsold_") || view.screen === "cancelled") && detail.closedHow) {
-    text = t(locale, detail.closedHow === "rescued" ? "streamSepolia.one.status.rescued" : "streamSepolia.one.status.refused");
-  } else if (view.screen.startsWith("unsold_") && detail.bids.length > 0) {
-    // Bids but no buyer and neither event (most likely a delisted collection):
-    // say only what the chain proves.
-    text = t(locale, "streamSepolia.one.status.delisted");
-  }
-  const shown = view.halted && view.screen.startsWith("unsold_") ? t(locale, "streamSepolia.one.status.halted") : text;
+  const shown = noBuyerText(view, detail, locale) ?? text;
   if (!shown) return null;
   return (
-    <p className={`tw-m-0 tw-text-sm ${view.screen === "closing" ? "tw-text-amber-300" : "tw-text-iron-300"}`}>
+    <p
+      className={`tw-m-0 ${lead ? "tw-text-base tw-font-semibold tw-text-iron-100" : "tw-text-sm"} ${
+        !lead && view.screen === "closing" ? "tw-text-amber-300" : ""
+      } ${lead ? "" : "tw-text-iron-300"}`}
+    >
       {shown}
     </p>
   );
@@ -395,12 +403,14 @@ export function OneOfOnePanel({
       <h2 id="stream-one-title" className={LABEL}>
         {t(locale, "streamSepolia.one.title")}
       </h2>
-      <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-4">
-        <Figure label={top.left.label} value={top.left.value} />
-        {top.right ? <Figure label={top.right.label} value={top.right.value} /> : null}
-      </div>
+      {top ? (
+        <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-4">
+          <Figure label={top.left.label} value={top.left.value} />
+          {top.right ? <Figure label={top.right.label} value={top.right.value} /> : null}
+        </div>
+      ) : null}
       <div className="tw-mt-3">
-        <StatusLine view={view} detail={detail} />
+        <StatusLine view={view} detail={detail} lead={!top} />
         {view.viewerLeads && (view.screen === "live" || view.screen === "closing") ? (
           <p className="tw-m-0 tw-mt-1 tw-text-sm tw-font-semibold tw-text-emerald-400">
             {t(locale, "streamSepolia.one.youLead")}

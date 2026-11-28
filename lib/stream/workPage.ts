@@ -4,7 +4,7 @@ import { contentStoreAbi, splitLedgerAbi, streamAbi, workFactsAbi } from "./abis
 import { getStreamClient } from "./client";
 import { getStreamInstance } from "./instances";
 import { itemHashOf, ZERO_HASH, type PackageItem } from "./item";
-import { readStartItem } from "./reads";
+import { readArtistWallet, readStartItem } from "./reads";
 
 /**
  * A work's permanent facts for its page, in the shape of the 6529 Stream SDK's
@@ -57,7 +57,14 @@ export interface WorkPageFacts {
   /** The seller vault and the item's payees; null unless the item is proven to be this work's. */
   readonly split: {
     readonly vault: Address;
-    readonly payees: readonly { readonly artistId: bigint; readonly account: Address; readonly percent: number }[];
+    readonly payees: readonly {
+      readonly artistId: bigint;
+      /** The payee's `account` field as the item records it (not a person). */
+      readonly account: Address;
+      /** The root wallet of the payee's artist account (Accounts), the person paid. */
+      readonly wallet: Address;
+      readonly percent: number;
+    }[];
   } | null;
   readonly checks: {
     /** The item found in the start transaction hashes to the item hash the token stores. */
@@ -105,11 +112,13 @@ async function readSplit(item: PackageItem) {
     functionName: "walletFor",
     args: [item.payees, ZERO_HASH],
   });
+  const wallets = await Promise.all(item.payees.map((payee) => readArtistWallet(payee.artistId)));
   return {
     vault,
-    payees: item.payees.map((payee) => ({
+    payees: item.payees.map((payee, index) => ({
       artistId: payee.artistId,
       account: payee.account,
+      wallet: wallets[index]!,
       percent: (payee.share / SHARE_DENOMINATOR) * 100,
     })),
   };
@@ -161,7 +170,7 @@ export async function readWorkPageFacts(args: {
       },
       record: { contract: "StreamWorkFacts6529", address: instance.addresses.workFacts, reads: "factsOf", url: sourceUrl("src/core/StreamWorkFacts6529.sol") },
       files: { contract: "ContentStore", address: instance.addresses.contentStore, reads: "fileInfo, isComplete, read", url: sourceUrl("src/content/ContentStore.sol") },
-      split: { contract: "SplitLedger", address: instance.addresses.splitLedger, reads: "walletFor", url: sourceUrl("src/economics/SplitLedger.sol") },
+      split: { contract: "SplitLedger", address: instance.addresses.splitLedger, reads: "walletFor (payees named from Accounts.artist)", url: sourceUrl("src/economics/SplitLedger.sol") },
     },
   };
 }

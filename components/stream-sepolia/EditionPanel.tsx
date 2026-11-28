@@ -22,7 +22,7 @@ import {
 } from "@/lib/stream/editions";
 import { encodeEditionOpenData } from "@/lib/stream/item";
 import { quoteEditionBid, readStartItem, type EditionBidRow, type EditionDetail } from "@/lib/stream/reads";
-import { editionView, sameAddress, type EditionView } from "@/lib/stream/state";
+import { EDITION_STATUS, editionView, sameAddress, type EditionView } from "@/lib/stream/state";
 
 import { formatClock, formatCount, formatDuration, formatEth } from "./format";
 import { StreamIdentity } from "./StreamIdentity";
@@ -101,20 +101,38 @@ function Result({
           </p>
         </>
       ) : (
-        <p className="tw-m-0 tw-mt-2 tw-text-3xl tw-font-semibold tw-text-iron-50">
+        // Nothing to show large: the state in plain words at normal size.
+        <p className="tw-m-0 tw-mt-2 tw-text-base tw-font-semibold tw-text-iron-100">
           {live ? t(locale, "streamSepolia.ed.noBidsYet") : t(locale, "streamSepolia.ed.noneMade")}
         </p>
       )}
-      {detail.sale.maxCount > 0 ? (
-        <p className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-400">
-          {t(locale, "streamSepolia.ed.cap", { cap: formatCount(detail.sale.maxCount, locale) })}
-        </p>
-      ) : null}
+      <CapLine detail={detail} />
       <div className="tw-mt-4 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-pt-3">
         <CloseLine detail={detail} view={view} />
       </div>
     </section>
   );
+}
+
+/**
+ * The edition cap. Once the supply is sealed the contract reports the final
+ * count as its maximum, so the cap shown then is the one the sale opened with.
+ */
+function CapLine({ detail }: { readonly detail: EditionDetail }) {
+  const locale = useBrowserLocale();
+  const sealed = detail.sale.status === EDITION_STATUS.SETTLED;
+  const cap = detail.openedCap ?? detail.sale.maxCount;
+  let text: string | null = null;
+  if (sealed) {
+    const count = formatCount(detail.sale.maxCount, locale);
+    text = cap > 0
+      ? t(locale, "streamSepolia.ed.capSealed", { count, cap: formatCount(cap, locale) })
+      : t(locale, "streamSepolia.ed.sealed", { count });
+  } else if (cap > 0) {
+    text = t(locale, "streamSepolia.ed.cap", { cap: formatCount(cap, locale) });
+  }
+  if (!text) return null;
+  return <p className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-400">{text}</p>;
 }
 
 function CloseLine({ detail, view }: { readonly detail: EditionDetail; readonly view: EditionView }) {
