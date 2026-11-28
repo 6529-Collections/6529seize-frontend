@@ -1,6 +1,7 @@
-// Copied from 6529-Collections/6529-provenance-app src/config/chains.ts at commit 512b6629470e06981905f3a94cff3f381d181478.
+// Copied from 6529-Collections/6529-provenance-app src/config/chains.ts at commit 906377e17438133e8a61f154edf9c6a5792b9f3f.
 // Do not edit here: change the package and run ops/scripts/sync-provenance-core.mjs.
 // Replaced by @6529-collections/provenance-core from npm once that is published.
+// SPDX-License-Identifier: Apache-2.0
 import { defineChain, type Chain } from "viem";
 import { mainnet, sepolia } from "viem/chains";
 
@@ -37,6 +38,19 @@ export const defaultTxServices: Partial<Record<SupportedChainId, string>> = {
   11155111: "https://safe-transaction-sepolia.safe.global",
   1: "https://safe-transaction-mainnet.safe.global",
 };
+
+/**
+ * The largest gas limit a chain accepts for one transaction, where it is below what the planner
+ * can ask for. Mainnet enforces EIP-7825's 2^24 cap, live since Fusaka. Sepolia runs the
+ * Glamsterdam rules, whose EIP-8037 state gas reservoir lets a transaction's limit exceed 2^24.
+ */
+export const MAX_TRANSACTION_GAS: Partial<Record<SupportedChainId, bigint>> = {
+  1: 2n ** 24n,
+};
+
+export function maxTransactionGas(chainId: number): bigint | undefined {
+  return isSupportedChainId(chainId) ? MAX_TRANSACTION_GAS[chainId] : undefined;
+}
 
 export function chainById(id: number): Chain | undefined {
   return supportedChains.find((c) => c.id === id);

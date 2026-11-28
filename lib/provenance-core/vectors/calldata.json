@@ -1,5 +1,5 @@
 {
-  "description": "Each registry write with its arguments and its ABI calldata at tag v1.0.0-rc.1. Integers are decimal strings.",
+  "description": "Each registry write with its arguments and its ABI calldata at the pinned contract tag, v1.0.0-rc.2, whose ABI equals that of v1.0.0-rc.1. Integers are decimal strings.",
   "cases": [
     {
       "name": "registerCanonicalization",

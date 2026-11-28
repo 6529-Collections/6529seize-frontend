@@ -1,6 +1,7 @@
-// Copied from 6529-Collections/6529-provenance-app src/actions.ts at commit 512b6629470e06981905f3a94cff3f381d181478.
+// Copied from 6529-Collections/6529-provenance-app src/actions.ts at commit 906377e17438133e8a61f154edf9c6a5792b9f3f.
 // Do not edit here: change the package and run ops/scripts/sync-provenance-core.mjs.
 // Replaced by @6529-collections/provenance-core from npm once that is published.
+// SPDX-License-Identifier: Apache-2.0
 import {
   decodeFunctionData,
   encodeFunctionData,
@@ -12,6 +13,7 @@ import {
   type Hex,
 } from "viem";
 import { provenanceRegistryAbi as abi } from "./abi/provenanceRegistry";
+import { cidProblem } from "./cid";
 
 export interface HashRefInput {
   algorithm: number;
@@ -179,6 +181,53 @@ export function literalProblem(literal: string): string | undefined {
   if (literal.length === 0) return "A literal needs at least 1 character.";
   if (literal.length > 128) return `A literal has at most 128 characters; this one has ${literal.length}.`;
   if (!/^[\x21-\x7e]+$/.test(literal)) return "A literal is printable ASCII without spaces.";
+  return undefined;
+}
+
+const ZERO_BYTES32 = `0x${"00".repeat(32)}`;
+
+/**
+ * Why the registry would refuse a record in a publish call, for the rules the package can check
+ * without reading state: a non-zero subject ID, algorithm 1 or 2, a non-zero digest, effectiveAt
+ * after 0, CID-1 for the CID, a 32-byte Arweave ID, a CID or an Arweave ID, and a label of at
+ * most 128 bytes. Undefined when none applies; the chain simulation checks the rest.
+ */
+export function recordProblem(r: RecordInput): string | undefined {
+  if (!isBytes32(r.subjectId) || r.subjectId.toLowerCase() === ZERO_BYTES32)
+    return "The subject ID is zero or not 32 bytes.";
+  if (r.contentHash.algorithm !== 1 && r.contentHash.algorithm !== 2)
+    return `Hash algorithm ${r.contentHash.algorithm} is not 1 (Keccak-256) or 2 (SHA-256).`;
+  if (!isBytes32(r.contentHash.digest) || r.contentHash.digest.toLowerCase() === ZERO_BYTES32)
+    return "The digest is zero or not 32 bytes.";
+  if (r.effectiveAt <= 0n) return "effectiveAt is 0.";
+  const cid = cidProblem(r.cid);
+  if (cid) return cid;
+  if (!isBytes32(r.arweaveId)) return `The Arweave ID ${r.arweaveId as string} is not 32 bytes.`;
+  if (r.cid === "0x" && r.arweaveId.toLowerCase() === ZERO_BYTES32)
+    return "The record has no CID or Arweave ID.";
+  const label = new TextEncoder().encode(r.label).length;
+  if (label > 128) return `The label is ${label} bytes, over 128.`;
+  return undefined;
+}
+
+/**
+ * Why the registry would refuse a release header (REL-3): the manifest hash rule, a manifest CID or
+ * Arweave ID, CID-1 for both CIDs, and a label of at most 128 bytes. Undefined when none applies.
+ */
+export function releaseHeaderProblem(h: ReleaseInput): string | undefined {
+  if (h.manifestHash.algorithm !== 1 && h.manifestHash.algorithm !== 2)
+    return `Manifest hash algorithm ${h.manifestHash.algorithm} is not 1 (Keccak-256) or 2 (SHA-256).`;
+  if (!isBytes32(h.manifestHash.digest) || h.manifestHash.digest.toLowerCase() === ZERO_BYTES32)
+    return "The manifest digest is zero or not 32 bytes.";
+  const manifest = cidProblem(h.manifestCid);
+  if (manifest) return `Manifest CID: ${manifest}`;
+  const root = cidProblem(h.rootCid);
+  if (root) return `Root CID: ${root}`;
+  if (!isBytes32(h.arweaveId)) return `The Arweave ID ${h.arweaveId as string} is not 32 bytes.`;
+  if (h.manifestCid === "0x" && h.arweaveId.toLowerCase() === ZERO_BYTES32)
+    return "The release has no manifest CID or Arweave ID.";
+  const label = new TextEncoder().encode(h.label).length;
+  if (label > 128) return `The label is ${label} bytes, over 128.`;
   return undefined;
 }
 

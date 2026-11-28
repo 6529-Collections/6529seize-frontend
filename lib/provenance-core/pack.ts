@@ -1,6 +1,7 @@
-// Copied from 6529-Collections/6529-provenance-app src/pack.ts at commit 512b6629470e06981905f3a94cff3f381d181478.
+// Copied from 6529-Collections/6529-provenance-app src/pack.ts at commit 906377e17438133e8a61f154edf9c6a5792b9f3f.
 // Do not edit here: change the package and run ops/scripts/sync-provenance-core.mjs.
 // Replaced by @6529-collections/provenance-core from npm once that is published.
+// SPDX-License-Identifier: Apache-2.0
 import { size } from "viem";
 import { encodeAction, type Action, type RecordInput, type ReleaseInput } from "./actions";
 import type { PlannedTx } from "./simulate";
@@ -12,7 +13,7 @@ export interface Measured {
 }
 
 /**
- * Runs `candidate` after `prefix`, on the chain, with the budget as its gas limit. In the app it
+ * Runs `candidate` after `prefix`, on the chain, with the budget as its gas limit. In planPublish it
  * is an eth_simulateV1 run of the whole prefix plus the candidate; the tests pass a model. A
  * candidate fits when it succeeds at that limit: under Glamsterdam a transaction can fail at a
  * limit above its gas used, because the limit also funds state gas.
@@ -39,7 +40,7 @@ export interface ReleasePlanInput {
   /**
    * Limits of the sending wallet, applied to each publish call before gas is measured: calldata
    * bytes and records per call. 6529 Desktop's forwarded browser wallets carry at most 10 KiB of
-   * calldata, about 15 records.
+   * calldata: 17 Museum records with labels of about 60 bytes (vectors/publish-limits.json).
    */
   limits?: CallLimits;
 }

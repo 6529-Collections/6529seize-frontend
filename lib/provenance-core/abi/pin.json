@@ -1,9 +1,9 @@
 {
   "repository": "6529-Collections/6529-provenance",
-  "tag": "v1.0.0-rc.2",
-  "commit": "2cf5c7b017fed8504dea0d4225e8fac775c3ebd9",
+  "tag": "v1.0.0-rc.4",
+  "commit": "c6b91cee52c7d0fcec53ceae5a1be08dfa74f9d3",
   "sha256": {
-    "ProvenanceRegistry.abi.json": "864f79ea58067cc43fc3cbaee29f88a554e0cc1ca17ec2959ee042f1322c633b",
-    "ProvenanceRegistry.code.json": "814bfb1d14e5994300bc18015534c22a3b7c200c272edb605790eba68ebe3123"
+    "ProvenanceRegistry.abi.json": "bacd05107d06f07975d3555504870b5ad832cddec0b2a3ea95ac59e8b8b90fec",
+    "ProvenanceRegistry.code.json": "2314879b8aaffdcc996624f2dc1fc519725bb152d84a521b4314d2d0e70a0635"
   }
 }

@@ -1,8 +1,8 @@
 {
   "interfaceIds": {
     "IERC165": "0x01ffc9a7",
-    "IProvenanceRegistry": "0x5d79f565"
+    "IProvenanceRegistry": "0xbaf53c64"
   },
-  "runtimeCodeBytes": 22656,
-  "runtimeCodeHash": "0xcda6420e706dcdcea09342b20168921b35f50ca3d87413665b700370f9fc50a9"
+  "runtimeCodeBytes": 23406,
+  "runtimeCodeHash": "0xcb3d55665a7e9385d97c0bcbf69f0b0b8f8aaa0285aeadb19dfaa5f2705a1bd5"
 }

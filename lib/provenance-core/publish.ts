@@ -1,12 +1,24 @@
-// Copied from 6529-Collections/6529-provenance-app src/publish.ts at commit 512b6629470e06981905f3a94cff3f381d181478.
+// Copied from 6529-Collections/6529-provenance-app src/publish.ts at commit 906377e17438133e8a61f154edf9c6a5792b9f3f.
 // Do not edit here: change the package and run ops/scripts/sync-provenance-core.mjs.
 // Replaced by @6529-collections/provenance-core from npm once that is published.
+// SPDX-License-Identifier: Apache-2.0
 import { isAddressEqual, size, type Address, type Hex, type PublicClient } from "viem";
 import { provenanceRegistryAbi as abi } from "./abi/provenanceRegistry";
-import { describeAction, encodeAction, type Action, type RecordInput, type ReleaseInput } from "./actions";
+import { rc2GetReleaseAbi } from "./abi/legacy";
+import {
+  describeAction,
+  encodeAction,
+  recordProblem,
+  releaseHeaderProblem,
+  type Action,
+  type RecordInput,
+  type ReleaseInput,
+} from "./actions";
+import { maxTransactionGas } from "./config/chains";
 import { chainMeasure } from "./dryrun";
 import type { Eip1193Provider } from "./governance";
 import { planRelease, PlanError, type CallLimits } from "./pack";
+import { readBuild, releaseHasSealedBy } from "./registry";
 
 /**
  * Publishing: openRelease, publish and sealRelease, sent by a publisher key (or the owner) as
@@ -81,6 +93,8 @@ export interface PublishPlan {
   chainId: number;
   registry: Address;
   from: Address;
+  /** The block every simulation of the plan ran on. */
+  block: bigint;
   /** The gas limit each transaction was simulated with and must succeed at. */
   gasLimit: bigint;
   capability: SenderCapability;
@@ -124,7 +138,26 @@ export async function checkPublisher(
  * used, so a call fits only when it succeeds at the limit.
  */
 export async function planPublish(p: PlanPublishInput): Promise<PublishPlan> {
+  const chainId = await p.client.getChainId();
+  if (chainId !== p.chainId)
+    throw new PlanError(`The client is on chain ${chainId}; the plan is for chain ${p.chainId}.`);
+  const cap = maxTransactionGas(p.chainId);
+  if (cap !== undefined && p.gasLimit > cap)
+    throw new PlanError(
+      `Chain ${p.chainId} refuses a transaction with more than ${cap} gas; the limit is ${p.gasLimit}.`,
+    );
+  p.records.forEach((r, i) => {
+    const problem = recordProblem(r);
+    if (problem) throw new PlanError(`Record ${i + 1}: ${problem}`);
+  });
+  if (p.target.kind === "open") {
+    const problem = releaseHeaderProblem(p.target.header);
+    if (problem) throw new PlanError(`Release header: ${problem}`);
+  }
   await checkPublisher(p.client, p.registry, p.from);
+  // Every simulation of this plan runs on one base block, so a release or subject that changes
+  // during planning cannot give a plan whose parts saw two states.
+  const block = await p.client.getBlockNumber({ cacheTime: 0 });
   let releaseId: number;
   let recordsSoFar = 0;
   if (p.target.kind === "open") {
@@ -132,6 +165,7 @@ export async function planPublish(p: PlanPublishInput): Promise<PublishPlan> {
       address: p.registry,
       abi,
       functionName: "releaseCount",
+      blockNumber: block,
     })) as number;
     releaseId = count + 1;
     const bytes = size(encodeAction({ kind: "openRelease", header: p.target.header }));
@@ -142,11 +176,13 @@ export async function planPublish(p: PlanPublishInput): Promise<PublishPlan> {
     }
   } else {
     releaseId = p.target.releaseId;
+    const withSealedBy = releaseHasSealedBy(await readBuild(p.client, p.registry, block));
     const release = (await p.client.readContract({
       address: p.registry,
-      abi,
+      abi: withSealedBy ? abi : rc2GetReleaseAbi,
       functionName: "getRelease",
       args: [releaseId],
+      blockNumber: block,
     })) as {
       firstSequence: number;
       isSealed: boolean;
@@ -156,6 +192,7 @@ export async function planPublish(p: PlanPublishInput): Promise<PublishPlan> {
       address: p.registry,
       abi,
       functionName: "sequenceCount",
+      blockNumber: block,
     })) as number;
     recordsSoFar = sequenceCount + 1 - release.firstSequence;
   }
@@ -172,12 +209,20 @@ export async function planPublish(p: PlanPublishInput): Promise<PublishPlan> {
       limits: p.capability,
       onProgress: p.onProgress,
     },
-    chainMeasure(p.client, p.registry, { kind: "key", account: p.from }, p.gasLimit),
+    chainMeasure(
+      p.client,
+      p.registry,
+      { kind: "key", account: p.from },
+      p.gasLimit,
+      new Map([[releaseId, recordsSoFar]]),
+      block,
+    ),
   );
   return {
     chainId: p.chainId,
     registry: p.registry,
     from: p.from,
+    block,
     gasLimit: p.gasLimit,
     capability: p.capability,
     txs: packed.map((t, index) => {
@@ -202,17 +247,84 @@ export interface PublishSender {
   send(tx: PublishTx, plan: PublishPlan): Promise<Hex | undefined>;
 }
 
+export interface ReceiptWait {
+  /** Time between eth_getTransactionReceipt polls. Default 2,000 ms. */
+  pollMs?: number;
+  /**
+   * How long to wait for a receipt before throwing, counted from submission. Default 600,000 ms. It
+   * holds while a receipt request is still outstanding: a provider that never answers does not
+   * extend the wait.
+   */
+  timeoutMs?: number;
+  /** Stops the wait; the send throws with the transaction hash. */
+  signal?: AbortSignal;
+  /**
+   * Called with the hash as soon as the wallet returns it, before the receipt wait. Store it here:
+   * if the wait then fails, the hash is the way to find what happened to the transaction.
+   */
+  onSubmitted?: (hash: Hex, tx: PublishTx) => void;
+}
+
+/** Thrown when a submitted transaction has no usable receipt; `hash` names it. */
+export class ReceiptError extends Error {
+  constructor(
+    message: string,
+    readonly hash: Hex,
+    readonly txIndex: number,
+  ) {
+    super(message);
+    this.name = "ReceiptError";
+  }
+}
+
+// Resolves with the request's answer, or rejects when the deadline passes or the signal aborts,
+// whichever comes first. The request itself cannot be cancelled through EIP-1193; it is abandoned.
+function withDeadline<T>(
+  request: Promise<T>,
+  deadline: number,
+  signal: AbortSignal | undefined,
+  onLate: () => Error,
+) {
+  return new Promise<T>((resolve, reject) => {
+    const ms = Math.max(0, deadline - Date.now());
+    const timer = setTimeout(() => reject(onLate()), ms);
+    const abort = () => {
+      clearTimeout(timer);
+      reject(onLate());
+    };
+    signal?.addEventListener("abort", abort, { once: true });
+    request.then(
+      (v) => {
+        clearTimeout(timer);
+        signal?.removeEventListener("abort", abort);
+        resolve(v);
+      },
+      (e: unknown) => {
+        clearTimeout(timer);
+        signal?.removeEventListener("abort", abort);
+        reject(e);
+      },
+    );
+  });
+}
+
 /**
  * Sends through any EIP-1193 provider: an injected browser wallet, WalletConnect, or 6529
  * Desktop's forwarding. When the wallet takes gas fields, gas comes from eth_estimateGas just
  * before each send, after the previous transaction is mined, and is never capped at 2^24.
- * Each send waits for its receipt and throws on a reverted transaction.
+ * Each send waits for its receipt and throws on a reverted transaction. When no receipt comes
+ * within the timeout, or the signal aborts, it throws with the hash: the transaction may still be
+ * mined, dropped or replaced, so read the subjects' version counts before sending again; a
+ * repeated publish reverts on `expectedVersion`.
  */
 export function eip1193Sender(
   provider: Eip1193Provider,
   capability: SenderCapability = STANDARD_SENDER,
-  pollMs = 2000,
+  wait: number | ReceiptWait = 2000,
 ): PublishSender {
+  const w: ReceiptWait = typeof wait === "number" ? { pollMs: wait } : wait;
+  const pollMs = w.pollMs ?? 2000;
+  const timeoutMs = w.timeoutMs ?? 600_000;
   return {
     capability,
     async send(tx, plan) {
@@ -227,15 +339,34 @@ export function eip1193Sender(
         method: "eth_sendTransaction",
         params: [gas ? { ...base, gas } : base],
       })) as Hex;
+      w.onSubmitted?.(hash, tx);
+      const deadline = Date.now() + timeoutMs;
+      const late = () =>
+        w.signal?.aborted
+          ? new ReceiptError(
+              `Stopped waiting for transaction ${tx.index + 1} (${hash}); it may still be mined.`,
+              hash,
+              tx.index,
+            )
+          : new ReceiptError(
+              `No receipt for transaction ${tx.index + 1} (${hash}) after ${timeoutMs / 1000} s; it may still be mined, dropped or replaced.`,
+              hash,
+              tx.index,
+            );
       for (;;) {
-        const receipt = (await provider.request({ method: "eth_getTransactionReceipt", params: [hash] })) as {
-          status: Hex;
-        } | null;
+        if (w.signal?.aborted || Date.now() > deadline) throw late();
+        const receipt = (await withDeadline(
+          provider.request({ method: "eth_getTransactionReceipt", params: [hash] }),
+          deadline,
+          w.signal,
+          late,
+        )) as { status: Hex } | null;
         if (receipt) {
-          if (receipt.status !== "0x1") throw new Error(`Transaction ${tx.index + 1} (${hash}) reverted.`);
+          if (receipt.status !== "0x1")
+            throw new ReceiptError(`Transaction ${tx.index + 1} (${hash}) reverted.`, hash, tx.index);
           return hash;
         }
-        await new Promise((r) => setTimeout(r, pollMs));
+        await withDeadline(new Promise((r) => setTimeout(r, pollMs)), deadline, w.signal, late);
       }
     },
   };
@@ -308,18 +439,37 @@ export function collectingSender(
   };
 }
 
-/** Sends a plan in order and stops at the first failure. The plan's limits must fit the sender's. */
+/**
+ * Why a planned transaction does not fit a sender's limits, or undefined when it does. The limits
+ * apply to the transaction's own calldata: openRelease against `maxOpenReleaseBytes`, every call
+ * against `maxCalldataBytes`, and a publish call's records against `maxRecordsPerCall`.
+ */
+export function senderLimitProblem(tx: PublishTx, c: SenderCapability): string | undefined {
+  const bytes = size(tx.data);
+  if (tx.action.kind === "openRelease" && bytes > c.maxOpenReleaseBytes)
+    return `openRelease is ${bytes} bytes of calldata, over the sender's ${c.maxOpenReleaseBytes}.`;
+  if (bytes > c.maxCalldataBytes)
+    return `${tx.description} is ${bytes} bytes of calldata, over the sender's ${c.maxCalldataBytes}.`;
+  if (tx.action.kind === "publish" && tx.action.records.length > c.maxRecordsPerCall)
+    return `${tx.description} holds ${tx.action.records.length} records, over the sender's ${c.maxRecordsPerCall}.`;
+  return undefined;
+}
+
+/**
+ * Sends a plan in order and stops at the first failure. Before sending anything it checks every
+ * transaction's calldata against the sender's limits, and that each transaction's calldata is the
+ * encoding of its action, so a plan edited after planning is refused.
+ */
 export async function sendPlan(
   plan: PublishPlan,
   sender: PublishSender,
   onSent?: (tx: PublishTx, hash: Hex | undefined) => void,
 ): Promise<(Hex | undefined)[]> {
-  const c = sender.capability;
-  if (
-    plan.capability.maxCalldataBytes > c.maxCalldataBytes ||
-    plan.capability.maxRecordsPerCall > c.maxRecordsPerCall
-  ) {
-    throw new Error("The plan was made for a sender with larger limits; plan again for this sender.");
+  for (const tx of plan.txs) {
+    if (encodeAction(tx.action).toLowerCase() !== tx.data.toLowerCase())
+      throw new Error(`Transaction ${tx.index + 1}: its calldata is not the encoding of its action.`);
+    const problem = senderLimitProblem(tx, sender.capability);
+    if (problem) throw new Error(`Transaction ${tx.index + 1}: ${problem} Plan again for this sender.`);
   }
   const hashes: (Hex | undefined)[] = [];
   for (const tx of plan.txs) {
