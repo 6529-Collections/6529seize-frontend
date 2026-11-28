@@ -1,0 +1,15 @@
+/*
+ * The reload hint is part of the server-rendered loading line and appears after
+ * 20 seconds through CSS alone, so it shows even if the page's JavaScript never
+ * runs. Once the page hydrates, the component renders without it.
+ */
+.reloadHint {
+  visibility: hidden;
+  animation: reveal 0s linear 20s forwards;
+}
+
+@keyframes reveal {
+  to {
+    visibility: visible;
+  }
+}

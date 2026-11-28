@@ -121,6 +121,9 @@
       // their focused Jest contract; Knip intentionally excludes test consumers.
       "scripts/public-package-policy.cjs": ["exports"],
       "scripts/run-secure-pnpm.cjs": ["exports"],
+      // The Stream ABI sync script exports writeAddresses for its focused Jest
+      // contract; Knip intentionally excludes test consumers.
+      "scripts/stream/sync-stream-abis.cjs": ["exports"],
       // Pure Museum change-classifier helpers are exported for their focused
       // adversarial Jest contract; Knip intentionally excludes test consumers.
       "scripts/museum-e2e-change-set.cjs": ["exports"],
