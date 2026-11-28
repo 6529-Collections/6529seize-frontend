@@ -25,18 +25,9 @@ import { LISTING_ACTIVE } from "@/lib/stream/independent";
 import { getStreamInstance } from "@/lib/stream/instances";
 import { sameAddress } from "@/lib/stream/state";
 
-import {
-  draftReady,
-  FIELD_LABEL,
-  FilesFailed,
-  HINT,
-  LINK,
-  parseCap,
-  parseRoyalty,
-  RunHeader,
-  useStoredFiles,
-  type Draft,
-} from "./createShared";
+import { draftReady, parseCap, parseRoyalty, type Draft } from "@/lib/stream/createDraft";
+
+import { FIELD_LABEL, FilesFailed, HINT, LINK, RunHeader, useStoredFiles } from "./createShared";
 import { CollectionField, CuratedRun, type CreatedWork } from "./CuratedRun";
 import { formatCount, shortAddress } from "./format";
 import { CARD } from "./OneOfOnePanel";

@@ -367,7 +367,8 @@ export async function readOneOfOne(token: Address, tokenId: bigint): Promise<One
   };
 }
 
-function closedHow(
+/** How a sale that ended without a buyer closed, counting only events since its latest start. */
+export function closedHow(
   refused: readonly { blockNumber: bigint }[],
   rescued: readonly { blockNumber: bigint }[],
   sinceBlock: bigint

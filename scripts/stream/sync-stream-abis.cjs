@@ -167,4 +167,6 @@ function main() {
   console.log(`wrote ${abiCount} ABIs${record ? " and addresses" : ""} from ${commit} to ${outDir}`);
 }
 
-main();
+if (require.main === module) main();
+
+module.exports = { writeAddresses };

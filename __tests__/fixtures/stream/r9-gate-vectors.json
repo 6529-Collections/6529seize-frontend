@@ -1,0 +1,22 @@
+{
+  "gate": "0x843d8DCdD279215225f39AFCA33a5Fd4E84370Ac",
+  "draft": {
+    "artist": "0x1e6078F7d688591823f77B0c1104D66aE1A442B5",
+    "collectionId": "2",
+    "contentHash": "0x53ffbd232342ff50dbe74cd0c51ff467b1220916320ff9de398c62a84a703c13",
+    "primaryFileId": "0xf05376d510697d0fe92177445475334b73d48159d3c98713c10ab3f9ca66c3ba",
+    "recordFileId": "0xcf8b3fc6a846c890832b597ba93420804df8f9ff5a1f4869886aaa16ed33b0b7",
+    "cc0TextFileId": "0x5b2741a3a4818c443249b02c388f2f24b9c3ec0e69adaafa3a367954887176f4"
+  },
+  "original": {
+    "maxCount": null,
+    "itemHash": "0xcce32dbfb4094313c6f2a5754e3b2009917f523003d7c19e119b3ffd71963a62",
+    "packageRoot": "0x712bce90c00fd11fc499ee62b06e6c96590dfe9dd45e63480be200dfab322114"
+  },
+  "master": {
+    "maxCount": 5,
+    "itemHash": "0xf4dd88affb880d337ae2d3caca4148ac4134af29418f336d5babe1455c0c7a43",
+    "packageRoot": "0xef3d95ff39356321c0562dd5c292609e9d667f305c348a890cc922b58b5bf84e"
+  },
+  "mediaHash": "0xb51f54a3df5df065478615eacb1880fd1985f415114bb6ac08a1f319df986f69"
+}

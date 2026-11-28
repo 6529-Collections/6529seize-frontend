@@ -26,7 +26,9 @@ import {
 } from "@/lib/stream/curatedCreate";
 import { getStreamInstance } from "@/lib/stream/instances";
 
-import { FIELD_LABEL, FilesFailed, HINT, parseCap, RunHeader, useStoredFiles, type CollectionChoice, type Draft } from "./createShared";
+import { parseCap, type CollectionChoice, type Draft } from "@/lib/stream/createDraft";
+
+import { FIELD_LABEL, FilesFailed, HINT, RunHeader, useStoredFiles } from "./createShared";
 import { StepRunner, type Step } from "./StepRunner";
 import { StreamLoading } from "./StreamLoading";
 
