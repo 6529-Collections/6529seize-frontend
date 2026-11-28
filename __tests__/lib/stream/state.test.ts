@@ -141,12 +141,20 @@ describe("oneOfOneView", () => {
     expect(oneOfOneView({ ...sold, viewer: BOB }).canClaimDelivery).toBe(false);
   });
 
-  it("disables every action while the auction contract is paused", () => {
+  it("keeps bids and settling open while the contract pauses new sales", () => {
     const view = oneOfOneView(one({ contractPaused: true }));
     expect(view.halted).toBe(true);
-    expect(view.canBid).toBe(false);
+    expect(view.canBid).toBe(true);
     const ended = oneOfOneView(one({ state: AUCTION_STATE.ENDED, contractPaused: true }));
-    expect(ended.canSettle).toBe(false);
+    expect(ended.canSettle).toBe(true);
+  });
+
+  it("blocks offering an unsold work again while new sales are paused", () => {
+    const view = oneOfOneView(
+      one({ state: AUCTION_STATE.SETTLED, independent: true, endTime: BigInt(NOW - 901), contractPaused: true })
+    );
+    expect(view.screen).toBe("unsold_restartable");
+    expect(view.canRestart).toBe(false);
   });
 });
 
@@ -228,9 +236,12 @@ describe("editionView", () => {
     expect(editionView(edition({ status: EDITION_STATUS.CLOSED, abandonable: true })).canAbandon).toBe(true);
   });
 
-  it("disables actions while the edition auction is paused", () => {
-    const view = editionView(edition({ contractPaused: true }));
-    expect(view.canBid).toBe(false);
-    expect(view.halted).toBe(true);
+  it("keeps bidding and claims open while the edition auction pauses new opens", () => {
+    expect(editionView(edition({ contractPaused: true })).canBid).toBe(true);
+    expect(editionView(edition({ status: EDITION_STATUS.SETTLED, contractPaused: true })).canClaim).toBe(true);
+    const openable = editionView(
+      edition({ status: EDITION_STATUS.NONE, masterOpenForEditions: true, contractPaused: true })
+    );
+    expect(openable.canOpen).toBe(false);
   });
 });

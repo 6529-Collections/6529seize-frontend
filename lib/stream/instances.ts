@@ -6,7 +6,7 @@ import type { Address } from "viem";
  * swapped in one place. Values are copied from the contracts repository's
  * deployment record (6529-works `deployments/11155111/`).
  */
-export interface StreamInstance {
+interface StreamInstance {
   /** Short instance name, as the contracts repository calls it. */
   readonly name: string;
   /** The deployment record file in the contracts repository. */
@@ -68,9 +68,9 @@ const R8: StreamInstance = {
   },
 };
 
-export const STREAM_INSTANCES = { r8: R8 } as const;
+const STREAM_INSTANCES = { r8: R8 } as const;
 
-export type StreamInstanceName = keyof typeof STREAM_INSTANCES;
+type StreamInstanceName = keyof typeof STREAM_INSTANCES;
 
 /** The instance the test pages run against. Change it here to move instance. */
 export const ACTIVE_STREAM_INSTANCE: StreamInstanceName = "r8";

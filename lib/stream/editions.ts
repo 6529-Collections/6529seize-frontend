@@ -4,7 +4,7 @@
  * candidate counts it chose between, so the page can show "editions x price =
  * ETH raised" for each one.
  */
-export interface ClearingCandidate {
+interface ClearingCandidate {
   readonly step: number;
   /** Copies sold if this step were the price. */
   readonly count: number;
@@ -14,7 +14,7 @@ export interface ClearingCandidate {
   readonly unitsAtStep: number;
 }
 
-export interface ClearingCandidates {
+interface ClearingCandidates {
   readonly candidates: readonly ClearingCandidate[];
   readonly bestRevenue: bigint;
   /** Index into candidates of the chosen result, or -1 with no bids. */

@@ -10,11 +10,10 @@ import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/stream-sepolia";
-import { getStreamClient, STREAM_CHAIN } from "@/lib/stream/client";
 
 import { sepoliaTxUrl } from "./format";
 import { TxStatus } from "./TxStatus";
-import { errorNameOf, type TxRequest, type TxState } from "./useStreamTx";
+import { errorNameOf, sendStreamTx, StreamTxError, type TxRequest, type TxState } from "./sendStreamTx";
 import { useStreamWallet } from "./WalletGate";
 
 export interface StepIo {
@@ -85,32 +84,21 @@ export function StepRunner<Context>({
         setCurrent({ id: step.id, tx: { phase: "idle" } });
         const io: StepIo = {
           account,
-          send: async (request) => {
-            const client = getStreamClient();
-            setCurrent({ id: step.id, tx: { phase: "wallet" } });
-            await client.simulateContract({
+          send: (request) =>
+            sendStreamTx({
               account,
-              address: request.address,
-              abi: request.abi,
-              functionName: request.functionName,
-              args: request.args ?? [],
-              value: request.value,
-            } as never);
-            const hash = await writeContractAsync({
-              chainId: STREAM_CHAIN.id,
-              address: request.address,
-              abi: request.abi,
-              functionName: request.functionName,
-              args: request.args ?? [],
-              value: request.value,
-            } as never);
-            setHashes((all) => ({ ...all, [step.id]: [...(all[step.id] ?? []), hash] }));
-            setCurrent({ id: step.id, tx: { phase: "pending", hash } });
-            const receipt = await client.waitForTransactionReceipt({ hash, timeout: 600_000 });
-            if (receipt.status !== "success") throw new Error("reverted");
-            setCurrent({ id: step.id, tx: { phase: "done", hash } });
-            return receipt;
-          },
+              request,
+              writeContractAsync: writeContractAsync as never,
+              onState: (tx) => {
+                if (tx.hash) {
+                  const hash = tx.hash;
+                  setHashes((all) =>
+                    (all[step.id] ?? []).includes(hash) ? all : { ...all, [step.id]: [...(all[step.id] ?? []), hash] }
+                  );
+                }
+                setCurrent({ id: step.id, tx });
+              },
+            }),
           signTypedData: async (data) => {
             setCurrent({ id: step.id, tx: { phase: "wallet" } });
             return signTypedDataAsync(data as never);
@@ -123,7 +111,11 @@ export function StepRunner<Context>({
           setStatuses((all) => ({ ...all, [step.id]: "failed" }));
           setCurrent((previous) => ({
             id: step.id,
-            tx: { phase: "error", hash: previous?.tx.hash, error: errorNameOf(error) },
+            tx: {
+              phase: "error",
+              hash: error instanceof StreamTxError ? error.hash : previous?.tx.hash,
+              error: errorNameOf(error),
+            },
           }));
           return;
         }

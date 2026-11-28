@@ -21,6 +21,12 @@ const CONTRACTS = [
     "abi/full/UniformEditionAuction.json",
     "editionAuctionAbi",
   ],
+  [
+    "IndependentEditionAuction",
+    "abi/full/IndependentEditionAuction.json",
+    "independentEditionAuctionAbi",
+  ],
+  ["SaleStarter", "abi/SaleStarter.json", "saleStarterAbi"],
   ["ContentStore", "abi/ContentStore.json", "contentStoreAbi"],
   ["Stream6529", "abi/Stream6529.json", "streamAbi"],
   ["StreamEditions6529", "abi/StreamEditions6529.json", "streamEditionsAbi"],

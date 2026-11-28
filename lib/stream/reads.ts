@@ -15,10 +15,12 @@ import {
 
 import { contentStoreAbi } from "./generated/ContentStore";
 import { editionAuctionAbi } from "./generated/UniformEditionAuction";
+import { independentEditionAuctionAbi } from "./generated/IndependentEditionAuction";
 import { englishAuctionAbi } from "./generated/EnglishAuction";
 import { independentRegistryAbi } from "./generated/IndependentStreamRegistry";
 import { independentDeployerAbi } from "./generated/IndependentStreamDeployer";
 import { streamAbi } from "./generated/Stream6529";
+import { workFactsAbi } from "./generated/StreamWorkFacts6529";
 import { streamEditionsAbi } from "./generated/StreamEditions6529";
 import { splitLedgerAbi } from "./generated/SplitLedger";
 import { getStreamClient, getStreamLogClient } from "./client";
@@ -28,8 +30,7 @@ import {
   CURRENCY_ETH,
   itemFromStartCalldata,
   ZERO_HASH,
-  type MediaFile,
-  type PackageItem,
+  type StartedWork,
 } from "./item";
 import { isZeroAddress, sameAddress, ZERO_ADDRESS } from "./state";
 
@@ -84,7 +85,7 @@ async function contractLogs(address: Address): Promise<Log[]> {
 }
 
 /** One event's logs from a contract, optionally filtered by indexed arguments. */
-export async function scanLogs<TEvent extends AbiEvent>(args: {
+async function scanLogs<TEvent extends AbiEvent>(args: {
   readonly address: Address;
   readonly event: TEvent;
   readonly args?: Record<string, unknown> | undefined;
@@ -184,7 +185,7 @@ export async function listSales(): Promise<SaleSummary[]> {
   });
 }
 
-export interface WorkMeta {
+interface WorkMeta {
   readonly name: string | null;
   readonly description: string | null;
   readonly image: string | null;
@@ -245,7 +246,7 @@ export function artistAddress(artistId: bigint): Address {
 export async function readStartItem(
   startTx: Hex,
   curated: boolean
-): Promise<{ item: PackageItem; media: readonly MediaFile[] } | null> {
+): Promise<StartedWork | null> {
   const tx = await getStreamClient().getTransaction({ hash: startTx });
   return itemFromStartCalldata(tx.input, curated);
 }
@@ -356,7 +357,7 @@ export async function readOneOfOne(token: Address, tokenId: bigint): Promise<One
 }
 
 /** The editions contract that partners a 1/1 contract, or null. */
-export async function editionsTokenFor(token: Address): Promise<Address | null> {
+async function editionsTokenFor(token: Address): Promise<Address | null> {
   const instance = getStreamInstance();
   if (sameAddress(token, instance.addresses.stream)) return instance.addresses.streamEditions;
   const listing = await getStreamClient().readContract({
@@ -580,7 +581,7 @@ export async function readClaimable(viewer: Address) {
     }),
     client.readContract({
       address: instance.addresses.independentEditionAuction,
-      abi: editionAuctionAbi,
+      abi: independentEditionAuctionAbi,
       functionName: "claimable",
       args: [viewer, CURRENCY_ETH],
     }),
@@ -593,17 +594,30 @@ export async function readClaimable(viewer: Address) {
  * inlines it, else the primary file read straight from the content store.
  */
 export async function readWorkArt(args: {
+  readonly token: Address;
+  readonly tokenId: bigint;
   readonly meta: WorkMeta;
   readonly firstStartTx: Hex | null;
   readonly curated: boolean;
 }): Promise<string | null> {
   if (args.meta.image) return args.meta.image;
-  if (!args.firstStartTx) return null;
-  const started = await readStartItem(args.firstStartTx, args.curated).catch(() => null);
-  const primary = started?.media[0];
-  if (!primary) return null;
   const instance = getStreamInstance();
   const client = getStreamClient();
+  // The work record holds the media list once it is open; before that, the start transaction does.
+  const facts = await client
+    .readContract({
+      address: instance.addresses.workFacts,
+      abi: workFactsAbi,
+      functionName: "factsOf",
+      args: [args.token, args.tokenId],
+    })
+    .catch(() => null);
+  let primary = facts?.opened ? facts.media[0] : undefined;
+  if (!primary && args.firstStartTx) {
+    const started = await readStartItem(args.firstStartTx, args.curated).catch(() => null);
+    primary = started?.media[0];
+  }
+  if (!primary) return null;
   const info = await client
     .readContract({
       address: instance.addresses.contentStore,
@@ -684,7 +698,7 @@ export interface MyOneOfOneBid {
   readonly endTime: bigint;
 }
 
-export interface MyEditionBid {
+interface MyEditionBid {
   readonly master: Address;
   readonly tokenId: bigint;
   readonly bidId: bigint;
@@ -692,14 +706,14 @@ export interface MyEditionBid {
   readonly claimed: boolean;
 }
 
-export interface MyPayout {
+interface MyPayout {
   readonly token: Address;
   readonly tokenId: bigint;
   readonly vault: Address;
   readonly releasable: bigint;
 }
 
-export interface MyActivity {
+interface MyActivity {
   readonly oneOfOneBids: readonly MyOneOfOneBid[];
   readonly editionBids: readonly MyEditionBid[];
   readonly works: readonly SaleSummary[];

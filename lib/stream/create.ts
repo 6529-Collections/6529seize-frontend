@@ -6,7 +6,7 @@ import {
 
 import { accountsAbi } from "./generated/Accounts";
 import { contentStoreAbi } from "./generated/ContentStore";
-import { editionAuctionAbi } from "./generated/UniformEditionAuction";
+import { independentEditionAuctionAbi } from "./generated/IndependentEditionAuction";
 import { englishAuctionAbi } from "./generated/EnglishAuction";
 import { independentDeployerAbi } from "./generated/IndependentStreamDeployer";
 import { independentRegistryAbi } from "./generated/IndependentStreamRegistry";
@@ -37,7 +37,7 @@ import { editionSaleExists, saleIdOf } from "./reads";
 import { ZERO_ADDRESS } from "./state";
 
 /** What a create step may send. Matches the UI's transaction request shape. */
-export interface CreateIo {
+interface CreateIo {
   readonly account: Address;
   send(request: {
     address: Address;
@@ -69,7 +69,7 @@ function manifestOf(file: StoredFile) {
 }
 
 /** A stored file's ID, computed by the content store from its manifest. */
-export async function fileIdOf(file: StoredFile): Promise<Hex> {
+async function fileIdOf(file: StoredFile): Promise<Hex> {
   return getStreamClient().readContract({
     address: getStreamInstance().addresses.contentStore,
     abi: contentStoreAbi,
@@ -123,7 +123,7 @@ export async function storeFile(
   return { fileId, sent };
 }
 
-export async function cc0TextFileId(): Promise<Hex> {
+async function cc0TextFileId(): Promise<Hex> {
   return getStreamClient().readContract({
     address: getStreamInstance().addresses.workFacts,
     abi: workFactsAbi,
@@ -135,7 +135,7 @@ export async function cc0TextFileId(): Promise<Hex> {
  * Builds the work's item from its files. Every step calls it, so a step that
  * runs after a reload rebuilds what earlier steps knew from the chain.
  */
-export async function prepareIndependentItem(context: IndependentWorkContext, artist: Address) {
+async function prepareIndependentItem(context: IndependentWorkContext, artist: Address) {
   context.primaryFileId ??= await fileIdOf(context.media);
   context.recordFileId ??= await fileIdOf(context.record);
   const draft = {
@@ -172,7 +172,7 @@ export async function approveIndependentItem(context: IndependentWorkContext, io
 }
 
 /** The token a sale start minted, from its SaleStarted log. */
-export function tokenIdFromStart(receipt: TransactionReceipt, token: Address): bigint | null {
+function tokenIdFromStart(receipt: TransactionReceipt, token: Address): bigint | null {
   const logs = parseEventLogs({ abi: englishAuctionAbi, logs: receipt.logs, eventName: "SaleStarted" });
   const match = logs.find((log) => log.args.token.toLowerCase() === token.toLowerCase());
   return match ? match.args.tokenId : null;
@@ -227,9 +227,9 @@ export async function openIndependentEdition(context: IndependentWorkContext, io
   if (await editionSaleExists(address, saleId)) return false;
   await io.send({
     address,
-    abi: editionAuctionAbi as Abi,
+    abi: independentEditionAuctionAbi as Abi,
     functionName: "open",
-    args: [context.editionsToken, tokenId, encodeEditionOpenData(item, false)],
+    args: [context.editionsToken, tokenId, encodeEditionOpenData({ item, media: [] }, false)],
   });
   return true;
 }
@@ -267,7 +267,7 @@ export async function openWorkRecord(context: IndependentWorkContext, io: Create
   return sent;
 }
 
-export interface SigningIo extends CreateIo {
+interface SigningIo extends CreateIo {
   signTypedData(data: unknown): Promise<Hex>;
 }
 

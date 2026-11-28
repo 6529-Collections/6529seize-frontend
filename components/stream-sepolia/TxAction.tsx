@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import Button from "@/components/utils/button/Button";
 import type { ButtonVariant } from "@/components/utils/button/buttonStyles";
 
@@ -29,7 +31,9 @@ export function TxAction({
   readonly onDone?: (() => void) | undefined;
 }) {
   const { state, send } = useStreamTx();
-  const busy = state.phase === "wallet" || state.phase === "pending";
+  // A request that cannot be built (a read failed) is reported like a failed send.
+  const [buildFailed, setBuildFailed] = useState(false);
+  const busy = state.phase === "wallet" || state.phase === "pending" || state.phase === "slow";
   return (
     <div>
       {description ? (
@@ -42,15 +46,24 @@ export function TxAction({
         loading={busy}
         disabled={disabled || busy}
         onClick={async () => {
-          const next = await request();
-          if (!next) return;
+          setBuildFailed(false);
+          let next;
+          try {
+            next = await request();
+          } catch {
+            next = null;
+          }
+          if (!next) {
+            setBuildFailed(true);
+            return;
+          }
           const receipt = await send(next);
           if (receipt) onDone?.();
         }}
       >
         {label}
       </Button>
-      <TxStatus state={state} />
+      <TxStatus state={buildFailed ? { phase: "error", error: "other" } : state} />
     </div>
   );
 }

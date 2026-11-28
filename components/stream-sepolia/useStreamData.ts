@@ -46,7 +46,13 @@ export function useWorkArt(args: {
   const art = useQuery({
     queryKey: [...KEY, "art", args.token.toLowerCase(), args.tokenId.toString()],
     queryFn: () =>
-      readWorkArt({ meta: meta.data!, firstStartTx: args.firstStartTx, curated: args.curated }),
+      readWorkArt({
+        token: args.token,
+        tokenId: args.tokenId,
+        meta: meta.data!,
+        firstStartTx: args.firstStartTx,
+        curated: args.curated,
+      }),
     enabled: !!meta.data,
     staleTime: Infinity,
   });

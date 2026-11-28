@@ -12,7 +12,7 @@ import { independentRegistryAbi } from "./generated/IndependentStreamRegistry";
 import { getStreamClient, STREAM_CHAIN } from "./client";
 import { getStreamInstance } from "./instances";
 
-export const PRODUCT_INDEPENDENT = keccak256(toBytes("PRODUCT_INDEPENDENT"));
+const PRODUCT_INDEPENDENT = keccak256(toBytes("PRODUCT_INDEPENDENT"));
 /** IIndependentStreamRegistry.Form */
 export const FORM = { ERC721: 0, ERC1155: 1 } as const;
 /** IIndependentStreamRegistry.Status: NONE, ACTIVE, ... */

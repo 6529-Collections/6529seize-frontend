@@ -10,13 +10,38 @@ import type { TxState } from "./useStreamTx";
 
 const KNOWN_ERRORS: Record<string, MessageKey> = {
   rejected: "streamSepolia.tx.error.rejected",
+  chain: "streamSepolia.tx.error.chain",
   failed: "streamSepolia.tx.error.failed",
   BidTooLow: "streamSepolia.tx.error.bidTooLow",
   RestartTooEarly: "streamSepolia.tx.error.restartTooEarly",
   InvalidAuctionState: "streamSepolia.tx.error.state",
-  AuctionNotActive: "streamSepolia.tx.error.state",
-  EnforcedPause: "streamSepolia.tx.error.paused",
-  InsufficientFunds: "streamSepolia.tx.error.funds",
+  SalePaused: "streamSepolia.tx.error.paused",
+  BiddingClosed: "streamSepolia.tx.error.biddingClosed",
+  IncorrectPayment: "streamSepolia.tx.error.payment",
+  InvalidStep: "streamSepolia.tx.error.price",
+  InvalidQuantity: "streamSepolia.tx.error.quantity",
+  SettlementNotReady: "streamSepolia.tx.error.notReady",
+  InvalidSettlementOrder: "streamSepolia.tx.error.tryAgain",
+  NotAbandonable: "streamSepolia.tx.error.notReady",
+  AuctionExists: "streamSepolia.tx.error.alreadyOpen",
+  NoOneOfOneAuction: "streamSepolia.tx.error.noOneOfOne",
+  NothingToClaim: "streamSepolia.tx.error.nothingToClaim",
+  ClaimFailed: "streamSepolia.tx.error.claimFailed",
+  NotHighBidder: "streamSepolia.tx.error.notHighBidder",
+  NoPendingDelivery: "streamSepolia.tx.error.nothingToClaim",
+  RefusalTooEarly: "streamSepolia.tx.error.notReady",
+  DeliveryInsufficientGas: "streamSepolia.tx.error.gas",
+  TargetNotAllowed: "streamSepolia.tx.error.notListed",
+  NotBidder: "streamSepolia.tx.error.notYourBid",
+  UnknownBid: "streamSepolia.tx.error.notYourBid",
+  InvalidRecipient: "streamSepolia.tx.error.recipient",
+  InvalidSaleTerms: "streamSepolia.tx.error.terms",
+  UnknownAuction: "streamSepolia.tx.error.state",
+  ItemNotApproved: "streamSepolia.tx.error.notApproved",
+  NotListable: "streamSepolia.tx.error.notListable",
+  NotArtist: "streamSepolia.tx.error.notArtist",
+  InvalidSignature: "streamSepolia.tx.error.signature",
+  SignatureExpired: "streamSepolia.tx.error.signature",
 };
 
 const LINK_CLASS =
@@ -40,15 +65,16 @@ export function TxStatus({ state }: { readonly state: TxState }) {
     case "pending":
       text = t(locale, "streamSepolia.tx.pending");
       break;
+    case "slow":
+      text = t(locale, "streamSepolia.tx.slow");
+      break;
     case "done":
       text = t(locale, "streamSepolia.tx.done");
       tone = "tw-text-emerald-400";
       break;
     case "error": {
       const key = KNOWN_ERRORS[state.error ?? "failed"];
-      text = key
-        ? t(locale, key)
-        : t(locale, "streamSepolia.tx.error.named", { name: state.error ?? "" });
+      text = key ? t(locale, key) : t(locale, "streamSepolia.tx.error.other");
       tone = "tw-text-red";
     }
   }

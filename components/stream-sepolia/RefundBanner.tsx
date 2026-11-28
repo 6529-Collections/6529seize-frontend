@@ -7,6 +7,7 @@ import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/stream-sepolia";
 import { editionAuctionAbi } from "@/lib/stream/generated/UniformEditionAuction";
 import { englishAuctionAbi } from "@/lib/stream/generated/EnglishAuction";
+import { independentEditionAuctionAbi } from "@/lib/stream/generated/IndependentEditionAuction";
 import { getStreamInstance } from "@/lib/stream/instances";
 import { CURRENCY_ETH } from "@/lib/stream/item";
 
@@ -48,7 +49,7 @@ export function RefundBanner() {
       amount: claimable.data.independentEdition,
       request: () => ({
         address: instance.addresses.independentEditionAuction,
-        abi: editionAuctionAbi as Abi,
+        abi: independentEditionAuctionAbi as Abi,
         functionName: "claim",
         args: [CURRENCY_ETH, wallet.address],
       }),

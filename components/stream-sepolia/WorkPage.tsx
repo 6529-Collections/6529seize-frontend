@@ -76,7 +76,7 @@ function WorkBody({ token, tokenId }: { readonly token: Address; readonly tokenI
             <p className={LABEL}>
               {t(locale, "streamSepolia.work.eyebrow", { product: productLabel, id: tokenId.toString() })}
             </p>
-            <h1 className="tw-m-0 tw-mt-1 tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl">
+            <h1 className="tw-m-0 tw-mt-1 tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 sm:tw-text-3xl">
               {title}
             </h1>
             <p className="tw-m-0 tw-mt-2 tw-text-sm tw-text-iron-400">

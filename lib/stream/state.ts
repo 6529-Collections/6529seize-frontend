@@ -48,7 +48,7 @@ export interface OneOfOneInput {
   readonly restartDelay: number;
   /** An Independent Stream work (an artist's own contract) rather than a curated 6529 Stream work. */
   readonly independent: boolean;
-  /** The whole auction contract is paused. */
+  /** The auction contract's pause: it stops new starts and restarts only. */
   readonly contractPaused: boolean;
   /** Who may claim a pending delivery, or zero. */
   readonly pendingDelivery: Address;
@@ -85,7 +85,10 @@ export interface OneOfOneView {
   readonly restartAt: number | null;
   readonly canWithdrawBid: boolean;
   readonly canClaimDelivery: boolean;
-  /** The whole auction contract is paused: nothing can be sent. */
+  /**
+   * New sales are paused (the contract's pause). Only starting and offering
+   * again are blocked; bids, settling, claims and take-backs still work.
+   */
   readonly halted: boolean;
 }
 
@@ -106,7 +109,6 @@ export function oneOfOneView(input: OneOfOneInput): OneOfOneView {
     restartAt: null,
     canWithdrawBid: false,
     canClaimDelivery:
-      !halted &&
       !isZeroAddress(input.pendingDelivery) &&
       sameAddress(input.pendingDelivery, input.viewer),
     halted,
@@ -118,16 +120,16 @@ export function oneOfOneView(input: OneOfOneInput): OneOfOneView {
     case AUCTION_STATE.ACTIVE: {
       // The derived state stays ACTIVE until the end; guard against a stale read.
       if (secondsLeft === 0) {
-        return { ...base, screen: "ended", canSettle: !halted };
+        return { ...base, screen: "ended", canSettle: true };
       }
       return {
         ...base,
         screen: secondsLeft <= input.extensionWindow ? "closing" : "live",
-        canBid: !halted,
+        canBid: true,
       };
     }
     case AUCTION_STATE.PAUSED:
-      return { ...base, screen: "paused", canWithdrawBid: !halted && viewerLeads };
+      return { ...base, screen: "paused", canWithdrawBid: viewerLeads };
     case AUCTION_STATE.ENDED:
       return endedView(input, base);
     case AUCTION_STATE.SETTLED:
@@ -147,8 +149,8 @@ function endedView(input: OneOfOneInput, base: ViewBase): OneOfOneView {
   return {
     ...base,
     screen: "ended",
-    canSettle: !base.halted,
-    canSettleOrRefund: !base.halted && refusable,
+    canSettle: true,
+    canSettleOrRefund: refusable,
   };
 }
 
@@ -215,7 +217,7 @@ export function editionView(input: EditionInput): EditionView {
     canOpen: false,
     canBid: false,
     canSettle: false,
-    canAbandon: !halted && input.abandonable,
+    canAbandon: input.abandonable,
     canClaim: false,
     halted,
   };
@@ -226,21 +228,21 @@ export function editionView(input: EditionInput): EditionView {
         : { ...base, screen: "not_open" };
     case EDITION_STATUS.OPEN:
       if (!input.biddingOpen || secondsLeft === 0) {
-        return { ...base, screen: "closed", canSettle: !halted && settleable(input) };
+        return { ...base, screen: "closed", canSettle: settleable(input) };
       }
       return {
         ...base,
         screen: secondsLeft <= input.softWindow ? "closing" : "open",
-        canBid: !halted,
+        canBid: true,
       };
     case EDITION_STATUS.CLOSED:
-      return { ...base, screen: "closed", canSettle: !halted && settleable(input) };
+      return { ...base, screen: "closed", canSettle: settleable(input) };
     case EDITION_STATUS.SETTLING:
-      return { ...base, screen: "settling", canSettle: !halted };
+      return { ...base, screen: "settling", canSettle: true };
     case EDITION_STATUS.SETTLED:
-      return { ...base, screen: "settled", canClaim: !halted };
+      return { ...base, screen: "settled", canClaim: true };
     case EDITION_STATUS.VOID:
-      return { ...base, screen: "void", canClaim: !halted };
+      return { ...base, screen: "void", canClaim: true };
     default:
       return { ...base, screen: "not_open" };
   }

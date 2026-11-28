@@ -626,7 +626,7 @@ function OpenEdition({
                 address: detail.auctionAddress,
                 abi,
                 functionName: "open",
-                args: [detail.editionsToken, tokenId, encodeEditionOpenData(started.item, curated)],
+                args: [detail.editionsToken, tokenId, encodeEditionOpenData(started, curated)],
               };
             }}
           />

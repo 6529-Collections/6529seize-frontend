@@ -33,7 +33,7 @@ function Figure({ label, value }: { readonly label: string; readonly value: stri
   return (
     <div>
       <p className={LABEL}>{label}</p>
-      <p className="tw-m-0 tw-mt-1 tw-text-2xl tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50 sm:tw-text-3xl">
+      <p className="tw-m-0 tw-mt-1 tw-text-3xl tw-font-semibold tw-tabular-nums tw-tracking-tight tw-text-iron-50 sm:tw-text-4xl xl:tw-text-5xl">
         {value}
       </p>
     </div>
@@ -125,7 +125,7 @@ function StatusLine({ view, detail }: { readonly view: OneOfOneView; readonly de
   }
   return (
     <p className={`tw-m-0 tw-text-sm ${view.screen === "closing" ? "tw-text-amber-300" : "tw-text-iron-300"}`}>
-      {view.halted ? t(locale, "streamSepolia.one.status.halted") : text}
+      {view.halted && view.screen.startsWith("unsold_") ? t(locale, "streamSepolia.one.status.halted") : text}
     </p>
   );
 }
@@ -340,7 +340,7 @@ export function OneOfOnePanel({
       <h2 id="stream-one-title" className={LABEL}>
         {t(locale, "streamSepolia.one.title")}
       </h2>
-      <div className="tw-mt-3 tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-3">
+      <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-4">
         <Figure label={top.left.label} value={top.left.value} />
         {top.right ? <Figure label={top.right.label} value={top.right.value} /> : null}
       </div>

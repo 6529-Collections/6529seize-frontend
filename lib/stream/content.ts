@@ -1,14 +1,14 @@
 import { bytesToHex, keccak256, toBytes, type Hex } from "viem";
 
 /** ContentStore stores files in chunks of at most this many bytes. */
-export const CHUNK_SIZE = 24_575;
+const CHUNK_SIZE = 24_575;
 /** Identity encoding: the stored bytes are the media itself. */
 export const ENCODING_IDENTITY = 0;
 /**
  * The largest primary file the create page accepts. Storing a byte on
  * Sepolia costs about 1,600 gas, so this keeps a work's upload near 25M gas.
  */
-export const MAX_MEDIA_BYTES = 16_384;
+const MAX_MEDIA_BYTES = 16_384;
 
 export interface StoredFile {
   readonly bytes: Uint8Array;
@@ -20,7 +20,7 @@ export interface StoredFile {
   readonly chunks: readonly Uint8Array[];
 }
 
-export function splitChunks(bytes: Uint8Array): Uint8Array[] {
+function splitChunks(bytes: Uint8Array): Uint8Array[] {
   const chunks: Uint8Array[] = [];
   for (let offset = 0; offset < bytes.length; offset += CHUNK_SIZE) {
     chunks.push(bytes.slice(offset, offset + CHUNK_SIZE));
@@ -28,7 +28,7 @@ export function splitChunks(bytes: Uint8Array): Uint8Array[] {
   return chunks;
 }
 
-export async function sha256Of(bytes: Uint8Array): Promise<Hex> {
+async function sha256Of(bytes: Uint8Array): Promise<Hex> {
   const digest = await crypto.subtle.digest("SHA-256", bytes as BufferSource);
   return bytesToHex(new Uint8Array(digest));
 }
@@ -47,7 +47,7 @@ export async function toStoredFile(
   };
 }
 
-export interface WorkRecord {
+interface WorkRecord {
   readonly name: string;
   readonly description: string;
   readonly artist: string;

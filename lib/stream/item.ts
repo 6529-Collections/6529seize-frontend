@@ -10,23 +10,24 @@ import {
 } from "viem";
 
 import { englishAuctionAbi } from "./generated/EnglishAuction";
+import { saleStarterAbi } from "./generated/SaleStarter";
 import { workFactsAbi } from "./generated/StreamWorkFacts6529";
 
 /** The contracts' constants, as WorksHashing / SaleKind / EconomicsTypes define them. */
-export const PACKAGE_ITEM_DOMAIN = keccak256(toBytes("6529WORKS_PACKAGE_ITEM_V1"));
-export const MEDIA_DOMAIN = keccak256(toBytes("6529WORKS_MEDIA_V1"));
-export const SALE_KIND_ENGLISH = keccak256(toBytes("ENGLISH_AUCTION"));
-export const SALE_KIND_UNIFORM = keccak256(toBytes("UNIFORM_AUCTION"));
+const PACKAGE_ITEM_DOMAIN = keccak256(toBytes("6529WORKS_PACKAGE_ITEM_V1"));
+const MEDIA_DOMAIN = keccak256(toBytes("6529WORKS_MEDIA_V1"));
+const SALE_KIND_ENGLISH = keccak256(toBytes("ENGLISH_AUCTION"));
+const SALE_KIND_UNIFORM = keccak256(toBytes("UNIFORM_AUCTION"));
 export const CURRENCY_ETH: Address = "0x0000000000000000000000000000000000000000";
 export const ZERO_HASH: Hex =
   "0x0000000000000000000000000000000000000000000000000000000000000000";
 /** Rates and shares are out of 100,000. */
-export const RATE_DENOMINATOR = 100_000;
+const RATE_DENOMINATOR = 100_000;
 
 export const ITEM_KIND = { ORIGINAL: 0, EDITION_MASTER: 1 } as const;
-export const PARTY_ROLE = { ARTIST: 0, COLLABORATOR: 1 } as const;
-export const FILE_ROLE = { PRIMARY: 0, PREVIEW: 1, AUXILIARY: 2 } as const;
-export const SEED_POLICY_NONE = 0;
+const PARTY_ROLE = { ARTIST: 0, COLLABORATOR: 1 } as const;
+const FILE_ROLE = { PRIMARY: 0, PREVIEW: 1, AUXILIARY: 2 } as const;
+const SEED_POLICY_NONE = 0;
 
 const openFunction = workFactsAbi.find(
   (entry) => entry.type === "function" && entry.name === "open"
@@ -40,7 +41,7 @@ const MEDIA_PARAM = openFunction.inputs[3];
 export type PackageItem = AbiParameterToPrimitiveType<typeof ITEM_PARAM>;
 export type MediaFile = AbiParameterToPrimitiveType<typeof MEDIA_PARAM>[number];
 
-export interface WorkDraft {
+interface WorkDraft {
   /** The artist (lead party). Its artist ID is its address as a number. */
   readonly artist: Address;
   readonly collectionId: bigint;
@@ -53,7 +54,7 @@ export interface WorkDraft {
   readonly edition?: { readonly maxCount: number } | undefined;
 }
 
-export function artistIdOf(artist: Address): bigint {
+function artistIdOf(artist: Address): bigint {
   return BigInt(artist);
 }
 
@@ -112,10 +113,6 @@ export function itemHashOf(item: PackageItem): Hex {
   );
 }
 
-/** The Merkle leaf of an item; a one-item package's root is its leaf. */
-export function leafOf(itemHash: Hex): Hex {
-  return keccak256(itemHash);
-}
 
 const INDEPENDENT_MINT_PARAMS = [
   {
@@ -155,65 +152,63 @@ const STREAM_MINT_PARAMS = [
   },
 ] as const;
 
-/** `abi.encode(StreamMintRequest)` for a one-item package (empty proof). */
-export function encodeStreamMint(args: {
+/** How a work was minted: its item and media, and for a curated work its package root and proof. */
+export interface StartedWork {
   readonly item: PackageItem;
-  readonly nonce: bigint;
-  readonly deadline: bigint;
-  /** `abi.encodePacked(wallet, signature)`. */
-  readonly moveProof: Hex;
-}): Hex {
-  return encodeAbiParameters(STREAM_MINT_PARAMS, [
-    {
-      packageRoot: leafOf(itemHashOf(args.item)),
-      item: args.item,
-      proof: [],
-      move: {
-        nonce: args.nonce,
-        deadline: args.deadline,
-        signature: args.moveProof,
-      },
-    },
-  ]);
-}
-
-/** Edition `open` data: the item alone for Independent Stream, item + root + proof for 6529 Stream. */
-export function encodeEditionOpenData(item: PackageItem, curated: boolean): Hex {
-  if (!curated) {
-    return encodeAbiParameters([ITEM_PARAM], [item]);
-  }
-  return encodeAbiParameters(
-    [ITEM_PARAM, { type: "bytes32" }, { type: "bytes32[]" }],
-    [item, leafOf(itemHashOf(item)), []]
-  );
+  readonly media: readonly MediaFile[];
+  /** Curated only: the package root and the item's Merkle proof the start carried. */
+  readonly packageRoot?: Hex | undefined;
+  readonly proof?: readonly Hex[] | undefined;
 }
 
 /**
- * Reads the item back out of the calldata of the transaction that started a
- * work's first sale (EnglishAuction.start / startWithBid), so anyone can open
- * the edition sale beside it. Returns null for any other call.
+ * Edition `open` data: the item alone for Independent Stream; for 6529 Stream
+ * the item with the root and proof of the package it was minted from (a
+ * package usually holds several items, so the proof is not empty).
  */
-export function itemFromStartCalldata(
-  input: Hex,
-  curated: boolean
-): { item: PackageItem; media: readonly MediaFile[] } | null {
-  let decoded;
-  try {
-    decoded = decodeFunctionData({ abi: englishAuctionAbi, data: input });
-  } catch {
-    return null;
+export function encodeEditionOpenData(started: StartedWork, curated: boolean): Hex {
+  if (!curated) {
+    return encodeAbiParameters([ITEM_PARAM], [started.item]);
   }
-  if (decoded.functionName !== "start" && decoded.functionName !== "startWithBid") {
-    return null;
-  }
-  const request = decoded.args[1];
+  if (!started.packageRoot) throw new Error("curated edition needs its package root");
+  return encodeAbiParameters(
+    [ITEM_PARAM, { type: "bytes32" }, { type: "bytes32[]" }],
+    [started.item, started.packageRoot, started.proof ?? []]
+  );
+}
+
+function decodeRequest(request: Hex, curated: boolean, media: readonly MediaFile[] | null): StartedWork | null {
   try {
     if (curated) {
       const [mint] = decodeAbiParameters(STREAM_MINT_PARAMS, request);
-      return { item: mint.item, media: [] };
+      return { item: mint.item, media: media ?? [], packageRoot: mint.packageRoot, proof: mint.proof };
     }
     const [mint] = decodeAbiParameters(INDEPENDENT_MINT_PARAMS, request);
     return { item: mint.item, media: mint.media };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Reads how a work was minted out of the calldata of the transaction that
+ * started its first sale: EnglishAuction.start / startWithBid, or
+ * SaleStarter.start (how the network's keeper starts curated works).
+ * Returns null for any other call.
+ */
+export function itemFromStartCalldata(input: Hex, curated: boolean): StartedWork | null {
+  try {
+    const direct = decodeFunctionData({ abi: englishAuctionAbi, data: input });
+    if (direct.functionName === "start" || direct.functionName === "startWithBid") {
+      return decodeRequest(direct.args[1], curated, null);
+    }
+    return null;
+  } catch {
+    // Not an EnglishAuction call; try the starter.
+  }
+  try {
+    const viaStarter = decodeFunctionData({ abi: saleStarterAbi, data: input });
+    return decodeRequest(viaStarter.args[2], curated, viaStarter.args[3]);
   } catch {
     return null;
   }
