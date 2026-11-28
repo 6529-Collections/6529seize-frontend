@@ -109,6 +109,14 @@ It uses synthetic local data and checks that hidden lists do not refetch.
 App PR CI selects it when reaction components, hooks, API helpers, or its browser
 contract change.
 
+The native competition sandbox pack also checks Configuration access identity
+editing at phone, tablet, and desktop widths, including simulated iOS. It verifies
+the pinned Save action, scoped identity rows, Included/Excluded, CSV removal,
+privacy, and unsaved Back navigation.
+Desktop resize coverage opens Configuration before narrowing the viewport,
+checks both sides of the 768 px breakpoint, and retains the access editor's
+selected identity tab and CSV draft while switching to the full-width phone view.
+
 The native competition sandbox pack exercises Additional Action through the real
 Main Stage submission modal on desktop and phone. It checks the optional plan,
 length limit, checkbox draft preservation, review/preview and back navigation,

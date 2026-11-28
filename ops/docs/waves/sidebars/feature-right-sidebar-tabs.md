@@ -74,6 +74,9 @@ Pin and mute use matching compact dark button surfaces.
 - Delete all my messages confirms in a sheet with a red destructive action.
 - On tablet-sized layouts, the overlay side panel also keeps these editors
   inside the panel. Back or Escape returns to the selected information tab.
+- An open side panel fills the viewport when the browser becomes narrower than
+  768 px. Its selected information tab and access-editor draft stay in place;
+  widening the browser restores the side-panel width.
 - Decision access, rules, appearance and pauses belong to **Settings** in the
   main row. Voter lists and vote activity belong to **Votes**.
 - Information tabs support ArrowLeft, ArrowRight, Home and End. Mobile confines

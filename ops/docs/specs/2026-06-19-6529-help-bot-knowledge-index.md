@@ -1104,7 +1104,14 @@ Create Wave access editing uses a vertical category list on smaller screens and
 touch devices. Selecting a category opens its fields; the shared Back control
 returns to the list and preserves the pending criteria. Desktop keeps its
 left-side criteria list. The help corpus distinguishes this from Configuration
-access editors, which retain their compact horizontal navigation.
+access editors, which open on the criteria list on phones and Identities on desktop.
+Configuration keeps Save changes in a pinned footer. Desktop places Hide criteria
+and members beside Save; on phones, that toggle and After editing follow the
+identity content. The phone Identities screen keeps the helper, Visibility shortcut,
+and Before editing on the parent criteria-list screen, reached with Back. Its
+Included/Excluded tabs span the view, Include me follows search, and the warning
+precedes EMMA/CSV and the unique identity count. These presentation changes are
+scoped to Configuration access editing.
 
 Create Wave also uses Network Filter’s concise Included copy and shared readiness
 tooltip. The editor omits Before editing and After editing captions and the default

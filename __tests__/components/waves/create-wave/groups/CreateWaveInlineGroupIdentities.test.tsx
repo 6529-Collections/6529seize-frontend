@@ -94,6 +94,8 @@ const selectedCurrentUserIdentity: CommunityMemberMinimal = {
   pfp: "me.png",
 };
 
+let presentation: "default" | "wave-access" = "default";
+
 function renderWithProfile({
   includedIdentities = [],
   excludedIdentities = [],
@@ -132,6 +134,7 @@ function renderWithProfile({
       }}
     >
       <CreateWaveInlineGroupIdentities
+        variant={presentation}
         showIdentityTotal={showIdentityTotal}
         includedIdentities={includedIdentities}
         excludedIdentities={excludedIdentities}
@@ -156,7 +159,11 @@ function renderWithProfile({
   };
 }
 
-describe("CreateWaveInlineGroupIdentities", () => {
+const presentations = ["default", "wave-access"] as const;
+describe.each(presentations)("%s identities", (variant) => {
+  beforeEach(() => {
+    presentation = variant;
+  });
   it.each([
     {
       mode: "Included",

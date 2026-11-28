@@ -1901,6 +1901,305 @@ async function openAppearanceDraft(
 }
 
 test.describe("Native competition sandbox @auth @medium @local-only", () => {
+  test("fills the phone viewport when an open information sidebar is resized", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-desktop-chromium",
+      "Desktop browser resizing coverage."
+    );
+    await installCompetitionApi(page, true);
+    await page.setViewportSize({ width: 1100, height: 850 });
+    await page.goto(`/waves/${WAVE}?tab=chat`);
+    const information = await openWaveInformation(page);
+    await information
+      .getByRole("tab", { name: "Configuration", exact: true })
+      .click();
+    await page.setViewportSize({ width: 900, height: 850 });
+    const panel = page.getByRole("dialog", {
+      name: "Wave details",
+      exact: true,
+    });
+    const surface = page.getByTestId("brain-right-sidebar-panel");
+    const configuration = panel.getByRole("tab", {
+      name: "Configuration",
+      exact: true,
+    });
+    await expect(configuration).toHaveAttribute("aria-selected", "true");
+    for (const width of [767, 390, 768]) {
+      await page.setViewportSize({ width, height: 850 });
+      await expect(surface).toHaveCSS(
+        "width",
+        `${width < 768 ? width : 328}px`
+      );
+      await expect(configuration).toHaveAttribute("aria-selected", "true");
+    }
+    await panel
+      .getByRole("button", { name: "Edit Chat access", exact: true })
+      .click();
+    const editor = page.getByRole("dialog").filter({
+      has: page.getByRole("button", { name: "Save changes", exact: true }),
+    });
+    await editor.getByRole("tab", { name: "Excluded", exact: true }).click();
+    await editor
+      .getByLabel("Choose a CSV file of identities to exclude", { exact: true })
+      .setInputFiles({
+        name: "resize-draft.csv",
+        mimeType: "text/csv",
+        buffer: Buffer.from("0x0000000000000000000000000000000000000532"),
+      });
+    for (const width of [767, 390, 768, 900, 390]) {
+      await page.setViewportSize({ width, height: 850 });
+      await expect(surface).toHaveCSS(
+        "width",
+        `${width < 768 ? width : 328}px`
+      );
+      await expect(editor).toHaveAccessibleName(
+        width < 768 ? "Identities" : "Edit Chat access"
+      );
+      await expect(
+        editor.getByRole("tab", { name: "Excluded", exact: true })
+      ).toHaveAttribute("aria-selected", "true");
+      await expect(
+        editor.getByText("resize-draft.csv", { exact: true })
+      ).toBeVisible();
+      await expect(
+        editor.getByText("1 unique identity excluded", { exact: true })
+      ).toBeVisible();
+      await expect(
+        editor.getByRole("button", { name: "Save changes", exact: true })
+      ).toBeInViewport({ ratio: 1 });
+      await expectNoHorizontalOverflow(page);
+    }
+    await page.setViewportSize({ width: 390, height: 480 });
+    await expect(
+      editor.getByRole("button", { name: "Save changes", exact: true })
+    ).toBeInViewport({ ratio: 1 });
+    await page.setViewportSize({ width: 390, height: 850 });
+    await page.screenshot({
+      path: testInfo.outputPath("access-identities-resized-phone.png"),
+      style: "nextjs-portal { visibility: hidden; }",
+    });
+    await expect(
+      editor.getByRole("heading", { name: "Identities", exact: true })
+    ).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(
+      editor.getByRole("tab", { name: "Excluded", exact: true })
+    ).toBeFocused();
+    await page.keyboard.press("Escape");
+    await expect(editor).toHaveAccessibleName("Edit Chat access");
+    await editor.getByRole("button", { name: "Back", exact: true }).click();
+    await page
+      .getByRole("dialog", { name: "Discard changes?", exact: true })
+      .getByRole("button", { name: "Discard changes", exact: true })
+      .click();
+    await expect(configuration).toHaveAttribute("aria-selected", "true");
+    await panel.getByRole("button", { name: "Back", exact: true }).click();
+    await expect(panel).toHaveCount(0);
+  });
+
+  for (const surface of ["web", "ios"] as const) {
+    test(`keeps access identity editing clean and Save reachable on ${surface}`, async ({
+      page,
+      baseURL,
+      isMobile,
+    }, testInfo) => {
+      test.skip(
+        surface === "ios" && !isMobile,
+        "iOS uses the phone presentation."
+      );
+      test.setTimeout(180000);
+      if (surface === "ios")
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          baseURL
+        );
+      await installCompetitionApi(page, true);
+      for (const width of isMobile ? [360, 390, 430, 768] : [1024, 1440]) {
+        const phone = isMobile && width < 768;
+        await page.setViewportSize({ width, height: 850 });
+        await page.goto(`/waves/${WAVE}?tab=chat`);
+        const information = await openWaveInformation(page);
+        await information
+          .getByRole("tab", { name: "Configuration", exact: true })
+          .click();
+        await information
+          .getByRole("button", { name: "Edit Chat access", exact: true })
+          .click();
+        const editor = page.getByRole("dialog").filter({
+          has: page.getByRole("button", { name: "Save changes", exact: true }),
+        });
+        const save = editor.getByRole("button", {
+          name: "Save changes",
+          exact: true,
+        });
+        await expect(save).toHaveCount(1);
+        await expect(save).toBeInViewport({ ratio: 1 });
+        if (phone) {
+          await expect(
+            editor.getByText("Before editing", { exact: true })
+          ).toBeVisible();
+          await editor.getByRole("button", { name: /^Identities/ }).click();
+          await expect(editor).toHaveAccessibleName("Identities");
+          await expect(
+            editor.getByRole("heading", { name: "Identities", exact: true })
+          ).toHaveCount(1);
+          await expect(
+            editor.getByText("Before editing", { exact: true })
+          ).toBeHidden();
+          const input = editor.getByRole("textbox", {
+            name: "Find an identity to include",
+            exact: true,
+          });
+          await expect(input).toHaveCSS("font-size", "16px");
+          const tabs = editor.getByRole("tab");
+          const included = await tabs.nth(0).boundingBox();
+          const excluded = await tabs.nth(1).boundingBox();
+          expect(
+            Math.abs(included!.width - excluded!.width)
+          ).toBeLessThanOrEqual(1);
+          const remove = editor.getByRole("button", {
+            name: /Remove playwright, wallet/,
+          });
+          await expect(remove).toHaveCSS("width", "44px");
+          await expect(
+            editor
+              .getByRole("button", { name: /Remove playwright, wallet/ })
+              .locator("..")
+          ).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+        }
+        const includeMe = editor.getByRole("switch", {
+          name: "Include me",
+          exact: true,
+        });
+        if (phone) {
+          await expect
+            .poll(() =>
+              editor
+                .getByRole("heading", { name: "Identities", exact: true })
+                .evaluate((el) =>
+                  Math.round(
+                    el
+                      .closest("[data-mobile-navigation-view]")!
+                      .getBoundingClientRect().left
+                  )
+                )
+            )
+            .toBe(0);
+        }
+        await page.addStyleTag({
+          content: "nextjs-portal { visibility: hidden; }",
+        });
+        await page.screenshot({
+          path: testInfo.outputPath(
+            `access-identities-${surface}-${width}-top.png`
+          ),
+        });
+        await expect(includeMe).toBeChecked();
+        await editor.getByText("Include me", { exact: true }).click();
+        await expect(includeMe).not.toBeChecked();
+        await editor.getByText("Include me", { exact: true }).click();
+        await expect(includeMe).toBeChecked();
+        await editor
+          .getByRole("tab", { name: "Excluded", exact: true })
+          .click();
+        await expect(
+          editor.getByRole("textbox", {
+            name: "Find an identity to exclude",
+            exact: true,
+          })
+        ).toBeVisible();
+        await editor
+          .getByLabel("Choose a CSV file of identities to exclude", {
+            exact: true,
+          })
+          .setInputFiles({
+            name: "excluded.csv",
+            mimeType: "text/csv",
+            buffer: Buffer.from("0x0000000000000000000000000000000000000532"),
+          });
+        await expect(
+          editor.getByText("1 unique identity excluded", { exact: true })
+        ).toBeVisible();
+        await editor
+          .getByRole("button", { name: "Remove CSV file", exact: true })
+          .click();
+        await editor
+          .getByRole("tab", { name: "Included", exact: true })
+          .click();
+        const privacy = editor.getByRole("switch", {
+          name: "Hide criteria and members",
+          exact: true,
+        });
+        await privacy.scrollIntoViewIfNeeded();
+        await expect(save).toBeInViewport({ ratio: 1 });
+        if (!phone)
+          await expect(
+            editor
+              .getByRole("switch", {
+                name: "Hide criteria and members",
+                exact: true,
+              })
+              .evaluate(
+                (el) => el.closest("[data-wave-access-footer]") !== null
+              )
+          ).resolves.toBe(true);
+        await editor
+          .getByText("Hide criteria and members", { exact: true })
+          .click();
+        await expect(privacy).toBeChecked();
+        await page.screenshot({
+          path: testInfo.outputPath(
+            `access-identities-${surface}-${width}.png`
+          ),
+        });
+        await expectNoHorizontalOverflow(page);
+        if (surface === "ios") {
+          await emitNativeKeyboard(page, "keyboardWillShow", 300);
+          await emitNativeKeyboard(page, "keyboardDidShow", 300);
+          await expect
+            .poll(() =>
+              save.evaluate((el) => el.getBoundingClientRect().bottom)
+            )
+            .toBeLessThanOrEqual(550);
+          await emitNativeKeyboard(page, "keyboardWillHide");
+          await emitNativeKeyboard(page, "keyboardDidHide");
+        } else {
+          await page.setViewportSize({ width, height: 480 });
+          await expect(save).toBeInViewport({ ratio: 1 });
+          await page.setViewportSize({ width, height: 850 });
+        }
+        if (phone) {
+          await editor
+            .getByRole("button", { name: "Back", exact: true })
+            .click();
+          await expect(
+            editor.getByText("Before editing", { exact: true })
+          ).toBeVisible();
+          await editor
+            .getByRole("button", { name: "Back", exact: true })
+            .click();
+          const discard = page.getByRole("dialog", {
+            name: "Discard changes?",
+            exact: true,
+          });
+          await expect(
+            discard.getByRole("heading", {
+              name: "Discard changes?",
+              exact: true,
+            })
+          ).toBeVisible();
+          await discard
+            .getByRole("button", { name: "Cancel", exact: true })
+            .click();
+          await expect(save).toBeInViewport({ ratio: 1 });
+        }
+      }
+    });
+  }
+
   test("keeps the last vote clear of the native keyboard", async ({
     page,
     baseURL,

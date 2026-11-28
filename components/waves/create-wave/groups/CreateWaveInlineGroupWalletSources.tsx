@@ -31,6 +31,7 @@ interface InlineWalletSourcesProps {
   readonly networkPresentation?: boolean;
   readonly hideEmptyMessages?: boolean;
   readonly mobilePresentation?: boolean;
+  readonly variant?: "default" | "wave-access";
 }
 
 function RemoveSourceButton({
@@ -85,8 +86,20 @@ function SourceCount({
 function getWalletSourceClasses(
   quiet: boolean,
   networkPresentation: boolean,
-  mobilePresentation: boolean
+  mobilePresentation: boolean,
+  variant: "default" | "wave-access"
 ) {
+  if (variant === "wave-access") {
+    return {
+      section: "tw-min-w-0 tw-rounded-xl tw-bg-iron-900 tw-p-4",
+      input: "[&_input]:tw-h-11 [&_input]:tw-py-0",
+      title: "tw-m-0 tw-text-[15px] tw-font-semibold tw-text-iron-50",
+      description:
+        "tw-mb-4 tw-mt-2 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400",
+      status: "tw-mt-3 tw-flex tw-items-start tw-justify-between tw-gap-3",
+      empty: "tw-m-0 tw-text-xs tw-font-normal tw-text-iron-500",
+    };
+  }
   if (mobilePresentation) {
     return {
       section: "tw-min-w-0 tw-rounded-xl tw-bg-iron-900 tw-p-4",
@@ -131,6 +144,7 @@ function EmmaWalletSource({
   networkPresentation = false,
   hideEmptyMessages = false,
   mobilePresentation = false,
+  variant = "default",
 }: Omit<InlineWalletSourcesProps, "direction">) {
   const locale = useBrowserLocale();
   const { connectedProfile, requestAuth } = useAuth();
@@ -209,7 +223,8 @@ function EmmaWalletSource({
   const sourceClasses = getWalletSourceClasses(
     quiet,
     networkPresentation,
-    mobilePresentation
+    mobilePresentation,
+    variant
   );
 
   return (
@@ -334,6 +349,7 @@ function CsvWalletSource({
   networkPresentation = false,
   hideEmptyMessages = false,
   mobilePresentation = false,
+  variant = "default",
 }: InlineWalletSourcesProps) {
   const locale = useBrowserLocale();
   const inputId = useId();
@@ -424,7 +440,8 @@ function CsvWalletSource({
   const sourceClasses = getWalletSourceClasses(
     quiet,
     networkPresentation,
-    mobilePresentation
+    mobilePresentation,
+    variant
   );
 
   return (
@@ -543,6 +560,7 @@ export default function CreateWaveInlineGroupWalletSources(
         networkPresentation={props.networkPresentation ?? false}
         hideEmptyMessages={props.hideEmptyMessages ?? false}
         mobilePresentation={props.mobilePresentation ?? false}
+        variant={props.variant ?? "default"}
       />
       <CsvWalletSource {...props} />
     </div>

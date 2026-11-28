@@ -8,12 +8,12 @@ import useCapacitor from "./useCapacitor";
 const KEYBOARD_SCROLL_CONTAINER = "data-keyboard-scroll-container";
 
 /** Fit a fixed dialog viewport without changing its panel, controls or gestures. */
-export const DIALOG_KEYBOARD_VIEWPORT_STYLE: CSSProperties = {
+export const DIALOG_KEYBOARD_VIEWPORT_STYLE = {
   bottom:
     "max(var(--dialog-bottom-reserve, 0px), var(--native-keyboard-inset-bottom, 0px))",
   transition:
     "bottom var(--native-keyboard-layout-transition-duration, 0ms) var(--native-keyboard-layout-transition-easing, ease-out)",
-};
+} satisfies CSSProperties;
 
 export default function useDialogKeyboard(
   isOpen: boolean,

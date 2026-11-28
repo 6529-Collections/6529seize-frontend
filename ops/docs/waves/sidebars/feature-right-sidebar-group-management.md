@@ -57,9 +57,14 @@ Users can:
    Desktop sidebar links use normal browser back navigation.
 6. Editors can select a Configuration access-row gear to open the group editor
    directly. There is no intermediate action menu.
-7. The modal opens on `Identities` in the same criteria editor used during wave creation,
-   including the privacy row, configured criteria rows, matching
-   `Before editing` and `After editing` summaries, and `Save changes`. Wave
+7. On desktop, the dialog opens on `Identities`; `Save changes` and
+   `Hide criteria and members` remain in its footer while the criteria and
+   `After editing` summary scroll. On phones, the editor opens on the criteria
+   list. Select `Identities` for its Included/Excluded tabs, identity search,
+   Include me, EMMA and CSV sources, and unique identity count. The helper,
+   Visibility shortcut, and `Before editing` summary stay on the criteria-list
+   screen, reached with Back. `After editing` and the privacy toggle follow the
+   identity content; `Save changes` remains at the bottom of the view. Wave
    access editors do not offer `Choose group`. The
    selected row's rules, included and excluded identities, NFT requirements,
    grant requirement, and criteria/member privacy setting are prefilled.
