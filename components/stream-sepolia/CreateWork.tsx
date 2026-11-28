@@ -34,11 +34,11 @@ import { LISTING_ACTIVE } from "@/lib/stream/independent";
 import { getStreamInstance } from "@/lib/stream/instances";
 import { sameAddress } from "@/lib/stream/state";
 
-import { formatCount, formatEth, shortAddress } from "./format";
+import { formatCount, formatDuration, formatEth, shortAddress } from "./format";
 import { CARD } from "./OneOfOnePanel";
 import { StepRunner, type Step } from "./StepRunner";
 import { STREAM_BASE } from "./StreamNav";
-import { useMyCollections } from "./useStreamData";
+import { useMyCollections, useSaleDuration } from "./useStreamData";
 import { useStreamWallet, WalletGate } from "./WalletGate";
 import { StreamLoading } from "./StreamLoading";
 
@@ -214,6 +214,7 @@ function IndependentRun({
   const locale = useBrowserLocale();
   // One run's state, filled step by step so "Continue" resumes after a failure.
   const [context, setContext] = useState<IndependentWorkContext | null>(null);
+  const duration = useSaleDuration();
   const gasPrice = useQuery({
     queryKey: [QueryKey.STREAM_SEPOLIA, "gasPrice"],
     queryFn: () => getStreamClient().getGasPrice(),
@@ -311,6 +312,11 @@ function IndependentRun({
   });
   return (
     <>
+      {duration.data !== undefined && duration.data > 0 ? (
+        <p className="tw-m-0 tw-mb-1 tw-text-sm tw-text-iron-300">
+          {t(locale, "streamSepolia.saleLength", { duration: formatDuration(duration.data, locale) })}
+        </p>
+      ) : null}
       {estimatedFee === null ? null : (
         <p className="tw-m-0 tw-mb-3 tw-text-sm tw-text-iron-300">
           {estimatedFee < TINY_FEE

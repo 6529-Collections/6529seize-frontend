@@ -20,6 +20,7 @@ export const STREAM_SEPOLIA_MESSAGES = registerSourceMessages({
   "streamSepolia.loading": "Reading Sepolia…",
   "streamSepolia.slow": "Sepolia is slow to answer right now.",
   "streamSepolia.retry": "Try again",
+  "streamSepolia.saleLength": "Sales on this test instance run {duration}.",
   "streamSepolia.loadError": "Could not read Sepolia. Try again in a moment.",
   "streamSepolia.you": "You",
   "streamSepolia.youHandle": "{handle} (you)",

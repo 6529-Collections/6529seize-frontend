@@ -6,7 +6,8 @@ import type { Address, Hex } from "viem";
 
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { getStreamClient } from "@/lib/stream/client";
-import { ACTIVE_STREAM_INSTANCE } from "@/lib/stream/instances";
+import { englishAuctionAbi } from "@/lib/stream/abis";
+import { ACTIVE_STREAM_INSTANCE, getStreamInstance } from "@/lib/stream/instances";
 import {
   listSales,
   readClaimable,
@@ -145,6 +146,22 @@ export function useMyCollections(viewer: Address | undefined) {
     queryKey: [...KEY, "collections", viewer?.toLowerCase() ?? ""],
     queryFn: () => readMyCollections(viewer!),
     enabled: !!viewer,
+  });
+}
+
+/** How long every 1/1 sale on this instance runs, in seconds (the auction's own config). */
+export function useSaleDuration() {
+  return useQuery({
+    queryKey: [...KEY, "saleDuration"],
+    queryFn: async () => {
+      const config = await getStreamClient().readContract({
+        address: getStreamInstance().addresses.englishAuction,
+        abi: englishAuctionAbi,
+        functionName: "config",
+      });
+      return Number(config.duration);
+    },
+    staleTime: 10 * 60_000,
   });
 }
 
