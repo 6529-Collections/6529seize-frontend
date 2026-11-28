@@ -69,6 +69,8 @@ jobs:
       # Staging never writes to the live chain: no chain flags, gateway or
       # network id here.
       NEXT_PUBLIC_IDENTITY_FREEZE_AT: "2026-11-29T00:00:00Z"
+      # Encrypted-DM read sync (D175/P60): on in staging and production.
+      NEXT_PUBLIC_E2EE_READ_SYNC: "true"
       # Gap-only chat sync (WAVES-PLAN 0.7/0.8): on in staging, off in production.
       NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC: "true"
       # App-socket PING keepalive (needs API #2354): on in staging, off in production.

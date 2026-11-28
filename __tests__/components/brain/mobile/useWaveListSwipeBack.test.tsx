@@ -40,6 +40,7 @@ function SwipeHarness({
     onSwipeBack,
     targetScreen,
     edgeSwipeBack,
+    includeHeader: withHeader,
   });
   const content = (
     <div
@@ -279,6 +280,7 @@ it.each([
   "releases a caught Back at its absolute page position after a %spx slow reversal",
   (distance, committed) => {
     const end = jest.fn();
+    jest.spyOn(phoneMotion, "canCatchPhoneBackGesture").mockReturnValue(true);
     jest.spyOn(phoneMotion, "beginPhoneBackGesture").mockReturnValue({
       origin: 250,
       width: 400,
@@ -288,6 +290,7 @@ it.each([
     render(
       <SwipeHarness
         edgeSwipeBack
+        withHeader
         targetScreen="list"
         onIntentStart={jest.fn()}
         onSwipeBack={jest.fn()}
@@ -302,6 +305,38 @@ it.each([
       changedTouches: [touch(100 + distance)],
     });
     expect(end).toHaveBeenCalledWith(committed, distance, expect.any(Function));
+  }
+);
+
+it.each([0, -15])(
+  "leaves a vertical drag with %spx of initial drift to the browser on a resting page",
+  (drift) => {
+    const begin = jest.spyOn(phoneMotion, "beginPhoneBackGesture");
+    const onIntentStart = jest.fn();
+    const onSwipeBack = jest.fn();
+    render(
+      <SwipeHarness
+        withHeader
+        edgeSwipeBack
+        {...{ onIntentStart, onSwipeBack }}
+      />
+    );
+    const target = screen.getByTestId("content");
+    fireEvent.touchStart(target, { touches: [touch(160)] });
+    expect(
+      fireEvent.touchMove(target, { touches: [touch(160 + drift, 112)] })
+    ).toBe(true);
+    expect(
+      fireEvent.touchMove(target, { touches: [touch(160 + drift, 160)] })
+    ).toBe(true);
+    fireEvent.touchEnd(target, {
+      touches: [],
+      changedTouches: [touch(160 + drift, 160)],
+    });
+    expect(begin).not.toHaveBeenCalled();
+    expect(onIntentStart).not.toHaveBeenCalled();
+    expect(onSwipeBack).not.toHaveBeenCalled();
+    expect(screen.getByTestId("page").style.willChange).toBe("");
   }
 );
 

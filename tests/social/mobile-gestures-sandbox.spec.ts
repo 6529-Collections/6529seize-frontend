@@ -144,17 +144,11 @@ async function keyboardEvent(page: Page, name: string, height = 0) {
   expect(delivered).toBe(true);
 }
 
-async function installMessageFixture(page: Page, baseURL: string | undefined) {
-  await page.route("**/api/open-graph**", (route) =>
-    route.fulfill({ json: {} })
-  );
-  await page.route("**/api/waves/*/curations**", (route) =>
-    route.fulfill({ json: [] })
-  );
-  await page.route("**/api/drops/*/curations**", (route) =>
-    route.fulfill({ json: [] })
-  );
-  const origin = getSandboxApiOrigin(baseURL);
+async function installWaveMessageFixture(
+  page: Page,
+  origin: string,
+  extraMessages = 0
+) {
   const response = await page.request.get(
     `${origin}/api/v2/waves/${WAVE}/drops?limit=50`
   );
@@ -170,10 +164,32 @@ async function installMessageFixture(page: Page, baseURL: string | undefined) {
       created_at: template.created_at + 1000,
       content: "Gesture fixture message two",
     },
+    ...Array.from({ length: extraMessages }, (_, index) => ({
+      ...template,
+      id: `00000000-0000-4000-8000-${String(800 + index).padStart(12, "0")}`,
+      serial_no: index + 3,
+      created_at: template.created_at + (index + 2) * 1000,
+      content: `Gesture fixture scroll history message ${index + 1}.`,
+    })),
   ].reverse();
   await page.route(`**/api/v2/waves/${WAVE}/drops?**`, (route) =>
     route.fulfill({ json: { ...feed, drops } })
   );
+  return template;
+}
+
+async function installMessageFixture(page: Page, baseURL: string | undefined) {
+  await page.route("**/api/open-graph**", (route) =>
+    route.fulfill({ json: {} })
+  );
+  await page.route("**/api/waves/*/curations**", (route) =>
+    route.fulfill({ json: [] })
+  );
+  await page.route("**/api/drops/*/curations**", (route) =>
+    route.fulfill({ json: [] })
+  );
+  const origin = getSandboxApiOrigin(baseURL);
+  const template = await installWaveMessageFixture(page, origin);
   await page.route("**/api/v2/curated-profile-wave-drops?**", (route) =>
     route.fulfill({
       json: {
@@ -1149,22 +1165,28 @@ for (const platform of ["ios", "android"] as const) {
       await expectNoUnsafeSandboxMutations(baseURL);
     });
 
-    test("vertical scrolling does not reply or navigate, including with reduced motion", async ({
+    test("the first vertical drag scrolls chat without replying or navigating in reduced motion", async ({
       page,
       baseURL,
     }) => {
       await page.emulateMedia({ reducedMotion: "reduce" });
+      await installWaveMessageFixture(page, getSandboxApiOrigin(baseURL), 24);
       await openWave(page);
-      const swipe = await touchDrag(
-        page,
-        page
-          .getByTestId("wave-swipe-surface")
-          .locator("[data-wave-drop-id][data-reply-enabled=true]")
-          .first(),
-        -30,
-        -120
-      );
+      const chat = page
+        .getByRole("tabpanel")
+        .locator('[data-wave-drops-scroll-container="true"]');
+      await expect
+        .poll(() =>
+          chat.evaluate((node) => node.scrollHeight - node.clientHeight)
+        )
+        .toBeGreaterThan(100);
+      const start = await chat.evaluate((node) => node.scrollTop);
+      // Wave chat is bottom anchored. Drag toward older messages to move it.
+      const swipe = await touchDrag(page, chat, 0, 220);
       await swipe.release();
+      await expect
+        .poll(() => chat.evaluate((node) => node.scrollTop))
+        .toBeLessThan(start - 50);
       await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}`));
       await expect(
         page.getByRole("button", { name: "Cancel reply", exact: true })

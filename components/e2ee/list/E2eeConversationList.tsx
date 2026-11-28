@@ -2,6 +2,7 @@
 
 import { BellSlashIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { getEncryptedConversationRouteFromMessages } from "../conversation/e2eeChatOrigin";
 import { useRouter } from "next/navigation";
 import { useId, useState, type ReactNode } from "react";
 import { useAuth } from "@/components/auth/Auth";
@@ -213,6 +214,15 @@ interface E2eeConversationRowProps {
   readonly muted: boolean;
   /** The display time zone for the last-activity time. */
   readonly zone: DisplayTimeZone;
+  /** Rendered on Messages: opened chats return there. */
+  readonly fromMessages: boolean;
+}
+
+function getRowHref(g: string, active: boolean, fromMessages: boolean) {
+  if (active) return getEncryptedMessagesRoute();
+  return fromMessages
+    ? getEncryptedConversationRouteFromMessages(g)
+    : getEncryptedConversationRoute(g);
 }
 
 function MutedMark({ locale }: { readonly locale: SupportedLocale }) {
@@ -293,6 +303,7 @@ function E2eeConversationRow({
   collapsed,
   muted,
   zone,
+  fromMessages,
 }: E2eeConversationRowProps) {
   const locale = useBrowserLocale();
   const timestampId = useId();
@@ -305,9 +316,7 @@ function E2eeConversationRow({
   const title = getConversationTitle(locale, conversation, selfProfileId);
   const statusKey = STATUS_KEYS[conversation.status];
   const pinned = conversation.pinned === true;
-  const href = active
-    ? getEncryptedMessagesRoute()
-    : getEncryptedConversationRoute(conversation.g);
+  const href = getRowHref(conversation.g, active, fromMessages);
   const hasUnread =
     !muted && (conversation.unread > 0 || conversation.mentions > 0);
   const rowClass = active
@@ -338,8 +347,10 @@ function E2eeConversationRow({
     )
       return;
     event.preventDefault();
-    runPhoneConversationEntryTransition(href, () =>
-      router.push(href, { scroll: false })
+    // The transition matches the committed pathname, without the query.
+    runPhoneConversationEntryTransition(
+      getEncryptedConversationRoute(conversation.g),
+      () => router.push(href, { scroll: false })
     );
   };
 
@@ -450,6 +461,8 @@ interface E2eeConversationListProps {
   readonly collapsed?: boolean | undefined;
   readonly limit?: number | undefined;
   readonly label: string;
+  /** Rendered on Messages: opened chats return there. */
+  readonly fromMessages?: boolean | undefined;
 }
 
 export function E2eeConversationList({
@@ -459,6 +472,7 @@ export function E2eeConversationList({
   collapsed = false,
   limit,
   label,
+  fromMessages = false,
 }: E2eeConversationListProps) {
   const muted = useMutedE2eeChats(selfProfileId);
   const zone = useDisplayTimeZone();
@@ -529,6 +543,7 @@ export function E2eeConversationList({
                 collapsed={collapsed}
                 muted={unmuted.length === 0}
                 zone={zone}
+                fromMessages={fromMessages}
               />
             );
           })}
