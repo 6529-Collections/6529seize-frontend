@@ -75,6 +75,23 @@ env:
   WS_ENDPOINT: "wss://ws.6529.io"
   ALLOWLIST_API_ENDPOINT: "https://allowlist-api.6529.io"
   BASE_ENDPOINT: "https://6529.io"
+  # Votes, entries and wave settings move to the 6529 Network: the notice
+  # shows until the freeze; from it 6529.io's own vote, entry, poll, wave REP,
+  # wave and decision writes close. To postpone, move both; to call it off,
+  # remove both (lib/waves-move/schedule.ts).
+  NEXT_PUBLIC_WAVES_FREEZE_AT: "2026-11-30T00:00:00Z"
+  NEXT_PUBLIC_WAVES_SWITCH_ON_AT: "2026-12-01T00:00:00Z"
+  # Identities move to the 6529 Network: the notice shows until the freeze;
+  # from it 6529.io's own profile, handle, REP, NIC and proxy edits close. The
+  # switch-on is the freeze plus 24 hours unless NEXT_PUBLIC_IDENTITY_SWITCH_ON_AT
+  # names a later UTC instant (lib/identity-move/schedule.ts).
+  NEXT_PUBLIC_IDENTITY_FREEZE_AT: "2026-11-29T00:00:00Z"
+  # Changes on the 6529 Network go through its chain gateway, for the network
+  # with this id (lib/chain-identity/config.ts).
+  NEXT_PUBLIC_FEATURE_CHAIN_IDENTITY: "true"
+  NEXT_PUBLIC_FEATURE_CHAIN_WAVES: "true"
+  NEXT_PUBLIC_CHAIN_GATEWAY_URL: "https://gateway.6529.io"
+  NEXT_PUBLIC_CHAIN_NETWORK_ID: "0xf2da16732d8b1807cf341522824d9942be9c3d21def66ac1ee79610191c7dedf"
   NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES: "true"
   NEXT_PUBLIC_FEATURE_APP_DEVICE_GRANTS: "true"
   # Encrypted DMs and groups (D109): on in production (owner decision, 2026-10-31).

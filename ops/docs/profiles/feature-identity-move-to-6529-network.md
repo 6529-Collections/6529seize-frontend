@@ -4,11 +4,11 @@
 
 Profiles, handles, ratings, consolidations and delegations move from 6529.io's
 database to the 6529 Network. 6529.io stops taking changes at the freeze, and
-the 6529 Network takes them about 24 hours later. From then on you change them
-on the 6529 Network, through this site.
+the 6529 Network takes them at the switch-on. From then on you change them on
+the 6529 Network, through this site.
 
 The build setting `NEXT_PUBLIC_IDENTITY_FREEZE_AT` names the freeze as a UTC
-instant (for example `2026-11-26T00:00:00Z`). Without it nothing below applies.
+instant (for example `2026-01-01T00:00:00Z`). Without it nothing below applies.
 The switch-on is the freeze plus 24 hours, unless the build setting
 `NEXT_PUBLIC_IDENTITY_SWITCH_ON_AT` names a later UTC instant.
 
@@ -23,12 +23,13 @@ The switch-on is the freeze plus 24 hours, unless the build setting
 
 | When | What it says |
 | --- | --- |
-| Before the freeze | Profiles, handles, ratings, consolidations and delegations move to the 6529 Network. From Thursday 26 November 00:00 UTC you can't change them for about 24 hours. From Friday you change them on the 6529 Network, through this site. |
-| The 24 hours from the freeze | They are moving. You can't change them until the switch-on time (Friday 27 November 00:00 UTC). |
+| Before the freeze | Profiles, handles, ratings, consolidations and delegations move to the 6529 Network. From [the freeze's day and time] UTC you can't change them for about [the hours to the switch-on] hours. From [the switch-on's weekday] you change them on the 6529 Network, through this site. |
+| From the freeze to the switch-on | Profiles, handles, ratings, consolidations and delegations are moving to the 6529 Network. You can't change them until [the switch-on's day and time] UTC. From then you change them on the 6529 Network, through this site. |
 | After the switch-on | They are on the 6529 Network. Change yours there, through this site. A link goes to your identity on the 6529 Network (`/network/identity`). Without the 6529 Network flows on (they need `NEXT_PUBLIC_FEATURE_CHAIN_IDENTITY` set to `true` and a valid `NEXT_PUBLIC_CHAIN_GATEWAY_URL`), it says instead that they moved on the switch-on day and you can't change them on this site yet. |
 
-Dates and times are shown in UTC. The notice changes at the freeze and at the
-switch-on while the page stays open.
+Bracketed words stand for what the notice fills in from the build settings,
+in UTC. The notice changes at the freeze and at the switch-on while the page
+stays open.
 
 ## What Is Paused From the Freeze
 
@@ -56,7 +57,7 @@ profile website studio are not affected.
 Every Delegation Center page under `/safe-collecting`, the consolidation
 builder included, shows from the time the setting is present:
 
-> From Thursday 26 November 00:00 UTC, new delegations and consolidations on
+> From [the freeze's day and time] UTC, new delegations and consolidations on
 > NFTDelegation don't count for 6529. Your delegations and consolidations as of
 > that time moved to the 6529 Network. Make changes there, on this site.
 
@@ -86,12 +87,13 @@ in both build workflows to the later switch-on, as a UTC instant, then builds
 and deploys again before the old switch-on passes. The notice, its dates and
 everything on 6529.io that waits for the switch-on follow it. The switch-on
 never comes sooner than the freeze plus 24 hours: an earlier, malformed or
-missing value means the freeze plus 24 hours. The help record
-`profiles.network-move` and the table above give the dates in words, so they
-change in the same commit; a test checks the help record against the
-production workflow. The 6529.io API's own `IDENTITY_SWITCH_ON_AT` must name
-the same instant. A page opened before the new build keeps the old switch-on
-until it is reloaded.
+missing value means the freeze plus 24 hours. Both settings are written as
+UTC instants in both build workflows, never as repository variables. The
+help record `profiles.network-move` gives the dates in words, so it changes
+in the same commit as the workflows; a test checks it against the production
+workflow. This page gives no dates. The 6529.io API's own
+`IDENTITY_SWITCH_ON_AT` must name the same instant. A page opened before the
+new build keeps the old switch-on until it is reloaded.
 
 ## Localization
 
