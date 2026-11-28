@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { getStreamInstance } from "@/lib/stream/instances";
 import "@/i18n/namespaces/stream-sepolia";
 import type { SaleSummary } from "@/lib/stream/reads";
 import { AUCTION_STATE, isZeroAddress } from "@/lib/stream/state";
@@ -187,22 +186,16 @@ export function StreamHome() {
   }
   const curated = sales.data.filter((sale) => sale.curated);
   const independent = sales.data.filter((sale) => !sale.curated);
-  // Curated first where any wallet can create curated works (r9 on); on r8 they are
-  // operator test tokens without art, so Independent Stream leads.
-  const curatedFirst = getStreamInstance().curatedCreationOpen;
-  const curatedSection = (
-    <ProductSection title={t(locale, "streamSepolia.product.stream")} sales={curated} now={now} />
-  );
+  // 6529 Stream always leads, then Independent Stream, on every instance.
   return (
     <div>
-      {curatedFirst ? curatedSection : null}
+      <ProductSection title={t(locale, "streamSepolia.product.stream")} sales={curated} now={now} />
       <ProductSection
         title={t(locale, "streamSepolia.product.independent")}
         sales={independent}
         now={now}
         extra={<ReadyToStart />}
       />
-      {curatedFirst ? null : curatedSection}
     </div>
   );
 }

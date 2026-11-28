@@ -49,12 +49,7 @@ function ProductChoice({
   const locale = useBrowserLocale();
   const curatedOpen = getStreamInstance().curatedCreationOpen;
   const options: { id: Product; title: string; help: string; disabled: boolean }[] = [
-    {
-      id: "independent",
-      title: t(locale, "streamSepolia.product.independent"),
-      help: t(locale, "streamSepolia.create.independentHelp"),
-      disabled: false,
-    },
+    // 6529 Stream is listed first, then Independent Stream.
     {
       id: "stream",
       title: t(locale, "streamSepolia.product.stream"),
@@ -62,6 +57,12 @@ function ProductChoice({
         ? t(locale, "streamSepolia.create.streamHelp")
         : t(locale, "streamSepolia.create.streamClosed"),
       disabled: !curatedOpen,
+    },
+    {
+      id: "independent",
+      title: t(locale, "streamSepolia.product.independent"),
+      help: t(locale, "streamSepolia.create.independentHelp"),
+      disabled: false,
     },
   ];
   return (
