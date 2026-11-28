@@ -213,8 +213,8 @@ export async function ensureCollection(context: CuratedWorkContext, io: CreateIo
  */
 async function prepareCuratedItem(context: CuratedWorkContext) {
   if (context.collectionId === null) throw new CreateRunError("failed", "no collection yet");
-  context.primaryFileId ??= await fileIdOf(context.media);
-  context.recordFileId ??= await fileIdOf(context.record);
+  context.primaryFileId ??= fileIdOf(context.media);
+  context.recordFileId ??= fileIdOf(context.record);
   const draft = {
     artist: context.artist,
     artistId: await ensureArtistId(context),

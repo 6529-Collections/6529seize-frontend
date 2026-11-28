@@ -7,6 +7,7 @@ import type { Address } from "viem";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/stream-sepolia";
+import { artistIdFor } from "@/lib/stream/accounts";
 import type { IndependentContract } from "@/lib/stream/activity";
 import { deployIndependent, listIndependent } from "@/lib/stream/create";
 import {
@@ -63,7 +64,12 @@ export function DeployContract({
         ctx.token = await deployIndependent({
           editions: false,
           salt: randomSalt(),
-          config: independent721Config({ name: name.trim(), symbol: symbolFromName(name.trim()), artist: io.account }),
+          config: independent721Config({
+            name: name.trim(),
+            symbol: symbolFromName(name.trim()),
+            artist: io.account,
+            artistId: await artistIdFor(io.account),
+          }),
           io,
         });
         return true;
@@ -139,6 +145,7 @@ export function DeployEditionsContract({
             symbol: `${symbolFromName(oneOfOne.name).slice(0, 6)}ED`,
             master: oneOfOne.token,
             artist: io.account,
+            artistId: await artistIdFor(io.account),
           }),
           io,
         });

@@ -600,20 +600,14 @@ function SettleAction({ detail, view }: { readonly detail: EditionDetail; readon
               request={async () => {
                 if (!wallet.address) return null;
                 const client = getStreamClient();
-                const order =
-                  view.screen === "settling"
-                    ? await client.readContract({
-                        address: detail.auctionAddress,
-                        abi: editionAuctionAbi,
-                        functionName: "settlementOrderFor",
-                        args: [detail.saleId, wallet.address],
-                      })
-                    : await client.readContract({
-                        address: detail.auctionAddress,
-                        abi: editionAuctionAbi,
-                        functionName: "settlementOrder",
-                        args: [detail.saleId],
-                      });
+                // The caller's own next slice: right for a first call and after any partial sweep
+                // (the contract keeps each settler's progress and refuses an order starting before it).
+                const order = await client.readContract({
+                  address: detail.auctionAddress,
+                  abi: editionAuctionAbi,
+                  functionName: "settlementOrderFor",
+                  args: [detail.saleId, wallet.address],
+                });
                 return streamTx({
                   address: detail.auctionAddress,
                   abi: editionAuctionAbi,

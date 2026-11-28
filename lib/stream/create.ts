@@ -3,10 +3,17 @@ import {
   BaseError,
   bytesToHex,
   ContractFunctionRevertedError,
-  parseEventLogs, type Address, type Hex, type TransactionReceipt } from "viem";
+  encodeAbiParameters,
+  keccak256,
+  parseEventLogs,
+  type Address,
+  type Hex,
+  type TransactionReceipt,
+} from "viem";
 
 import { chainDeadline } from "./chainTime";
-import { assertRunWallet } from "./createErrors";
+import { artistIdFor } from "./accounts";
+import { assertRunWallet, CreateRunError } from "./createErrors";
 import { getStreamClient } from "./client";
 import { ENCODING_IDENTITY, toStoredFile, type StoredFile } from "./content";
 import {
@@ -50,6 +57,7 @@ export interface IndependentWorkContext {
   readonly royaltyRate: number;
   /** Edition cap (0 = none), or null for a 1/1 only. */
   readonly editionCap: number | null;
+  artistId?: bigint;
   primaryFileId?: Hex;
   recordFileId?: Hex;
   item?: PackageItem;
@@ -61,14 +69,17 @@ function manifestOf(file: StoredFile) {
   return [file.chunkHashes, BigInt(file.bytes.length), ENCODING_IDENTITY, file.mimeType, file.sha256] as const;
 }
 
-/** A stored file's ID, computed by the content store from its manifest. */
-export function fileIdOf(file: StoredFile): Promise<Hex> {
-  return getStreamClient().readContract({
-    address: getStreamInstance().addresses.contentStore,
-    abi: contentStoreAbi,
-    functionName: "manifestId",
-    args: manifestOf(file),
-  });
+/**
+ * A stored file's ID: `ContentStore.manifestId`, a pure hash of its manifest,
+ * computed here so the ID that goes into a signed item never comes from an RPC.
+ */
+export function fileIdOf(file: StoredFile): Hex {
+  return keccak256(
+    encodeAbiParameters(
+      [{ type: "bytes32[]" }, { type: "uint256" }, { type: "uint8" }, { type: "string" }, { type: "bytes32" }],
+      manifestOf(file)
+    )
+  );
 }
 
 /** Writes a file's missing chunks and registers its manifest. Returns its file ID and whether anything was sent. */
@@ -93,7 +104,7 @@ export async function storeFile(
     }
   }
   const manifest = manifestOf(file);
-  const fileId = await fileIdOf(file);
+  const fileId = fileIdOf(file);
   const registered = await client
     .readContract({ address: store, abi: contentStoreAbi, functionName: "fileInfo", args: [fileId] })
     .then(() => true)
@@ -129,10 +140,13 @@ export function cc0TextFileId(): Promise<Hex> {
  * runs after a reload rebuilds what earlier steps knew from the chain.
  */
 async function prepareIndependentItem(context: IndependentWorkContext, artist: Address) {
-  context.primaryFileId ??= await fileIdOf(context.media);
-  context.recordFileId ??= await fileIdOf(context.record);
+  // The payee is the artist's account ID, read from Accounts (not assumed to be the address).
+  context.artistId ??= await artistIdFor(artist);
+  context.primaryFileId ??= fileIdOf(context.media);
+  context.recordFileId ??= fileIdOf(context.record);
   const draft = {
     artist,
+    artistId: context.artistId,
     collectionId: 1n,
     contentHash: context.media.sha256,
     primaryFileId: context.primaryFileId,
@@ -192,9 +206,12 @@ export function tokenIdFromStart(receipt: TransactionReceipt, token: Address): b
   return match ? match.args.tokenId : null;
 }
 
-export async function startIndependentSale(context: IndependentWorkContext, io: CreateIo): Promise<boolean> {
-  assertRunWallet(context.artist, io.account);
-  if (!context.item || !context.mediaList) await prepareIndependentItem(context, io.account);
+/**
+ * The token already minted from this run's item in the artist's contract, or 0.
+ * A token minted from the same image but another item is a different work:
+ * that stops the run instead of being adopted.
+ */
+async function mintedFromThisItem(context: IndependentWorkContext): Promise<bigint> {
   const client = getStreamClient();
   const minted = await client.readContract({
     address: context.token,
@@ -202,6 +219,22 @@ export async function startIndependentSale(context: IndependentWorkContext, io: 
     functionName: "tokenOfContent",
     args: [context.media.sha256],
   });
+  if (minted === 0n) return 0n;
+  // itemHashOf reverts for a burned token; the start then fails with the contract's own error.
+  const mintedItem = await client
+    .readContract({ address: context.token, abi: streamAbi, functionName: "itemHashOf", args: [minted] })
+    .catch(() => null);
+  if (mintedItem === null) return 0n;
+  if (mintedItem !== itemHashOf(context.item!)) {
+    throw new CreateRunError("contentMinted", "this image is already another work in this contract");
+  }
+  return minted;
+}
+
+export async function startIndependentSale(context: IndependentWorkContext, io: CreateIo): Promise<boolean> {
+  assertRunWallet(context.artist, io.account);
+  if (!context.item || !context.mediaList) await prepareIndependentItem(context, io.account);
+  const minted = await mintedFromThisItem(context);
   if (minted > 0n) {
     context.tokenId = minted;
     return false;
@@ -222,13 +255,8 @@ export async function startIndependentSale(context: IndependentWorkContext, io: 
 async function ensureStarted(context: IndependentWorkContext, artist: Address) {
   if (!context.item || !context.mediaList) await prepareIndependentItem(context, artist);
   if (context.tokenId === undefined) {
-    const minted = await getStreamClient().readContract({
-      address: context.token,
-      abi: streamAbi,
-      functionName: "tokenOfContent",
-      args: [context.media.sha256],
-    });
-    if (minted === 0n) throw new Error("the sale has not started");
+    const minted = await mintedFromThisItem(context);
+    if (minted === 0n) throw new CreateRunError("notStarted", "the sale has not started");
     context.tokenId = minted;
   }
   return { item: context.item!, mediaList: context.mediaList!, tokenId: context.tokenId };

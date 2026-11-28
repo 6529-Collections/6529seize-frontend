@@ -7,7 +7,6 @@ import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/stream-sepolia";
 import { getStreamInstance } from "@/lib/stream/instances";
 import { ITEM_KIND } from "@/lib/stream/item";
-import { artistAddress } from "@/lib/stream/reads";
 import { AUCTION_STATE, sameAddress } from "@/lib/stream/state";
 
 import { EditionPanel, OpenEdition } from "./EditionPanel";
@@ -57,7 +56,7 @@ function WorkBody({ token, tokenId }: { readonly token: Address; readonly tokenI
   }
   const title =
     meta.data.name ?? t(locale, "streamSepolia.work.untitled", { id: tokenId.toString() });
-  const artist = artistAddress(meta.data.artistId);
+  const artist = meta.data.artistWallet;
   const productLabel = curated
     ? t(locale, "streamSepolia.product.stream")
     : t(locale, "streamSepolia.product.independent");

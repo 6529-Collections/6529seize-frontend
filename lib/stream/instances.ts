@@ -65,6 +65,8 @@ interface StreamNaming {
   readonly packageItemPrefix: string;
   /** Prefix hashed into every media-list hash. */
   readonly mediaPrefix: string;
+  /** Label hashed into the subject an artist consents to when listing an Independent contract. */
+  readonly independentListingLabel: string;
 }
 
 /** The names r8 and r9 were deployed with (6529-stream before the rename). */
@@ -73,6 +75,7 @@ const WORKS_NAMING: StreamNaming = {
   artistRegistryDomain: "6529 Works Artist Registry",
   packageItemPrefix: "6529WORKS_PACKAGE_ITEM_V1",
   mediaPrefix: "6529WORKS_MEDIA_V1",
+  independentListingLabel: "6529WORKS_INDEPENDENT_LISTING_V1",
 };
 
 type StreamInstanceName = "r9" | "r8";

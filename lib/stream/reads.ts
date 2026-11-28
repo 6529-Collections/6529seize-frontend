@@ -1,4 +1,4 @@
-import { contentStoreAbi, editionAuctionAbi, englishAuctionAbi, independentEditionAuctionAbi, independentRegistryAbi, streamAbi, workFactsAbi } from "./abis";
+import { accountsAbi, editionAuctionAbi, englishAuctionAbi, independentEditionAuctionAbi, independentRegistryAbi, streamAbi, workFactsAbi } from "./abis";
 import {
   BaseError,
   ContractFunctionRevertedError,
@@ -6,7 +6,7 @@ import {
   getAbiItem,
   getAddress,
   parseEventLogs,
-  hexToBytes,
+  sha256,
   keccak256,
   type AbiEvent,
   type Address,
@@ -16,6 +16,7 @@ import {
 
 import { getStreamClient, getStreamLogClient } from "./client";
 import { mediaDataUrl } from "./content";
+import { readVerifiedFile } from "./files";
 import { getStreamInstance } from "./instances";
 import {
   CURRENCY_ETH,
@@ -68,7 +69,8 @@ async function contractLogs(address: Address): Promise<Log[]> {
   scan = (async () => {
     try {
       const client = getStreamLogClient();
-      const latest = await client.getBlockNumber();
+      // A fresh read: viem caches the block number, which could hide the newest block.
+      const latest = await client.getBlockNumber({ cacheTime: 0 });
       for (let start = current.to + 1n; start <= latest; start += LOG_WINDOW) {
         const windowEnd = start + LOG_WINDOW - 1n;
         const end = windowEnd > latest ? latest : windowEnd;
@@ -195,6 +197,8 @@ interface WorkMeta {
   readonly description: string | null;
   readonly image: string | null;
   readonly artistId: bigint;
+  /** The artist account's root wallet (see readArtistWallet). */
+  readonly artistWallet: Address;
   readonly kind: number;
   readonly owner: Address | null;
 }
@@ -238,14 +242,26 @@ export async function readWorkMeta(token: Address, tokenId: bigint): Promise<Wor
     // On-chain art only: an outside image URL would let a work track its viewers.
     image: image?.startsWith("data:image/") ? image : null,
     artistId: BigInt(work.artistId),
+    artistWallet: await readArtistWallet(BigInt(work.artistId)),
     kind: work.kind,
     owner,
   };
 }
 
 /** The address an artist ID names (artist IDs are the root wallet as a number). */
-export function artistAddress(artistId: bigint): Address {
-  return getAddress(`0x${artistId.toString(16).padStart(40, "0")}`);
+/**
+ * The wallet to show for an artist ID: the root wallet of that account in
+ * Accounts. An ID is a new account's address as a number, but an account keeps
+ * its ID when its root wallet changes, so the root is read, not derived. Falls
+ * back to the ID as an address only if the account cannot be read.
+ */
+export async function readArtistWallet(artistId: bigint): Promise<Address> {
+  const fallback = getAddress(`0x${artistId.toString(16).padStart(40, "0")}`);
+  const account = await getStreamClient()
+    .readContract({ address: getStreamInstance().addresses.accounts, abi: accountsAbi, functionName: "artist", args: [artistId] })
+    .catch(() => null);
+  const root = account?.[0].root;
+  return root && !isZeroAddress(root) ? root : fallback;
 }
 
 /** The item and media a work was minted from, read from its first start transaction. */
@@ -640,23 +656,13 @@ export async function readWorkArt(args: {
     primary = started?.media[0];
   }
   if (!primary) return null;
-  const info = await client
-    .readContract({
-      address: instance.addresses.contentStore,
-      abi: contentStoreAbi,
-      functionName: "fileInfo",
-      args: [primary.fileId],
-    })
+  // Shown only if the bytes hash to what the store recorded, and that hash is this token's
+  // content on its own contract (a content hash mints once), so no other file can stand in.
+  const file = await readVerifiedFile({ fileId: primary.fileId, maxBytes: 262_144n });
+  if (!file?.mimeType.startsWith("image/")) return null;
+  const ownToken = await client
+    .readContract({ address: args.token, abi: streamAbi, functionName: "tokenOfContent", args: [sha256(file.bytes)] })
     .catch(() => null);
-  if (!info?.mimeType.startsWith("image/") || info.length > 262_144n) return null;
-  const bytes = await client
-    .readContract({
-      address: instance.addresses.contentStore,
-      abi: contentStoreAbi,
-      functionName: "read",
-      args: [primary.fileId, 0n, info.length],
-    })
-    .catch(() => null);
-  if (!bytes) return null;
-  return mediaDataUrl(hexToBytes(bytes), info.mimeType);
+  if (ownToken !== args.tokenId) return null;
+  return mediaDataUrl(file.bytes, file.mimeType);
 }

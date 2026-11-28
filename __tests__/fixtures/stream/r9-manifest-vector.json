@@ -1,0 +1,10 @@
+{
+  "note": "Meridian's primary file on r9; fileId as ContentStore.manifestId answered on Sepolia for this manifest.",
+  "chunkHashes": [
+    "0x77048d8494b0a83e11562f68272d62d455471c674bf4633fa5722d15f748a6df"
+  ],
+  "length": 2930,
+  "mimeType": "image/svg+xml",
+  "sha256": "0xb7d81c898b08879bb12dd120cc8a0b91ee152869e626a79409c845db468d5282",
+  "fileId": "0xc54572ed5846409f5ddd7f85da4f1780d6134ba87b37af282fe823e3e5df91a4"
+}

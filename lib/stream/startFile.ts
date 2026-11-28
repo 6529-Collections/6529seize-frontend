@@ -12,6 +12,7 @@ import { getStreamClient } from "./client";
 import { getStreamInstance } from "./instances";
 import { decodeIndependentMint, encodeIndependentMint, itemHashOf, type MediaFile, type PackageItem } from "./item";
 import { mediaDataUrl } from "./content";
+import { readVerifiedFile } from "./files";
 import { scanLogs } from "./reads";
 
 /**
@@ -111,40 +112,25 @@ export async function findStartableItems(): Promise<PendingStart[]> {
   return approved.filter((_entry, index) => simulated[index]);
 }
 
-async function readFileBytes(fileId: Hex, maxBytes: bigint): Promise<{ bytes: Hex; mimeType: string } | null> {
-  const instance = getStreamInstance();
-  const client = getStreamClient();
-  const info = await client
-    .readContract({ address: instance.addresses.contentStore, abi: contentStoreAbi, functionName: "fileInfo", args: [fileId] })
-    .catch(() => null);
-  if (!info || info.length > maxBytes) return null;
-  const bytes = await client
-    .readContract({
-      address: instance.addresses.contentStore,
-      abi: contentStoreAbi,
-      functionName: "read",
-      args: [fileId, 0n, info.length],
-    })
-    .catch(() => null);
-  return bytes ? { bytes, mimeType: info.mimeType } : null;
-}
-
 /** The title and picture of a work waiting to start, from its stored record and media. */
 export async function readStartPreview(start: PendingStart): Promise<{ title: string | null; image: string | null }> {
+  // Both files are checked against the store's recorded hash; the image also against the
+  // hash the start request names for it.
   const [record, primary] = await Promise.all([
-    readFileBytes(start.item.recordFileId, 16_384n),
-    start.media[0] ? readFileBytes(start.media[0].fileId, 262_144n) : Promise.resolve(null),
+    readVerifiedFile({ fileId: start.item.recordFileId, maxBytes: 16_384n }),
+    start.media[0]
+      ? readVerifiedFile({ fileId: start.media[0].fileId, maxBytes: 262_144n, expectedSha256: start.media[0].sha256Hash })
+      : Promise.resolve(null),
   ]);
   let title: string | null = null;
   if (record) {
     try {
-      const json = JSON.parse(new TextDecoder().decode(hexToBytes(record.bytes))) as { name?: unknown };
+      const json = JSON.parse(new TextDecoder().decode(record.bytes)) as { name?: unknown };
       title = typeof json.name === "string" ? json.name : null;
     } catch {
       title = null;
     }
   }
-  const image =
-    primary?.mimeType.startsWith("image/") ? mediaDataUrl(hexToBytes(primary.bytes), primary.mimeType) : null;
+  const image = primary?.mimeType.startsWith("image/") ? mediaDataUrl(primary.bytes, primary.mimeType) : null;
   return { title, image };
 }

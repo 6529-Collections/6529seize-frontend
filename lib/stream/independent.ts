@@ -9,6 +9,7 @@ import {
 } from "viem";
 
 import { getStreamClient, STREAM_CHAIN } from "./client";
+import { CreateRunError } from "./createErrors";
 import { getStreamInstance } from "./instances";
 
 const PRODUCT_INDEPENDENT = keccak256(toBytes("PRODUCT_INDEPENDENT"));
@@ -33,6 +34,8 @@ export function independent721Config(args: {
   readonly name: string;
   readonly symbol: string;
   readonly artist: Address;
+  /** The artist's account ID (read from Accounts; a new account's is its address). */
+  readonly artistId: bigint;
 }): Hex {
   const instance = getStreamInstance();
   return encodeAbiParameters(
@@ -50,7 +53,7 @@ export function independent721Config(args: {
       args.symbol,
       instance.addresses.workFacts,
       instance.addresses.streamDirectory,
-      BigInt(args.artist),
+      args.artistId,
       args.artist,
       instance.addresses.renderer,
     ]
@@ -63,6 +66,7 @@ export function independentEditionsConfig(args: {
   readonly symbol: string;
   readonly master: Address;
   readonly artist: Address;
+  readonly artistId: bigint;
 }): Hex {
   const instance = getStreamInstance();
   return encodeAbiParameters(
@@ -79,7 +83,7 @@ export function independentEditionsConfig(args: {
       args.symbol,
       args.master,
       instance.addresses.streamDirectory,
-      BigInt(args.artist),
+      args.artistId,
       args.artist,
     ]
   );
@@ -158,12 +162,30 @@ export async function listingSubject(args: {
     functionName: "economics",
     args: [PRODUCT_INDEPENDENT],
   });
-  const subject = await client.readContract({
+  // The subject the artist signs is computed here from what the page shows; the registry's
+  // own answer must agree, so a wallet never signs a value only an RPC supplied.
+  const subject = keccak256(
+    encodeAbiParameters(
+      [{ type: "bytes32" }, { type: "address" }, { type: "uint8" }, { type: "address" }, { type: "uint32" }, { type: "uint64" }],
+      [
+        keccak256(toBytes(instance.naming.independentListingLabel)),
+        args.token,
+        args.form,
+        args.partner,
+        economics.feeShare,
+        args.deadline,
+      ]
+    )
+  );
+  const registrySubject = await client.readContract({
     address: instance.addresses.independentRegistry,
     abi: independentRegistryAbi,
     functionName: "listingSubject",
     args: [args.token, args.form, args.partner, economics.feeShare, args.deadline],
   });
+  if (registrySubject !== subject) {
+    throw new CreateRunError("digestMismatch", "the registry's listing subject differs from the page's");
+  }
   return { subject, feeShare: economics.feeShare };
 }
 
