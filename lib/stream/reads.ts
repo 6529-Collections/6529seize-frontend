@@ -255,7 +255,7 @@ export async function readWorkMeta(token: Address, tokenId: bigint): Promise<Wor
  * its ID when its root wallet changes, so the root is read, not derived. Falls
  * back to the ID as an address only if the account cannot be read.
  */
-export async function readArtistWallet(artistId: bigint): Promise<Address> {
+async function readArtistWallet(artistId: bigint): Promise<Address> {
   const fallback = getAddress(`0x${artistId.toString(16).padStart(40, "0")}`);
   const account = await getStreamClient()
     .readContract({ address: getStreamInstance().addresses.accounts, abi: accountsAbi, functionName: "artist", args: [artistId] })
