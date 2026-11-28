@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
+import { RefundBanner } from "@/components/stream-sepolia/RefundBanner";
 import { StreamNav } from "@/components/stream-sepolia/StreamNav";
 import { publicEnv } from "@/config/env";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -30,7 +31,10 @@ export default function StreamSepoliaLayout({ children }: { readonly children: R
           </p>
           <StreamNav />
         </div>
-        <div className="tw-pt-8">{children}</div>
+        <div className="tw-pt-8">
+          <RefundBanner />
+          {children}
+        </div>
       </div>
     </main>
   );

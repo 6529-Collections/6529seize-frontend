@@ -68,6 +68,7 @@ export function RefundBanner() {
           </p>
           <TxAction
             label={t(locale, "streamSepolia.refund.withdraw")}
+            doneText={t(locale, "streamSepolia.refund.done", { amount: formatEth(item.amount, locale) })}
             request={item.request}
           />
         </div>

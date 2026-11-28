@@ -171,6 +171,7 @@ function BidBox({ detail }: { readonly detail: OneOfOneDetail }) {
         </p>
         <TxAction
           label={t(locale, "streamSepolia.one.bid")}
+          doneText={amount === null ? undefined : t(locale, "streamSepolia.one.bidDone", { amount: formatEth(amount, locale) })}
           fullWidth
           disabled={amount === null || tooLow}
           description={
@@ -212,6 +213,7 @@ function Actions({ view, detail }: { readonly view: OneOfOneView; readonly detai
         key="settle"
         fullWidth
         label={t(locale, "streamSepolia.one.settle")}
+        doneText={t(locale, "streamSepolia.one.settleDone")}
         description={
           view.hasBid
             ? t(locale, "streamSepolia.one.settleSoldHelp")

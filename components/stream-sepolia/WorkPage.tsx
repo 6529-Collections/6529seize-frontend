@@ -13,7 +13,6 @@ import { AUCTION_STATE, sameAddress } from "@/lib/stream/state";
 import { EditionPanel } from "./EditionPanel";
 import { StreamIdentity } from "./StreamIdentity";
 import { OneOfOnePanel } from "./OneOfOnePanel";
-import { RefundBanner } from "./RefundBanner";
 import { useEdition, useOneOfOne, useWorkMeta } from "./useStreamData";
 import { WorkArt } from "./WorkArt";
 
@@ -61,7 +60,6 @@ function WorkBody({ token, tokenId }: { readonly token: Address; readonly tokenI
 
   return (
     <div>
-      <RefundBanner />
       <div className="tw-grid tw-gap-8 lg:tw-grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:tw-gap-10">
         <WorkArt
           token={token}

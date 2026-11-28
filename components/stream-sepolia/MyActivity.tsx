@@ -17,7 +17,6 @@ import { AUCTION_STATE, isZeroAddress } from "@/lib/stream/state";
 
 import { formatCount, formatEth } from "./format";
 import { CARD, LABEL } from "./OneOfOnePanel";
-import { RefundBanner } from "./RefundBanner";
 import { STREAM_BASE } from "./StreamNav";
 import { TxAction } from "./TxAction";
 import { useNow } from "./useStreamData";
@@ -78,7 +77,6 @@ function ActivityBody({ viewer }: { readonly viewer: Address }) {
   const workLink = (token: Address, tokenId: bigint) => `${STREAM_BASE}/work/${token}/${tokenId.toString()}`;
   return (
     <div className="tw-flex tw-flex-col tw-gap-5">
-      <RefundBanner />
       {empty ? <p className="tw-m-0 tw-text-sm tw-text-iron-400">{t(locale, "streamSepolia.me.empty")}</p> : null}
       {oneOfOneBids.length > 0 ? (
         <Section title={t(locale, "streamSepolia.me.oneBids")}>

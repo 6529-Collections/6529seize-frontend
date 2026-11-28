@@ -21,6 +21,7 @@ export function TxAction({
   variant = "action",
   fullWidth = false,
   onDone,
+  doneText,
 }: {
   readonly label: string;
   readonly description?: string | undefined;
@@ -29,6 +30,8 @@ export function TxAction({
   readonly variant?: ButtonVariant | undefined;
   readonly fullWidth?: boolean | undefined;
   readonly onDone?: (() => void) | undefined;
+  /** What happened, said after the transaction lands. */
+  readonly doneText?: string | undefined;
 }) {
   const { state, send } = useStreamTx();
   // A request that cannot be built (a read failed) is reported like a failed send.
@@ -63,7 +66,7 @@ export function TxAction({
       >
         {label}
       </Button>
-      <TxStatus state={buildFailed ? { phase: "error", error: "other" } : state} />
+      <TxStatus state={buildFailed ? { phase: "error", error: "other" } : state} doneText={doneText} />
     </div>
   );
 }

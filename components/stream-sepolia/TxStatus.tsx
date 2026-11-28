@@ -48,7 +48,14 @@ const LINK_CLASS =
   "tw-font-medium tw-text-primary-300 tw-underline tw-decoration-primary-400/50 tw-underline-offset-4 hover:tw-text-primary-400";
 
 /** One line that always says where a transaction stands, with its Etherscan link. */
-export function TxStatus({ state }: { readonly state: TxState }) {
+export function TxStatus({
+  state,
+  doneText,
+}: {
+  readonly state: TxState;
+  /** What happened, said after it lands (e.g. "You have the top bid at 0.05 ETH."). */
+  readonly doneText?: string | undefined;
+}) {
   const locale = useBrowserLocale();
   if (state.phase === "idle") return null;
   const link = state.hash ? (
@@ -69,7 +76,7 @@ export function TxStatus({ state }: { readonly state: TxState }) {
       text = t(locale, "streamSepolia.tx.slow");
       break;
     case "done":
-      text = t(locale, "streamSepolia.tx.done");
+      text = doneText ?? t(locale, "streamSepolia.tx.done");
       tone = "tw-text-emerald-400";
       break;
     case "error": {

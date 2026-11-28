@@ -486,6 +486,14 @@ function YourBids({
                 <TxAction
                   variant="action"
                   label={t(locale, "streamSepolia.ed.claim")}
+                  doneText={
+                    outcome
+                      ? t(locale, "streamSepolia.ed.claimDone", {
+                          won: formatCount(outcome.unitsWon, locale),
+                          refund: formatEth(outcome.refund, locale),
+                        })
+                      : undefined
+                  }
                   description={
                     outcome
                       ? t(locale, "streamSepolia.ed.claimHelp", {
