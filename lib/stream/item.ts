@@ -149,6 +149,18 @@ const STREAM_MINT_PARAMS = [
   },
 ] as const;
 
+/** Decodes `abi.encode(IIndependentStream.IndependentMint)`. */
+export function decodeIndependentMint(
+  request: Hex
+): { item: PackageItem; media: readonly MediaFile[] } | null {
+  try {
+    const [mint] = decodeAbiParameters(INDEPENDENT_MINT_PARAMS, request);
+    return { item: mint.item, media: mint.media };
+  } catch {
+    return null;
+  }
+}
+
 /** How a work was minted: its item and media, and for a curated work its package root and proof. */
 export interface StartedWork {
   readonly item: PackageItem;

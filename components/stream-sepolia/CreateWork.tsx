@@ -14,6 +14,7 @@ import {
   openIndependentEdition,
   openWorkRecord,
   startIndependentSale,
+  storeStartFile,
   storeFile,
   type IndependentWorkContext,
 } from "@/lib/stream/create";
@@ -259,6 +260,12 @@ function IndependentRun({
       label: t(locale, "streamSepolia.create.step.approve"),
       help: t(locale, "streamSepolia.create.step.approveHelp"),
       run: (ctx, io) => approveIndependentItem(ctx, io),
+    },
+    {
+      id: "startFile",
+      label: t(locale, "streamSepolia.create.step.startFile"),
+      help: t(locale, "streamSepolia.create.step.startFileHelp"),
+      run: (ctx, io) => storeStartFile(ctx, io),
     },
     {
       id: "start",

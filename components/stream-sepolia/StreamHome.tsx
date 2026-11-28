@@ -12,6 +12,7 @@ import { AUCTION_STATE, isZeroAddress } from "@/lib/stream/state";
 import { THE_MEMES_GRID_CLASS_NAME } from "@/components/the-memes/theMemesLayout";
 
 import { formatCount, formatDuration, formatEth } from "./format";
+import { ReadyToStart } from "./ReadyToStart";
 import { STREAM_BASE } from "./StreamNav";
 import { useNow, useSales, useWorkMeta } from "./useStreamData";
 import { WorkArt } from "./WorkArt";
@@ -119,10 +120,13 @@ function ProductSection({
   title,
   sales,
   now,
+  extra,
 }: {
   readonly title: string;
   readonly sales: readonly SaleSummary[];
   readonly now: number;
+  /** Shown after the live shelf (e.g. works ready to start). */
+  readonly extra?: React.ReactNode;
 }) {
   const locale = useBrowserLocale();
   const live = sales
@@ -149,6 +153,7 @@ function ProductSection({
         now={now}
         empty={t(locale, "streamSepolia.home.liveEmpty")}
       />
+      {extra}
       {waiting.length > 0 ? (
         <Shelf
           title={t(locale, "streamSepolia.home.waiting")}
@@ -190,6 +195,7 @@ export function StreamHome() {
         title={t(locale, "streamSepolia.product.independent")}
         sales={independent}
         now={now}
+        extra={<ReadyToStart />}
       />
     </div>
   );

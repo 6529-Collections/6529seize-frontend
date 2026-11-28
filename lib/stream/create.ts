@@ -13,7 +13,7 @@ import { independentRegistryAbi } from "./generated/IndependentStreamRegistry";
 import { streamAbi } from "./generated/Stream6529";
 import { workFactsAbi } from "./generated/StreamWorkFacts6529";
 import { getStreamClient } from "./client";
-import { ENCODING_IDENTITY, type StoredFile } from "./content";
+import { ENCODING_IDENTITY, toStoredFile, type StoredFile } from "./content";
 import {
   consentTypedData,
   FORM,
@@ -24,6 +24,7 @@ import {
   walletProof,
 } from "./independent";
 import { getStreamInstance } from "./instances";
+import { encodeStartFile, START_FILE_MIME } from "./startFile";
 import {
   buildItem,
   encodeEditionOpenData,
@@ -169,6 +170,25 @@ export async function approveIndependentItem(context: IndependentWorkContext, io
     args: [context.token, itemHash, context.royaltyRate],
   });
   return true;
+}
+
+/**
+ * Stores the start request as a public file, so that anyone can start the sale
+ * of the approved work (an approval alone is only a hash). Returns false when
+ * the sale already started or the file is already stored.
+ */
+export async function storeStartFile(context: IndependentWorkContext, io: CreateIo): Promise<boolean> {
+  if (!context.item || !context.mediaList) await prepareIndependentItem(context, io.account);
+  const minted = await getStreamClient().readContract({
+    address: context.token,
+    abi: streamAbi,
+    functionName: "tokenOfContent",
+    args: [context.media.sha256],
+  });
+  if (minted > 0n) return false;
+  const file = await toStoredFile(encodeStartFile(context.token, context.item!, context.mediaList!), START_FILE_MIME);
+  const { sent } = await storeFile(file, io);
+  return sent;
 }
 
 /** The token a sale start minted, from its SaleStarted log. */
