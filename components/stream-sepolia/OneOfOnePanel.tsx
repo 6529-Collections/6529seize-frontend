@@ -11,7 +11,7 @@ import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/stream-sepolia";
 import { getStreamInstance } from "@/lib/stream/instances";
 import type { OneOfOneDetail } from "@/lib/stream/reads";
-import { isZeroAddress, oneOfOneView, type OneOfOneView } from "@/lib/stream/state";
+import { isZeroAddress, oneOfOneView, sameAddress, type OneOfOneView } from "@/lib/stream/state";
 
 import { formatClock, formatDuration, formatEth, sepoliaTxUrl } from "./format";
 import { StreamIdentity } from "./StreamIdentity";
@@ -130,7 +130,8 @@ function StatusLine({ view, detail }: { readonly view: OneOfOneView; readonly de
       text = t(locale, "streamSepolia.one.status.notStarted");
   }
   // A sale that ended with no buyer for another reason says so instead of "No one bid".
-  if (view.screen.startsWith("unsold_") && detail.closedHow) {
+  // On r9 a rescued sale ends cancelled; on r8 it ended settled with no buyer.
+  if ((view.screen.startsWith("unsold_") || view.screen === "cancelled") && detail.closedHow) {
     text = t(locale, detail.closedHow === "rescued" ? "streamSepolia.one.status.rescued" : "streamSepolia.one.status.refused");
   } else if (view.screen.startsWith("unsold_") && detail.bids.length > 0) {
     // Bids but no buyer and neither event (most likely a delisted collection):
@@ -212,12 +213,22 @@ function BidBox({ detail }: { readonly detail: OneOfOneDetail }) {
   );
 }
 
-function Actions({ view, detail }: { readonly view: OneOfOneView; readonly detail: OneOfOneDetail }) {
+function Actions({
+  view,
+  detail,
+  owner,
+}: {
+  readonly view: OneOfOneView;
+  readonly detail: OneOfOneDetail;
+  readonly owner: Address | null;
+}) {
   const locale = useBrowserLocale();
   const wallet = useStreamWallet();
   const address = getStreamInstance().addresses.englishAuction;
   // Calls anyone may make on this sale, checked against the auction's ABI.
-  const anyone = (functionName: "settle" | "settleOrRefund" | "restart" | "withdrawBid") => () =>
+  const anyone = (
+    functionName: "settle" | "settleOrRefund" | "restart" | "withdrawBid" | "sendRescuedToMuseum"
+  ) => () =>
     streamTx({ address, abi: englishAuctionAbi, functionName, args: [detail.saleId] });
   const actions = [];
   if (view.canSettle) {
@@ -273,6 +284,20 @@ function Actions({ view, detail }: { readonly view: OneOfOneView; readonly detai
         doneText={t(locale, "streamSepolia.one.withdrawBidDone")}
         description={t(locale, "streamSepolia.one.withdrawBidHelp")}
         request={anyone("withdrawBid")}
+      />
+    );
+  }
+  // A rescued work the auction still holds can only leave for the museum; anyone may send it.
+  if (detail.closedHow === "rescued" && sameAddress(owner, address)) {
+    actions.push(
+      <TxAction
+        key="museum"
+        fullWidth
+        variant="secondary"
+        label={t(locale, "streamSepolia.one.toMuseum")}
+        description={t(locale, "streamSepolia.one.toMuseumHelp")}
+        doneText={t(locale, "streamSepolia.one.toMuseumDone")}
+        request={anyone("sendRescuedToMuseum")}
       />
     );
   }
@@ -398,7 +423,7 @@ export function OneOfOnePanel({
       </div>
       <div className="tw-mt-5 tw-flex tw-flex-col tw-gap-4">
         {view.canBid ? <BidBox detail={detail} /> : null}
-        <Actions view={view} detail={detail} />
+        <Actions view={view} detail={detail} owner={owner} />
       </div>
       <BidHistory detail={detail} />
     </section>

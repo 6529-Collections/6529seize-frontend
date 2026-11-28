@@ -1,21 +1,25 @@
 import type { Address } from "viem";
 
+import * as r8 from "./generated/r8/addresses";
+import * as r9 from "./generated/r9/addresses";
+
 /**
  * 6529 Stream contract instances on Sepolia. Every address the Stream test
- * pages use comes from here, keyed by instance name, so a new deployment is
- * swapped in one place. Values are copied from the contracts repository's
- * deployment record (6529-works `deployments/11155111/`).
+ * pages use comes from here, keyed by instance name. The addresses are
+ * generated from each instance's deployment record in the contracts repository
+ * (scripts/stream/sync-stream-abis.cjs --record), never copied by hand.
  */
 interface StreamInstance {
   /** Short instance name, as the contracts repository calls it. */
-  readonly name: string;
+  readonly name: StreamInstanceName;
   /** The deployment record file in the contracts repository. */
   readonly record: string;
   /** The first block to scan for this instance's events. */
   readonly startBlock: bigint;
   /**
-   * Whether creating a curated 6529 Stream work can be done by any wallet.
-   * On r8 curation approval needs keys the website does not hold.
+   * Whether any wallet can create a curated 6529 Stream work. r9 has a test
+   * gate (SepoliaOpenGate) that approves any package and creates collections;
+   * on r8 curation approval needs keys the website does not hold.
    */
   readonly curatedCreationOpen: boolean;
   readonly addresses: {
@@ -38,43 +42,65 @@ interface StreamInstance {
     readonly streamEditions: Address;
     readonly workFacts: Address;
     readonly museumVault: Address;
+    /** The test-only open gate, where the instance has one. */
+    readonly openGate?: Address | undefined;
   };
 }
 
-const R8: StreamInstance = {
-  name: "r8",
-  record: "deployments/11155111/core-1795440624.json",
-  startBlock: 12_196_001n,
-  curatedCreationOpen: false,
-  addresses: {
-    accounts: "0xdE5781c21fbCCF11056F2b7af6b299a2970B55Ba",
-    contentStore: "0xa22F278ffB83416Ba72B12d867970fc9f6f34eB1",
-    economics: "0xDB9d78844dc7a06297644536C06A14EA2Cd14f0D",
-    englishAuction: "0x3075498Ba1A52518f4f19b24A6DB9511f0311Fb8",
-    editionAuction: "0x43f3D854D85c9163C8C6b5064ab22ceF855EF4Ce",
-    independentEditionAuction: "0x6beD438ecFd9fbF2a808aE07300D2DbC8000232b",
-    independentRegistry: "0xaE49cE82F1448a2B60ee7863624AEBf575Cb75a5",
-    independent721Deployer: "0x68286E3d2CeDC92bca1d1270Ead2531D489d0f9f",
-    independentEditionsDeployer: "0xa606b6f0d9FB76578457c45eB0e17B8001cA20a4",
-    packageRegistry: "0xcAcB4ea395c3F265a1DceEAED795Bd3eF05d6Ecb",
-    renderer: "0x4Ca69fd081cc3bbFb5360c9224057eEA117e37f2",
-    saleStarter: "0xAEBA344701692a7898cCD8515fE5e00CbbCd2274",
-    splitLedger: "0x43A78e628F6cc1C73524D227B32Ea5d5059567Ce",
-    stream: "0xf2F45cC99a24C100a42f084a88E9697E0a798F6C",
-    streamDirectory: "0x7c2c78f346Bc49fCaB5dEd8Ea1898aC08423EaEd",
-    streamEditions: "0xaED9aB8079fcDC789e29119193853E02dDbf3060",
-    workFacts: "0x7fe774a5bD72ca2Eda2ad471d1655BE73673DD29",
-    museumVault: "0x52405E7Ba3fA10937C1F030f5b616b89B855E844",
+type StreamInstanceName = "r9" | "r8";
+
+const STREAM_INSTANCES: Record<StreamInstanceName, StreamInstance> = {
+  r9: {
+    name: "r9",
+    record: r9.record,
+    startBlock: r9.startBlock,
+    curatedCreationOpen: true,
+    addresses: r9.addresses,
+  },
+  r8: {
+    name: "r8",
+    record: r8.record,
+    startBlock: r8.startBlock,
+    curatedCreationOpen: false,
+    addresses: r8.addresses,
   },
 };
 
-const STREAM_INSTANCES = { r8: R8 } as const;
+/** The current instance. Older ones stay readable so works made there can still be seen. */
+export const DEFAULT_STREAM_INSTANCE: StreamInstanceName = "r9";
+export const OLDER_STREAM_INSTANCES: readonly StreamInstanceName[] = ["r8"];
 
-type StreamInstanceName = keyof typeof STREAM_INSTANCES;
+const STORAGE_KEY = "stream-sepolia-instance";
 
-/** The instance the test pages run against. Change it here to move instance. */
-export const ACTIVE_STREAM_INSTANCE: StreamInstanceName = "r8";
+function isInstanceName(value: unknown): value is StreamInstanceName {
+  return value === "r9" || value === "r8";
+}
+
+/** The visitor's choice, kept per browser; anything unreadable means the default. */
+function chosenInstance(): StreamInstanceName {
+  if (typeof window === "undefined") return DEFAULT_STREAM_INSTANCE;
+  try {
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    return isInstanceName(stored) ? stored : DEFAULT_STREAM_INSTANCE;
+  } catch {
+    return DEFAULT_STREAM_INSTANCE;
+  }
+}
+
+let active: StreamInstanceName | null = null;
 
 export function getStreamInstance(): StreamInstance {
-  return STREAM_INSTANCES[ACTIVE_STREAM_INSTANCE];
+  active ??= chosenInstance();
+  return STREAM_INSTANCES[active];
+}
+
+/** Switches instance and reloads, so no read of the other instance stays cached. */
+export function switchStreamInstance(name: StreamInstanceName): void {
+  try {
+    if (name === DEFAULT_STREAM_INSTANCE) window.localStorage.removeItem(STORAGE_KEY);
+    else window.localStorage.setItem(STORAGE_KEY, name);
+  } catch {
+    // Without storage the page stays on the default instance.
+  }
+  window.location.reload();
 }

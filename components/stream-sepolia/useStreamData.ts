@@ -7,7 +7,7 @@ import type { Address, Hex } from "viem";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { getStreamClient } from "@/lib/stream/client";
 import { englishAuctionAbi } from "@/lib/stream/abis";
-import { ACTIVE_STREAM_INSTANCE, getStreamInstance } from "@/lib/stream/instances";
+import { getStreamInstance } from "@/lib/stream/instances";
 import {
   listSales,
   readClaimable,
@@ -19,7 +19,8 @@ import {
 import { readMyCollections } from "@/lib/stream/activity";
 import { findStartableItems, readStartPreview, type PendingStart } from "@/lib/stream/startFile";
 
-const KEY = [QueryKey.STREAM_SEPOLIA, ACTIVE_STREAM_INSTANCE] as const;
+// Read once on the client: switching instance reloads the page.
+const KEY = [QueryKey.STREAM_SEPOLIA, getStreamInstance().name] as const;
 /** Live sales change by the block (12 s on Sepolia). */
 const LIVE_REFRESH_MS = 15_000;
 
