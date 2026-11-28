@@ -123,6 +123,10 @@ function StatusLine({ view, detail }: { readonly view: OneOfOneView; readonly de
     case "not_started":
       text = t(locale, "streamSepolia.one.status.notStarted");
   }
+  // A sale that ended with no buyer for another reason says so instead of "No one bid".
+  if (view.screen.startsWith("unsold_") && detail.closedHow) {
+    text = t(locale, detail.closedHow === "rescued" ? "streamSepolia.one.status.rescued" : "streamSepolia.one.status.refused");
+  }
   return (
     <p className={`tw-m-0 tw-text-sm ${view.screen === "closing" ? "tw-text-amber-300" : "tw-text-iron-300"}`}>
       {view.halted && view.screen.startsWith("unsold_") ? t(locale, "streamSepolia.one.status.halted") : text}

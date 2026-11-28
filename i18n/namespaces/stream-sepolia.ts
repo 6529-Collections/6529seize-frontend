@@ -114,6 +114,8 @@ export const STREAM_SEPOLIA_MESSAGES = registerSourceMessages({
   "streamSepolia.one.status.museum": "No one bid. The work went to the 6529 Network Museum.",
   "streamSepolia.one.status.unsoldWaiting": "No one bid. It can be offered again from {time}.",
   "streamSepolia.one.status.unsoldRestartable": "No one bid. Anyone can offer it again now.",
+  "streamSepolia.one.status.refused": "The sale could not be finished, so the bid went back to the bidder.",
+  "streamSepolia.one.status.rescued": "The network closed this sale and returned the bid.",
   "streamSepolia.one.status.paused": "Paused for a dispute review. Bids are closed; the top bid stays.",
   "streamSepolia.one.status.cancelled": "The sale was cancelled. Every bid can be taken back.",
   "streamSepolia.one.status.notStarted": "Not on sale yet.",

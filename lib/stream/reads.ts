@@ -102,6 +102,8 @@ async function scanLogs<TEvent extends AbiEvent>(args: {
 const SALE_STARTED = getAbiItem({ abi: englishAuctionAbi, name: "SaleStarted" });
 const ONE_BID_PLACED = getAbiItem({ abi: englishAuctionAbi, name: "BidPlaced" });
 const SALE_SETTLED = getAbiItem({ abi: englishAuctionAbi, name: "SaleSettled" });
+const SETTLEMENT_REFUSED = getAbiItem({ abi: englishAuctionAbi, name: "SettlementRefused" });
+const RESCUED_SALE_CLOSED = getAbiItem({ abi: englishAuctionAbi, name: "RescuedSaleClosed" });
 const EDITION_BID_PLACED = getAbiItem({ abi: editionAuctionAbi, name: "BidPlaced" });
 const EDITION_BID_RAISED = getAbiItem({ abi: editionAuctionAbi, name: "BidRaised" });
 const EDITION_BID_CLAIMED = getAbiItem({ abi: editionAuctionAbi, name: "BidClaimed" });
@@ -291,6 +293,8 @@ export interface OneOfOneDetail {
   readonly bids: readonly OneOfOneBid[];
   readonly settlement: OneOfOneSettlement | null;
   readonly firstStartTx: Hex | null;
+  /** How the latest run ended without a buyer, when it was not simply unbid. */
+  readonly closedHow: "refused" | "rescued" | null;
 }
 
 export async function readOneOfOne(token: Address, tokenId: bigint): Promise<OneOfOneDetail> {
@@ -316,10 +320,12 @@ export async function readOneOfOne(token: Address, tokenId: bigint): Promise<One
       read<boolean>("paused"),
       read<bigint>("RESTART_DELAY"),
     ]);
-  const [bidLogs, settleLogs, startLogs] = await Promise.all([
+  const [bidLogs, settleLogs, startLogs, refusedLogs, rescuedLogs] = await Promise.all([
     scanLogs({ address, event: ONE_BID_PLACED, args: { saleId } }),
     scanLogs({ address, event: SALE_SETTLED, args: { saleId } }),
     scanLogs({ address, event: SALE_STARTED, args: { saleId } }),
+    scanLogs({ address, event: SETTLEMENT_REFUSED, args: { saleId } }),
+    scanLogs({ address, event: RESCUED_SALE_CLOSED, args: { saleId } }),
   ]);
   const lastSettle = settleLogs.at(-1);
   // Bids of the latest run only: a restart starts a fresh sale under the same ID.
@@ -354,7 +360,18 @@ export async function readOneOfOne(token: Address, tokenId: bigint): Promise<One
           }
         : null,
     firstStartTx: startLogs[0]?.transactionHash ?? null,
+    closedHow: closedHow(refusedLogs, rescuedLogs, lastStartBlock),
   };
+}
+
+function closedHow(
+  refused: readonly { blockNumber: bigint }[],
+  rescued: readonly { blockNumber: bigint }[],
+  sinceBlock: bigint
+): "refused" | "rescued" | null {
+  if (rescued.some((log) => log.blockNumber >= sinceBlock)) return "rescued";
+  if (refused.some((log) => log.blockNumber >= sinceBlock)) return "refused";
+  return null;
 }
 
 /** The editions contract that partners a 1/1 contract, or null. */
