@@ -28,7 +28,7 @@ import { formatCount } from "./format";
 import { StepRunner, type Step } from "./StepRunner";
 import { StreamLoading } from "./StreamLoading";
 
-export function useCollections() {
+function useCollections() {
   return useQuery({
     queryKey: [QueryKey.STREAM_SEPOLIA, getStreamInstance().name, "collections"],
     queryFn: readCollections,

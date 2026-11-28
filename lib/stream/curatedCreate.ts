@@ -186,7 +186,7 @@ async function profileFieldsOf(account: Address): Promise<{ profileId: Hex; prof
 }
 
 /** Thrown when the page's typed data would not produce the digest the contract checks. */
-export class DigestMismatchError extends Error {
+class DigestMismatchError extends Error {
   constructor(what: string) {
     super(`${what}: the page's typed data does not match the contract's digest`);
     this.name = "DigestMismatchError";

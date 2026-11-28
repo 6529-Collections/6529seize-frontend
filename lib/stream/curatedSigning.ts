@@ -8,7 +8,7 @@ import type { Address, Hex } from "viem";
  * contract expects, and the create flow checks against them before asking the
  * wallet to sign.
  */
-export function packageRegistryDomain(packageRegistry: Address) {
+function packageRegistryDomain(packageRegistry: Address) {
   return {
     name: "6529 Works Package Registry",
     version: "1",
