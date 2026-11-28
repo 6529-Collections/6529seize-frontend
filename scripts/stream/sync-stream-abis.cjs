@@ -17,6 +17,11 @@
  * (the edition auctions from `abi/full/`, which merges their lens views), so
  * the contract calls stay type-checked against what is deployed. Re-run it
  * when a new instance changes an ABI.
+ *
+ * Each ABI is cut down to the functions and events in ABI_ALLOW below, plus
+ * every error (viem names a revert only from errors present in the ABI). Add a
+ * name there before a page calls a new function or reads a new event, then
+ * re-run. Entries are written one per line in the source order.
  */
 const fs = require("node:fs");
 const path = require("node:path");
@@ -55,6 +60,92 @@ const CONTRACTS = [
   ["PackageRegistry", "abi/PackageRegistry.json", "packageRegistryAbi"],
   ["AssetAllowlist", "abi/AssetAllowlist.json", "assetAllowlistAbi"],
 ];
+
+/**
+ * The functions and events the pages use, per contract (overloads of a name
+ * are all kept). Errors are always kept in full; constructors, fallbacks and
+ * everything else are dropped.
+ */
+const ABI_ALLOW = {
+  Accounts: {
+    functions: ["artist", "artistIdOf", "editions", "register", "stream"],
+    events: [],
+  },
+  AssetAllowlist: {
+    functions: ["openingBid", "status"],
+    events: [],
+  },
+  ContentStore: {
+    functions: ["chunkPointer", "fileInfo", "isComplete", "read", "registerManifest", "writeChunk"],
+    events: ["ManifestRegistered"],
+  },
+  EconomicsResolver: {
+    functions: ["assetAllowlist", "cc0TextFileId", "economics", "museum"],
+    events: [],
+  },
+  EnglishAuction: {
+    functions: [
+      "RESTART_DELAY", "auction", "auctionClock", "bid", "claim", "claimDelivery", "claimable",
+      "config", "economics", "minimumBid", "paused", "pendingDelivery", "refusableAt", "restart",
+      "sendRescuedToMuseum", "settle", "settleOrRefund", "start", "startWithBid", "stream", "withdrawBid",
+    ],
+    events: ["BidPlaced", "RescuedSaleClosed", "SaleSettled", "SaleStarted", "SettlementRefused"],
+  },
+  IndependentStreamDeployer: {
+    functions: ["deploy"],
+    events: ["Deployed"],
+  },
+  IndependentStreamRegistry: {
+    functions: ["approveItem", "economics", "facts", "itemOf", "listingOf", "listingSubject", "preview", "register"],
+    events: [],
+  },
+  PackageRegistry: {
+    functions: [
+      "acceptPackage", "acceptanceDigest", "acceptedAs", "cc0TextFileId", "economics", "isMoveNonceUsed",
+      "moveDigest", "packageOf", "preview", "registerPackage", "stream",
+    ],
+    events: [],
+  },
+  SaleStarter: {
+    functions: ["start"],
+    events: [],
+  },
+  SepoliaOpenGate: {
+    functions: ["attestationOf", "createCollection", "oneItemPackage", "stream"],
+    events: [],
+  },
+  SplitLedger: {
+    functions: ["network", "releasable", "release", "released", "walletFor"],
+    events: [],
+  },
+  Stream6529: {
+    functions: [
+      "approve", "collectionCount", "collectionOf", "createCollection", "facts", "itemHashOf", "name",
+      "ownerOf", "tokenOfContent", "tokenURI", "workOf",
+    ],
+    events: ["CollectionCreated", "WorkMinted"],
+  },
+  StreamEditions6529: {
+    functions: ["name", "stream"],
+    events: [],
+  },
+  StreamWorkFacts6529: {
+    functions: ["cc0TextFileId", "factsOf", "markOnChainComplete", "open"],
+    events: [],
+  },
+};
+
+/** Both edition auctions are read through the same calls. */
+const EDITION_AUCTION_ALLOW = {
+  functions: [
+    "CLOSE_OFFSET", "abandon", "abandonable", "auction", "bid", "bidOutcome", "claim", "claimBid", "claimable",
+    "clearing", "config", "economics", "editions", "endTimes", "ladder", "open", "paused", "quote", "raise", "settle",
+    "settlementOrderFor", "stepPrice", "stepTotals", "stream",
+  ],
+  events: ["AuctionCleared", "AuctionOpened", "BidClaimed", "BidPlaced", "BidRaised", "SaleSettled", "SaleStarted"],
+};
+ABI_ALLOW.UniformEditionAuction = EDITION_AUCTION_ALLOW;
+ABI_ALLOW.IndependentEditionAuction = EDITION_AUCTION_ALLOW;
 
 /** Record name -> the key the test pages use. */
 const RECORD_ADDRESSES = [
@@ -132,6 +223,39 @@ function stripInternalTypes(node) {
   return node;
 }
 
+/**
+ * Keeps the allowed functions and events and every error, in source order.
+ * Throws when an allowed name is missing, so a renamed function fails here
+ * rather than at the first call. Exported for its unit test.
+ */
+function filterAbi(abi, allow, name = "ABI") {
+  const keep = new Map([
+    ["function", new Set(allow.functions)],
+    ["event", new Set(allow.events)],
+  ]);
+  const found = new Map([
+    ["function", new Set()],
+    ["event", new Set()],
+  ]);
+  const kept = abi.filter((entry) => {
+    if (entry.type === "error") return true;
+    if (!keep.get(entry.type)?.has(entry.name)) return false;
+    found.get(entry.type).add(entry.name);
+    return true;
+  });
+  for (const [type, names] of keep) {
+    const missing = [...names].filter((wanted) => !found.get(type).has(wanted));
+    if (missing.length > 0) throw new Error(`${name} has no ${type} ${missing.join(", ")}`);
+  }
+  return kept;
+}
+
+/** An `as const` array module with one ABI entry per line. Exported for its unit test. */
+function formatAbiModule(exportName, abi, header) {
+  const lines = abi.map((entry) => `  ${JSON.stringify(entry)},`);
+  return [header, `export const ${exportName} = [`, ...lines, "] as const;", ""].join("\n");
+}
+
 function main() {
   const source = process.argv[2];
   if (!source) {
@@ -160,13 +284,13 @@ function main() {
   fs.mkdirSync(outDir, { recursive: true });
   for (const [name, file, exportName] of addressesOnly ? [] : contracts) {
     const raw = JSON.parse(fs.readFileSync(path.join(source, file), "utf8"));
-    const abi = stripInternalTypes(Array.isArray(raw) ? raw : raw.abi);
-    const fileName = `${name}.ts`;
-    const body =
+    const allow = ABI_ALLOW[name];
+    if (!allow) throw new Error(`${name} has no ABI_ALLOW entry`);
+    const abi = filterAbi(stripInternalTypes(Array.isArray(raw) ? raw : raw.abi), allow, name);
+    const header =
       `// Generated by scripts/stream/sync-stream-abis.cjs from 6529-works ${file}` +
-      ` at ${commit}. Do not edit by hand.\n` +
-      `export const ${exportName} = ${JSON.stringify(abi, null, 2)} as const;\n`;
-    fs.writeFileSync(path.join(outDir, fileName), body);
+      ` at ${commit} (the functions and events the pages use, and every error). Do not edit by hand.`;
+    fs.writeFileSync(path.join(outDir, `${name}.ts`), formatAbiModule(exportName, abi, header));
   }
   if (record) writeAddresses({ source, record, gate, outDir, commit });
   const abiCount = addressesOnly ? 0 : contracts.length;
@@ -175,4 +299,4 @@ function main() {
 
 if (require.main === module) main();
 
-module.exports = { writeAddresses };
+module.exports = { writeAddresses, filterAbi, formatAbiModule };

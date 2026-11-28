@@ -2,9 +2,14 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
+type AbiEntry = { readonly type: string; readonly name?: string };
+type Allow = { readonly functions: readonly string[]; readonly events: readonly string[] };
+
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { writeAddresses } = require("../../scripts/stream/sync-stream-abis.cjs") as {
+const { writeAddresses, filterAbi, formatAbiModule } = require("../../scripts/stream/sync-stream-abis.cjs") as {
   writeAddresses: (args: { source: string; record: string; gate: string | null; outDir: string; commit: string }) => void;
+  filterAbi: (abi: readonly AbiEntry[], allow: Allow, name?: string) => AbiEntry[];
+  formatAbiModule: (exportName: string, abi: readonly AbiEntry[], header: string) => string;
 };
 
 const NAMES = [
@@ -48,5 +53,52 @@ describe("sync-stream-abis writeAddresses", () => {
     const { Renderer: _omitted, ...missing } = full;
     const dir = setup(missing);
     expect(() => writeAddresses({ source: dir, record: "record.json", gate: null, outDir: dir, commit: "abc" })).toThrow(/Renderer/);
+  });
+});
+
+describe("sync-stream-abis filterAbi", () => {
+  const abi: AbiEntry[] = [
+    { type: "constructor" },
+    { type: "function", name: "bid" },
+    { type: "error", name: "SaleClosed" },
+    { type: "function", name: "owner" },
+    { type: "event", name: "BidPlaced" },
+    { type: "function", name: "bid" },
+    { type: "event", name: "Transfer" },
+    { type: "error", name: "NotOwner" },
+    { type: "fallback" },
+  ];
+
+  it("keeps the allowed functions (every overload) and events and every error, in source order", () => {
+    expect(filterAbi(abi, { functions: ["bid"], events: ["BidPlaced"] })).toEqual([
+      { type: "function", name: "bid" },
+      { type: "error", name: "SaleClosed" },
+      { type: "event", name: "BidPlaced" },
+      { type: "function", name: "bid" },
+      { type: "error", name: "NotOwner" },
+    ]);
+  });
+  it("refuses an allowed name the ABI does not have", () => {
+    expect(() => filterAbi(abi, { functions: ["bid", "settle"], events: [] }, "EnglishAuction")).toThrow(
+      /EnglishAuction has no function settle/
+    );
+    expect(() => filterAbi(abi, { functions: [], events: ["Settled"] })).toThrow(/no event Settled/);
+  });
+  it("does not treat Object.prototype names as allowed types", () => {
+    expect(filterAbi([{ type: "constructor" }, { type: "toString" }], { functions: [], events: [] })).toEqual([]);
+  });
+  it("writes one entry per line", () => {
+    const out = formatAbiModule("testAbi", filterAbi(abi, { functions: ["owner"], events: [] }), "// header");
+    expect(out).toBe(
+      [
+        "// header",
+        "export const testAbi = [",
+        '  {"type":"error","name":"SaleClosed"},',
+        '  {"type":"function","name":"owner"},',
+        '  {"type":"error","name":"NotOwner"},',
+        "] as const;",
+        "",
+      ].join("\n")
+    );
   });
 });
