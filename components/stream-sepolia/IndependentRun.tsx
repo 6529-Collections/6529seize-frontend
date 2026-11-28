@@ -22,6 +22,7 @@ import { FilesFailed, RunHeader, useStoredFiles } from "./createShared";
 import type { CreatedWork } from "./CuratedRun";
 import { StepRunner, type Step } from "./StepRunner";
 import { StreamLoading } from "./StreamLoading";
+import { useEditionCloseOffset } from "./useStreamData";
 
 /**
  * The Independent Stream create run in the artist's own contract: files,
@@ -57,6 +58,7 @@ function IndependentSteps({
   readonly onDone: (work: CreatedWork) => void;
 }) {
   const locale = useBrowserLocale();
+  const closeOffset = useEditionCloseOffset(false);
   // One run's state, created once and filled step by step so "Continue" resumes after a failure.
   const [context] = useState<IndependentWorkContext>(() => ({
     artist: viewer,
@@ -112,7 +114,9 @@ function IndependentSteps({
     steps.push({
       id: "edition",
       label: t(locale, "streamSepolia.create.step.edition"),
-      help: t(locale, "streamSepolia.create.step.editionHelp"),
+      help: closeOffset
+        ? t(locale, "streamSepolia.create.step.editionHelpTimed", { offset: closeOffset })
+        : t(locale, "streamSepolia.create.step.editionHelp"),
       run: (ctx, io) => openIndependentEdition(ctx, io),
     });
   }

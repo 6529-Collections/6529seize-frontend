@@ -20,7 +20,7 @@ import {
   workFactsAbi,
 } from "./abis";
 import { artistIdFor } from "./accounts";
-import { chainDeadline } from "./chainTime";
+import { chainDeadline, deadlineStillUsable } from "./chainTime";
 import { getStreamClient } from "./client";
 import type { StoredFile } from "./content";
 import { cc0TextFileId, fileIdOf, tokenIdFromStart, type CreateIo, type SigningIo } from "./create";
@@ -68,6 +68,16 @@ export interface CuratedWorkContext {
   itemHash?: Hex;
   packageRoot?: Hex;
   tokenId?: bigint;
+  /** Signatures kept after a failed send, so "Continue" does not ask the wallet again. */
+  heldAcceptance?: { readonly acceptance: PackageAcceptance; readonly signature: Hex };
+  heldMove?: { readonly move: MoveToStream; readonly signature: Hex };
+}
+
+interface MoveToStream {
+  readonly packageRoot: Hex;
+  readonly itemHash: Hex;
+  readonly nonce: bigint;
+  readonly deadline: bigint;
 }
 
 /** Signatures expire an hour after the chain's latest block. */
@@ -320,6 +330,29 @@ export async function acceptCuratedPackage(context: CuratedWorkContext, io: Sign
     args: [packageRoot, io.account],
   });
   if (accepted !== 0n) return false;
+  const { acceptance, signature } = await acceptanceSignature(context, io, packageRoot);
+  // Kept until the send succeeds: a failed or rejected send reuses it on "Continue".
+  context.heldAcceptance = { acceptance, signature };
+  await io.send(
+    streamTx({
+      address: registry,
+      abi: packageRegistryAbi,
+      functionName: "acceptPackage",
+      args: [packageRoot, acceptance, walletProof(io.account, signature)],
+    })
+  );
+  delete context.heldAcceptance;
+  return true;
+}
+
+/** The acceptance kept from an earlier try while it is still usable, else a new signature. */
+async function acceptanceSignature(context: CuratedWorkContext, io: SigningIo, packageRoot: Hex) {
+  const held = context.heldAcceptance;
+  if (held && sameAddress(held.acceptance.account, io.account) && (await deadlineStillUsable(held.acceptance.deadline))) {
+    return held;
+  }
+  const client = getStreamClient();
+  const registry = getStreamInstance().addresses.packageRegistry;
   const acceptance: PackageAcceptance = {
     account: io.account,
     ...(await profileFieldsOf(io.account)),
@@ -335,16 +368,7 @@ export async function acceptCuratedPackage(context: CuratedWorkContext, io: Sign
   if (hashTypedData(typedData) !== expected) {
     throw new CreateRunError("digestMismatch", "PackageAcceptance typed data does not match the contract");
   }
-  const signature = await io.signTypedData(typedData);
-  await io.send(
-    streamTx({
-      address: registry,
-      abi: packageRegistryAbi,
-      functionName: "acceptPackage",
-      args: [packageRoot, acceptance, walletProof(io.account, signature)],
-    })
-  );
-  return true;
+  return { acceptance, signature: await io.signTypedData(typedData) };
 }
 
 /** The artist's first unused move nonce, read 32 at a time. */
@@ -388,25 +412,14 @@ export async function startCuratedSale(context: CuratedWorkContext, io: SigningI
     return false;
   }
   const instance = getStreamInstance();
-  const client = getStreamClient();
-  const nonce = await nextMoveNonce(await ensureArtistId(context));
-  const move = { packageRoot, itemHash, nonce, deadline: await chainDeadline(SIGNATURE_LIFETIME_S) };
-  const typedData = moveTypedData(instance.addresses.packageRegistry, move);
-  const expected = await client.readContract({
-    address: instance.addresses.packageRegistry,
-    abi: packageRegistryAbi,
-    functionName: "moveDigest",
-    args: [packageRoot, itemHash, nonce, move.deadline],
-  });
-  if (hashTypedData(typedData) !== expected) {
-    throw new CreateRunError("digestMismatch", "MoveToStream typed data does not match the contract");
-  }
-  const signature = await io.signTypedData(typedData);
+  const artistId = await ensureArtistId(context);
+  const { move, signature } = await moveSignature(context, io, artistId, packageRoot, itemHash);
+  context.heldMove = { move, signature };
   const request = encodeStreamMint({
     packageRoot,
     item,
     proof: [],
-    nonce,
+    nonce: move.nonce,
     deadline: move.deadline,
     signature: walletProof(io.account, signature),
   });
@@ -418,10 +431,41 @@ export async function startCuratedSale(context: CuratedWorkContext, io: SigningI
       args: [instance.addresses.englishAuction, instance.addresses.stream, request, mediaList],
     })
   );
+  delete context.heldMove;
   const tokenId = tokenIdFromStart(receipt, instance.addresses.stream);
   if (tokenId === null) throw new CreateRunError("failed", "no SaleStarted");
   context.tokenId = tokenId;
   return true;
+}
+
+/**
+ * The move signature kept from an earlier try, while it is for this item, its
+ * nonce is still unused and its deadline still usable; else a new signature.
+ */
+async function moveSignature(context: CuratedWorkContext, io: SigningIo, artistId: bigint, packageRoot: Hex, itemHash: Hex) {
+  const client = getStreamClient();
+  const registry = getStreamInstance().addresses.packageRegistry;
+  const held = context.heldMove;
+  if (held?.move.packageRoot === packageRoot && held.move.itemHash === itemHash) {
+    const [nonceUsed, usable] = await Promise.all([
+      client.readContract({ address: registry, abi: packageRegistryAbi, functionName: "isMoveNonceUsed", args: [artistId, held.move.nonce] }),
+      deadlineStillUsable(held.move.deadline),
+    ]);
+    if (!nonceUsed && usable) return held;
+  }
+  const nonce = await nextMoveNonce(artistId);
+  const move: MoveToStream = { packageRoot, itemHash, nonce, deadline: await chainDeadline(SIGNATURE_LIFETIME_S) };
+  const typedData = moveTypedData(registry, move);
+  const expected = await client.readContract({
+    address: registry,
+    abi: packageRegistryAbi,
+    functionName: "moveDigest",
+    args: [packageRoot, itemHash, nonce, move.deadline],
+  });
+  if (hashTypedData(typedData) !== expected) {
+    throw new CreateRunError("digestMismatch", "MoveToStream typed data does not match the contract");
+  }
+  return { move, signature: await io.signTypedData(typedData) };
 }
 
 async function ensureCuratedStarted(context: CuratedWorkContext, account: Address) {

@@ -28,6 +28,7 @@ import { getStreamInstance } from "@/lib/stream/instances";
 import { FilesFailed, RunHeader, useStoredFiles } from "./createShared";
 import { StepRunner, type Step } from "./StepRunner";
 import { StreamLoading } from "./StreamLoading";
+import { useEditionCloseOffset } from "./useStreamData";
 
 export interface CreatedWork {
   readonly token: Address;
@@ -112,6 +113,7 @@ function CuratedSteps({
   readonly onDone: (work: CreatedWork) => void;
 }) {
   const locale = useBrowserLocale();
+  const closeOffset = useEditionCloseOffset(true);
   // One run's state, created once and filled step by step so "Continue" resumes after a failure.
   const [run] = useState<CuratedWorkContext>(() => ({
     artist: viewer,
@@ -177,7 +179,9 @@ function CuratedSteps({
     steps.push({
       id: "edition",
       label: t(locale, "streamSepolia.create.step.edition"),
-      help: t(locale, "streamSepolia.create.step.editionHelp"),
+      help: closeOffset
+        ? t(locale, "streamSepolia.create.step.editionHelpTimed", { offset: closeOffset })
+        : t(locale, "streamSepolia.create.step.editionHelp"),
       run: (ctx, io) => openCuratedEdition(ctx, io),
     });
   }

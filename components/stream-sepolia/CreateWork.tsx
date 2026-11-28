@@ -17,10 +17,11 @@ import { getStreamInstance } from "@/lib/stream/instances";
 import { LINK } from "./createShared";
 import { CuratedRun, type CreatedWork } from "./CuratedRun";
 import { artistContracts, DeployContract, DeployEditionsContract } from "./DeployContract";
-import { formatCount, shortAddress } from "./format";
+import { formatCount } from "./format";
 import { IndependentRun } from "./IndependentRun";
 import { CARD } from "./OneOfOnePanel";
 import { RecentWorks } from "./RecentWorks";
+import { useStreamHandle } from "./StreamIdentity";
 import { STREAM_BASE, workHref } from "./StreamNav";
 import { StreamLoading } from "./StreamLoading";
 import { useMyCollections } from "./useStreamData";
@@ -128,7 +129,8 @@ function CreateFlow({
   const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
   const [reviewing, setReviewing] = useState(false);
   const [done, setDone] = useState<CreatedWork | null>(null);
-  const artistFallback = viewer ? shortAddress(viewer) : t(locale, "streamSepolia.preview.you");
+  // The connected wallet's 6529 handle, else "your wallet".
+  const artistFallback = useStreamHandle(viewer) ?? t(locale, "streamSepolia.preview.yourWallet");
   const update = (patch: Partial<Draft>) => setDraft((current) => ({ ...current, ...patch }));
   let main: ReactNode;
   if (done) {
@@ -241,10 +243,16 @@ export function CreateWork({ initialDoor }: { readonly initialDoor?: Door | unde
   const [door, setDoor] = useState<Door>(initialDoor ?? (curatedOpen ? "stream" : "independent"));
   const { oneOfOne } = artistContracts(collections.data ?? []);
   const contractName = oneOfOne?.status === LISTING_ACTIVE ? oneOfOne.name : null;
+  let doorTitle = t(locale, "streamSepolia.door.stream");
+  if (door === "independent") {
+    doorTitle = contractName
+      ? t(locale, "streamSepolia.door.inContract", { name: contractName })
+      : t(locale, "streamSepolia.door.deploy");
+  }
   return (
     <div className="tw-flex tw-flex-col tw-gap-6">
       <div>
-        <h1 className="tw-m-0 tw-text-3xl tw-font-semibold tw-text-iron-50">{t(locale, "streamSepolia.create.title")}</h1>
+        <h1 className="tw-m-0 tw-text-3xl tw-font-semibold tw-text-iron-50">{doorTitle}</h1>
         <p className="tw-m-0 tw-mt-2 tw-max-w-3xl tw-text-sm tw-text-iron-400">{t(locale, "streamSepolia.create.intro")}</p>
       </div>
       <Doors value={door} onChange={setDoor} contractName={contractName} />

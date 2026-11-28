@@ -1,4 +1,4 @@
-import { assetAllowlistAbi, economicsAbi, englishAuctionAbi } from "./abis";
+import { assetAllowlistAbi, economicsAbi, editionAuctionAbi, englishAuctionAbi, independentEditionAuctionAbi } from "./abis";
 import { getStreamClient } from "./client";
 import { getStreamInstance } from "./instances";
 import { CURRENCY_ETH } from "./item";
@@ -16,14 +16,22 @@ interface SaleTerms {
   readonly bidStep: number;
   /** The opening bid in wei (ETH). */
   readonly openingBid: bigint;
+  /** An edition sale closes this long after its 1/1, in seconds (`CLOSE_OFFSET`), by product. */
+  readonly editionCloseOffset: { readonly curated: number; readonly independent: number };
 }
 
 export async function readSaleTerms(): Promise<SaleTerms> {
   const client = getStreamClient();
   const instance = getStreamInstance();
-  const [config, allowlist] = await Promise.all([
+  const [config, allowlist, curatedOffset, independentOffset] = await Promise.all([
     client.readContract({ address: instance.addresses.englishAuction, abi: englishAuctionAbi, functionName: "config" }),
     client.readContract({ address: instance.addresses.economics, abi: economicsAbi, functionName: "assetAllowlist" }),
+    client.readContract({ address: instance.addresses.editionAuction, abi: editionAuctionAbi, functionName: "CLOSE_OFFSET" }),
+    client.readContract({
+      address: instance.addresses.independentEditionAuction,
+      abi: independentEditionAuctionAbi,
+      functionName: "CLOSE_OFFSET",
+    }),
   ]);
   const openingBid = await client.readContract({
     address: allowlist,
@@ -36,5 +44,6 @@ export async function readSaleTerms(): Promise<SaleTerms> {
     extensionWindow: Number(config.extensionWindow),
     bidStep: Number(config.incrementShare) / SHARE_DENOMINATOR,
     openingBid,
+    editionCloseOffset: { curated: Number(curatedOffset), independent: Number(independentOffset) },
   };
 }

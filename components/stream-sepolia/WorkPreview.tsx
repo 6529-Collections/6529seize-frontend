@@ -47,6 +47,30 @@ export function SaleTermsList({ editions }: { readonly editions: boolean }) {
   );
 }
 
+const RINGS = [0.92, 0.74, 0.56, 0.38, 0.2];
+
+/** Until a file is picked: a quiet abstract placeholder in the frame the work will fill. */
+function PlaceholderArt({ caption }: { readonly caption: string }) {
+  return (
+    <div className="tw-relative tw-h-full tw-w-full">
+      <svg viewBox="0 0 100 100" aria-hidden="true" className="tw-absolute tw-inset-0 tw-h-full tw-w-full">
+        <defs>
+          <radialGradient id="stream-placeholder-glow" cx="50%" cy="45%" r="60%">
+            <stop offset="0%" stopColor="rgb(99 102 241 / 0.28)" />
+            <stop offset="100%" stopColor="rgb(99 102 241 / 0)" />
+          </radialGradient>
+        </defs>
+        <rect width="100" height="100" fill="url(#stream-placeholder-glow)" />
+        {RINGS.map((scale) => (
+          <circle key={scale} cx="50" cy="45" r={34 * scale} fill="none" stroke="rgb(255 255 255 / 0.09)" strokeWidth="0.4" />
+        ))}
+        <circle cx="50" cy="45" r="3" fill="rgb(165 180 252 / 0.6)" />
+      </svg>
+      <span className="tw-absolute tw-inset-x-0 tw-bottom-6 tw-px-6 tw-text-center tw-text-sm tw-text-iron-500">{caption}</span>
+    </div>
+  );
+}
+
 /** A live preview of the work being made, with where and how it will be sold. */
 export function WorkPreview({
   draft,
@@ -78,7 +102,7 @@ export function WorkPreview({
           // eslint-disable-next-line @next/next/no-img-element
           <img src={image} alt={title} className="tw-h-full tw-w-full tw-object-contain" />
         ) : (
-          <span className="tw-px-6 tw-text-center tw-text-sm tw-text-iron-600">{t(locale, "streamSepolia.preview.noArt")}</span>
+          <PlaceholderArt caption={t(locale, "streamSepolia.preview.noArt")} />
         )}
       </div>
       <div>

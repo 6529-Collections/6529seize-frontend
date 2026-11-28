@@ -11,6 +11,7 @@ import { AUCTION_STATE, isZeroAddress } from "@/lib/stream/state";
 
 import { formatCount, formatDuration, formatEth } from "./format";
 import { workHref } from "./StreamNav";
+import { useStreamName } from "./StreamIdentity";
 import { useWorkMeta } from "./useStreamData";
 import { WorkArt } from "./WorkArt";
 
@@ -43,6 +44,7 @@ export function WorkCard({ sale, now }: { readonly sale: SaleSummary; readonly n
   const meta = useWorkMeta(sale.token, sale.tokenId);
   const title =
     meta.data?.name ?? t(locale, "streamSepolia.work.untitled", { id: sale.tokenId.toString() });
+  const artist = useStreamName(meta.data?.artistWallet);
   return (
     <li>
       <Link
@@ -60,6 +62,9 @@ export function WorkCard({ sale, now }: { readonly sale: SaleSummary; readonly n
           <p className="tw-m-0 tw-truncate tw-text-base tw-font-semibold tw-text-iron-50 group-hover:tw-text-white">
             {title}
           </p>
+          {artist ? (
+            <p className="tw-m-0 tw-mt-0.5 tw-truncate tw-text-sm tw-text-iron-300">{t(locale, "streamSepolia.card.by", { name: artist })}</p>
+          ) : null}
           <p className="tw-m-0 tw-mt-1 tw-text-sm tw-tabular-nums tw-text-iron-400">
             {statusLine(sale, now, locale)}
           </p>

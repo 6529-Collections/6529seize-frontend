@@ -1,10 +1,11 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import type { Address, Hex } from "viem";
 
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { getStreamClient } from "@/lib/stream/client";
 import { getStreamInstance } from "@/lib/stream/instances";
 import {
@@ -14,9 +15,13 @@ import {
   readOneOfOne,
   readWorkArt,
   readWorkMeta,
+  type SaleSummary,
 } from "@/lib/stream/reads";
+import { isTestWork } from "@/lib/stream/showcase";
 import { readMyCollections } from "@/lib/stream/activity";
 import { readSaleTerms } from "@/lib/stream/saleTerms";
+
+import { formatSpan } from "./format";
 import { findStartableItems, readStartPreview, type PendingStart } from "@/lib/stream/startFile";
 
 // Read once on the client: switching instance reloads the page.
@@ -173,4 +178,51 @@ export function useStartPreview(start: PendingStart) {
     queryFn: () => readStartPreview(start),
     staleTime: Infinity,
   });
+}
+
+/** How long after its 1/1 an edition sale closes, formatted, or null until read. */
+export function useEditionCloseOffset(curated: boolean): string | null {
+  const locale = useBrowserLocale();
+  const terms = useSaleTerms();
+  if (!terms.data) return null;
+  return formatSpan(terms.data.editionCloseOffset[curated ? "curated" : "independent"], locale);
+}
+
+/**
+ * Splits works into the main grids and "Test tokens" (no art, or an operator's
+ * test name), from the same metadata and art queries the cards use. A work is
+ * placed once both have answered.
+ */
+export function useShowcase(sales: readonly SaleSummary[]): {
+  readonly shown: SaleSummary[];
+  readonly tests: SaleSummary[];
+} {
+  const metas = useQueries({
+    queries: sales.map((sale) => ({
+      queryKey: [...KEY, "meta", sale.token.toLowerCase(), sale.tokenId.toString()],
+      queryFn: () => readWorkMeta(sale.token, sale.tokenId),
+      staleTime: 60_000,
+    })),
+  });
+  const arts = useQueries({
+    queries: sales.map((sale, index) => {
+      const meta = metas[index]?.data;
+      return {
+        queryKey: [...KEY, "art", sale.token.toLowerCase(), sale.tokenId.toString()],
+        queryFn: () =>
+          readWorkArt({ token: sale.token, tokenId: sale.tokenId, meta: meta!, firstStartTx: sale.firstStartTx, curated: sale.curated }),
+        enabled: !!meta,
+        staleTime: Infinity,
+      };
+    }),
+  });
+  const shown: SaleSummary[] = [];
+  const tests: SaleSummary[] = [];
+  sales.forEach((sale, index) => {
+    const meta = metas[index]?.data;
+    const art = arts[index];
+    if (!meta || !art || art.isPending) return;
+    (isTestWork({ name: meta.name, hasArt: !!art.data }) ? tests : shown).push(sale);
+  });
+  return { shown, tests };
 }

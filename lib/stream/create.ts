@@ -11,7 +11,7 @@ import {
   type TransactionReceipt,
 } from "viem";
 
-import { chainDeadline } from "./chainTime";
+import { chainDeadline, deadlineStillUsable } from "./chainTime";
 import { artistIdFor } from "./accounts";
 import { assertRunWallet, CreateRunError } from "./createErrors";
 import { getStreamClient } from "./client";
@@ -38,7 +38,7 @@ import {
   type PackageItem,
 } from "./item";
 import { editionSaleExists, saleIdOf } from "./reads";
-import { ZERO_ADDRESS } from "./state";
+import { sameAddress, ZERO_ADDRESS } from "./state";
 
 /** What a create step may send. Matches the UI's transaction request shape. */
 export interface CreateIo {
@@ -350,6 +350,8 @@ export async function listIndependent(args: {
   /** For an editions contract: its 1/1 contract. */
   readonly partner: Address | null;
   readonly io: SigningIo;
+  /** Holds the listing signatures after a failed send, so a retry does not ask the wallet again. */
+  readonly keep?: { held?: HeldListing };
 }): Promise<boolean> {
   const instance = getStreamInstance();
   const client = getStreamClient();
@@ -361,22 +363,8 @@ export async function listIndependent(args: {
   });
   if (listing.status !== 0) return false;
   const account = args.io.account;
-  const deadline = await chainDeadline(86_400);
-  const artistId = await client.readContract({
-    address: instance.addresses.accounts,
-    abi: accountsAbi,
-    functionName: "artistIdOf",
-    args: [account],
-  });
-  const registration =
-    artistId === 0n ? await args.io.signTypedData(registrationTypedData(account, deadline)) : "0x";
-  const { subject } = await listingSubject({
-    token: args.token,
-    form: args.editions ? FORM.ERC1155 : FORM.ERC721,
-    partner: args.editions && args.partner ? args.partner : ZERO_ADDRESS,
-    deadline,
-  });
-  const consent = await args.io.signTypedData(consentTypedData(subject));
+  const { deadline, registration, consent } = await listingSignatures(args);
+  if (args.keep) args.keep.held = { token: args.token, account, deadline, registration, consent };
   await args.io.send(streamTx({
     address: instance.addresses.independentRegistry,
     abi: independentRegistryAbi,
@@ -395,5 +383,40 @@ export async function listIndependent(args: {
       },
     ],
   }));
+  if (args.keep) delete args.keep.held;
   return true;
+}
+
+export interface HeldListing {
+  readonly token: Address;
+  readonly account: Address;
+  readonly deadline: bigint;
+  readonly registration: Hex;
+  readonly consent: Hex;
+}
+
+/** The listing signatures kept from an earlier try while still usable, else new ones. */
+async function listingSignatures(args: Parameters<typeof listIndependent>[0]) {
+  const account = args.io.account;
+  const held = args.keep?.held;
+  if (held && sameAddress(held.token, args.token) && sameAddress(held.account, account) && (await deadlineStillUsable(held.deadline))) {
+    return held;
+  }
+  const instance = getStreamInstance();
+  const deadline = await chainDeadline(86_400);
+  const artistId = await getStreamClient().readContract({
+    address: instance.addresses.accounts,
+    abi: accountsAbi,
+    functionName: "artistIdOf",
+    args: [account],
+  });
+  const registration: Hex =
+    artistId === 0n ? await args.io.signTypedData(registrationTypedData(account, deadline)) : "0x";
+  const { subject } = await listingSubject({
+    token: args.token,
+    form: args.editions ? FORM.ERC1155 : FORM.ERC721,
+    partner: args.editions && args.partner ? args.partner : ZERO_ADDRESS,
+    deadline,
+  });
+  return { deadline, registration, consent: await args.io.signTypedData(consentTypedData(subject)) };
 }

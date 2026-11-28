@@ -1,7 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Address, Hex, TransactionReceipt } from "viem";
 import { useSignTypedData, useWriteContract } from "wagmi";
 
@@ -12,6 +12,7 @@ import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/stream-sepolia";
 
 import { sepoliaTxUrl } from "./format";
+import { markRunActive } from "./runInProgress";
 import { TxStatus } from "./TxStatus";
 import { errorNameOf, sendStreamTx, StreamTxError, type TxRequest, type TxState } from "./sendStreamTx";
 import { useStreamWallet, WalletGate } from "./WalletGate";
@@ -129,6 +130,9 @@ export function StepRunner<Context>({
   };
 
   const anyStarted = Object.keys(statuses).length > 0;
+  const inProgress = anyStarted && !finished;
+  // An instance switch asks first while this run has started and not finished.
+  useEffect(() => (inProgress ? markRunActive() : undefined), [inProgress]);
   return (
     <StepRunnerView
       steps={steps}

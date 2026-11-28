@@ -17,12 +17,12 @@ import { workHref } from "./StreamNav";
 import { TxAction } from "./TxAction";
 import { formatSpan } from "./format";
 import { usePendingStarts, useSaleTerms, useStartPreview } from "./useStreamData";
-import { WalletGate } from "./WalletGate";
+import { useStreamWallet, WalletGate } from "./WalletGate";
 
 const LABEL =
   "tw-m-0 tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500";
 
-function StartCard({ start }: { readonly start: PendingStart }) {
+function StartCard({ start, canSend }: { readonly start: PendingStart; readonly canSend: boolean }) {
   const locale = useBrowserLocale();
   const router = useRouter();
   const preview = useStartPreview(start);
@@ -46,7 +46,7 @@ function StartCard({ start }: { readonly start: PendingStart }) {
           </p>
         ) : null}
       </div>
-      <WalletGate>
+      {canSend ? (
         <TxAction
           fullWidth
           label={t(locale, "streamSepolia.start.button")}
@@ -64,7 +64,7 @@ function StartCard({ start }: { readonly start: PendingStart }) {
             args: [start.token, start.request],
           }))}
         />
-      </WalletGate>
+      ) : null}
     </li>
   );
 }
@@ -73,15 +73,23 @@ function StartCard({ start }: { readonly start: PendingStart }) {
 export function ReadyToStart() {
   const locale = useBrowserLocale();
   const pending = usePendingStarts();
+  const wallet = useStreamWallet();
   if (!pending.data || pending.data.length === 0) return null;
+  const canSend = !!wallet.address && wallet.onSepolia;
   return (
     <section className="tw-mt-6" aria-labelledby="stream-ready-to-start">
       <h3 id="stream-ready-to-start" className={LABEL}>
         {t(locale, "streamSepolia.start.title")}
       </h3>
+      {canSend ? null : (
+        <div className="tw-mt-2">
+          {/* One wallet prompt for the shelf, not one per card. */}
+          <WalletGate reason={t(locale, "streamSepolia.start.connect")}>{null}</WalletGate>
+        </div>
+      )}
       <ul className={`tw-m-0 tw-mt-3 tw-list-none tw-p-0 ${THE_MEMES_GRID_CLASS_NAME}`}>
         {pending.data.map((start) => (
-          <StartCard key={start.itemHash} start={start} />
+          <StartCard key={start.itemHash} start={start} canSend={canSend} />
         ))}
       </ul>
     </section>

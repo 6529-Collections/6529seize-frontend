@@ -9,7 +9,7 @@ import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/stream-sepolia";
 import { artistIdFor } from "@/lib/stream/accounts";
 import type { IndependentContract } from "@/lib/stream/activity";
-import { deployIndependent, listIndependent } from "@/lib/stream/create";
+import { deployIndependent, listIndependent, type HeldListing } from "@/lib/stream/create";
 import {
   independent721Config,
   independentEditionsConfig,
@@ -34,6 +34,8 @@ export function artistContracts(contracts: readonly IndependentContract[]) {
 
 interface DeployContext {
   token: Address | null;
+  /** Listing signatures kept after a failed send. */
+  held?: HeldListing;
 }
 
 /**
@@ -81,7 +83,7 @@ export function DeployContract({
       id: "list721",
       label: t(locale, "streamSepolia.contract.step.list"),
       help: t(locale, "streamSepolia.contract.step.listHelp"),
-      run: (ctx, io) => listIndependent({ token: (ctx.token ?? known)!, editions: false, partner: null, io }),
+      run: (ctx, io) => listIndependent({ token: (ctx.token ?? known)!, editions: false, partner: null, io, keep: ctx }),
     });
   }
   if (steps.length === 0) return null;
@@ -158,7 +160,7 @@ export function DeployEditionsContract({
       id: "listEditions",
       label: t(locale, "streamSepolia.contract.step.listEditions"),
       run: (ctx, io) =>
-        listIndependent({ token: (ctx.token ?? known)!, editions: true, partner: oneOfOne.token, io }),
+        listIndependent({ token: (ctx.token ?? known)!, editions: true, partner: oneOfOne.token, io, keep: ctx }),
     });
   }
   if (steps.length === 0) return null;

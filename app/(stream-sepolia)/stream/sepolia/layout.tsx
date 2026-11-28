@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
-import { InstanceSwitch } from "@/components/stream-sepolia/InstanceSwitch";
+import { InstanceNotice, InstanceSwitch } from "@/components/stream-sepolia/InstanceSwitch";
 import { RefundBanner } from "@/components/stream-sepolia/RefundBanner";
 import { TxResultBar } from "@/components/stream-sepolia/TxResultBar";
 import { StreamNav } from "@/components/stream-sepolia/StreamNav";
@@ -35,11 +35,14 @@ export default function StreamSepoliaLayout({ children }: { readonly children: R
           <StreamNav />
         </div>
         <div className="tw-pt-8">
-          <InstanceSwitch />
+          <InstanceNotice />
           <RefundBanner />
           <TxResultBar />
           {children}
         </div>
+        <footer className="tw-mt-16 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.07] tw-pt-6">
+          <InstanceSwitch />
+        </footer>
       </div>
     </main>
   );

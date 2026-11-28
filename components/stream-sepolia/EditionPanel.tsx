@@ -30,7 +30,7 @@ import { CARD, LABEL } from "./OneOfOnePanel";
 import { streamTx } from "@/lib/stream/streamTx";
 
 import { TxAction } from "./TxAction";
-import { useNow } from "./useStreamData";
+import { useEditionCloseOffset, useNow } from "./useStreamData";
 import { useStreamWallet, WalletGate } from "./WalletGate";
 
 const STEPPER =
@@ -652,12 +652,15 @@ export function OpenEdition({
   readonly curated: boolean;
 }) {
   const locale = useBrowserLocale();
+  const closeOffset = useEditionCloseOffset(curated);
   return (
     <section className={`${CARD} tw-border-primary-400/40`} aria-labelledby="stream-ed-open-next">
       <h2 id="stream-ed-open-next" className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
         {t(locale, "streamSepolia.ed.openNext")}
       </h2>
-      <p className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-300">{t(locale, "streamSepolia.ed.notOpen")}</p>
+      <p className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-300">{t(locale, "streamSepolia.ed.notOpen")}
+        {closeOffset ? ` ${t(locale, "streamSepolia.ed.closesAfter", { offset: closeOffset })}` : null}
+      </p>
       <div className="tw-mt-3">
         <WalletGate reason={t(locale, "streamSepolia.one.connectToAct")}>
           <TxAction
