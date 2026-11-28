@@ -17,6 +17,40 @@ import { CARD } from "./OneOfOnePanel";
 import { TxAction } from "./TxAction";
 import { WalletGate } from "./WalletGate";
 
+type PublishStep = "open" | "complete";
+
+/**
+ * The next publish step the contract would accept now, or null. Media that was
+ * only registered (served off chain) can never be marked complete, so each
+ * step is simulated before it is offered.
+ */
+async function nextPublishStep(
+  token: Address,
+  tokenId: bigint,
+  firstStartTx: Hex | null,
+  curated: boolean
+): Promise<PublishStep | null> {
+  const client = getStreamClient();
+  const address = getStreamInstance().addresses.workFacts;
+  const facts = await client.readContract({ address, abi: workFactsAbi, functionName: "factsOf", args: [token, tokenId] });
+  if (!facts.opened) {
+    if (!firstStartTx) return null;
+    const started = await readStartItem(firstStartTx, curated);
+    if (!started || started.media.length === 0) return null;
+    const ok = await client
+      .simulateContract({ address, abi: workFactsAbi, functionName: "open", args: [token, tokenId, started.item, [...started.media]] })
+      .then(() => true)
+      .catch(() => false);
+    return ok ? "open" : null;
+  }
+  if (facts.onChainComplete) return null;
+  const ok = await client
+    .simulateContract({ address, abi: workFactsAbi, functionName: "markOnChainComplete", args: [token, tokenId] })
+    .then(() => true)
+    .catch(() => false);
+  return ok ? "complete" : null;
+}
+
 /**
  * A work started from the shelf has no published record yet (a curated start
  * through SaleStarter opens it; EnglishAuction.start does not), so wallets and
@@ -35,18 +69,13 @@ export function PublishRecord({
   readonly curated: boolean;
 }) {
   const locale = useBrowserLocale();
-  const facts = useQuery({
-    queryKey: [QueryKey.STREAM_SEPOLIA, getStreamInstance().name, "facts", token.toLowerCase(), tokenId.toString()],
-    queryFn: () =>
-      getStreamClient().readContract({
-        address: getStreamInstance().addresses.workFacts,
-        abi: workFactsAbi,
-        functionName: "factsOf",
-        args: [token, tokenId],
-      }),
+  const next = useQuery({
+    queryKey: [QueryKey.STREAM_SEPOLIA, getStreamInstance().name, "publishNext", token.toLowerCase(), tokenId.toString()],
+    queryFn: () => nextPublishStep(token, tokenId, firstStartTx, curated),
+    enabled: !!firstStartTx,
   });
-  if (!facts.data || !firstStartTx || (facts.data.opened && facts.data.onChainComplete)) return null;
-  const opening = !facts.data.opened;
+  if (!next.data) return null;
+  const opening = next.data === "open";
   return (
     <section className={CARD} aria-labelledby="stream-publish-record">
       <h2 id="stream-publish-record" className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
@@ -66,7 +95,7 @@ export function PublishRecord({
               if (!opening) {
                 return streamTx({ address, abi: workFactsAbi, functionName: "markOnChainComplete", args: [token, tokenId] });
               }
-              const started = await readStartItem(firstStartTx, curated);
+              const started = firstStartTx ? await readStartItem(firstStartTx, curated) : null;
               if (!started || started.media.length === 0) return null;
               return streamTx({
                 address,
