@@ -30,7 +30,6 @@ import { CARD, LABEL } from "./OneOfOnePanel";
 import { streamTx } from "@/lib/stream/streamTx";
 
 import { TxAction } from "./TxAction";
-import { TxStatus } from "./TxStatus";
 import { useNow } from "./useStreamData";
 import { useStreamWallet, WalletGate } from "./WalletGate";
 
@@ -464,8 +463,6 @@ function YourBids({
   const wallet = useStreamWallet();
   const mine = detail.bids.filter((bid) => sameAddress(bid.bidder, wallet.address));
   const open = mine.filter((bid) => !bid.claimed);
-  // A raise that wins removes its button; its result line stays here.
-  const [raised, setRaised] = useState<{ bidId: bigint; text: string; hash: Hex } | null>(null);
   // The contract's own answer for each of your bids, live or final (exact at a cut price).
   const outcomes = useBidOutcomes(detail, open, true);
   if (mine.length === 0) return null;
@@ -541,15 +538,7 @@ function YourBids({
                 />
               ) : null}
               {!bid.claimed && view.canBid && standing !== "in" ? (
-                <RaiseAction
-                  detail={detail}
-                  bid={bid}
-                  key={`raise-${bid.bidId.toString()}`}
-                  onRaised={(text, hash) => setRaised({ bidId: bid.bidId, text, hash })}
-                />
-              ) : null}
-              {raised?.bidId === bid.bidId && standing === "in" ? (
-                <TxStatus state={{ phase: "done", hash: raised.hash }} doneText={raised.text} />
+                <RaiseAction detail={detail} bid={bid} key={`raise-${bid.bidId.toString()}`} />
               ) : null}
             </li>
           );
@@ -560,15 +549,7 @@ function YourBids({
   );
 }
 
-function RaiseAction({
-  detail,
-  bid,
-  onRaised,
-}: {
-  readonly detail: EditionDetail;
-  readonly bid: EditionBidRow;
-  readonly onRaised: (text: string, hash: Hex) => void;
-}) {
+function RaiseAction({ detail, bid }: { readonly detail: EditionDetail; readonly bid: EditionBidRow }) {
   const locale = useBrowserLocale();
   const step = raiseTargetStep({
     prices: detail.prices,
@@ -591,7 +572,6 @@ function RaiseAction({
         count: formatCount(bid.quantity, locale),
       })}
       doneText={doneText}
-      onDone={(receipt) => onRaised(doneText, receipt.transactionHash)}
       request={() => (streamTx({
         address: detail.auctionAddress,
         abi: editionAuctionAbi,

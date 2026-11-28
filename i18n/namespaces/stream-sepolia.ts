@@ -34,6 +34,7 @@ export const STREAM_SEPOLIA_MESSAGES = registerSourceMessages({
   "streamSepolia.tx.wallet": "Confirm in your wallet.",
   "streamSepolia.tx.pending": "Sent. Waiting for Sepolia to include it.",
   "streamSepolia.tx.done": "Done.",
+  "streamSepolia.tx.dismiss": "Close",
   "streamSepolia.one.bidDone": "Your bid of {amount} ETH is in.",
   "streamSepolia.one.settleDone": "The sale is finished.",
   "streamSepolia.refund.done": "{amount} ETH sent to your wallet.",
@@ -137,6 +138,10 @@ export const STREAM_SEPOLIA_MESSAGES = registerSourceMessages({
   "streamSepolia.one.bid": "Bid",
   "streamSepolia.one.bidCost":
     "You send {amount} ETH now. If you are outbid, it comes back as a credit you claim.",
+  "streamSepolia.one.settleOrRefundDone": "The bid went back to the bidder and the sale is closed.",
+  "streamSepolia.one.restartDone": "The work is on sale again.",
+  "streamSepolia.one.withdrawBidDone": "Your bid came back to you.",
+  "streamSepolia.one.claimDeliveryDone": "The work was sent to your wallet.",
   "streamSepolia.one.settle": "Finish the sale",
   "streamSepolia.one.settleSoldHelp": "Sends the work to the winner and pays the artist. You pay only the network fee.",
   "streamSepolia.one.settleUnsoldHelp": "Closes the sale with no buyer. You pay only the network fee.",

@@ -240,6 +240,7 @@ function Actions({ view, detail }: { readonly view: OneOfOneView; readonly detai
         fullWidth
         variant="secondary"
         label={t(locale, "streamSepolia.one.settleOrRefund")}
+        doneText={t(locale, "streamSepolia.one.settleOrRefundDone")}
         description={t(locale, "streamSepolia.one.settleOrRefundHelp")}
         request={anyone("settleOrRefund")}
       />
@@ -251,6 +252,7 @@ function Actions({ view, detail }: { readonly view: OneOfOneView; readonly detai
         key="restart"
         fullWidth
         label={t(locale, "streamSepolia.one.restart")}
+        doneText={t(locale, "streamSepolia.one.restartDone")}
         description={t(locale, "streamSepolia.one.restartHelp", {
           duration: formatDuration(detail.duration, locale),
         })}
@@ -265,6 +267,7 @@ function Actions({ view, detail }: { readonly view: OneOfOneView; readonly detai
         fullWidth
         variant="secondary"
         label={t(locale, "streamSepolia.one.withdrawBid")}
+        doneText={t(locale, "streamSepolia.one.withdrawBidDone")}
         description={t(locale, "streamSepolia.one.withdrawBidHelp")}
         request={anyone("withdrawBid")}
       />
@@ -276,6 +279,7 @@ function Actions({ view, detail }: { readonly view: OneOfOneView; readonly detai
         key="delivery"
         fullWidth
         label={t(locale, "streamSepolia.one.claimDelivery")}
+        doneText={t(locale, "streamSepolia.one.claimDeliveryDone")}
         description={t(locale, "streamSepolia.one.claimDeliveryHelp")}
         request={() =>
           streamTx({

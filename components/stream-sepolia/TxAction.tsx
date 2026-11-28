@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { TransactionReceipt } from "viem";
 
 import Button from "@/components/utils/button/Button";
 import type { ButtonVariant } from "@/components/utils/button/buttonStyles";
 
+import { keepTxResult } from "./txResults";
 import { TxStatus } from "./TxStatus";
 import { useStreamTx, type TxRequest } from "./useStreamTx";
 
@@ -40,6 +41,17 @@ export function TxAction({
   // The result line is fixed when pressed: after the transaction the page refetches,
   // and amounts it was built from (a balance, a minimum) change.
   const [pressedDoneText, setPressedDoneText] = useState<string | undefined>(undefined);
+  // A finished transaction whose button leaves the page (the screen moved on)
+  // hands its result line to the page-level bar instead of losing it.
+  const mounted = useRef(true);
+  const landed = useRef<{ text: string | undefined; hash: TransactionReceipt["transactionHash"] } | null>(null);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      if (landed.current) keepTxResult(landed.current.text, landed.current.hash);
+    };
+  }, []);
   const busy = state.phase === "wallet" || state.phase === "pending" || state.phase === "slow";
   return (
     <div>
@@ -55,6 +67,8 @@ export function TxAction({
         onClick={async () => {
           setBuildFailed(false);
           setPressedDoneText(doneText);
+          landed.current = null;
+          const pressedText = doneText;
           let next;
           try {
             next = await request();
@@ -66,7 +80,10 @@ export function TxAction({
             return;
           }
           const receipt = await send(next);
-          if (receipt) onDone?.(receipt);
+          if (!receipt) return;
+          if (mounted.current) landed.current = { text: pressedText, hash: receipt.transactionHash };
+          else keepTxResult(pressedText, receipt.transactionHash);
+          onDone?.(receipt);
         }}
       >
         {label}
