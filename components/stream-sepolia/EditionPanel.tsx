@@ -272,7 +272,7 @@ function WhyThisMany({ detail }: { readonly detail: EditionDetail }) {
           return (
             <li
               key={candidate.step}
-              className="tw-grid tw-grid-cols-[minmax(0,10em)_minmax(2.5rem,1fr)_auto] tw-items-center tw-gap-3 tw-text-[13px] sm:tw-text-sm"
+              className="tw-grid tw-grid-cols-[auto_minmax(2rem,1fr)_auto] tw-items-center tw-gap-3 tw-text-[13px] sm:tw-text-sm"
             >
               <span className={`tw-whitespace-nowrap tw-tabular-nums ${picked ? "tw-font-semibold tw-text-iron-50" : "tw-text-iron-300"}`}>
                 {t(locale, "streamSepolia.ed.candidate", {

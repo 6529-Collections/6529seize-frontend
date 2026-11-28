@@ -22,7 +22,7 @@ export function StreamNav() {
   const pathname = usePathname();
   return (
     <nav aria-label={t(locale, "streamSepolia.nav.label")} className="tw-overflow-x-auto">
-      <ul className="tw-m-0 tw-flex tw-list-none tw-gap-6 tw-p-0">
+      <ul className="tw-m-0 tw-flex tw-flex-wrap tw-list-none tw-gap-x-6 tw-gap-y-2 tw-p-0">
         {LINKS.map((link) => {
           const active =
             link.href === STREAM_BASE
