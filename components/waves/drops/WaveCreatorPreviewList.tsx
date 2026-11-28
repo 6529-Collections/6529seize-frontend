@@ -35,7 +35,7 @@ interface WaveCreatorPreviewListProps {
   readonly onWaveSelect?:
     | ((wave: ApiWave, href: string, event: React.MouseEvent) => void)
     | undefined;
-  readonly variant?: "modal" | "compact" | undefined;
+  readonly variant?: "modal" | "compact" | "sheet" | undefined;
 }
 
 export function useWaveCreatorPreviewWaves({
@@ -112,7 +112,7 @@ export const WaveCreatorPreviewList: React.FC<WaveCreatorPreviewListProps> = ({
   onWaveSelect,
   variant = "modal",
 }) => {
-  const isCompact = variant === "compact";
+  const isCompact = variant !== "modal";
   const hasError = state.error !== null && state.error !== undefined;
   const showPaginationLoader =
     !isCompact &&
@@ -127,7 +127,7 @@ export const WaveCreatorPreviewList: React.FC<WaveCreatorPreviewListProps> = ({
       >
         <div
           className={`tw-flex tw-items-center ${
-            isCompact ? "tw-gap-2" : "tw-flex-col tw-gap-3"
+            isCompact ? "tw-gap-0" : "tw-flex-col tw-gap-3"
           }`}
         >
           <CircleLoader
@@ -173,13 +173,14 @@ export const WaveCreatorPreviewList: React.FC<WaveCreatorPreviewListProps> = ({
       )}
       {state.waves.length > 0 && (
         <div
-          className={`tw-flex tw-flex-col ${isCompact ? "tw-gap-2" : "tw-gap-3"}`}
+          className={`tw-flex tw-flex-col ${isCompact ? "tw-gap-0" : "tw-gap-3"}`}
         >
           {state.waves.map((wave) => (
             <WaveCreatorPreviewItem
               key={wave.id}
               wave={wave}
               onSelect={onWaveSelect}
+              variant={variant}
             />
           ))}
         </div>

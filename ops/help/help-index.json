@@ -4215,7 +4215,8 @@
         "When Explain vote is enabled, clearing an edited rationale blocks submission until text is added or the switch is turned off. An untouched generated rationale remains valid.",
         "If an optional rationale reply fails after a successful vote, the vote stays saved and the user is told that the reply failed.",
         "Boosting is a per-user flame toggle on full drop cards and boosted cards in wave and direct-message threads.",
-        "Wave creator badges and drop state indicators explain context around submitted drops."
+        "Wave creator badges and drop state indicators explain context around submitted drops.",
+        "On touch devices, including tablets, or in any window narrower than 1024px, selecting a profile-wave badge opens a content-sized sheet with one scrolling area and a close button floating above the sheet. Open profile wave is the full-width main action, with Show all waves or Hide waves underneath. On mouse and trackpad devices in windows at least 1024px wide, hover opens the preview and clicking the badge opens the profile wave. Show all waves expands the author’s created-wave list; Hide waves collapses it. Show all brain activity opens the author’s Brain tab. The preview retains the artwork, wave details and captions."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
@@ -4224,7 +4225,8 @@
         "ops/docs/waves/drop-actions/feature-reactions-and-ratings.md",
         "ops/docs/waves/drop-actions/feature-vote-slider.md",
         "ops/docs/waves/drop-actions/feature-vote-summary-and-modal.md",
-        "ops/docs/waves/drop-actions/feature-drop-boosting.md"
+        "ops/docs/waves/drop-actions/feature-drop-boosting.md",
+        "ops/docs/waves/drop-actions/feature-wave-creator-badge.md"
       ]
     },
     {

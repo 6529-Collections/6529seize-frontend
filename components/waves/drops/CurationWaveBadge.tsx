@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useState, useSyncExternalStore } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import Image from "next/image";
 import AuthorBadgeButton, {
   type AuthorBadgeSize,
@@ -11,6 +17,8 @@ import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import HoverCard from "@/components/utils/tooltip/HoverCard";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
+import type { CurationPreviewHoverLayout } from "./curation-preview/types";
 import { CurationWavePreviewCard } from "./CurationWavePreviewCard";
 
 interface CurationWaveBadgeProps {
@@ -47,6 +55,7 @@ export const CurationWaveBadge: React.FC<CurationWaveBadgeProps> = ({
   wavePfp,
 }) => {
   const { hasTouchScreen } = useDeviceInfo();
+  const isMobileLayoutViewport = useIsMobileLayoutViewport();
   const isClientHydrated = useSyncExternalStore(
     subscribeToClientRender,
     getClientRenderSnapshot,
@@ -54,6 +63,40 @@ export const CurationWaveBadge: React.FC<CurationWaveBadgeProps> = ({
   );
   const [failedImageSrc, setFailedImageSrc] = useState<string | null>(null);
   const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false);
+  const badgeRef = useRef<HTMLButtonElement>(null);
+  const [hoverLayout, setHoverLayout] = useState<CurationPreviewHoverLayout>();
+  const updateExpansionLayout = useCallback(() => {
+    const rect = badgeRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const viewport = globalThis.visualViewport;
+    const viewportRight =
+      (viewport?.offsetLeft ?? 0) + (viewport?.width ?? globalThis.innerWidth);
+    const viewportTop = viewport?.offsetTop ?? 0;
+    const viewportBottom =
+      viewportTop + (viewport?.height ?? globalThis.innerHeight);
+    const spaceAbove = rect.top - viewportTop;
+    const spaceBelow = viewportBottom - rect.bottom;
+    setHoverLayout({
+      canExpandSideways: viewportRight - rect.left - 10 >= 720,
+      placement: spaceAbove >= spaceBelow ? "top" : "bottom",
+      // Reserve the 10px anchor gap, 8px viewport gutter and 2px card border.
+      maxHeight: Math.max(0, Math.floor(Math.max(spaceAbove, spaceBelow) - 20)),
+    });
+  }, []);
+  useEffect(() => {
+    globalThis.addEventListener("resize", updateExpansionLayout);
+    globalThis.visualViewport?.addEventListener(
+      "resize",
+      updateExpansionLayout
+    );
+    return () => {
+      globalThis.removeEventListener("resize", updateExpansionLayout);
+      globalThis.visualViewport?.removeEventListener(
+        "resize",
+        updateExpansionLayout
+      );
+    };
+  }, [updateExpansionLayout]);
   const normalizedWaveName = getTrimmedText(waveName);
   const normalizedWavePfp = getTrimmedText(wavePfp);
   const waveImageSrc = normalizedWavePfp
@@ -66,7 +109,8 @@ export const CurationWaveBadge: React.FC<CurationWaveBadgeProps> = ({
   const imageSize = IMAGE_SIZE[size];
   const showImage = waveImageSrc !== null && failedImageSrc !== waveImageSrc;
   const imageSrc = showImage ? waveImageSrc : null;
-  const usesSheetPreview = isClientHydrated && hasTouchScreen;
+  const usesSheetPreview =
+    isClientHydrated && (hasTouchScreen || isMobileLayoutViewport);
 
   const previewCard = (
     <CurationWavePreviewCard
@@ -75,11 +119,15 @@ export const CurationWaveBadge: React.FC<CurationWaveBadgeProps> = ({
       fallbackName={normalizedWaveName}
       fallbackPfp={normalizedWavePfp}
       variant={usesSheetPreview ? "sheet" : "hovercard"}
+      hoverLayout={hoverLayout}
     />
   );
 
   const button = (
     <AuthorBadgeButton
+      ref={badgeRef}
+      onMouseEnter={updateExpansionLayout}
+      onFocus={updateExpansionLayout}
       size={size}
       onClick={(e) => {
         e.preventDefault();
@@ -127,11 +175,11 @@ export const CurationWaveBadge: React.FC<CurationWaveBadgeProps> = ({
       <>
         {button}
         <MobileWrapperDialog
+          ariaLabel={`Wave details for ${waveLabel}`}
           isOpen={isMobilePreviewOpen}
           onClose={() => setIsMobilePreviewOpen(false)}
           noPadding
           showScrollbar
-          tall
           showHeaderCloseButton={false}
           zIndexClassName="tw-z-[1200]"
         >
@@ -145,7 +193,8 @@ export const CurationWaveBadge: React.FC<CurationWaveBadgeProps> = ({
     <HoverCard
       content={previewCard}
       ariaLabel={`Wave details for ${waveLabel}`}
-      placement="auto"
+      placement={hoverLayout?.placement ?? "bottom"}
+      alignment="start"
       delayShow={500}
       delayHide={0}
       offset={10}

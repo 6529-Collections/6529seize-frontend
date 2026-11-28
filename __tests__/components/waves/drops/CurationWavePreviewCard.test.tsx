@@ -359,7 +359,7 @@ describe("CurationWavePreviewCard", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("uses contained scrolling for created waves in the touch sheet variant", () => {
+  it("keeps created waves in the sheet’s single scrolling content flow", () => {
     useWavesMock.mockReturnValue({
       waves: [createCreatedWave()],
       isFetching: false,
@@ -387,19 +387,8 @@ describe("CurationWavePreviewCard", () => {
       ".tw-overflow-y-auto"
     );
 
-    expect(scrollContainer).not.toBeNull();
-    expect(createdWavesPanel).toHaveClass(
-      "tw-flex",
-      "tw-min-h-0",
-      "tw-flex-[1_1_14rem]",
-      "tw-flex-col"
-    );
-    expect(scrollContainer as Element).toHaveClass(
-      "tw-min-h-0",
-      "tw-flex-1",
-      "tw-overflow-y-auto",
-      "tw-max-h-none"
-    );
+    expect(scrollContainer).toBeNull();
+    expect(createdWavesPanel).toHaveClass("tw-flex-none");
   });
 
   it("omits the all-waves disclosure without a profile identity", () => {

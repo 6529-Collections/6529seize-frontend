@@ -2,12 +2,19 @@ import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
 
 export type CurationWavePreviewCardVariant = "hovercard" | "sheet";
 
+export interface CurationPreviewHoverLayout {
+  readonly canExpandSideways: boolean;
+  readonly placement: "top" | "bottom";
+  readonly maxHeight: number;
+}
+
 export interface CurationWavePreviewCardProps {
   readonly waveId: string;
   readonly profileIdentity?: string | null | undefined;
   readonly fallbackName?: string | null | undefined;
   readonly fallbackPfp?: string | null | undefined;
   readonly variant?: CurationWavePreviewCardVariant | undefined;
+  readonly hoverLayout?: CurationPreviewHoverLayout | undefined;
 }
 
 export interface PreviewNftLink {

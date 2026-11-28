@@ -17,16 +17,16 @@ const PreviewMediaTile: React.FC<{
 
   return (
     <div
-      className="tw-[contain:content] tw-[content-visibility:auto] tw-group tw-mb-2 tw-inline-block tw-w-full tw-break-inside-avoid tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-[#1A1A20] tw-align-top tw-shadow-sm tw-shadow-black/20 tw-transition-colors tw-duration-300 tw-ease-out desktop-hover:hover:tw-border-white/[0.12] desktop-hover:hover:tw-bg-[#202028]"
+      className="tw-[contain:content] tw-[content-visibility:auto] tw-group tw-mb-3 tw-inline-block tw-w-full tw-break-inside-avoid tw-align-top"
       aria-label={item.text ?? (isVideo ? "Curated video" : "Curated media")}
     >
       <div
-        className="tw-relative tw-w-full tw-bg-[#101014]"
+        className="tw-relative tw-w-full tw-overflow-hidden tw-rounded-lg tw-bg-iron-900"
         style={{ aspectRatio: getMediaAspectRatio(item.media, hasText) }}
       >
         {imageUrl === null ? (
           <div
-            className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-[#101014]"
+            className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-iron-900"
             aria-hidden="true"
           >
             <span className="tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-full tw-bg-white/10 tw-text-white/70 tw-ring-1 tw-ring-white/15">
@@ -58,10 +58,10 @@ const PreviewMediaTile: React.FC<{
         )}
       </div>
       {hasText && (
-        <div className="tw-flex tw-items-start tw-gap-1.5 tw-px-2.5 tw-py-2">
+        <div className="tw-flex tw-items-start tw-gap-1.5 tw-px-0 tw-pt-1.5">
           <p
             dir="auto"
-            className="tw-[overflow-wrap:anywhere] tw-mb-0 tw-line-clamp-2 tw-min-w-0 tw-flex-1 tw-break-words tw-text-xs tw-font-medium tw-leading-snug tw-text-zinc-300 tw-transition-colors tw-duration-300 desktop-hover:group-hover:tw-text-white"
+            className="tw-[overflow-wrap:anywhere] tw-mb-0 tw-line-clamp-2 tw-min-w-0 tw-flex-1 tw-break-words tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-400"
           >
             {item.text}
           </p>
@@ -84,7 +84,7 @@ const PreviewLinkTile: React.FC<{
     href={item.url}
     target="_blank"
     rel="noreferrer"
-    className="tw-text-primary-100 tw-[contain:content] tw-[content-visibility:auto] desktop-hover:hover:tw-text-primary-50 tw-group tw-mb-2 tw-inline-block tw-w-full tw-break-inside-avoid tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-primary-500/15 tw-bg-primary-500/5 tw-p-2.5 tw-align-top tw-no-underline tw-shadow-sm tw-shadow-black/20 tw-transition-colors tw-duration-300 tw-ease-out desktop-hover:hover:tw-border-primary-500/30 desktop-hover:hover:tw-bg-primary-500/10"
+    className="tw-text-primary-100 tw-[contain:content] tw-[content-visibility:auto] desktop-hover:hover:tw-text-primary-50 tw-group tw-mb-3 tw-inline-block tw-w-full tw-break-inside-avoid tw-px-0 tw-py-1.5 tw-align-top tw-no-underline"
   >
     <span className="tw-mb-2 tw-flex tw-items-center tw-gap-1.5 tw-text-[11px] tw-font-bold tw-leading-none tw-text-primary-300/95">
       <LinkIcon className="tw-h-3.5 tw-w-3.5" aria-hidden="true" />
@@ -124,7 +124,7 @@ const PreviewTextTile: React.FC<{
 }> = ({ item }) => {
   if (item.isEmojiOnly) {
     return (
-      <div className="tw-[contain:content] tw-[content-visibility:auto] tw-group tw-mb-2 tw-inline-flex tw-min-h-20 tw-w-full tw-break-inside-avoid tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-[#1A1A20] tw-p-3 tw-text-center tw-align-top tw-text-2xl tw-leading-none tw-text-zinc-300 tw-shadow-sm tw-shadow-black/20 tw-transition-colors tw-duration-300 tw-ease-out desktop-hover:hover:tw-border-white/[0.12] desktop-hover:hover:tw-bg-[#202028] desktop-hover:hover:tw-text-white">
+      <div className="tw-[contain:content] tw-[content-visibility:auto] tw-group tw-mb-3 tw-inline-flex tw-min-h-20 tw-w-full tw-break-inside-avoid tw-items-center tw-justify-center tw-p-3 tw-text-center tw-align-top tw-text-2xl tw-leading-none tw-text-iron-400 desktop-hover:hover:tw-text-white">
         <p
           dir="auto"
           className="tw-[overflow-wrap:anywhere] tw-mb-0 tw-break-words"
@@ -137,7 +137,7 @@ const PreviewTextTile: React.FC<{
 
   if (item.isShortText) {
     return (
-      <div className="tw-[contain:content] tw-[content-visibility:auto] tw-group tw-mb-2 tw-inline-flex tw-min-h-14 tw-w-full tw-break-inside-avoid tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-[#1A1A20] tw-p-2.5 tw-text-center tw-align-top tw-text-[13px] tw-font-semibold tw-leading-snug tw-text-zinc-300 tw-shadow-sm tw-shadow-black/20 tw-transition-colors tw-duration-300 tw-ease-out desktop-hover:hover:tw-border-white/[0.12] desktop-hover:hover:tw-bg-[#202028] desktop-hover:hover:tw-text-white">
+      <div className="tw-[contain:content] tw-[content-visibility:auto] tw-group tw-mb-3 tw-inline-flex tw-min-h-14 tw-w-full tw-break-inside-avoid tw-items-center tw-justify-center tw-p-2.5 tw-text-center tw-align-top tw-text-[13px] tw-font-semibold tw-leading-snug tw-text-iron-400 desktop-hover:hover:tw-text-white">
         <p
           dir="auto"
           className="tw-[overflow-wrap:anywhere] tw-mb-0 tw-break-words"
@@ -150,7 +150,7 @@ const PreviewTextTile: React.FC<{
   }
 
   return (
-    <div className="tw-[contain:content] tw-[content-visibility:auto] tw-group tw-mb-2 tw-inline-block tw-w-full tw-break-inside-avoid tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-[#1A1A20] tw-p-2.5 tw-align-top tw-text-xs tw-font-medium tw-leading-snug tw-text-zinc-300 tw-shadow-sm tw-shadow-black/20 tw-transition-colors tw-duration-300 tw-ease-out desktop-hover:hover:tw-border-white/[0.12] desktop-hover:hover:tw-bg-[#202028] desktop-hover:hover:tw-text-white">
+    <div className="tw-[contain:content] tw-[content-visibility:auto] tw-group tw-mb-3 tw-inline-block tw-w-full tw-break-inside-avoid tw-p-2.5 tw-align-top tw-text-xs tw-font-medium tw-leading-snug tw-text-iron-400 desktop-hover:hover:tw-text-white">
       <p
         dir="auto"
         className="tw-[overflow-wrap:anywhere] tw-mb-0 tw-line-clamp-5 tw-break-words"

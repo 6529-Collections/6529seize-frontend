@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useId, useState } from "react";
+import { useId, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRightIcon,
@@ -60,7 +60,7 @@ const WavePreviewPicture: React.FC<{
   readonly imageSize: string;
 }> = ({ picture, sizeClassName, iconClassName, imageSize }) => (
   <div
-    className={`${sizeClassName} tw-relative tw-flex-shrink-0 tw-overflow-hidden tw-rounded-full tw-bg-[#1A1A20] tw-shadow-sm tw-ring-1 tw-ring-white/[0.05]`}
+    className={`${sizeClassName} tw-relative tw-flex-shrink-0 tw-overflow-hidden tw-rounded-full tw-bg-iron-900 tw-shadow-sm tw-ring-1 tw-ring-white/[0.05]`}
   >
     {picture ? (
       <FallbackImage
@@ -88,6 +88,10 @@ const CurationPreviewBody: React.FC<{
   readonly variant: CurationWavePreviewCardVariant;
   readonly children: React.ReactNode;
 }> = ({ hasBannerCover, variant, children }) => {
+  if (variant === "sheet") {
+    return <div className="tw-px-4 tw-pb-4 tw-pt-5">{children}</div>;
+  }
+
   if (hasBannerCover) {
     return (
       <div className="tw-relative tw-z-10 -tw-mt-3 tw-px-5 tw-pb-4">
@@ -96,105 +100,57 @@ const CurationPreviewBody: React.FC<{
     );
   }
 
-  if (variant === "sheet") {
-    return <div className="tw-px-4 tw-pb-4 tw-pt-6">{children}</div>;
-  }
-
   return <div className="tw-px-4 tw-pb-4 tw-pt-4">{children}</div>;
 };
 
 const getProfileBrainHref = (profileIdentity: string | null): string | null =>
   profileIdentity ? `/${encodeURIComponent(profileIdentity)}/brain` : null;
 
-const getPreviewLayoutClassNames = ({
-  isExpanded,
-  variant,
-}: {
-  readonly isExpanded: boolean;
-  readonly variant: CurationWavePreviewCardVariant;
-}): {
-  readonly layoutClassName: string;
-  readonly columnClassName: string;
-} => {
-  if (!isExpanded) {
-    return {
-      layoutClassName: "",
-      columnClassName: "",
-    };
-  }
-
-  if (variant === "hovercard") {
-    return {
-      layoutClassName:
-        "tw-flex tw-min-h-0 tw-flex-1 tw-flex-col min-[760px]:tw-flex-row",
-      columnClassName:
-        "tw-flex tw-min-h-0 tw-min-w-0 tw-w-full tw-flex-[0_1_auto] tw-flex-col min-[760px]:tw-w-[360px] min-[760px]:tw-flex-none",
-    };
-  }
-
-  return {
-    layoutClassName: "tw-flex tw-min-h-0 tw-flex-1 tw-flex-col",
-    columnClassName:
-      "tw-flex tw-min-h-0 tw-min-w-0 tw-w-full tw-flex-[0_1_auto] tw-flex-col",
-  };
-};
-
-const getPreviewBodyFrameClassName = ({
-  isExpanded,
-  variant,
-}: {
-  readonly isExpanded: boolean;
-  readonly variant: CurationWavePreviewCardVariant;
-}): string => {
-  if (!isExpanded) {
-    return "";
-  }
-
-  if (variant === "hovercard") {
-    return "tw-min-h-0 tw-flex-[0_1_auto] tw-overflow-y-auto min-[760px]:tw-overflow-visible";
-  }
-
-  return "tw-min-h-0 tw-flex-[0_1_auto] tw-overflow-y-auto";
-};
-
 const WavePreviewHeader: React.FC<{
   readonly hasBannerCover: boolean;
   readonly picture: string | null | undefined;
   readonly waveName: string;
   readonly author: string | null;
-}> = ({ hasBannerCover, picture, waveName, author }) => {
+  readonly variant: CurationWavePreviewCardVariant;
+}> = ({ hasBannerCover, picture, waveName, author, variant }) => {
+  const isSheet = variant === "sheet";
   const pictureElement = (
     <WavePreviewPicture
       picture={picture}
-      sizeClassName="tw-h-10 tw-w-10"
+      sizeClassName={isSheet ? "tw-size-11" : "tw-size-10"}
       iconClassName="tw-h-4 tw-w-4"
-      imageSize="40px"
+      imageSize={isSheet ? "44px" : "40px"}
     />
   );
   const titleElement = (
     <div className="tw-min-w-0 tw-flex-1">
-      <div className="tw-line-clamp-2 tw-text-base tw-font-bold tw-leading-[1.15] tw-text-zinc-100">
+      <div
+        className={`tw-line-clamp-2 tw-text-iron-50 ${
+          isSheet
+            ? "tw-text-[17px] tw-font-semibold tw-leading-[22px]"
+            : "tw-text-base tw-font-bold tw-leading-[1.15]"
+        }`}
+      >
         {waveName}
       </div>
       {author && (
-        <div className="tw-mt-1 tw-truncate tw-text-xs tw-font-medium tw-text-zinc-400">
+        <div
+          className={`tw-truncate tw-text-iron-500 ${
+            isSheet
+              ? "tw-mt-0.5 tw-text-[13px] tw-font-normal"
+              : "tw-mt-1 tw-text-xs tw-font-medium"
+          }`}
+        >
           @{author}
         </div>
       )}
     </div>
   );
 
-  if (hasBannerCover) {
-    return (
-      <div className="tw-mb-3 tw-flex tw-items-center tw-gap-2.5">
-        {pictureElement}
-        {titleElement}
-      </div>
-    );
-  }
-
   return (
-    <div className="tw-flex tw-items-center tw-gap-3">
+    <div
+      className={`tw-flex tw-items-center ${isSheet ? "tw-gap-3" : "tw-gap-2.5"} ${hasBannerCover && !isSheet ? "tw-mb-3" : ""}`}
+    >
       {pictureElement}
       {titleElement}
     </div>
@@ -224,6 +180,8 @@ const PreviewActions: React.FC<{
   readonly createdWavesPanelId: string;
   readonly onToggleCreatedWaves: () => void;
   readonly variant: CurationWavePreviewCardVariant;
+  readonly className?: string | undefined;
+  readonly toggleRef: React.RefObject<HTMLButtonElement | null>;
 }> = ({
   waveHref,
   canShowCreatedWavesPanel,
@@ -231,12 +189,24 @@ const PreviewActions: React.FC<{
   createdWavesPanelId,
   onToggleCreatedWaves,
   variant,
+  className = "",
+  toggleRef,
 }) => (
-  <div className="tw-flex tw-flex-shrink-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-bg-iron-950 tw-px-5 tw-py-3">
+  <div
+    className={`${
+      variant === "sheet"
+        ? "tw-flex tw-flex-col tw-gap-1 tw-px-4 tw-pb-3"
+        : "tw-sticky tw-bottom-0 tw-flex tw-flex-shrink-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-bg-iron-950 tw-px-5 tw-py-3"
+    } ${className}`}
+  >
     <Link
       href={waveHref}
       prefetch={false}
-      className="tw-group/open-wave tw-inline-flex tw-min-h-10 tw-items-center tw-gap-1.5 tw-text-[13px] tw-font-semibold tw-text-primary-400 tw-no-underline tw-transition-colors tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-text-primary-300"
+      className={`tw-group/open-wave tw-inline-flex tw-items-center tw-gap-1.5 tw-no-underline tw-transition-colors tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 ${
+        variant === "sheet"
+          ? "tw-h-11 tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.06] tw-text-[15px] tw-font-medium tw-text-iron-50 active:tw-bg-white/10"
+          : "tw-min-h-10 tw-text-[13px] tw-font-semibold tw-text-primary-400 desktop-hover:hover:tw-text-primary-300"
+      }`}
     >
       Open profile wave
       <ArrowRightIcon
@@ -246,11 +216,12 @@ const PreviewActions: React.FC<{
     </Link>
     {canShowCreatedWavesPanel && (
       <button
+        ref={toggleRef}
         type="button"
         onClick={onToggleCreatedWaves}
         aria-expanded={isCreatedWavesExpanded}
         aria-controls={createdWavesPanelId}
-        className="tw-group/show-waves tw-inline-flex tw-min-h-10 tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-p-0 tw-text-[13px] tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-text-iron-50"
+        className={`tw-group/show-waves tw-inline-flex tw-min-h-10 tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 tw-transition-colors tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-text-iron-50 ${variant === "sheet" ? "tw-h-11 tw-justify-center tw-text-sm tw-font-medium" : "tw-text-[13px] tw-font-semibold"}`}
       >
         {isCreatedWavesExpanded && (
           <CreatedWavesToggleIcon
@@ -278,9 +249,12 @@ export const CurationWavePreviewCard: React.FC<
   fallbackName,
   fallbackPfp,
   variant = "hovercard",
+  hoverLayout,
 }) => {
   const createdWavesPanelId = useId();
   const [areCreatedWavesOpen, setAreCreatedWavesOpen] = useState(false);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const shouldRestoreToggleFocus = useRef(false);
   const normalizedProfileIdentity = getTrimmedText(profileIdentity);
   const { wave, isError: isWaveError } = useWaveById(waveId);
   const resolvedWave = wave?.id === waveId ? wave : undefined;
@@ -357,30 +331,58 @@ export const CurationWavePreviewCard: React.FC<
     normalizedProfileIdentity !== null && profileBrainHref !== null;
   const isCreatedWavesExpanded =
     canShowCreatedWavesPanel && areCreatedWavesOpen;
-  const {
-    layoutClassName: previewLayoutClassName,
-    columnClassName: previewColumnClassName,
-  } = getPreviewLayoutClassNames({
-    isExpanded: isCreatedWavesExpanded,
-    variant,
-  });
-  const previewBodyFrameClassName = getPreviewBodyFrameClassName({
-    isExpanded: isCreatedWavesExpanded,
-    variant,
-  });
+  const twoColumns =
+    isCreatedWavesExpanded &&
+    variant === "hovercard" &&
+    (hoverLayout?.canExpandSideways ?? true);
+  const isAnchoredAbove =
+    variant === "hovercard" && hoverLayout?.placement === "top";
+  const showFooterAfterWaves =
+    isCreatedWavesExpanded && !twoColumns && isAnchoredAbove;
   const bannerBackground = getBannerBackground({
     banner1: resolvedWave?.author.banner1_color,
     banner2: resolvedWave?.author.banner2_color,
   });
   const hasBannerCover = bannerBackground !== null;
-  const onToggleCreatedWaves = () =>
+  const onToggleCreatedWaves = () => {
+    shouldRestoreToggleFocus.current =
+      document.activeElement === toggleRef.current;
     setAreCreatedWavesOpen((current) => !current);
+  };
+  useLayoutEffect(() => {
+    if (!shouldRestoreToggleFocus.current) return;
+    shouldRestoreToggleFocus.current = false;
+    toggleRef.current?.focus({ preventScroll: true });
+  }, [isCreatedWavesExpanded]);
+
+  const actions = (
+    <PreviewActions
+      waveHref={waveHref}
+      canShowCreatedWavesPanel={canShowCreatedWavesPanel}
+      isCreatedWavesExpanded={isCreatedWavesExpanded}
+      createdWavesPanelId={createdWavesPanelId}
+      onToggleCreatedWaves={onToggleCreatedWaves}
+      variant={variant}
+      className={isAnchoredAbove ? "tw-mt-auto" : undefined}
+      toggleRef={toggleRef}
+    />
+  );
 
   return (
-    <CurationPreviewShell variant={variant} expanded={isCreatedWavesExpanded}>
-      <div className={previewLayoutClassName}>
-        <div className={previewColumnClassName}>
-          <div className={previewBodyFrameClassName}>
+    <CurationPreviewShell
+      variant={variant}
+      twoColumns={twoColumns}
+      maxHeight={hoverLayout?.maxHeight}
+    >
+      <div className={twoColumns ? "tw-flex" : undefined}>
+        <div
+          className={
+            twoColumns
+              ? "tw-flex tw-w-[360px] tw-flex-none tw-flex-col"
+              : undefined
+          }
+        >
+          <div>
             {hasBannerCover && (
               <div
                 className={
@@ -406,9 +408,12 @@ export const CurationWavePreviewCard: React.FC<
                 picture={wavePicture}
                 waveName={waveName}
                 author={author}
+                variant={variant}
               />
               {description && (
-                <p className="tw-mb-0 tw-mt-3 tw-line-clamp-2 tw-pr-1 tw-text-xs tw-font-medium tw-leading-[1.45] tw-text-zinc-300">
+                <p
+                  className={`tw-mb-0 tw-mt-3 tw-pr-1 tw-text-iron-300 ${variant === "sheet" ? "tw-line-clamp-3 tw-text-sm tw-font-normal tw-leading-5" : "tw-line-clamp-2 tw-text-xs tw-font-medium tw-leading-[1.45]"}`}
+                >
                   {description}
                 </p>
               )}
@@ -420,14 +425,7 @@ export const CurationWavePreviewCard: React.FC<
             </CurationPreviewBody>
           </div>
 
-          <PreviewActions
-            waveHref={waveHref}
-            canShowCreatedWavesPanel={canShowCreatedWavesPanel}
-            isCreatedWavesExpanded={isCreatedWavesExpanded}
-            createdWavesPanelId={createdWavesPanelId}
-            onToggleCreatedWaves={onToggleCreatedWaves}
-            variant={variant}
-          />
+          {!showFooterAfterWaves && actions}
         </div>
         {isCreatedWavesExpanded && (
           <CreatedWavesPanel
@@ -435,8 +433,10 @@ export const CurationWavePreviewCard: React.FC<
             identity={normalizedProfileIdentity}
             profileBrainHref={profileBrainHref}
             variant={variant}
+            twoColumns={twoColumns}
           />
         )}
+        {showFooterAfterWaves && actions}
       </div>
     </CurationPreviewShell>
   );
@@ -447,7 +447,8 @@ const CreatedWavesPanel: React.FC<{
   readonly identity: string;
   readonly profileBrainHref: string;
   readonly variant: CurationWavePreviewCardVariant;
-}> = ({ id, identity, profileBrainHref, variant }) => {
+  readonly twoColumns: boolean;
+}> = ({ id, identity, profileBrainHref, variant, twoColumns }) => {
   const wavesState = useWaveCreatorPreviewWaves({
     identity,
     enabled: true,
@@ -458,15 +459,15 @@ const CreatedWavesPanel: React.FC<{
     <section
       id={id}
       aria-label="Created waves"
-      className={`tw-flex tw-min-h-0 tw-min-w-0 tw-flex-[1_1_14rem] tw-flex-col ${
+      className={`tw-flex tw-min-h-0 tw-min-w-0 tw-flex-col ${
         isSheet
-          ? "tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-4"
-          : "tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-p-4 min-[760px]:tw-w-[360px] min-[760px]:tw-flex-none min-[760px]:tw-flex-shrink-0 min-[760px]:tw-border-l min-[760px]:tw-border-t-0"
-      }`}
+          ? "tw-flex-none tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-4 tw-pb-5 tw-pt-4"
+          : "tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-p-4"
+      } ${twoColumns ? "tw-w-[360px] tw-flex-none !tw-border-l !tw-border-t-0" : ""}`}
     >
-      <div className="tw-flex tw-flex-col tw-items-start tw-justify-between tw-gap-3 min-[420px]:tw-flex-row">
+      <div className="tw-flex tw-flex-row tw-items-center tw-justify-between tw-gap-3">
         <div className="tw-min-w-0">
-          <div className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+          <div className="tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-[0.06em] tw-text-iron-400">
             Created waves
           </div>
         </div>
@@ -480,13 +481,16 @@ const CreatedWavesPanel: React.FC<{
         </Link>
       </div>
       <div
-        className={`tw-mt-3 tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-pr-1 tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-700 desktop-hover:hover:tw-scrollbar-thumb-iron-500 ${
+        className={
           isSheet
-            ? "tw-max-h-none"
-            : "min-[760px]:tw-max-h-[320px] min-[760px]:tw-flex-none"
-        }`}
+            ? "tw-mt-3"
+            : "tw-mt-3 tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-pr-1 tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-700 desktop-hover:hover:tw-scrollbar-thumb-iron-500 min-[760px]:tw-max-h-[320px] min-[760px]:tw-flex-none"
+        }
       >
-        <WaveCreatorPreviewList state={wavesState} variant="compact" />
+        <WaveCreatorPreviewList
+          state={wavesState}
+          variant={isSheet ? "sheet" : "compact"}
+        />
       </div>
     </section>
   );
@@ -498,7 +502,7 @@ const PreviewContent: React.FC<{
 }> = ({ isPending, previewItems }) => {
   if (previewItems.length > 0) {
     return (
-      <div className="tw-mt-4 tw-columns-2 tw-gap-2">
+      <div className="tw-mt-4 tw-columns-2 tw-gap-3">
         {previewItems.map((item) => (
           <PreviewTile key={item.key} item={item} />
         ))}
