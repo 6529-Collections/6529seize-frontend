@@ -11,6 +11,7 @@ import { AUCTION_STATE, sameAddress } from "@/lib/stream/state";
 
 import { EditionPanel, OpenEdition } from "./EditionPanel";
 import { PublishRecord } from "./PublishRecord";
+import { WorkFacts } from "./WorkFacts";
 import { StreamIdentity } from "./StreamIdentity";
 import { OneOfOnePanel } from "./OneOfOnePanel";
 import { useEdition, useOneOfOne, useWorkMeta } from "./useStreamData";
@@ -108,6 +109,7 @@ function WorkBody({ token, tokenId }: { readonly token: Address; readonly tokenI
           <PublishRecord token={token} tokenId={tokenId} firstStartTx={oneOfOne.data.firstStartTx} curated={curated} />
         </div>
       </div>
+      <WorkFacts token={token} tokenId={tokenId} firstStartTx={oneOfOne.data.firstStartTx} curated={curated} />
       {showEditions && edition.data ? (
         <EditionPanel
           detail={edition.data}

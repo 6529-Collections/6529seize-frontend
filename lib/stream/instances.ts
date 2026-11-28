@@ -16,6 +16,8 @@ interface StreamInstance {
   readonly record: string;
   /** The first block to scan for this instance's events. */
   readonly startBlock: bigint;
+  /** The 6529-stream commit the instance was deployed from (for links to the source). */
+  readonly sourceCommit: string;
   /**
    * Whether the instance has the test gate (SepoliaOpenGate) that lets any
    * wallet create curated works. Whether the gate is open right now is read
@@ -85,6 +87,7 @@ const STREAM_INSTANCES: Record<StreamInstanceName, StreamInstance> = {
     name: "r9",
     record: r9.record,
     startBlock: r9.startBlock,
+    sourceCommit: r9.sourceCommit,
     curatedCreationOpen: true,
     rescuedToMuseum: true,
     naming: WORKS_NAMING,
@@ -94,6 +97,7 @@ const STREAM_INSTANCES: Record<StreamInstanceName, StreamInstance> = {
     name: "r8",
     record: r8.record,
     startBlock: r8.startBlock,
+    sourceCommit: r8.sourceCommit,
     curatedCreationOpen: false,
     rescuedToMuseum: false,
     naming: WORKS_NAMING,
