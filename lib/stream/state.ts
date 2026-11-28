@@ -227,12 +227,13 @@ export function editionView(input: EditionInput): EditionView {
         ? { ...base, screen: "openable", canOpen: !halted }
         : { ...base, screen: "not_open" };
     case EDITION_STATUS.OPEN:
-      if (!input.biddingOpen || secondsLeft === 0) {
+      // The contract's own answer decides: while the 1/1 is paused, bids stay open past the clock.
+      if (!input.biddingOpen) {
         return { ...base, screen: "closed", canSettle: settleable(input) };
       }
       return {
         ...base,
-        screen: secondsLeft <= input.softWindow ? "closing" : "open",
+        screen: secondsLeft > 0 && secondsLeft <= input.softWindow ? "closing" : "open",
         canBid: true,
       };
     case EDITION_STATUS.CLOSED:

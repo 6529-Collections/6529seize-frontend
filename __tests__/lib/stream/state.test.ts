@@ -195,6 +195,14 @@ describe("editionView", () => {
     expect(editionView(edition({ endTime: BigInt(NOW + 120) })).screen).toBe("closing");
   });
 
+  it("keeps taking bids past the clock while the contract says bidding is open (1/1 paused)", () => {
+    const view = editionView(
+      edition({ endTime: BigInt(NOW - 60), biddingOpen: true, oneOfOneState: AUCTION_STATE.PAUSED })
+    );
+    expect(view.screen).toBe("open");
+    expect(view.canBid).toBe(true);
+  });
+
   it("closes when bidding is no longer open, and waits for the 1/1 to settle", () => {
     const view = editionView(edition({ biddingOpen: false, endTime: BigInt(NOW - 1) }));
     expect(view.screen).toBe("closed");
