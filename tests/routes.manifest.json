@@ -2252,6 +2252,26 @@
       "classification": "exempt",
       "exemptReason": "6529 Stream product section behind its host flag: production 404s until the r4 launch; staging and local serve mock data."
     },
+    "/stream/sepolia": {
+      "classification": "exempt",
+      "exemptReason": "Sepolia test pages for 6529 Stream: they return 404 unless the build enables Sepolia (staging, local) and render live Sepolia contract state."
+    },
+    "/stream/sepolia/collection": {
+      "classification": "exempt",
+      "exemptReason": "Sepolia test pages for 6529 Stream: they return 404 unless the build enables Sepolia (staging, local) and render live Sepolia contract state."
+    },
+    "/stream/sepolia/create": {
+      "classification": "exempt",
+      "exemptReason": "Sepolia test pages for 6529 Stream: they return 404 unless the build enables Sepolia (staging, local) and render live Sepolia contract state."
+    },
+    "/stream/sepolia/me": {
+      "classification": "exempt",
+      "exemptReason": "Sepolia test pages for 6529 Stream: they return 404 unless the build enables Sepolia (staging, local) and render live Sepolia contract state."
+    },
+    "/stream/sepolia/work/[token]/[tokenId]": {
+      "classification": "exempt",
+      "exemptReason": "Sepolia test pages for 6529 Stream: they return 404 unless the build enables Sepolia (staging, local) and render live Sepolia contract state."
+    },
     "/the-memes": {
       "classification": "crawlable",
       "family": "collections"
