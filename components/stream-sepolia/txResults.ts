@@ -9,7 +9,7 @@ import type { Hex } from "viem";
  * "Finish the sale" button), so TxAction hands its result line here when it
  * unmounts, and TxResultBar keeps showing it with its Etherscan link.
  */
-export interface TxResult {
+interface TxResult {
   readonly id: number;
   readonly text: string | undefined;
   readonly hash: Hex;
