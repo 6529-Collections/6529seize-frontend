@@ -38,6 +38,7 @@ export function parseRoyalty(value: string): number | null {
   const [whole = "", fraction = "", ...rest] = trimmed.split(".");
   const digits = (part: string) => [...part].every((character) => character >= "0" && character <= "9");
   if (rest.length > 0 || whole === "" || !digits(whole) || !digits(fraction)) return null;
+  if (trimmed.includes(".") && fraction === "") return null;
   const number = Number(trimmed);
   if (number < 0 || number > 25) return null;
   return Math.round(number * 1000);
