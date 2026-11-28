@@ -1,4 +1,12 @@
-import { independentDeployerAbi, independentRegistryAbi, splitLedgerAbi, streamAbi, streamEditionsAbi } from "./abis";
+import {
+  editionAuctionAbi,
+  englishAuctionAbi,
+  independentDeployerAbi,
+  independentRegistryAbi,
+  splitLedgerAbi,
+  streamAbi,
+  streamEditionsAbi,
+} from "./abis";
 import { getAbiItem, type Address } from "viem";
 
 import { getStreamClient } from "./client";
@@ -8,6 +16,7 @@ import {
   AUCTION_OPENED,
   EDITION_BID_CLAIMED,
   EDITION_BID_PLACED,
+  EDITION_BID_RAISED,
   listSales,
   ONE_BID_PLACED,
   scanLogs,
@@ -76,31 +85,100 @@ export interface MyOneOfOneBid {
   readonly endTime: bigint;
 }
 
-interface MyEditionBid {
+export interface MyEditionBid {
   readonly master: Address;
   readonly tokenId: bigint;
+  readonly auction: Address;
+  readonly saleId: bigint;
   readonly bidId: bigint;
   readonly quantity: number;
+  /** The price each the bid stands at now (after any raise). */
+  readonly priceEach: bigint;
+  /** What the bid gets: from the claim when claimed, else the contract's live or final answer. */
+  readonly unitsWon: bigint | null;
+  readonly refund: bigint | null;
+  /** The sale is settled (or void), so the bid can be claimed. */
+  readonly final: boolean;
   readonly claimed: boolean;
 }
 
-interface MyPayout {
-  readonly token: Address;
-  readonly tokenId: bigint;
-  readonly vault: Address;
-  readonly releasable: bigint;
+interface MyProceeds {
+  readonly available: bigint;
+  readonly takenOut: bigint;
 }
 
 interface MyActivity {
   readonly oneOfOneBids: readonly MyOneOfOneBid[];
+  /** ETH from outbid 1/1 bids waiting to be withdrawn. */
+  readonly oneOfOneCredit: bigint;
   readonly editionBids: readonly MyEditionBid[];
   readonly works: readonly SaleSummary[];
-  readonly payouts: readonly MyPayout[];
+  readonly proceeds: MyProceeds | null;
 }
 
 /** The artist's single-payee seller vault, as the create page sets it up. */
 export function soloPayees(artist: Address) {
   return [{ artistId: BigInt(artist), account: ZERO_ADDRESS, share: 100_000 }] as const;
+}
+
+async function readEditionBids(viewer: Address): Promise<MyEditionBid[]> {
+  const instance = getStreamInstance();
+  const client = getStreamClient();
+  const bids: MyEditionBid[] = [];
+  for (const auction of [instance.addresses.editionAuction, instance.addresses.independentEditionAuction]) {
+    const [placed, raised, opened, claimed] = await Promise.all([
+      scanLogs({ address: auction, event: EDITION_BID_PLACED, args: { bidder: viewer } }),
+      scanLogs({ address: auction, event: EDITION_BID_RAISED, args: { bidder: viewer } }),
+      scanLogs({ address: auction, event: AUCTION_OPENED }),
+      scanLogs({ address: auction, event: EDITION_BID_CLAIMED, args: { bidder: viewer } }),
+    ]);
+    const openedBySale = new Map(opened.map((log) => [log.args.saleId, log.args]));
+    const claims = new Map(claimed.map((log) => [`${log.args.saleId}:${log.args.bidId}`, log.args]));
+    const steps = new Map(placed.map((log) => [`${log.args.saleId}:${log.args.bidId}`, log.args.step]));
+    for (const log of raised) steps.set(`${log.args.saleId}:${log.args.bidId}`, log.args.toStep);
+    const rows = await Promise.all(
+      placed.map(async (log) => {
+        const open = openedBySale.get(log.args.saleId);
+        if (!open) return null;
+        const key = `${log.args.saleId}:${log.args.bidId}`;
+        const claim = claims.get(key);
+        const [priceEach, sale, outcome] = await Promise.all([
+          client.readContract({
+            address: auction,
+            abi: editionAuctionAbi,
+            functionName: "stepPrice",
+            args: [log.args.saleId, steps.get(key) ?? log.args.step],
+          }),
+          client.readContract({ address: auction, abi: editionAuctionAbi, functionName: "auction", args: [log.args.saleId] }),
+          claim
+            ? Promise.resolve(null)
+            : client
+                .readContract({
+                  address: auction,
+                  abi: editionAuctionAbi,
+                  functionName: "bidOutcome",
+                  args: [log.args.saleId, log.args.bidId],
+                })
+                .catch(() => null),
+        ]);
+        return {
+          master: open.master,
+          tokenId: open.id,
+          auction,
+          saleId: log.args.saleId,
+          bidId: log.args.bidId,
+          quantity: Number(log.args.quantity),
+          priceEach,
+          unitsWon: claim ? claim.unitsWon : (outcome?.unitsWon ?? null),
+          refund: claim ? claim.refund : (outcome?.refund ?? null),
+          final: sale.status >= 4,
+          claimed: !!claim,
+        };
+      })
+    );
+    bids.push(...rows.filter((row): row is MyEditionBid => row !== null));
+  }
+  return bids;
 }
 
 export async function readMyActivity(viewer: Address): Promise<MyActivity> {
@@ -134,48 +212,47 @@ export async function readMyActivity(viewer: Address): Promise<MyActivity> {
       },
     ];
   });
+  const [oneOfOneCredit, editionBids, collections] = await Promise.all([
+    client.readContract({
+      address: instance.addresses.englishAuction,
+      abi: englishAuctionAbi,
+      functionName: "claimable",
+      args: [viewer],
+    }),
+    readEditionBids(viewer),
+    readMyCollections(viewer),
+  ]);
 
-  const editionBids: MyEditionBid[] = [];
-  for (const auction of [instance.addresses.editionAuction, instance.addresses.independentEditionAuction]) {
-    const [placed, opened, claimed] = await Promise.all([
-      scanLogs({ address: auction, event: EDITION_BID_PLACED, args: { bidder: viewer } }),
-      scanLogs({ address: auction, event: AUCTION_OPENED }),
-      scanLogs({ address: auction, event: EDITION_BID_CLAIMED, args: { bidder: viewer } }),
-    ]);
-    const openedBySale = new Map(opened.map((log) => [log.args.saleId, log.args]));
-    const claimedKeys = new Set(claimed.map((log) => `${log.args.saleId}:${log.args.bidId}`));
-    for (const log of placed) {
-      const open = openedBySale.get(log.args.saleId);
-      if (!open) continue;
-      editionBids.push({
-        master: open.master,
-        tokenId: open.id,
-        bidId: log.args.bidId,
-        quantity: Number(log.args.quantity),
-        claimed: claimedKeys.has(`${log.args.saleId}:${log.args.bidId}`),
-      });
-    }
-  }
-
-  const collections = await readMyCollections(viewer);
   const myTokens = collections.filter((c) => !c.editions).map((c) => c.token);
   const works = sales.filter((sale) => myTokens.some((token) => sameAddress(token, sale.token)));
-  const payees = soloPayees(viewer);
-  const vault = await client.readContract({
-    address: instance.addresses.splitLedger,
-    abi: splitLedgerAbi,
-    functionName: "walletFor",
-    args: [payees, ZERO_HASH],
-  });
-  const releasable = await client
-    .readContract({
+  let proceeds: MyProceeds | null = null;
+  if (works.length > 0) {
+    const payees = soloPayees(viewer);
+    const vault = await client.readContract({
       address: instance.addresses.splitLedger,
       abi: splitLedgerAbi,
-      functionName: "releasable",
-      args: [payees, ZERO_HASH, CURRENCY_ETH, 0n],
-    })
-    .catch(() => 0n);
-  const payouts: MyPayout[] =
-    works.length > 0 ? [{ token: works[0]!.token, tokenId: works[0]!.tokenId, vault, releasable }] : [];
-  return { oneOfOneBids, editionBids, works, payouts };
+      functionName: "walletFor",
+      args: [payees, ZERO_HASH],
+    });
+    const [available, takenOut] = await Promise.all([
+      client
+        .readContract({
+          address: instance.addresses.splitLedger,
+          abi: splitLedgerAbi,
+          functionName: "releasable",
+          args: [payees, ZERO_HASH, CURRENCY_ETH, 0n],
+        })
+        .catch(() => 0n),
+      client
+        .readContract({
+          address: instance.addresses.splitLedger,
+          abi: splitLedgerAbi,
+          functionName: "released",
+          args: [vault, CURRENCY_ETH, 0n],
+        })
+        .catch(() => 0n),
+    ]);
+    proceeds = { available, takenOut };
+  }
+  return { oneOfOneBids, oneOfOneCredit, editionBids, works, proceeds };
 }

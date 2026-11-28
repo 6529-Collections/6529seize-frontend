@@ -83,9 +83,9 @@ const GAS_PER_STORED_BYTE = 1_650n;
 const FIXED_CREATE_GAS = 6_000_000n;
 
 /** A rough total of the gas a create run uses, for the fee shown before it starts. */
-export function estimateCreateGas(mediaBytes: number, recordBytes: number): bigint {
+export function estimateCreateGas(mediaBytes: number, recordSize: number): bigint {
   // The start file is about 1.5 KB; each file adds a manifest registration (~600k gas).
-  const stored = BigInt(mediaBytes + recordBytes + 1_500);
+  const stored = BigInt(mediaBytes + recordSize + 1_500);
   const files = BigInt(Math.ceil(mediaBytes / CHUNK_SIZE) + 2);
   return stored * GAS_PER_STORED_BYTE + files * 600_000n + FIXED_CREATE_GAS;
 }
