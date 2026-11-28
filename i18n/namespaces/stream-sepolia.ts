@@ -204,7 +204,7 @@ export const STREAM_SEPOLIA_MESSAGES = registerSourceMessages({
   "streamSepolia.ed.quoteOut": "If bidding closed now, this bid would be out.",
   "streamSepolia.ed.bid": "Bid",
   "streamSepolia.ed.fine":
-    "Everyone who wins pays the same price. Anything above it comes back, and a losing bid comes back in full.",
+    "Everyone who wins pays the same price. Anything above it comes back.",
   "streamSepolia.ed.yourBids": "Your bids",
   "streamSepolia.ed.held": "You have {amount} ETH in bids.",
   "streamSepolia.ed.bidRow": "{count} at {price} ETH",
@@ -234,7 +234,7 @@ export const STREAM_SEPOLIA_MESSAGES = registerSourceMessages({
   "streamSepolia.create.needCollection": "First make your collection: your own contracts on Sepolia.",
   "streamSepolia.create.makeCollection": "Make your collection",
   "streamSepolia.create.art": "Art",
-  "streamSepolia.create.artHelp": "PNG, JPEG, WebP, GIF or SVG. Large images are made smaller to store on Sepolia.",
+  "streamSepolia.create.artHelp": "PNG, JPEG, WebP, GIF or SVG, up to {max} KB stored on Sepolia. Larger images are made smaller first.",
   "streamSepolia.create.artPreparing": "Preparing the image…",
   "streamSepolia.create.artSize": "{size} KB to store on Sepolia.",
   "streamSepolia.create.artTooLarge": "This file is too large to store. Try a smaller image.",
@@ -258,8 +258,9 @@ export const STREAM_SEPOLIA_MESSAGES = registerSourceMessages({
   "streamSepolia.create.go": "Start",
   "streamSepolia.create.done": "Your work is on sale.",
   "streamSepolia.create.viewWork": "See the work",
+  "streamSepolia.create.feeEstimate": "About {amount} ETH in network fees for all steps.",
   "streamSepolia.create.step.media": "Store the art",
-  "streamSepolia.create.step.mediaHelp": "Up to {count} transactions: the file is stored in parts.",
+  "streamSepolia.create.step.mediaHelp": "Larger files cost more network fee: {count} transactions for this one.",
   "streamSepolia.create.step.record": "Store the title and description",
   "streamSepolia.create.step.recordHelp": "Up to 2 transactions.",
   "streamSepolia.create.step.approve": "Approve the work for sale",
@@ -275,7 +276,7 @@ export const STREAM_SEPOLIA_MESSAGES = registerSourceMessages({
 
   "streamSepolia.collection.title": "Your collection",
   "streamSepolia.collection.intro":
-    "Independent Stream works are minted on your own contracts: one for 1/1s, one for editions.",
+    "Independent Stream works are minted on your own contracts: one for 1/1s, one for editions. One collection per wallet for now.",
   "streamSepolia.collection.connect": "Connect a wallet on Sepolia to see or make your collection.",
   "streamSepolia.collection.yours": "Your contracts",
   "streamSepolia.collection.oneContract": "{name} (1/1s)",

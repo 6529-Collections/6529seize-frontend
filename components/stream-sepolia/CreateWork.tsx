@@ -1,14 +1,24 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { Address } from "viem";
 
+import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/stream-sepolia";
-import { mediaDataUrl, prepareMedia, recordBytes, toStoredFile } from "@/lib/stream/content";
+import {
+  estimateCreateGas,
+  MAX_MEDIA_BYTES,
+  mediaDataUrl,
+  prepareMedia,
+  recordBytes,
+  toStoredFile,
+} from "@/lib/stream/content";
+import { getStreamClient } from "@/lib/stream/client";
 import {
   approveIndependentItem,
   openIndependentEdition,
@@ -22,7 +32,7 @@ import { LISTING_ACTIVE } from "@/lib/stream/independent";
 import { getStreamInstance } from "@/lib/stream/instances";
 import { sameAddress } from "@/lib/stream/state";
 
-import { formatCount, shortAddress } from "./format";
+import { formatCount, formatEth, shortAddress } from "./format";
 import { CARD } from "./OneOfOnePanel";
 import { StepRunner, type Step } from "./StepRunner";
 import { STREAM_BASE } from "./StreamNav";
@@ -106,7 +116,11 @@ function ProductChoice({
 
 function mediaHint(busy: boolean, media: Draft["media"], locale: SupportedLocale): string {
   if (busy) return t(locale, "streamSepolia.create.artPreparing");
-  if (!media) return t(locale, "streamSepolia.create.artHelp");
+  if (!media) {
+    return t(locale, "streamSepolia.create.artHelp", {
+      max: formatCount(Math.floor(MAX_MEDIA_BYTES / 1024), locale),
+    });
+  }
   return t(locale, "streamSepolia.create.artSize", {
     size: formatCount(Math.ceil(media.bytes.length / 1024), locale),
   });
@@ -202,6 +216,11 @@ function IndependentRun({
   const locale = useBrowserLocale();
   // One run's state, filled step by step so "Continue" resumes after a failure.
   const [context, setContext] = useState<IndependentWorkContext | null>(null);
+  const gasPrice = useQuery({
+    queryKey: [QueryKey.STREAM_SEPOLIA, "gasPrice"],
+    queryFn: () => getStreamClient().getGasPrice(),
+    staleTime: 60_000,
+  });
   useEffect(() => {
     let active = true;
     const media = draft.media!;
@@ -234,6 +253,10 @@ function IndependentRun({
   }, [draft, token, editionsToken, viewer]);
   if (!context) return <p className="tw-text-sm tw-text-iron-400">{t(locale, "streamSepolia.loading")}</p>;
   const chunks = context.media.chunks.length;
+  const estimatedFee =
+    gasPrice.data === undefined
+      ? null
+      : estimateCreateGas(context.media.bytes.length, context.record.bytes.length) * gasPrice.data;
   const steps: Step<IndependentWorkContext>[] = [
     {
       id: "media",
@@ -289,12 +312,19 @@ function IndependentRun({
     run: (ctx, io) => openWorkRecord(ctx, io),
   });
   return (
+    <>
+      {estimatedFee === null ? null : (
+        <p className="tw-m-0 tw-mb-3 tw-text-sm tw-text-iron-300">
+          {t(locale, "streamSepolia.create.feeEstimate", { amount: formatEth(estimatedFee, locale) })}
+        </p>
+      )}
     <StepRunner
       steps={steps}
       context={context}
       startLabel={t(locale, "streamSepolia.create.go")}
       onFinished={onDone}
     />
+    </>
   );
 }
 

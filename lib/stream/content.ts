@@ -5,10 +5,11 @@ const CHUNK_SIZE = 24_575;
 /** Identity encoding: the stored bytes are the media itself. */
 export const ENCODING_IDENTITY = 0;
 /**
- * The largest primary file the create page accepts. Storing a byte on
- * Sepolia costs about 1,600 gas, so this keeps a work's upload near 25M gas.
+ * The largest primary file the create page stores: eight content-store chunks
+ * (about 192 KB). Storing costs about 1,600 gas per byte on Sepolia, so the
+ * page shows the estimated fee before anything is sent.
  */
-const MAX_MEDIA_BYTES = 16_384;
+export const MAX_MEDIA_BYTES = CHUNK_SIZE * 8;
 
 export interface StoredFile {
   readonly bytes: Uint8Array;
@@ -67,13 +68,27 @@ export function recordBytes(record: WorkRecord): Uint8Array {
 }
 
 const IMAGE_ATTEMPTS: readonly { size: number; quality: number }[] = [
-  { size: 768, quality: 0.8 },
-  { size: 640, quality: 0.72 },
-  { size: 512, quality: 0.7 },
-  { size: 448, quality: 0.6 },
-  { size: 384, quality: 0.55 },
-  { size: 320, quality: 0.5 },
+  { size: 2048, quality: 0.86 },
+  { size: 1600, quality: 0.84 },
+  { size: 1280, quality: 0.82 },
+  { size: 1024, quality: 0.8 },
+  { size: 768, quality: 0.76 },
+  { size: 640, quality: 0.7 },
+  { size: 512, quality: 0.66 },
 ];
+
+/** Approximate Sepolia gas for one stored byte, measured on the r8 uploads. */
+const GAS_PER_STORED_BYTE = 1_650n;
+/** Approximate gas of the fixed steps: record, approval, start, edition sale, record publish. */
+const FIXED_CREATE_GAS = 6_000_000n;
+
+/** A rough total of the gas a create run uses, for the fee shown before it starts. */
+export function estimateCreateGas(mediaBytes: number, recordBytes: number): bigint {
+  // The start file is about 1.5 KB; each file adds a manifest registration (~600k gas).
+  const stored = BigInt(mediaBytes + recordBytes + 1_500);
+  const files = BigInt(Math.ceil(mediaBytes / CHUNK_SIZE) + 2);
+  return stored * GAS_PER_STORED_BYTE + files * 600_000n + FIXED_CREATE_GAS;
+}
 
 /**
  * Shrinks a picked image to a WebP small enough to store on Sepolia. SVG and
