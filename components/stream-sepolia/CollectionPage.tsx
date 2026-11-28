@@ -15,7 +15,7 @@ import {
   randomSalt,
   symbolFromName,
 } from "@/lib/stream/independent";
-import type { IndependentContract } from "@/lib/stream/reads";
+import type { IndependentContract } from "@/lib/stream/activity";
 import { sameAddress } from "@/lib/stream/state";
 
 import { sepoliaAddressUrl, shortAddress } from "./format";

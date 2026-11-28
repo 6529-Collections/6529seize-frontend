@@ -12,7 +12,8 @@ import "@/i18n/namespaces/stream-sepolia";
 import { splitLedgerAbi } from "@/lib/stream/generated/SplitLedger";
 import { getStreamInstance } from "@/lib/stream/instances";
 import { CURRENCY_ETH, ZERO_HASH } from "@/lib/stream/item";
-import { readMyActivity, soloPayees, type MyOneOfOneBid, type SaleSummary } from "@/lib/stream/reads";
+import { readMyActivity, soloPayees, type MyOneOfOneBid } from "@/lib/stream/activity";
+import type { SaleSummary } from "@/lib/stream/reads";
 import { AUCTION_STATE, isZeroAddress } from "@/lib/stream/state";
 
 import { formatCount, formatEth } from "./format";

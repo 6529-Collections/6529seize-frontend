@@ -9,12 +9,12 @@ import { ACTIVE_STREAM_INSTANCE } from "@/lib/stream/instances";
 import {
   listSales,
   readClaimable,
-  readMyCollections,
   readEdition,
   readOneOfOne,
   readWorkArt,
   readWorkMeta,
 } from "@/lib/stream/reads";
+import { readMyCollections } from "@/lib/stream/activity";
 
 const KEY = [QueryKey.STREAM_SEPOLIA, ACTIVE_STREAM_INSTANCE] as const;
 /** Live sales change by the block (12 s on Sepolia). */
