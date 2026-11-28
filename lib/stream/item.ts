@@ -1,3 +1,4 @@
+import { englishAuctionAbi, saleStarterAbi, workFactsAbi } from "./abis";
 import {
   decodeAbiParameters,
   decodeFunctionData,
@@ -9,9 +10,6 @@ import {
   type Hex,
 } from "viem";
 
-import { englishAuctionAbi } from "./generated/EnglishAuction";
-import { saleStarterAbi } from "./generated/SaleStarter";
-import { workFactsAbi } from "./generated/StreamWorkFacts6529";
 
 /** The contracts' constants, as WorksHashing / SaleKind / EconomicsTypes define them. */
 const PACKAGE_ITEM_DOMAIN = keccak256(toBytes("6529WORKS_PACKAGE_ITEM_V1"));

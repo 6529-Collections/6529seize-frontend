@@ -1,14 +1,15 @@
 "use client";
 
-import type { Abi } from "viem";
+import { englishAuctionAbi } from "@/lib/stream/abis";
 
 import { THE_MEMES_GRID_CLASS_NAME } from "@/components/the-memes/theMemesLayout";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/stream-sepolia";
-import { englishAuctionAbi } from "@/lib/stream/generated/EnglishAuction";
 import { getStreamInstance } from "@/lib/stream/instances";
 import type { PendingStart } from "@/lib/stream/startFile";
+
+import { streamTx } from "@/lib/stream/streamTx";
 
 import { TxAction } from "./TxAction";
 import { usePendingStarts, useStartPreview } from "./useStreamData";
@@ -42,12 +43,12 @@ function StartCard({ start }: { readonly start: PendingStart }) {
           label={t(locale, "streamSepolia.start.button")}
           description={t(locale, "streamSepolia.start.help")}
           doneText={t(locale, "streamSepolia.start.done")}
-          request={() => ({
+          request={() => (streamTx({
             address: getStreamInstance().addresses.englishAuction,
-            abi: englishAuctionAbi as Abi,
+            abi: englishAuctionAbi,
             functionName: "start",
             args: [start.token, start.request],
-          })}
+          }))}
         />
       </WalletGate>
     </li>

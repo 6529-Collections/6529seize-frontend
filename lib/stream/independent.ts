@@ -1,3 +1,4 @@
+import { economicsAbi, independentRegistryAbi } from "./abis";
 import {
   bytesToHex,
   encodeAbiParameters,
@@ -7,8 +8,6 @@ import {
   type Hex,
 } from "viem";
 
-import { economicsAbi } from "./generated/EconomicsResolver";
-import { independentRegistryAbi } from "./generated/IndependentStreamRegistry";
 import { getStreamClient, STREAM_CHAIN } from "./client";
 import { getStreamInstance } from "./instances";
 

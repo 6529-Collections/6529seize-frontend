@@ -1,19 +1,21 @@
 "use client";
 
+import { englishAuctionAbi } from "@/lib/stream/abis";
 import { useState } from "react";
-import { formatEther, parseEther, type Abi, type Address } from "viem";
+import { formatEther, parseEther, type Address } from "viem";
 
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/stream-sepolia";
-import { englishAuctionAbi } from "@/lib/stream/generated/EnglishAuction";
 import { getStreamInstance } from "@/lib/stream/instances";
 import type { OneOfOneDetail } from "@/lib/stream/reads";
 import { isZeroAddress, oneOfOneView, type OneOfOneView } from "@/lib/stream/state";
 
 import { formatClock, formatDuration, formatEth, sepoliaTxUrl } from "./format";
 import { StreamIdentity } from "./StreamIdentity";
+import { streamTx } from "@/lib/stream/streamTx";
+
 import { TxAction } from "./TxAction";
 import { useNow } from "./useStreamData";
 import { useStreamWallet, WalletGate } from "./WalletGate";
@@ -27,7 +29,6 @@ const LINK =
 const INPUT =
   "tw-block tw-h-12 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-black/25 tw-px-4 tw-text-lg tw-font-semibold tw-tabular-nums tw-text-iron-50 placeholder:tw-text-iron-600 focus:tw-border-primary-400/70 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/20";
 
-const auctionAbi = englishAuctionAbi as Abi;
 
 function Figure({ label, value }: { readonly label: string; readonly value: string }) {
   return (
@@ -196,13 +197,13 @@ function BidBox({ detail }: { readonly detail: OneOfOneDetail }) {
             setSent(amount);
             return amount === null || !wallet.address
               ? null
-              : {
+              : streamTx({
                   address: getStreamInstance().addresses.englishAuction,
-                  abi: auctionAbi,
+                  abi: englishAuctionAbi,
                   functionName: "bid",
                   args: [detail.saleId, wallet.address],
                   value: amount,
-                };
+                });
           }}
         />
       </div>
@@ -214,12 +215,9 @@ function Actions({ view, detail }: { readonly view: OneOfOneView; readonly detai
   const locale = useBrowserLocale();
   const wallet = useStreamWallet();
   const address = getStreamInstance().addresses.englishAuction;
-  const anyone = (functionName: string, args: readonly unknown[]) => () => ({
-    address,
-    abi: auctionAbi,
-    functionName,
-    args,
-  });
+  // Calls anyone may make on this sale, checked against the auction's ABI.
+  const anyone = (functionName: "settle" | "settleOrRefund" | "restart" | "withdrawBid") => () =>
+    streamTx({ address, abi: englishAuctionAbi, functionName, args: [detail.saleId] });
   const actions = [];
   if (view.canSettle) {
     actions.push(
@@ -233,7 +231,7 @@ function Actions({ view, detail }: { readonly view: OneOfOneView; readonly detai
             ? t(locale, "streamSepolia.one.settleSoldHelp")
             : t(locale, "streamSepolia.one.settleUnsoldHelp")
         }
-        request={anyone("settle", [detail.saleId])}
+        request={anyone("settle")}
       />
     );
   }
@@ -245,7 +243,7 @@ function Actions({ view, detail }: { readonly view: OneOfOneView; readonly detai
         variant="secondary"
         label={t(locale, "streamSepolia.one.settleOrRefund")}
         description={t(locale, "streamSepolia.one.settleOrRefundHelp")}
-        request={anyone("settleOrRefund", [detail.saleId])}
+        request={anyone("settleOrRefund")}
       />
     );
   }
@@ -258,7 +256,7 @@ function Actions({ view, detail }: { readonly view: OneOfOneView; readonly detai
         description={t(locale, "streamSepolia.one.restartHelp", {
           duration: formatDuration(detail.duration, locale),
         })}
-        request={anyone("restart", [detail.saleId])}
+        request={anyone("restart")}
       />
     );
   }
@@ -270,7 +268,7 @@ function Actions({ view, detail }: { readonly view: OneOfOneView; readonly detai
         variant="secondary"
         label={t(locale, "streamSepolia.one.withdrawBid")}
         description={t(locale, "streamSepolia.one.withdrawBidHelp")}
-        request={anyone("withdrawBid", [detail.saleId])}
+        request={anyone("withdrawBid")}
       />
     );
   }
@@ -281,7 +279,14 @@ function Actions({ view, detail }: { readonly view: OneOfOneView; readonly detai
         fullWidth
         label={t(locale, "streamSepolia.one.claimDelivery")}
         description={t(locale, "streamSepolia.one.claimDeliveryHelp")}
-        request={anyone("claimDelivery", [detail.saleId, wallet.address])}
+        request={() =>
+          streamTx({
+            address,
+            abi: englishAuctionAbi,
+            functionName: "claimDelivery",
+            args: [detail.saleId, wallet.address!],
+          })
+        }
       />
     );
   }

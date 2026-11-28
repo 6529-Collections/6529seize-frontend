@@ -1,17 +1,10 @@
+import { accountsAbi, contentStoreAbi, englishAuctionAbi, independentDeployerAbi, independentEditionAuctionAbi, independentRegistryAbi, streamAbi, workFactsAbi } from "./abis";
 import {
   BaseError,
   bytesToHex,
   ContractFunctionRevertedError,
-  parseEventLogs, type Abi, type Address, type Hex, type TransactionReceipt } from "viem";
+  parseEventLogs, type Address, type Hex, type TransactionReceipt } from "viem";
 
-import { accountsAbi } from "./generated/Accounts";
-import { contentStoreAbi } from "./generated/ContentStore";
-import { independentEditionAuctionAbi } from "./generated/IndependentEditionAuction";
-import { englishAuctionAbi } from "./generated/EnglishAuction";
-import { independentDeployerAbi } from "./generated/IndependentStreamDeployer";
-import { independentRegistryAbi } from "./generated/IndependentStreamRegistry";
-import { streamAbi } from "./generated/Stream6529";
-import { workFactsAbi } from "./generated/StreamWorkFacts6529";
 import { getStreamClient } from "./client";
 import { ENCODING_IDENTITY, toStoredFile, type StoredFile } from "./content";
 import {
@@ -25,6 +18,7 @@ import {
 } from "./independent";
 import { getStreamInstance } from "./instances";
 import { encodeStartFile, START_FILE_MIME } from "./startFile";
+import { streamTx, type StreamTxRequest } from "./streamTx";
 import {
   buildItem,
   encodeEditionOpenData,
@@ -40,13 +34,7 @@ import { ZERO_ADDRESS } from "./state";
 /** What a create step may send. Matches the UI's transaction request shape. */
 interface CreateIo {
   readonly account: Address;
-  send(request: {
-    address: Address;
-    abi: Abi;
-    functionName: string;
-    args?: readonly unknown[];
-    value?: bigint;
-  }): Promise<TransactionReceipt>;
+  send(request: StreamTxRequest): Promise<TransactionReceipt>;
 }
 
 export interface IndependentWorkContext {
@@ -96,7 +84,7 @@ export async function storeFile(
     });
     if (/^0x0{40}$/i.test(pointer)) {
       const data = bytesToHex(file.chunks[index]!);
-      await io.send({ address: store, abi: contentStoreAbi as Abi, functionName: "writeChunk", args: [data] });
+      await io.send(streamTx({ address: store, abi: contentStoreAbi, functionName: "writeChunk", args: [data] }));
       sent = true;
     }
   }
@@ -113,12 +101,12 @@ export async function storeFile(
       throw error;
     });
   if (!registered) {
-    await io.send({
+    await io.send(streamTx({
       address: store,
-      abi: contentStoreAbi as Abi,
+      abi: contentStoreAbi,
       functionName: "registerManifest",
       args: manifest,
-    });
+    }));
     sent = true;
   }
   return { fileId, sent };
@@ -163,12 +151,12 @@ export async function approveIndependentItem(context: IndependentWorkContext, io
     args: [context.token, itemHash],
   });
   if (current.used || (current.approved && current.royaltyRate === context.royaltyRate)) return false;
-  await io.send({
+  await io.send(streamTx({
     address: registry,
-    abi: independentRegistryAbi as Abi,
+    abi: independentRegistryAbi,
     functionName: "approveItem",
     args: [context.token, itemHash, context.royaltyRate],
-  });
+  }));
   return true;
 }
 
@@ -211,12 +199,12 @@ export async function startIndependentSale(context: IndependentWorkContext, io: 
     context.tokenId = minted;
     return false;
   }
-  const receipt = await io.send({
+  const receipt = await io.send(streamTx({
     address: getStreamInstance().addresses.englishAuction,
-    abi: englishAuctionAbi as Abi,
+    abi: englishAuctionAbi,
     functionName: "start",
     args: [context.token, encodeIndependentMint(context.item!, context.mediaList!)],
-  });
+  }));
   const tokenId = tokenIdFromStart(receipt, context.token);
   if (tokenId === null) throw new Error("no SaleStarted");
   context.tokenId = tokenId;
@@ -245,12 +233,12 @@ export async function openIndependentEdition(context: IndependentWorkContext, io
   const address = getStreamInstance().addresses.independentEditionAuction;
   const saleId = saleIdOf(context.editionsToken, tokenId);
   if (await editionSaleExists(address, saleId)) return false;
-  await io.send({
+  await io.send(streamTx({
     address,
-    abi: independentEditionAuctionAbi as Abi,
+    abi: independentEditionAuctionAbi,
     functionName: "open",
     args: [context.editionsToken, tokenId, encodeEditionOpenData({ item, media: [] }, false)],
-  });
+  }));
   return true;
 }
 
@@ -267,21 +255,21 @@ export async function openWorkRecord(context: IndependentWorkContext, io: Create
     args: [context.token, tokenId],
   });
   if (!current.opened) {
-    await io.send({
+    await io.send(streamTx({
       address: facts,
-      abi: workFactsAbi as Abi,
+      abi: workFactsAbi,
       functionName: "open",
       args: [context.token, tokenId, item, mediaList],
-    });
+    }));
     sent = true;
   }
   if (!current.onChainComplete) {
-    await io.send({
+    await io.send(streamTx({
       address: facts,
-      abi: workFactsAbi as Abi,
+      abi: workFactsAbi,
       functionName: "markOnChainComplete",
       args: [context.token, tokenId],
-    });
+    }));
     sent = true;
   }
   return sent;
@@ -302,12 +290,12 @@ export async function deployIndependent(args: {
   const deployer = args.editions
     ? instance.addresses.independentEditionsDeployer
     : instance.addresses.independent721Deployer;
-  const receipt = await args.io.send({
+  const receipt = await args.io.send(streamTx({
     address: deployer,
-    abi: independentDeployerAbi as Abi,
+    abi: independentDeployerAbi,
     functionName: "deploy",
     args: [args.salt, args.config],
-  });
+  }));
   const logs = parseEventLogs({ abi: independentDeployerAbi, logs: receipt.logs, eventName: "Deployed" });
   const token = logs[0]?.args.token;
   if (!token) throw new Error("no Deployed log");
@@ -352,9 +340,9 @@ export async function listIndependent(args: {
     deadline,
   });
   const consent = await args.io.signTypedData(consentTypedData(subject));
-  await args.io.send({
+  await args.io.send(streamTx({
     address: instance.addresses.independentRegistry,
-    abi: independentRegistryAbi as Abi,
+    abi: independentRegistryAbi,
     functionName: "register",
     args: [
       args.token,
@@ -369,6 +357,6 @@ export async function listIndependent(args: {
         consent: walletProof(account, consent),
       },
     ],
-  });
+  }));
   return true;
 }

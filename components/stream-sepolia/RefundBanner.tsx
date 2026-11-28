@@ -1,17 +1,16 @@
 "use client";
 
-import type { Abi } from "viem";
+import { editionAuctionAbi, englishAuctionAbi, independentEditionAuctionAbi } from "@/lib/stream/abis";
 
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/stream-sepolia";
-import { editionAuctionAbi } from "@/lib/stream/generated/UniformEditionAuction";
-import { englishAuctionAbi } from "@/lib/stream/generated/EnglishAuction";
-import { independentEditionAuctionAbi } from "@/lib/stream/generated/IndependentEditionAuction";
 import { getStreamInstance } from "@/lib/stream/instances";
 import { CURRENCY_ETH } from "@/lib/stream/item";
 
 import { formatEth } from "./format";
+import { streamTx } from "@/lib/stream/streamTx";
+
 import { TxAction } from "./TxAction";
 import { useClaimable } from "./useStreamData";
 import { useStreamWallet } from "./WalletGate";
@@ -22,37 +21,38 @@ export function RefundBanner() {
   const wallet = useStreamWallet();
   const claimable = useClaimable(wallet.address);
   if (!wallet.address || !wallet.onSepolia || !claimable.data) return null;
+  const viewer = wallet.address;
   const instance = getStreamInstance();
   const items = [
     {
       key: "english",
       amount: claimable.data.english,
-      request: () => ({
+      request: () => (streamTx({
         address: instance.addresses.englishAuction,
-        abi: englishAuctionAbi as Abi,
+        abi: englishAuctionAbi,
         functionName: "claim",
-        args: [wallet.address],
-      }),
+        args: [viewer],
+      })),
     },
     {
       key: "edition",
       amount: claimable.data.edition,
-      request: () => ({
+      request: () => (streamTx({
         address: instance.addresses.editionAuction,
-        abi: editionAuctionAbi as Abi,
+        abi: editionAuctionAbi,
         functionName: "claim",
-        args: [CURRENCY_ETH, wallet.address],
-      }),
+        args: [CURRENCY_ETH, viewer],
+      })),
     },
     {
       key: "independentEdition",
       amount: claimable.data.independentEdition,
-      request: () => ({
+      request: () => (streamTx({
         address: instance.addresses.independentEditionAuction,
-        abi: independentEditionAuctionAbi as Abi,
+        abi: independentEditionAuctionAbi,
         functionName: "claim",
-        args: [CURRENCY_ETH, wallet.address],
-      }),
+        args: [CURRENCY_ETH, viewer],
+      })),
     },
   ].filter((item) => item.amount > 0n);
   if (items.length === 0) return null;

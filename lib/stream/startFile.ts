@@ -1,3 +1,4 @@
+import { contentStoreAbi, independentRegistryAbi } from "./abis";
 import {
   decodeAbiParameters,
   encodeAbiParameters,
@@ -8,8 +9,6 @@ import {
 } from "viem";
 
 import { getStreamClient } from "./client";
-import { contentStoreAbi } from "./generated/ContentStore";
-import { independentRegistryAbi } from "./generated/IndependentStreamRegistry";
 import { getStreamInstance } from "./instances";
 import { decodeIndependentMint, encodeIndependentMint, itemHashOf, type MediaFile, type PackageItem } from "./item";
 import { mediaDataUrl } from "./content";

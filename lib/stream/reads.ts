@@ -1,3 +1,4 @@
+import { contentStoreAbi, editionAuctionAbi, englishAuctionAbi, independentEditionAuctionAbi, independentRegistryAbi, streamAbi, workFactsAbi } from "./abis";
 import {
   BaseError,
   ContractFunctionRevertedError,
@@ -13,13 +14,6 @@ import {
   type Log,
 } from "viem";
 
-import { contentStoreAbi } from "./generated/ContentStore";
-import { editionAuctionAbi } from "./generated/UniformEditionAuction";
-import { independentEditionAuctionAbi } from "./generated/IndependentEditionAuction";
-import { englishAuctionAbi } from "./generated/EnglishAuction";
-import { independentRegistryAbi } from "./generated/IndependentStreamRegistry";
-import { streamAbi } from "./generated/Stream6529";
-import { workFactsAbi } from "./generated/StreamWorkFacts6529";
 import { getStreamClient, getStreamLogClient } from "./client";
 import { mediaDataUrl } from "./content";
 import { getStreamInstance } from "./instances";

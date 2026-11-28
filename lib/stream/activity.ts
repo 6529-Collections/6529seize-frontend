@@ -1,11 +1,7 @@
+import { independentDeployerAbi, independentRegistryAbi, splitLedgerAbi, streamAbi, streamEditionsAbi } from "./abis";
 import { getAbiItem, type Address } from "viem";
 
 import { getStreamClient } from "./client";
-import { independentDeployerAbi } from "./generated/IndependentStreamDeployer";
-import { independentRegistryAbi } from "./generated/IndependentStreamRegistry";
-import { splitLedgerAbi } from "./generated/SplitLedger";
-import { streamAbi } from "./generated/Stream6529";
-import { streamEditionsAbi } from "./generated/StreamEditions6529";
 import { getStreamInstance } from "./instances";
 import { CURRENCY_ETH, ZERO_HASH } from "./item";
 import {

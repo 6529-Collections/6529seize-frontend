@@ -1,8 +1,9 @@
 "use client";
 
+import { editionAuctionAbi } from "@/lib/stream/abis";
 import { useQuery } from "@tanstack/react-query";
 import { Fragment, useMemo, useState } from "react";
-import type { Abi, Hex } from "viem";
+import type { Hex } from "viem";
 
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -10,7 +11,6 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { MessageKey } from "@/i18n/messages/en-US.complete";
 import "@/i18n/namespaces/stream-sepolia";
-import { editionAuctionAbi } from "@/lib/stream/generated/UniformEditionAuction";
 import { getStreamClient } from "@/lib/stream/client";
 import {
   bidStanding,
@@ -27,11 +27,12 @@ import { editionView, sameAddress, type EditionView } from "@/lib/stream/state";
 import { formatClock, formatCount, formatDuration, formatEth } from "./format";
 import { StreamIdentity } from "./StreamIdentity";
 import { CARD, LABEL } from "./OneOfOnePanel";
+import { streamTx } from "@/lib/stream/streamTx";
+
 import { TxAction } from "./TxAction";
 import { useNow } from "./useStreamData";
 import { useStreamWallet, WalletGate } from "./WalletGate";
 
-const abi = editionAuctionAbi as Abi;
 const STEPPER =
   "tw-flex tw-h-12 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-black/25";
 const STEPPER_BUTTON =
@@ -403,13 +404,13 @@ function BidComposer({ detail }: { readonly detail: EditionDetail }) {
             label={t(locale, "streamSepolia.ed.bid")}
             request={() =>
               wallet.address
-                ? {
+                ? streamTx({
                     address: detail.auctionAddress,
-                    abi,
+                    abi: editionAuctionAbi,
                     functionName: "bid",
                     args: [detail.saleId, BigInt(step), BigInt(quantity)],
                     value: cost,
-                  }
+                  })
                 : null
             }
           />
@@ -522,12 +523,12 @@ function YourBids({
                   }
                   request={() =>
                     wallet.address
-                      ? {
+                      ? streamTx({
                           address: detail.auctionAddress,
-                          abi,
+                          abi: editionAuctionAbi,
                           functionName: "claimBid",
                           args: [detail.saleId, bid.bidId, wallet.address],
-                        }
+                        })
                       : null
                   }
                 />
@@ -566,13 +567,13 @@ function RaiseAction({ detail, bid }: { readonly detail: EditionDetail; readonly
         count: formatCount(bid.quantity, locale),
       })}
       doneText={t(locale, "streamSepolia.ed.raiseDone", { price: formatEth(price, locale) })}
-      request={() => ({
+      request={() => (streamTx({
         address: detail.auctionAddress,
-        abi,
+        abi: editionAuctionAbi,
         functionName: "raise",
         args: [detail.saleId, bid.bidId, BigInt(step)],
         value: extra,
-      })}
+      }))}
     />
   );
 }
@@ -607,7 +608,12 @@ function SettleAction({ detail, view }: { readonly detail: EditionDetail; readon
                         functionName: "settlementOrder",
                         args: [detail.saleId],
                       });
-                return { address: detail.auctionAddress, abi, functionName: "settle", args: [detail.saleId, order] };
+                return streamTx({
+                  address: detail.auctionAddress,
+                  abi: editionAuctionAbi,
+                  functionName: "settle",
+                  args: [detail.saleId, order],
+                });
               }}
             />
           ) : null}
@@ -617,7 +623,9 @@ function SettleAction({ detail, view }: { readonly detail: EditionDetail; readon
               variant="secondary"
               label={t(locale, "streamSepolia.ed.abandon")}
               description={t(locale, "streamSepolia.ed.abandonHelp")}
-              request={() => ({ address: detail.auctionAddress, abi, functionName: "abandon", args: [detail.saleId] })}
+              request={() =>
+                streamTx({ address: detail.auctionAddress, abi: editionAuctionAbi, functionName: "abandon", args: [detail.saleId] })
+              }
             />
           ) : null}
         </div>
@@ -650,12 +658,12 @@ function OpenEdition({
               if (!firstStartTx) return null;
               const started = await readStartItem(firstStartTx, curated);
               if (!started) return null;
-              return {
+              return streamTx({
                 address: detail.auctionAddress,
-                abi,
+                abi: editionAuctionAbi,
                 functionName: "open",
                 args: [detail.editionsToken, tokenId, encodeEditionOpenData(started, curated)],
-              };
+              });
             }}
           />
         </WalletGate>

@@ -1,15 +1,15 @@
 "use client";
 
+import { splitLedgerAbi } from "@/lib/stream/abis";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import type { Abi, Address } from "viem";
+import type { Address } from "viem";
 
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/stream-sepolia";
-import { splitLedgerAbi } from "@/lib/stream/generated/SplitLedger";
 import { getStreamInstance } from "@/lib/stream/instances";
 import { CURRENCY_ETH, ZERO_HASH } from "@/lib/stream/item";
 import { readMyActivity, soloPayees, type MyOneOfOneBid } from "@/lib/stream/activity";
@@ -19,6 +19,8 @@ import { AUCTION_STATE, isZeroAddress } from "@/lib/stream/state";
 import { formatCount, formatEth } from "./format";
 import { CARD, LABEL } from "./OneOfOnePanel";
 import { STREAM_BASE } from "./StreamNav";
+import { streamTx } from "@/lib/stream/streamTx";
+
 import { TxAction } from "./TxAction";
 import { useNow } from "./useStreamData";
 import { WorkTitle } from "./WorkTitle";
@@ -140,12 +142,12 @@ function ActivityBody({ viewer }: { readonly viewer: Address }) {
             label={t(locale, "streamSepolia.me.release")}
             doneText={t(locale, "streamSepolia.refund.done", { amount: formatEth(payout.releasable, locale) })}
             disabled={payout.releasable === 0n}
-            request={() => ({
+            request={() => (streamTx({
               address: getStreamInstance().addresses.splitLedger,
-              abi: splitLedgerAbi as Abi,
+              abi: splitLedgerAbi,
               functionName: "release",
               args: [soloPayees(viewer), ZERO_HASH, CURRENCY_ETH, 0n],
-            })}
+            }))}
           />
         </section>
       ))}

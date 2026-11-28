@@ -3,7 +3,7 @@
  * Copies the 6529 Stream (6529-works) contract ABIs the Sepolia test pages
  * use into typed `as const` modules under lib/stream/generated/.
  *
- * Usage: node scripts/stream/sync-stream-abis.cjs <path-to-6529-works-checkout>
+ * Usage: node scripts/stream/sync-stream-abis.cjs <path-to-6529-works-checkout> [instance=r8]
  *
  * The ABIs are taken from the contracts repository's exported `abi/` folder
  * (the edition auctions from `abi/full/`, which merges their lens views), so
@@ -73,7 +73,8 @@ function main() {
   } catch {
     // The commit is informational only.
   }
-  const outDir = path.join(__dirname, "..", "..", "lib", "stream", "generated");
+  const instance = process.argv[3] ?? "r8";
+  const outDir = path.join(__dirname, "..", "..", "lib", "stream", "generated", instance);
   fs.mkdirSync(outDir, { recursive: true });
   for (const [name, file, exportName] of CONTRACTS) {
     const raw = JSON.parse(fs.readFileSync(path.join(source, file), "utf8"));
