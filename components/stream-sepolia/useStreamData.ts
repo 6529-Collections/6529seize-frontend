@@ -116,7 +116,7 @@ function chainNowSeconds(): number {
  * Keeps the countdown on the chain's time: the contracts decide "ended" by
  * block time, so a visitor's fast or slow clock must not.
  */
-export function useChainClock() {
+function useChainClock() {
   return useQuery({
     queryKey: [...KEY, "chainClock"],
     queryFn: async () => {
