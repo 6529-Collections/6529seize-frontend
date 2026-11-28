@@ -1262,22 +1262,29 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     await openHeaderSearch(page);
     await page.getByRole("tab", { name: /^Messages/ }).click();
     const messagesTab = page.getByRole("tab", { name: /^Messages/ });
+    const input = page.getByRole("combobox", {
+      name: "Search messages",
+      exact: true,
+    });
+    // Establish the initial selection and its lazily loaded panel before
+    // exercising keyboard navigation; clicking the tab is not panel readiness.
+    await expect(messagesTab).toHaveAttribute("aria-selected", "true");
+    await expect(input).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
     await messagesTab.focus();
-    await messagesTab.press(
+    await expect(messagesTab).toBeFocused();
+    await page.keyboard.press(
       testInfo.project.use.isMobile ? "ArrowLeft" : "ArrowUp"
     );
     const wavesTab = page.getByRole("tab", { name: /^Waves/ });
     await expect(wavesTab).toBeFocused();
     await expect(wavesTab).toHaveAttribute("aria-selected", "true");
-    await wavesTab.press(
+    // Exercise real keyboard input on the verified focus target, rather than
+    // letting Locator.press move focus on the test's behalf.
+    await page.keyboard.press(
       testInfo.project.use.isMobile ? "ArrowRight" : "ArrowDown"
     );
     await expect(messagesTab).toBeFocused();
     await expect(messagesTab).toHaveAttribute("aria-selected", "true");
-    const input = page.getByRole("combobox", {
-      name: "Search messages",
-      exact: true,
-    });
     await expect(input).toBeVisible();
     await expect(
       page.getByRole("button", { name: /^Remove wave filter/ })

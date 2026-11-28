@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test";
+import { isolateHomeArtworkDocuments } from "../support/homeArtworkIsolation";
 import {
   decodeFunctionData,
   encodeFunctionResult,
@@ -25,6 +26,9 @@ export const loadingTestArtwork = {
 };
 
 export async function installLoadingTestArtwork(page: Page) {
+  // Browser API mocks cannot replace the live artwork already present in SSR.
+  // Keep its scripts out of fixture-driven layout, clock and navigation checks.
+  await isolateHomeArtworkDocuments(page);
   await page.route(
     `**/api/minting-claims/*/${loadingTestArtwork.id}/roots`,
     (route) => route.fulfill({ json: [] })

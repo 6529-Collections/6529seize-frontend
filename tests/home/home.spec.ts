@@ -18,6 +18,7 @@ import { gateSidebarHydration } from "../support/sidebarHydration";
 import { installSectionTrackingFixture } from "../support/sectionTrackingFixture";
 import { installReadonlyMutationGuard } from "../support/readonlyMutationGuard";
 import { RESPONSE_TIMEOUT_MS } from "../support/routeReadiness";
+import { isolateHomeArtworkDocuments } from "../support/homeArtworkIsolation";
 import {
   comingUpLeaderboard,
   comingUpLeaderboardPattern,
@@ -27,6 +28,40 @@ import {
   installCompletedMintStatus,
   loadingTestArtwork,
 } from "./homeDropFixtures";
+
+test("homepage fixture isolates only the artwork document, not other frames @smoke @medium @large", async ({
+  page,
+}) => {
+  const originalDocuments: string[] = [];
+  await page.route("https://home-artwork-fixture.test/**", (route) => {
+    originalDocuments.push(new URL(route.request().url()).pathname);
+    return route.fulfill({
+      contentType: "text/html",
+      body: "<!doctype html><html><body><p>Original child document</p></body></html>",
+    });
+  });
+  await isolateHomeArtworkDocuments(page);
+  await page.setContent(`
+    <main>
+      <section data-home-drop="next">
+        <iframe title="Homepage fixture artwork" src="https://home-artwork-fixture.test/artwork"></iframe>
+      </section>
+      <iframe title="Unrelated fixture frame" src="https://home-artwork-fixture.test/unrelated"></iframe>
+    </main>
+  `);
+  const artwork = page.getByTitle("Homepage fixture artwork").contentFrame();
+  await expect(
+    artwork.getByText("Isolated homepage artwork fixture", { exact: true })
+  ).toBeVisible();
+  await expect(artwork.getByText("Original child document")).toHaveCount(0);
+  await expect(
+    page
+      .getByTitle("Unrelated fixture frame")
+      .contentFrame()
+      .getByText("Original child document", { exact: true })
+  ).toBeVisible();
+  expect(originalDocuments).toEqual(["/unrelated"]);
+});
 
 test.describe("Initial homepage HTML", () => {
   test.use({ javaScriptEnabled: false });
@@ -310,7 +345,11 @@ test("Subscription Minting stays readable with the reference layout @smoke @medi
   }
 });
 
-async function waitForComingUpLayoutReady(page: Page, timeout = 5000) {
+// Initial fixture data uses the response budget, not the interaction deadline.
+async function waitForComingUpLayoutReady(
+  page: Page,
+  timeout = RESPONSE_TIMEOUT_MS
+) {
   const artwork = page.getByRole("main").first().getByRole("img", {
     name: loadingTestArtwork.name,
     exact: true,
@@ -416,11 +455,15 @@ for (const cardCount of [1, 3]) {
         await lastCard.scrollIntoViewIfNeeded();
         await expect(lastCard).toBeInViewport();
         if (cardCount > 1) {
-          expect(
-            await cards.evaluate(
-              (element) => element.getBoundingClientRect().top
+          await expect
+            .poll(
+              () =>
+                cards.evaluate(
+                  (element) => element.getBoundingClientRect().top
+                ),
+              { message: `Page scroll reaches the final card at ${width}px` }
             )
-          ).toBeLessThan(geometry.top);
+            .toBeLessThan(geometry.top);
         }
       } else {
         const columns = width < 1024 ? 2 : 3;
@@ -588,7 +631,9 @@ test("Coming Up keeps collaborator credits compact and accessible @smoke @medium
   const more = section.getByRole("link", {
     name: "+3 more View all collaborators on this drop",
   });
-  await expect(more).toHaveText("+3 more View all collaborators on this drop");
+  await expect(more).toHaveText("+3 more View all collaborators on this drop", {
+    timeout: RESPONSE_TIMEOUT_MS,
+  });
   await expect(more).toHaveAttribute(
     "href",
     `/waves/${comingUpWave.id}?drop=coming-up-1`
@@ -677,7 +722,7 @@ test("Coming Up loads without a homepage Boosted section or request @smoke @medi
   const comingUp = page.getByRole("region", { name: "Coming up", exact: true });
   await expect(
     comingUp.getByRole("link", { name: "Coming Up artwork 3", exact: true })
-  ).toBeVisible();
+  ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
   await expect(
     page.getByRole("heading", { name: "Boosted Drops", exact: true })
   ).toHaveCount(0);
@@ -705,7 +750,7 @@ test("Coming Up retains cards across navigation and a failed refresh @smoke @med
   const comingUp = page.getByRole("region", { name: "Coming up", exact: true });
   await expect(
     comingUp.getByRole("link", { name: "Coming Up artwork 3", exact: true })
-  ).toBeVisible();
+  ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
   expect(requests).toBe(1);
 
   await Promise.all([
@@ -748,6 +793,10 @@ for (const slowEndpoint of ["leaderboard", "settings"] as const) {
     await page.clock.install();
     await installComingUpFixture(page);
     let requests = 0;
+    let markRequestStarted!: () => void;
+    const requestStarted = new Promise<void>((resolve) => {
+      markRequestStarted = resolve;
+    });
     let releaseResponse!: () => void;
     const responseReady = new Promise<void>((resolve) => {
       releaseResponse = resolve;
@@ -755,6 +804,7 @@ for (const slowEndpoint of ["leaderboard", "settings"] as const) {
     await page.route(comingUpLeaderboardPattern, async (route) => {
       if (slowEndpoint === "leaderboard") {
         requests += 1;
+        markRequestStarted();
         await responseReady;
       }
       await route.fulfill({ json: comingUpLeaderboard });
@@ -762,6 +812,7 @@ for (const slowEndpoint of ["leaderboard", "settings"] as const) {
     if (slowEndpoint === "settings") {
       await page.route("**/api/settings", async (route) => {
         requests += 1;
+        markRequestStarted();
         await responseReady;
         await route.fulfill({ json: comingUpSettings });
       });
@@ -772,7 +823,16 @@ for (const slowEndpoint of ["leaderboard", "settings"] as const) {
         name: "Coming up",
         exact: true,
       });
-      await expect.poll(() => requests).toBe(1);
+      // Hydration may start the request later on a busy runner. Start the
+      // delayed-response experiment only after its request and UI are ready.
+      await requestStarted;
+      expect(requests).toBe(1);
+      if (slowEndpoint === "leaderboard") {
+        await expect(comingUp.getByRole("status")).toHaveText(
+          "Loading upcoming artwork…",
+          { timeout: RESPONSE_TIMEOUT_MS }
+        );
+      }
       await page.clock.fastForward(20_000);
       if (slowEndpoint === "leaderboard") {
         await expect(comingUp.getByRole("status")).toHaveText(
@@ -2205,7 +2265,7 @@ test("collapsed sidebar fits full rows when a desktop update appears @smoke @med
     const account = page
       .getByLabel("Primary sidebar", { exact: true })
       .locator("[data-sidebar-account]");
-    await expect(share).toBeVisible();
+    await expect(share).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     await expect(account).toHaveAttribute("data-sidebar-account", "signed-out");
     await expect(
       page
@@ -2215,7 +2275,11 @@ test("collapsed sidebar fits full rows when a desktop update appears @smoke @med
     await expect(about).toHaveCSS("height", "46px");
     const accountBeforeUpdate = await account.boundingBox();
 
+    const initialVersionResponse = page.waitForResponse("**/api/version", {
+      timeout: RESPONSE_TIMEOUT_MS,
+    });
     releaseVersion();
+    expect((await initialVersionResponse).ok()).toBe(true);
     await expect(update).toBeVisible();
     await expect
       .poll(async () => (await about.boundingBox())!.height)
@@ -2243,7 +2307,13 @@ test("collapsed sidebar fits full rows when a desktop update appears @smoke @med
     await expect(about).toBeInViewport({ ratio: 1 });
 
     await page.setViewportSize({ width: 1440, height: 600 });
+    // A full document navigation restarts the provider. SSR sidebar visibility
+    // is not evidence that its new version poll has completed.
+    const nextVersionResponse = page.waitForResponse("**/api/version", {
+      timeout: RESPONSE_TIMEOUT_MS,
+    });
     await page.goto("/notifications", { waitUntil: "domcontentloaded" });
+    expect((await nextVersionResponse).ok()).toBe(true);
     await expect(share).toHaveCount(0);
     await expect(update).toBeVisible();
     await expect(about).toHaveCSS("height", "46px");
